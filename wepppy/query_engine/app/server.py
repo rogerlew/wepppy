@@ -22,6 +22,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import yaml
+from starlette.concurrency import run_in_threadpool
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request as StarletteRequest
@@ -616,11 +617,11 @@ async def run_info(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
-    catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
+    catalog_entries = await run_in_threadpool(visible_entries, request, context.base_dir, context.catalog.entries())
     runid_str = str(run_path)
     slug = runid_param.strip("/") or runid_param
     schema_path = str(request.app.url_path_for("run_schema", runid=slug))
@@ -658,13 +659,14 @@ async def run_schema(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
+    entries = await run_in_threadpool(visible_entries, request, context.base_dir, context.catalog.entries())
     data = {
         "runid": str(run_path),
-        "entries": [asdict(entry) for entry in visible_entries(request, context.base_dir, context.catalog.entries())],
+        "entries": [asdict(entry) for entry in entries],
     }
     return JSONResponse(data, headers=discovery_headers(context.base_dir, context.catalog.entries()))
 
@@ -710,9 +712,9 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     sample_dataset = "landuse/landuse.parquet"
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
         headers = discovery_headers(context.base_dir, context.catalog.entries())
-        catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
+        catalog_entries = await run_in_threadpool(visible_entries, request, context.base_dir, context.catalog.entries())
         if catalog_entries:
             # Use first parquet file, skip JSON/other metadata files
             for entry in catalog_entries:
@@ -774,6 +776,12 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     )
 
 
+def _check_roads_current(root: str | Path) -> None:
+    """Keep the complete guarded readiness check on one worker thread."""
+    with roads_lifecycle.current_read(root):
+        pass
+
+
 async def run_query_endpoint(request: StarletteRequest) -> Response:
     """Execute a query payload posted from the web console.
 
@@ -830,7 +838,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     scenario = body.pop("scenario", None)
 
     try:
-        context = resolve_run_context(str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(resolve_run_context, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -852,13 +860,13 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     require_datasets(request, context.base_dir, [spec.path for spec in payload.dataset_specs], entries=context.catalog.entries())
     try:
         if any(roads_lifecycle.current_path(spec.path) for spec in payload.dataset_specs):
-            with roads_lifecycle.current_read(context.base_dir):
-                pass
+            await run_in_threadpool(_check_roads_current, context.base_dir)
     except roads_lifecycle.RoadsResultsUnavailable as exc:
         return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
                             headers={'Cache-Control': 'no-store'})
     try:
-        result = run_query(
+        result = await run_in_threadpool(
+            run_query,
             context, payload,
             authorize=lambda fresh: require_datasets(
                 request, fresh.base_dir, [spec.path for spec in payload.dataset_specs],
@@ -935,7 +943,7 @@ async def activate_run(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        catalog = activate_query_engine(run_path, force_refresh=True)
+        catalog = await run_in_threadpool(activate_query_engine, run_path, force_refresh=True)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
     except Exception as exc:
@@ -944,7 +952,7 @@ async def activate_run(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Activation failed: {exc}", "stacktrace": stacktrace}, status_code=500)
 
     catalog = dict(catalog)
-    catalog["files"] = visible_entries(request, run_path, catalog.get("files", []))
+    catalog["files"] = await run_in_threadpool(visible_entries, request, run_path, catalog.get("files", []))
     return JSONResponse(catalog)
 
 
@@ -963,7 +971,7 @@ _health_log_filter = _HealthLogFilter()
 for _log_name in ('uvicorn.access', 'gunicorn.access'):
     logging.getLogger(_log_name).addFilter(_health_log_filter)
 
-def health(_: StarletteRequest):
+async def health(_: StarletteRequest):
     """Return a plain-text OK response for container health checks.
 
     Args:

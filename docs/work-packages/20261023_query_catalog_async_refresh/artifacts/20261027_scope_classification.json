@@ -1,0 +1,42 @@
+{
+  "elapsed_seconds": 2866.146760167554,
+  "counts": {
+    "wc1:runs": {
+      "scopes": 5709,
+      "readonly": 1100,
+      "writable": 4609,
+      "unwritable": 0,
+      "missing_catalog": 2622
+    },
+    "wc1:batch": {
+      "scopes": 1756,
+      "readonly": 0,
+      "writable": 1756,
+      "unwritable": 0,
+      "missing_catalog": 47
+    },
+    "wc1:culverts": {
+      "scopes": 2727,
+      "readonly": 0,
+      "writable": 2727,
+      "unwritable": 0,
+      "missing_catalog": 2204
+    },
+    "legacy:runs": {
+      "scopes": 20699,
+      "readonly": 11277,
+      "writable": 9422,
+      "unwritable": 0,
+      "missing_catalog": 20556
+    }
+  },
+  "errors": [],
+  "profiled": 30891,
+  "discovered": 30891,
+  "inventory_completed": [
+    true,
+    true
+  ],
+  "sample_method": "12 smallest SHA256 path digests per namespace, writable non-READONLY only; raw sample paths private",
+  "state": "completed"
+}

@@ -1,0 +1,13 @@
+{"event": "identity", "role": "publish", "epoch": 1793058824.048593, "elapsed": 0.05922906473278999, "hostname": "1281c0dad239", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 248998786, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "publication_start", "role": "publish", "epoch": 1793058824.332049, "elapsed": 0.34268522821366787}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058824.4113328, "elapsed": 0.4219683054834604, "operation": 2}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058831.5410707, "elapsed": 7.551706101745367, "operation": 2, "seconds": 7.129729313775897}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058831.5935192, "elapsed": 7.604154657572508, "operation": 8}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058831.5994782, "elapsed": 7.610113646835089, "operation": 8, "seconds": 0.005960676819086075}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058835.318239, "elapsed": 11.32887439802289, "operation": 2}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058835.3200278, "elapsed": 11.33066326007247, "operation": 2, "seconds": 0.0017926692962646484}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058836.2733176, "elapsed": 12.283953096717596, "operation": 8}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058836.2741766, "elapsed": 12.284811967983842, "operation": 8, "seconds": 0.0008616000413894653}
+{"event": "publication_complete", "role": "publish", "epoch": 1793058836.3061001, "elapsed": 12.316735859960318, "seconds": 11.96872217580676, "catalog_sha256": "fec270046ed90b1d3fde4cfafa2e4c2171907ae194ac1723ad1a79b46fc232d6", "catalog": {"files": [{"extension": ".json", "modified": "2026-10-26T17:31:57.234341+00:00", "path": "_query_engine/catalog.json", "size_bytes": 637}, {"extension": ".parquet", "modified": "2026-10-26T17:18:36.740258+00:00", "path": "probe.parquet", "schema": {"fields": [{"name": "value", "type": "int64"}]}, "size_bytes": 518}], "generated_at": "2026-10-26T23:53:55.310992+00:00", "root": "/wc1/query-catalog-validation/20261026/async-preflight-1719/runs/aa/aa-preflight", "version": 1}}
+{"event": "success", "role": "publish", "epoch": 1793058836.3061893, "elapsed": 12.316824909299612, "inode_unchanged": true}
+{"event": "heartbeat", "role": "publish", "epoch": 1793058836.3065104, "elapsed": 12.317145757377148, "samples": 119, "max_gap_seconds": 0.16603894531726837}

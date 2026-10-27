@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-16T06:01:26Z",
+  "generated_at_utc": "2026-10-27T00:57:59Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 1092.0,
-      "p50": 130.0,
-      "p75": 306.5,
-      "p90": 678.8,
-      "p95": 965.6,
-      "p99": 2087.9,
-      "max": 5706.0
+      "count": 1101.0,
+      "p50": 131.0,
+      "p75": 308.0,
+      "p90": 679.0,
+      "p95": 962.0,
+      "p99": 2087.0,
+      "max": 5406.0
     },
     "python_prod_max_function_len": {
-      "count": 907.0,
+      "count": 916.0,
       "p50": 58.0,
-      "p75": 105.5,
-      "p90": 172.0,
-      "p95": 228.7,
-      "p99": 388.58,
+      "p75": 107.0,
+      "p90": 172.5,
+      "p95": 228.25,
+      "p99": 387.95,
       "max": 2249.0
     },
     "python_prod_max_cc": {
@@ -64,21 +64,21 @@
       "max": 0.0
     },
     "js_source_file_sloc": {
-      "count": 232.0,
-      "p50": 242.0,
-      "p75": 550.5,
-      "p90": 1113.6,
-      "p95": 1559.05,
-      "p99": 2333.76,
+      "count": 236.0,
+      "p50": 241.0,
+      "p75": 547.25,
+      "p90": 1092.0,
+      "p95": 1549.25,
+      "p99": 2317.6,
       "max": 2840.0
     },
     "js_source_max_cc": {
-      "count": 232.0,
+      "count": 236.0,
       "p50": 6.0,
       "p75": 19.0,
       "p90": 32.0,
-      "p95": 42.9,
-      "p99": 84.45,
+      "p95": 42.5,
+      "p99": 84.25,
       "max": 155.0
     }
   },
@@ -86,7 +86,7 @@
     "python_file_sloc_top20": [
       {
         "path": "wepppy/nodb/mods/roads/roads.py",
-        "value": 5706.0
+        "value": 5406.0
       },
       {
         "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
@@ -94,19 +94,19 @@
       },
       {
         "path": "tests/weppcloud/routes/test_pure_controls_render.py",
-        "value": 4546.0
-      },
-      {
-        "path": "tests/nodb/mods/test_roads_controller.py",
-        "value": 3256.0
+        "value": 4579.0
       },
       {
         "path": "tests/nodb/mods/test_features_export_service.py",
-        "value": 3209.0
+        "value": 3243.0
       },
       {
         "path": "wepppy/nodb/mods/features_export/service.py",
-        "value": 3099.0
+        "value": 3139.0
+      },
+      {
+        "path": "tests/nodb/mods/test_roads_controller.py",
+        "value": 3065.0
       },
       {
         "path": "tests/nodb/mods/test_omni.py",
@@ -114,7 +114,7 @@
       },
       {
         "path": "wepppy/rq/project_rq.py",
-        "value": 2818.0
+        "value": 2837.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -126,7 +126,7 @@
       },
       {
         "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 2401.0
+        "value": 2404.0
       },
       {
         "path": "wepppy/climates/cligen/cligen.py",
@@ -141,12 +141,12 @@
         "value": 2359.0
       },
       {
-        "path": "tests/microservices/test_rq_engine_landuse_routes.py",
-        "value": 2183.0
+        "path": "tests/rq/test_project_rq_fork.py",
+        "value": 2185.0
       },
       {
-        "path": "tests/rq/test_project_rq_fork.py",
-        "value": 2152.0
+        "path": "tests/microservices/test_rq_engine_landuse_routes.py",
+        "value": 2183.0
       },
       {
         "path": "wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py",
@@ -172,7 +172,7 @@
       },
       {
         "path": "wepppy/nodb/mods/roads/roads.py",
-        "value": 2126.0
+        "value": 2031.0
       },
       {
         "path": "tests/nodb/mods/disturbed/live_e2e/runbook.py",
@@ -184,7 +184,7 @@
       },
       {
         "path": "wepppy/microservices/rq_engine/fork_archive_routes.py",
-        "value": 631.0
+        "value": 634.0
       },
       {
         "path": "wepppy/nodb/mods/path_ce/data_prep.py",
@@ -322,12 +322,12 @@
         "value": 1300.0
       },
       {
-        "path": "wepppy/weppcloud/controllers_js/__tests__/console_smoke.test.js",
-        "value": 1254.0
+        "path": "wepppy/weppcloud/controllers_js/roads.js",
+        "value": 1266.0
       },
       {
-        "path": "wepppy/weppcloud/controllers_js/disturbed.js",
-        "value": 1250.0
+        "path": "wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js",
+        "value": 1257.0
       }
     ],
     "js_max_cc_top20": [
@@ -413,5 +413,486 @@
       }
     ]
   },
-  "changed_files": []
+  "changed_files": [
+    {
+      "path": "tests/microservices/test_browse_auth_routes.py",
+      "base_path": "tests/microservices/test_browse_auth_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1972.0,
+          "current": 2013.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 76.0,
+          "current": 76.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/microservices/test_dtale_freshness.py",
+      "base_path": "tests/microservices/test_dtale_freshness.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 432.0,
+          "current": 452.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 63.0,
+          "current": 63.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_files_routes.py",
+      "base_path": "tests/microservices/test_files_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1582.0,
+          "current": 1570.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 57.0,
+          "current": 57.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/nodb/mods/test_roads_controller.py",
+      "base_path": "tests/nodb/mods/test_roads_controller.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 3056.0,
+          "current": 3065.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 256.0,
+          "current": 256.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/roads/test_roads_publication.py",
+      "base_path": "tests/roads/test_roads_publication.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 43.0,
+          "current": 62.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 13.0,
+          "current": 31.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/wepp/interchange/test_roads_lifecycle.py",
+      "base_path": "tests/wepp/interchange/test_roads_lifecycle.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 330.0,
+          "current": 306.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 45.0,
+          "current": 45.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_diff_bp.py",
+      "base_path": "tests/weppcloud/routes/test_diff_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 83.0,
+          "current": 83.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 31.0,
+          "current": 31.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/microservices/browse/_download.py",
+      "base_path": "wepppy/microservices/browse/_download.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 681.0,
+          "current": 678.0,
+          "trend": "improved",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 118.0,
+          "current": 120.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/browse/_roads.py",
+      "base_path": "wepppy/microservices/browse/_roads.py",
+      "status": "D",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 47.0,
+          "current": null,
+          "trend": "removed",
+          "severity": "unknown"
+        },
+        {
+          "name": "python_function_len",
+          "base": 23.0,
+          "current": null,
+          "trend": "removed",
+          "severity": "unknown"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "unknown"
+    },
+    {
+      "path": "wepppy/microservices/browse/browse.py",
+      "base_path": "wepppy/microservices/browse/browse.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1347.0,
+          "current": 1342.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 109.0,
+          "current": 109.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/browse/dtale.py",
+      "base_path": "wepppy/microservices/browse/dtale.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 309.0,
+          "current": 306.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 249.0,
+          "current": 247.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/browse/files_api.py",
+      "base_path": "wepppy/microservices/browse/files_api.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 963.0,
+          "current": 960.0,
+          "trend": "improved",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 201.0,
+          "current": 199.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/browse/listing.py",
+      "base_path": "wepppy/microservices/browse/listing.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 843.0,
+          "current": 836.0,
+          "trend": "improved",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 195.0,
+          "current": 195.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "base_path": "wepppy/nodb/mods/roads/roads.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 5405.0,
+          "current": 5406.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 2030.0,
+          "current": 2031.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/runtime_paths/paths.py",
+      "base_path": "wepppy/runtime_paths/paths.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 63.0,
+          "current": 55.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 27.0,
+          "current": 23.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/webservices/dtale/dtale.py",
+      "base_path": "wepppy/webservices/dtale/dtale.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1581.0,
+          "current": 1546.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 221.0,
+          "current": 221.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    }
+  ]
 }

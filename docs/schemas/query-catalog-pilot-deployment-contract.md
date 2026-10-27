@@ -1,5 +1,5 @@
 # Query-catalog pilot: scoped batch deployment
-
+Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
 Status: operator-authorized pilot intent, implementation/acceptance pending
 (2026-10-27 UTC). Applies with the bounded-pilot section of
 [query catalog refresh](query-engine-catalog-refresh-contract.md) and the existing
@@ -88,10 +88,30 @@ repository destinations, no symlinks/traversal and verified content hashes.
 Reject unexpected files, a changed base image or a mismatched manifest before
 build/cutover. Generate the build recipe from trusted tooling, never accept an
 operator-supplied arbitrary Dockerfile/command. Preserve the base image's runtime
-configuration and dependencies. Remove only stale bytecode for replaced source
+configuration and dependencies. Existing source file owners/modes are preserved;
+new approved files inherit the baseline catalog module's owner/mode. Copy files
+individually so existing parent-directory metadata is not replaced. Remove only stale bytecode for replaced source
 modules; retain the immutable overlay manifest in the image. Use no-network
 build steps and keep exact base/candidate IDs and fingerprints in evidence.
 The pilot image's native modules, Python distributions, runtime identity and
 entrypoint/command contracts must match its base. Only the approved source and
 its derived bytecode/provenance may differ. Unrelated running image IDs remain
 unchanged, and rollback restores each host's exact retained original image.
+
+## Canonical invocation and rollback order
+
+Candidate activation uses `scripts/deploy-production.sh --targeted-batch
+--source-overlay-manifest /private/manifest.json --skip-pull --skip-themes
+--no-flush-rq-db`. The manifest contains version `1`, the exact running
+`base_image_id`, and SHA-256 digests for exactly the five approved source files.
+The helper retains build/rollback evidence under `DEPLOY_STATE_DIR` before
+promoting the service image tag. Equivalent Compose identity/configuration
+imports precede the warm stop and service-scoped recreation.
+
+Rollback first restores application source bytes/absences and tags the retained
+original image as the effective batch service image. Invoke the still-installed
+candidate deployment tooling with `--targeted-batch --batch-rollback-image-id
+sha256:<original-id> --skip-pull --skip-themes --no-flush-rq-db`. This path verifies
+the exact tag/ID and performs the same fenced cutover without a build. Restore
+the deployment script/helper bytes/absences last, after original-image runtime
+acceptance; restoring the old script first would remove the scoped rollback mode.

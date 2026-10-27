@@ -699,12 +699,22 @@
   },
   {
     "depends_on": [],
+    "enqueue_target": "inventory_query_catalog_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_inventory",
+    "source_lineno": 328,
+    "source_module": "wepppy/rq/query_catalog_rq.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "refresh_query_catalog_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_catalog_refresh",
-    "source_lineno": 184,
+    "source_lineno": 196,
     "source_module": "wepppy/rq/query_catalog_rq.py"
   },
   {
@@ -1719,7 +1729,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_roads_job",
-    "source_lineno": 412,
+    "source_lineno": 413,
     "source_module": "wepppy/weppcloud/routes/nodb_api/roads_bp.py"
   },
   {

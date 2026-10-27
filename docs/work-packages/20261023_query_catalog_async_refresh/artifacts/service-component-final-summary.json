@@ -1,0 +1,226 @@
+{
+  "selected": 48,
+  "measured": 48,
+  "unattempted": 0,
+  "source_hash_sets": 1,
+  "blocked_mutations": [],
+  "paired_entry_differences": [],
+  "namespaces": {
+    "wc1:runs": {
+      "attempted": 12,
+      "completed": 11,
+      "timeouts": 1,
+      "errors": 0,
+      "pass1": {
+        "completed_passes": 11,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.24737229943275452,
+          "mean": 28.86568107549101,
+          "max": 256.4944303892553
+        },
+        "verify_seconds": {
+          "min": 0.020322639495134354,
+          "mean": 5.906296573579311,
+          "max": 64.10655562765896
+        },
+        "component_seconds": {
+          "min": 0.26769493892788887,
+          "mean": 14.078454984182661,
+          "max": 145.07197932898998
+        },
+        "entry_count": {
+          "min": 10,
+          "mean": 143.83333333333334,
+          "max": 1463
+        }
+      },
+      "pass2": {
+        "completed_passes": 11,
+        "completed_collections": 11,
+        "collect_seconds": {
+          "min": 0.00976535864174366,
+          "mean": 0.717731726271185,
+          "max": 7.289801254868507
+        },
+        "verify_seconds": {
+          "min": 0.018225902691483498,
+          "mean": 1.0750911398367449,
+          "max": 10.972145404666662
+        },
+        "component_seconds": {
+          "min": 0.030965877696871758,
+          "mean": 1.7928228661079297,
+          "max": 18.26194665953517
+        },
+        "entry_count": {
+          "min": 10,
+          "mean": 23.90909090909091,
+          "max": 106
+        }
+      }
+    },
+    "wc1:batch": {
+      "attempted": 12,
+      "completed": 11,
+      "timeouts": 1,
+      "errors": 0,
+      "pass1": {
+        "completed_passes": 12,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.9574552029371262,
+          "mean": 35.816841203408934,
+          "max": 165.07927735336125
+        },
+        "verify_seconds": {
+          "min": 0.10325912572443485,
+          "mean": 22.72203313248853,
+          "max": 112.511809354648
+        },
+        "component_seconds": {
+          "min": 1.060714328661561,
+          "mean": 58.53887433589747,
+          "max": 277.59108670800924
+        },
+        "entry_count": {
+          "min": 21,
+          "mean": 137.41666666666666,
+          "max": 378
+        }
+      },
+      "pass2": {
+        "completed_passes": 11,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.07444636151194572,
+          "mean": 4.2560206499571605,
+          "max": 16.210494762286544
+        },
+        "verify_seconds": {
+          "min": 0.10363958962261677,
+          "mean": 6.432335876605728,
+          "max": 20.669909050688148
+        },
+        "component_seconds": {
+          "min": 0.1780859511345625,
+          "mean": 9.601586152714761,
+          "max": 30.134880179539323
+        },
+        "entry_count": {
+          "min": 21,
+          "mean": 137.41666666666666,
+          "max": 378
+        }
+      }
+    },
+    "wc1:culverts": {
+      "attempted": 12,
+      "completed": 12,
+      "timeouts": 0,
+      "errors": 0,
+      "pass1": {
+        "completed_passes": 12,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.5024839621037245,
+          "mean": 3.9736623256467283,
+          "max": 8.631360743194818
+        },
+        "verify_seconds": {
+          "min": 0.035452987998723984,
+          "mean": 0.3862288980744779,
+          "max": 1.7387627437710762
+        },
+        "component_seconds": {
+          "min": 0.5379369501024485,
+          "mean": 4.359891223721206,
+          "max": 10.048390971496701
+        },
+        "entry_count": {
+          "min": 12,
+          "mean": 44.666666666666664,
+          "max": 50
+        }
+      },
+      "pass2": {
+        "completed_passes": 12,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.01568678393959999,
+          "mean": 0.4589430989387135,
+          "max": 2.104732006788254
+        },
+        "verify_seconds": {
+          "min": 0.0341863427311182,
+          "mean": 0.2077700087490181,
+          "max": 0.3979067914187908
+        },
+        "component_seconds": {
+          "min": 0.04987312667071819,
+          "mean": 0.6667131076877316,
+          "max": 2.4503766410052776
+        },
+        "entry_count": {
+          "min": 12,
+          "mean": 44.666666666666664,
+          "max": 50
+        }
+      }
+    },
+    "legacy:runs": {
+      "attempted": 12,
+      "completed": 12,
+      "timeouts": 0,
+      "errors": 0,
+      "pass1": {
+        "completed_passes": 12,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.6191997081041336,
+          "mean": 6.250712472014129,
+          "max": 31.181944739073515
+        },
+        "verify_seconds": {
+          "min": 0.0244501493871212,
+          "mean": 1.9511269548286994,
+          "max": 12.391093783080578
+        },
+        "component_seconds": {
+          "min": 0.647926015779376,
+          "mean": 8.20183942684283,
+          "max": 43.57303852215409
+        },
+        "entry_count": {
+          "min": 10,
+          "mean": 37,
+          "max": 104
+        }
+      },
+      "pass2": {
+        "completed_passes": 12,
+        "completed_collections": 12,
+        "collect_seconds": {
+          "min": 0.015051327645778656,
+          "mean": 0.31729848325873417,
+          "max": 1.2332173604518175
+        },
+        "verify_seconds": {
+          "min": 0.027853606268763542,
+          "mean": 0.8840507081088921,
+          "max": 3.0965243857353926
+        },
+        "component_seconds": {
+          "min": 0.0429049339145422,
+          "mean": 1.2013491913676262,
+          "max": 4.32974174618721
+        },
+        "entry_count": {
+          "min": 10,
+          "mean": 37,
+          "max": 104
+        }
+      }
+    }
+  }
+}

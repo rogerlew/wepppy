@@ -1,0 +1,236 @@
+{
+  "wepp1": {
+    "uid": 1002,
+    "gid": 130,
+    "candidate_only": true,
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": true
+    },
+    "sha256": "02d605c5c8a13a1210ac866e879cb38fff5d6afbb04d8e73e394a28a8c23c2f8",
+    "access": [
+      {
+        "namespace": "wc1:runs",
+        "path": "/wc1/runs",
+        "resolved": "/wc1/runs",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:batch",
+        "path": "/wc1/batch",
+        "resolved": "/wc1/batch",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:culverts",
+        "path": "/wc1/culverts",
+        "resolved": "/wc1/culverts",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "legacy:runs",
+        "path": "/geodata/weppcloud_runs",
+        "resolved": "/geodata/weppcloud_runs",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      }
+    ]
+  },
+  "wepp2": {
+    "uid": 1002,
+    "gid": 130,
+    "candidate_only": true,
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": true
+    },
+    "sha256": "02d605c5c8a13a1210ac866e879cb38fff5d6afbb04d8e73e394a28a8c23c2f8",
+    "access": [
+      {
+        "namespace": "wc1:runs",
+        "path": "/wc1/runs",
+        "resolved": "/wc1/runs",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:batch",
+        "path": "/wc1/batch",
+        "resolved": "/wc1/batch",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:culverts",
+        "path": "/wc1/culverts",
+        "resolved": "/wc1/culverts",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "legacy:runs",
+        "path": "/geodata/weppcloud_runs",
+        "resolved": "/geodata/weppcloud_runs",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      }
+    ]
+  },
+  "wepp3": {
+    "uid": 1002,
+    "gid": 130,
+    "candidate_only": true,
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": true
+    },
+    "sha256": "02d605c5c8a13a1210ac866e879cb38fff5d6afbb04d8e73e394a28a8c23c2f8",
+    "access": [
+      {
+        "namespace": "wc1:runs",
+        "path": "/wc1/runs",
+        "resolved": "/wc1/runs",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:batch",
+        "path": "/wc1/batch",
+        "resolved": "/wc1/batch",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "wc1:culverts",
+        "path": "/wc1/culverts",
+        "resolved": "/wc1/culverts",
+        "exists": true,
+        "read": true,
+        "write": true,
+        "search": true,
+        "coordination_write": true
+      },
+      {
+        "namespace": "legacy:runs",
+        "path": "/geodata/weppcloud_runs",
+        "resolved": "/geodata/weppcloud_runs",
+        "exists": true,
+        "read": true,
+        "write": false,
+        "search": true,
+        "coordination_write": true
+      }
+    ]
+  }
+}

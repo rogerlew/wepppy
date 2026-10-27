@@ -1,0 +1,90 @@
+INFO:wctl2:docker compose exec -e BATCH_BOUNDARY_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/pilot-test.sock weppcloud /opt/venv/bin/python -m pytest docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py -q -s
+{"work_still_running": true, "claimed_job_status": "canceled", "reported_outstanding_before": 6, "actual_outstanding_before": 7, "new_admission": {"state": "queued", "job_id": "query_catalog_refresh_46e569db-14d6-41cf-a033-b1932c23bd59"}}
+F
+=================================== FAILURES ===================================
+______________ test_claimed_cancellation_retains_live_work_permit ______________
+
+catalog_queue = (PosixPath('/tmp/pytest-of-unknown/pytest-133/test_claimed_cancellation_reta0/runs'), Queue('batch'), <tests.rq.test_query_catalog_rq.CatalogWorker object at 0x72370c026c90>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7236d5e4e780>
+
+    def test_claimed_cancellation_retains_live_work_permit(catalog_queue, monkeypatch):
+        root, queue, worker = catalog_queue
+        identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=8)
+        for path in paths:
+            core.record_catalog_refresh(path)
+        jobs = [tasks.enqueue_catalog_refresh(path, queue=queue, pilot_id=identifier,
+                                             controller_token=token)['job_id']
+                for path in paths[:7]]
+        context = multiprocessing.get_context('fork')
+        entered = context.Event()
+        release = context.Event()
+    
+        def blocked_refresh(*args, **kwargs):
+            entered.set()
+            assert release.wait(15)
+    
+        def execute_one():
+            worker.register_death()
+            worker.work(burst=True, max_jobs=1)
+    
+        monkeypatch.setattr(core, 'refresh_catalog', blocked_refresh)
+        process = context.Process(target=execute_one)
+        process.start()
+        try:
+            assert entered.wait(10)
+            ledger = json.loads(queue.connection.get(guard.LEDGER_KEY))
+            assert ledger['jobs'][jobs[0]]['claimed']
+            queue.fetch_job(jobs[0]).cancel()
+            assert process.is_alive() and not release.is_set()
+            status = pilot.pilot_status(queue.connection, identifier)
+            result = tasks.enqueue_catalog_refresh(paths[7], queue=queue,
+                                                  pilot_id=identifier, controller_token=token)
+            print(json.dumps({'work_still_running': process.is_alive(),
+                              'claimed_job_status': queue.fetch_job(jobs[0]).get_status(),
+                              'reported_outstanding_before': status['outstanding'],
+                              'actual_outstanding_before': 7,
+                              'new_admission': result}, default=str))
+>           assert not result.get('job_id'), 'Live claimed cancellation freed a global permit'
+E           AssertionError: Live claimed cancellation freed a global permit
+E           assert not 'query_catalog_refresh_46e569db-14d6-41cf-a033-b1932c23bd59'
+E            +  where 'query_catalog_refresh_46e569db-14d6-41cf-a033-b1932c23bd59' = <built-in method get of dict object at 0x7236d5c14300>('job_id')
+E            +    where <built-in method get of dict object at 0x7236d5c14300> = {'job_id': 'query_catalog_refresh_46e569db-14d6-41cf-a033-b1932c23bd59', 'state': 'queued'}.get
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py:52: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_batch_task_boundary.py:25
+  /workdir/wepppy/tests/rq/test_batch_task_boundary.py:25: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/rq/test_query_catalog_rq.py:15
+  /workdir/wepppy/tests/rq/test_query_catalog_rq.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/rq/test_query_catalog_pilot.py:17
+  /workdir/wepppy/tests/rq/test_query_catalog_pilot.py:17: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py: 51 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py::test_claimed_cancellation_retains_live_work_permit
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3066202) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py::test_claimed_cancellation_retains_live_work_permit
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:227: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20261023_query_catalog_async_refresh/artifacts/pilot-security-cancellation-repro.py::test_claimed_cancellation_retains_live_work_permit
+1 failed, 58 warnings in 10.07s

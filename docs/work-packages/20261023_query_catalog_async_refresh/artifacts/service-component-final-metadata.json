@@ -1,0 +1,245 @@
+{
+  "epoch": 1793066082.2564633,
+  "samples": [
+    {
+      "namespace": "wc1:runs",
+      "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00972b3ec9e0bde4e8e18ba3b808f0bfe77d83d159f3def3a3f19edaeff9526b",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00aa3deaaebc5f09d2fba330f082ef5c0a33ef4e5402e662668400014e79f7d0",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00c9e06c93cdd56a03b28d8714a97024479325206e7db326ef802feb1d04dad2",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0062e3b14f00d2e150587e5c208a9f7cb1e22796d7d43d7a48d8c811e70e6934",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0067565bf11e7c1a061e3ab6f1934df988f9edd0e3f0114ef8b0b8a4666b402e",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "007e1d061baf4feeb31de902f237ffc25db3482c7666ebfc96b6da28b08162cc",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01830c72f105b653376ce85f8a38fa516dbcbac9912b5526292f9e09e54ab34b",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01b33d69888cef7e2a2fc7d8af54d5c71408dd11760ca4f076c746a75b4ac970",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01c4ae7b6d8a408e66ffbe1dab4ab5b9e3e0cc6a6e29a27ec6abb4e4b8a1148b",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "003c1cac786f49418666b4ef5e2f650011145a54cde5ddd606369381f155787a",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+      "catalog_present": true
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0117218ac0ca4baa32d81fc874d913849b04d0d867aab3f69a457ec3ce5f7a6b",
+      "catalog_present": false
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "01229124a377ea41a3a49619e8c2dfed23edeaf92ba8230ff91fe31fb0dd189b",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0009916e35739a0a396d5d130d4a518b1b144d34ce6c30302ea14823511b6bd7",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "000bd5400030afc0618fa991be99567f51ed629cffae424e1516d2d42af8c7e6",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "001ca19c124b23673e8539d65030243baa7443fc75beb1b9cb1c5f78a459ef7a",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0038a6d0509feaf2a70e15975db1cb5911516e1971e8c226006f708439c97b96",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "003c653c946877ea02932c6a1bab3e2235fcd0df5951fa31c489e17888aa3cf2",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0044cdbf28761bbd214a6bb2b5ea26f30f7574944ca6369d87401ac265e08b44",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0075fb59d3c9015eadd6db23cceff84516e72a4cbd50850791b64b80dd61366d",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "007a22c301769916988181d953bea470873035d5986b5a696ca5758b13c63ad3",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0080a3a8b7c84216dd2530f3d09f483550bb2f0e13482c29d7212afa0895f253",
+      "catalog_present": false
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+      "catalog_present": false
+    }
+  ]
+}

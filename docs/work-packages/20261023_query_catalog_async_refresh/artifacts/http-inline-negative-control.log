@@ -1,0 +1,106 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py -q --maxfail=1
+F
+=================================== FAILURES ===================================
+______________________ test_inline_guard_blocks_http_loop ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x75a267465370>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-72/test_inline_guard_blocks_http_0')
+
+    def test_inline_guard_blocks_http_loop(monkeypatch, tmp_path):
+        original = suite._make_client
+    
+        def make_client(*args, **kwargs):
+            result = original(*args, **kwargs)
+            from wepppy.query_engine.app import server
+    
+            async def inline(function, *args, **kwargs):
+                return function(*args, **kwargs)
+    
+            monkeypatch.setattr(server, 'run_in_threadpool', inline)
+            return result
+    
+        monkeypatch.setattr(suite, '_make_client', make_client)
+>       suite.test_catalog_contention_keeps_http_loop_responsive(monkeypatch, tmp_path, 'schema')
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/query_engine/test_mcp_router.py:1250: in test_catalog_contention_keeps_http_loop_responsive
+    asyncio.run(exercise())
+/usr/local/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def exercise():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://testserver') as client:
+            headers = {'Authorization': f'Bearer {token}'}
+            paths = {
+                'schema': f'/runs/{runid}/schema',
+                'catalog': f'/mcp/runs/{runid}/catalog',
+                'validate': f'/mcp/runs/{runid}/queries/validate',
+                'activate': f'/mcp/runs/{runid}/activate',
+                'query': f'/runs/{runid}/query',
+            }
+            if endpoint in {'validate', 'query'}:
+                body = {'datasets': ['a.parquet']}
+                call = client.post(paths[endpoint], headers=headers, json=body)
+            elif endpoint == 'activate':
+                call = client.post(paths[endpoint], headers=headers)
+            else:
+                call = client.get(paths[endpoint], headers=headers)
+            task = asyncio.create_task(call)
+            try:
+                deadline = time.monotonic() + 2
+                while not entered.is_set() and time.monotonic() < deadline:
+                    await asyncio.sleep(.01)
+                assert entered.is_set(), 'handler did not reach the actual guard'
+>               assert time.monotonic() < deadline, 'guard wait blocked the event loop'
+E               AssertionError: guard wait blocked the event loop
+E               assert 1667931.369245822 < 1667925.321494032
+E                +  where 1667931.369245822 = <built-in function monotonic>()
+E                +    where <built-in function monotonic> = <module 'time' (built-in)>.monotonic
+
+tests/query_engine/test_mcp_router.py:1225: AssertionError
+=============================== warnings summary ===============================
+tests/query_engine/test_mcp_router.py:15
+  /workdir/wepppy/tests/query_engine/test_mcp_router.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+tests/query_engine/test_mcp_router.py:1145
+  /workdir/wepppy/tests/query_engine/test_mcp_router.py:1145: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.integration
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20261023_query_catalog_async_refresh/artifacts/http-inline-negative-control.py::test_inline_guard_blocks_http_loop
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 warnings in 21.32s

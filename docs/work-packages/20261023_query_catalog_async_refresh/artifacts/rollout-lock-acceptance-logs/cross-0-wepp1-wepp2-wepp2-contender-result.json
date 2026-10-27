@@ -1,0 +1,102 @@
+{
+  "trial": "cross-0-wepp1-wepp2",
+  "host": "wepp2",
+  "role": "contender",
+  "exit_code": 0,
+  "driver_error": null,
+  "driver_start_epoch": 1793058703.410065,
+  "driver_end_epoch": 1793058719.569811,
+  "events": [
+    {
+      "event": "identity",
+      "role": "contender",
+      "epoch": 1793058704.2208753,
+      "elapsed": 0.06586247496306896,
+      "hostname": "1281c0dad239",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock",
+      "inode": 248998786,
+      "mode": "0o640",
+      "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+    },
+    {
+      "event": "guard_request",
+      "role": "contender",
+      "epoch": 1793058704.221334,
+      "elapsed": 0.06632054224610329,
+      "repeat": 0
+    },
+    {
+      "event": "lockf_enter",
+      "role": "contender",
+      "epoch": 1793058704.2448769,
+      "elapsed": 0.08986310102045536,
+      "operation": 2
+    },
+    {
+      "event": "lockf_exit",
+      "role": "contender",
+      "epoch": 1793058719.5377955,
+      "elapsed": 15.382782068103552,
+      "operation": 2,
+      "seconds": 15.292911928147078
+    },
+    {
+      "event": "acquired",
+      "role": "contender",
+      "epoch": 1793058719.5379248,
+      "elapsed": 15.382911331951618,
+      "repeat": 0,
+      "wait_seconds": 15.316591933369637
+    },
+    {
+      "event": "release_start",
+      "role": "contender",
+      "epoch": 1793058719.5379837,
+      "elapsed": 15.38297021575272,
+      "repeat": 0
+    },
+    {
+      "event": "lockf_enter",
+      "role": "contender",
+      "epoch": 1793058719.5380108,
+      "elapsed": 15.382997192442417,
+      "operation": 8
+    },
+    {
+      "event": "lockf_exit",
+      "role": "contender",
+      "epoch": 1793058719.5385737,
+      "elapsed": 15.383560283109546,
+      "operation": 8,
+      "seconds": 0.0005624871701002121
+    },
+    {
+      "event": "released",
+      "role": "contender",
+      "epoch": 1793058719.5391414,
+      "elapsed": 15.384127967059612,
+      "repeat": 0
+    },
+    {
+      "event": "success",
+      "role": "contender",
+      "epoch": 1793058719.5392225,
+      "elapsed": 15.384209020063281,
+      "inode_unchanged": true
+    },
+    {
+      "event": "heartbeat",
+      "role": "contender",
+      "epoch": 1793058719.5394547,
+      "elapsed": 15.38444111123681,
+      "samples": 152,
+      "max_gap_seconds": 0.16641988046467304
+    }
+  ],
+  "stderr": ""
+}

@@ -1,0 +1,78 @@
+INFO:wctl2:docker compose exec -e BATCH_BOUNDARY_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/inventory-test.sock weppcloud /opt/venv/bin/python -m pytest docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py -q -s --maxfail=1
+{'state': 'completed', 'admitted': 0, 'visited': 1, 'failures': 0, 'cycle_started_at': 1793061442.152541, 'completed_at': 1793061442.362441, 'inventory_job_id': 'query_catalog_refresh_dcd91e05-797c-4096-80f3-6436eeafeb59'}
+F
+=================================== FAILURES ===================================
+____________ test_required_root_loss_after_completed_cycle_degrades ____________
+
+catalog_queue = (PosixPath('/tmp/pytest-of-unknown/pytest-88/test_required_root_loss_after_0/runs'), Queue('batch'), <tests.rq.test_query_catalog_rq.CatalogWorker object at 0x7b12d4aa0dd0>)
+
+    def test_required_root_loss_after_completed_cycle_degrades(catalog_queue):
+        root, queue, worker = catalog_queue
+        tasks.reconcile_query_catalogs(queue=queue)
+        drain(queue, worker)
+        worker.register_birth()
+        worker.set_state('idle')
+        assert tasks.reconcile_query_catalogs(queue=queue)['state'] == 'completed'
+        root.rmdir()
+        outcome = tasks.reconcile_query_catalogs(queue=queue)
+        print(outcome)
+>       assert outcome['state'] == 'degraded'
+E       AssertionError: assert 'completed' == 'degraded'
+E         
+E         - degraded
+E         + completed
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py:16: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     rq.worker:worker.py:571 Worker rq:worker:query-catalog-test-f8d3ada30a674f859c581ab2dcbb19f1 started with PID 2251146, version 1.16.2
+INFO     rq.worker:worker.py:615 Subscribing to channel rq:pubsub:query-catalog-test-f8d3ada30a674f859c581ab2dcbb19f1
+INFO     rq.worker:worker.py:575 *** Listening on batch...
+INFO     rq.worker:worker.py:316 Cleaning registries for queue: batch
+INFO     rq.worker:worker.py:671 batch: Query catalog maintenance (query_catalog_refresh_dcd91e05-797c-4096-80f3-6436eeafeb59)
+INFO     rq.worker:worker.py:1465 batch: Job OK (query_catalog_refresh_dcd91e05-797c-4096-80f3-6436eeafeb59)
+INFO     rq.worker:worker.py:1474 Result is kept for 86400 seconds
+INFO     rq.worker:worker.py:428 Worker rq:worker:query-catalog-test-f8d3ada30a674f859c581ab2dcbb19f1: done, quitting
+INFO     rq.worker:worker.py:623 Unsubscribing from channel rq:pubsub:query-catalog-test-f8d3ada30a674f859c581ab2dcbb19f1
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_batch_task_boundary.py:25
+  /workdir/wepppy/tests/rq/test_batch_task_boundary.py:25: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/rq/test_query_catalog_rq.py:15
+  /workdir/wepppy/tests/rq/test_query_catalog_rq.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py: 29 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:227: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:58: DeprecationWarning: The `push_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:72: DeprecationWarning: The `pop_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20261023_query_catalog_async_refresh/artifacts/inventory-root-loss-regression.py::test_required_root_loss_after_completed_cycle_degrades
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 41 warnings in 9.36s

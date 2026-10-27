@@ -1,0 +1,480 @@
+[
+  {
+    "mode": "schema",
+    "exit_code": 0,
+    "holder_exit_code": 0,
+    "events": [
+      {
+        "event": "ready",
+        "epoch": 1793061373.0902095,
+        "elapsed": 20.354791363701224,
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "sources": {
+          "wepppy.query_engine.app.mcp.router": {
+            "candidate_sha256": "550642bebb640ce490124b71a2af5758e927cc34e6f1e203146a97f107d96d31",
+            "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/mcp/router.py",
+            "live_file_sha256": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+          },
+          "wepppy.query_engine.app.server": {
+            "candidate_sha256": "3d7c18ad022d4e582fb6e74bc43ec96a1fe2c5ba9a2db9fe2185b77e7377a191",
+            "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/server.py",
+            "live_file_sha256": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f"
+          }
+        },
+        "guard_inode": 4253772674,
+        "mode": "schema"
+      },
+      {
+        "event": "request_start",
+        "epoch": 1793061374.5934982,
+        "elapsed": 21.858077604323626,
+        "path": "/runs/qcat-isolated-http-canary/schema"
+      },
+      {
+        "event": "guard_wait_started",
+        "epoch": 1793061374.6335576,
+        "elapsed": 21.89813680201769
+      },
+      {
+        "event": "test_pool_saturated",
+        "epoch": 1793061374.6352985,
+        "elapsed": 21.899878101423383,
+        "tokens": 1,
+        "borrowed": 1
+      },
+      {
+        "event": "unrelated_response",
+        "epoch": 1793061374.6393352,
+        "elapsed": 21.903914300724864,
+        "path": "/",
+        "seconds": 0.003951609134674072,
+        "status": 200
+      },
+      {
+        "event": "unrelated_response",
+        "epoch": 1793061374.6409457,
+        "elapsed": 21.90552486293018,
+        "path": "/health",
+        "seconds": 0.0015198979526758194,
+        "status": 200
+      },
+      {
+        "event": "unauthorized_run_response",
+        "epoch": 1793061374.8427756,
+        "elapsed": 22.107354635372758,
+        "status": 404
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061404.7403045,
+        "elapsed": 52.00488356500864,
+        "operation": 2,
+        "seconds": 30.10676814056933
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061404.821582,
+        "elapsed": 52.086161442101,
+        "operation": 8,
+        "seconds": 0.0011268500238656998
+      },
+      {
+        "event": "guard_wait_started",
+        "epoch": 1793061404.8308847,
+        "elapsed": 52.09546364098787
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061404.8320005,
+        "elapsed": 52.09657985530794,
+        "operation": 2,
+        "seconds": 0.0011347420513629913
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061404.9834054,
+        "elapsed": 52.24798470363021,
+        "operation": 8,
+        "seconds": 0.003227509558200836
+      },
+      {
+        "event": "success",
+        "epoch": 1793061405.0323677,
+        "elapsed": 52.29694673791528,
+        "response_status": 200,
+        "request_seconds": 30.43886505998671,
+        "entry": {
+          "extension": ".parquet",
+          "modified": "2026-10-26T17:18:36.740258+00:00",
+          "path": "probe.parquet",
+          "schema": {
+            "fields": [
+              {
+                "name": "value",
+                "type": "int64"
+              }
+            ]
+          },
+          "size_bytes": 518
+        },
+        "pending_receipts": 0,
+        "source_asset_unchanged": true,
+        "live_module_files_unchanged": true,
+        "guard_inode_unchanged": true,
+        "lock_calls": [
+          {
+            "operation": 2,
+            "seconds": 30.10675103403628
+          },
+          {
+            "operation": 8,
+            "seconds": 0.0011186301708221436
+          },
+          {
+            "operation": 2,
+            "seconds": 0.0011299122124910355
+          },
+          {
+            "operation": 8,
+            "seconds": 0.003216242417693138
+          }
+        ]
+      }
+    ],
+    "holder_events": [
+      {
+        "event": "identity",
+        "role": "holder",
+        "epoch": 1793061374.1390169,
+        "elapsed": 0.06124139204621315,
+        "hostname": "1281c0dad239",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock",
+        "inode": 248998786,
+        "mode": "0o640",
+        "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+      },
+      {
+        "event": "guard_request",
+        "role": "holder",
+        "epoch": 1793061374.1395035,
+        "elapsed": 0.0617266483604908,
+        "repeat": 0
+      },
+      {
+        "event": "lockf_enter",
+        "role": "holder",
+        "epoch": 1793061374.1740417,
+        "elapsed": 0.09626509249210358,
+        "operation": 2
+      },
+      {
+        "event": "lockf_exit",
+        "role": "holder",
+        "epoch": 1793061374.175003,
+        "elapsed": 0.09722614474594593,
+        "operation": 2,
+        "seconds": 0.0009629912674427032
+      },
+      {
+        "event": "acquired",
+        "role": "holder",
+        "epoch": 1793061374.1750445,
+        "elapsed": 0.09726780466735363,
+        "repeat": 0,
+        "wait_seconds": 0.03554537892341614
+      },
+      {
+        "event": "release_start",
+        "role": "holder",
+        "epoch": 1793061386.175146,
+        "elapsed": 12.097370892763138,
+        "repeat": 0
+      },
+      {
+        "event": "lockf_enter",
+        "role": "holder",
+        "epoch": 1793061386.1752334,
+        "elapsed": 12.097456496208906,
+        "operation": 8
+      },
+      {
+        "event": "lockf_exit",
+        "role": "holder",
+        "epoch": 1793061386.200509,
+        "elapsed": 12.122732343152165,
+        "operation": 8,
+        "seconds": 0.025269534438848495
+      },
+      {
+        "event": "released",
+        "role": "holder",
+        "epoch": 1793061386.30606,
+        "elapsed": 12.228284357115626,
+        "repeat": 0
+      },
+      {
+        "event": "success",
+        "role": "holder",
+        "epoch": 1793061386.3061814,
+        "elapsed": 12.228404495865107,
+        "inode_unchanged": true
+      },
+      {
+        "event": "heartbeat",
+        "role": "holder",
+        "epoch": 1793061386.3064518,
+        "elapsed": 12.228674924001098,
+        "samples": 106,
+        "max_gap_seconds": 0.32931145653128624
+      }
+    ]
+  },
+  {
+    "mode": "mcp",
+    "exit_code": 0,
+    "holder_exit_code": 0,
+    "events": [
+      {
+        "event": "ready",
+        "epoch": 1793061427.0826187,
+        "elapsed": 19.320213202387094,
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "sources": {
+          "wepppy.query_engine.app.mcp.router": {
+            "candidate_sha256": "550642bebb640ce490124b71a2af5758e927cc34e6f1e203146a97f107d96d31",
+            "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/mcp/router.py",
+            "live_file_sha256": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+          },
+          "wepppy.query_engine.app.server": {
+            "candidate_sha256": "3d7c18ad022d4e582fb6e74bc43ec96a1fe2c5ba9a2db9fe2185b77e7377a191",
+            "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/server.py",
+            "live_file_sha256": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f"
+          }
+        },
+        "guard_inode": 4253772674,
+        "mode": "mcp"
+      },
+      {
+        "event": "request_start",
+        "epoch": 1793061428.4387276,
+        "elapsed": 20.67632045224309,
+        "path": "/mcp/runs/qcat-isolated-http-canary/catalog"
+      },
+      {
+        "event": "guard_wait_started",
+        "epoch": 1793061428.5220962,
+        "elapsed": 20.759688762947917
+      },
+      {
+        "event": "test_pool_saturated",
+        "epoch": 1793061428.5226877,
+        "elapsed": 20.760280534625053,
+        "tokens": 1,
+        "borrowed": 1
+      },
+      {
+        "event": "unrelated_response",
+        "epoch": 1793061428.5268316,
+        "elapsed": 20.764424309134483,
+        "path": "/",
+        "seconds": 0.004055723547935486,
+        "status": 200
+      },
+      {
+        "event": "unrelated_response",
+        "epoch": 1793061428.5296686,
+        "elapsed": 20.767261389642954,
+        "path": "/health",
+        "seconds": 0.0026287008076906204,
+        "status": 200
+      },
+      {
+        "event": "unauthorized_run_response",
+        "epoch": 1793061428.5651996,
+        "elapsed": 20.802792709320784,
+        "status": 404
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061459.0232377,
+        "elapsed": 51.26083022169769,
+        "operation": 2,
+        "seconds": 30.50117144547403
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061459.4983754,
+        "elapsed": 51.73596831969917,
+        "operation": 8,
+        "seconds": 0.002878233790397644
+      },
+      {
+        "event": "guard_wait_started",
+        "epoch": 1793061459.5429337,
+        "elapsed": 51.78052641265094
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061459.5477746,
+        "elapsed": 51.785367239266634,
+        "operation": 2,
+        "seconds": 0.004869077354669571
+      },
+      {
+        "event": "lockf_return",
+        "epoch": 1793061459.8016477,
+        "elapsed": 52.03924043290317,
+        "operation": 8,
+        "seconds": 0.0020698625594377518
+      },
+      {
+        "event": "success",
+        "epoch": 1793061459.8591578,
+        "elapsed": 52.0967504568398,
+        "response_status": 200,
+        "request_seconds": 31.420427268370986,
+        "entry": {
+          "extension": ".parquet",
+          "modified": "2026-10-26T17:18:36.740258+00:00",
+          "path": "probe.parquet",
+          "schema": {
+            "fields": [
+              {
+                "name": "value",
+                "type": "int64"
+              }
+            ]
+          },
+          "size_bytes": 518
+        },
+        "pending_receipts": 0,
+        "source_asset_unchanged": true,
+        "live_module_files_unchanged": true,
+        "guard_inode_unchanged": true,
+        "lock_calls": [
+          {
+            "operation": 2,
+            "seconds": 30.50115487165749
+          },
+          {
+            "operation": 8,
+            "seconds": 0.0028705596923828125
+          },
+          {
+            "operation": 2,
+            "seconds": 0.004862193018198013
+          },
+          {
+            "operation": 8,
+            "seconds": 0.002062905579805374
+          }
+        ]
+      }
+    ],
+    "holder_events": [
+      {
+        "event": "identity",
+        "role": "holder",
+        "epoch": 1793061427.9140334,
+        "elapsed": 0.08734476193785667,
+        "hostname": "1281c0dad239",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock",
+        "inode": 248998786,
+        "mode": "0o640",
+        "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+      },
+      {
+        "event": "guard_request",
+        "role": "holder",
+        "epoch": 1793061427.9146507,
+        "elapsed": 0.08796070329844952,
+        "repeat": 0
+      },
+      {
+        "event": "lockf_enter",
+        "role": "holder",
+        "epoch": 1793061428.0199032,
+        "elapsed": 0.19321337528526783,
+        "operation": 2
+      },
+      {
+        "event": "lockf_exit",
+        "role": "holder",
+        "epoch": 1793061428.027091,
+        "elapsed": 0.20040088705718517,
+        "operation": 2,
+        "seconds": 0.007186805829405785
+      },
+      {
+        "event": "acquired",
+        "role": "holder",
+        "epoch": 1793061428.0271442,
+        "elapsed": 0.20045412331819534,
+        "repeat": 0,
+        "wait_seconds": 0.11249767802655697
+      },
+      {
+        "event": "release_start",
+        "role": "holder",
+        "epoch": 1793061440.0272954,
+        "elapsed": 12.200607957318425,
+        "repeat": 0
+      },
+      {
+        "event": "lockf_enter",
+        "role": "holder",
+        "epoch": 1793061440.0274122,
+        "elapsed": 12.200722308829427,
+        "operation": 8
+      },
+      {
+        "event": "lockf_exit",
+        "role": "holder",
+        "epoch": 1793061440.0969791,
+        "elapsed": 12.27028913423419,
+        "operation": 8,
+        "seconds": 0.06956388056278229
+      },
+      {
+        "event": "released",
+        "role": "holder",
+        "epoch": 1793061440.3424742,
+        "elapsed": 12.515785543248057,
+        "repeat": 0
+      },
+      {
+        "event": "success",
+        "role": "holder",
+        "epoch": 1793061440.342596,
+        "elapsed": 12.515906350687146,
+        "inode_unchanged": true
+      },
+      {
+        "event": "heartbeat",
+        "role": "holder",
+        "epoch": 1793061440.3428526,
+        "elapsed": 12.516162671148777,
+        "samples": 124,
+        "max_gap_seconds": 0.18806065432727337
+      }
+    ]
+  }
+]

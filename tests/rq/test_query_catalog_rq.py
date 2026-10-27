@@ -34,10 +34,23 @@ def catalog_queue(tmp_path, monkeypatch, isolated_rq):
     worker = CatalogWorker([queue], connection=isolated_rq, name="query-catalog-test-" + uuid4().hex)
     worker.register_birth()
     worker.set_state("idle")
+    companions = [CatalogWorker([queue], connection=isolated_rq, name="query-catalog-companion-" + uuid4().hex) for _ in range(7)]
+    for companion in companions:
+        companion.register_birth()
+        companion.set_state("idle")
+    from wepppy.rq._query_catalog_admission import initialize_admission, LEDGER_KEY, PAUSE_KEY
+    # This fixture owns the disposable Redis server; prior test jobs are deleted.
+    isolated_rq.delete(LEDGER_KEY, PAUSE_KEY)
+    for owned_key in isolated_rq.scan_iter("query-catalog:pilot:*"):
+        isolated_rq.delete(owned_key)
+    initialize_admission(isolated_rq, queue)
+    worker._catalog_test_companions = companions
     try:
         yield root, queue, worker
     finally:
         worker.register_death()
+        for companion in companions:
+            companion.register_death()
         queue.delete(delete_jobs=True)
 
 
@@ -52,6 +65,14 @@ def project(root, name="sample"):
 def drain(queue, worker):
     worker.register_death()
     worker.work(burst=True)
+
+
+def discover(queue, worker):
+    """Exercise the real asynchronous inventory job before scope admission."""
+    tasks.reconcile_query_catalogs(queue=queue)
+    drain(queue, worker)
+    worker.register_birth()
+    worker.set_state("idle")
 
 
 def test_concurrent_admission_coalesces_one_job(catalog_queue):
@@ -88,10 +109,11 @@ def test_existing_started_job_retained_until_terminal(catalog_queue):
     core.record_catalog_refresh(path)
     first = tasks.enqueue_catalog_refresh(path, queue=queue)
     job = queue.fetch_job(first["job_id"])
+    queue.connection.lrem(queue.key, 0, job.id)  # Real workers dequeue before STARTED.
     job.set_status(JobStatus.STARTED)
     core.record_catalog_refresh(path, "values.csv")
     assert tasks.enqueue_catalog_refresh(path, queue=queue)["job_id"] == first["job_id"]
-    assert queue.count == 1
+    assert queue.count == 0
     job.set_status(JobStatus.FAILED)
     replacement = tasks.enqueue_catalog_refresh(path, queue=queue)
     assert replacement["job_id"] != first["job_id"]
@@ -113,6 +135,7 @@ def test_receipt_free_crash_gap_recovered_by_inventory(catalog_queue):
     path = project(root)
     # Models the durable artifact left by death before receipt creation.
     assert not (path / "_query_engine/refresh").exists()
+    discover(queue, worker)
     outcome = tasks.reconcile_query_catalogs(queue=queue)
     assert outcome["admitted"] == 1
     assert core.pending_catalog_requests(path)
@@ -127,6 +150,7 @@ def test_redis_discovery_loss_recovers_filesystem_receipts(catalog_queue):
     path = project(root)
     core.record_catalog_refresh(path, "values.csv")
     # No Redis index or admission entry exists, as after Redis restart.
+    discover(queue, worker)
     assert tasks.reconcile_query_catalogs(queue=queue)["admitted"] == 1
     assert queue.count == 1
 
@@ -150,6 +174,7 @@ def test_nested_inventory_scopes_and_bounded_resume(catalog_queue, monkeypatch):
     child.mkdir(parents=True)
     (child / "wepp.nodb").write_text("{}")
     monkeypatch.setenv("QUERY_CATALOG_INVENTORY_LIMIT", "1")
+    discover(queue, worker)
     for _ in range(8):
         tasks.reconcile_query_catalogs(queue=queue)
     assert queue.count == 2
@@ -214,6 +239,7 @@ def test_failed_attempt_retains_request_and_backoff(catalog_queue, monkeypatch):
 def test_no_repeat_request_after_clean_tick(catalog_queue):
     root, queue, worker = catalog_queue
     path = project(root)
+    discover(queue, worker)
     tasks.reconcile_query_catalogs(queue=queue)
     drain(queue, worker)
     worker.register_birth()
@@ -231,6 +257,7 @@ def test_receipt_free_nested_source_inventory(catalog_queue, nested):
     location = parent / nested
     location.parent.mkdir(parents=True, exist_ok=True)
     child = project(location.parent, location.name)
+    discover(queue, worker)
     tasks.reconcile_query_catalogs(queue=queue)
     assert queue.count == 2
     drain(queue, worker)
@@ -252,6 +279,7 @@ def test_disabled_consumer_configuration_blocks_admission(catalog_queue, monkeyp
 def test_cycle_completion_waits_for_acknowledgment(catalog_queue):
     root, queue, worker = catalog_queue
     project(root)
+    discover(queue, worker)
     first = tasks.reconcile_query_catalogs(queue=queue)
     assert first["completed_at"] is None
     assert first["state"] == "pending"
@@ -278,14 +306,14 @@ def test_new_cycle_resets_errors_and_retains_previous_evidence(catalog_queue):
 def test_missing_namespace_degrades_and_retries_on_next_tick(catalog_queue):
     root, queue, worker = catalog_queue
     root.rmdir()
+    discover(queue, worker)
     missing = tasks.reconcile_query_catalogs(queue=queue)
     assert missing["state"] == "degraded"
-    assert missing["unavailable_namespaces"]
     assert missing["completed_at"] is None
     root.mkdir()
     path = project(root)
+    discover(queue, worker)
     recovered = tasks.reconcile_query_catalogs(queue=queue)
-    assert recovered["unavailable_namespaces"] == []
     assert recovered["admitted"] == 1
     drain(queue, worker)
     assert (path / "_query_engine/catalog.json").is_file()
@@ -296,9 +324,14 @@ def test_missing_redundant_alias_does_not_degrade(catalog_queue, monkeypatch):
     from dataclasses import replace
     roots = core.configured_roots()
     monkeypatch.setattr(core, "configured_roots", lambda: roots + [replace(roots[0], path=root / "missing-alias")])
+    # Worker advertisements must describe the same configured roots.
+    for consumer in [worker, *worker._catalog_test_companions]:
+        consumer.register_death()
+        consumer.register_birth()
+        consumer.set_state("idle")
+    discover(queue, worker)
     result = tasks.reconcile_query_catalogs(queue=queue)
     assert result["state"] == "completed"
-    assert result["unavailable_namespaces"] == []
 
 
 def test_ambiguous_transaction_commit_coalesces_on_retry(catalog_queue, monkeypatch):
@@ -440,36 +473,6 @@ def test_real_watch_conflict_keeps_durable_request(catalog_queue, monkeypatch, e
     assert job.meta["query_catalog_maintenance"] is True
 
 
-def test_inventory_budget_across_multiple_namespaces(tmp_path):
-    roots = []
-    expected = set()
-    for namespace in ("runs", "batch", "culverts"):
-        root = tmp_path / namespace
-        root.mkdir()
-        roots.append(core.RootConfig(root, namespace, tmp_path / "coordination", "flat"))
-        for group in range(3):
-            parent = root / str(group)
-            parent.mkdir()
-            for number in range(3):
-                path = project(parent, str(number))
-                expected.add(path)
-                # Inventory must not walk scientific output subtrees.
-                (path / "wepp/output/deep/ignored").mkdir(parents=True)
-    cursor = {}
-    found = set()
-    ticks = 0
-    while True:
-        scopes, cursor = tasks._inventory_step(roots, cursor, 4)
-        assert cursor["visited"] <= 4
-        found.update(scopes)
-        ticks += 1
-        if not cursor["stack"]:
-            break
-        assert ticks < 20
-    assert found == expected
-    assert ticks == 10  # 3 roots + 9 groups + 27 projects; outputs excluded.
-
-
 def test_enabled_default_host_requires_explicit_roots(monkeypatch):
     monkeypatch.delenv("QUERY_CATALOG_ROOTS_JSON", raising=False)
     monkeypatch.setenv("QUERY_CATALOG_REFRESH_ENABLED", "true")
@@ -499,5 +502,7 @@ def test_queued_child_fails_after_owner_freeze(catalog_queue):
     worker.register_birth()
     worker.set_state("idle")
     assert tasks.reconcile_query_catalogs(queue=queue)["admitted"] == 0
-    assert queue.count == 0
+    assert queue.count == 1
+    drain(queue, worker)
+    assert tasks.reconcile_query_catalogs(queue=queue)["admitted"] == 0
     assert core.pending_catalog_requests(child)

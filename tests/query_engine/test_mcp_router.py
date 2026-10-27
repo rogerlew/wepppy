@@ -714,6 +714,12 @@ def test_validate_query_requires_scope(monkeypatch, tmp_path):
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
+    from wepppy.query_engine.app.mcp import router
+
+    def unexpected_prepare(*args, **kwargs):
+        pytest.fail("Denied requests must not enter catalog preparation")
+
+    monkeypatch.setattr(router, "_prepare_query_request", unexpected_prepare)
     client = TestClient(app)
     token = _issue_token(auth, runid, scopes="runs:read")
     response = client.post(
@@ -1017,6 +1023,12 @@ def test_execute_query_requires_scope(monkeypatch, tmp_path):
     from starlette.testclient import TestClient  # type: ignore
     from wepppy.query_engine.app.mcp import auth
 
+    from wepppy.query_engine.app.mcp import router
+
+    def unexpected_prepare(*args, **kwargs):
+        pytest.fail("Denied requests must not enter catalog preparation")
+
+    monkeypatch.setattr(router, "_prepare_query_request", unexpected_prepare)
     client = TestClient(app)
     token = _issue_token(auth, runid, scopes="runs:read")
     response = client.post(
@@ -1128,3 +1140,128 @@ def test_discovery_does_not_cache_roads_availability(monkeypatch, tmp_path, road
         # Missing receipt suppresses stale catalog entries; the filtered response
         # must not hide a later successful publication through browser caching.
         assert files[0]['path'] not in response.text
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize('endpoint', ['schema', 'catalog', 'validate', 'activate', 'query', 'saturated-health'])
+def test_catalog_contention_keeps_http_loop_responsive(monkeypatch, tmp_path, endpoint):
+    """Actual handlers must serve unrelated traffic while a process owns the guard."""
+    import asyncio
+    import fcntl
+    import subprocess
+    import sys
+    import threading
+    import time
+
+    import httpx
+
+    from wepppy.query_engine import catalog_refresh as refresh
+    from wepppy.query_engine.context import resolve_run_context
+
+    _set_auth_env(monkeypatch)
+    runid = 'contended-run'
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([{
+        'path': str(tmp_path / 'runs'), 'namespace': 'http-contention',
+        'coordination': str(tmp_path / 'locks'), 'layout': 'flat',
+    }]))
+    monkeypatch.setenv('QUERY_CATALOG_REFRESH_ENABLED', 'false')
+    app, run_dir = _make_client(monkeypatch, tmp_path / 'runs', runid)
+    from wepppy.query_engine.app import server
+    from wepppy.query_engine.app.mcp import auth
+
+    # Isolate the query executor's second freshness barrier from initial discovery.
+    context = resolve_run_context(str(run_dir), run_interchange=False)
+    if endpoint == 'query':
+        monkeypatch.setattr(server, 'resolve_run_context', lambda *a, **k: context)
+    receipt = refresh.record_catalog_refresh(run_dir, 'a.parquet')
+    token = _issue_token(auth, runid, scopes=('runs:read', 'queries:validate', 'queries:execute', 'runs:activate'))
+    child = subprocess.Popen(
+        [sys.executable, '-u', '-c', '''
+import select, signal, sys
+signal.alarm(20)
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+with catalog_lifecycle_guard(sys.argv[1]):
+    print('held', flush=True)
+    # Bound failure of the old event-loop-blocking implementation.
+    select.select([sys.stdin], [], [], 8)
+''', str(run_dir)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, text=True,
+    )
+    entered = threading.Event()
+    original_lockf = fcntl.lockf
+
+    def observed_lockf(fd, operation, *args):
+        if operation == fcntl.LOCK_EX:
+            entered.set()
+        return original_lockf(fd, operation, *args)
+
+    try:
+        assert child.stdout.readline().strip() == 'held'
+        monkeypatch.setattr(fcntl, 'lockf', observed_lockf)
+
+        async def exercise():
+            import anyio.to_thread
+
+            limiter = anyio.to_thread.current_default_thread_limiter()
+            if endpoint == 'saturated-health':
+                # This event loop owns the test-local limiter; production defaults stay intact.
+                limiter.total_tokens = 1
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://testserver') as client:
+                headers = {'Authorization': f'Bearer {token}'}
+                paths = {
+                    'schema': f'/runs/{runid}/schema',
+                    'saturated-health': f'/runs/{runid}/schema',
+                    'catalog': f'/mcp/runs/{runid}/catalog',
+                    'validate': f'/mcp/runs/{runid}/queries/validate',
+                    'activate': f'/mcp/runs/{runid}/activate',
+                    'query': f'/runs/{runid}/query',
+                }
+                if endpoint in {'validate', 'query'}:
+                    body = {'datasets': ['a.parquet']}
+                    call = client.post(paths[endpoint], headers=headers, json=body)
+                elif endpoint == 'activate':
+                    call = client.post(paths[endpoint], headers=headers)
+                else:
+                    call = client.get(paths[endpoint], headers=headers)
+                task = asyncio.create_task(call)
+                try:
+                    deadline = time.monotonic() + 2
+                    while not entered.is_set() and time.monotonic() < deadline:
+                        await asyncio.sleep(.01)
+                    assert entered.is_set(), 'handler did not reach the actual guard'
+                    assert time.monotonic() < deadline, 'guard wait blocked the event loop'
+                    assert child.poll() is None, 'holder expired before responsiveness check'
+                    if endpoint == 'saturated-health':
+                        assert limiter.borrowed_tokens == limiter.total_tokens == 1
+                    for path in ('/', '/health'):
+                        before = time.monotonic()
+                        health = await asyncio.wait_for(client.get(path), timeout=1)
+                        assert health.status_code == 200
+                        if path == '/health':
+                            assert health.text == 'OK'
+                        assert time.monotonic() - before < 1
+                        assert not task.done(), 'guard was released before unrelated traffic could progress'
+                finally:
+                    try:
+                        child.stdin.write('\n')
+                        child.stdin.flush()
+                    except BrokenPipeError:
+                        # The bounded holder may already have expired on a regression.
+                        pass
+                response = await asyncio.wait_for(task, timeout=15)
+                assert response.status_code == 200, response.text
+                pending = refresh.pending_catalog_requests(run_dir)
+                if endpoint == 'activate':
+                    # Synchronous activation does not acknowledge another refresh's receipts.
+                    assert [item['request_id'] for item in pending] == [receipt['request_id']]
+                else:
+                    assert not pending
+                catalog = json.loads((run_dir / '_query_engine/catalog.json').read_text())
+                assert any(entry['path'] == 'a.parquet' and entry['size_bytes'] > 1 for entry in catalog['files'])
+
+        asyncio.run(exercise())
+    finally:
+        if child.poll() is None:
+            child.stdin.close()
+        child.wait(timeout=12)
+        assert child.returncode == 0, child.stderr.read()

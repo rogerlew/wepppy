@@ -1,0 +1,2400 @@
+{
+  "containers": [
+    {
+      "host": "wepp1",
+      "container": "docker-weppcloud-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:24.935942+00:00",
+        "hostname": "2f5e43fed59c",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "2552 2187 0:105 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-engine-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:24.730222+00:00",
+        "hostname": "566f58029bf2",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "1645 1605 0:105 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-query-engine-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:24.906353+00:00",
+        "hostname": "09d47286fe93",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "2361 1923 0:105 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp1",
+      "container": "wepppy-scheduler",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:24.905974+00:00",
+        "hostname": "5cddcb9a395f",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": false
+          },
+          "/wc1/batch": {
+            "exists": false
+          },
+          "/wc1/culverts": {
+            "exists": false
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": false
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": false
+          }
+        },
+        "mounts": [
+          "1253 2538 8:1 /wc1 /wc1 rw,relatime - ext4 /dev/sda1 rw,errors=remount-ro"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-worker-batch-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:24.903737+00:00",
+        "hostname": "7cda8f7b4275",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "2053 2460 0:105 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-worker-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:26.697432+00:00",
+        "hostname": "b9f5546561d5",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "2096 2075 0:105 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp2",
+      "container": "docker-rq-worker-batch-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:26.149090+00:00",
+        "hostname": "1281c0dad239",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "1167 1144 0:68 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.217,local_lock=none,addr=192.168.100.101"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp2",
+      "container": "docker-rq-worker-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:26.149066+00:00",
+        "hostname": "f6f7a458cb74",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": true,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "1164 1145 0:68 / /wc1 rw,noatime - nfs4 nas.rocket.net:/wepp/wc1 rw,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.217,local_lock=none,addr=192.168.100.101"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    },
+    {
+      "host": "wepp3",
+      "container": "docker-rq-worker-fork-archive-1",
+      "code": 0,
+      "data": {
+        "utc": "2026-10-26T17:16:26.602871+00:00",
+        "hostname": "39ca2ed3f7fa",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "pid1_status": {
+          "Umask": "0022",
+          "Uid": "1002\t1002\t1002\t1002",
+          "Gid": "130\t130\t130\t130",
+          "Groups": "130"
+        },
+        "native_path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+        "native_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+        "scanner_exports": [
+          "catalog_scan"
+        ],
+        "configuration": {
+          "protocol": 1,
+          "roots": [
+            {
+              "path": "/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/wc1/runs",
+              "namespace": "wc1:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "sharded"
+            },
+            {
+              "path": "/geodata/wc1/batch",
+              "namespace": "wc1:batch",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "batch"
+            },
+            {
+              "path": "/geodata/wc1/culverts",
+              "namespace": "wc1:culverts",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "culverts"
+            },
+            {
+              "path": "/geodata/weppcloud_runs",
+              "namespace": "legacy:runs",
+              "coordination": "/geodata/wc1/query-engine-coordination/locks",
+              "layout": "flat"
+            }
+          ],
+          "enabled": false
+        },
+        "explicit_env": {},
+        "roots": {
+          "/wc1/runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/batch": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/culverts": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2775",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/wc1/query-engine-coordination/locks": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o2755",
+            "read": true,
+            "write": true,
+            "execute": true
+          },
+          "/geodata/weppcloud_runs": {
+            "exists": true,
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o777",
+            "read": true,
+            "write": false,
+            "execute": true
+          }
+        },
+        "mounts": [
+          "283 189 0:50 / /wc1 rw,relatime - nfs nas.rocket.net:/wepp/wc1 rw,vers=3,rsize=32768,wsize=32768,namlen=255,soft,proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=192.168.100.101,mountvers=3,mountport=635,mountproto=tcp,local_lock=none,addr=192.168.100.101"
+        ],
+        "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+        "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c"
+      },
+      "error": null
+    }
+  ],
+  "registry_first": {
+    "utc": "2026-10-26T17:16:01.744675+00:00",
+    "workers": [
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "333",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.878581Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118379Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0230596fccd244cbb0139bb6f43d6e87",
+        "ttl": 187
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "331",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.777468Z",
+        "last_heartbeat": "2026-10-26T17:10:49.374510Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": "1",
+        "total_working_time": "0.602306",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0ceed99373d247269c75a98c361789f1",
+        "ttl": 168
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "333",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.989384Z",
+        "last_heartbeat": "2026-10-26T17:10:29.741034Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "6",
+        "failed_job_count": null,
+        "total_working_time": "119.481904",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0e3d2f6e3f43411880513302008455a4",
+        "ttl": 148
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "259",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.198145Z",
+        "last_heartbeat": "2026-10-26T17:09:42.537824Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:27393fc59e9641019e79ddf12ae27c81",
+        "ttl": 101
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "4261",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T11:50:38.585436Z",
+        "last_heartbeat": "2026-10-26T17:14:32.899896Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "5",
+        "failed_job_count": "1",
+        "total_working_time": "251.781181",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:273ef7eb58ad4fffaa0d751089a78ebb",
+        "ttl": 391
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "258",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.156862Z",
+        "last_heartbeat": "2026-10-26T17:09:38.101139Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "2",
+        "failed_job_count": null,
+        "total_working_time": "5432.71018500000000007",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:49713cb93267419a84c9d8de436f3fac",
+        "ttl": 96
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "260",
+        "queues": "batch",
+        "state": "busy",
+        "birth": "2026-10-26T10:58:21.203594Z",
+        "last_heartbeat": "2026-10-26T17:15:38.199611Z",
+        "death": null,
+        "current_job": "d9f67e0f-b69d-4851-844c-7ebb44454074",
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:56cc15b4cd6a4731afd20f8b7363fb28",
+        "ttl": 66
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "335",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.965009Z",
+        "last_heartbeat": "2026-10-26T17:10:21.412315Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "8",
+        "failed_job_count": null,
+        "total_working_time": "202.16638",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:62fce9f69f724d72910c9d3508c07c25",
+        "ttl": 140
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "261",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.179804Z",
+        "last_heartbeat": "2026-10-26T17:13:20.408331Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": "1",
+        "total_working_time": "0.566554",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:6375761a551c472794a6adfe5076c639",
+        "ttl": 319
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "330",
+        "queues": "default",
+        "state": "busy",
+        "birth": "2026-10-26T10:45:18.910845Z",
+        "last_heartbeat": "2026-10-26T17:15:55.686882Z",
+        "death": null,
+        "current_job": "17a55071-1f17-4285-9cf9-742002f61bfb",
+        "successful_job_count": "6",
+        "failed_job_count": null,
+        "total_working_time": "125.406732",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:73168b3a1df741cc927a36c9982d45f1",
+        "ttl": 84
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "263",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.460390Z",
+        "last_heartbeat": "2026-10-26T17:09:35.667818Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "8",
+        "failed_job_count": null,
+        "total_working_time": "49.988195",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:770c97ac44534ca6bf00dacdee95b089",
+        "ttl": 94
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "332",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.844775Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118752Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:8115f935134447e090aedfa2eb4d7ae3",
+        "ttl": 187
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "330",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.768842Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118383Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:8b56389837514a0ab5588a4ce64059d1",
+        "ttl": 187
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "331",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.937045Z",
+        "last_heartbeat": "2026-10-26T17:11:22.010754Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "10",
+        "failed_job_count": "1",
+        "total_working_time": "32.403365",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:97848d2bcd344c9cb031c0753c3b753a",
+        "ttl": 200
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "17739",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T16:46:25.972860Z",
+        "last_heartbeat": "2026-10-26T17:14:27.996660Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "1",
+        "failed_job_count": null,
+        "total_working_time": "152.367997",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:a1721750a13949cea7210ca58d172a8c",
+        "ttl": 386
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "262",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.386290Z",
+        "last_heartbeat": "2026-10-26T17:11:55.687603Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "8",
+        "failed_job_count": null,
+        "total_working_time": "321.91729300000000003",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:aac7001f1823464090f930cd1f91e731",
+        "ttl": 234
+      },
+      {
+        "name": null,
+        "hostname": "39ca2ed3f7fa",
+        "pid": "220",
+        "queues": "fork-archive",
+        "state": "idle",
+        "birth": "2026-10-26T16:15:36.577608Z",
+        "last_heartbeat": "2026-10-26T17:09:36.969626Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:acc4e07b398d4252bbff960530b1b57b",
+        "ttl": 95
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "334",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.972801Z",
+        "last_heartbeat": "2026-10-26T17:13:02.015439Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "7",
+        "failed_job_count": null,
+        "total_working_time": "196.840839",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:badad4650efd43d2ba4baa748724bc99",
+        "ttl": 300
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "332",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.973415Z",
+        "last_heartbeat": "2026-10-26T17:10:26.919930Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "7",
+        "failed_job_count": null,
+        "total_working_time": "240.78275800000000001",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:c58eff6fdfc348a7a86523f84b0ee4f2",
+        "ttl": 145
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "8386",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T13:22:40.020528Z",
+        "last_heartbeat": "2026-10-26T17:11:05.080313Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "5",
+        "failed_job_count": null,
+        "total_working_time": "71.25057",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:f20c79dfe49b4c96b10fa26ec9484232",
+        "ttl": 183
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "260",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.460896Z",
+        "last_heartbeat": "2026-10-26T17:11:22.636642Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "9",
+        "failed_job_count": null,
+        "total_working_time": "72.538838",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:fd72defaf8b1487ca772d9e63b960ecb",
+        "ttl": 201
+      }
+    ],
+    "queues": {
+      "batch": {
+        "queued": 0,
+        "head_sample": []
+      },
+      "default": {
+        "queued": 0,
+        "head_sample": []
+      },
+      "fork-archive": {
+        "queued": 0,
+        "head_sample": []
+      }
+    }
+  },
+  "registry_second": {
+    "utc": "2026-10-26T17:17:46.156405+00:00",
+    "workers": [
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "333",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.878581Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118379Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0230596fccd244cbb0139bb6f43d6e87",
+        "ttl": 83
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "331",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.777468Z",
+        "last_heartbeat": "2026-10-26T17:17:34.443633Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": "1",
+        "total_working_time": "0.602306",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0ceed99373d247269c75a98c361789f1",
+        "ttl": 468
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "333",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.989384Z",
+        "last_heartbeat": "2026-10-26T17:17:14.783059Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "6",
+        "failed_job_count": null,
+        "total_working_time": "119.481904",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:0e3d2f6e3f43411880513302008455a4",
+        "ttl": 449
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "259",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.198145Z",
+        "last_heartbeat": "2026-10-26T17:16:27.593850Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:27393fc59e9641019e79ddf12ae27c81",
+        "ttl": 401
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "4261",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T11:50:38.585436Z",
+        "last_heartbeat": "2026-10-26T17:14:32.899896Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "5",
+        "failed_job_count": "1",
+        "total_working_time": "251.781181",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:273ef7eb58ad4fffaa0d751089a78ebb",
+        "ttl": 287
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "605071",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T17:16:11.345375Z",
+        "last_heartbeat": "2026-10-26T17:16:11.396535Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:431fe970fa6e456082fca3ab54fb39d7",
+        "ttl": 385
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "258",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.156862Z",
+        "last_heartbeat": "2026-10-26T17:16:23.129892Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "2",
+        "failed_job_count": null,
+        "total_working_time": "5432.71018500000000007",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:49713cb93267419a84c9d8de436f3fac",
+        "ttl": 397
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "260",
+        "queues": "batch",
+        "state": "busy",
+        "birth": "2026-10-26T10:58:21.203594Z",
+        "last_heartbeat": "2026-10-26T17:17:38.264504Z",
+        "death": null,
+        "current_job": "d9f67e0f-b69d-4851-844c-7ebb44454074",
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:56cc15b4cd6a4731afd20f8b7363fb28",
+        "ttl": 82
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "335",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.965009Z",
+        "last_heartbeat": "2026-10-26T17:17:06.498086Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "8",
+        "failed_job_count": null,
+        "total_working_time": "202.16638",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:62fce9f69f724d72910c9d3508c07c25",
+        "ttl": 440
+      },
+      {
+        "name": null,
+        "hostname": "1281c0dad239",
+        "pid": "261",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.179804Z",
+        "last_heartbeat": "2026-10-26T17:13:20.408331Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": "1",
+        "total_working_time": "0.566554",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:6375761a551c472794a6adfe5076c639",
+        "ttl": 214
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "263",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.460390Z",
+        "last_heartbeat": "2026-10-26T17:17:18.107725Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "9",
+        "failed_job_count": null,
+        "total_working_time": "119.21091799999999999",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:770c97ac44534ca6bf00dacdee95b089",
+        "ttl": 452
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "332",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.844775Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118752Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:8115f935134447e090aedfa2eb4d7ae3",
+        "ttl": 83
+      },
+      {
+        "name": null,
+        "hostname": "7cda8f7b4275",
+        "pid": "330",
+        "queues": "batch",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:17.768842Z",
+        "last_heartbeat": "2026-10-26T17:11:09.118383Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:8b56389837514a0ab5588a4ce64059d1",
+        "ttl": 83
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "331",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.937045Z",
+        "last_heartbeat": "2026-10-26T17:11:22.010754Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "10",
+        "failed_job_count": "1",
+        "total_working_time": "32.403365",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:97848d2bcd344c9cb031c0753c3b753a",
+        "ttl": 96
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "17739",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T16:46:25.972860Z",
+        "last_heartbeat": "2026-10-26T17:14:27.996660Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "1",
+        "failed_job_count": null,
+        "total_working_time": "152.367997",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:a1721750a13949cea7210ca58d172a8c",
+        "ttl": 282
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "262",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.386290Z",
+        "last_heartbeat": "2026-10-26T17:11:55.687603Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "8",
+        "failed_job_count": null,
+        "total_working_time": "321.91729300000000003",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:aac7001f1823464090f930cd1f91e731",
+        "ttl": 130
+      },
+      {
+        "name": null,
+        "hostname": "39ca2ed3f7fa",
+        "pid": "220",
+        "queues": "fork-archive",
+        "state": "idle",
+        "birth": "2026-10-26T16:15:36.577608Z",
+        "last_heartbeat": "2026-10-26T17:16:22.023005Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": null,
+        "failed_job_count": null,
+        "total_working_time": null,
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:acc4e07b398d4252bbff960530b1b57b",
+        "ttl": 396
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "334",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.972801Z",
+        "last_heartbeat": "2026-10-26T17:13:02.015439Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "7",
+        "failed_job_count": null,
+        "total_working_time": "196.840839",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:badad4650efd43d2ba4baa748724bc99",
+        "ttl": 196
+      },
+      {
+        "name": null,
+        "hostname": "b9f5546561d5",
+        "pid": "332",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:45:18.973415Z",
+        "last_heartbeat": "2026-10-26T17:17:12.015856Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "7",
+        "failed_job_count": null,
+        "total_working_time": "240.78275800000000001",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:c58eff6fdfc348a7a86523f84b0ee4f2",
+        "ttl": 446
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "8386",
+        "queues": "default",
+        "state": "busy",
+        "birth": "2026-10-26T13:22:40.020528Z",
+        "last_heartbeat": "2026-10-26T17:17:18.043179Z",
+        "death": null,
+        "current_job": "aefa367e-6981-4b2a-a54c-153c98077c48",
+        "successful_job_count": "5",
+        "failed_job_count": null,
+        "total_working_time": "71.25057",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:f20c79dfe49b4c96b10fa26ec9484232",
+        "ttl": 62
+      },
+      {
+        "name": null,
+        "hostname": "f6f7a458cb74",
+        "pid": "260",
+        "queues": "default",
+        "state": "idle",
+        "birth": "2026-10-26T10:58:21.460896Z",
+        "last_heartbeat": "2026-10-26T17:11:22.636642Z",
+        "death": null,
+        "current_job": null,
+        "successful_job_count": "9",
+        "failed_job_count": null,
+        "total_working_time": "72.538838",
+        "query_catalog_configuration": "{\"protocol\": 1, \"roots\": [{\"path\": \"/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/wc1/runs\", \"namespace\": \"wc1:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"sharded\"}, {\"path\": \"/geodata/wc1/batch\", \"namespace\": \"wc1:batch\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"batch\"}, {\"path\": \"/geodata/wc1/culverts\", \"namespace\": \"wc1:culverts\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"culverts\"}, {\"path\": \"/geodata/weppcloud_runs\", \"namespace\": \"legacy:runs\", \"coordination\": \"/geodata/wc1/query-engine-coordination/locks\", \"layout\": \"flat\"}], \"enabled\": false}",
+        "key": "rq:worker:fd72defaf8b1487ca772d9e63b960ecb",
+        "ttl": 96
+      }
+    ],
+    "queues": {
+      "batch": {
+        "queued": 0,
+        "head_sample": []
+      },
+      "default": {
+        "queued": 0,
+        "head_sample": []
+      },
+      "fork-archive": {
+        "queued": 0,
+        "head_sample": []
+      }
+    }
+  },
+  "capacity_sample": {
+    "utc": "2026-10-26T17:17:24.213491+00:00",
+    "shallow_inventory": [
+      {
+        "path": "/wc1/runs",
+        "realpath": "/wc1/runs",
+        "entry_count_up_to_101": 101,
+        "truncated": true,
+        "seconds": 0.006319904699921608,
+        "directory_count_in_sample": 101
+      },
+      {
+        "path": "/wc1/batch",
+        "realpath": "/wc1/batch",
+        "entry_count_up_to_101": 8,
+        "truncated": false,
+        "seconds": 1.0694225169718266,
+        "directory_count_in_sample": 8
+      },
+      {
+        "path": "/wc1/culverts",
+        "realpath": "/wc1/culverts",
+        "entry_count_up_to_101": 59,
+        "truncated": false,
+        "seconds": 3.468987315893173,
+        "directory_count_in_sample": 59
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "realpath": "/geodata/weppcloud_runs",
+        "entry_count_up_to_101": 101,
+        "truncated": true,
+        "seconds": 59.245359068736434,
+        "directory_count_in_sample": 39
+      }
+    ],
+    "disabled_configuration_inventory_state_present": false,
+    "scanner_doc": null
+  },
+  "scratch_metadata": [
+    {
+      "host": "wepp1",
+      "code": 0,
+      "stdout": "{\"host\": \"7cda8f7b4275\", \"utc\": 1793035243.0408897, \"paths\": [{\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719\", \"dev\": 105, \"inode\": 248998780, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/runs/aa/aa-preflight\", \"dev\": 105, \"inode\": 248998783, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks\", \"dev\": 105, \"inode\": 248998784, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock\", \"dev\": 105, \"inode\": 248998786, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o640\"}]}\n",
+      "stderr": ""
+    },
+    {
+      "host": "wepp2",
+      "code": 0,
+      "stdout": "{\"host\": \"1281c0dad239\", \"utc\": 1793035243.1297126, \"paths\": [{\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719\", \"dev\": 68, \"inode\": 248998780, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/runs/aa/aa-preflight\", \"dev\": 68, \"inode\": 248998783, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks\", \"dev\": 68, \"inode\": 248998784, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock\", \"dev\": 68, \"inode\": 248998786, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o640\"}]}\n",
+      "stderr": ""
+    },
+    {
+      "host": "wepp3",
+      "code": 0,
+      "stdout": "{\"host\": \"39ca2ed3f7fa\", \"utc\": 1793035243.2435546, \"paths\": [{\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719\", \"dev\": 50, \"inode\": 4253772668, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/runs/aa/aa-preflight\", \"dev\": 50, \"inode\": 4253772671, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks\", \"dev\": 50, \"inode\": 4253772672, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o2755\"}, {\"path\": \"/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock\", \"dev\": 50, \"inode\": 4253772674, \"uid\": 1002, \"gid\": 130, \"mode\": \"0o640\"}]}\n",
+      "stderr": ""
+    }
+  ],
+  "lock_repeat": [
+    {
+      "host": "wepp1",
+      "exit_code": 0,
+      "driver_error": null,
+      "events": [
+        {
+          "event": "before_import",
+          "utc_epoch": 1793035308.5495532,
+          "elapsed": 2.2351741790771484e-06,
+          "role": "holder"
+        },
+        {
+          "event": "imported",
+          "utc_epoch": 1793035308.6011145,
+          "elapsed": 0.05156398378312588,
+          "role": "holder",
+          "uid": 1002,
+          "gid": 130
+        },
+        {
+          "event": "before_acquisition",
+          "utc_epoch": 1793035308.6012096,
+          "elapsed": 0.05165856517851353,
+          "role": "holder"
+        },
+        {
+          "event": "acquired",
+          "utc_epoch": 1793035308.6274195,
+          "elapsed": 0.07786822132766247,
+          "role": "holder",
+          "wait_seconds": 0.026187818497419357
+        },
+        {
+          "event": "released",
+          "utc_epoch": 1793035316.7389603,
+          "elapsed": 8.189410291612148,
+          "role": "holder"
+        },
+        {
+          "event": "process_exit",
+          "utc_epoch": 1793035316.7390404,
+          "elapsed": 8.189489535987377,
+          "role": "holder",
+          "code": 0
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "host": "wepp2",
+      "exit_code": 0,
+      "driver_error": null,
+      "events": [
+        {
+          "event": "before_import",
+          "utc_epoch": 1793035309.8381717,
+          "elapsed": 3.030523657798767e-06,
+          "role": "contender"
+        },
+        {
+          "event": "imported",
+          "utc_epoch": 1793035310.103846,
+          "elapsed": 0.2656787149608135,
+          "role": "contender",
+          "uid": 1002,
+          "gid": 130
+        },
+        {
+          "event": "before_acquisition",
+          "utc_epoch": 1793035310.103933,
+          "elapsed": 0.2657644469290972,
+          "role": "contender"
+        },
+        {
+          "event": "acquired",
+          "utc_epoch": 1793035343.2146354,
+          "elapsed": 33.37646643817425,
+          "role": "contender",
+          "wait_seconds": 33.11065690405667
+        },
+        {
+          "event": "released",
+          "utc_epoch": 1793035343.4294496,
+          "elapsed": 33.59128241240978,
+          "role": "contender"
+        },
+        {
+          "event": "process_exit",
+          "utc_epoch": 1793035343.4295776,
+          "elapsed": 33.5914089307189,
+          "role": "contender",
+          "code": 0
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "host": "wepp3",
+      "exit_code": 0,
+      "driver_error": null,
+      "events": [
+        {
+          "event": "before_import",
+          "utc_epoch": 1793035310.036961,
+          "elapsed": 4.384666681289673e-06,
+          "role": "contender"
+        },
+        {
+          "event": "imported",
+          "utc_epoch": 1793035310.1360967,
+          "elapsed": 0.09914126247167587,
+          "role": "contender",
+          "uid": 1002,
+          "gid": 130
+        },
+        {
+          "event": "before_acquisition",
+          "utc_epoch": 1793035310.1362257,
+          "elapsed": 0.09926898777484894,
+          "role": "contender"
+        },
+        {
+          "event": "acquired",
+          "utc_epoch": 1793035340.8679597,
+          "elapsed": 30.831003135070205,
+          "role": "contender",
+          "wait_seconds": 30.731697618961334
+        },
+        {
+          "event": "released",
+          "utc_epoch": 1793035340.8708403,
+          "elapsed": 30.833885487169027,
+          "role": "contender"
+        },
+        {
+          "event": "process_exit",
+          "utc_epoch": 1793035340.8709612,
+          "elapsed": 30.83400473371148,
+          "role": "contender",
+          "code": 0
+        }
+      ],
+      "stderr": ""
+    }
+  ],
+  "publication": [
+    {
+      "host": "wepp1",
+      "exit_code": 0,
+      "stdout": "{\"role\": \"publish\", \"hostname\": \"7cda8f7b4275\", \"seconds\": 4.8343710992485285, \"catalog_uid\": 1002, \"catalog_gid\": 130, \"catalog_mode\": \"0o644\", \"catalog_sha256\": \"d2c3b5c523554017cf7ca404bd9184d8f6334de092ae80fa02f0a6ba74fae104\", \"entry\": {\"extension\": \".parquet\", \"modified\": \"2026-10-26T17:18:36.740258+00:00\", \"path\": \"probe.parquet\", \"schema\": {\"fields\": [{\"name\": \"value\", \"type\": \"int64\"}]}, \"size_bytes\": 518}}\n",
+      "stderr": ""
+    },
+    {
+      "host": "wepp2",
+      "exit_code": 0,
+      "stdout": "{\"role\": \"publish\", \"hostname\": \"1281c0dad239\", \"seconds\": 11.97704808972776, \"catalog_uid\": 1002, \"catalog_gid\": 130, \"catalog_mode\": \"0o640\", \"catalog_sha256\": \"7d955be4a639ee99dc113f4f3468e2f66fd7e52c27f1bc8a1bce2631fadef6c8\", \"entry\": {\"extension\": \".parquet\", \"modified\": \"2026-10-26T17:18:36.740258+00:00\", \"path\": \"probe.parquet\", \"schema\": {\"fields\": [{\"name\": \"value\", \"type\": \"int64\"}]}, \"size_bytes\": 518}}\n",
+      "stderr": ""
+    },
+    {
+      "host": "wepp3",
+      "exit_code": 0,
+      "stdout": "{\"role\": \"publish\", \"hostname\": \"39ca2ed3f7fa\", \"seconds\": 7.561878239735961, \"catalog_uid\": 1002, \"catalog_gid\": 130, \"catalog_mode\": \"0o640\", \"catalog_sha256\": \"07baf9ff8c0a38fac3c1b84639f72266eafe1c2cb5aa4f73f3b59fe790ed7261\", \"entry\": {\"extension\": \".parquet\", \"modified\": \"2026-10-26T17:18:36.740258+00:00\", \"path\": \"probe.parquet\", \"schema\": {\"fields\": [{\"name\": \"value\", \"type\": \"int64\"}]}, \"size_bytes\": 518}}\n",
+      "stderr": ""
+    }
+  ],
+  "initial_lock_attempt": {
+    "status": "incomplete evidence",
+    "holder_announced_acquired": true,
+    "hold_seconds": 6,
+    "wepp2_timeout_seconds": 30,
+    "other_results": "not retained because driver raised before collection",
+    "owned_processes_after_attempt": []
+  },
+  "source_commits": {
+    "wepp1": "813d912be1c8f6f13b6fc60cecebbef9259cd36e",
+    "wepp2": "813d912be1c8f6f13b6fc60cecebbef9259cd36e",
+    "wepp3": "e5e59e83256a19ba5fc9b5f5c8401f3848e11e73"
+  },
+  "probe_source_hashes": {
+    "qcat_fleet_registry.py": "c0ecc3969510bdde67229fdd3fa04d0bc8d9e2b330b56974fe313bc9950e18ab",
+    "qcat_fleet_container.py": "a88e6d6b769b52b8bbcf35faaabe5417fbf7d854f4de4f75d284780dcdb7f7fd",
+    "qcat_fleet_capacity.py": "571f3f93f91ddf623acae3fe22b3b02d76a24756dfd4591e5f6faf4e8097abc0",
+    "qcat_prod_scratch.py": "183a8ac219d33f11a9b8b7d40e820eaa00965b5e36ecddf14bc8f349f2f4855e",
+    "qcat_prod_lock_diagnostic.py": "a062c317b3ed692c2ff7c990ac8807aeefd2cd9eaa168247721d077e4ba8f032",
+    "qcat_lock_diagnostic_driver.py": "91e6607bf8988ca8fad6a4d039128fa456a6ff3b291b3e7aa1b1836346c354ed"
+  },
+  "lock_latency_diagnosis": {
+    "kernel_versions": {
+      "wepp1": "6.8.0-110-generic",
+      "wepp2": "6.8.0-110-generic",
+      "wepp3": "6.8.0-136-generic"
+    },
+    "all_hosts_lockd_nlm_timeout_seconds": 10,
+    "all_hosts_lockd_nlm_grace_period": 0,
+    "kernel_log_window_utc": [
+      "2026-10-26T17:15:00Z",
+      "2026-10-26T17:30:00Z"
+    ],
+    "matching_nfs_lockd_rpc_kernel_log_lines": {
+      "wepp1": [],
+      "wepp2": [],
+      "wepp3": []
+    },
+    "upstream_sources": [
+      "https://github.com/torvalds/linux/blob/v6.8/fs/lockd/clntproc.c",
+      "https://github.com/torvalds/linux/blob/v6.8/fs/nfs/nfs4proc.c"
+    ],
+    "source_hashes": {
+      "qcat-linux-lockd-clntproc.c": "13e3b0cfab440bcf48ec0df1bc533fcf0e2bfdf66383f909c9715ddaec55a729",
+      "qcat-linux-nfs4proc.c": "5ab0fedbb9ec2bf89458e79feaaa04c2b8627a6201d34b95f926b3aab0666fec",
+      "qcat_guard_phase_probe.py": "a02bfc1a994eee6e37a977a9dc41a928028cf1d67b91c28fdda5d91b748ae265"
+    },
+    "phase_results": [
+      {
+        "host": "wepp1",
+        "exit_code": 0,
+        "data": {
+          "hostname": "7cda8f7b4275",
+          "utc_epoch": 1793035885.0269902,
+          "guards": [
+            0.13445370644330978,
+            0.024990564212203026
+          ],
+          "guard_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.002771768718957901
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.002567283809185028
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.012635653838515282
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0012462902814149857
+            }
+          ],
+          "publication_seconds": 4.270661905407906,
+          "publication_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.0022015441209077835
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0026599913835525513
+            },
+            {
+              "phase": "build_catalog",
+              "seconds": 3.985756943002343
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.031135106459259987
+            },
+            {
+              "phase": "fsync",
+              "seconds": 4.816800355911255e-06
+            },
+            {
+              "phase": "fsync",
+              "seconds": 4.947185516357422e-06
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.0394609160721302
+            },
+            {
+              "phase": "fsync",
+              "seconds": 5.749985575675964e-06
+            },
+            {
+              "phase": "fsync",
+              "seconds": 4.276633262634277e-06
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.058467524126172066
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.004740988835692406
+            }
+          ],
+          "freshness_seconds": 0.04885600693523884,
+          "freshness_calls": [],
+          "metadata": {
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o640"
+          }
+        },
+        "stderr": ""
+      },
+      {
+        "host": "wepp2",
+        "exit_code": 0,
+        "data": {
+          "hostname": "1281c0dad239",
+          "utc_epoch": 1793035891.989616,
+          "guards": [
+            0.3652007654309273,
+            0.03255102224647999
+          ],
+          "guard_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.001150740310549736
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.004206620156764984
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0030015502125024796
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0164226982742548
+            }
+          ],
+          "publication_seconds": 16.10559712909162,
+          "publication_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.004693910479545593
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.003096075728535652
+            },
+            {
+              "phase": "build_catalog",
+              "seconds": 13.598465356975794
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.04207521677017212
+            },
+            {
+              "phase": "fsync",
+              "seconds": 7.290393114089966e-06
+            },
+            {
+              "phase": "fsync",
+              "seconds": 6.375834345817566e-06
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.6637551728636026
+            },
+            {
+              "phase": "fsync",
+              "seconds": 7.361173629760742e-06
+            },
+            {
+              "phase": "fsync",
+              "seconds": 5.714595317840576e-06
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.3853209149092436
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.004200156778097153
+            }
+          ],
+          "freshness_seconds": 0.8012793324887753,
+          "freshness_calls": [],
+          "metadata": {
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o640"
+          }
+        },
+        "stderr": ""
+      },
+      {
+        "host": "wepp3",
+        "exit_code": 0,
+        "data": {
+          "hostname": "39ca2ed3f7fa",
+          "utc_epoch": 1793035911.4515023,
+          "guards": [
+            0.26985795609652996,
+            0.005324631929397583
+          ],
+          "guard_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.0018513482064008713
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0006529595702886581
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0007436331361532211
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0011439286172389984
+            }
+          ],
+          "publication_seconds": 5.854518543928862,
+          "publication_calls": [
+            {
+              "phase": "lockf",
+              "seconds": 0.0005592554807662964
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.000791601836681366
+            },
+            {
+              "phase": "build_catalog",
+              "seconds": 5.2368708699941635
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.021387899294495583
+            },
+            {
+              "phase": "fsync",
+              "seconds": 1.648813486099243e-05
+            },
+            {
+              "phase": "fsync",
+              "seconds": 1.7076730728149414e-05
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.13529204577207565
+            },
+            {
+              "phase": "fsync",
+              "seconds": 1.31949782371521e-05
+            },
+            {
+              "phase": "fsync",
+              "seconds": 1.532025635242462e-05
+            },
+            {
+              "phase": "atomic_json",
+              "seconds": 0.22145052812993526
+            },
+            {
+              "phase": "lockf",
+              "seconds": 0.0038676876574754715
+            }
+          ],
+          "freshness_seconds": 0.16989370435476303,
+          "freshness_calls": [],
+          "metadata": {
+            "uid": 1002,
+            "gid": 130,
+            "mode": "0o640"
+          }
+        },
+        "stderr": ""
+      }
+    ],
+    "attribution": "Consistent with upstream 30-second blocked-lock wait/retry paths, not proof of callback loss or exact Ubuntu kernel branch. NAS server configuration and callback traffic not inspected."
+  }
+}

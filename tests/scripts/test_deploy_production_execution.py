@@ -223,7 +223,9 @@ if [ "${1:-}" = "inspect" ]; then
         *State.Running*) printf 'true\n' ;;
         *RestartCount*) printf 'container-%s 0\n' "${container}" ;;
         *Image*)
-            if [ "${FAKE_CANDIDATE_MISMATCH:-0}" = 1 ] && [ "${container}" = "cid-cap" ]; then
+            if [ "${container}" = "cid-rq-worker-batch" ] && [[ "${FAKE_CONFIG}" == *"wepppy:rollback-test"* ]]; then
+                printf 'sha256:%064d\n' 0
+            elif [ "${FAKE_CANDIDATE_MISMATCH:-0}" = 1 ] && [ "${container}" = "cid-cap" ]; then
                 printf 'sha-known-good\n'
             else
                 printf 'sha-candidate\n'
@@ -234,7 +236,11 @@ if [ "${1:-}" = "inspect" ]; then
     esac
 elif [ "${1:-}" = "image" ] && [ "${2:-}" = "inspect" ]; then
     if [ "${3:-}" = "--format" ]; then
-        printf 'sha-candidate\n'
+        if [ "${5:-}" = 'wepppy:rollback-test' ]; then
+            printf 'sha256:%064d\n' 0
+        else
+            printf 'sha-candidate\n'
+        fi
     fi
 elif [ "${1:-}" = "compose" ]; then
     if [[ "$*" == *" up -d --no-deps --force-recreate cap"* ]] \
@@ -1006,3 +1012,20 @@ def test_active_job_probe_preserves_gate_with_stopped_worker(
             assert "Unable to determine active RQ job count" in result.stderr
         else:
             assert "Redis connection unavailable" in result.stderr
+
+
+@pytest.mark.parametrize("worker_only", [False, True])
+def test_targeted_batch_preserves_other_services_and_owned_fence(tmp_path: Path, worker_only: bool) -> None:
+    services = _full_services_with_cap_and_renderer()
+    if worker_only:
+        services = {k: v for k, v in services.items() if k in {"rq-worker", "rq-worker-batch", "weppcloudr"}}
+    services["rq-worker-batch"]["image"] = "wepppy:rollback-test"
+    result, commands = _run_deploy(tmp_path, services, "--targeted-batch",
+                                   "--batch-rollback-image-id", "sha256:" + "0" * 64)
+    assert result.returncode == 0, result.stdout + result.stderr
+    stop = _position(commands, "stop --timeout 216000 rq-worker-batch")
+    start = _position(commands, "up -d --no-deps --force-recreate rq-worker-batch")
+    assert _position(commands, _RQ_SUSPEND) < stop < start < _position(commands, _RQ_RESUME)
+    assert not any("wctl|down" in c or "wctl|build" in c or "prune" in c for c in commands)
+    assert not any("stop --timeout 216000 rq-worker rq-worker-batch" in c for c in commands)
+    assert not any("cap-validator|" in c or "controllers-builder|" in c for c in commands)

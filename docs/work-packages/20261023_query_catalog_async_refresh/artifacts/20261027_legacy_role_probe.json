@@ -1,0 +1,12 @@
+{
+  "uid": 1002,
+  "gid": 130,
+  "anchor_sha256": "7e7aa1408d124f3febeae50039fe85c07e951f2b856f03306c8d50ceaa794cb6",
+  "catalog_guard": "passed",
+  "project_config_guard": {
+    "error": "OSError",
+    "errno": 30,
+    "message": "[Errno 30] Read-only file system: '/geodata/weppcloud_runs/.qcat-role-20261027-0020/.config-amendment.lock'"
+  },
+  "elapsed_seconds": 0.38467049039900303
+}

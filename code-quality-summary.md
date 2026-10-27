@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-10-16T06:01:26Z`
+- Generated (UTC): `2026-10-27T00:57:59Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,15 +27,34 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 1092 | 130.0 | 306.5 | 678.8 | 965.6 | 2087.9 | 5706.0 |
-| `python_prod_max_function_len` | 907 | 58.0 | 105.5 | 172.0 | 228.7 | 388.58 | 2249.0 |
+| `python_prod_file_sloc` | 1101 | 131.0 | 308.0 | 679.0 | 962.0 | 2087.0 | 5406.0 |
+| `python_prod_max_function_len` | 916 | 58.0 | 107.0 | 172.5 | 228.25 | 387.95 | 2249.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| `js_source_file_sloc` | 232 | 242.0 | 550.5 | 1113.6 | 1559.05 | 2333.76 | 2840.0 |
-| `js_source_max_cc` | 232 | 6.0 | 19.0 | 32.0 | 42.9 | 84.45 | 155.0 |
+| `js_source_file_sloc` | 236 | 241.0 | 547.25 | 1092.0 | 1549.25 | 2317.6 | 2840.0 |
+| `js_source_max_cc` | 236 | 6.0 | 19.0 | 32.0 | 42.5 | 84.25 | 155.0 |
 
 ## Changed Files
 
-_No changed-file analysis available (base ref missing or no analyzable files changed)._
+- Files analyzed: `16`; highest severity red: `9`, yellow: `1`; worsened metric entries: `8` (exceptions: `0`, actionable: `8`)
+
+| File | Lang | Highest | Key Metric Deltas |
+| --- | --- | --- | --- |
+| `tests/microservices/test_browse_auth_routes.py` | `python` | `red` | python_file_sloc 1972->2013 (worsened, red)<br>python_function_len 76->76 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/microservices/test_dtale_freshness.py` | `python` | `green` | python_file_sloc 432->452 (worsened, green)<br>python_function_len 63->63 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/microservices/test_files_routes.py` | `python` | `red` | python_file_sloc 1582->1570 (improved, red)<br>python_function_len 57->57 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/nodb/mods/test_roads_controller.py` | `python` | `red` | python_file_sloc 3056->3065 (worsened, red)<br>python_function_len 256->256 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/roads/test_roads_publication.py` | `python` | `green` | python_file_sloc 43->62 (worsened, green)<br>python_function_len 13->31 (worsened, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/wepp/interchange/test_roads_lifecycle.py` | `python` | `green` | python_file_sloc 330->306 (improved, green)<br>python_function_len 45->45 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/weppcloud/routes/test_diff_bp.py` | `python` | `green` | python_file_sloc 83->83 (unchanged, green)<br>python_function_len 31->31 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/_download.py` | `python` | `yellow` | python_file_sloc 681->678 (improved, yellow)<br>python_function_len 118->120 (worsened, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/_roads.py` | `python` | `unknown` | python_file_sloc 47->n/a (removed, unknown)<br>python_function_len 23->n/a (removed, unknown)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/browse.py` | `python` | `red` | python_file_sloc 1347->1342 (improved, red)<br>python_function_len 109->109 (unchanged, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/dtale.py` | `python` | `red` | python_file_sloc 309->306 (improved, green)<br>python_function_len 249->247 (improved, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/files_api.py` | `python` | `red` | python_file_sloc 963->960 (improved, yellow)<br>python_function_len 201->199 (improved, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/browse/listing.py` | `python` | `red` | python_file_sloc 843->836 (improved, yellow)<br>python_function_len 195->195 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/nodb/mods/roads/roads.py` | `python` | `red` | python_file_sloc 5405->5406 (worsened, red)<br>python_function_len 2030->2031 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/runtime_paths/paths.py` | `python` | `green` | python_file_sloc 63->55 (improved, green)<br>python_function_len 27->23 (improved, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/webservices/dtale/dtale.py` | `python` | `red` | python_file_sloc 1581->1546 (improved, red)<br>python_function_len 221->221 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
 
 ## Hotspots (Current Tree)
 
@@ -43,14 +62,14 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/roads/roads.py` | 5706 |
+| `wepppy/nodb/mods/roads/roads.py` | 5406 |
 | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 5349 |
-| `tests/weppcloud/routes/test_pure_controls_render.py` | 4546 |
-| `tests/nodb/mods/test_roads_controller.py` | 3256 |
-| `tests/nodb/mods/test_features_export_service.py` | 3209 |
-| `wepppy/nodb/mods/features_export/service.py` | 3099 |
+| `tests/weppcloud/routes/test_pure_controls_render.py` | 4579 |
+| `tests/nodb/mods/test_features_export_service.py` | 3243 |
+| `wepppy/nodb/mods/features_export/service.py` | 3139 |
+| `tests/nodb/mods/test_roads_controller.py` | 3065 |
 | `tests/nodb/mods/test_omni.py` | 2972 |
-| `wepppy/rq/project_rq.py` | 2818 |
+| `wepppy/rq/project_rq.py` | 2837 |
 | `wepppy/wepp/management/managements.py` | 2623 |
 | `wepppy/nodb/core/wepp.py` | 2423 |
 
@@ -59,10 +78,10 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | Path | Value |
 | --- | ---: |
 | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 2249 |
-| `wepppy/nodb/mods/roads/roads.py` | 2126 |
+| `wepppy/nodb/mods/roads/roads.py` | 2031 |
 | `tests/nodb/mods/disturbed/live_e2e/runbook.py` | 768 |
 | `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 641 |
-| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 631 |
+| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 634 |
 | `wepppy/nodb/mods/path_ce/data_prep.py` | 541 |
 | `wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py` | 528 |
 | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | 470 |

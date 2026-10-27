@@ -1,0 +1,30 @@
+{
+  "auth_method": "real dedicated local dev-agent Flask session seeded in testclient; actual authorizers; login CAPTCHA not exercised",
+  "anonymous_report_status": 404,
+  "reports": [
+    {
+      "path": "/report/wepp/run_summary",
+      "status": 200,
+      "seconds": 0.18665737193077803,
+      "bytes": 80,
+      "sha256": "7243540b9e0289c2d62ed83665b777d0c8cbea05a270dfdc6403bb0e86af3dfd",
+      "hillslopes_ran": 1908
+    },
+    {
+      "path": "/report/wepp/summary",
+      "status": 200,
+      "seconds": 2.7924941359087825,
+      "bytes": 11725150,
+      "sha256": "7128db0ca6cf5ffc04011de5fbfaea6712ed67505764ef3aea91ba19a2968b16"
+    },
+    {
+      "path": "/report/wepp/summary?format=csv&table=hillslopes",
+      "status": 200,
+      "seconds": 0.41359431110322475,
+      "bytes": 624857,
+      "sha256": "3793a6d9180e055d887726ce710f4595981e9c5877bf06397dc23f3ddb5f0298",
+      "csv_rows": 1908
+    }
+  ],
+  "logout_status": 302
+}

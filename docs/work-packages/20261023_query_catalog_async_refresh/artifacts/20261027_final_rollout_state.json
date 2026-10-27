@@ -1,0 +1,193 @@
+{
+  "containers": [
+    {
+      "host": "wepp1",
+      "container": "docker-weppcloud-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067530.5467162,
+        "hostname": "2f5e43fed59c",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-engine-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067530.5590343,
+        "hostname": "566f58029bf2",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-query-engine-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067530.5381777,
+        "hostname": "09d47286fe93",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp1",
+      "container": "wepppy-scheduler",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067531.6536567,
+        "hostname": "5cddcb9a395f",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-worker-batch-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067531.6508434,
+        "hostname": "7cda8f7b4275",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp1",
+      "container": "docker-rq-worker-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067531.6432254,
+        "hostname": "b9f5546561d5",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp2",
+      "container": "docker-rq-worker-batch-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067532.4613647,
+        "hostname": "1281c0dad239",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp2",
+      "container": "docker-rq-worker-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067532.4312894,
+        "hostname": "f6f7a458cb74",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    },
+    {
+      "host": "wepp3",
+      "container": "docker-rq-worker-fork-archive-1",
+      "returncode": 0,
+      "data": {
+        "observed_at": 1793067532.8547585,
+        "hostname": "39ca2ed3f7fa",
+        "uid": 1002,
+        "gid": 130,
+        "refresh_enabled_environment": null,
+        "explicit_roots_set": false,
+        "on_disk_sources": {
+          "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+          "wepppy/rq/_query_catalog_inventory.py": null,
+          "wepppy/query_engine/app/server.py": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f",
+          "wepppy/query_engine/app/mcp/router.py": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "limitation": "Environment and on-disk source readback; does not inspect function objects already loaded by long-lived processes."
+      },
+      "error_type": null
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine --maxfail=1 -q
+..............ss........................................................ [ 35%]
+........................................................................ [ 71%]
+.........................................................                [100%]
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/query_engine/test_mcp_openapi_contract.py: 1 warning
+tests/query_engine/test_mcp_router.py: 85 warnings
+tests/query_engine/test_server_routes.py: 16 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=2245331) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/query_engine/test_mcp_router.py::test_validate_query_invalid_json
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-True]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-True]
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+  /opt/venv/lib/python3.12/site-packages/starlette/templating.py:162: DeprecationWarning: The `name` is not the first parameter anymore. The first parameter should be the `Request` instance.
+  Replace `TemplateResponse(name, {"request": request})` by `TemplateResponse(request, name)`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+199 passed, 2 skipped, 117 warnings in 23.21s

@@ -1,0 +1,959 @@
+{
+  "scope": "owned tiny scratch only; scheduler durations exclude worker service and 30-second cadence",
+  "waves": [
+    {
+      "tag": "qcat-admission25-20261027T020802Z",
+      "scratch": "/wc1/query-catalog-validation/20261026/qcat-admission25-20261027T020802Z",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "parent_pid": 564571,
+      "admission_limit": 25,
+      "inventory_limit": 100,
+      "source_hashes": {
+        "qcat-admission25-20261027T020802Z-inventory.py": "d39f056e243b7889b0dd50c2030c518b822f3d54e4263fb6f16a4b5e8cc86791",
+        "qcat-admission25-20261027T020802Z-rq.py": "839bafc4efa1b1f4161b3d7fec1b7f0a4c0c7e0b3652727f70bd6363404c0cac",
+        "qcat_admission25_probe.py": "98149404ef454b6cb70d154e54f9833956649fc2ac395f9922668a2aca64c50b"
+      },
+      "ticks": [
+        {
+          "label": "discovery-admission",
+          "elapsed_seconds": 0.007658971473574638,
+          "result": {
+            "state": "pending",
+            "admitted": 0,
+            "visited": 0,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793066935.7926838,
+            "completed_at": null,
+            "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+          },
+          "pending_scope_count": 0,
+          "queue_count": 1
+        },
+        {
+          "label": "full-25-new-scope-admission",
+          "elapsed_seconds": 11.668846165761352,
+          "result": {
+            "state": "pending",
+            "admitted": 25,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793066935.7926838,
+            "completed_at": null,
+            "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+          },
+          "pending_scope_count": 25,
+          "queue_count": 25
+        },
+        {
+          "label": "full-25-completion-recheck",
+          "elapsed_seconds": 0.6232305988669395,
+          "result": {
+            "state": "completed",
+            "admitted": 0,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793066935.7926838,
+            "completed_at": 1793067082.4619198,
+            "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+          },
+          "pending_scope_count": 0,
+          "queue_count": 0
+        },
+        {
+          "label": "completed-cycle-noop",
+          "elapsed_seconds": 0.00275493785738945,
+          "result": {
+            "state": "completed",
+            "admitted": 0,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793066935.7926838,
+            "completed_at": 1793067082.4619198,
+            "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+          },
+          "pending_scope_count": 0,
+          "queue_count": 0
+        }
+      ],
+      "worker_phases": [
+        {
+          "label": "inventory-worker",
+          "elapsed_seconds": 0.40633233822882175
+        },
+        {
+          "label": "25-refresh-workers",
+          "elapsed_seconds": 132.1114831008017
+        }
+      ],
+      "state": "passed",
+      "elapsed_seconds": 149.32480992935598,
+      "readback": [
+        {
+          "scope_sha256": "71d4caf4ae4ad7b6ba18c2c8341a4d1c9fa5e43d533a28b664b89f01f5dbdad2",
+          "source_sha256": "42c469b328e1dc5fc2b08960fcc2590e14cef8f59c0197a604bd353ec47320c2",
+          "catalog_sha256": "14c34f149576a4dd7c5b51ea872894e460763e3d971297bb68c06a12ad754895",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "9e9656f6ba0271525490737dac1a28697dbffcee318c868e08b6de89a16d7e15",
+          "source_sha256": "1a80986111952a11d02e84dbed98ae00f279469aad0615d17fa81911f8a6b428",
+          "catalog_sha256": "713c60a1db19d7164760e15ca50a8f745d5545f09032e1dabdc3e7ded6721759",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "930d2b356f297ea6ce1477f4a818bc2a80b2dce8a1ee01bc52cc03e027206ccc",
+          "source_sha256": "2bb5ffa520e4bbe57b59ddc8f4a2bcc31e9d0c5fb2b261c7fd77721278f5a8c8",
+          "catalog_sha256": "7ea89a9cccf57e09c163601d35b95abe17ae6a2d61a595871e9538840d5fdd4c",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "05aa28edd3f084ca080d286efa6550f70309ff92993493d75234d682e6b58935",
+          "source_sha256": "9694854c32ce793afe20aac48984e938d627a4d82c60528fc9eafe2be666f9d0",
+          "catalog_sha256": "806ddfc1bc632a77b04d9beb574980b553b6c09ac3fa47b564f3ccf32ba91bab",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "815132d7e5cb8b2adff7ce228800ac60f866eecb2b96cfbade54f6346ce5533e",
+          "source_sha256": "1fbfe0841b7955f3f3d58b283adf3f1d3bfb43cbdac140342c8a1e00038f36ab",
+          "catalog_sha256": "dd620351e0096d454ba7289627d86d9c58233e595e374e978aeafa65d60ebc19",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "b3dd33752dc2187d7d76eb44690b730d394eaf35590b5dc5eb32aff250163d23",
+          "source_sha256": "1adf2d7ab9003a882dc87b8020a6759abfae7de11eff81e801b00afea14c3ebb",
+          "catalog_sha256": "e1dd41791fd7f214473277b49b7f935fa445f3571e9f7cb5ebfd2a89fb4be716",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "bf846bdfd173170bb5477486900986a2ad92229c0553db7c75cdd0c8097abb39",
+          "source_sha256": "1a8d66bdaaadfd7627ba9b10bc89b69045a4af78272e7ea78303ff39f7e3fd23",
+          "catalog_sha256": "ca03ef65fbd6e5cedded0cc5a3d6a2e6c46935d8ae464f495fbfca66a30ca068",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "43a493b5d57738123255a4ba850ced2d75ef9c81175f3b96afd8692e4a0de3a2",
+          "source_sha256": "6261a8a5c9520d9b34b81547d09f44371c2dda8c06d1ad432bcbf146465d4fce",
+          "catalog_sha256": "676ae1dcc24e5f8742f196f5b99128682b8abe9e3bd8f897a12cc6bd74cbdfaf",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "bc317cb609444f708f71e43e614746069d5f92029adafe35ea23df3ff8d43b67",
+          "source_sha256": "f006433cdea80964ca522fba688e169900ac0aba915bc030bef232d4a9b0429f",
+          "catalog_sha256": "328cb2f725908f381a96cfd35ef4a92185f82b98184fd511d242e092a61a4f00",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "f2d90bd3cd5f589eedcba9db63f851fe9151f74680e39f1d176a59728b0b1bc5",
+          "source_sha256": "88c071a112dd8d634c27f8ed87f6ded690f28a6bc28a1bcb616d7e6ab7c8ad12",
+          "catalog_sha256": "bfb5ec11297599c7e7105529b25f31b71f719d22d7ffb285aa5428445e3bb6fc",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "72c223f620a1dabf138eef0c657c2ceff5dc1808f728a5dbdb154846fe38cfc1",
+          "source_sha256": "c3e029749ed5b62b8d20404a73201d7f160059fdaa50421287c9976aa06858c1",
+          "catalog_sha256": "87a4d8d8e6e728036cbd8a3bbf5c668df470f18fc88a3a91042344095f310c3b",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "bc10de13e8d26b90d9510e7f2511b789c0b5d059f426a5986ac99277c2aaa645",
+          "source_sha256": "8bac696e14016cb869e909d1517eb60f54bbff5f3bdccbfa1a1a8fc58ab4365c",
+          "catalog_sha256": "965fadc65bd892081bd2cbf2cd6980c9d1143a617adb072346baae89d082d739",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "89e4b46725c6b95f05272033d371f0e2190dec5ddc8427327f3cb1736d8bcd98",
+          "source_sha256": "75de32bc298521d5c092420f2f34a39dfb05de66d1d4cecbffcdd9028bf0e279",
+          "catalog_sha256": "d5f4dd83af73e635f43647cc4ea7bd38d14546c376e0d7f37d093d511b756d36",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "fecfb929e750f5d1d5884672f25ea5f4fdbf85f2a8b2131951a1d784f4451fca",
+          "source_sha256": "42eb453a5783060d074b8b92bb342f819af3000b98725cdb13b975c276d498e1",
+          "catalog_sha256": "a7cd86018f49d3595c7fe1c7faa8cb8a90ff262583fe67408cb912a5f3a697a9",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "9844262331127d01385dca507291b46ecea0743e075731318a354d70cc415fcd",
+          "source_sha256": "bc7caf6ba6c9592b5febde0e8cf3d19095a834d328e405de8e594c74870163c6",
+          "catalog_sha256": "6d5fe072899a9adfc66c5f02f3520f7ce2a7698880dbf1bee6566555e4742e1b",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "d3fd59884c84e8e990735507e3c2b2a485eb7f48aaca34fc2f57d352e07955c5",
+          "source_sha256": "3f58e1cb206f6c3910ea837ade06942573f3645d2c2814273755ccf30e490b1f",
+          "catalog_sha256": "47073068bf3de069b4ba3100a7b6768cb58e64e74d330fe3488f1ae406160fa0",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "162faa5cd25d0290eebe27603c0a47d63b71ec02f9982a04c3eef706d1f711a0",
+          "source_sha256": "e84c9f69c6134403cdb139600f80198a090771e83aee49e2d5f4fdc3185b41c2",
+          "catalog_sha256": "60723ecc9475fae6aff0fe8791f7b4194d562183441136692fb570ec7040bfd9",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "61c4957bc7f802c6efcd02b20f6bb7c1fca032d227348777719000274bd2dc61",
+          "source_sha256": "8657e7a6b82e60a87f8f9b9ec985c70bc1f24fddf55c2f24450c2914ffd1672b",
+          "catalog_sha256": "80df9a35c1c2b6f1b9b12f145e29e5e42e61deffc18e13836ee918dc1126313f",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "fc0ea3a9ac8d8ab4ce5fe2623b1f04a6abc66238713d9551c663d55a838aa927",
+          "source_sha256": "f57abbe1736a581c8a01fdb75719cbdf52ef930782a8eac00e7492e224632573",
+          "catalog_sha256": "d1594ce3809fe041cec0b58a076fca0eb6ba5be3218d95e1ce1cd7512919f293",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "1af19edec18b04edb3cc98efef1e4cf55e39b2e6503d55831f58d6cce96ee6cd",
+          "source_sha256": "ae14a4043a9da67cb0d4cd715106824e7b76aec13e3981500d71e37bf4b1f907",
+          "catalog_sha256": "0ff73880be7b5b3738d119a529ed8c7bad00e677ec9cc326d7a224798b652a8e",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "299c3fbba40895bca5c73d168bcca65c2f2141d095c5cff80ba30737e6d7fdb6",
+          "source_sha256": "15f341a0f3ef2f28e436d3c3906022e8be42f97f560b212cfad7d0097fbc23e4",
+          "catalog_sha256": "393d59509a7d5998bfb70e20e9a05afb7ee72e566fbe771e608be9ffcc37b6c7",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "337944263ca7c0f01df8cc15d2d342b54c466f28fed860349a9d96ff826397ff",
+          "source_sha256": "2d1f4f66b8367d23b77d671aa4a0790625efd667bb99a94ad9440992fcea3e44",
+          "catalog_sha256": "14469748e28a832e8d168d7597b58f77a284bce64e57c950406de2c0b4d7eacd",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "3ead38ea21ddb21748eb93685108ba8d5c1e384bd5d14c9e9e3162959bb5e682",
+          "source_sha256": "ff38ed23e0f65e5c2109e4857b3f24cdfef1f18ed59d00ac509ce56c17efc5da",
+          "catalog_sha256": "42ede3c1e2578277544eed534e76cb9a0b6a6e2d786cf5ee8382559a22e82957",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "03b37f15ad57223b05e7589dc90ba4b2ee768d0149e68a600602e96cc91cfc0d",
+          "source_sha256": "4ab7764324019bcb6fca7f5d2bb5cdd493f5fd22799e0bc1427d15165cbe3914",
+          "catalog_sha256": "6f5162d3e167bd48cfd58114b4c88ba26d6b7fb68b80007540972ea1a92fa843",
+          "pending_receipts": 0
+        },
+        {
+          "scope_sha256": "7cf80eb1a6c7fd509685067fc37e4e3c7f74d19e09778cd0bc138da9282cbbf4",
+          "source_sha256": "3d130914ac3a639fce40b25da4b053e96dbd9a229f4b8e91abfcb8767a39b732",
+          "catalog_sha256": "e91cc9f97012c995626818570aa427f9bcff1bb7a562f6f139ce1906a082b08b",
+          "pending_receipts": 0
+        }
+      ],
+      "jobs": [
+        {
+          "id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_d4b8053d-5136-4519-8ca3-17e627bda335",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_a1ce03bb-b99b-4349-abfd-e9e335197e3b",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_57d1c15f-9300-41ad-be88-088ff6a6915e",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_9354800f-2324-47d5-8a26-458fb0f8a020",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_c22d65cb-5c6d-4970-8f97-ea32c695667c",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_bb1a0f16-4240-4be9-a62a-380283f46dab",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_46a80d77-48dd-422e-8bb3-f5638dad79f4",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_d18158c8-dd0e-42c3-beb1-a9522d46f0e7",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_e0f7b3d5-ad2c-4fc4-9a2d-65d7e346a28c",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_ffd183b4-2258-4aba-8986-9c4c0f8d7d0b",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_29cada32-4c6d-492e-a6e3-e021f3939fc4",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_30d7a009-a057-4163-bff4-4c5f9b87f641",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_ea3da233-9991-4bc8-9da7-66a711e115eb",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_603a200a-1b0d-4b0a-afd6-0c3be7ba7af9",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_b2b044a8-dd81-4d4f-9292-7b72b38c073b",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_fcbf8768-e222-49f6-81aa-e83eee5dca05",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_1a722be4-04c7-42dc-8db8-89ef0b09ada6",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_436d55ed-15d3-4c95-b50c-15c1b55c0119",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_1a5eed7b-a642-47f8-b3c6-2d2c3f3c15d0",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_79206f56-d257-4920-857b-a7c3e1b67c40",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_4be72e56-3491-4ca2-9192-b6bf35cdb0f0",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_d5f00537-a713-43c5-9dae-f89128530e44",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_c25d0e74-3b0c-4877-a52f-b8c357f96284",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_bd19ae0a-1956-46cf-93c9-11fc6f2436ad",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_f928533a-b2a2-4c03-b93a-64dc54ddc1ec",
+          "status": "finished",
+          "timeout": 3600
+        }
+      ],
+      "cleanup": {
+        "worker_dead": true,
+        "queued": 0,
+        "started": 0,
+        "private_keys_expire_seconds": 86400,
+        "private_key_count": 89,
+        "private_queue_unregistered": true,
+        "parent_process_absent": true
+      },
+      "run_log_sha256": "9e8fc7ca477f168d346b77d0c182f60bdb1c43abcd42a38a4d40b81dca76b593",
+      "source_metadata_readback": [
+        {
+          "scope_sha256": "71d4caf4ae4ad7b6ba18c2c8341a4d1c9fa5e43d533a28b664b89f01f5dbdad2",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 0
+        },
+        {
+          "scope_sha256": "9e9656f6ba0271525490737dac1a28697dbffcee318c868e08b6de89a16d7e15",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 1
+        },
+        {
+          "scope_sha256": "930d2b356f297ea6ce1477f4a818bc2a80b2dce8a1ee01bc52cc03e027206ccc",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 2
+        },
+        {
+          "scope_sha256": "05aa28edd3f084ca080d286efa6550f70309ff92993493d75234d682e6b58935",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 3
+        },
+        {
+          "scope_sha256": "815132d7e5cb8b2adff7ce228800ac60f866eecb2b96cfbade54f6346ce5533e",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 4
+        },
+        {
+          "scope_sha256": "b3dd33752dc2187d7d76eb44690b730d394eaf35590b5dc5eb32aff250163d23",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 5
+        },
+        {
+          "scope_sha256": "bf846bdfd173170bb5477486900986a2ad92229c0553db7c75cdd0c8097abb39",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 6
+        },
+        {
+          "scope_sha256": "43a493b5d57738123255a4ba850ced2d75ef9c81175f3b96afd8692e4a0de3a2",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 7
+        },
+        {
+          "scope_sha256": "bc317cb609444f708f71e43e614746069d5f92029adafe35ea23df3ff8d43b67",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 8
+        },
+        {
+          "scope_sha256": "f2d90bd3cd5f589eedcba9db63f851fe9151f74680e39f1d176a59728b0b1bc5",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 9
+        },
+        {
+          "scope_sha256": "72c223f620a1dabf138eef0c657c2ceff5dc1808f728a5dbdb154846fe38cfc1",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 10
+        },
+        {
+          "scope_sha256": "bc10de13e8d26b90d9510e7f2511b789c0b5d059f426a5986ac99277c2aaa645",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 11
+        },
+        {
+          "scope_sha256": "89e4b46725c6b95f05272033d371f0e2190dec5ddc8427327f3cb1736d8bcd98",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 12
+        },
+        {
+          "scope_sha256": "fecfb929e750f5d1d5884672f25ea5f4fdbf85f2a8b2131951a1d784f4451fca",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 13
+        },
+        {
+          "scope_sha256": "9844262331127d01385dca507291b46ecea0743e075731318a354d70cc415fcd",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 14
+        },
+        {
+          "scope_sha256": "d3fd59884c84e8e990735507e3c2b2a485eb7f48aaca34fc2f57d352e07955c5",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 15
+        },
+        {
+          "scope_sha256": "162faa5cd25d0290eebe27603c0a47d63b71ec02f9982a04c3eef706d1f711a0",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 16
+        },
+        {
+          "scope_sha256": "61c4957bc7f802c6efcd02b20f6bb7c1fca032d227348777719000274bd2dc61",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 17
+        },
+        {
+          "scope_sha256": "fc0ea3a9ac8d8ab4ce5fe2623b1f04a6abc66238713d9551c663d55a838aa927",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 18
+        },
+        {
+          "scope_sha256": "1af19edec18b04edb3cc98efef1e4cf55e39b2e6503d55831f58d6cce96ee6cd",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 19
+        },
+        {
+          "scope_sha256": "299c3fbba40895bca5c73d168bcca65c2f2141d095c5cff80ba30737e6d7fdb6",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 20
+        },
+        {
+          "scope_sha256": "337944263ca7c0f01df8cc15d2d342b54c466f28fed860349a9d96ff826397ff",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 21
+        },
+        {
+          "scope_sha256": "3ead38ea21ddb21748eb93685108ba8d5c1e384bd5d14c9e9e3162959bb5e682",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 22
+        },
+        {
+          "scope_sha256": "03b37f15ad57223b05e7589dc90ba4b2ee768d0149e68a600602e96cc91cfc0d",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 23
+        },
+        {
+          "scope_sha256": "7cf80eb1a6c7fd509685067fc37e4e3c7f74d19e09778cd0bc138da9282cbbf4",
+          "catalog_size_matches": true,
+          "catalog_mtime_delta_seconds": 0.0,
+          "source_fixture_value": 24
+        }
+      ]
+    },
+    {
+      "tag": "qcat-recheck25-20261027T021200Z",
+      "scratch": "/wc1/query-catalog-validation/20261026/qcat-recheck25-20261027T021200Z",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "parent_pid": 568865,
+      "admission_limit": 25,
+      "inventory_limit": 100,
+      "source_hashes": {
+        "qcat-recheck25-20261027T021200Z-inventory.py": "d39f056e243b7889b0dd50c2030c518b822f3d54e4263fb6f16a4b5e8cc86791",
+        "qcat-recheck25-20261027T021200Z-rq.py": "839bafc4efa1b1f4161b3d7fec1b7f0a4c0c7e0b3652727f70bd6363404c0cac",
+        "qcat_recheck25_probe.py": "9694eb5c887bdeee5f2cd0c536099c9641c3d6ce6b5a2ee7abb040c08a3bfb93"
+      },
+      "ticks": [
+        {
+          "label": "discovery-admission",
+          "elapsed_seconds": 0.00860380008816719,
+          "result": {
+            "state": "pending",
+            "admitted": 0,
+            "visited": 0,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793067190.356396,
+            "completed_at": null,
+            "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+          },
+          "pending_scope_count": 0,
+          "queue_count": 1,
+          "pending_count_before": 0,
+          "pending_json_bytes_before": 2,
+          "pending_json_bytes_after": 2,
+          "cursor_json_bytes_before": 0,
+          "cursor_json_bytes_after": 383
+        },
+        {
+          "label": "full-25-new-scope-admission",
+          "elapsed_seconds": 6.716833779588342,
+          "result": {
+            "state": "pending",
+            "admitted": 25,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793067190.356396,
+            "completed_at": null,
+            "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+          },
+          "pending_scope_count": 25,
+          "queue_count": 25,
+          "pending_count_before": 0,
+          "pending_json_bytes_before": 2,
+          "pending_json_bytes_after": 3375,
+          "cursor_json_bytes_before": 383,
+          "cursor_json_bytes_after": 3815
+        },
+        {
+          "label": "full-25-queued-recheck",
+          "elapsed_seconds": 0.7908397503197193,
+          "result": {
+            "state": "pending",
+            "admitted": 25,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793067190.356396,
+            "completed_at": null,
+            "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+          },
+          "pending_scope_count": 25,
+          "queue_count": 25,
+          "pending_count_before": 25,
+          "pending_json_bytes_before": 3375,
+          "pending_json_bytes_after": 3375,
+          "cursor_json_bytes_before": 3815,
+          "cursor_json_bytes_after": 3816
+        },
+        {
+          "label": "full-25-readonly-skip",
+          "elapsed_seconds": 0.1352617833763361,
+          "result": {
+            "state": "completed",
+            "admitted": 0,
+            "visited": 26,
+            "failures": 0,
+            "unavailable_namespaces": [],
+            "unavailable_aliases": [],
+            "cycle_started_at": 1793067190.356396,
+            "completed_at": 1793067198.809414,
+            "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+          },
+          "pending_scope_count": 0,
+          "queue_count": 0,
+          "pending_count_before": 25,
+          "pending_json_bytes_before": 3375,
+          "pending_json_bytes_after": 2,
+          "cursor_json_bytes_before": 3816,
+          "cursor_json_bytes_after": 477
+        }
+      ],
+      "worker_phases": [
+        {
+          "label": "inventory-worker",
+          "elapsed_seconds": 0.4058248121291399
+        }
+      ],
+      "state": "passed-readonly-skip-not-reconciled",
+      "elapsed_seconds": 8.870644483715296,
+      "readback": [
+        {
+          "scope_sha256": "c800411a19caaec946deacf5a7d03f5f12d0d6ee2c3fba6c96c35a399a2f775f",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "90601c6c34d58be19a7141ffd0c2542838549346ebe04d04154973a58b2d0865",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "de76d74fc9e56826126715c0bf989d8ea616deffb36bb3110abaa5a39be176a7",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "27eb8af51a77109681648279c885600c45d9db2d75bb7addad7857f3e1d1d655",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "680029bba8e1bd64704cc3cd6e113d415df904c62723ad4e67bf0b4e75f094e3",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "8b2edd73e7e509015453450670b1325c270aafe2bf3f9a9b0807be1165343765",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "194d456c3f2db270be1ac9b2e7702984d49cf09f7af0e67bb69def2f58f49e54",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "282c737a7f8f3d8e2618f814b319564c4cf1834f2687ca852fdb3bb098205c05",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "b34ce3e34581c2d03bc2eb70e8a5366593583b6e2fb5e79024b04ec63523b5b1",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "f7af7a8fd28acb946d135a3843f36905ad698eaadeec8d69e54899273a1f0879",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "2fd8b1f7f2ac5c5f3fbf4db3d37e423206864b3af83f1bab69a78089db20d309",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "1167d106b766d9c72791823ba605b6a9238ab7e2f926304f8b25c5d6041929ae",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "8c8afa03f67ead5644d1fc53a14f29ee58369e9e3bb76c34dd88b7c210c5d4b7",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "fc82b57e3db359328153eeac1cdac832ba7df09c19135fc22763df6fa2184dbe",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "a3c6dee1687cb18203fddcdfadb9d9e41c426ca51c512d3f659201f9160d1705",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "7668014727d4f08317a9a1e2eba250f46f4fd02aaea29dc4d78b0f52bab5cb62",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "22efd81254ced3be7bfe4e92a136f09f7b3e341569b2ec0a4610a10ab66c4f8d",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "9b9e5902d03af138bd1bd1da804f8d9810b332008f34b65671dd46741082c722",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "38ffde3e9c58a9b53794327680f65e590f0c821df83e660192f198b039899e68",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "701d6af8c5d7d2f26ca2636270e936dd8b78a33727cba48512b5682548fffb0d",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "20e08b3edacf2d7e368265b142faedf222505320dfd59146502bfa2494b029f3",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "8e26b57ee56b4c3829d313ad0fffb48eed8b3fca68e09841c671774b4ee21f67",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "3d2a07e6c818bcd8028850e27269e2857a1a404f56e7bf519b423ca727c29e81",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "e1f406ff8826d3fc97ffcd4f5dc8456c215705c3b5d89e4ade9c4833fd7faa31",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        },
+        {
+          "scope_sha256": "50ac69d73d4366616c2ae529c532e5352a60f11b6638db986c75c275fb15ca07",
+          "readonly": true,
+          "pending_receipts_retained": 1,
+          "catalog_exists": false
+        }
+      ],
+      "jobs": [
+        {
+          "id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254",
+          "status": "finished",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_59ce8add-b131-4116-8e79-7adf67eb49d9",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_40a33168-4f31-4df4-91c4-6ddbdc0ab2f8",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_e2fa0a3c-350e-4568-802b-14ef4e96ef5e",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_68ef6110-e715-4af3-961e-a544a5f7ed18",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_dee7d75c-74df-4c84-b263-0324cd4356a1",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_5e03c2af-4b77-4170-af1f-32c4765d6475",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_80a2970f-e416-4196-925a-435f387c72f8",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_136be148-b07f-4372-b94a-b8f0d2765a38",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_9af1541f-13bd-4c9f-a582-e2cfddbaf492",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_d978eadb-4af2-4753-af2a-5ef1f5848fca",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_c4b866b2-ca45-4c74-a054-b9dda6a4de4f",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_0fee6200-566d-4c6b-a4db-1c91892423d1",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_bd3dd2b2-eeaf-4a2d-ae35-5c9d94da45d5",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_827af68f-d571-4799-a683-19d9c2576b4f",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_ea605b2e-28c3-4a5f-97a1-e783e8e84a9a",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_d12132f7-cddc-4747-aab2-5e08ff948f52",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_98fffc39-b5cd-48ad-aa57-38442df46e3b",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_2028946e-28ec-4ed7-8f6b-6a71a9b02e92",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_5c071f23-4188-4ec7-9a95-54b402acd0bf",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_e665d7ab-c74f-49d0-bc6a-a9d29d1f58c5",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_57d157da-61f7-49d3-a74f-35aa3dcf9020",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_cda0156b-5d9e-4ebc-836a-c1bb41d121d1",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_adaf5a24-4169-4a47-a33d-3a7d68fbfe61",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_50e404f0-dca4-4c36-b1a8-cbae30f94297",
+          "status": "canceled",
+          "timeout": 3600
+        },
+        {
+          "id": "query_catalog_refresh_c78fab82-a023-40ec-a027-cede6b749722",
+          "status": "canceled",
+          "timeout": 3600
+        }
+      ],
+      "cleanup": {
+        "worker_dead": true,
+        "queued": 0,
+        "started": 0,
+        "private_keys_expire_seconds": 86400,
+        "private_key_count": 89,
+        "private_queue_unregistered": true,
+        "parent_process_absent": true
+      },
+      "run_log_sha256": "9b8a43d8c246cf11837a2d4dc88b9df2d8e3d7a4f5c967d417a38e8e4a78b689"
+    }
+  ]
+}

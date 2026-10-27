@@ -1,0 +1,356 @@
+{
+  "hostname": "wepp2",
+  "at": 1793072296.477074,
+  "containers": [
+    {
+      "id": "f6f7a458cb7461b0c06df8931660f2327a77914aea5826cb42b3bacb39e4f9f7",
+      "name": "/docker-rq-worker-1",
+      "image": "sha256:e8cb0d8f38e481694ac9abe3f06f90486beb4ebfabb4014cff7b322358a8241a",
+      "service": "rq-worker",
+      "started_at": "2026-10-26T10:57:59.2023858Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "bash",
+        "-lc",
+        "exec /workdir/wepppy/docker/rq-worker-startup.sh 6 default\n"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/climate_engine_api_key",
+          "Destination": "/run/secrets/climate_engine_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/opentopography_api_key",
+          "Destination": "/run/secrets/opentopography_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/discord_bot_token",
+          "Destination": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "1281c0dad23934b072d8a1e11a4fc89c4f473309e1cdad82aab4e66cc7e04450",
+      "name": "/docker-rq-worker-batch-1",
+      "image": "sha256:e8cb0d8f38e481694ac9abe3f06f90486beb4ebfabb4014cff7b322358a8241a",
+      "service": "rq-worker-batch",
+      "started_at": "2026-10-26T10:57:59.203945362Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "bash",
+        "-lc",
+        "exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch\n"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/climate_engine_api_key",
+          "Destination": "/run/secrets/climate_engine_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/discord_bot_token",
+          "Destination": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/opentopography_api_key",
+          "Destination": "/run/secrets/opentopography_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "9b4c66c38ea28b460d43b773ef64e5421e9c6217b8fabce251d6562fc540e6e0",
+      "name": "/weppcloudr",
+      "image": "sha256:0e7c69cd48d2a686d750e3546462cb00e679b3b6f05e73d9d4d2ba580f3f649c",
+      "service": "weppcloudr",
+      "started_at": "2026-10-26T10:57:28.47004892Z",
+      "user": "1000:993",
+      "group_add": null,
+      "command": null,
+      "entrypoint": [
+        "Rscript",
+        "/srv/weppcloudr/docker-entrypoint.R"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_weppcloudr-renv-cache/_data",
+          "Destination": "/opt/weppcloudr/renv/cache",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "4a88069b2961eb2f787f110d7b5303f107c00110f05297e4a0e0b75be9a3f1e4",
+      "name": "/culvert_web_app-rq-worker-1",
+      "image": "sha256:074cda969c625e6832ae5659449d19389c0ee838357081edbc7bbe7485641746",
+      "service": "rq-worker",
+      "started_at": "2026-10-26T16:43:26.752630458Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "rq",
+        "worker-pool",
+        "-n",
+        "20",
+        "-u",
+        "redis://redis:6379/0",
+        "default"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/Culvert_web_app/culvert_app",
+          "Destination": "/app",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/culvert_app_instance_dir",
+          "Destination": "/app/instance",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "9631a0bd3663bbbed792b7d1987292530bd8dd033eeccfd77a368707e00fc4dc",
+      "name": "/culvert_web_app-culvert-web-app_main-1",
+      "image": "sha256:99d9f062a38ce93360f6ca16b0f629ab3538ae70a525e79c9f75a4b116179d53",
+      "service": "culvert-web-app_main",
+      "started_at": "2026-10-26T16:43:26.782742733Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--worker-class",
+        "geventwebsocket.gunicorn.workers.GeventWebSocketWorker",
+        "-w",
+        "1",
+        "--timeout",
+        "3600",
+        "-b",
+        "0.0.0.0:5000",
+        "app:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/Culvert_web_app/culvert_app",
+          "Destination": "/app",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/culvert_app_instance_dir",
+          "Destination": "/app/instance",
+          "RW": true
+        },
+        {
+          "Type": "tmpfs",
+          "Source": "",
+          "Destination": "/app/data/temp",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "3d24c62321593f9955670ae0f5505df92372d14414a7d3763088ac9903a7f7a7",
+      "name": "/culvert_web_app-caddy-1",
+      "image": "sha256:612f0ff47f33888e3b61a8db399ff2dc22c2cefb8cb652d86a619e52eabcd51f",
+      "service": "caddy",
+      "started_at": "2026-10-09T18:23:32.969201642Z",
+      "user": "33:33",
+      "group_add": null,
+      "command": [
+        "caddy",
+        "run",
+        "--config",
+        "/etc/caddy/Caddyfile",
+        "--adapter",
+        "caddyfile"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/Culvert_web_app/culvert_app/static",
+          "Destination": "/srv/app-static",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/Culvert_web_app/Caddyfile",
+          "Destination": "/etc/caddy/Caddyfile",
+          "RW": false
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/culvert_web_app_caddy_data/_data",
+          "Destination": "/data",
+          "RW": true
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/culvert_web_app_caddy_config/_data",
+          "Destination": "/config",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/etc/certs",
+          "Destination": "/etc/certs",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/Culvert-static-webapp",
+          "Destination": "/srv/static-dashboard",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "263a9c58c06516cea931a0ae04bb3736943eb698e1d07ed03a01dda9a6e62f6c",
+      "name": "/culvert_web_app-redis-1",
+      "image": "sha256:f218e591b571a4129aa29a8566b597d849fba21af7be853d31b03122b20db5e9",
+      "service": "redis",
+      "started_at": "2026-10-09T18:23:32.969712582Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "redis-server"
+      ],
+      "entrypoint": [
+        "docker-entrypoint.sh"
+      ],
+      "mounts": [
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/714fc787c328b681268af0acabd888fa59ab6c98474d905fa763de4ca998cab8/_data",
+          "Destination": "/data",
+          "RW": true
+        }
+      ]
+    }
+  ]
+}

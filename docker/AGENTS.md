@@ -15,6 +15,10 @@
   with ad hoc `docker compose` commands unless the user explicitly requests a
   bounded diagnostic action.
 
+Scoped catalog pilot batch activation/rollback follows
+`docs/schemas/query-catalog-pilot-deployment-contract.md`; it extends the same
+canonical entry point and preserves every unrelated running service.
+
 There are three Docker Compose deployments of the full app and a dedicated
 production worker deployment.
 

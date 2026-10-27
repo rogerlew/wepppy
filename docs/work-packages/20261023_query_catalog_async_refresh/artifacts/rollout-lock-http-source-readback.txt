@@ -1,0 +1,58 @@
+/workdir/wepppy/wepppy/query_engine/app/server.py
+async def run_info(request: StarletteRequest) -> Response:
+    """Render a run summary page including catalog entry listings.
+
+    Args:
+        request: Current Starlette request with `runid` path parameter.
+
+    Returns:
+        TemplateResponse or JSON error when the run is missing.
+    """
+    runid_param: str = request.path_params["runid"]
+    try:
+        run_path = resolve_run_path(runid_param)
+        require_root(request, run_path)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
+    try:
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
+    catalog_entries = visible_entries(request, context.base_dir, context.catalog.entries())
+    runid_str = str(run_path)
+    slug = runid_param.strip("/") or runid_param
+    schema_path = str(request.app.url_path_for("run_schema", runid=slug))
+    query_path = str(request.app.url_path_for("run_query_endpoint", runid=slug))
+    return TEMPLATES.TemplateResponse(
+        "run_info.html",
+        {
+            "request": request,
+            "runid": runid_str,
+            "runid_slug": runid_str.lstrip("/"),
+            "schema_path": schema_path,
+            "query_path": query_path,
+            "entry_count": len(catalog_entries),
+            "catalog_entries": catalog_entries,
+            "asset_version": ASSET_VERSION,
+        },
+        headers=discovery_headers(context.base_dir, context.catalog.entries()),
+    )
+/workdir/wepppy/wepppy/query_engine/context.py
+def refresh_run_context(
+    context: RunContext, required_paths: Iterable[str] | None = None
+) -> RunContext:
+    """Cross the catalog freshness barrier and replace held metadata.
+
+    Explicit paths verify the selected source and schema even when a producer
+    died before recording its invalidation. With no paths, drain pending intent
+    only; ordinary discovery must not rescan every source on each read.
+    """
+    from wepppy.query_engine.catalog_refresh import ensure_catalog_fresh
+
+    data = ensure_catalog_fresh(context.base_dir, required_paths=required_paths)
+    context.catalog = DatasetCatalog(
+        Path(data["root"]), [CatalogEntry(**entry) for entry in data.get("files", [])]
+    )
+    return context

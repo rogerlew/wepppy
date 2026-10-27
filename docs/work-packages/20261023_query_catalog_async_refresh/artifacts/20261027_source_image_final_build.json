@@ -1,0 +1,91 @@
+{
+  "base_image_id": "sha256:6876ff0f9f978e7deb2d4392394ae464e76d33bd518f4561a645bf6121e69069",
+  "candidate_image_id": "sha256:0a4a8019bf17ee15b850e64902e21b25a0184239bbb12009a779df452d441fe2",
+  "rollback_reference": "wepppy-source-base:6876ff0f9f978e7deb2d4392394ae464e76d33bd518f4561a645bf6121e69069",
+  "candidate_reference": "wepppy-source-candidate:d725f7472cb4714b4c17d1ade3bd678adb6244d29860be29e83d3a8ff02fa82c",
+  "target_image": "wepppy-catalog-pilot-local-user-target:20261027",
+  "source_manifest_sha256": "d725f7472cb4714b4c17d1ade3bd678adb6244d29860be29e83d3a8ff02fa82c",
+  "runtime_configuration_matches": true,
+  "before": {
+    "distributions": "e6e860d893f2b3de9b437275e9c4c74f674783a285c01dc5556c2e63e0886417",
+    "distribution_count": 306,
+    "native": {
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so": "98988e98022d1bdf56865c044c544830c3d4d639a0e6279c9ac6c6c15e70118c",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so": "4d5700bde43b515f91098a5a9b6b1f5c18a3dbb74d393bcf8bde811d9abd2c3e",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/sbs_map/sbs_map_rust.so": "17a255f2f72dba49fa9d2d7c41125c82538227ac1b0eff1cf8cef0130fe4ea84",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_interchange/swat_interchange_rust.so": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_utils/swat_utils_rust.so": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/watershed_abstraction/watershed_abstraction_rust.so": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so": "9607fb39ee82aca6f00946a8b9100932155a4ef8e3a78e7f2a483d9421c31a77",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_viz/wepp_viz_rust.so": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+    },
+    "source_metadata": {
+      "tools/query_catalog_pilot.py": null,
+      "wepppy/rq/_query_catalog_admission.py": null,
+      "wepppy/rq/_query_catalog_inventory.py": null,
+      "wepppy/rq/_query_catalog_pilot.py": null,
+      "wepppy/rq/query_catalog_rq.py": [
+        436,
+        1002,
+        130
+      ]
+    },
+    "sources": {
+      "tools/query_catalog_pilot.py": null,
+      "wepppy/rq/_query_catalog_admission.py": null,
+      "wepppy/rq/_query_catalog_inventory.py": null,
+      "wepppy/rq/_query_catalog_pilot.py": null,
+      "wepppy/rq/query_catalog_rq.py": "6240e8feda020c7b0361b049774c52c16017a1894a979c2da0b58593bddff8ca"
+    }
+  },
+  "after": {
+    "distributions": "e6e860d893f2b3de9b437275e9c4c74f674783a285c01dc5556c2e63e0886417",
+    "distribution_count": 306,
+    "native": {
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so": "98988e98022d1bdf56865c044c544830c3d4d639a0e6279c9ac6c6c15e70118c",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so": "4d5700bde43b515f91098a5a9b6b1f5c18a3dbb74d393bcf8bde811d9abd2c3e",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/sbs_map/sbs_map_rust.so": "17a255f2f72dba49fa9d2d7c41125c82538227ac1b0eff1cf8cef0130fe4ea84",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_interchange/swat_interchange_rust.so": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_utils/swat_utils_rust.so": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/watershed_abstraction/watershed_abstraction_rust.so": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so": "9607fb39ee82aca6f00946a8b9100932155a4ef8e3a78e7f2a483d9421c31a77",
+      "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_viz/wepp_viz_rust.so": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+    },
+    "source_metadata": {
+      "tools/query_catalog_pilot.py": [
+        436,
+        1002,
+        130
+      ],
+      "wepppy/rq/_query_catalog_admission.py": [
+        436,
+        1002,
+        130
+      ],
+      "wepppy/rq/_query_catalog_inventory.py": [
+        436,
+        1002,
+        130
+      ],
+      "wepppy/rq/_query_catalog_pilot.py": [
+        436,
+        1002,
+        130
+      ],
+      "wepppy/rq/query_catalog_rq.py": [
+        436,
+        1002,
+        130
+      ]
+    },
+    "sources": {
+      "tools/query_catalog_pilot.py": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5",
+      "wepppy/rq/_query_catalog_admission.py": "ccf94032d46ec7038017a4f219b13e1d288b59753412ea3b9fdcf60abfecaf80",
+      "wepppy/rq/_query_catalog_inventory.py": "f023fc55743141705aa964baf9ded6a4d031319c8b247f90c95583daa31de1b4",
+      "wepppy/rq/_query_catalog_pilot.py": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5",
+      "wepppy/rq/query_catalog_rq.py": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9"
+    }
+  }
+}

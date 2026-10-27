@@ -16,6 +16,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 from starlette.exceptions import HTTPException
+from starlette.concurrency import run_in_threadpool
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -725,7 +726,7 @@ async def get_catalog(request: Request) -> JSONResponse:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
-        raw_entries, generated_at = _load_catalog_data(run_path)
+        raw_entries, generated_at = await run_in_threadpool(_load_catalog_data, run_path)
     except FileNotFoundError:
         return _error_response(404, "catalog_missing", f"Catalog for run '{runid}' not found")
     except (OSError, ValueError) as exc:  # pragma: no cover - malformed catalog files
@@ -748,7 +749,7 @@ async def get_catalog(request: Request) -> JSONResponse:
         return _error_response(400, "invalid_request", str(exc))
 
     headers = discovery_headers(run_path, raw_entries)
-    raw_entries = visible_entries(request, run_path, raw_entries)
+    raw_entries = await run_in_threadpool(visible_entries, request, run_path, raw_entries)
     filtered_entries = _filter_catalog_entries(raw_entries)
     filtered_total = len(filtered_entries)
 
@@ -803,11 +804,11 @@ async def get_run(request: Request) -> JSONResponse:
         return _error_response(404, "not_found", f"Run '{runid}' is not accessible")
 
     try:
-        run_path, entry = _resolve_run_entry(request, runid)
+        run_path, entry = await run_in_threadpool(_resolve_run_entry, request, runid)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
-    activated, generated_at, dataset_count = _load_catalog_metadata(run_path)
+    activated, generated_at, dataset_count = await run_in_threadpool(_load_catalog_metadata, run_path)
     meta: dict[str, Any] = {
         "catalog": {
             "activated": activated,
@@ -852,7 +853,8 @@ async def validate_query(request: Request) -> JSONResponse:
         return _error_response(400, "invalid_request", "Request body must be a JSON object")
 
     try:
-        query_request, normalized_payload, raw_entries, generated_at = _prepare_query_request(
+        query_request, normalized_payload, raw_entries, generated_at = await run_in_threadpool(
+            _prepare_query_request,
             payload,
             runid=runid,
             run_path=run_path,
@@ -878,6 +880,12 @@ async def validate_query(request: Request) -> JSONResponse:
     }
     meta = _with_trace_id(meta)
     return JSONResponse({"data": data, "meta": meta})
+
+
+def _check_roads_current(root: str | Path) -> None:
+    """Keep the complete guarded readiness check on one worker thread."""
+    with roads_lifecycle.current_read(root):
+        pass
 
 
 async def execute_query(request: Request) -> JSONResponse:
@@ -925,15 +933,15 @@ async def execute_query(request: Request) -> JSONResponse:
         require_datasets(request, run_path, paths)
         try:
             if any(roads_lifecycle.current_path(path) for path in paths):
-                with roads_lifecycle.current_read(run_path):
-                    pass
+                await run_in_threadpool(_check_roads_current, run_path)
         except roads_lifecycle.RoadsResultsUnavailable as exc:
             response = _error_response(409, exc.code, str(exc))
             response.headers['Cache-Control'] = 'no-store'
             return response
 
     try:
-        query_request, normalized_payload, raw_entries, generated_at = _prepare_query_request(
+        query_request, normalized_payload, raw_entries, generated_at = await run_in_threadpool(
+            _prepare_query_request,
             payload,
             runid=runid,
             run_path=run_path,
@@ -966,7 +974,7 @@ async def execute_query(request: Request) -> JSONResponse:
         return JSONResponse({"data": data, "meta": meta})
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging
@@ -977,7 +985,8 @@ async def execute_query(request: Request) -> JSONResponse:
     started = time.perf_counter()
 
     try:
-        result = run_query(
+        result = await run_in_threadpool(
+            run_query,
             context, query_request,
             authorize=lambda fresh: require_datasets(
                 request, fresh.base_dir, [spec.path for spec in query_request.dataset_specs],
@@ -1058,7 +1067,7 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
-        catalog = activate_query_engine(run_path, force_refresh=True)
+        catalog = await run_in_threadpool(activate_query_engine, run_path, force_refresh=True)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging
@@ -1147,14 +1156,14 @@ async def get_prompt_template(request: Request) -> JSONResponse:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
-        raw_entries, generated_at = _load_catalog_data(run_path)
+        raw_entries, generated_at = await run_in_threadpool(_load_catalog_data, run_path)
     except FileNotFoundError:
         raw_entries, generated_at = [], None
     except (OSError, ValueError) as exc:  # pragma: no cover - defensive logging
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raw_entries, generated_at = [], None
 
-    raw_entries = visible_entries(request, run_path, raw_entries)
+    raw_entries = await run_in_threadpool(visible_entries, request, run_path, raw_entries)
     schema_summary = _build_schema_summary(raw_entries)
     default_payload = _build_default_payload(raw_entries)
     sample_payload_json = json.dumps(default_payload, indent=2)

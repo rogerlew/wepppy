@@ -1,0 +1,14 @@
+{
+  "samples": 40,
+  "span_seconds": 1170.6623318195343,
+  "first_epoch": 1793064959.0239985,
+  "last_epoch": 1793066129.6863303,
+  "queue_min": 0,
+  "queue_max": 0,
+  "consumer_state_sample_counts": {
+    "{\"busy\": 1, \"idle\": 7}": 6,
+    "{\"idle\": 8}": 34
+  },
+  "suspended_samples": 0,
+  "limitation": "Read-only point samples, not continuous worker utilization or daily spare-capacity guarantee; private validation workers use separate queues and are excluded."
+}

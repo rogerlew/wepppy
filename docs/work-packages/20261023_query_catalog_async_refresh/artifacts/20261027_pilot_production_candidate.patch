@@ -1,0 +1,2417 @@
+diff --git a/scripts/build_source_overlay.py b/scripts/build_source_overlay.py
+new file mode 100644
+index 000000000..82bde74a9
+--- /dev/null
++++ b/scripts/build_source_overlay.py
+@@ -0,0 +1,250 @@
++#!/usr/bin/env python3
++"""Build a manifest-bound source overlay on an exact local batch image.
++
++Used only by deploy-production.sh --targeted-batch --source-overlay-manifest.
++No registry, dependency installer, arbitrary recipe, or container patching path.
++"""
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import os
++from pathlib import Path
++import re
++import stat
++import subprocess
++import sys
++import tempfile
++from typing import Any
++
++APP_ROOT = "/workdir/wepppy"
++APP_FILES = frozenset({
++    "wepppy/rq/query_catalog_rq.py",
++    "wepppy/rq/_query_catalog_inventory.py",
++    "wepppy/rq/_query_catalog_admission.py",
++    "wepppy/rq/_query_catalog_pilot.py",
++    "tools/query_catalog_pilot.py",
++})
++PROVENANCE = "/opt/wepppy-source-overlay/manifest.json"
++CONFIG_FIELDS = (
++    "User", "Env", "WorkingDir", "Entrypoint", "Cmd", "Volumes",
++    "ExposedPorts", "Healthcheck", "StopSignal", "Shell", "Labels", "OnBuild",
++)
++PROBE = r'''
++import hashlib, importlib.metadata, importlib.util, json, stat
++from pathlib import Path
++files = json.loads(__import__('sys').argv[1])
++packages = sorted((d.metadata['Name'], d.version) for d in importlib.metadata.distributions())
++native_spec = importlib.util.find_spec('wepppyo3')
++if native_spec is None or not native_spec.origin:
++    raise RuntimeError('Required native package is absent')
++native_root = Path(native_spec.origin).resolve().parent
++native = {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
++          for p in sorted(native_root.rglob('*.so')) if p.is_file()}
++if not native or not any('wepp_interchange_rust' in p for p in native):
++    raise RuntimeError('Required native scanner fingerprint is absent')
++print(json.dumps({'distributions': hashlib.sha256(json.dumps(packages).encode()).hexdigest(),
++                  'distribution_count': len(packages), 'native': native,
++                  'source_metadata': {p: [stat.S_IMODE(s.st_mode), s.st_uid, s.st_gid]
++                                      if (s := Path('/workdir/wepppy', p).stat() if Path('/workdir/wepppy', p).is_file() else None) else None for p in files},
++                  'sources': {p: hashlib.sha256(Path('/workdir/wepppy', p).read_bytes()).hexdigest()
++                              if Path('/workdir/wepppy', p).is_file() else None for p in files}}))
++'''
++BASE_CHECK = r'''
++import json, stat
++from pathlib import Path
++targets = ['/workdir/wepppy/' + n for n in json.loads(__import__('sys').argv[1])]
++targets.append('/opt/wepppy-source-overlay/manifest.json')
++for target in targets:
++    path = Path('/')
++    for part in Path(target).parts[1:]:
++        path = path / part
++        if path.is_symlink():
++            raise RuntimeError('Overlay destination contains a symlink')
++    if path.exists() and not stat.S_ISREG(path.stat().st_mode):
++        raise RuntimeError('Overlay destination is not a regular file')
++'''
++COMPILE = r'''
++import json, os, py_compile, stat
++from pathlib import Path
++manifest = json.loads(Path('/opt/wepppy-source-overlay/manifest.json').read_text())
++for name in manifest['files']:
++    path = Path('/workdir/wepppy', name)
++    cache = path.parent / '__pycache__'
++    if cache.is_symlink():
++        raise RuntimeError('Overlay bytecode directory contains a symlink')
++    if cache.exists():
++        for old in cache.glob(path.stem + '.*.pyc'):
++            old.unlink()
++    if not cache.exists():
++        cache.mkdir(mode=stat.S_IMODE(path.parent.stat().st_mode))
++        os.chown(cache, path.parent.stat().st_uid, path.parent.stat().st_gid)
++        cache.chmod(stat.S_IMODE(path.parent.stat().st_mode))
++    bytecode = py_compile.compile(str(path), doraise=True)
++    source_stat = path.stat()
++    os.chown(bytecode, source_stat.st_uid, source_stat.st_gid)
++    os.chmod(bytecode, stat.S_IMODE(source_stat.st_mode))
++'''
++
++
++def docker(*arguments: str) -> str:
++    return subprocess.run(["docker", *arguments], check=True, text=True,
++                          capture_output=True).stdout.strip()
++
++
++def inspect_image(reference: str) -> dict[str, Any]:
++    records = json.loads(docker("image", "inspect", reference))
++    if len(records) != 1:
++        raise ValueError("Expected one local image")
++    return records[0]
++
++
++def read_sources(root: Path, manifest: dict[str, Any]) -> dict[str, bytes]:
++    if set(manifest) != {"version", "base_image_id", "files"} or manifest["version"] != 1:
++        raise ValueError("Unsupported source-overlay manifest")
++    if not re.fullmatch(r"sha256:[0-9a-f]{64}", manifest["base_image_id"]):
++        raise ValueError("An immutable local base image ID is required")
++    if not isinstance(manifest["files"], dict) or set(manifest["files"]) != APP_FILES:
++        raise ValueError("Source-overlay manifest must name exactly the approved five files")
++    root = root.resolve(strict=True)
++    contents = {}
++    for name, expected in manifest["files"].items():
++        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
++            raise ValueError("Invalid source digest")
++        path = root
++        for part in name.split("/"):
++            path = path / part
++            if path.is_symlink():
++                raise ValueError("Source-overlay input contains a symlink")
++        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
++        with os.fdopen(descriptor, "rb") as source:
++            if not stat.S_ISREG(os.fstat(source.fileno()).st_mode):
++                raise ValueError("Source-overlay input must be a regular file")
++            content = source.read()
++        if path.resolve(strict=True) != root / name or hashlib.sha256(content).hexdigest() != expected:
++            raise ValueError("Source-overlay path or content changed")
++        contents[name] = content
++    return contents
++
++
++def fingerprint(reference: str) -> dict[str, Any]:
++    return json.loads(docker("run", "--rm", "--network", "none", "--entrypoint",
++                             "/opt/venv/bin/python", reference, "-B", "-c", PROBE,
++                             json.dumps(sorted(APP_FILES))))
++
++
++def build_overlay(root: Path, manifest: dict[str, Any], image: str,
++                  container: str) -> dict[str, Any]:
++    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_./:@-]*", image):
++        raise ValueError("Invalid service image reference")
++    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_.-]*", container):
++        raise ValueError("Invalid batch container reference")
++    contents = read_sources(root, manifest)
++    base = inspect_image(manifest["base_image_id"])
++    running = json.loads(docker("inspect", container))
++    if (len(running) != 1 or running[0]["Image"] != base["Id"]
++            or not running[0]["State"]["Running"]):
++        raise ValueError("Running batch image differs from the approved immutable base")
++    if inspect_image(image)["Id"] != base["Id"]:
++        raise ValueError("Service image tag differs from the running baseline")
++    config = base["Config"]
++    if config.get("OnBuild"):
++        raise ValueError("Base image ONBUILD instructions are not permitted")
++    for volume in config.get("Volumes") or {}:
++        if any(Path(p).is_relative_to(volume)
++               for p in [PROVENANCE, *(APP_ROOT + '/' + name for name in APP_FILES)]):
++            raise ValueError("Base image volume overlaps source/provenance destinations")
++    user = config.get("User") or ""
++    if user and not re.fullmatch(r"[a-zA-Z0-9_.:-]+", user):
++        raise ValueError("Unsupported base image user syntax")
++    before = fingerprint(base["Id"])
++    reference_metadata = before['source_metadata'].get('wepppy/rq/query_catalog_rq.py')
++    if not reference_metadata:
++        raise ValueError("Baseline catalog source metadata is absent")
++    metadata = {name: before['source_metadata'].get(name) or reference_metadata
++                for name in APP_FILES}
++    token = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
++    rollback = "wepppy-source-base:" + base["Id"].split(":")[1]
++    candidate = "wepppy-source-candidate:" + token
++    docker("image", "tag", base["Id"], rollback)
++    with tempfile.TemporaryDirectory(prefix="wepppy-source-overlay-") as directory:
++        context = Path(directory)
++        for name, content in contents.items():
++            destination = context / "overlay" / name
++            destination.parent.mkdir(parents=True, exist_ok=True)
++            destination.write_bytes(content)
++            destination.chmod(0o644)
++        (context / "manifest.json").write_text(json.dumps(manifest, sort_keys=True))
++        recipe = ["FROM " + rollback]
++        if user:
++            recipe.append("USER 0")
++        recipe += [
++            "RUN " + json.dumps(["/opt/venv/bin/python", "-B", "-c", BASE_CHECK,
++                                 json.dumps(sorted(APP_FILES))]),
++            *('COPY --chown=' + str(metadata[name][1]) + ':' + str(metadata[name][2])
++              + ' --chmod=' + format(metadata[name][0], '04o') + ' '
++              + json.dumps(['overlay/' + name, APP_ROOT + '/' + name])
++              for name in sorted(APP_FILES)),
++            'COPY manifest.json /opt/wepppy-source-overlay/manifest.json',
++            "RUN " + json.dumps(["/opt/venv/bin/python", "-B", "-c", COMPILE]),
++        ]
++        if user:
++            recipe.append("USER " + user)
++        (context / "Dockerfile").write_text("\n".join(recipe) + "\n")
++        docker("build", "--pull=false", "--network=none", "--tag", candidate, str(context))
++    built = inspect_image(candidate)
++    if any(config.get(field) != built["Config"].get(field) for field in CONFIG_FIELDS):
++        raise ValueError("Candidate runtime configuration differs from the baseline")
++    after = fingerprint(built["Id"])
++    if any(before[key] != after[key] for key in ("distributions", "distribution_count", "native")):
++        raise ValueError("Candidate dependency/native fingerprint differs from the baseline")
++    if after["source_metadata"] != metadata:
++        raise ValueError("Candidate source permissions/ownership differ from baseline")
++    if after["sources"] != manifest["files"]:
++        raise ValueError("Candidate source does not match the manifest")
++    if inspect_image(image)["Id"] != base["Id"]:
++        raise ValueError("Service image tag changed during candidate build")
++    return {"base_image_id": base["Id"], "candidate_image_id": built["Id"],
++            "rollback_reference": rollback, "candidate_reference": candidate,
++            "target_image": image,
++            "source_manifest_sha256": token, "runtime_configuration_matches": True,
++            "before": before, "after": after}
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--manifest", type=Path, required=True)
++    parser.add_argument("--source-root", type=Path, required=True)
++    parser.add_argument("--image", required=True)
++    parser.add_argument("--container", required=True)
++    parser.add_argument("--result", type=Path, required=True)
++    args = parser.parse_args()
++    if args.result.exists():
++        parser.error("Result evidence already exists; use a fresh destination")
++    manifest = json.loads(args.manifest.read_text())
++    result = build_overlay(args.source_root, manifest, args.image, args.container)
++    with args.result.open("x") as output:
++        json.dump(result, output, indent=2)
++        output.write("\n")
++        output.flush()
++        os.fsync(output.fileno())
++    # Durable rollback evidence precedes the only mutation of the service tag.
++    if inspect_image(args.image)["Id"] != result["base_image_id"]:
++        raise ValueError("Service image tag changed before promotion")
++    running = json.loads(docker("inspect", args.container))
++    if (len(running) != 1 or running[0]["Image"] != result["base_image_id"]
++            or not running[0]["State"]["Running"]):
++        raise ValueError("Batch container changed before promotion")
++    docker("image", "tag", result["candidate_image_id"], args.image)
++    print(json.dumps({key: value for key, value in result.items() if key not in {"before", "after"}}))
++    return 0
++
++
++if __name__ == "__main__":
++    try:
++        raise SystemExit(main())
++    except subprocess.CalledProcessError as error:
++        # CLI boundary: retain trusted recipe/probe diagnostics and fail visibly.
++        print(error.stderr or "Docker operation failed", file=sys.stderr)
++        raise SystemExit(error.returncode) from error
+diff --git a/scripts/deploy-production.sh b/scripts/deploy-production.sh
+index cecf7f803..31e043157 100755
+--- a/scripts/deploy-production.sh
++++ b/scripts/deploy-production.sh
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+ # Production Deployment Script for WEPPcloud
+-# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
++# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+ # The installed wctl preset selects full production, worker-pool, or the
+ # dedicated wepp3 fork/archive deployment automatically.
+ 
+@@ -260,6 +260,9 @@ SKIP_DOCKER_PRUNE=false
+ DOCKER_PRUNE_VOLUMES=false
+ TARGETED_WEB=false
+ TARGETED_CAP=false
++TARGETED_BATCH=false
++SOURCE_OVERLAY_MANIFEST=""
++BATCH_ROLLBACK_IMAGE_ID=""
+ PRINT_PLAN=false
+ HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
+ RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
+@@ -281,6 +284,18 @@ while [[ $# -gt 0 ]]; do
+             TARGETED_CAP=true
+             shift
+             ;;
++        --targeted-batch)
++            TARGETED_BATCH=true
++            shift
++            ;;
++        --source-overlay-manifest)
++            SOURCE_OVERLAY_MANIFEST="${2:?--source-overlay-manifest requires a path}"
++            shift 2
++            ;;
++        --batch-rollback-image-id)
++            BATCH_ROLLBACK_IMAGE_ID="${2:?--batch-rollback-image-id requires an image ID}"
++            shift 2
++            ;;
+         --print-plan)
+             PRINT_PLAN=true
+             shift
+@@ -413,11 +428,41 @@ configure_deploy_topology() {
+         RECREATED_SERVICES=(cap)
+         EXPECTED_RUNNING_SERVICES=(cap)
+     fi
++    if [ "${TARGETED_BATCH}" = true ]; then
++        if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
++            || ! echo "${COMPOSE_SERVICES}" | grep -qx "rq-worker-batch" \
++            || ! printf "%s\n" "${EXPECTED_RUNNING_SERVICES[@]}" | grep -qx "rq-worker-batch"; then
++            echo "✗ --targeted-batch requires an existing batch worker service." >&2
++            exit 1
++        fi
++        BUILD_SERVICES=(rq-worker-batch)
++        RECREATED_SERVICES=(rq-worker-batch)
++        EXPECTED_RUNNING_SERVICES=(rq-worker-batch)
++    fi
++
+ }
+ 
+ configure_deploy_topology
+ 
+ validate_deploy_topology() {
++    if [ "${TARGETED_BATCH}" = true ]; then
++        if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
++            || [ "${DOCKER_PRUNE_VOLUMES}" = true ]; then
++            echo "✗ --targeted-batch conflicts with other targeted modes or volume pruning." >&2
++            exit 1
++        fi
++        if [ -n "${SOURCE_OVERLAY_MANIFEST}" ] && [ -n "${BATCH_ROLLBACK_IMAGE_ID}" ]; then
++            echo "✗ Select source derivation or exact-image rollback, not both." >&2
++            exit 1
++        fi
++        if [ "${PRINT_PLAN}" = false ] && [ -z "${SOURCE_OVERLAY_MANIFEST}${BATCH_ROLLBACK_IMAGE_ID}" ]; then
++            echo "✗ Targeted batch activation requires a source manifest or exact rollback image ID." >&2
++            exit 1
++        fi
++    elif [ -n "${SOURCE_OVERLAY_MANIFEST}${BATCH_ROLLBACK_IMAGE_ID}" ]; then
++        echo "✗ Source derivation and batch rollback require --targeted-batch." >&2
++        exit 1
++    fi
+     if [ "${FLUSH_RQ_DB}" = true ]; then
+         echo "✗ Deploy-time Redis flushing is incompatible with the global RQ cutover fence." >&2
+         echo "  Perform destructive queue maintenance as a separate, explicitly fenced operation." >&2
+@@ -486,6 +531,8 @@ if [ "${TARGETED_WEB}" = true ]; then
+     echo "Scope: targeted weppcloud + rq-engine recreation; dependencies remain running"
+ elif [ "${TARGETED_CAP}" = true ]; then
+     echo "Scope: targeted CAP recreation; all other services remain running"
++elif [ "${TARGETED_BATCH}" = true ]; then
++    echo "Scope: targeted batch worker recreation; all other services remain running"
+ fi
+ echo "Timestamp: $(date --iso-8601=seconds)"
+ echo ""
+@@ -882,7 +929,24 @@ trap recover_targeted_cap ERR
+ trap 'echo "✗ Deployment interrupted" >&2; false' INT TERM
+ 
+ # Build Docker images
+-if [ "${SKIP_BUILD}" = false ]; then
++if [ "${TARGETED_BATCH}" = true ]; then
++    BATCH_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["rq-worker-batch"]["image"])')"
++    BATCH_CONTAINER="$(wctl docker compose ps -q rq-worker-batch)"
++    if [ -n "${SOURCE_OVERLAY_MANIFEST}" ]; then
++        OVERLAY_RESULT_DIR="$(mktemp -d "${DEPLOY_STATE_DIR%/}/wepppy-batch-source.XXXXXX")"
++        python3 "${SCRIPT_DIR}/build_source_overlay.py" \
++            --manifest "${SOURCE_OVERLAY_MANIFEST}" --source-root "${PROJECT_ROOT}" \
++            --image "${BATCH_IMAGE}" --container "${BATCH_CONTAINER}" \
++            --result "${OVERLAY_RESULT_DIR}/result.json"
++        echo "    Source derivation evidence: ${OVERLAY_RESULT_DIR}/result.json"
++    else
++        [[ "${BATCH_ROLLBACK_IMAGE_ID}" =~ ^sha256:[a-f0-9]{64}$ ]]
++        [ "$(docker image inspect --format '{{.Id}}' "${BATCH_IMAGE}")" = "${BATCH_ROLLBACK_IMAGE_ID}" ]
++        echo "    Verified exact retained rollback image ${BATCH_ROLLBACK_IMAGE_ID}"
++    fi
++    wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
++        rq-worker-batch -B -c 'from wepppy.rq import query_catalog_rq; import wepppyo3; print(query_catalog_rq.catalog_worker_configuration())'
++elif [ "${SKIP_BUILD}" = false ]; then
+     echo ">>> Step 2: Building Docker images..."
+     BASE_BUILD_SERVICES=()
+     DEPENDENT_BUILD_SERVICES=()
+@@ -931,12 +995,16 @@ if [ "${DEPLOY_MODE}" = "full" ] && [ "${FLUSH_RQ_DB}" = true ]; then
+     assert_no_active_rq_jobs
+     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+ fi
+-if [ "${DEPLOY_MODE}" = "worker" ]; then
++if [ "${DEPLOY_MODE}" = "worker" ] && [ "${TARGETED_BATCH}" = false ]; then
+     suspend_rq_dequeue
+     assert_no_active_rq_jobs
+     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+ fi
+-if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
++if [ "${TARGETED_BATCH}" = true ]; then
++    suspend_rq_dequeue
++    assert_no_active_rq_jobs
++    run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker-batch
++elif [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
+     echo "    Skipping stack shutdown; workers and dependencies remain running."
+ elif [ "${DEPLOY_MODE}" = "full" ]; then
+     echo "    Skipping full-stack down; services will be force-recreated in place."
+@@ -953,7 +1021,7 @@ elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
+         rq-worker-fork-archive
+ fi
+ if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
+-    && [ "${DEPLOY_MODE}" != "full" ]; then
++    && [ "${TARGETED_BATCH}" = false ] && [ "${DEPLOY_MODE}" != "full" ]; then
+     run_wctl_with_retry \
+         "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+         "${WCTL_COMPOSE_RETRIES}" \
+@@ -1022,7 +1090,7 @@ else
+ fi
+ 
+ # Build static assets (controllers and themes)
+-if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_CAP}" = false ]; then
++if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_CAP}" = false ] && [ "${TARGETED_BATCH}" = false ]; then
+     echo ">>> Step 4: Building static assets..."
+ 
+     # Build controllers-gl.js
+@@ -1053,7 +1121,7 @@ fi
+ echo ">>> Step 5: Starting services..."
+ if [ "${DEPLOY_MODE}" = "full" ] \
+     && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
+-    && [ "${FLUSH_RQ_DB}" = false ]; then
++    && [ "${TARGETED_BATCH}" = false ] && [ "${FLUSH_RQ_DB}" = false ]; then
+     suspend_rq_dequeue
+     assert_no_active_rq_jobs
+     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+@@ -1094,6 +1162,11 @@ elif [ "${TARGETED_CAP}" = true ]; then
+         "${WCTL_COMPOSE_RETRIES}" \
+         "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+         docker compose up -d --no-deps --force-recreate cap
++elif [ "${TARGETED_BATCH}" = true ]; then
++    run_wctl_with_retry \
++        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" "${WCTL_COMPOSE_RETRIES}" \
++        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
++        docker compose up -d --no-deps --force-recreate rq-worker-batch
+ else
+     if [ -n "${CAP_RESCUE_IMAGE}" ]; then
+         CAP_ACTIVATION_STARTED=true
+@@ -1107,7 +1180,7 @@ fi
+ echo ""
+ 
+ # Wait for health check
+-if [ "${HAS_WEPPCLOUD}" = true ]; then
++if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
+     echo ">>> Step 6: Waiting for services to be healthy..."
+     sleep 5
+ 
+@@ -1345,7 +1418,7 @@ if [ -n "${BACKUP_CONTROLLERS_JS}" ]; then
+ fi
+ 
+ if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
+-    || [ -n "${CAP_RESCUE_IMAGE}" ]; then
++    || [ "${TARGETED_BATCH}" = true ] || [ -n "${CAP_RESCUE_IMAGE}" ]; then
+     echo ""
+     echo ">>> Step 7: Skipping broad Docker runtime prune after targeted deployment"
+ elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+@@ -1370,7 +1443,7 @@ echo ""
+ echo "============================================"
+ echo "Deployment complete!"
+ echo "============================================"
+-if [ "${HAS_WEPPCLOUD}" = true ]; then
++if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
+     echo "Controllers bundle: wepppy/weppcloud/static/js/controllers-gl.js"
+     echo "Theme CSS: wepppy/weppcloud/static/css/themes/"
+     echo ""
+diff --git a/tools/query_catalog_pilot.py b/tools/query_catalog_pilot.py
+new file mode 100644
+index 000000000..02b51a4c8
+--- /dev/null
++++ b/tools/query_catalog_pilot.py
+@@ -0,0 +1,580 @@
++#!/usr/bin/env python3
++"""Trusted operator controller for the finite, disabled-mode catalog pilot.
++
++No queue/root/environment overrides or source overlays are accepted. Evidence is
++private operator data; this program never enables ordinary asynchronous refresh.
++"""
++from __future__ import annotations
++
++import argparse
++from datetime import datetime, timezone
++import hashlib
++import json
++import os
++from pathlib import Path
++import re
++import shutil
++import sys
++import threading
++import time
++from typing import Any
++
++ROOT = Path('/wc1/runs/qc')
++SOURCE = Path('/wc1/query-catalog-validation/20261026/rollout-cycle-2355/runs/representative')
++MARKER = '.query-catalog-pilot-owner.json'
++OBSERVE_SECONDS = 10
++TICK_SECONDS = 30
++SOURCE_FILES = 79
++SOURCE_BYTES = 73328103
++
++
++def digest(path: Path) -> str:
++    result = hashlib.sha256()
++    with path.open('rb') as stream:
++        for block in iter(lambda: stream.read(1024 * 1024), b''):
++            result.update(block)
++    return result.hexdigest()
++
++
++def write_json(path: Path, value: Any, *, exclusive: bool = False) -> None:
++    # Evidence is operator-private, including exact job trees and controller state.
++    flags = os.O_WRONLY | os.O_CREAT | (os.O_EXCL if exclusive else os.O_TRUNC) | os.O_NOFOLLOW
++    fd = os.open(path, flags, 0o600)
++    with os.fdopen(fd, 'w') as stream:
++        json.dump(value, stream, indent=2, sort_keys=True)
++        stream.write('\n')
++        stream.flush()
++        os.fsync(stream.fileno())
++
++
++def canonical(path: Path) -> Path:
++    if not path.is_absolute() or path.resolve() != path:
++        raise ValueError('Pilot paths must be absolute and contain no symlink redirection')
++    return path
++
++
++def fixture_paths(pilot_id: str) -> list[Path]:
++    if not re.fullmatch(r'[a-z0-9][a-z0-9-]{7,63}', pilot_id):
++        raise ValueError('Invalid pilot identifier')
++    canonical(ROOT)
++    return [ROOT / f'qcat-pilot-{pilot_id}-{suffix}' for suffix in [*(f'{i:02d}' for i in range(8)), 'sentinel']]
++
++
++def tree_digest(path: Path) -> dict[str, str]:
++    canonical(path)
++    result = {}
++    for directory, dirs, files in os.walk(path, followlinks=False):
++        for name in dirs + files:
++            if (Path(directory) / name).is_symlink():
++                raise ValueError('Symlink in owned fixture')
++        for name in files:
++            target = Path(directory) / name
++            result[target.relative_to(path).as_posix()] = digest(target)
++    return result
++
++
++def source_manifest() -> list[dict[str, Any]]:
++    canonical(SOURCE)
++    all_files = tree_digest(SOURCE)
++    files = [dict(path=name, sha256=value, bytes=(SOURCE / name).stat().st_size,
++                  modified_ns=(SOURCE / name).stat().st_mtime_ns)
++             for name, value in sorted(all_files.items()) if name.endswith('.parquet')]
++    if len(files) != SOURCE_FILES or sum(row['bytes'] for row in files) != SOURCE_BYTES:
++        raise ValueError('Owned source fixture size/count differs from retained evidence')
++    return files
++
++
++def assert_owned(path: Path, pilot_id: str) -> None:
++    canonical(path)
++    if path not in fixture_paths(pilot_id):
++        raise ValueError('Path is not an exact pilot fixture')
++    marker = path / MARKER
++    if marker.is_symlink() or json.loads(marker.read_text()) != {'pilot_id': pilot_id}:
++        raise ValueError('Missing or mismatched fixture ownership')
++
++
++def prepare(pilot_id: str, evidence: Path, cr: Any) -> dict[str, Any]:
++    paths = fixture_paths(pilot_id)
++    files = source_manifest()
++    ROOT.mkdir(exist_ok=True)  # Canonical qc shard may not exist before the first pilot.
++    if not canonical(ROOT).is_dir():
++        raise NotADirectoryError(ROOT)
++    if any(path.exists() or path.is_symlink() for path in paths):
++        raise FileExistsError('Pilot fixtures must be exclusively new; no overwrite or automatic repair')
++    for path in paths:
++        path.mkdir()  # Existing canonical parent must already be available.
++        write_json(path / MARKER, {'pilot_id': pilot_id}, exclusive=True)
++        write_json(path / 'wepp.nodb', {}, exclusive=True)
++        for row in files:
++            target = path / row['path']
++            target.parent.mkdir(parents=True, exist_ok=True)
++            with (SOURCE / row['path']).open('rb') as source, target.open('xb') as dest:
++                shutil.copyfileobj(source, dest)
++            if digest(target) != row['sha256']:
++                raise ValueError('Fixture copy checksum mismatch')
++        scope = cr.resolve_scope(path, create=True)
++        if not scope.managed or not scope.incarnation:
++            raise ValueError('Fixture did not resolve to an initialized canonical scope')
++    receipt = cr.record_catalog_refresh(paths[-1])
++    setup = dict(pilot_id=pilot_id, paths=[str(path) for path in paths[:-1]],
++                 sentinel=str(paths[-1]), files=files, sentinel_receipt=receipt,
++                 sentinel_before=tree_digest(paths[-1]), created_at=time.time())
++    write_json(evidence / 'setup.json', setup, exclusive=True)
++    return setup
++
++
++def load_setup(evidence: Path, pilot_id: str) -> dict[str, Any]:
++    setup = json.loads((evidence / 'setup.json').read_text())
++    expected = fixture_paths(pilot_id)
++    if (setup['pilot_id'] != pilot_id or setup['paths'] != [str(p) for p in expected[:-1]]
++            or setup['sentinel'] != str(expected[-1])):
++        raise ValueError('Evidence fixture locators do not match the exact pilot')
++    for path in expected:
++        assert_owned(path, pilot_id)
++    if setup['files'] != source_manifest():
++        raise ValueError('Source manifest changed')
++    return setup
++
++
++def raw_ready(setup: dict[str, Any], cr: Any) -> bool:
++    return all((Path(path) / '_query_engine/catalog.json').is_file()
++               and not cr.pending_catalog_requests(path) for path in setup['paths'])
++
++
++def verify_bindings(setup: dict[str, Any], cr: Any, bindings: list[dict[str, Any]]) -> None:
++    """Compare artifact identity with admission authority, never just itself."""
++    if len(bindings) != len(setup['paths']) or {item['path'] for item in bindings} != set(setup['paths']):
++        raise ValueError('Artifact scope set differs from admitted manifest')
++    for binding in bindings:
++        path = Path(binding['path'])
++        assert_owned(path, setup['pilot_id'])
++        scope = cr.resolve_scope(path, create=False)
++        if (scope.scope_id != binding['scope_id'] or scope.incarnation != binding['incarnation']
++                or scope.namespace != binding['namespace']
++                or {'inode': path.stat().st_ino} != binding['directory_identity']):
++            raise ValueError('Artifact identity differs from admitted manifest')
++
++
++def verify_artifacts(setup: dict[str, Any], cr: Any, *, consumers: bool = True,
++                     bindings: list[dict[str, Any]] | None = None) -> dict[str, Any]:
++    """Raw publication gates precede every potentially repairing consumer call."""
++    import duckdb
++    import pyarrow.parquet as pq
++
++    if bindings is not None:
++        verify_bindings(setup, cr, bindings)
++    if not raw_ready(setup, cr):
++        raise ValueError('Raw publication incomplete; consumer repair is not acceptance')
++    expected = {row['path']: row for row in setup['files']}
++    results = []
++    for name in setup['paths']:
++        path = Path(name)
++        assert_owned(path, setup['pilot_id'])
++        catalog = json.loads((path / '_query_engine/catalog.json').read_text())
++        indexed = {row['path']: row for row in catalog['files']}
++        if len(indexed) != len(catalog['files']) or not expected.keys() <= indexed.keys():
++            raise ValueError('Missing or duplicated catalog dataset')
++        if not indexed.keys() <= expected.keys() | {'wepp.nodb', MARKER, '_query_engine/catalog.json'}:
++            raise ValueError('Unexpected catalog dataset')
++        publication = json.loads((path / cr.REFRESH_PATH / 'status.json').read_text())
++        scope = cr.resolve_scope(path, create=False)
++        if (publication.get('state') != 'current' or publication.get('incarnation') != scope.incarnation
++                or publication.get('catalog_digest') != digest(path / '_query_engine/catalog.json')):
++            raise ValueError('Raw publication identity/digest is not current')
++        cr._verify_required(path, catalog, list(expected))
++        for row in catalog['files']:
++            physical = Path(row.get('fs_path') or row['path'])
++            physical = physical if physical.is_absolute() else path / physical
++            if not physical.resolve().is_relative_to(path):
++                raise ValueError('Unexpected external catalog reference')
++        for relative, row in expected.items():
++            target = path / relative
++            if target.is_symlink() or digest(target) != row['sha256']:
++                raise ValueError('Copied scientific source changed')
++            if not pq.read_schema(target).equals(pq.read_schema(SOURCE / relative), check_metadata=True):
++                raise ValueError('Copied schema differs from source')
++        results.append(dict(path=name, catalog_entries=len(indexed), catalog_sha256=digest(path / '_query_engine/catalog.json')))
++    if tree_digest(Path(setup['sentinel'])) != setup['sentinel_before']:
++        raise ValueError('Excluded sentinel changed')
++    if source_manifest() != setup['files']:
++        raise ValueError('Owned source changed')
++    if bindings is not None:
++        verify_bindings(setup, cr, bindings)
++    probes = ['watershed/channels.parquet', 'wepp/output/interchange/H.pass.parquet',
++              next(name for name in expected if name.startswith('climate/'))]
++    queries = []
++    with duckdb.connect() as conn:
++        for relative in probes:
++            reference = conn.execute('SELECT count(*) FROM read_parquet(?)', [str(SOURCE / relative)]).fetchone()[0]
++            for name in setup['paths']:
++                actual = conn.execute('SELECT count(*) FROM read_parquet(?)', [str(Path(name) / relative)]).fetchone()[0]
++                if actual != reference:
++                    raise ValueError('DuckDB row-count mismatch')
++                if consumers:
++                    from wepppy.query_engine.catalog import DatasetCatalog
++                    from wepppy.query_engine.context import RunContext
++                    from wepppy.query_engine.core import run_query
++                    from wepppy.query_engine.payload import QueryRequest
++                    context = RunContext(name, Path(name), None, DatasetCatalog.load(Path(name) / '_query_engine/catalog.json'))
++                    result = run_query(context, QueryRequest(datasets=[relative], columns=[],
++                                       aggregations=[{'fn': 'count', 'column': '*', 'alias': 'n'}], include_schema=True))
++                    if result.records != [{'n': reference}] or not result.schema:
++                        raise ValueError('Query-engine consumer result mismatch')
++                queries.append(dict(path=name, dataset=relative, rows=actual, source_rows=reference))
++    if bindings is not None:
++        verify_bindings(setup, cr, bindings)
++    for row in results:
++        if digest(Path(row['path']) / '_query_engine/catalog.json') != row['catalog_sha256']:
++            raise ValueError('Consumer changed publication; repair cannot be credited')
++    return dict(status='passed', scopes=results, queries=queries, sentinel_unchanged=True, source_unchanged=True)
++
++
++def ordinary_waits(jobs: dict[str, Any], waiting: list[str], now: float) -> dict[str, Any]:
++    waits = {}
++    unavailable = []
++    for job_id, fields in jobs.items():
++        try:
++            def timestamp(value):
++                parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
++                return (parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)).timestamp()
++            enqueued = timestamp(fields['enqueued_at'])
++            if fields.get('started_at'):
++                waits[job_id] = max(0.0, timestamp(fields['started_at']) - enqueued)
++            elif job_id in waiting:
++                waits[job_id] = max(0.0, now - enqueued)
++        except (AttributeError, TypeError, ValueError, KeyError):
++            unavailable.append(job_id)
++    return dict(wait_seconds=waits, max_observed_wait_seconds=max(waits.values(), default=0),
++                unavailable_timestamps=unavailable)
++
++
++class Runtime:
++    def __init__(self) -> None:
++        import redis
++        from rq import Queue
++        from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
++        from wepppy.query_engine import catalog_refresh
++        from wepppy.rq import query_catalog_rq, _query_catalog_pilot
++        self.connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
++        self.queue = Queue('batch', connection=self.connection)
++        self.cr = catalog_refresh
++        self.cq = query_catalog_rq
++        self.pilot = _query_catalog_pilot
++        self.ordinary_seen: set[str] = set()
++        if self.cr.catalog_refresh_enabled():
++            raise ValueError('This pilot requires general asynchronous refresh disabled')
++
++    def preflight(self, *, require_all: bool = True) -> dict[str, Any]:
++        import socket
++        status = self.cq.consumer_status(self.queue)
++        if require_all and (status['compatible'] != 8 or status['incompatible'] or status['suspended']):
++            raise RuntimeError('Pilot requires the eight existing compatible unsuspended consumers')
++        return dict(host=socket.gethostname(), uid=os.getuid(), gid=os.getgid(), groups=os.getgroups(),
++                    consumers=status, configuration=self.cq.catalog_worker_configuration(),
++                    source_sha256={name: digest(Path(module.__file__)) for name, module in
++                                   [('catalog_refresh', self.cr), ('query_catalog_rq', self.cq), ('pilot', self.pilot)]},
++                    operator_tool_sha256=digest(Path(__file__)))
++
++    def raw_ordinary(self, status: dict[str, Any]) -> dict[str, Any]:
++        from rq.registry import StartedJobRegistry
++        decode = lambda value: value.decode() if isinstance(value, bytes) else str(value)
++        waiting = [decode(value) for value in self.connection.lrange(self.queue.key, 0, -1)]
++        started = [decode(value) for value in self.connection.zrange(StartedJobRegistry('batch', connection=self.connection).key, 0, -1)]
++        admitted = status['global_job_ids']
++        self.ordinary_seen.update(jid for jid in waiting + started if jid not in admitted)
++        jobs = self.raw_jobs({'jobs': {jid: {} for jid in sorted(self.ordinary_seen)}})
++        waits = ordinary_waits(jobs, waiting, time.time())
++        return dict(waiting_ids=waiting, started_ids=started, jobs=jobs, **waits)
++
++    def status(self, pilot_id: str) -> dict[str, Any]:
++        return self.pilot.pilot_status(self.connection, pilot_id)
++
++    def observe(self, pilot_id: str, token: str) -> dict[str, Any]:
++        return self.pilot.observe_pilot(self.connection, pilot_id, token)
++
++    def pause(self, pilot_id: str, reason: str) -> None:
++        self.pilot.pause_pilot(self.connection, pilot_id, reason)
++
++    def phase(self, pilot_id: str, token: str, phase: str, value: Any) -> None:
++        self.pilot.record_phase(self.connection, pilot_id, token, phase, value)
++
++    def public_jobs(self, status: dict[str, Any]) -> dict[str, Any]:
++        from wepppy.rq.job_info import get_wepppy_rq_job_info
++        return {job_id: get_wepppy_rq_job_info(job_id) for job_id in status['jobs']}
++
++    def raw_jobs(self, status: dict[str, Any]) -> dict[str, Any]:
++        # HGET fields only: no deserialization of task payloads or registry cleanup.
++        fields = ['status', 'origin', 'created_at', 'enqueued_at', 'started_at', 'ended_at', 'worker_name', 'dependency_ids']
++        return {job_id: dict(zip(fields, [value.decode() if isinstance(value, bytes) else value
++                    for value in self.connection.hmget('rq:job:' + job_id, fields)])) for job_id in status['jobs']}
++
++
++class Observer:
++    """One process-local observer, renewing only after the helper's raw observation."""
++    def __init__(self, runtime: Runtime, pilot_id: str, token: str, evidence: Path):
++        self.runtime, self.pilot_id, self.token, self.evidence = runtime, pilot_id, token, evidence
++        self.stop = threading.Event()
++        self.error: BaseException | None = None
++        self.thread = threading.Thread(target=self._loop, name='catalog-pilot-observer', daemon=True)
++
++    def once(self) -> dict[str, Any]:
++        try:
++            return self._sample()
++        except Exception as exc:
++            # Observation boundary: pause immediately in this thread, even while
++            # the main controller is blocked in scientific artifact readback.
++            try:
++                self.runtime.pause(self.pilot_id, 'controller_observation_failure')
++            except Exception as pause_error:
++                raise ExceptionGroup('Observation and admission pause both failed', [exc, pause_error]) from None
++            raise
++
++    def _sample(self) -> dict[str, Any]:
++        status = self.runtime.observe(self.pilot_id, self.token)
++        if status['global_uncertain'] or status['global_outstanding'] is None or status['global_outstanding'] > 7:
++            self.runtime.pause(self.pilot_id, 'accounting_failure')
++        if status['counters']['refresh'] > 25 or status['counters']['inventory'] > 2:
++            self.runtime.pause(self.pilot_id, 'accounting_failure')
++        participants = self.runtime.preflight(require_all=False)
++        live = participants['consumers']
++        if live['compatible'] != 8 or live['incompatible'] or live['suspended']:
++            self.runtime.pause(self.pilot_id, 'configuration_mismatch')
++        ordinary = self.runtime.raw_ordinary(status)
++        if ordinary.get('unavailable_timestamps'):
++            self.runtime.pause(self.pilot_id, 'controller_observation_failure')
++        if ordinary.get('max_observed_wait_seconds', 0) >= 300:
++            self.runtime.pause(self.pilot_id, 'ordinary_wait_limit')
++        row = dict(at=time.time(), status=status, jobs=self.runtime.raw_jobs(status),
++                   ordinary=ordinary, participants=participants)
++        with (self.evidence / 'observations.jsonl').open('a') as stream:
++            stream.write(json.dumps(row, sort_keys=True) + '\n')
++            stream.flush()
++        return status
++
++    def _loop(self) -> None:
++        try:
++            next_sample = time.monotonic() + OBSERVE_SECONDS
++            while not self.stop.wait(max(0, next_sample - time.monotonic())):
++                self.once()
++                next_sample = max(next_sample + OBSERVE_SECONDS, time.monotonic())
++        except Exception as exc:
++            # Deliberate thread boundary: propagate observer failure to controller;
++            # no separate heartbeat can keep admissions alive after this failure.
++            self.error = exc
++            self.stop.set()
++
++    def check(self) -> None:
++        if self.error is not None:
++            raise RuntimeError('Pilot observation failed; acceptance cannot pass') from self.error
++
++    def close(self) -> None:
++        self.stop.set()
++        if self.thread.ident is None:
++            return
++        self.thread.join(timeout=OBSERVE_SECONDS + 1)
++        if self.thread.is_alive():
++            raise RuntimeError('Observer did not drain; retained evidence is incomplete')
++
++
++def assert_job_lineage(status: dict[str, Any], setup: dict[str, Any], *, waves: int) -> None:
++    scopes = {item['scope_id'] for item in status['manifest']['scopes']}
++    counts = {scope: 0 for scope in scopes}
++    kinds = {'refresh': 0, 'inventory': 0}
++    for job_id, binding in status['jobs'].items():
++        if not job_id.startswith('query_catalog_refresh_') or binding['status'] != 'finished':
++            raise ValueError('Pilot job did not finish with canonical identity')
++        kind = binding['kind']
++        if kind not in kinds:
++            raise ValueError('Unexpected pilot job kind')
++        kinds[kind] += 1
++        if kind == 'refresh':
++            scope_id = binding['scope']['scope_id']
++            if scope_id not in counts or binding['scope']['wd'] not in setup['paths']:
++                raise ValueError('Pilot job escaped frozen scope set')
++            counts[scope_id] += 1
++    if (kinds != status['counters'] or kinds['refresh'] > 25 or not 1 <= kinds['inventory'] <= 2
++            or any(count < waves for count in counts.values()) or len(scopes) != 8):
++        raise ValueError('Pilot job/budget lineage does not prove the required waves')
++
++
++def negative_controls(runtime: Runtime, setup: dict[str, Any], pilot_id: str, token: str) -> None:
++    before = runtime.status(pilot_id)
++    result = runtime.cq.enqueue_catalog_refresh(setup['sentinel'], queue=runtime.queue)
++    if result.get('error_code') != 'query_catalog_refresh_disabled' or result.get('job_id'):
++        raise ValueError('General disabled admission changed')
++    for identifier, expected in [(pilot_id, 'Scope is not approved'),
++                                 ('unknown-' + hashlib.sha256(pilot_id.encode()).hexdigest()[:16], 'authority is absent')]:
++        try:
++            runtime.cq.enqueue_catalog_refresh(setup['sentinel'], queue=runtime.queue,
++                                              pilot_id=identifier, controller_token=token)
++        except ValueError as exc:
++            if expected not in str(exc):
++                raise
++        else:
++            raise ValueError('Unapproved scope/pilot was not rejected')
++    after = runtime.status(pilot_id)
++    if before['jobs'] != after['jobs'] or before['counters'] != after['counters']:
++        raise ValueError('Negative control changed admission ledger')
++    if tree_digest(Path(setup['sentinel'])) != setup['sentinel_before']:
++        raise ValueError('Denied admission changed sentinel')
++
++
++def receipt_wave(runtime: Runtime, setup: dict[str, Any], pilot_id: str, token: str) -> None:
++    phases = runtime.status(pilot_id)['phases']
++    if 'receipt_wave_complete' in phases:
++        return
++    if 'receipt_wave_started' in phases:
++        raise RuntimeError('Incomplete receipt wave requires explicit operator reconciliation')
++    runtime.phase(pilot_id, token, 'receipt_wave_started', True)
++    receipts = []
++    for name in setup['paths']:
++        if runtime.status(pilot_id)['state'] != 'active':
++            return  # Safe stop retains partial-wave evidence and created receipts.
++        runtime.pilot.authorize_receipt(runtime.connection, pilot_id, name, token)
++        with runtime.cr.catalog_lifecycle_guard(name):
++            runtime.pilot.authorize_receipt(runtime.connection, pilot_id, name, token)
++            receipts.append(runtime.cr.record_catalog_refresh(name, 'watershed/channels.parquet'))
++        # Canonical enqueue only; disabled general behavior is never bypassed.
++        runtime.cq.enqueue_catalog_refresh(name, queue=runtime.queue, pilot_id=pilot_id, controller_token=token)
++    runtime.phase(pilot_id, token, 'receipt_wave_complete', receipts)
++
++
++def retry_receipt_wave(runtime: Runtime, setup: dict[str, Any], pilot_id: str, token: str) -> None:
++    """A completed inventory frontier is not discovery of later explicit receipts."""
++    if 'receipt_wave_complete' not in runtime.status(pilot_id)['phases']:
++        return
++    for name in setup['paths']:
++        if runtime.status(pilot_id)['state'] != 'active':
++            return
++        runtime.pilot.authorize_receipt(runtime.connection, pilot_id, name, token)
++        if runtime.cr.pending_catalog_requests(name):
++            runtime.cq.enqueue_catalog_refresh(name, queue=runtime.queue,
++                                              pilot_id=pilot_id, controller_token=token)
++
++
++def run_controller(runtime: Runtime, pilot_id: str, evidence: Path, *, resume: bool = False,
++                   monitor_seconds: float = 5400, drain_only: bool = False) -> dict[str, Any]:
++    setup = {} if drain_only else load_setup(evidence, pilot_id)
++    write_json(evidence / 'preflight.json', runtime.preflight(require_all=not drain_only))
++    before = runtime.status(pilot_id)
++    if not drain_only and 'acceptance_failure' in before['phases']:
++        raise RuntimeError('Retained acceptance failure cannot become a passed pilot')
++    if not drain_only and before['phases'].get('receipt_wave_started') and 'receipt_wave_complete' not in before['phases']:
++        raise RuntimeError('Interrupted receipt wave requires operator reconciliation before resume')
++    if not drain_only and not resume and before['phases']:
++        raise ValueError('Existing pilot progress requires explicit resume')
++    token = runtime.pilot.acquire_controller(runtime.connection, pilot_id)
++    observer = Observer(runtime, pilot_id, token, evidence)
++    began = time.monotonic()
++    next_tick = 0.0
++    outcome = 'incomplete'
++    try:
++        observer.once()
++        if drain_only:
++            runtime.pause(pilot_id, 'operator_drain')
++        else:
++            runtime.pilot.resume_pilot(runtime.connection, pilot_id, token)
++        observer.thread.start()
++        if not drain_only and 'negative_controls' not in before['phases']:
++            negative_controls(runtime, setup, pilot_id, token)
++            runtime.phase(pilot_id, token, 'negative_controls', True)
++        while time.monotonic() - began < monitor_seconds:
++            observer.check()
++            status = runtime.status(pilot_id)
++            active = not drain_only and status['state'] == 'active' and not status['failures']
++            if active and time.monotonic() >= next_tick:
++                tick_start = time.monotonic()
++                runtime.cq.reconcile_query_catalogs(queue=runtime.queue, pilot_id=pilot_id, controller_token=token)
++                retry_receipt_wave(runtime, setup, pilot_id, token)
++                next_tick = tick_start + TICK_SECONDS
++            status = runtime.status(pilot_id)
++            if not status['outstanding']:
++                if status['failures'] or status['state'] != 'active':
++                    outcome = 'safely_stopped' if not status['failures'] else 'failed'
++                    break
++                if raw_ready(setup, runtime.cr):
++                    phases = status['phases']
++                    assert_job_lineage(status, setup, waves=2 if 'receipt_wave_complete' in phases else 1)
++                    verification = verify_artifacts(setup, runtime.cr, bindings=status['manifest']['scopes'])
++                    observer.check()
++                    phases = runtime.status(pilot_id)['phases']
++                    if 'inventory_verified' not in phases:
++                        write_json(evidence / 'inventory-readback.json', verification)
++                        runtime.phase(pilot_id, token, 'inventory_verified', True)
++                        receipt_wave(runtime, setup, pilot_id, token)
++                    elif 'receipt_wave_complete' in phases:
++                        write_json(evidence / 'receipt-readback.json', verification)
++                        for receipt in phases['receipt_wave_complete']:
++                            scope = next(item for item in status['manifest']['scopes'] if item['scope_id'] == receipt['scope_id'])
++                            published = json.loads((Path(scope['path']) / runtime.cr.REFRESH_PATH / 'status.json').read_text())
++                            if receipt['request_id'] not in published.get('acknowledged', []):
++                                raise ValueError('Owned receipt lacks publication acknowledgment')
++                        runtime.phase(pilot_id, token, 'artifact_verified', True)
++                        runtime.pause(pilot_id, 'acceptance_readback_complete')
++                        observer.once()
++                        outcome = 'completed'
++                        break
++            time.sleep(1)
++        if outcome == 'incomplete':
++            runtime.pause(pilot_id, 'controller_monitor_bound')
++        final = runtime.status(pilot_id)
++        result = dict(outcome=outcome, status=final, jobs=runtime.raw_jobs(final), elapsed_seconds=time.monotonic()-began)
++        failed = bool(final['failures'] or 'acceptance_failure' in final['phases'])
++        if final['outstanding'] or failed or final['global_uncertain']:
++            result['outcome'] = 'failed' if failed else 'incomplete_drain'
++        result['public_job_trees'] = runtime.public_jobs(final)
++        write_json(evidence / 'result.json', result)
++        return result
++    except BaseException as exc:
++        # Operator/exception boundary: stop new work, preserve receipts and exact
++        # prior evidence. Failure to pause is visible; the observer lease expires.
++        reason = ('operator_interruption' if isinstance(exc, (KeyboardInterrupt, SystemExit))
++                  else 'controller_observation_failure' if observer.error else 'artifact_failure')
++        runtime.pause(pilot_id, reason)
++        if not isinstance(exc, (KeyboardInterrupt, SystemExit)):
++            runtime.phase(pilot_id, token, 'acceptance_failure', {'error_type': type(exc).__name__})
++        raise
++    finally:
++        observer.close()
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('command', choices=['prepare', 'register', 'status', 'run', 'resume', 'pause', 'drain', 'verify'])
++    parser.add_argument('--pilot-id', required=True)
++    parser.add_argument('--evidence', type=Path, required=True)
++    args = parser.parse_args(argv)
++    fixture_paths(args.pilot_id)
++    evidence = canonical(args.evidence)
++    evidence.mkdir(mode=0o700, parents=True, exist_ok=True)
++    if (evidence.stat().st_mode & 0o077) or evidence.stat().st_uid != os.getuid():
++        raise PermissionError('Evidence directory must be private and owned by this operator')
++    if (os.getuid(), os.getgid()) != (1002, 130):
++        raise PermissionError('Pilot operator requires production UID1002/GID130')
++    runtime = Runtime()
++    if args.command == 'prepare':
++        result = prepare(args.pilot_id, evidence, runtime.cr)
++    elif args.command == 'register':
++        setup = load_setup(evidence, args.pilot_id)
++        write_json(evidence / 'preflight-register.json', runtime.preflight())
++        result = runtime.pilot.register_pilot(runtime.connection, args.pilot_id, setup['paths'])
++        write_json(evidence / 'registration.json', result, exclusive=True)
++    elif args.command == 'status':
++        result = runtime.status(args.pilot_id)
++    elif args.command == 'pause':
++        runtime.pause(args.pilot_id, 'operator_pause')
++        result = runtime.status(args.pilot_id)
++    elif args.command == 'verify':
++        result = verify_artifacts(load_setup(evidence, args.pilot_id), runtime.cr,
++                                  bindings=runtime.status(args.pilot_id)['manifest']['scopes'])
++        write_json(evidence / 'manual-readback.json', result)
++    else:
++        result = run_controller(runtime, args.pilot_id, evidence, resume=args.command == 'resume',
++                                drain_only=args.command == 'drain')
++    print(json.dumps(result, sort_keys=True))
++    return 0 if result.get('outcome', 'completed') == 'completed' else 2
++
++
++if __name__ == '__main__':
++    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++    raise SystemExit(main())
+diff --git a/wepppy/rq/_query_catalog_admission.py b/wepppy/rq/_query_catalog_admission.py
+new file mode 100644
+index 000000000..5fc5d5c6b
+--- /dev/null
++++ b/wepppy/rq/_query_catalog_admission.py
+@@ -0,0 +1,273 @@
++"""One Redis admission ledger for every catalog job on shared batch."""
++from __future__ import annotations
++
++from datetime import datetime, timezone
++import json
++import time
++from typing import Any
++
++from redis.exceptions import WatchError
++from rq import Queue, worker_registration
++from rq.job import Job
++from rq.suspension import WORKERS_SUSPENDED
++
++LEDGER_KEY = 'query-catalog:batch-admission:v1'
++PAUSE_KEY = LEDGER_KEY + ':paused'
++TERMINAL = frozenset({'finished', 'failed', 'stopped', 'canceled'})
++CAP = 7
++
++
++class AdmissionDenied(RuntimeError):
++    pass
++
++
++def _text(value):
++    return value.decode() if isinstance(value, bytes) else value
++
++
++def _ledger(connection):
++    raw = connection.get(LEDGER_KEY)
++    if raw is None:
++        raise AdmissionDenied('query_catalog_accounting_unavailable')
++    data = json.loads(raw)
++    if not isinstance(data, dict) or not isinstance(data.get('jobs'), dict):
++        raise AdmissionDenied('query_catalog_accounting_invalid')
++    for jid, binding in data['jobs'].items():
++        if (not isinstance(jid, str) or not isinstance(binding, dict)
++                or binding.get('kind') not in {'refresh', 'inventory'}
++                or not isinstance(binding.get('configuration'), dict)
++                or type(binding.get('claimed')) is not bool
++                or not isinstance(binding.get('reserved_at'), (int, float))):
++            raise AdmissionDenied('query_catalog_accounting_invalid')
++    return data
++
++
++def execution_uncertain(binding: dict[str, Any], status: str | None) -> bool:
++    # RQ cancel() can mark STARTED work canceled without stopping its workhorse.
++    # Real finished/failed/stopped transitions retain RQ's death/timeout semantics.
++    return status is None or (status == 'canceled' and binding['claimed']
++                              and not binding.get('execution_exited_at'))
++
++
++def execution_outstanding(binding: dict[str, Any], status: str | None) -> bool:
++    return status not in TERMINAL or execution_uncertain(binding, status)
++
++
++def initialize_admission(connection: Any, queue: Queue) -> None:
++    """Explicit operator bootstrap; never reset an existing or uncertain ledger."""
++    if queue.name != 'batch':
++        raise ValueError('Catalog admission requires shared batch')
++    with connection.pipeline() as pipe:
++        keys = [queue.key] + ['rq:' + name + ':batch' for name in ('wip', 'deferred', 'scheduled')]
++        pipe.watch(LEDGER_KEY, *keys)
++        if pipe.exists(LEDGER_KEY):
++            _ledger(pipe)
++            return
++        if next(connection.scan_iter('query-catalog:pilot:*'), None) is not None:
++            raise AdmissionDenied('Lost ledger requires explicit operator recovery')
++        identifiers = list(pipe.lrange(queue.key, 0, -1))
++        for registry in keys[1:]:
++            identifiers.extend(pipe.zrange(registry, 0, -1))
++        if any((_text(jid) or '').startswith('query_catalog_refresh_') for jid in identifiers):
++            raise AdmissionDenied('Existing maintenance requires explicit ledger recovery')
++        pipe.multi()
++        pipe.set(LEDGER_KEY, json.dumps({'jobs': {}, 'initialized_at': time.time()}))
++        pipe.execute()
++
++
++def ordinary_observation(connection: Any, queue: Queue, ledger: dict[str, Any]) -> dict[str, Any]:
++    waiting = []
++    oldest = 0.0
++    unknown = False
++    for raw in connection.lrange(queue.key, 0, -1):
++        jid = _text(raw)
++        if jid in ledger['jobs']:
++            continue
++        waiting.append(jid)
++        value = connection.hget(Job.key_for(jid), 'enqueued_at')
++        try:
++            timestamp = datetime.fromisoformat(_text(value).replace('Z', '+00:00'))
++            if timestamp.tzinfo is None:
++                timestamp = timestamp.replace(tzinfo=timezone.utc)
++            oldest = max(oldest, time.time() - timestamp.timestamp())
++        except (AttributeError, TypeError, ValueError):
++            unknown = True
++    return dict(ordinary_waiting=len(waiting), oldest_wait_seconds=oldest,
++                unknown_wait_metadata=unknown)
++
++
++def _deny(queue, pilot_id, reason):
++    if pilot_id:
++        from ._query_catalog_pilot import pause_pilot
++        pause_pilot(queue.connection, pilot_id, reason)
++    raise AdmissionDenied(reason)
++
++
++def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: dict[str, Any],
++            scope: dict[str, Any] | None = None, pilot_id: str | None = None,
++            controller_token: str | None = None) -> dict[str, Any]:
++    """Read all policy inputs under WATCH; caller enqueues and commits ticket."""
++    from . import _query_catalog_pilot as pilot
++    from .query_catalog_rq import WORKER_FIELD
++    if queue.name != 'batch' or kind not in {'refresh', 'inventory'}:
++        raise AdmissionDenied('query_catalog_queue_invalid')
++    pipe.watch(LEDGER_KEY, PAUSE_KEY, queue.key, WORKERS_SUSPENDED)
++    try:
++        ledger = _ledger(pipe)
++    except (AdmissionDenied, ValueError):
++        _deny(queue, pilot_id, 'accounting_failure')
++    if pipe.exists(PAUSE_KEY) or pipe.exists(WORKERS_SUSPENDED):
++        _deny(queue, pilot_id, 'query_catalog_admission_paused')
++    if len(ledger['jobs']) > CAP:
++        _deny(queue, pilot_id, 'query_catalog_accounting_invalid')
++    remaining = {}
++    for jid, binding in ledger['jobs'].items():
++        pipe.watch(Job.key_for(jid))
++        status = _text(pipe.hget(Job.key_for(jid), 'status'))
++        if execution_uncertain(binding, status):
++            _deny(queue, pilot_id, 'query_catalog_accounting_uncertain')
++        if execution_outstanding(binding, status):
++            remaining[jid] = binding
++    # Queue classification uses ledger ownership; unknown prefix-shaped jobs are
++    # ordinary/uncertain work, never authority to bypass backlog priority.
++    queued = [_text(jid) for jid in pipe.lrange(queue.key, 0, -1)]
++    if len(queued) != len(set(queued)):
++        _deny(queue, pilot_id, 'accounting_failure')
++    if any(jid not in ledger['jobs'] for jid in queued):
++        _deny(queue, pilot_id, 'query_catalog_ordinary_backlog')
++    if any(_text(pipe.hget(Job.key_for(jid), 'status')) != 'queued' for jid in queued):
++        _deny(queue, pilot_id, 'accounting_failure')
++    pipe.watch('rq:workers', 'rq:workers:batch')
++    registrations = list(worker_registration.get_keys(queue=queue))
++    compatible = 0
++    for registration in registrations:
++        pipe.watch(registration)
++        queues, advertised, death = pipe.hmget(registration, 'queues', WORKER_FIELD, 'death')
++        if death is not None or pipe.ttl(registration) <= 0 or 'batch' not in (_text(queues) or '').split(','):
++            continue
++        try:
++            observed = json.loads(advertised) if advertised else None
++        except (ValueError, TypeError):
++            observed = None
++        if observed != configuration:
++            _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
++        compatible += 1
++    if pilot_id and compatible != 8:
++        _deny(queue, pilot_id, 'configuration_mismatch')
++    if not compatible:
++        _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
++    if len(remaining) >= min(CAP, compatible):
++        raise AdmissionDenied('query_catalog_capacity_pending')
++    pilot_data = None
++    if pilot_id:
++        pipe.watch(pilot.key(pilot_id), pilot.key(pilot_id) + ':observer')
++        pilot_data = pilot.read(pipe, pilot_id)
++        try:
++            pilot.require_admission(pipe, pilot_data, controller_token)
++        except RuntimeError:
++            _deny(queue, pilot_id, 'query_catalog_pilot_authority_unavailable')
++        if pilot_data['counters'][kind] >= pilot.BUDGETS[kind]:
++            raise AdmissionDenied('query_catalog_pilot_budget_exhausted')
++        if kind == 'refresh':
++            approved = pilot._scope(pilot_data['manifest'], scope['wd'])
++            if approved['scope_id'] != scope['scope_id'] or approved['incarnation'] != scope['incarnation']:
++                raise AdmissionDenied('query_catalog_pilot_scope_invalid')
++    elif not configuration['enabled']:
++        raise AdmissionDenied('query_catalog_refresh_disabled')
++    binding = dict(kind=kind, pilot_id=pilot_id, configuration=configuration,
++                   scope=scope, claimed=False, reserved_at=time.time())
++    if pilot_data:
++        binding['generation'] = pilot_data['manifest']['generation']
++        pilot_data['counters'][kind] += 1
++        pilot_data['jobs'][job_id] = binding
++    remaining[job_id] = binding
++    ledger['jobs'] = remaining
++    return dict(ledger=ledger, pilot=pilot_data, pilot_id=pilot_id)
++
++
++def commit(pipe: Any, ticket: dict[str, Any]) -> None:
++    """Append policy writes to the caller's existing RQ enqueue transaction."""
++    from . import _query_catalog_pilot as pilot
++    pipe.set(LEDGER_KEY, json.dumps(ticket['ledger']))
++    if ticket['pilot'] is not None:
++        pipe.set(pilot.key(ticket['pilot_id']), json.dumps(ticket['pilot']))
++
++
++def _authorize_job_once(connection: Any, job: Job, *, kind: str, pilot_id: str | None,
++                  scope_id: str | None = None, wd: str | None = None) -> dict[str, Any] | None:
++    from . import _query_catalog_pilot as pilot
++    from .query_catalog_rq import catalog_worker_configuration
++    with connection.pipeline() as pipe:
++        pipe.watch(LEDGER_KEY, Job.key_for(job.id))
++        ledger = _ledger(pipe)
++        binding = ledger['jobs'].get(job.id)
++        if (not binding or binding['kind'] != kind or binding.get('pilot_id') != pilot_id or
++                binding['configuration'] != catalog_worker_configuration() or binding.get('claimed')):
++            raise ValueError('Catalog job has no unused admitted execution authority')
++        if job.origin != 'batch' or _text(pipe.hget(Job.key_for(job.id), 'status')) != 'started':
++            raise ValueError('Catalog job is not started')
++        if kind == 'refresh' and (binding['scope']['scope_id'] != scope_id or binding['scope']['wd'] != str(wd)):
++            raise ValueError('Catalog scope argument changed')
++        data = None
++        if pilot_id:
++            pipe.watch(pilot.key(pilot_id))
++            data = pilot.read(pipe, pilot_id)
++            approved = data['jobs'].get(job.id)
++            if approved != binding or data['manifest']['generation'] != binding['generation']:
++                raise ValueError('Pilot job binding changed')
++            if kind == 'refresh':
++                if binding['scope']['scope_id'] != scope_id:
++                    raise ValueError('Pilot scope argument changed')
++                pilot._scope(data['manifest'], binding['scope']['wd'])
++        binding['claimed'] = True
++        binding['claimed_at'] = time.time()
++        pipe.multi()
++        pipe.set(LEDGER_KEY, json.dumps(ledger))
++        if data:
++            data['jobs'][job.id] = binding
++            pipe.set(pilot.key(pilot_id), json.dumps(data))
++        pipe.execute()
++    return data['manifest'] if data else None
++
++
++def authorize_job(connection: Any, job: Job, *, kind: str, pilot_id: str | None,
++                  scope_id: str | None = None, wd: str | None = None) -> dict[str, Any] | None:
++    # Up to seven workers claim concurrently against the shared ledger. A CAS
++    # retry rereads all authority; it never replays a committed execution claim.
++    for attempt in range(16):
++        try:
++            return _authorize_job_once(connection, job, kind=kind, pilot_id=pilot_id,
++                                       scope_id=scope_id, wd=wd)
++        except WatchError:
++            if attempt == 15:
++                raise
++
++
++def execution_exited(connection: Any, job: Job, pilot_id: str | None) -> None:
++    """Durable proof that admitted scope work has left its worker boundary."""
++    from . import _query_catalog_pilot as pilot
++    for attempt in range(16):
++        try:
++            with connection.pipeline() as pipe:
++                pipe.watch(LEDGER_KEY)
++                ledger = _ledger(pipe)
++                binding = ledger['jobs'].get(job.id)
++                if not binding or not binding['claimed'] or binding.get('pilot_id') != pilot_id:
++                    raise ValueError('Execution exit has no admitted claim')
++                data = None
++                if pilot_id:
++                    pipe.watch(pilot.key(pilot_id))
++                    data = pilot.read(pipe, pilot_id)
++                    if data['jobs'].get(job.id) != binding:
++                        raise ValueError('Execution exit binding changed')
++                binding['execution_exited_at'] = time.time()
++                pipe.multi()
++                pipe.set(LEDGER_KEY, json.dumps(ledger))
++                if data is not None:
++                    data['jobs'][job.id] = binding
++                    pipe.set(pilot.key(pilot_id), json.dumps(data))
++                pipe.execute()
++            return
++        except WatchError:
++            if attempt == 15:
++                raise
+diff --git a/wepppy/rq/_query_catalog_inventory.py b/wepppy/rq/_query_catalog_inventory.py
+new file mode 100644
+index 000000000..95a8e7be6
+--- /dev/null
++++ b/wepppy/rq/_query_catalog_inventory.py
+@@ -0,0 +1,264 @@
++"""Replayable directory streaming; Redis state is coordination, never provenance."""
++from __future__ import annotations
++
++import json
++import os
++from pathlib import Path
++import stat
++import time
++from typing import Any
++
++from redis.exceptions import WatchError
++
++
++class InventorySuperseded(RuntimeError):
++    """A replaced inventory attempt cannot publish progress."""
++
++
++class InventoryScopeMissing(FileNotFoundError):
++    """A discovered child disappeared while its required root remains present."""
++
++
++def validated_scope_path(roots: list[Any], value: str) -> Path:
++    """Map a Redis locator lexically before any resolving/project-writing API."""
++    if not isinstance(value, str):
++        raise ValueError('Malformed inventory scope path')
++    path = Path(value)
++    if not path.is_absolute() or '..' in path.parts:
++        raise ValueError('Inventory scope must be inside a configured root')
++    matches = []
++    for index, root in enumerate(roots):
++        try:
++            relative = path.relative_to(root.path)
++        except ValueError:
++            continue
++        matches.append((len(Path(root.path).parts), index, relative))
++    if not matches:
++        raise ValueError('Inventory scope is outside configured roots')
++    _, index, relative = max(matches)
++    try:
++        return _validated_scope_relative(roots, index, relative)
++    except InventoryScopeMissing:
++        raise
++    except FileNotFoundError:
++        # Only explicitly configured namespace/layout aliases may replace a
++        # missing root spelling. Never redirect a symlink or missing child.
++        missing_child = None
++        for alias_index, alias in enumerate(roots):
++            if (alias_index == index or alias.namespace != roots[index].namespace or
++                    alias.layout != roots[index].layout):
++                continue
++            try:
++                return _validated_scope_relative(roots, alias_index, relative)
++            except InventoryScopeMissing as exc:
++                missing_child = exc
++            except FileNotFoundError:
++                continue
++        if missing_child is not None:
++            raise missing_child
++        raise
++
++
++def _validated_scope_relative(roots: list[Any], index: int, relative: Path) -> Path:
++    root = Path(roots[index].path)
++    # A missing required root remains an error, never a deleted-child success.
++    validated_path(roots, {'root': index, 'relative': '.'})
++    _identity(root)
++    try:
++        result = validated_path(roots, {'root': index, 'relative': str(relative)})
++        _identity(result)
++    except (FileNotFoundError, NotADirectoryError) as exc:
++        validated_path(roots, {'root': index, 'relative': '.'})
++        _identity(root)
++        if relative == Path('.'):
++            raise
++        raise InventoryScopeMissing('Discovered scope is no longer a directory') from exc
++    return result
++
++
++def state(connection: Any, key: str) -> dict[str, Any]:
++    raw = connection.get(key + ':discovery')
++    return json.loads(raw) if raw else {}
++
++
++def initialize(pipeline: Any, key: str, cycle: str, roots: list[Any], *, seeds: list[dict[str, Any]] | None = None) -> None:
++    pipeline.delete(*(key + suffix for suffix in (':frontier', ':seen', ':scopes', ':stream')))
++    pipeline.set(key + ':discovery', json.dumps({
++        'cycle': cycle, 'job_id': None, 'started_at': time.time(), 'visited': 0,
++        'entries': 0, 'errors': [],
++    }))
++    frontier = seeds if seeds is not None else [{'root': i, 'relative': '.'} for i in range(len(roots))]
++    if frontier:
++        pipeline.rpush(key + ':frontier', *(json.dumps(item) for item in frontier))
++
++
++def validated_path(roots: list[Any], item: dict[str, Any]) -> Path:
++    index = item.get('root')
++    relative = item.get('relative')
++    if type(index) is not int or not 0 <= index < len(roots) or not isinstance(relative, str):
++        raise ValueError('Malformed inventory frontier')
++    rel = Path(relative)
++    if rel.is_absolute() or '..' in rel.parts:
++        raise ValueError('Inventory path escapes configured root')
++    root = Path(roots[index].path)
++    path = root
++    # Check each component, including intermediate scenario containers.
++    for component in (None, *rel.parts):
++        if component is not None:
++            path = path / component
++        if stat.S_ISLNK(path.lstat().st_mode):
++            raise ValueError('Inventory symlink is not traversable')
++    path.resolve().relative_to(root.resolve())
++    return path
++
++
++def _identity(path: Path) -> list[int]:
++    info = path.stat()
++    if not stat.S_ISDIR(info.st_mode):
++        raise NotADirectoryError(str(path))
++    return [info.st_dev, info.st_ino]
++
++
++def checkpoint(connection: Any, key: str, job_id: str, cycle: str, *,
++               children: list[dict[str, Any]] = (), scope: str | None = None,
++               identity: list[int] | None = None, exhausted: bool = False,
++               entries: int = 0, error: str | None = None) -> None:
++    """Fence dedup, frontier, discoveries and completion in one transaction."""
++    with connection.pipeline() as pipe:
++        pipe.watch(key + ':discovery', key + ':generation')
++        current = state(pipe, key)
++        if current.get('job_id') != job_id or current.get('cycle') != cycle:
++            raise InventorySuperseded('Inventory attempt was replaced')
++        reset = identity is not None and current.get('directory_identity') != identity
++        fresh = []
++        for child in children:
++            encoded = json.dumps(child, sort_keys=True)
++            if reset or not pipe.sismember(key + ':seen', encoded):
++                fresh.append(encoded)
++        publish_scope = scope is not None and not pipe.sismember(key + ':scopes', scope)
++        current['entries'] = current.get('entries', 0) + entries
++        current['updated_at'] = time.time()
++        current['errors'] = [error] if error else []
++        if identity is not None:
++            current['directory_identity'] = identity
++        if exhausted:
++            current['visited'] = current.get('visited', 0) + 1
++            current.pop('directory_identity', None)
++        pipe.multi()
++        if reset:
++            pipe.delete(key + ':seen')
++        if fresh:
++            pipe.sadd(key + ':seen', *fresh)
++            pipe.rpush(key + ':frontier', *fresh)
++        if publish_scope:
++            pipe.sadd(key + ':scopes', scope)
++            pipe.xadd(key + ':stream', {'path': scope})
++        if exhausted:
++            pipe.lpop(key + ':frontier')
++            pipe.delete(key + ':seen')
++        pipe.set(key + ':discovery', json.dumps(current))
++        try:
++            pipe.execute()
++        except WatchError as exc:
++            raise InventorySuperseded('Inventory checkpoint ownership changed') from exc
++
++
++def _complete(connection: Any, key: str, job_id: str, cycle: str) -> None:
++    with connection.pipeline() as pipe:
++        pipe.watch(key + ':discovery', key + ':frontier', key + ':generation')
++        current = state(pipe, key)
++        if current.get('job_id') != job_id or current.get('cycle') != cycle:
++            raise InventorySuperseded('Inventory completion ownership changed')
++        if pipe.llen(key + ':frontier') or current.get('errors'):
++            raise RuntimeError('Incomplete inventory cannot complete')
++        current['completed_at'] = time.time()
++        pipe.multi()
++        pipe.set(key + ':discovery', json.dumps(current))
++        try:
++            pipe.execute()
++        except WatchError as exc:
++            raise InventorySuperseded('Inventory completion ownership changed') from exc
++
++
++def run(connection: Any, key: str, job_id: str, cycle: str, roots: list[Any], limit: int, *, approved_paths: set[str] | None = None, validate_scope: Any = None) -> None:
++    """Stream to exhaustion; restart replays only the current directory prefix.
++
++    Each publication contains at most ``limit`` entry records. RQ supplies the
++    overall execution deadline; slow directory I/O never holds a scheduler lock.
++    """
++    while True:
++        current = state(connection, key)
++        if current.get('job_id') != job_id or current.get('cycle') != cycle:
++            raise InventorySuperseded('Inventory attempt was replaced')
++        raw = connection.lindex(key + ':frontier', 0)
++        if raw is None:
++            _complete(connection, key, job_id, cycle)
++            return
++        item = json.loads(raw)
++        try:
++            path = validated_path(roots, item)
++            if approved_paths is not None:
++                if str(path) not in approved_paths:
++                    raise ValueError('Inventory scope is outside pilot manifest')
++                validate_scope(path)
++            identity = _identity(path)
++            checkpoint(connection, key, job_id, cycle, identity=identity)
++            project = any((path / marker).is_file() for marker in ('ron.nodb', 'wepp.nodb', '_query_engine/catalog.json'))
++            children = []
++            if approved_paths is not None:
++                if not project:
++                    raise ValueError('Approved pilot project marker missing')
++                validate_scope(path)
++                checkpoint(connection, key, job_id, cycle, scope=str(path), exhausted=True)
++                continue
++            if project:
++                for name in ('_pups', 'rhessys/scenarios', 'runs', '_base'):
++                    child = path / name
++                    try:
++                        info = child.lstat()
++                    except FileNotFoundError:
++                        continue
++                    if stat.S_ISDIR(info.st_mode):
++                        children.append({'root': item['root'], 'relative': str(child.relative_to(roots[item['root']].path))})
++                validated_path(roots, item)
++                if _identity(path) != identity:
++                    raise RuntimeError('Inventory directory replaced during discovery')
++                for offset in range(0, len(children), limit):
++                    checkpoint(connection, key, job_id, cycle, children=children[offset:offset + limit])
++                checkpoint(connection, key, job_id, cycle, scope=str(path), exhausted=True)
++                continue
++            count = 0
++            with os.scandir(path) as stream:
++                for entry in stream:
++                    count += 1
++                    if entry.is_dir(follow_symlinks=False):
++                        children.append({'root': item['root'], 'relative': str(Path(entry.path).relative_to(roots[item['root']].path))})
++                    if count >= limit:
++                        validated_path(roots, item)
++                        if _identity(path) != identity:
++                            raise RuntimeError('Inventory directory replaced during streaming')
++                        checkpoint(connection, key, job_id, cycle, children=children, entries=count)
++                        children, count = [], 0
++            validated_path(roots, item)
++            if _identity(path) != identity:
++                raise RuntimeError('Inventory directory replaced during streaming')
++            checkpoint(connection, key, job_id, cycle, children=children, entries=count, exhausted=True)
++        except FileNotFoundError:
++            # Removed children are no longer scopes. A required missing root is
++            # degraded unless another configured alias covers its namespace.
++            if item.get('relative') != '.':
++                checkpoint(connection, key, job_id, cycle, exhausted=True)
++                continue
++            namespace = roots[item['root']].namespace
++            aliases = [root for i, root in enumerate(roots) if i != item['root'] and root.namespace == namespace]
++            if any(Path(root.path).is_dir() and os.access(root.path, os.R_OK | os.X_OK) for root in aliases):
++                checkpoint(connection, key, job_id, cycle, exhausted=True)
++                continue
++            checkpoint(connection, key, job_id, cycle, error='FileNotFoundError')
++            raise
++        except InventorySuperseded:
++            raise
++        except (OSError, ValueError, RuntimeError) as exc:
++            # Worker boundary retains incomplete frontier for retry; no project writes.
++            checkpoint(connection, key, job_id, cycle, error=type(exc).__name__)
++            raise
+diff --git a/wepppy/rq/_query_catalog_pilot.py b/wepppy/rq/_query_catalog_pilot.py
+new file mode 100644
+index 000000000..cce5b3e26
+--- /dev/null
++++ b/wepppy/rq/_query_catalog_pilot.py
+@@ -0,0 +1,281 @@
++"""Trusted operator pilot authority; no public control or implicit registration."""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++import re
++import time
++from typing import Any
++from uuid import uuid4
++
++from redis.exceptions import WatchError
++from rq import Queue
++from rq.job import Job
++
++MARKER = '.query-catalog-pilot-owner.json'
++OBSERVATION_SECONDS = 10
++LEASE_SECONDS = 60
++WINDOW_SECONDS = 1800
++BUDGETS = {'refresh': 25, 'inventory': 2}
++
++
++def key(pilot_id: str) -> str:
++    if not isinstance(pilot_id, str) or not re.fullmatch(r'[a-z0-9][a-z0-9-]{7,63}', pilot_id):
++        raise ValueError('Invalid pilot identifier')
++    return 'query-catalog:pilot:' + pilot_id
++
++
++def text(value: Any) -> str | None:
++    return value.decode() if isinstance(value, bytes) else value
++
++
++def read(connection: Any, pilot_id: str) -> dict[str, Any]:
++    raw = connection.get(key(pilot_id))
++    if raw is None:
++        raise ValueError('Pilot authority is absent; operator recovery required')
++    data = json.loads(raw)
++    if not isinstance(data, dict) or not isinstance(data.get('manifest'), dict) or not isinstance(data.get('jobs'), dict):
++        raise ValueError('Malformed pilot authority')
++    if (data['manifest'].get('pilot_id') != pilot_id or not isinstance(data.get('counters'), dict)
++            or data['counters'].keys() != BUDGETS.keys()):
++        raise ValueError('Malformed pilot accounting')
++    if any(type(data['counters'][kind]) is not int or not 0 <= data['counters'][kind] <= limit for kind, limit in BUDGETS.items()):
++        raise ValueError('Malformed pilot counters')
++    manifest = data['manifest']
++    if (manifest.get('protocol') != 1 or manifest.get('budgets') != BUDGETS
++            or manifest.get('queue') != 'batch'):
++        raise ValueError('Malformed pilot manifest protocol or budgets')
++    counts = dict.fromkeys(BUDGETS, 0)
++    for binding in data['jobs'].values():
++        if (not isinstance(binding, dict) or binding.get('kind') not in BUDGETS
++                or binding.get('pilot_id') != pilot_id
++                or binding.get('generation') != manifest.get('generation')):
++            raise ValueError('Malformed pilot job accounting')
++        counts[binding['kind']] += 1
++    if counts != data['counters']:
++        raise ValueError('Pilot counters disagree with retained job bindings')
++    digest = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
++    if digest != data.get('manifest_sha256'):
++        raise ValueError('Immutable pilot manifest changed')
++    return data
++
++
++def _directory_identity(path: Path) -> dict[str, int]:
++    # NFS mount device numbers differ across hosts. Namespace, incarnation and
++    # owned marker bind the shared scope; its inode detects directory replacement.
++    return {'inode': path.stat().st_ino}
++
++
++def _scope(manifest: dict[str, Any], path: str) -> dict[str, Any]:
++    from wepppy.query_engine.catalog_refresh import configured_roots, resolve_scope
++    from ._query_catalog_inventory import validated_scope_path
++    approved = next((s for s in manifest['scopes'] if s['path'] == str(path)), None)
++    if approved is None:
++        raise ValueError('Scope is not approved by pilot')
++    base = validated_scope_path(configured_roots(), str(path))
++    if str(base) != approved['path']:
++        raise ValueError('Pilot scope locator changed')
++    marker = base / MARKER
++    if marker.is_symlink() or json.loads(marker.read_text()) != {'pilot_id': manifest['pilot_id']}:
++        raise ValueError('Pilot fixture ownership changed')
++    scope = resolve_scope(base, create=False)
++    identity = _directory_identity(base)
++    if (not scope.managed or scope.scope_id != approved['scope_id'] or
++            scope.incarnation != approved['incarnation'] or scope.namespace != approved['namespace'] or
++            identity != approved['directory_identity']):
++        raise ValueError('Pilot scope identity changed')
++    return approved
++
++
++def register_pilot(connection: Any, pilot_id: str, paths: list[str]) -> dict[str, Any]:
++    from wepppy.query_engine.catalog_refresh import configured_roots, resolve_scope
++    from ._query_catalog_inventory import validated_scope_path
++    from .query_catalog_rq import catalog_worker_configuration
++    from ._query_catalog_admission import initialize_admission
++    destination = key(pilot_id)
++    if connection.exists(destination):
++        raise ValueError('Pilot identifier already registered; budgets cannot reset')
++    if not paths or len(paths) > 25 or len(set(map(str, paths))) != len(paths):
++        raise ValueError('Pilot requires one to 25 distinct owned scopes')
++    configuration = catalog_worker_configuration()
++    if configuration['enabled']:
++        raise ValueError('Owned pilot requires general admission disabled')
++    scopes = []
++    for path in paths:
++        base = validated_scope_path(configured_roots(), str(path))
++        marker = base / MARKER
++        if marker.is_symlink() or json.loads(marker.read_text()) != {'pilot_id': pilot_id}:
++            raise ValueError('Pilot fixture ownership marker required')
++        scope = resolve_scope(base, create=False)
++        if not scope.managed or not scope.incarnation:
++            raise ValueError('Operator must initialize owned fixture identity before registration')
++        scopes.append(dict(path=str(base), scope_id=scope.scope_id, incarnation=scope.incarnation,
++                           namespace=scope.namespace, directory_identity=_directory_identity(base)))
++    now = time.time()
++    manifest = dict(protocol=1, pilot_id=pilot_id, generation=uuid4().hex, scopes=scopes,
++                    configuration=configuration, started_at=now, deadline=now + WINDOW_SECONDS,
++                    budgets=dict(BUDGETS), queue='batch')
++    data = dict(manifest=manifest, manifest_sha256=hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest(), state='paused', counters=dict(refresh=0, inventory=0),
++                jobs={}, failures=[], phases={}, observation={}, pause_reason='registered')
++    initialize_admission(connection, Queue('batch', connection=connection))
++    if not connection.set(destination, json.dumps(data), nx=True):
++        raise ValueError('Pilot identifier already registered; budgets cannot reset')
++    return manifest
++
++
++def acquire_controller(connection: Any, pilot_id: str) -> str:
++    read(connection, pilot_id)
++    token = uuid4().hex
++    if not connection.set(key(pilot_id) + ':observer', token, nx=True, ex=LEASE_SECONDS):
++        raise RuntimeError('Pilot observer already owned')
++    return token
++
++
++def require_owner(connection: Any, pilot_id: str, token: str | None) -> None:
++    if not token or text(connection.get(key(pilot_id) + ':observer')) != token:
++        raise RuntimeError('Pilot observation ownership lost')
++
++
++def require_admission(connection: Any, data: dict[str, Any], token: str | None) -> None:
++    from .query_catalog_rq import catalog_worker_configuration
++    manifest = data['manifest']
++    require_owner(connection, manifest['pilot_id'], token)
++    if data['state'] != 'active' or time.time() >= manifest['deadline']:
++        raise RuntimeError('Pilot is paused, expired or exhausted')
++    if time.time() - data.get('observation', {}).get('at', 0) >= LEASE_SECONDS:
++        raise RuntimeError('Pilot observation is stale')
++    if manifest['configuration'] != catalog_worker_configuration():
++        raise RuntimeError('Pilot configuration changed')
++
++
++def _mutate_once(connection: Any, pilot_id: str, change: Any, *, token: str | None = None) -> dict[str, Any]:
++    with connection.pipeline() as pipe:
++        pipe.watch(key(pilot_id), key(pilot_id) + ':observer')
++        data = read(pipe, pilot_id)
++        if token is not None:
++            require_owner(pipe, pilot_id, token)
++        change(data)
++        pipe.multi()
++        pipe.set(key(pilot_id), json.dumps(data))
++        pipe.execute()
++    return pilot_status(connection, pilot_id)
++
++
++def _mutate(connection: Any, pilot_id: str, change: Any, *, token: str | None = None) -> dict[str, Any]:
++    # Concurrent claims/observations are expected; reread authority on every CAS.
++    for attempt in range(8):
++        try:
++            return _mutate_once(connection, pilot_id, change, token=token)
++        except WatchError:
++            if attempt == 7:
++                raise
++
++
++def pause_pilot(connection: Any, pilot_id: str, reason: str) -> dict[str, Any]:
++    def change(data):
++        data['state'] = 'paused'
++        data['pause_reason'] = str(reason)
++        if reason in {'artifact_failure', 'controller_observation_failure', 'controller_monitor_bound', 'query_catalog_pilot_authority_unavailable', 'accounting_failure', 'configuration_mismatch', 'ordinary_wait_limit'}:
++            if not any(f.get('reason') == reason for f in data['failures']):
++                data['failures'].append(dict(reason=reason, at=time.time()))
++    return _mutate(connection, pilot_id, change)
++
++
++def resume_pilot(connection: Any, pilot_id: str, token: str) -> dict[str, Any]:
++    def change(data):
++        if time.time() >= data['manifest']['deadline']:
++            raise RuntimeError('Original pilot admission window expired')
++        if time.time() - data.get('observation', {}).get('at', 0) >= LEASE_SECONDS:
++            raise RuntimeError('Successful observation required before resume')
++        if data['observation'].get('ordinary_waiting'):
++            raise RuntimeError('Ordinary batch backlog prevents resume')
++        data['state'] = 'active'
++        data['pause_reason'] = None
++    return _mutate(connection, pilot_id, change, token=token)
++
++
++def _observe_once(connection: Any, pilot_id: str, token: str) -> dict[str, Any]:
++    from ._query_catalog_admission import ordinary_observation, LEDGER_KEY, _ledger, execution_uncertain
++    with connection.pipeline() as pipe:
++        pipe.watch(key(pilot_id), key(pilot_id) + ':observer', LEDGER_KEY)
++        data = read(pipe, pilot_id)
++        require_owner(pipe, pilot_id, token)
++        ledger_raw = pipe.get(LEDGER_KEY)
++        if ledger_raw is None:
++            raise RuntimeError('Admission ledger lost; operator recovery required')
++        ledger = _ledger(pipe)
++        observed = ordinary_observation(connection, Queue('batch', connection=connection), ledger)
++        if any(execution_uncertain(binding, text(connection.hget(Job.key_for(jid), 'status')))
++               for jid, binding in ledger['jobs'].items()):
++            data['state'] = 'paused'
++            data['pause_reason'] = 'uncertain_accounting'
++            if not any(f.get('reason') == 'uncertain_accounting' for f in data['failures']):
++                data['failures'].append(dict(reason='uncertain_accounting', at=time.time()))
++        known = {f.get('job_id') for f in data['failures'] if isinstance(f, dict)}
++        for jid in data['jobs']:
++            status = text(connection.hget(Job.key_for(jid), 'status'))
++            if status in {'failed', 'stopped', 'canceled'} and jid not in known:
++                data['failures'].append(dict(job_id=jid, state=status, at=time.time()))
++                data['state'] = 'paused'
++                data['pause_reason'] = 'job_failure'
++        if observed['ordinary_waiting']:
++            data['state'] = 'paused'
++            data['pause_reason'] = 'ordinary_backlog'
++        if observed.get('oldest_wait_seconds', 0) >= 300 and not any(f.get('reason') == 'ordinary_wait_limit' for f in data['failures']):
++            data['failures'].append(dict(reason='ordinary_wait_limit', at=time.time()))
++        data['observation'] = dict(observed, at=time.time())
++        pipe.multi()
++        pipe.set(key(pilot_id), json.dumps(data))
++        pipe.expire(key(pilot_id) + ':observer', LEASE_SECONDS)
++        pipe.execute()
++    return pilot_status(connection, pilot_id)
++
++
++def observe_pilot(connection: Any, pilot_id: str, token: str) -> dict[str, Any]:
++    for attempt in range(8):
++        try:
++            return _observe_once(connection, pilot_id, token)
++        except WatchError:
++            if attempt == 7:
++                raise
++
++
++def pilot_status(connection: Any, pilot_id: str) -> dict[str, Any]:
++    data = read(connection, pilot_id)
++    jobs = {}
++    for jid, binding in data['jobs'].items():
++        jobs[jid] = dict(binding, status=text(connection.hget(Job.key_for(jid), 'status')) or 'unknown')
++    result = dict(data, jobs=jobs, deadline=data['manifest']['deadline'])
++    from ._query_catalog_admission import _ledger, AdmissionDenied, execution_outstanding, execution_uncertain
++    result['outstanding'] = sum(execution_outstanding(j, None if j['status'] == 'unknown' else j['status']) for j in jobs.values())
++    try:
++        ledger = _ledger(connection)
++        statuses = [text(connection.hget(Job.key_for(jid), 'status')) for jid in ledger['jobs']]
++        result['global_job_ids'] = list(ledger['jobs'])
++        result['global_outstanding'] = sum(execution_outstanding(binding, status) for binding, status in zip(ledger['jobs'].values(), statuses))
++        result['global_uncertain'] = sum(execution_uncertain(binding, status) for binding, status in zip(ledger['jobs'].values(), statuses))
++    except (AdmissionDenied, ValueError) as exc:
++        result['global_job_ids'] = []
++        result['global_outstanding'] = None
++        result['global_uncertain'] = True
++        result['accounting_error'] = type(exc).__name__
++    if time.time() >= result['deadline']:
++        result['state'] = 'expired'
++    elif all(data['counters'][kind] >= maximum for kind, maximum in BUDGETS.items()):
++        result['state'] = 'exhausted'
++    return result
++
++
++def authorize_receipt(connection: Any, pilot_id: str, path: str, controller_token: str) -> dict[str, Any]:
++    data = read(connection, pilot_id)
++    require_admission(connection, data, controller_token)
++    return dict(_scope(data['manifest'], str(path)))
++
++
++def record_phase(connection: Any, pilot_id: str, controller_token: str, phase: str, value: Any) -> dict[str, Any]:
++    def change(data):
++        if phase in data['phases'] and data['phases'][phase] != value:
++            raise ValueError('Pilot phase is already recorded differently')
++        data['phases'][phase] = value
++    return _mutate(connection, pilot_id, change, token=controller_token)
+diff --git a/wepppy/rq/query_catalog_rq.py b/wepppy/rq/query_catalog_rq.py
+index 5c2927973..ec45e85f5 100644
+--- a/wepppy/rq/query_catalog_rq.py
++++ b/wepppy/rq/query_catalog_rq.py
+@@ -26,7 +26,7 @@ from wepppy.rq.job_id import new_rq_job_id
+ __all__ = [
+     "enqueue_catalog_refresh", "refresh_query_catalog_rq", "reconcile_query_catalogs",
+     "catalog_worker_configuration", "consumer_status", "QueryCatalogSettings",
+-    "suspend_catalog_refresh", "resume_catalog_refresh",
++    "suspend_catalog_refresh", "resume_catalog_refresh", "inventory_query_catalog_rq",
+ ]
+ 
+ LOGGER = logging.getLogger(__name__)
+@@ -67,7 +67,8 @@ class QueryCatalogSettings:
+ 
+ def catalog_worker_configuration() -> dict[str, Any]:
+     from wepppy.query_engine.catalog_refresh import catalog_worker_configuration as configuration
+-    return {**configuration(), "enabled": QueryCatalogSettings.from_environ().enabled}
++    return {**configuration(), "enabled": QueryCatalogSettings.from_environ().enabled,
++            "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1}
+ 
+ 
+ def _configuration_id() -> str:
+@@ -135,10 +136,15 @@ def enqueue_catalog_refresh(
+     queue: Queue | None = None,
+     timeout: int = 3600,
+     result_ttl: int = 86400,
++    pilot_id: str | None = None,
++    controller_token: str | None = None,
+ ) -> dict[str, Any]:
+     """Admit once per incarnation; leave durable receipts on any contention."""
+     from wepppy.query_engine.catalog_refresh import resolve_scope
++    from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
+ 
++    if pilot_id:
++        pilot.authorize_receipt((queue if queue is not None else _default_queue()).connection, pilot_id, str(wd), controller_token)
+     settings = QueryCatalogSettings.from_environ()
+     resolved = resolve_scope(wd, create=False)
+     current = resolved.as_dict()
+@@ -146,19 +152,22 @@ def enqueue_catalog_refresh(
+         raise ValueError("Asynchronous catalog work requires initialized managed scope")
+     if scope is not None and any(scope.get(key) != current.get(key) for key in ("scope_id", "incarnation", "namespace")):
+         raise ValueError("Catalog scope identity changed before admission")
+-    if not settings.enabled:
++    if not settings.enabled and not pilot_id:
+         return _pending("query_catalog_refresh_disabled")
+     queue = queue if queue is not None else _default_queue()
+     connection = queue.connection
+     scope_id = resolved.scope_id
+     try:
+-        connection.sadd("query-catalog:dirty:" + _configuration_id(), str(resolved.base))
++        if not pilot_id:
++            connection.sadd("query-catalog:dirty:" + _configuration_id(), str(resolved.base))
+         if connection.exists(_suspension_key(scope_id)):
+             return _pending("query_catalog_refresh_suspended")
+         status = consumer_status(queue)
+         if status["suspended"]:
+             return _pending("query_catalog_workers_suspended")
+         if status["incompatible"] or not status["compatible"]:
++            if pilot_id:
++                pilot.pause_pilot(connection, pilot_id, "configuration_mismatch")
+             return _pending("query_catalog_workers_unavailable")
+         retry_at = connection.hget(_retry_key(scope_id), "next_attempt_at")
+         if retry_at and float(retry_at) > time.time():
+@@ -181,19 +190,25 @@ def enqueue_catalog_refresh(
+                             return _pending("query_catalog_admission_invalid", previous)
+                         return {"state": "running" if _text(state) == "started" else "queued", "job_id": previous}
+                 identifier = PREFIX + new_rq_job_id()
++                ticket = admission.prepare(pipeline, queue, job_id=identifier, kind="refresh",
++                                           configuration=catalog_worker_configuration(), scope=current,
++                                           pilot_id=pilot_id, controller_token=controller_token)
+                 queue.enqueue_call(
+                     refresh_query_catalog_rq,
+                     kwargs={"wd": str(resolved.base), "scope_id": scope_id,
+                             "incarnation": resolved.incarnation,
+-                            "configuration": catalog_worker_configuration()},
++                            "configuration": catalog_worker_configuration(), "pilot_id": pilot_id},
+                     job_id=identifier, description=DESCRIPTION,
+                     timeout=timeout, result_ttl=result_ttl,
+                     meta={"query_catalog_maintenance": True}, pipeline=pipeline,
+                 )
+                 pipeline.hset(Job.key_for(identifier), "query_catalog_scope", scope_id)
+                 pipeline.set(key, identifier)
++                admission.commit(pipeline, ticket)
+                 pipeline.execute()
+                 return {"state": "queued", "job_id": identifier}
++            except admission.AdmissionDenied as exc:
++                return _pending(str(exc))
+             except WatchError:
+                 return _pending("query_catalog_admission_contended")
+     except redis.RedisError:
+@@ -211,7 +226,7 @@ def resume_catalog_refresh(connection: Any, scope_id: str) -> None:
+ 
+ 
+ def refresh_query_catalog_rq(
+-    wd: str, *, scope_id: str, incarnation: str, configuration: dict[str, Any]
++    wd: str, *, scope_id: str, incarnation: str, configuration: dict[str, Any], pilot_id: str | None = None
+ ) -> None:
+     """One finite receipt snapshot; scheduler handles late work and retries."""
+     from wepppy.query_engine.catalog_refresh import refresh_catalog, resolve_scope
+@@ -220,79 +235,195 @@ def refresh_query_catalog_rq(
+     if job is None:
+         raise RuntimeError("Query catalog maintenance requires an RQ job")
+     settings = QueryCatalogSettings.from_environ()
+-    if not settings.enabled or configuration != catalog_worker_configuration():
++    if (not settings.enabled and not pilot_id) or configuration != catalog_worker_configuration():
+         raise RuntimeError("Query catalog worker configuration is incompatible")
+     connection = job.connection
+-    if connection.exists(_suspension_key(scope_id)):
+-        return None
+-    resolved = resolve_scope(wd, create=False)
+-    if resolved.scope_id != scope_id or resolved.incarnation != incarnation or not resolved.managed:
+-        raise ValueError("Queued catalog project identity is no longer current")
+-    # Recheck executing worker's raw registration before filesystem work.
++    from . import _query_catalog_admission as admission
+     registration = connection.hget("rq:worker:" + job.worker_name, WORKER_FIELD) if job.worker_name else None
+     if not registration or json.loads(registration) != configuration:
+         raise RuntimeError("Executing worker did not advertise catalog compatibility")
++    admission.authorize_job(connection, job, kind="refresh", pilot_id=pilot_id, scope_id=scope_id, wd=wd)
+     try:
+-        refresh_catalog(wd, expected_incarnation=incarnation, strict=True)
+-    except (OSError, ValueError, RuntimeError):
+-        # Worker boundary: retain core failure evidence/receipts and retry budget.
+-        attempts = connection.hincrby(_retry_key(scope_id), "attempts", 1)
+-        delay = min(settings.retry_max_seconds, settings.retry_seconds * 2 ** min(attempts - 1, 16))
+-        connection.hset(_retry_key(scope_id), mapping={"next_attempt_at": time.time() + delay})
+-        raise
+-    else:
+-        connection.delete(_retry_key(scope_id))
+-    # Keep the admission pointer while RQ still marks this job started.
+-    # A later tick replaces only terminal/missing jobs, including late receipts.
+-    return None
+-
+-
+-def _inventory_step(roots: list[Any], cursor: dict[str, Any], limit: int) -> tuple[list[Path], dict[str, Any]]:
+-    """Bound directory visits; never follow symlinks or enter scientific trees."""
+-    stack = list(cursor.get("stack", []))
+-    if not cursor.get("initialized"):
+-        stack = [{"root": index, "relative": "."} for index in reversed(range(len(roots)))]
+-    found: list[Path] = []
+-    errors: list[dict[str, str]] = []
+-    visited = 0
+-    while stack and visited < limit:
+-        item = stack.pop()
+-        visited += 1
+-        root_index = item["root"]
+-        root = Path(roots[root_index].path)
+-        path = root / item["relative"]
++        if connection.exists(_suspension_key(scope_id)):
++            return None
++        resolved = resolve_scope(wd, create=False)
++        if resolved.scope_id != scope_id or resolved.incarnation != incarnation or not resolved.managed:
++            raise ValueError("Queued catalog project identity is no longer current")
+         try:
+-            if path.is_symlink() or not path.is_dir():
+-                continue
+-            path.resolve().relative_to(root.resolve())
+-            project = (path / "ron.nodb").is_file() or (path / "wepp.nodb").is_file() or (path / "_query_engine/catalog.json").is_file()
+-            if project:
+-                found.append(path)
+-                children = [path / name for name in ("_pups", "rhessys/scenarios", "runs", "_base")
+-                            if (path / name).is_dir()]
+-            else:
+-                children = sorted((entry for entry in path.iterdir() if entry.is_dir() and not entry.is_symlink()), reverse=True)
+-            for child in children:
+-                stack.append({"root": root_index, "relative": str(child.relative_to(root))})
+-        except (OSError, ValueError) as exc:
+-            errors.append({"root": str(root_index), "relative": item["relative"], "error": type(exc).__name__})
+-    return found, {"initialized": True, "stack": stack, "errors": errors, "visited": visited}
++            refresh_catalog(wd, expected_incarnation=incarnation, strict=True)
++        except (OSError, ValueError, RuntimeError):
++            # Worker boundary: retain core failure evidence/receipts and retry budget.
++            attempts = connection.hincrby(_retry_key(scope_id), "attempts", 1)
++            delay = min(settings.retry_max_seconds, settings.retry_seconds * 2 ** min(attempts - 1, 16))
++            connection.hset(_retry_key(scope_id), mapping={"next_attempt_at": time.time() + delay})
++            raise
++        else:
++            connection.delete(_retry_key(scope_id))
++        # Keep the admission pointer while RQ still marks this job started.
++        # A later tick replaces only terminal/missing jobs, including late receipts.
++        return None
++    finally:
++        admission.execution_exited(connection, job, pilot_id)
++
++
++def _enqueue_inventory(queue: Queue, key: str, roots: list[Any], *, new_cycle: bool, lock: Any, pilot_id: str | None = None, controller_token: str | None = None) -> dict[str, Any]:
++    from wepppy.rq import _query_catalog_inventory as inventory
++    from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
++
++    status = consumer_status(queue)
++    if status["suspended"] or status["incompatible"] or not status["compatible"]:
++        if pilot_id:
++            pilot.pause_pilot(queue.connection, pilot_id, "configuration_mismatch")
++        return {**inventory.state(queue.connection, key), "state": "unavailable"}
++    connection = queue.connection
++    with connection.pipeline() as pipe:
++        try:
++            pipe.watch(key + ":discovery", key + ":generation", lock.name)
++            if pipe.get(lock.name) != lock.local.token:
++                return {"state": "lease_lost"}
++            current = inventory.state(pipe, key)
++            previous = current.get("job_id")
++            if previous:
++                pipe.watch(Job.key_for(previous))
++                job_state = _text(pipe.hget(Job.key_for(previous), "status"))
++                if job_state in ACTIVE_STATES:
++                    return current
++            if not new_cycle and current.get("completed_at"):
++                return current
++            if previous and not new_cycle and current.get("failed_job") != previous:
++                # Hard worker death/timeout bypasses the worker's error boundary.
++                # Give its retained frontier the same bounded retry policy.
++                settings = QueryCatalogSettings.from_environ()
++                attempts = current.get("attempts", 0) + 1
++                current["errors"] = current.get("errors") or ["InventoryJobFailed"]
++                current.update(attempts=attempts, failed_job=previous,
++                               retry_at=time.time() + min(settings.retry_max_seconds, settings.retry_seconds * 2 ** min(attempts - 1, 16)))
++                pipe.multi()
++                pipe.set(key + ":discovery", json.dumps(current))
++                pipe.execute()
++                return current
++            if current.get("retry_at", 0) > time.time():
++                return current
++            identifier = PREFIX + new_rq_job_id()
++            cycle = identifier if new_cycle or not current else current["cycle"]
++            initialize_cycle = new_cycle or not current
++            if initialize_cycle:
++                current = {"cycle": cycle, "started_at": time.time(), "visited": 0,
++                           "entries": 0, "errors": []}
++            current["job_id"] = identifier
++            current.pop("retry_at", None)
++            ticket = admission.prepare(pipe, queue, job_id=identifier, kind="inventory",
++                                       configuration=catalog_worker_configuration(), pilot_id=pilot_id,
++                                       controller_token=controller_token)
++            seeds = None
++            if pilot_id:
++                seeds = []
++                for scope in ticket['pilot']['manifest']['scopes']:
++                    for index, root in enumerate(roots):
++                        if Path(scope['path']).is_relative_to(root.path):
++                            seeds.append({'root': index, 'relative': str(Path(scope['path']).relative_to(root.path))})
++                            break
++                    else:
++                        raise ValueError('Pilot inventory seed is not configured')
++            queue.enqueue_call(
++                inventory_query_catalog_rq,
++                kwargs={"configuration": catalog_worker_configuration(), "cycle": cycle, "pilot_id": pilot_id},
++                job_id=identifier, description=DESCRIPTION, timeout=3600, result_ttl=86400,
++                meta={"query_catalog_maintenance": True}, pipeline=pipe,
++            )
++            if initialize_cycle:
++                inventory.initialize(pipe, key, cycle, roots, seeds=seeds)
++            pipe.set(key + ":discovery", json.dumps(current))
++            pipe.set(key + ":generation", json.dumps([cycle, identifier]))
++            admission.commit(pipe, ticket)
++            pipe.execute()
++            return current
++        except admission.AdmissionDenied as exc:
++            return {**inventory.state(connection, key), "state": "unavailable", "error_code": str(exc)}
++        except WatchError:
++            return {"state": "contended"}
++
++
++def inventory_query_catalog_rq(*, configuration: dict[str, Any], cycle: str, pilot_id: str | None = None) -> None:
++    """Read configured roots only; publish fenced Redis discovery checkpoints."""
++    from wepppy.query_engine.catalog_refresh import configured_roots
++    from wepppy.rq import _query_catalog_inventory as inventory
++
++    job = get_current_job()
++    if job is None or configuration != catalog_worker_configuration() or (not QueryCatalogSettings.from_environ().enabled and not pilot_id):
++        raise RuntimeError("Inventory worker configuration is incompatible")
++    registration = job.connection.hget("rq:worker:" + job.worker_name, WORKER_FIELD) if job.worker_name else None
++    if not registration or json.loads(registration) != configuration:
++        raise RuntimeError("Executing inventory worker did not advertise compatibility")
++    from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
++    manifest = admission.authorize_job(job.connection, job, kind="inventory", pilot_id=pilot_id)
++    try:
++        key = "query-catalog:inventory:" + _configuration_id() + (":pilot:" + pilot_id if pilot_id else "")
++        settings = QueryCatalogSettings.from_environ()
++        try:
++            inventory.run(job.connection, key, job.id, cycle, configured_roots(), settings.inventory_limit,
++                          approved_paths={s["path"] for s in manifest["scopes"]} if manifest else None,
++                          validate_scope=(lambda path: pilot._scope(manifest, str(path))) if manifest else None)
++        except inventory.InventorySuperseded:
++            raise
++        except (OSError, ValueError, RuntimeError):
++            # Boundary: retain retry metadata only while this attempt still owns state.
++            with job.connection.pipeline() as pipe:
++                pipe.watch(key + ":discovery")
++                current = inventory.state(pipe, key)
++                if current.get("job_id") == job.id and current.get("cycle") == cycle:
++                    attempts = current.get("attempts", 0) + 1
++                    current["attempts"] = attempts
++                    current["failed_job"] = job.id
++                    current["retry_at"] = time.time() + min(settings.retry_max_seconds, settings.retry_seconds * 2 ** min(attempts - 1, 16))
++                    pipe.multi()
++                    pipe.set(key + ":discovery", json.dumps(current))
++                    try:
++                        pipe.execute()
++                    except WatchError:
++                        LOGGER.info("Inventory retry publication superseded")
++            raise
++    finally:
++        admission.execution_exited(job.connection, job, pilot_id)
+ 
+ 
+-def reconcile_query_catalogs(*, queue: Queue | None = None) -> dict[str, Any]:
+-    """Scheduler-side bounded rediscovery plus recurring source reconciliation."""
++def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None = None, controller_token: str | None = None) -> dict[str, Any]:
++    """Admit streaming discovery and drain bounded durable scope checkpoints."""
+     from wepppy.query_engine.catalog_refresh import (
+         configured_roots, record_catalog_refresh, resolve_scope, pending_catalog_requests,
+         is_catalog_readonly,
+     )
++    from wepppy.rq import _query_catalog_inventory as inventory
+ 
+     settings = QueryCatalogSettings.from_environ()
+-    if not settings.enabled:
++    if not settings.enabled and not pilot_id:
+         return {"state": "disabled", "admitted": 0}
+     queue = queue if queue is not None else _default_queue()
+     connection = queue.connection
+     identity = _configuration_id()
+-    key = "query-catalog:inventory:" + identity
++    from . import _query_catalog_pilot as pilot
++    manifest = pilot.read(connection, pilot_id)["manifest"] if pilot_id else None
++    key = "query-catalog:inventory:" + identity + (":pilot:" + pilot_id if pilot_id else "")
++    roots = configured_roots()
++    available_namespaces: set[str] = set()
++    unavailable_aliases: list[dict[str, Any]] = []
++    # Metadata probes run outside the scheduler lease. A completed inventory
++    # must not conceal a lost mount until the next daily cycle; aliases share
++    # availability, so an absent redundant spelling is not a missing namespace.
++    for index, root in enumerate(roots):
++        if manifest and not any(Path(s["path"]).is_relative_to(root.path) for s in manifest["scopes"]):
++            continue
++        try:
++            path = inventory.validated_path(roots, {"root": index, "relative": "."})
++            if path.is_dir() and os.access(path, os.R_OK | os.X_OK):
++                available_namespaces.add(root.namespace)
++            else:
++                unavailable_aliases.append({"root": index, "namespace": root.namespace, "error": "Unavailable"})
++        except (OSError, ValueError) as exc:
++            unavailable_aliases.append({"root": index, "namespace": root.namespace, "error": type(exc).__name__})
++            LOGGER.warning("Catalog inventory root unavailable namespace=%s", root.namespace)
++    expected_namespaces = {s["namespace"] for s in manifest["scopes"]} if manifest else {root.namespace for root in roots}
++    unavailable_namespaces = sorted(expected_namespaces - available_namespaces)
+     lock = connection.lock(key + ":lock", timeout=60, blocking_timeout=0)
+     if not lock.acquire(blocking=False):
+         return {"state": "already_running", "admitted": 0}
+@@ -300,41 +431,37 @@ def reconcile_query_catalogs(*, queue: Queue | None = None) -> dict[str, Any]:
+         raw = connection.get(key)
+         cursor = json.loads(raw) if raw else {}
+         now = time.time()
+-        roots = configured_roots()
+-        available_namespaces: set[str] = set()
+-        expected_namespaces = {root.namespace for root in roots}
+-        for root in roots:
+-            try:
+-                if Path(root.path).is_dir() and os.access(root.path, os.R_OK | os.X_OK):
+-                    available_namespaces.add(root.namespace)
+-            except OSError:
+-                LOGGER.warning("Catalog inventory root unavailable namespace=%s", root.namespace)
+-        unavailable_namespaces = sorted(expected_namespaces - available_namespaces)
+-        if unavailable_namespaces and cursor.get("completed_at"):
+-            # A missing namespace is not a completed empty inventory. Retry on
+-            # ordinary ticks, without waiting the full source-cycle interval.
++        if unavailable_namespaces:
+             cursor.pop("completed_at", None)
+             cursor.pop("discovery_completed_at", None)
+-            cursor["initialized"] = False
+-        dirty_key = "query-catalog:dirty:" + identity
+-        dirty_cursor, dirty_paths = connection.sscan(
+-            dirty_key, cursor=cursor.get("dirty_cursor", 0), count=settings.admission_limit
+-        )
++            cursor["rediscovery_required"] = True
++        discovery = inventory.state(connection, key)
++        new_cycle = (not discovery or bool(cursor.get("rediscovery_required")) or
++                     bool(cursor.get("completed_at") and now >= cursor["completed_at"] + settings.cycle_seconds))
++        if not unavailable_namespaces and (new_cycle or not discovery.get("completed_at")):
++            discovery = _enqueue_inventory(queue, key, roots, new_cycle=new_cycle, lock=lock, pilot_id=pilot_id, controller_token=controller_token)
++        scan = dict(cursor)
++        if discovery.get("cycle") != cursor.get("cycle"):
++            scan = {"cycle": discovery.get("cycle"), "stream_ack": "0-0",
++                    "cycle_started_at": discovery.get("started_at", now),
++                    "previous_cycle_errors": cursor.get("cycle_errors", [])}
++        if unavailable_namespaces:
++            scan["rediscovery_required"] = True
++        scan["unavailable_namespaces"] = unavailable_namespaces
++        scan["unavailable_aliases"] = unavailable_aliases
++        ack = scan.get("stream_ack", "0-0")
++        records = connection.xrange(key + ":stream", min="(" + ack, count=settings.inventory_limit)
++        candidates = [Path(_text(fields.get(b"path", fields.get("path")))) for _, fields in records]
++        if records:
++            scan["stream_ack"] = _text(records[-1][0])
++        scan["cycle_errors"] = discovery.get("errors", [])
++        scan["visited"] = discovery.get("visited", 0)
++        stream_drained = not connection.xrange(key + ":stream", min="(" + scan.get("stream_ack", "0-0"), count=1)
++        if discovery.get("completed_at") and stream_drained and not scan.get("rediscovery_required"):
++            scan["discovery_completed_at"] = discovery["completed_at"]
++        dirty_key = "query-catalog:dirty:" + identity + (":pilot:" + pilot_id if pilot_id else "")
++        dirty_cursor, dirty_paths = (0, []) if pilot_id else connection.sscan(dirty_key, cursor=cursor.get("dirty_cursor", 0), count=settings.admission_limit)
+         retry_candidates = [{"path": _text(value), "reconcile": False} for value in dirty_paths]
+-        if cursor.get("completed_at") and now < cursor["completed_at"] + settings.cycle_seconds:
+-            candidates = []
+-            scan = dict(cursor)
+-        elif cursor.get("discovery_completed_at") and not cursor.get("completed_at"):
+-            candidates = []
+-            scan = dict(cursor)
+-        else:
+-            new_cycle = not cursor.get("initialized")
+-            candidates, scan = _inventory_step(roots, cursor, settings.inventory_limit)
+-            scan["cycle_started_at"] = now if new_cycle else cursor["cycle_started_at"]
+-            scan["previous_cycle_errors"] = cursor.get("cycle_errors", []) if new_cycle else cursor.get("previous_cycle_errors", [])
+-            scan["cycle_errors"] = ([] if new_cycle else list(cursor.get("cycle_errors", []))) + scan.pop("errors", [])
+-            if not scan["stack"]:
+-                scan["discovery_completed_at"] = now
+         pending = list(cursor.get("pending", []))
+         pending.extend({"path": str(path), "reconcile": True, "cycle": True} for path in candidates)
+         pending.extend(retry_candidates)
+@@ -348,67 +475,86 @@ def reconcile_query_catalogs(*, queue: Queue | None = None) -> dict[str, Any]:
+         admitted = 0
+         failures: list[dict[str, str]] = []
+         for _ in range(min(settings.admission_limit, len(pending))):
++            # Redis verifies the current token; an expired lease is never revived.
++            try:
++                lock.reacquire()
++            except LockNotOwnedError:
++                return {"state": "lease_lost", "admitted": admitted}
+             item = pending.pop(0)
+             path = Path(item["path"])
+             try:
+-                if not path.is_dir() or is_catalog_readonly(path):
+-                    connection.srem(dirty_key, str(path))
++                # Stream, dirty-index and retained-cursor paths are locators,
++                # never authority. Reject redirection before resolving helpers
++                # can initialize even standalone project metadata.
++                if manifest:
++                    pilot._scope(manifest, item["path"])
++                path = inventory.validated_scope_path(roots, item["path"])
++                if is_catalog_readonly(path):
++                    connection.srem(dirty_key, str(path), item["path"])
+                     continue
+-                scope = resolve_scope(path, create=True)
++                existing_scope = resolve_scope(path, create=False)
++                if not existing_scope.managed:
++                    raise ValueError("Inventory scope is not managed")
++                inventory.validated_scope_path(roots, str(path))
++                scope = resolve_scope(path, create=not bool(pilot_id))
+                 if not scope.managed:
+                     raise ValueError("Inventory scope is not managed")
+                 if item["reconcile"]:
+                     # Full scan detects the artifact-publication/pre-receipt crash gap.
+-                    record_catalog_refresh(path)
++                    if pilot_id:
++                        from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
++                        with catalog_lifecycle_guard(path):
++                            pilot.authorize_receipt(connection, pilot_id, str(path), controller_token)
++                            record_catalog_refresh(path)
++                    else:
++                        record_catalog_refresh(path)
+                     item["reconcile"] = False
+                 elif not pending_catalog_requests(path):
+-                    connection.srem(dirty_key, str(path))
++                    connection.srem(dirty_key, str(path), item["path"])
+                     continue
+-                result = enqueue_catalog_refresh(path, scope=scope.as_dict(), queue=queue)
++                result = enqueue_catalog_refresh(path, scope=scope.as_dict(), queue=queue, pilot_id=pilot_id, controller_token=controller_token)
+                 if result.get("job_id"):
+                     admitted += 1
+                 if item.get("cycle"):
+                     pending.append(item)
++            except inventory.InventoryScopeMissing:
++                connection.srem(dirty_key, str(path), item["path"])
+             except (OSError, ValueError, RuntimeError) as exc:
+                 LOGGER.exception("Catalog reconciliation could not admit scope")
+                 failures.append({"scope": hashlib.sha256(str(path).encode()).hexdigest(), "error": type(exc).__name__})
+                 # Retry failed discovery as well as producer-registered dirty scopes.
+-                connection.sadd(dirty_key, str(path))
++                if not pilot_id:
++                    connection.sadd(dirty_key, str(path))
+                 if item.get("cycle"):
+                     pending.append(item)
+-        if scan.get("discovery_completed_at") and not unavailable_namespaces and not any(item.get("cycle") for item in pending):
++        if (scan.get("discovery_completed_at") and not scan.get("rediscovery_required") and
++                not scan.get("cycle_errors") and not any(item.get("cycle") for item in pending)):
+             scan.setdefault("completed_at", now)
+-            scan["initialized"] = False
+-        if unavailable_namespaces:
+-            scan.pop("discovery_completed_at", None)
+-            if not scan.get("stack"):
+-                scan["initialized"] = False
+-        scan["unavailable_namespaces"] = unavailable_namespaces
+-        scan["dirty_cursor"] = dirty_cursor
+-        scan["pending"] = pending
+-        scan["last_tick_at"] = now
+-        scan["admitted"] = admitted
+-        scan["failures"] = failures
+-        scan["target_cycle_seconds"] = settings.cycle_seconds
+-        # Fence cursor publication against an expired scheduler lease. Duplicate
+-        # admissions are coalesced, but an old cursor must not skip newer work.
++        scan.update(dirty_cursor=dirty_cursor, pending=pending, last_tick_at=now,
++                    admitted=admitted, failures=failures, target_cycle_seconds=settings.cycle_seconds)
+         with connection.pipeline() as pipeline:
+-            pipeline.watch(lock.name)
+-            if pipeline.get(lock.name) != lock.local.token:
++            pipeline.watch(lock.name, key + ":generation")
++            latest = inventory.state(pipeline, key)
++            if pipeline.get(lock.name) != lock.local.token or latest.get("cycle") != scan.get("cycle"):
+                 return {"state": "lease_lost", "admitted": admitted}
+             pipeline.multi()
++            # Batch acknowledgment and durable pending publication are one commit.
+             pipeline.set(key, json.dumps(scan))
++            if records:
++                pipeline.xdel(key + ":stream", *(identifier for identifier, _ in records))
+             try:
+                 pipeline.execute()
+             except WatchError:
+                 return {"state": "lease_lost", "admitted": admitted}
+-        state = "pending" if pending or scan.get("stack") else "completed"
+-        if failures or scan.get("cycle_errors") or unavailable_namespaces:
++        state = "completed" if scan.get("completed_at") else "pending"
++        if failures or scan.get("cycle_errors") or unavailable_namespaces or discovery.get("state") == "unavailable":
+             state = "degraded"
+-        return {"state": state, "admitted": admitted,
+-                "visited": scan.get("visited", 0), "failures": len(failures) + len(scan.get("cycle_errors", [])) + len(unavailable_namespaces),
++        return {"state": state, "admitted": admitted, "visited": scan.get("visited", 0),
++                "failures": len(failures) + len(scan.get("cycle_errors", [])) + len(unavailable_namespaces),
+                 "unavailable_namespaces": unavailable_namespaces,
+-                "cycle_started_at": scan.get("cycle_started_at"), "completed_at": scan.get("completed_at")}
++                "unavailable_aliases": unavailable_aliases,
++                "cycle_started_at": scan.get("cycle_started_at"), "completed_at": scan.get("completed_at"),
++                "inventory_job_id": discovery.get("job_id")}
+     finally:
+         try:
+             lock.release()

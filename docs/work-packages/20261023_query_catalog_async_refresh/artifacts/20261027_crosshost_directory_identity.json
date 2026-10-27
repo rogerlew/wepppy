@@ -1,0 +1,7 @@
+{
+  "operation": "read-only stat from normal batch containers",
+  "path": "/wc1/query-catalog-validation/20261026/rollout-cycle-2355/runs/representative",
+  "wepp1": {"st_dev": 105, "st_ino": 103515897},
+  "wepp2": {"st_dev": 68, "st_ino": 103515897},
+  "finding": "Host-local device numbers cannot be compared as cross-host shared-directory identity. Stable inode must remain bound to canonical namespace, scope incarnation and owner marker."
+}

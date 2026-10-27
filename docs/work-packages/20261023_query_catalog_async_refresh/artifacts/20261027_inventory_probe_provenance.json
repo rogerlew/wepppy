@@ -1,0 +1,12 @@
+{
+  "initial_helper_sha256": "7a3ac5cbe7b8dd6550ca113792cd3eb2ec6076c197887076c8d006d424b6c814",
+  "final_helper_sha256": "d39f056e243b7889b0dd50c2030c518b822f3d54e4263fb6f16a4b5e8cc86791",
+  "unchanged_discovery_function_AST": {
+    "validated_path": true,
+    "_identity": true,
+    "checkpoint": true,
+    "_complete": true,
+    "run": true
+  },
+  "note": "Final helper additionally contains admission validation. Full listing/checkpoint functions tested by primary and initial legacy probes are unchanged."
+}

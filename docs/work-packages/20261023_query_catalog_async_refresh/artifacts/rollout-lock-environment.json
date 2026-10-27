@@ -1,0 +1,29 @@
+{
+  "wepp1": {
+    "exit_code": 0,
+    "stdout": "wepp1\n6.8.0-110-generic\n/geodata systemd-1            autofs rw,relatime,fd=55,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=46770\n/geodata nas.rocket.net:/wepp nfs4   rw,noatime,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.237,local_lock=none,addr=192.168.100.102\n",
+    "stderr": ""
+  },
+  "wepp2": {
+    "exit_code": 0,
+    "stdout": "wepp2\n6.8.0-110-generic\n/geodata systemd-1            autofs rw,relatime,fd=62,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=19524\n/geodata nas.rocket.net:/wepp nfs4   rw,noatime,vers=4.2,rsize=65536,wsize=65536,namlen=255,acregmax=30,acdirmin=5,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.217,local_lock=none,addr=192.168.100.101\n",
+    "stderr": ""
+  },
+  "wepp3": {
+    "exit_code": 0,
+    "stdout": "wepp3\n6.8.0-136-generic\n/geodata nas.rocket.net:/wepp nfs    rw,relatime,vers=3,rsize=32768,wsize=32768,namlen=255,soft,proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=192.168.100.101,mountvers=3,mountport=635,mountproto=tcp,local_lock=none,addr=192.168.100.101\n",
+    "stderr": ""
+  },
+  "http_service_commands": {
+    "exit_code": 0,
+    "stdout": "[\"gunicorn\",\"--workers\",\"10\",\"--threads\",\"4\",\"--timeout\",\"1800\",\"--bind\",\"0.0.0.0:8000\",\"--log-level\",\"info\",\"--max-requests\",\"1000\",\"--max-requests-jitter\",\"200\",\"wepppy.weppcloud.app:app\"]\n[\"uvicorn\",\"wepppy.query_engine.app.server:create_app\",\"--factory\",\"--host\",\"0.0.0.0\",\"--port\",\"8041\"]\n[\"uvicorn\",\"wepppy.microservices.rq_engine:app\",\"--workers\",\"4\",\"--host\",\"0.0.0.0\",\"--port\",\"8042\"]\n",
+    "stderr": ""
+  },
+  "utc": "2026-10-26T23:53:52.278310+00:00",
+  "probe_sha256": {
+    "rollout-lock-acceptance-probe.py": "0f8a000cd26ddb62e50741b967b7f13bb709ac5c47b0d672306acb4dde8617a1",
+    "rollout-lock-acceptance-driver.py": "5601169422f7652bb70339075ec27306c82e7d3eef10415356b2009f0db8e189",
+    "rollout-lock-receipt-driver.py": "b16f691559208bfe8294e98fa83fd30a316b087e4407a807ad6ed8d1efb85081",
+    "rollout-lock-receipt-probe.py": "0ea2c8b73af8a7b5e26d604e953fb9dd50059ba262251695d726908bba0b97b6"
+  }
+}

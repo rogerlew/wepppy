@@ -1,0 +1,225 @@
+{
+  "trials": [
+    {
+      "trial": "same-wepp1",
+      "wait_seconds": 6.73280338011682,
+      "after_release_seconds": 0.0021610260009765625,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.1814616098999977
+    },
+    {
+      "trial": "same-wepp2",
+      "wait_seconds": 7.1775198224931955,
+      "after_release_seconds": 0.0027866363525390625,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.14697501994669437
+    },
+    {
+      "trial": "same-wepp3",
+      "wait_seconds": 6.59988509863615,
+      "after_release_seconds": -0.0001373291015625,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.2023064661771059
+    },
+    {
+      "trial": "cross-0-wepp1-wepp2",
+      "wait_seconds": 15.292911928147078,
+      "after_release_seconds": 8.160755395889282,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.16641988046467304
+    },
+    {
+      "trial": "cross-0-wepp2-wepp3",
+      "wait_seconds": 30.49901187606156,
+      "after_release_seconds": 23.646697759628296,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.15461854450404644
+    },
+    {
+      "trial": "cross-0-wepp3-wepp1",
+      "wait_seconds": 7.092575691640377,
+      "after_release_seconds": 0.3663771152496338,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.16903088800609112
+    },
+    {
+      "trial": "cross-1-wepp1-wepp2",
+      "wait_seconds": 15.637403724715114,
+      "after_release_seconds": 8.452558994293213,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.1481586992740631
+    },
+    {
+      "trial": "cross-1-wepp2-wepp3",
+      "wait_seconds": 30.253356954082847,
+      "after_release_seconds": 23.454038858413696,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.16192745603621006
+    },
+    {
+      "trial": "cross-1-wepp3-wepp1",
+      "wait_seconds": 7.1255141869187355,
+      "after_release_seconds": 0.5866439342498779,
+      "publication_seconds": null,
+      "heartbeat_max_gap": 0.2151526752859354
+    },
+    {
+      "trial": "publish-wepp1-wepp2",
+      "wait_seconds": 7.129729313775897,
+      "after_release_seconds": 0.30611538887023926,
+      "publication_seconds": 11.96872217580676,
+      "heartbeat_max_gap": 0.16603894531726837
+    },
+    {
+      "trial": "publish-wepp2-wepp3",
+      "wait_seconds": 30.450505124405026,
+      "after_release_seconds": 23.89046549797058,
+      "publication_seconds": 35.378622790798545,
+      "heartbeat_max_gap": 0.19717159308493137
+    },
+    {
+      "trial": "publish-wepp3-wepp1",
+      "wait_seconds": 7.141994293779135,
+      "after_release_seconds": 0.746168851852417,
+      "publication_seconds": 12.571611190214753,
+      "heartbeat_max_gap": 0.2951217368245125
+    }
+  ],
+  "process_count": 27,
+  "all_exit_zero": true,
+  "source_sha256": [
+    "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+  ],
+  "inode_by_host": {
+    "wepp1": [
+      248998786
+    ],
+    "wepp2": [
+      248998786
+    ],
+    "wepp3": [
+      4253772674
+    ]
+  },
+  "uncontended_waits": {
+    "wepp1": [
+      0.12156961113214493,
+      0.003652414306998253,
+      0.004413522779941559
+    ],
+    "wepp2": [
+      0.03366028890013695,
+      0.0049331095069646835,
+      0.008748229593038559
+    ],
+    "wepp3": [
+      0.05391242727637291,
+      0.009906383231282234,
+      0.007816735655069351
+    ]
+  },
+  "no_critical_section_overlap": true,
+  "publication_entry_readback": "All three publish value:int64,518 bytes; actual required-path barrier passed",
+  "receipt_probe": {
+    "trial": "receipt-wepp2-wepp1",
+    "host": "wepp1",
+    "role": "receipt",
+    "exit_code": 0,
+    "driver_error": null,
+    "driver_start_epoch": 1793058894.7095802,
+    "driver_end_epoch": 1793058903.549431,
+    "events": [
+      {
+        "event": "identity",
+        "role": "receipt",
+        "epoch": 1793058895.9430342,
+        "elapsed": 0.13339664787054062,
+        "hostname": "7cda8f7b4275",
+        "uid": 1002,
+        "gid": 130,
+        "groups": [
+          130
+        ],
+        "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock",
+        "inode": 248998786,
+        "mode": "0o640",
+        "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+      },
+      {
+        "event": "receipt_start",
+        "role": "receipt",
+        "epoch": 1793058895.9435592,
+        "elapsed": 0.13392167910933495
+      },
+      {
+        "event": "lockf_enter",
+        "role": "receipt",
+        "epoch": 1793058896.269377,
+        "elapsed": 0.459738926962018,
+        "operation": 2
+      },
+      {
+        "event": "lockf_exit",
+        "role": "receipt",
+        "epoch": 1793058903.3711982,
+        "elapsed": 7.561560088768601,
+        "operation": 2,
+        "seconds": 7.101813055574894
+      },
+      {
+        "event": "lockf_enter",
+        "role": "receipt",
+        "epoch": 1793058903.4431212,
+        "elapsed": 7.633483177050948,
+        "operation": 8
+      },
+      {
+        "event": "lockf_exit",
+        "role": "receipt",
+        "epoch": 1793058903.44702,
+        "elapsed": 7.637381812557578,
+        "operation": 8,
+        "seconds": 0.0039015766233205795
+      },
+      {
+        "event": "receipt_complete",
+        "role": "receipt",
+        "epoch": 1793058903.451658,
+        "elapsed": 7.6420197281986475,
+        "seconds": 7.508053705096245,
+        "receipt": {
+          "protocol": 1,
+          "scope_id": "107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57",
+          "incarnation": "8f5fc48d-847a-4731-820d-3445d290dedb",
+          "request_id": "17b88740-34a4-496d-b009-d2251f4fa3cc",
+          "asset_path": "probe.parquet",
+          "created_at": "2026-10-26T23:55:03.392576+00:00",
+          "state": "pending"
+        }
+      },
+      {
+        "event": "success",
+        "role": "receipt",
+        "epoch": 1793058903.4517467,
+        "elapsed": 7.642108552157879,
+        "inode_unchanged": true
+      },
+      {
+        "event": "heartbeat",
+        "role": "receipt",
+        "epoch": 1793058903.4520729,
+        "elapsed": 7.6424347795546055,
+        "samples": 73,
+        "max_gap_seconds": 0.2346173543483019,
+        "wait_channels": {
+          "nfs4_retry_setlk": 7
+        }
+      }
+    ],
+    "stderr": ""
+  },
+  "all_29_exit_zero": true,
+  "utc_start": "2026-10-26T23:51:10.163050+00:00",
+  "utc_end": "2026-10-26T23:55:03.549431+00:00",
+  "initial_failed_attempt": "Prior 30-second client timeout retained in20261026_production_preflight.json; not overwritten or treated as exclusion failure."
+}

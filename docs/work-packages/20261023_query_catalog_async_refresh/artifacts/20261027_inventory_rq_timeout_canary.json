@@ -1,0 +1,142 @@
+{
+  "tag": "qcat-timeout-20261027T013526Z",
+  "uid": 1002,
+  "gid": 130,
+  "groups": [
+    130
+  ],
+  "parent_pid": 556159,
+  "scratch": "/wc1/query-catalog-validation/20261026/qcat-timeout-20261027T013526Z",
+  "production_timeout_seconds": 3600,
+  "test_first_timeout_seconds": 2,
+  "test_retry_timeout_seconds": 60,
+  "test_retry_backoff_seconds": 1,
+  "checkpoint_limit": 100,
+  "source_hashes": {
+    "qcat-timeout-20261027T013526Z-inventory.py": "d39f056e243b7889b0dd50c2030c518b822f3d54e4263fb6f16a4b5e8cc86791",
+    "qcat-timeout-20261027T013526Z-rq.py": "839bafc4efa1b1f4161b3d7fec1b7f0a4c0c7e0b3652727f70bd6363404c0cac",
+    "qcat_timeout_probe.py": "f7f7eb08e8a31a7cd97a26446276ec4bc9452684fe75c62bf62e36340c03f6ac"
+  },
+  "ticks": [
+    {
+      "state": "pending",
+      "admitted": 0,
+      "visited": 0,
+      "failures": 0,
+      "unavailable_namespaces": [],
+      "unavailable_aliases": [],
+      "cycle_started_at": 1793065009.066449,
+      "completed_at": null,
+      "inventory_job_id": "query_catalog_refresh_e9d5d2c4-d396-4167-b325-6ea18e432033"
+    },
+    {
+      "state": "degraded",
+      "admitted": 0,
+      "visited": 0,
+      "failures": 1,
+      "unavailable_namespaces": [],
+      "unavailable_aliases": [],
+      "cycle_started_at": 1793065009.066449,
+      "completed_at": null,
+      "inventory_job_id": "query_catalog_refresh_e9d5d2c4-d396-4167-b325-6ea18e432033"
+    },
+    {
+      "state": "degraded",
+      "admitted": 0,
+      "visited": 0,
+      "failures": 1,
+      "unavailable_namespaces": [],
+      "unavailable_aliases": [],
+      "cycle_started_at": 1793065009.066449,
+      "completed_at": null,
+      "inventory_job_id": "query_catalog_refresh_de0ff8d9-1b70-48df-9848-ad4a9848d739"
+    },
+    {
+      "state": "pending",
+      "admitted": 3,
+      "visited": 4,
+      "failures": 0,
+      "unavailable_namespaces": [],
+      "unavailable_aliases": [],
+      "cycle_started_at": 1793065009.066449,
+      "completed_at": null,
+      "inventory_job_id": "query_catalog_refresh_de0ff8d9-1b70-48df-9848-ad4a9848d739"
+    },
+    {
+      "state": "completed",
+      "admitted": 0,
+      "visited": 4,
+      "failures": 0,
+      "unavailable_namespaces": [],
+      "unavailable_aliases": [],
+      "cycle_started_at": 1793065009.066449,
+      "completed_at": 1793065028.849069,
+      "inventory_job_id": "query_catalog_refresh_de0ff8d9-1b70-48df-9848-ad4a9848d739"
+    }
+  ],
+  "first_job": {
+    "id": "query_catalog_refresh_e9d5d2c4-d396-4167-b325-6ea18e432033",
+    "status": "failed",
+    "timeout": 2,
+    "exception_type": "JobTimeoutException",
+    "elapsed_seconds": 2.000359,
+    "entries": 100,
+    "frontier": 1,
+    "completed_at": null,
+    "exception_sha256": "f61845c1ee0085cb8282a67c97faa28e33fbcd556e805d57baf023b0f9a37539"
+  },
+  "workhorse": {
+    "pid": 556166,
+    "ppid": 556159,
+    "entries": 100,
+    "frontier": 1,
+    "at": 1793065009.1383896
+  },
+  "backoff_remaining_seconds": 0.9978306293487549,
+  "second_job": {
+    "id": "query_catalog_refresh_de0ff8d9-1b70-48df-9848-ad4a9848d739",
+    "status": "finished",
+    "timeout": 60,
+    "entries": 213,
+    "visited": 4,
+    "frontier": 0,
+    "stream_count": 3,
+    "unique_scope_count": 3,
+    "completed_at": 1793065012.4841995
+  },
+  "state": "passed",
+  "elapsed_seconds": 19.966517087072134,
+  "readback": [
+    {
+      "scope_sha256": "164f99ddf1390a1244d4d59f0ab57d67ffd60871bcc4a4c7d692c12fc04c8dad",
+      "catalog_sha256": "45acad592dec85480971663d66ac38e833fbc5fa7e69be97cd827c0df0e9cbe5",
+      "pending_receipts": 0
+    },
+    {
+      "scope_sha256": "552a73b884fa63ad0b3b41fde77677d4d574a3ecf49f333d3801779ecc5b13f9",
+      "catalog_sha256": "d69b555fe414706fbe4b658bae1c7252a48df9a2bca3774343ec4b5bd381e49f",
+      "pending_receipts": 0
+    },
+    {
+      "scope_sha256": "f3f63180bfad98d6e2479dbcca97862bf03b2e40309e0d61c0e15f3f45e5b46d",
+      "catalog_sha256": "058baa1e7ec981d4a0409432c437abf0bb596a655a7e7908f56d116cf14a4f00",
+      "pending_receipts": 0
+    }
+  ],
+  "cleanup": {
+    "worker_dead": true,
+    "queued": 0,
+    "started": 0,
+    "private_keys_expire_seconds": 86400,
+    "private_key_count": 24,
+    "private_queue_unregistered": true,
+    "parent_process_absent": true,
+    "workhorse_process_absent": true,
+    "first_job_ttl_seconds": 86345
+  },
+  "evidence": {
+    "raw_run_log_sha256": "6d00edcf9dc8e0e8e14daeb0d74eec31c7ef442e833e26587c3cd29e9f17ed12",
+    "raw_run_log_local": "/tmp/qcat_timeout_probe.log",
+    "private_scratch_result": "/wc1/query-catalog-validation/20261026/qcat-timeout-20261027T013526Z/result.json"
+  }
+}

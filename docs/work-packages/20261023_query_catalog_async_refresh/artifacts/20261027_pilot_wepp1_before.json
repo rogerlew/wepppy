@@ -1,0 +1,1304 @@
+{
+  "hostname": "wepp1",
+  "at": 1793072295.7180996,
+  "containers": [
+    {
+      "id": "a82ba2f0a1aab7398c2cdba5cb019832d021be32164777f6aa704187ffb4ea02",
+      "name": "/docker-caddy-1",
+      "image": "sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90",
+      "service": "caddy",
+      "started_at": "2026-10-26T10:45:02.1243608Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "caddy",
+        "run",
+        "--config",
+        "/etc/caddy/Caddyfile",
+        "--adapter",
+        "caddyfile"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": false
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_caddy-data/_data",
+          "Destination": "/data",
+          "RW": true
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_caddy-config/_data",
+          "Destination": "/config",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/caddy/Caddyfile.wepp1",
+          "Destination": "/etc/caddy/Caddyfile",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/wepppy/weppcloud/static",
+          "Destination": "/srv/weppcloud/static",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/wepppy/weppcloud/routes/usersum/static",
+          "Destination": "/srv/usersum/static",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "7e571ed490151218a3c584b1b801165d9c3c526d431a1e3ee14ca4099d3c47c6",
+      "name": "/docker-profile-playback-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "profile-playback",
+      "started_at": "2026-10-26T10:45:01.379742527Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "uvicorn",
+        "services.profile_playback.app:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8070"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy-test-engine-data",
+          "Destination": "/workdir/wepppy-test-engine-data",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/admin_password",
+          "Destination": "/run/secrets/admin_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "2f5e43fed59c8d24d7747ef8f98c87a018e6199c558090406cd67ec173cd85e4",
+      "name": "/docker-weppcloud-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "weppcloud",
+      "started_at": "2026-10-26T10:44:29.902734556Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "10",
+        "--threads",
+        "4",
+        "--timeout",
+        "1800",
+        "--bind",
+        "0.0.0.0:8000",
+        "--log-level",
+        "info",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.weppcloud.app:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/wepppy/weppcloud/static",
+          "Destination": "/srv/weppcloud/static",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/oauth_google_client_secret",
+          "Destination": "/run/secrets/oauth_google_client_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/opentopography_api_key",
+          "Destination": "/run/secrets/opentopography_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/agent_jwt_secret",
+          "Destination": "/run/secrets/agent_jwt_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+          "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/cap_secret",
+          "Destination": "/run/secrets/cap_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/oauth_github_client_secret",
+          "Destination": "/run/secrets/oauth_github_client_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/zoho_noreply_email_password",
+          "Destination": "/run/secrets/zoho_noreply_email_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/climate_engine_api_key",
+          "Destination": "/run/secrets/climate_engine_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "b9f5546561d57c701897f36933737bfbff790293901a79c03d96056f4640e1da",
+      "name": "/docker-rq-worker-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "rq-worker",
+      "started_at": "2026-10-26T10:44:49.890304475Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "bash",
+        "-lc",
+        "exec /workdir/wepppy/docker/rq-worker-startup.sh 6 default\n"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/climate_engine_api_key",
+          "Destination": "/run/secrets/climate_engine_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/opentopography_api_key",
+          "Destination": "/run/secrets/opentopography_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "566f58029bf25311a9a8b69cf1b684eafdcbdae5135059d68cafaf9b5b4b11e3",
+      "name": "/docker-rq-engine-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "rq-engine",
+      "started_at": "2026-10-26T10:44:29.899119476Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "uvicorn",
+        "wepppy.microservices.rq_engine:app",
+        "--workers",
+        "4",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8042"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+          "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/cap_secret",
+          "Destination": "/run/secrets/cap_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "7cda8f7b42751f875f342c5ed1296d9d47ddafd9701fee283f82849c7f9cf049",
+      "name": "/docker-rq-worker-batch-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "rq-worker-batch",
+      "started_at": "2026-10-26T10:44:49.885391904Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "bash",
+        "-lc",
+        "exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch\n"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/climate_engine_api_key",
+          "Destination": "/run/secrets/climate_engine_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_security_password_salt",
+          "Destination": "/run/secrets/flask_security_password_salt",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/opentopography_api_key",
+          "Destination": "/run/secrets/opentopography_api_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/flask_secret_key",
+          "Destination": "/run/secrets/flask_secret_key",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "5cddcb9a395f1312d3c1a5f6d412c8dee61e92ada3296383692289aebc04106e",
+      "name": "/wepppy-scheduler",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "scheduler",
+      "started_at": "2026-10-26T10:44:29.902277817Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "python",
+        "-m",
+        "wepppy.tools.scheduler"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/wc1/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "e66b2491b9f63ecf84920f8cffba639e893658c719afc248ca48f001f0fc5fee",
+      "name": "/docker-browse-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "browse",
+      "started_at": "2026-10-26T10:44:29.903649374Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "8",
+        "--bind",
+        "0.0.0.0:9009",
+        "--log-level",
+        "info",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.microservices.browse:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+          "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/dtale_internal_token",
+          "Destination": "/run/secrets/dtale_internal_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "a63e1e6150f77f2933233d4ddd6990da801d5678267a65fd7051e25518ad82fd",
+      "name": "/docker-dtale-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "dtale",
+      "started_at": "2026-10-26T10:44:29.899322485Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "1",
+        "--bind",
+        "0.0.0.0:9010",
+        "--log-level",
+        "info",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.webservices.dtale:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/dtale_internal_token",
+          "Destination": "/run/secrets/dtale_internal_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "09d47286fe938b10e34d92d82f991b414be590bb8732f953b3357b51e1fecb33",
+      "name": "/docker-query-engine-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "query-engine",
+      "started_at": "2026-10-26T10:44:29.908859821Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "uvicorn",
+        "wepppy.query_engine.app.server:create_app",
+        "--factory",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8041"
+      ],
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_mcp_jwt_secret",
+          "Destination": "/run/secrets/wepp_mcp_jwt_secret",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+          "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "1b7cafca84f781c348da10cdf3d34b5c93e4040fc6002aed0271a60dff1df3b1",
+      "name": "/docker-wmesque2-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "wmesque2",
+      "started_at": "2026-10-26T10:44:29.907540696Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "4",
+        "--bind",
+        "0.0.0.0:8030",
+        "--log-level",
+        "info",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.webservices.wmesque2:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "f78677d1fb86063370385a8694a270a6482bd8ac519826055798de6e4b330d5c",
+      "name": "/docker-download-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "download",
+      "started_at": "2026-10-26T10:44:29.886693041Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "4",
+        "--bind",
+        "0.0.0.0:9011",
+        "--log-level",
+        "info",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "--timeout",
+        "1800",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.microservices.download:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+          "Destination": "/run/secrets/wepp_auth_jwt_secrets",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "31730347242fe393de52d4a2ff9c16b41ffc4f76067f07a6ddbc74b70ee25034",
+      "name": "/docker-wmesque-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "wmesque",
+      "started_at": "2026-10-26T10:44:29.886693047Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "4",
+        "--bind",
+        "0.0.0.0:8003",
+        "--log-level",
+        "info",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.webservices.wmesque:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "c8ceacfb0f09c5e5372f7d71f864a02b452224c01fe51cd163b2d03b1bea6be2",
+      "name": "/docker-elevationquery-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "elevationquery",
+      "started_at": "2026-10-26T10:44:29.894834874Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "2",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "--bind",
+        "0.0.0.0:8002",
+        "--log-level",
+        "info",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.microservices.elevationquery:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "51fe6a4854904d917134fc5703b679ddf5213a837d5ac729091927e411e60620",
+      "name": "/docker-metquery-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "metquery",
+      "started_at": "2026-10-26T10:44:29.910740956Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "gunicorn",
+        "--workers",
+        "2",
+        "--bind",
+        "0.0.0.0:8004",
+        "--log-level",
+        "info",
+        "--max-requests",
+        "1000",
+        "--max-requests-jitter",
+        "200",
+        "wepppy.webservices.metquery:app"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "a9347284a45bdd4e22c29e3ff61b8fe79fb7c3b6d27ac67998dc038696c276de",
+      "name": "/docker-shape-converter-1",
+      "image": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "service": "shape-converter",
+      "started_at": "2026-10-26T10:44:29.886692867Z",
+      "user": "10001:10001",
+      "group_add": null,
+      "command": [
+        "uvicorn",
+        "wepppy.microservices.shape_converter:app",
+        "--workers",
+        "2",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8060",
+        "--timeout-keep-alive",
+        "5"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "Destination": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "920bb813f23346fdb2a3c8cc9999d6d7f710539a9b348b901c1e3902fb692875",
+      "name": "/docker-status-1",
+      "image": "sha256:6be51e4e3d45ca6277a0f3317fb38016ad38e6a5f222c71c15e2205b70e7ce78",
+      "service": "status",
+      "started_at": "2026-10-26T10:44:49.826885029Z",
+      "user": "1002:130",
+      "group_add": null,
+      "command": null,
+      "entrypoint": [
+        "/status2"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "6d18a4607cbe63a6fa6616705e3c59f33daea0f95f7798ff2b5a652a84aca669",
+      "name": "/docker-preflight-1",
+      "image": "sha256:e9dfc4103ad03c87dcb0112d99a4f15a05deb1650dc7a171555778a2946614a1",
+      "service": "preflight",
+      "started_at": "2026-10-26T10:44:49.828630189Z",
+      "user": "1002:130",
+      "group_add": null,
+      "command": null,
+      "entrypoint": [
+        "/preflight2"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "6629fec3e33663ab9833293c4c05cb5211ea4f3f59f756530189a18db1bea52e",
+      "name": "/docker-postgres-backup-1",
+      "image": "sha256:c482971e06a84ca61d677321488dee4034e8979c6311d72f065be07f4e886760",
+      "service": "postgres-backup",
+      "started_at": "2026-10-26T10:44:29.906656019Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "bash",
+        "-lc",
+        "set -euo pipefail\nmkdir -p \"${BACKUP_DIR:-/backups}\"\n\nif [ ! -f /run/secrets/postgres_password ]; then\n  echo \"[postgres-backup] Missing /run/secrets/postgres_password\" >&2\n  exit 1\nfi\n\npassword=\"$(cat /run/secrets/postgres_password)\"\nif [ -z \"$password\" ]; then\n  echo \"[postgres-backup] /run/secrets/postgres_password is empty\" >&2\n  exit 1\nfi\n\npgpass_file=\"/tmp/.pgpass\"\numask 077\nprintf \"%s:%s:%s:%s:%s\\\\n\" \"${PGHOST}\" \"${PGPORT:-5432}\" \"${PGDATABASE}\" \"${PGUSER}\" \"$password\" > \"$pgpass_file\"\nexport PGPASSFILE=\"$pgpass_file\"\n\n# Run initial backup on startup\nrun_backup() {\n  ts=$(date +\"%Y%m%d-%H%M%S\")\n  target=\"${BACKUP_DIR:-/backups}/weppcloud-${ts}.dump\"\n  tmp_target=\"${target}.tmp\"\n\n  echo \"[ $(date --iso-8601=seconds) ] Starting backup to $target\"\n\n  # Dump to temp file first, then atomic rename\n  if pg_dump -h \"${PGHOST}\" -U \"${PGUSER}\" -d \"${PGDATABASE}\" -Fc -f \"$tmp_target\"; then\n    mv \"$tmp_target\" \"$target\"\n\n    # Verify backup header\n    if head -c 5 \"$target\" | grep -q \"PGDMP\"; then\n      size=$(du -h \"$target\" | cut -f1)\n      echo \"[ $(date --iso-8601=seconds) ] Backup complete: $target ($size)\"\n    else\n      echo \"[ $(date --iso-8601=seconds) ] ERROR: Backup verification failed - invalid header\"\n      rm -f \"$target\"\n      return 1\n    fi\n  else\n    echo \"[ $(date --iso-8601=seconds) ] ERROR: pg_dump failed\"\n    rm -f \"$tmp_target\"\n    return 1\n  fi\n\n  # Purge old backups\n  echo \"[ $(date --iso-8601=seconds) ] Purging backups older than ${BACKUP_KEEP_DAYS:-7} days\"\n  find \"${BACKUP_DIR:-/backups}\" -name \"weppcloud-*.dump\" -type f -mtime +${BACKUP_KEEP_DAYS:-7} -delete\n\n  # Also purge legacy named backups\n  find \"${BACKUP_DIR:-/backups}\" -name \"wepppy-*.dump\" -type f -mtime +${BACKUP_KEEP_DAYS:-7} -delete\n\n  # List current backups\n  echo \"[ $(date --iso-8601=seconds) ] Current backups:\"\n  ls -lh \"${BACKUP_DIR:-/backups}\"/*.dump 2>/dev/null || echo \"  (none)\"\n}\n\n# Initial backup\nrun_backup || echo \"Initial backup failed, will retry on schedule\"\n\n# Scheduled backups\nwhile true; do\n  sleep ${BACKUP_INTERVAL_SECONDS:-86400}\n  run_backup || echo \"Scheduled backup failed\"\ndone\n"
+      ],
+      "entrypoint": [
+        "docker-entrypoint.sh"
+      ],
+      "mounts": [
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_postgres-backups/_data",
+          "Destination": "/backups",
+          "RW": true
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/97d6f67fac10cd4b80fa53e3e113028533b0ce0fc8c71c60ec46d4e32a5de418/_data",
+          "Destination": "/var/lib/postgresql/data",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "a40b60c145c894c9a6e11b972b7e37dbac45eefef42f38416a5c9d267eb6e39e",
+      "name": "/weppcloudr",
+      "image": "sha256:8481e7e0c71bb445ec0e7556d34065e44aedc9f33d3b3d9b5f668289dcf7a9eb",
+      "service": "weppcloudr",
+      "started_at": "2026-10-26T10:44:23.948590252Z",
+      "user": "1000:993",
+      "group_add": [
+        "130"
+      ],
+      "command": null,
+      "entrypoint": [
+        "Rscript",
+        "/srv/weppcloudr/docker-entrypoint.R"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_weppcloudr-renv-cache/_data",
+          "Destination": "/opt/weppcloudr/renv/cache",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "c7918d8da69f0dc69ec0b272786c596d95ae81fe1cce6d34803b883778fff574",
+      "name": "/docker-cap-1",
+      "image": "sha256:2d0bf9293b62eb4ebeeebc8a3fe192ac6a6ce0257d665c25a7f2c9ceb813941c",
+      "service": "cap",
+      "started_at": "2026-10-26T10:44:23.940305942Z",
+      "user": "10001:10001",
+      "group_add": null,
+      "command": [
+        "node",
+        "server.js"
+      ],
+      "entrypoint": [
+        "docker-entrypoint.sh"
+      ],
+      "mounts": [
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_cap-data/_data",
+          "Destination": "/var/lib/cap",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/cap_secret",
+          "Destination": "/run/secrets/cap_secret",
+          "RW": false
+        }
+      ]
+    },
+    {
+      "id": "e407db7b27b2acdbeb9b354af924a5290dcc00d8477cf7c7bd55235882510eaf",
+      "name": "/docker-fcgiwrap-1",
+      "image": "sha256:5fd7973ac6e26a15c0145daecadd93c6209f639d9a535ef0bd3d02ab8bcf7c6b",
+      "service": "fcgiwrap",
+      "started_at": "2026-10-26T10:44:23.944221131Z",
+      "user": "roger",
+      "group_add": null,
+      "command": [
+        "spawn-fcgi",
+        "-n",
+        "-p",
+        "9000",
+        "--",
+        "/usr/sbin/fcgiwrap"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "2843877d6f9d8cd9cd59b413ebd3dbd6c024cf2d7ecce50fb5ce530be8d50142",
+      "name": "/docker-redis-1",
+      "image": "sha256:646a47c903c5c45f99081094d8c3ba51ec2a1091babf42dc5a928cef024e6fcd",
+      "service": "redis",
+      "started_at": "2026-10-26T10:44:23.942853647Z",
+      "user": "",
+      "group_add": null,
+      "command": null,
+      "entrypoint": [
+        "/usr/local/bin/redis-entrypoint.sh"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/redis-entrypoint.sh",
+          "Destination": "/usr/local/bin/redis-entrypoint.sh",
+          "RW": false
+        },
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/redis_password",
+          "Destination": "/run/secrets/redis_password",
+          "RW": false
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_redis-data/_data",
+          "Destination": "/data",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "7d3bf8f3b8bb096e36ec3c921eda927ebc3e9fbf335cc4c644cfcafc716aaf3c",
+      "name": "/docker-postgres-1",
+      "image": "sha256:c482971e06a84ca61d677321488dee4034e8979c6311d72f065be07f4e886760",
+      "service": "postgres",
+      "started_at": "2026-10-26T10:44:23.948573818Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "postgres"
+      ],
+      "entrypoint": [
+        "docker-entrypoint.sh"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/workdir/wepppy/docker/secrets/postgres_password",
+          "Destination": "/run/secrets/postgres_password",
+          "RW": false
+        },
+        {
+          "Type": "volume",
+          "Source": "/var/lib/docker/volumes/docker_postgres-data/_data",
+          "Destination": "/var/lib/postgresql/data",
+          "RW": true
+        }
+      ]
+    },
+    {
+      "id": "1068db2b0448252e07e33a60666b4c33def9c75f918ee757fd93135297043440",
+      "name": "/wepppy-f-esri",
+      "image": "sha256:7ed8fd486756a551b9795d6476c24a5152c7c1c19622859e4e6211627ae9519e",
+      "service": "f-esri",
+      "started_at": "2026-08-11T01:12:07.580509642Z",
+      "user": "",
+      "group_add": null,
+      "command": [
+        "tail",
+        "-f",
+        "/dev/null"
+      ],
+      "entrypoint": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/geodata/wc1",
+          "Destination": "/wc1",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/geodata",
+          "Destination": "/geodata",
+          "RW": true
+        }
+      ]
+    }
+  ]
+}

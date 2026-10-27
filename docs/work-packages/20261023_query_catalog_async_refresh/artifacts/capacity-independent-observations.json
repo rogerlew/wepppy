@@ -1,0 +1,1269 @@
+{
+  "reviewer": "independent capacity review; no production action",
+  "readback_utc": "2026-10-27T01:29:27.999602+00:00",
+  "source_snapshots": {
+    "primary_inventory": {
+      "source": "/tmp/qcat-primary-inventory-readback.json",
+      "sha256": "8c1581e78a862abb07f2d8d137df827d1e9760c639e5b879c1eeac082ad20c12"
+    },
+    "batch_history": {
+      "source": "/tmp/qcat-batch-history.json",
+      "sha256": "ab8e6a6b6ee4b378767f8be0bdc49621667215fc5940e726dc14d956f5a7e96a"
+    },
+    "batch_window": {
+      "source": "/tmp/qcat-batch-capacity-window.jsonl",
+      "sha256": "32622fd14175f083936157b02226d3f1eac6a5b599606854065ea592ff5be868"
+    },
+    "partial_profile_log": {
+      "source": "/tmp/qcat-capacity-profile.log",
+      "sha256": "e5077609f5e18465e25ddbf01101f6001616d6bd2fb6e580e6396ead3769629f"
+    }
+  },
+  "primary_inventory": {
+    "state": "passed",
+    "job_status": "finished",
+    "scopes": 10192,
+    "frontier": 0,
+    "stream": 10192,
+    "visited": 15399,
+    "entries": 39354,
+    "elapsed_seconds": 2000.59827542305,
+    "errors": []
+  },
+  "partial_profile": {
+    "elapsed_seconds": 1339.9263996426016,
+    "counts": {
+      "wc1:runs": {
+        "scopes": 3510,
+        "readonly": 656,
+        "writable": 2854,
+        "unwritable": 0,
+        "missing_catalog": 1618
+      },
+      "wc1:batch": {
+        "scopes": 1110,
+        "readonly": 0,
+        "writable": 1110,
+        "unwritable": 0,
+        "missing_catalog": 28
+      },
+      "wc1:culverts": {
+        "scopes": 1695,
+        "readonly": 0,
+        "writable": 1695,
+        "unwritable": 0,
+        "missing_catalog": 1387
+      },
+      "legacy:runs": {
+        "scopes": 6307,
+        "readonly": 4477,
+        "writable": 1830,
+        "unwritable": 0,
+        "missing_catalog": 6238
+      }
+    },
+    "errors": [],
+    "profiled": 12622,
+    "discovered": 26310,
+    "inventory_completed": [
+      false,
+      true
+    ],
+    "sample_method": "12 smallest SHA256 path digests per namespace, writable non-READONLY only; raw sample paths private"
+  },
+  "batch_history": {
+    "window_end": 1793064204.1041934,
+    "window_seconds": 86400,
+    "registries": {
+      "FinishedJobRegistry": {
+        "registry_count": 274,
+        "sampled": 274,
+        "truncated": false
+      },
+      "FailedJobRegistry": {
+        "registry_count": 416,
+        "sampled": 416,
+        "truncated": false
+      }
+    },
+    "observed_worker_seconds_in_window": 71928.4734442234,
+    "observed_average_busy_workers": 0.8325054796785116,
+    "overlapping_jobs": 121,
+    "finished_in_window": 120,
+    "active_with_start": 1,
+    "missing_start_or_expired": 0,
+    "sample_earliest_end": 1772013747.667137,
+    "sample_latest_end": 1793064194.753489,
+    "limitation": "retained job attempts only; expired history and earlier retry attempts are not reconstructed; raw read without cleanup"
+  },
+  "batch_window": [
+    {
+      "epoch": 1793062643.6866534,
+      "queued": 80,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062673.6912045,
+      "queued": 80,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062703.6956081,
+      "queued": 79,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062733.7010875,
+      "queued": 79,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062763.706419,
+      "queued": 78,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062793.7094986,
+      "queued": 77,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062823.7138317,
+      "queued": 76,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062853.7178514,
+      "queued": 74,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062883.8544903,
+      "queued": 74,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062913.8606958,
+      "queued": 72,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062943.8641655,
+      "queued": 71,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793062973.8688755,
+      "queued": 69,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063003.8738658,
+      "queued": 68,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063033.8774598,
+      "queued": 65,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063063.8807752,
+      "queued": 64,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063093.8842752,
+      "queued": 62,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063123.8874254,
+      "queued": 60,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063153.8901618,
+      "queued": 58,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063183.89452,
+      "queued": 56,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    },
+    {
+      "epoch": 1793063213.948204,
+      "queued": 54,
+      "started_registry_total": 8,
+      "unexpired_executions": 8,
+      "live_consumer_states": {
+        "busy": 8
+      },
+      "suspended": false,
+      "method": "read-only raw registry/worker fields; no cleanup; no jobs submitted"
+    }
+  ],
+  "canary_service_seconds": [
+    23.758491,
+    20.776008,
+    20.596394,
+    24.038844,
+    16.523025,
+    20.776433,
+    14.95197,
+    14.513475
+  ],
+  "derivations": {
+    "canary_service_mean_seconds": 19.49183,
+    "canary_service_total_worker_seconds": 155.93464,
+    "candidate_ceiling_per_hour": 3000.0,
+    "workers_demanded_at_mean_service_and_candidate_ceiling": 16.243191666666668,
+    "hypothetical_jobs_per_hour_8_idle_workers": 1477.5421291895118,
+    "hypothetical_jobs_per_hour_7_idle_workers": 1292.8493630408227,
+    "observed_two_worker_cohort_jobs_per_hour": 345.79674392150554,
+    "batch_window_seconds": 570.2615506649017,
+    "batch_window_net_queue_decrease_per_hour": 164.13521109895314
+  },
+  "limits": [
+    "Candidate ceiling is not actual new-job arrival rate.",
+    "Eight hardlinked same-owner canary scopes do not represent fleet service distribution.",
+    "Retained RQ history is an incomplete lower bound on consumed worker time.",
+    "Partial profile cannot be extrapolated to the undiscovered or unclassified fleet.",
+    "Primary inventory completion is discovery only; no fleet project refresh occurred."
+  ],
+  "completed_discovery_followup": {
+    "terminal_file": "20261027_full_inventory_terminal.json",
+    "terminal_sha256": "8efca83d136756f22d9a5fcbd0035291dad97df7db62432f01114b31b4673825",
+    "terminal": {
+      "state": "passed",
+      "observed_at": 1793065091.515476,
+      "uid": 1002,
+      "gid": 130,
+      "inventories": [
+        {
+          "key": "query-catalog:validation:20261027:legacy-stream-0035",
+          "state": {
+            "cycle": "legacy-stream-0035",
+            "job_id": "owned-readonly-resume-0055",
+            "started_at": 1793060911.1628234,
+            "visited": 21262,
+            "entries": 138922,
+            "errors": [],
+            "updated_at": 1793065016.4871852,
+            "completed_at": 1793065016.4880903
+          },
+          "frontier": 0,
+          "scopes": 20699,
+          "stream": 20699,
+          "unique_stream_equals_scope_set": true,
+          "sorted_scope_digest": "0fb643997cf03d91eb86ac27e7c547531973ec8f9aed7b842657dfe7662cd011",
+          "ttl_seconds": 604725
+        },
+        {
+          "key": "query-catalog:inventory:9d4205ed0955b7518cd3b2a8556a00c6e83cf29b7a8ca97b2a32a165d341a6d4",
+          "state": {
+            "cycle": "query_catalog_refresh_57a08162-8f26-4a69-8855-926b51eb2b1f",
+            "started_at": 1793061151.5948784,
+            "visited": 15399,
+            "entries": 39354,
+            "errors": [],
+            "job_id": "query_catalog_refresh_57a08162-8f26-4a69-8855-926b51eb2b1f",
+            "updated_at": 1793063152.192213,
+            "completed_at": 1793063152.1931539
+          },
+          "frontier": 0,
+          "scopes": 10192,
+          "stream": 10192,
+          "unique_stream_equals_scope_set": true,
+          "sorted_scope_digest": "4a87eafd63b32e0e9da61ae2be2341c52bb7fb1849217d8069c8afdbaf126e42",
+          "ttl_seconds": 603091
+        }
+      ],
+      "total_scopes": 30891,
+      "limitation": "Discovery only; no fleet reconciliation or project writes."
+    },
+    "primary_driver_elapsed_seconds": 2000.714,
+    "legacy_initial_process_seconds": 1391.382,
+    "legacy_resume_process_seconds": 2641.268,
+    "legacy_cumulative_process_seconds": 4032.65,
+    "timing_limit": "Separate probes and different boundaries; not combined fleet execution or CPU time."
+  },
+  "component_profile_followup": {
+    "source": "service-component-exploratory.json",
+    "sha256": "b871456f4ac5caad99c72b9e5d73be7b1b750453a9bf6a9418343cc5e71653e7",
+    "selected": 48,
+    "attempted": 38,
+    "elapsed_seconds": 720.0163753125817,
+    "summary": {
+      "wc1:runs": {
+        "two_pass_successes": 9,
+        "full_deadline_timeouts": 1,
+        "remaining_budget_timeouts": 0,
+        "pass1_component_seconds": [
+          0.5834380555897951,
+          0.627301087602973,
+          0.8148300498723984,
+          0.5642688386142254,
+          1.4933711290359497,
+          0.5112655311822891,
+          0.6520234886556864,
+          2.098111443221569,
+          2.178720934316516
+        ],
+        "successful_only_pass1_mean": 1.0581478397879336,
+        "successful_only_pass1_range": [
+          0.5112655311822891,
+          2.178720934316516
+        ]
+      },
+      "wc1:batch": {
+        "two_pass_successes": 6,
+        "full_deadline_timeouts": 3,
+        "remaining_budget_timeouts": 1,
+        "pass1_component_seconds": [
+          6.917681058868766,
+          13.508919633924961,
+          4.674156283959746,
+          12.941224994137883,
+          5.732750676572323,
+          1.060714328661561
+        ],
+        "successful_only_pass1_mean": 7.472574496020873,
+        "successful_only_pass1_range": [
+          1.060714328661561,
+          13.508919633924961
+        ]
+      },
+      "wc1:culverts": {
+        "two_pass_successes": 9,
+        "full_deadline_timeouts": 0,
+        "remaining_budget_timeouts": 0,
+        "pass1_component_seconds": [
+          4.735304033383727,
+          9.17893648892641,
+          7.182947866618633,
+          3.4682237319648266,
+          0.5379369501024485,
+          10.048390971496701,
+          1.416223967447877,
+          3.3666381631046534,
+          4.080305812880397
+        ],
+        "successful_only_pass1_mean": 4.89054533176952,
+        "successful_only_pass1_range": [
+          0.5379369501024485,
+          10.048390971496701
+        ]
+      },
+      "legacy:runs": {
+        "two_pass_successes": 8,
+        "full_deadline_timeouts": 1,
+        "remaining_budget_timeouts": 0,
+        "pass1_component_seconds": [
+          14.597309680655599,
+          0.8990681581199169,
+          27.868401998654008,
+          26.642002925276756,
+          0.9852776229381561,
+          29.99047439172864,
+          0.7420624140650034,
+          10.392806114628911
+        ],
+        "successful_only_pass1_mean": 14.014675413258374,
+        "successful_only_pass1_range": [
+          0.7420624140650034,
+          29.99047439172864
+        ]
+      }
+    },
+    "limits": "Incomplete sampling frame; whole-child censoring; two read-only components exclude remaining job phases. Successful-only means are not whole-job or fleet estimates."
+  },
+  "final_classification_headroom_followup": {
+    "classification": {
+      "file": "20261027_scope_classification.json",
+      "sha256": "8bd29f9d4a84a39bf12a54d08f73bfc48e43143c6d5d2e9ca204a6a7f3ad005b",
+      "aggregate": {
+        "elapsed_seconds": 2866.146760167554,
+        "counts": {
+          "wc1:runs": {
+            "scopes": 5709,
+            "readonly": 1100,
+            "writable": 4609,
+            "unwritable": 0,
+            "missing_catalog": 2622
+          },
+          "wc1:batch": {
+            "scopes": 1756,
+            "readonly": 0,
+            "writable": 1756,
+            "unwritable": 0,
+            "missing_catalog": 47
+          },
+          "wc1:culverts": {
+            "scopes": 2727,
+            "readonly": 0,
+            "writable": 2727,
+            "unwritable": 0,
+            "missing_catalog": 2204
+          },
+          "legacy:runs": {
+            "scopes": 20699,
+            "readonly": 11277,
+            "writable": 9422,
+            "unwritable": 0,
+            "missing_catalog": 20556
+          }
+        },
+        "errors": [],
+        "profiled": 30891,
+        "discovered": 30891,
+        "inventory_completed": [
+          true,
+          true
+        ],
+        "sample_method": "12 smallest SHA256 path digests per namespace, writable non-READONLY only; raw sample paths private",
+        "state": "completed"
+      }
+    },
+    "owner_concentration": {
+      "file": "20261027_owner_concentration.json",
+      "sha256": "823128a865cf7211089c5e4d458ac76be8ebe1f0bf7aa0d308499e375ffc01e2",
+      "aggregate": {
+        "state": "passed",
+        "scope": "All discovered scopes, INCLUDING READONLY; not writable-only concentration. Lexical owner depth matches canonical _owner after full classification validated locators. No project reads or writes.",
+        "total_scopes": 30891,
+        "namespaces": {
+          "wc1:runs": {
+            "scopes": 5709,
+            "owners": 4553,
+            "largest_owner_scope_count": 105,
+            "owners_with_multiple_scopes": 46,
+            "scopes_per_owner_histogram": {
+              "1": 4507,
+              "2": 4,
+              "3": 1,
+              "4": 2,
+              "5": 4,
+              "6": 5,
+              "7": 6,
+              "8": 7,
+              "9": 2,
+              "15": 1,
+              "21": 1,
+              "39": 1,
+              "56": 1,
+              "57": 1,
+              "74": 5,
+              "77": 2,
+              "95": 1,
+              "105": 2
+            }
+          },
+          "wc1:batch": {
+            "scopes": 1756,
+            "owners": 8,
+            "largest_owner_scope_count": 470,
+            "owners_with_multiple_scopes": 7,
+            "scopes_per_owner_histogram": {
+              "1": 1,
+              "17": 1,
+              "57": 1,
+              "125": 1,
+              "171": 1,
+              "449": 1,
+              "466": 1,
+              "470": 1
+            }
+          },
+          "wc1:culverts": {
+            "scopes": 2727,
+            "owners": 55,
+            "largest_owner_scope_count": 278,
+            "owners_with_multiple_scopes": 55,
+            "scopes_per_owner_histogram": {
+              "3": 2,
+              "6": 4,
+              "8": 1,
+              "9": 1,
+              "13": 1,
+              "15": 1,
+              "20": 1,
+              "32": 14,
+              "36": 16,
+              "37": 3,
+              "42": 2,
+              "59": 3,
+              "81": 1,
+              "154": 1,
+              "234": 2,
+              "255": 1,
+              "278": 1
+            }
+          },
+          "legacy:runs": {
+            "scopes": 20699,
+            "owners": 20699,
+            "largest_owner_scope_count": 1,
+            "owners_with_multiple_scopes": 0,
+            "scopes_per_owner_histogram": {
+              "1": 20699
+            }
+          }
+        }
+      }
+    },
+    "extended_batch_window": {
+      "file": "20261027_batch_capacity_extended_summary.json",
+      "sha256": "66b13c5bda5bae3c39927c21fa5d9cd1ba16f273bbc2edb54fe63858a68ff9ce",
+      "aggregate": {
+        "samples": 40,
+        "span_seconds": 1170.6623318195343,
+        "first_epoch": 1793064959.0239985,
+        "last_epoch": 1793066129.6863303,
+        "queue_min": 0,
+        "queue_max": 0,
+        "consumer_state_sample_counts": {
+          "{\"busy\": 1, \"idle\": 7}": 6,
+          "{\"idle\": 8}": 34
+        },
+        "suspended_samples": 0,
+        "limitation": "Read-only point samples, not continuous worker utilization or daily spare-capacity guarantee; private validation workers use separate queues and are excluded."
+      }
+    },
+    "conditional_homogeneous_service_scenario": {
+      "writable_scopes": 18514,
+      "assumed_mean_whole_job_seconds": 19.49183,
+      "refresh_worker_hours": 100.24215017222222,
+      "discovery_cost_proxy_seconds": 6033.364,
+      "with_discovery_proxy_hours": 101.91808461666666,
+      "ideal_eight_idle_workers_elapsed_hours": 12.739760577083333,
+      "limitation": "Scale illustration, not a fleet forecast: homogeneous mean, different discovery timing boundaries, no ordinary load/retry budget, ignores owner concurrency constraints."
+    }
+  },
+  "scheduler_consideration_budget": {
+    "scope_assumption": "Stable observed population; each READONLY once, each writable first admission plus later pending-empty retirement.",
+    "minimum_considerations": 49405,
+    "minimum_ticks": 1977,
+    "candidate_limit": 25,
+    "cadence_seconds": 30,
+    "continuous_approximation_hours": 16.468333333333334,
+    "first_to_last_minimum_tick_start_hours": 16.466666666666665,
+    "ideal_24h_candidate_slots": 72000.0,
+    "remaining_ideal_consideration_slots": 22595.0,
+    "approximate_maximum_effective_tick_spacing_seconds_for_24h": 43.70257966616085,
+    "schedule_behavior": "Loop-start now + interval; synchronous direct reconciliation, 0.01-second minimum sleep after overdue work; not work duration plus a fixed 30-second sleep.",
+    "source_hashes": {
+      "wepppy/tools/scheduler.py": "f06ad9e348670a6aae56398a5ba161df639f41e89e4a4fb920d0acf9860f4343",
+      "wepppy/rq/query_catalog_rq.py": "839bafc4efa1b1f4161b3d7fec1b7f0a4c0c7e0b3652727f70bd6363404c0cac",
+      "docker/scheduled-tasks.yml": "0f1d57579086c0d92ce30d5307a0a620d753977df41b5cab8c839e478afbbdf3"
+    },
+    "limits": [
+      "No extra active-job rechecks, dirty arrivals, failures or discovery starvation are included.",
+      "Actual full-tick duration and scheduler interference remain unmeasured.",
+      "Scheduler, discovery and worker durations overlap and cannot simply be added."
+    ]
+  },
+  "scheduler_tick_canary_followup": {
+    "file": "20261027_inventory_scheduler_tick_canary.json",
+    "sha256": "e8d713d59c03d23c461c0fe6cedfd0b93d9c2feb8a3184d3a6f8bddad3bddbf2",
+    "waves": [
+      {
+        "tag": "qcat-admission25-20261027T020802Z",
+        "state": "passed",
+        "ticks": [
+          {
+            "label": "discovery-admission",
+            "elapsed_seconds": 0.007658971473574638,
+            "result": {
+              "state": "pending",
+              "admitted": 0,
+              "visited": 0,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793066935.7926838,
+              "completed_at": null,
+              "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+            },
+            "pending_scope_count": 0,
+            "queue_count": 1
+          },
+          {
+            "label": "full-25-new-scope-admission",
+            "elapsed_seconds": 11.668846165761352,
+            "result": {
+              "state": "pending",
+              "admitted": 25,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793066935.7926838,
+              "completed_at": null,
+              "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+            },
+            "pending_scope_count": 25,
+            "queue_count": 25
+          },
+          {
+            "label": "full-25-completion-recheck",
+            "elapsed_seconds": 0.6232305988669395,
+            "result": {
+              "state": "completed",
+              "admitted": 0,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793066935.7926838,
+              "completed_at": 1793067082.4619198,
+              "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+            },
+            "pending_scope_count": 0,
+            "queue_count": 0
+          },
+          {
+            "label": "completed-cycle-noop",
+            "elapsed_seconds": 0.00275493785738945,
+            "result": {
+              "state": "completed",
+              "admitted": 0,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793066935.7926838,
+              "completed_at": 1793067082.4619198,
+              "inventory_job_id": "query_catalog_refresh_c0e9301a-541e-43d5-ac89-b229eb48cce1"
+            },
+            "pending_scope_count": 0,
+            "queue_count": 0
+          }
+        ],
+        "worker_phases": [
+          {
+            "label": "inventory-worker",
+            "elapsed_seconds": 0.40633233822882175
+          },
+          {
+            "label": "25-refresh-workers",
+            "elapsed_seconds": 132.1114831008017
+          }
+        ],
+        "cleanup": {
+          "worker_dead": true,
+          "queued": 0,
+          "started": 0,
+          "private_keys_expire_seconds": 86400,
+          "private_key_count": 89,
+          "private_queue_unregistered": true,
+          "parent_process_absent": true
+        }
+      },
+      {
+        "tag": "qcat-recheck25-20261027T021200Z",
+        "state": "passed-readonly-skip-not-reconciled",
+        "ticks": [
+          {
+            "label": "discovery-admission",
+            "elapsed_seconds": 0.00860380008816719,
+            "result": {
+              "state": "pending",
+              "admitted": 0,
+              "visited": 0,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793067190.356396,
+              "completed_at": null,
+              "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+            },
+            "pending_scope_count": 0,
+            "queue_count": 1,
+            "pending_count_before": 0,
+            "pending_json_bytes_before": 2,
+            "pending_json_bytes_after": 2,
+            "cursor_json_bytes_before": 0,
+            "cursor_json_bytes_after": 383
+          },
+          {
+            "label": "full-25-new-scope-admission",
+            "elapsed_seconds": 6.716833779588342,
+            "result": {
+              "state": "pending",
+              "admitted": 25,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793067190.356396,
+              "completed_at": null,
+              "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+            },
+            "pending_scope_count": 25,
+            "queue_count": 25,
+            "pending_count_before": 0,
+            "pending_json_bytes_before": 2,
+            "pending_json_bytes_after": 3375,
+            "cursor_json_bytes_before": 383,
+            "cursor_json_bytes_after": 3815
+          },
+          {
+            "label": "full-25-queued-recheck",
+            "elapsed_seconds": 0.7908397503197193,
+            "result": {
+              "state": "pending",
+              "admitted": 25,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793067190.356396,
+              "completed_at": null,
+              "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+            },
+            "pending_scope_count": 25,
+            "queue_count": 25,
+            "pending_count_before": 25,
+            "pending_json_bytes_before": 3375,
+            "pending_json_bytes_after": 3375,
+            "cursor_json_bytes_before": 3815,
+            "cursor_json_bytes_after": 3816
+          },
+          {
+            "label": "full-25-readonly-skip",
+            "elapsed_seconds": 0.1352617833763361,
+            "result": {
+              "state": "completed",
+              "admitted": 0,
+              "visited": 26,
+              "failures": 0,
+              "unavailable_namespaces": [],
+              "unavailable_aliases": [],
+              "cycle_started_at": 1793067190.356396,
+              "completed_at": 1793067198.809414,
+              "inventory_job_id": "query_catalog_refresh_04b4f80a-67c8-48cd-b994-301dc4f77254"
+            },
+            "pending_scope_count": 0,
+            "queue_count": 0,
+            "pending_count_before": 25,
+            "pending_json_bytes_before": 3375,
+            "pending_json_bytes_after": 2,
+            "cursor_json_bytes_before": 3816,
+            "cursor_json_bytes_after": 477
+          }
+        ],
+        "worker_phases": [
+          {
+            "label": "inventory-worker",
+            "elapsed_seconds": 0.4058248121291399
+          }
+        ],
+        "cleanup": {
+          "worker_dead": true,
+          "queued": 0,
+          "started": 0,
+          "private_keys_expire_seconds": 86400,
+          "private_key_count": 89,
+          "private_queue_unregistered": true,
+          "parent_process_absent": true
+        }
+      }
+    ],
+    "limitation": "Tiny owned scratch; measured calls exclude real scheduler cadence and other due tasks; maximum pending count 25. No fleet capacity claim."
+  },
+  "final_capacity_disposition": {
+    "component_summary": {
+      "file": "service-component-final-summary.json",
+      "sha256": "db42f4436dfcc362d15be307b5c13ddd117922da1ab3617cf84c571131c1a5ca",
+      "aggregate": {
+        "selected": 48,
+        "measured": 48,
+        "unattempted": 0,
+        "source_hash_sets": 1,
+        "blocked_mutations": [],
+        "paired_entry_differences": [],
+        "namespaces": {
+          "wc1:runs": {
+            "attempted": 12,
+            "completed": 11,
+            "timeouts": 1,
+            "errors": 0,
+            "pass1": {
+              "completed_passes": 11,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.24737229943275452,
+                "mean": 28.86568107549101,
+                "max": 256.4944303892553
+              },
+              "verify_seconds": {
+                "min": 0.020322639495134354,
+                "mean": 5.906296573579311,
+                "max": 64.10655562765896
+              },
+              "component_seconds": {
+                "min": 0.26769493892788887,
+                "mean": 14.078454984182661,
+                "max": 145.07197932898998
+              },
+              "entry_count": {
+                "min": 10,
+                "mean": 143.83333333333334,
+                "max": 1463
+              }
+            },
+            "pass2": {
+              "completed_passes": 11,
+              "completed_collections": 11,
+              "collect_seconds": {
+                "min": 0.00976535864174366,
+                "mean": 0.717731726271185,
+                "max": 7.289801254868507
+              },
+              "verify_seconds": {
+                "min": 0.018225902691483498,
+                "mean": 1.0750911398367449,
+                "max": 10.972145404666662
+              },
+              "component_seconds": {
+                "min": 0.030965877696871758,
+                "mean": 1.7928228661079297,
+                "max": 18.26194665953517
+              },
+              "entry_count": {
+                "min": 10,
+                "mean": 23.90909090909091,
+                "max": 106
+              }
+            }
+          },
+          "wc1:batch": {
+            "attempted": 12,
+            "completed": 11,
+            "timeouts": 1,
+            "errors": 0,
+            "pass1": {
+              "completed_passes": 12,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.9574552029371262,
+                "mean": 35.816841203408934,
+                "max": 165.07927735336125
+              },
+              "verify_seconds": {
+                "min": 0.10325912572443485,
+                "mean": 22.72203313248853,
+                "max": 112.511809354648
+              },
+              "component_seconds": {
+                "min": 1.060714328661561,
+                "mean": 58.53887433589747,
+                "max": 277.59108670800924
+              },
+              "entry_count": {
+                "min": 21,
+                "mean": 137.41666666666666,
+                "max": 378
+              }
+            },
+            "pass2": {
+              "completed_passes": 11,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.07444636151194572,
+                "mean": 4.2560206499571605,
+                "max": 16.210494762286544
+              },
+              "verify_seconds": {
+                "min": 0.10363958962261677,
+                "mean": 6.432335876605728,
+                "max": 20.669909050688148
+              },
+              "component_seconds": {
+                "min": 0.1780859511345625,
+                "mean": 9.601586152714761,
+                "max": 30.134880179539323
+              },
+              "entry_count": {
+                "min": 21,
+                "mean": 137.41666666666666,
+                "max": 378
+              }
+            }
+          },
+          "wc1:culverts": {
+            "attempted": 12,
+            "completed": 12,
+            "timeouts": 0,
+            "errors": 0,
+            "pass1": {
+              "completed_passes": 12,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.5024839621037245,
+                "mean": 3.9736623256467283,
+                "max": 8.631360743194818
+              },
+              "verify_seconds": {
+                "min": 0.035452987998723984,
+                "mean": 0.3862288980744779,
+                "max": 1.7387627437710762
+              },
+              "component_seconds": {
+                "min": 0.5379369501024485,
+                "mean": 4.359891223721206,
+                "max": 10.048390971496701
+              },
+              "entry_count": {
+                "min": 12,
+                "mean": 44.666666666666664,
+                "max": 50
+              }
+            },
+            "pass2": {
+              "completed_passes": 12,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.01568678393959999,
+                "mean": 0.4589430989387135,
+                "max": 2.104732006788254
+              },
+              "verify_seconds": {
+                "min": 0.0341863427311182,
+                "mean": 0.2077700087490181,
+                "max": 0.3979067914187908
+              },
+              "component_seconds": {
+                "min": 0.04987312667071819,
+                "mean": 0.6667131076877316,
+                "max": 2.4503766410052776
+              },
+              "entry_count": {
+                "min": 12,
+                "mean": 44.666666666666664,
+                "max": 50
+              }
+            }
+          },
+          "legacy:runs": {
+            "attempted": 12,
+            "completed": 12,
+            "timeouts": 0,
+            "errors": 0,
+            "pass1": {
+              "completed_passes": 12,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.6191997081041336,
+                "mean": 6.250712472014129,
+                "max": 31.181944739073515
+              },
+              "verify_seconds": {
+                "min": 0.0244501493871212,
+                "mean": 1.9511269548286994,
+                "max": 12.391093783080578
+              },
+              "component_seconds": {
+                "min": 0.647926015779376,
+                "mean": 8.20183942684283,
+                "max": 43.57303852215409
+              },
+              "entry_count": {
+                "min": 10,
+                "mean": 37,
+                "max": 104
+              }
+            },
+            "pass2": {
+              "completed_passes": 12,
+              "completed_collections": 12,
+              "collect_seconds": {
+                "min": 0.015051327645778656,
+                "mean": 0.31729848325873417,
+                "max": 1.2332173604518175
+              },
+              "verify_seconds": {
+                "min": 0.027853606268763542,
+                "mean": 0.8840507081088921,
+                "max": 3.0965243857353926
+              },
+              "component_seconds": {
+                "min": 0.0429049339145422,
+                "mean": 1.2013491913676262,
+                "max": 4.32974174618721
+              },
+              "entry_count": {
+                "min": 10,
+                "mean": 37,
+                "max": 104
+              }
+            }
+          }
+        }
+      }
+    },
+    "worker_lifetimes": {
+      "file": "20261027_worker_lifetime_accounting.json",
+      "sha256": "fba026b1140f7290b5cdc2d26dab338d65d468470a6329aaa3328fff53c161bd",
+      "aggregate": {
+        "observed_at": 1793067283.7767565,
+        "workers": [
+          {
+            "worker_digest": "3a15156912f7e3a2041464949e7ab5b3e2fc9cfea5a84bc4a03ee3dc089848a6",
+            "state": "idle",
+            "birth": "2026-10-27T00:53:33.946096Z",
+            "age_seconds": 4869.830660581589,
+            "last_heartbeat": "2026-10-27T02:09:35.714422Z",
+            "total_working_seconds": 1723.500666,
+            "successful_job_count": 11,
+            "failed_job_count": 0
+          },
+          {
+            "worker_digest": "c5dd353f44c7ebc4455f6e006c73dd867d97ed7f6456e15d1057806c5fe00d02",
+            "state": "idle",
+            "birth": "2026-10-26T10:58:21.156862Z",
+            "age_seconds": 54982.61989450455,
+            "last_heartbeat": "2026-10-27T02:09:38.173717Z",
+            "total_working_seconds": 15045.605631,
+            "successful_job_count": 15,
+            "failed_job_count": 1
+          },
+          {
+            "worker_digest": "4e3669efa060cadf0d4275fea783b57c5d50491d091375d539c758b8fd12edc9",
+            "state": "idle",
+            "birth": "2026-10-27T00:52:06.375868Z",
+            "age_seconds": 4957.400888442993,
+            "last_heartbeat": "2026-10-27T02:10:30.273554Z",
+            "total_working_seconds": 1864.190335,
+            "successful_job_count": 12,
+            "failed_job_count": 0
+          },
+          {
+            "worker_digest": "b55900929d6fb12cbbe6c15036279326187b4ba608ded0014eb552a57356f7d4",
+            "state": "idle",
+            "birth": "2026-10-27T01:12:26.353913Z",
+            "age_seconds": 3737.4228434562683,
+            "last_heartbeat": "2026-10-27T02:09:06.830870Z",
+            "total_working_seconds": 563.73692,
+            "successful_job_count": 4,
+            "failed_job_count": 0
+          },
+          {
+            "worker_digest": "cdfcd560996786a1ef7947c4592db1a3c570e505bd9b0319a3b4b5106a19fea0",
+            "state": "idle",
+            "birth": "2026-10-26T10:45:17.777468Z",
+            "age_seconds": 55765.99928855896,
+            "last_heartbeat": "2026-10-27T02:12:41.423645Z",
+            "total_working_seconds": 3922.022645,
+            "successful_job_count": 11,
+            "failed_job_count": 1
+          },
+          {
+            "worker_digest": "be68bbf31c5ea7f8f4b3d27846e06608b8007b75b0a119668eed553b4aa1a5b9",
+            "state": "idle",
+            "birth": "2026-10-26T10:58:21.203594Z",
+            "age_seconds": 54982.573162555695,
+            "last_heartbeat": "2026-10-27T02:09:33.631184Z",
+            "total_working_seconds": 12175.63341,
+            "successful_job_count": 17,
+            "failed_job_count": 0
+          },
+          {
+            "worker_digest": "38b81ec62aea6db448189fef0ae974d5652acdb125bfa1c11c88dcd63e22e79b",
+            "state": "idle",
+            "birth": "2026-10-26T10:58:21.179804Z",
+            "age_seconds": 54982.596952438354,
+            "last_heartbeat": "2026-10-27T02:09:12.390528Z",
+            "total_working_seconds": 9640.974412,
+            "successful_job_count": 12,
+            "failed_job_count": 1
+          },
+          {
+            "worker_digest": "fb323164666517c863233a45fb848e48c692a07585ee281f137ec9ecbbaa07f6",
+            "state": "idle",
+            "birth": "2026-10-27T01:01:33.601380Z",
+            "age_seconds": 4390.175376415253,
+            "last_heartbeat": "2026-10-27T02:09:42.189332Z",
+            "total_working_seconds": 1248.518733,
+            "successful_job_count": 11,
+            "failed_job_count": 0
+          }
+        ],
+        "source_default_result_ttl": [
+          604800
+        ],
+        "rq_worker_sha256": "6f18302dff00e9d6976932867a064f9fd151fbf7bd50d8d9acac7a0288a78012",
+        "limitation": "Counters cover current worker lifetimes, not a complete24h history; previous/dead workers and earlier lost counters are not reconstructed. No registry cleanup or jobs submitted."
+      }
+    },
+    "component_cleanup": {
+      "file": "service-component-final-cleanup.json",
+      "sha256": "e9c2586b90ddeecfd00898f726e360127f3ce0497238fd76839a3a6f32ad2119",
+      "aggregate": {
+        "epoch": 1793067489.0775793,
+        "uid": 1002,
+        "gid": 130,
+        "owned_process_pids": []
+      }
+    },
+    "independent_checks": {
+      "exact_final_membership_count": 48,
+      "source_hash_sets": 1,
+      "matching_entry_digest_pairs": 46,
+      "raw_final_measurements_sha256": "f10d5a95a141b06e91d20e4fd95b2aaff1ef238eb65e14a39536c8d4ba7ec555",
+      "strict_refresh_call_count": {
+        "collections": 1,
+        "verifications": 2,
+        "guarded_verifications": 1
+      },
+      "measured_pass_call_count": {
+        "collections": 1,
+        "verifications": 1
+      },
+      "worker_lifetime_total_working_seconds": 46184.182752
+    },
+    "disposition": {
+      "general_enablement": "hold",
+      "recommended_next_step": "Policy-approved bounded existing-batch pilot; cap outstanding inventory+refresh to no more than one compatible worker cohort, pause new catalog admissions when ordinary work waits, finite scope/time and artifact/queue readback.",
+      "policy_status": "proposal only; no runtime/default changes authorized here",
+      "unresolved": [
+        "whole-job cost across representative scopes",
+        "shared-load ordinary queue delay",
+        "current-scale pending processing and scheduler interference",
+        "pilot ceiling, wait/stop/resume policy and extent"
+      ],
+      "no_fleet_upper_bound_or_capacity_pass": true
+    },
+    "concrete_proposal_review": {
+      "file": "20261027_bounded_admission_proposal.md",
+      "outstanding_cap": 7,
+      "current_compatible_cohort": 8,
+      "refresh_job_budget": 25,
+      "new_admission_window_seconds": 1800,
+      "ordinary_wait_failure_seconds": 300,
+      "resume": "explicit operator action",
+      "status": "reasonable proposal for decision; no implementation or execution authorization",
+      "required_clarifications": [
+        "cumulative refresh attempts include retries; inventory attempts also bounded",
+        "admission window differs from completion/drain deadline",
+        "owned-scope isolation and normal fleet compatibility before shared execution"
+      ]
+    }
+  }
+}

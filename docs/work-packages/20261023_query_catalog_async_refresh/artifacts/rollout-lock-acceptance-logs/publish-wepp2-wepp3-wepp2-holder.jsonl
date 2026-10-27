@@ -1,0 +1,11 @@
+{"event": "identity", "role": "holder", "epoch": 1793058837.3372917, "elapsed": 0.06101005710661411, "hostname": "1281c0dad239", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 248998786, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "guard_request", "role": "holder", "epoch": 1793058837.3378313, "elapsed": 0.06154877319931984, "repeat": 0}
+{"event": "lockf_enter", "role": "holder", "epoch": 1793058837.3472106, "elapsed": 0.07092815078794956, "operation": 2}
+{"event": "lockf_exit", "role": "holder", "epoch": 1793058837.3502448, "elapsed": 0.07396236807107925, "operation": 2, "seconds": 0.0030338317155838013}
+{"event": "acquired", "role": "holder", "epoch": 1793058837.3502915, "elapsed": 0.07400898821651936, "repeat": 0, "wait_seconds": 0.012462295591831207}
+{"event": "release_start", "role": "holder", "epoch": 1793058845.350416, "elapsed": 8.074135445058346, "repeat": 0}
+{"event": "lockf_enter", "role": "holder", "epoch": 1793058845.3505168, "elapsed": 8.074234215542674, "operation": 8}
+{"event": "lockf_exit", "role": "holder", "epoch": 1793058845.3998585, "elapsed": 8.123575976118445, "operation": 8, "seconds": 0.04933914169669151}
+{"event": "released", "role": "holder", "epoch": 1793058845.4311724, "elapsed": 8.154890157282352, "repeat": 0}
+{"event": "success", "role": "holder", "epoch": 1793058845.4312613, "elapsed": 8.154978573322296, "inode_unchanged": true}
+{"event": "heartbeat", "role": "holder", "epoch": 1793058845.431568, "elapsed": 8.155285419896245, "samples": 80, "max_gap_seconds": 0.16165692918002605}

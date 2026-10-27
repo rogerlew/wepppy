@@ -1,0 +1,96 @@
+{
+  "status": "passed",
+  "probe_host": "wepp3",
+  "holder_host": "wepp2",
+  "holder_seconds": 12,
+  "trials": [
+    {
+      "mode": "schema",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "request_utc": "2026-10-27T00:30:09.896185+00:00",
+      "request_seconds": 31.9219427742064,
+      "initial_lock_wait_seconds": 30.408667664974928,
+      "unrelated": [
+        {
+          "path": "/",
+          "seconds": 0.0028260983526706696,
+          "status": 200,
+          "during_holder": true
+        },
+        {
+          "path": "/health",
+          "seconds": 0.0025851894170045853,
+          "status": 200,
+          "during_holder": true
+        }
+      ],
+      "response_status": 200,
+      "pending_receipts": 0,
+      "sources": {
+        "wepppy.query_engine.app.mcp.router": {
+          "candidate_sha256": "550642bebb640ce490124b71a2af5758e927cc34e6f1e203146a97f107d96d31",
+          "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/mcp/router.py",
+          "live_file_sha256": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "wepppy.query_engine.app.server": {
+          "candidate_sha256": "68f94495468b67069093a6a27adff2f1494bb301b328b360d88b558a65484797",
+          "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/server.py",
+          "live_file_sha256": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f"
+        }
+      },
+      "live_files_unchanged": true,
+      "guard_inode_unchanged": true
+    },
+    {
+      "mode": "mcp",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "request_utc": "2026-10-27T00:31:01.749368+00:00",
+      "request_seconds": 30.860564447939396,
+      "initial_lock_wait_seconds": 30.333121860399842,
+      "unrelated": [
+        {
+          "path": "/",
+          "seconds": 0.0029246360063552856,
+          "status": 200,
+          "during_holder": true
+        },
+        {
+          "path": "/health",
+          "seconds": 0.002998102456331253,
+          "status": 200,
+          "during_holder": true
+        }
+      ],
+      "response_status": 200,
+      "pending_receipts": 0,
+      "sources": {
+        "wepppy.query_engine.app.mcp.router": {
+          "candidate_sha256": "550642bebb640ce490124b71a2af5758e927cc34e6f1e203146a97f107d96d31",
+          "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/mcp/router.py",
+          "live_file_sha256": "514940af5e287720707ba348b1c6d3338cdac8c2247252e1e5d8685d1b4c1b5b"
+        },
+        "wepppy.query_engine.app.server": {
+          "candidate_sha256": "68f94495468b67069093a6a27adff2f1494bb301b328b360d88b558a65484797",
+          "canonical_file": "/workdir/wepppy/wepppy/query_engine/app/server.py",
+          "live_file_sha256": "2efadde8374d1f48d93f60d111568102c208402c5a36517187144e8a14ab4e7f"
+        }
+      },
+      "live_files_unchanged": true,
+      "guard_inode_unchanged": true
+    }
+  ],
+  "isolated_ASGI_no_listener": true,
+  "production_deployed": false,
+  "scripts_sha256": {
+    "http-production-canary-probe.py": "5d294e945f61464999381dbf3b5f4e8cb5b760515cdaeed8a4e9ab292f64daa8",
+    "http-production-canary-driver.py": "f17a50e25e6564dade2f4106aac22948482b2bf047ba2eb690b464ee698b6540"
+  }
+}

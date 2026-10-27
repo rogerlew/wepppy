@@ -1,0 +1,403 @@
+{
+  "uid": 1002,
+  "gid": 130,
+  "state": "passed",
+  "tables": [
+    {
+      "path": "watershed/channels.parquet",
+      "source_rows": 19,
+      "copy_rows": 19
+    },
+    {
+      "path": "watershed/hillslopes.parquet",
+      "source_rows": 48,
+      "copy_rows": 48
+    },
+    {
+      "path": "landuse/landuse.parquet",
+      "source_rows": 48,
+      "copy_rows": 48
+    },
+    {
+      "path": "soils/soils.parquet",
+      "source_rows": 48,
+      "copy_rows": 48
+    },
+    {
+      "path": "climate/gridmet_observed_101_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_102_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_103_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_111_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_112_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_113_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_121_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_122_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_123_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_131_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_132_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_133_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_142_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_143_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_152_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_153_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_161_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_162_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_163_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_172_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_173_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_181_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_182_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_183_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_191_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_192_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_193_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_201_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_202_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_203_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_22_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_23_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_31_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_32_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_33_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_42_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_43_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_52_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_53_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_62_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_63_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_72_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_73_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_82_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_83_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_91_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_92_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_93_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/gridmet_observed_ws_2000-2015.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "climate/wepp_cli.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "wepp/output/interchange/H.ebe.parquet",
+      "source_rows": 10583,
+      "copy_rows": 10583
+    },
+    {
+      "path": "wepp/output/interchange/H.element.parquet",
+      "source_rows": 83669,
+      "copy_rows": 83669
+    },
+    {
+      "path": "wepp/output/interchange/H.loss.parquet",
+      "source_rows": 240,
+      "copy_rows": 240
+    },
+    {
+      "path": "wepp/output/interchange/H.pass.parquet",
+      "source_rows": 280512,
+      "copy_rows": 280512
+    },
+    {
+      "path": "wepp/output/interchange/H.soil.parquet",
+      "source_rows": 824004,
+      "copy_rows": 824004
+    },
+    {
+      "path": "wepp/output/interchange/H.wat.parquet",
+      "source_rows": 824004,
+      "copy_rows": 824004
+    },
+    {
+      "path": "wepp/output/interchange/chan.out.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "wepp/output/interchange/chanwb.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "wepp/output/interchange/chnwb.parquet",
+      "source_rows": 111036,
+      "copy_rows": 111036
+    },
+    {
+      "path": "wepp/output/interchange/ebe_pw0.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "source_rows": 304,
+      "copy_rows": 304
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "source_rows": 80,
+      "copy_rows": 80
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "source_rows": 768,
+      "copy_rows": 768
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "source_rows": 144,
+      "copy_rows": 144
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.chn.parquet",
+      "source_rows": 19,
+      "copy_rows": 19
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.class_data.parquet",
+      "source_rows": 5,
+      "copy_rows": 5
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+      "source_rows": 48,
+      "copy_rows": 48
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "source_rows": 11,
+      "copy_rows": 11
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.events.parquet",
+      "source_rows": 280512,
+      "copy_rows": 280512
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.metadata.parquet",
+      "source_rows": 48,
+      "copy_rows": 48
+    },
+    {
+      "path": "wepp/output/interchange/return_period_event_ranks.parquet",
+      "source_rows": 20640,
+      "copy_rows": 20640
+    },
+    {
+      "path": "wepp/output/interchange/return_period_events.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    },
+    {
+      "path": "wepp/output/interchange/soil_pw0.parquet",
+      "source_rows": 111036,
+      "copy_rows": 111036
+    },
+    {
+      "path": "wepp/output/interchange/tc_out.parquet",
+      "source_rows": 5052,
+      "copy_rows": 5052
+    },
+    {
+      "path": "wepp/output/interchange/totalwatsed3.parquet",
+      "source_rows": 5844,
+      "copy_rows": 5844
+    }
+  ],
+  "elapsed_seconds": 3.2792385034263134
+}

@@ -1,0 +1,13 @@
+{"event": "identity", "role": "publish", "epoch": 1793058877.037962, "elapsed": 0.06558354943990707, "hostname": "7cda8f7b4275", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 248998786, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "publication_start", "role": "publish", "epoch": 1793058877.384861, "elapsed": 0.4124817382544279}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058877.414048, "elapsed": 0.4416677448898554, "operation": 2}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058884.556047, "elapsed": 7.583666587248445, "operation": 2, "seconds": 7.141994293779135}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058884.5647485, "elapsed": 7.592368479818106, "operation": 8}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058884.5652828, "elapsed": 7.592902677133679, "operation": 8, "seconds": 0.0005355030298233032}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058889.718424, "elapsed": 12.746044602245092, "operation": 2}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058889.725007, "elapsed": 12.752626905217767, "operation": 2, "seconds": 0.0065875593572855}
+{"event": "lockf_enter", "role": "publish", "epoch": 1793058889.9326406, "elapsed": 12.960260417312384, "operation": 8}
+{"event": "lockf_exit", "role": "publish", "epoch": 1793058889.9335377, "elapsed": 12.961157970130444, "operation": 8, "seconds": 0.0008982233703136444}
+{"event": "publication_complete", "role": "publish", "epoch": 1793058889.9576588, "elapsed": 12.98527904599905, "seconds": 12.571611190214753, "catalog_sha256": "97a9f423bab26c14f465eb02cd08c64020be25bfe6e44387cdc9bc7a80f01bdd", "catalog": {"files": [{"extension": ".json", "modified": "2026-10-26T23:54:34.182691+00:00", "path": "_query_engine/catalog.json", "size_bytes": 637}, {"extension": ".parquet", "modified": "2026-10-26T17:18:36.740258+00:00", "path": "probe.parquet", "schema": {"fields": [{"name": "value", "type": "int64"}]}, "size_bytes": 518}], "generated_at": "2026-10-26T23:54:49.704283+00:00", "root": "/wc1/query-catalog-validation/20261026/async-preflight-1719/runs/aa/aa-preflight", "version": 1}}
+{"event": "success", "role": "publish", "epoch": 1793058889.957757, "elapsed": 12.985376741737127, "inode_unchanged": true}
+{"event": "heartbeat", "role": "publish", "epoch": 1793058889.9580312, "elapsed": 12.985650889575481, "samples": 120, "max_gap_seconds": 0.2951217368245125}

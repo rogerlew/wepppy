@@ -1,0 +1,174 @@
+{
+  "runid": "qcat-mill-creek-20261026",
+  "uid": 1000,
+  "gid": 993,
+  "artifacts": [
+    {
+      "path": "soils/soils.parquet",
+      "rows": 1908,
+      "columns": [
+        "topaz_id",
+        "wepp_id",
+        "mukey",
+        "fname",
+        "soils_dir",
+        "build_date",
+        "desc",
+        "color",
+        "area",
+        "pct_coverage",
+        "clay",
+        "sand",
+        "avke",
+        "ll",
+        "bd",
+        "simple_texture",
+        "soil_depth",
+        "rock",
+        "raw_mukey",
+        "shadow_cluster_id",
+        "shadow_search_radius_m",
+        "shadow_proposed_mukey",
+        "shadow_candidate_support_json",
+        "shadow_reason",
+        "substituted_mukey",
+        "substitution_reason",
+        "selection_policy",
+        "global_mukey",
+        "source_location_wgs84_json",
+        "candidate_raster_json",
+        "search_radius_m",
+        "candidate_support_json",
+        "source_profile_json",
+        "selected_profile_json",
+        "fallback_reason"
+      ],
+      "size_bytes": 67814,
+      "sha256": "7a917bc0bd4658ca2bb10df7e0fb6c672fe9b0f64ab3d80598968fb27bde8ddd"
+    },
+    {
+      "path": "watershed/hillslopes.parquet",
+      "rows": 1908,
+      "columns": [
+        "topaz_id",
+        "slope_scalar",
+        "length",
+        "width",
+        "direction",
+        "aspect",
+        "length_estimate_mode",
+        "length_area_over_channel",
+        "length_edge_median",
+        "area",
+        "elevation",
+        "centroid_px",
+        "centroid_py",
+        "centroid_lon",
+        "centroid_lat",
+        "wepp_id"
+      ],
+      "size_bytes": 136088,
+      "sha256": "c7fd37505816394879cc1cbdff5000cd0b071087a404733360d5e717183117f2"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+      "rows": 1908,
+      "columns": [
+        "Type",
+        "wepp_id",
+        "Runoff Volume",
+        "Subrunoff Volume",
+        "Baseflow Volume",
+        "Soil Loss",
+        "Sediment Deposition",
+        "Sediment Yield",
+        "Hillslope Area",
+        "Solub. React. Pollutant",
+        "Particulate Pollutant",
+        "Total Pollutant"
+      ],
+      "size_bytes": 70080,
+      "sha256": "64d3bce1a233f1bbd7be09bb7b2b45a2c651bd74763f2bfa977778206a1fbdec"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.chn.parquet",
+      "rows": 876,
+      "columns": [
+        "Type",
+        "chn_enum",
+        "Discharge Volume",
+        "Sediment Yield",
+        "Soil Loss",
+        "Upland Charge",
+        "Subsuface Flow Volume",
+        "Contributing Area",
+        "Solub. React. Pollutant",
+        "Particulate Pollutant",
+        "Total Pollutant",
+        "wepp_id"
+      ],
+      "size_bytes": 40280,
+      "sha256": "168e808a7407839e79db53b2031390e5f91d4becc6ceb720015b9fc297e62161"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "rows": 11,
+      "columns": [
+        "key",
+        "value",
+        "units"
+      ],
+      "size_bytes": 1773,
+      "sha256": "0df3ec03ebfdbce04857324924e1c52a96c1deda5c4e49877c88f95aa429c69d"
+    }
+  ],
+  "large_hillslope_products": [
+    {
+      "path": "H.ebe.parquet",
+      "rows": 8548903,
+      "row_groups": 1908,
+      "size_bytes": 120829514
+    },
+    {
+      "path": "H.element.parquet",
+      "rows": 16426276,
+      "row_groups": 1908,
+      "size_bytes": 459868554
+    },
+    {
+      "path": "H.loss.parquet",
+      "rows": 9540,
+      "row_groups": 1908,
+      "size_bytes": 3837823
+    },
+    {
+      "path": "H.pass.parquet",
+      "rows": 128227140,
+      "row_groups": 1908,
+      "size_bytes": 2930351357
+    },
+    {
+      "path": "H.soil.parquet",
+      "rows": 128227140,
+      "row_groups": 1908,
+      "size_bytes": 1669531064
+    },
+    {
+      "path": "H.wat.parquet",
+      "rows": 128227140,
+      "row_groups": 1908,
+      "size_bytes": 2796454488
+    }
+  ],
+  "query_backed_reports": {
+    "hillslope_rows": 1908,
+    "channel_rows": 876,
+    "outlet_rows": 8
+  },
+  "pending_receipts": 0,
+  "live_authenticated_download": {
+    "status": 200,
+    "bytes": 70080,
+    "sha256": "64d3bce1a233f1bbd7be09bb7b2b45a2c651bd74763f2bfa977778206a1fbdec"
+  }
+}

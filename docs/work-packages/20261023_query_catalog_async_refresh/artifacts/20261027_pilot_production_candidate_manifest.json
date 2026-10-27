@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "813d912be1c8f6f13b6fc60cecebbef9259cd36e",
+  "patch_sha256": "08cf69965d21ac00465874e7387fb1cae857a0b81025b224a24b09894aa8d161",
+  "files": {
+    "scripts/deploy-production.sh": "74866cfb081699157134c2c7f450019adaeeeff96d6a63c95bf74dde0f4fbf92",
+    "scripts/build_source_overlay.py": "b5493432a3c3cf901a0cfe0d7d4647f72658c831bb7c49afb7d9dc4553d5836f",
+    "wepppy/rq/query_catalog_rq.py": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9",
+    "wepppy/rq/_query_catalog_inventory.py": "f023fc55743141705aa964baf9ded6a4d031319c8b247f90c95583daa31de1b4",
+    "wepppy/rq/_query_catalog_admission.py": "ccf94032d46ec7038017a4f219b13e1d288b59753412ea3b9fdcf60abfecaf80",
+    "wepppy/rq/_query_catalog_pilot.py": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5",
+    "tools/query_catalog_pilot.py": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5"
+  },
+  "baseline_files": {
+    "scripts/deploy-production.sh": "4dc17a66c62b3c6f1cd27986275a5fa7b429bfddedff260a3fab6230f7788f1a",
+    "scripts/build_source_overlay.py": null,
+    "wepppy/rq/query_catalog_rq.py": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+    "wepppy/rq/_query_catalog_inventory.py": null,
+    "wepppy/rq/_query_catalog_admission.py": null,
+    "wepppy/rq/_query_catalog_pilot.py": null,
+    "tools/query_catalog_pilot.py": null
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "hillslopes": 1908,
+  "expected_ofe_profiles": 1908,
+  "days_per_profile": 67205,
+  "rows": 128227140,
+  "unique_complete_calendar": true,
+  "seconds": 12.49650085507892
+}

@@ -1,0 +1,102 @@
+{
+  "trial": "cross-0-wepp3-wepp1",
+  "host": "wepp3",
+  "role": "holder",
+  "exit_code": 0,
+  "driver_error": null,
+  "driver_start_epoch": 1793058752.2068508,
+  "driver_end_epoch": 1793058761.4477036,
+  "events": [
+    {
+      "event": "identity",
+      "role": "holder",
+      "epoch": 1793058753.3543527,
+      "elapsed": 0.04840007796883583,
+      "hostname": "39ca2ed3f7fa",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock",
+      "inode": 4253772674,
+      "mode": "0o640",
+      "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"
+    },
+    {
+      "event": "guard_request",
+      "role": "holder",
+      "epoch": 1793058753.3553736,
+      "elapsed": 0.049419404938817024,
+      "repeat": 0
+    },
+    {
+      "event": "lockf_enter",
+      "role": "holder",
+      "epoch": 1793058753.3671746,
+      "elapsed": 0.06122049689292908,
+      "operation": 2
+    },
+    {
+      "event": "lockf_exit",
+      "role": "holder",
+      "epoch": 1793058753.3685405,
+      "elapsed": 0.06258630566298962,
+      "operation": 2,
+      "seconds": 0.0013646595180034637
+    },
+    {
+      "event": "acquired",
+      "role": "holder",
+      "epoch": 1793058753.368605,
+      "elapsed": 0.06265071593225002,
+      "repeat": 0,
+      "wait_seconds": 0.013234348967671394
+    },
+    {
+      "event": "release_start",
+      "role": "holder",
+      "epoch": 1793058761.3688104,
+      "elapsed": 8.062861323356628,
+      "repeat": 0
+    },
+    {
+      "event": "lockf_enter",
+      "role": "holder",
+      "epoch": 1793058761.3690305,
+      "elapsed": 8.06307608820498,
+      "operation": 8
+    },
+    {
+      "event": "lockf_exit",
+      "role": "holder",
+      "epoch": 1793058761.36988,
+      "elapsed": 8.063925752416253,
+      "operation": 8,
+      "seconds": 0.0008461996912956238
+    },
+    {
+      "event": "released",
+      "role": "holder",
+      "epoch": 1793058761.370032,
+      "elapsed": 8.064078072085977,
+      "repeat": 0
+    },
+    {
+      "event": "success",
+      "role": "holder",
+      "epoch": 1793058761.3705635,
+      "elapsed": 8.064610058441758,
+      "inode_unchanged": true
+    },
+    {
+      "event": "heartbeat",
+      "role": "holder",
+      "epoch": 1793058761.3709562,
+      "elapsed": 8.065002262592316,
+      "samples": 79,
+      "max_gap_seconds": 0.14908192306756973
+    }
+  ],
+  "stderr": ""
+}

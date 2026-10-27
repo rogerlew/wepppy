@@ -1,0 +1,3924 @@
+{
+  "manifest": {
+    "sample_snapshot_sha256": "a71757de7b2fb5df24a50d11ecbe1017f20ce585a403cc8b849e14e26801c050",
+    "profile_summary": {
+      "elapsed_seconds": 1832.6962002553046,
+      "counts": {
+        "wc1:runs": {
+          "scopes": 4869,
+          "readonly": 927,
+          "writable": 3942,
+          "unwritable": 0,
+          "missing_catalog": 2238
+        },
+        "wc1:batch": {
+          "scopes": 1518,
+          "readonly": 0,
+          "writable": 1518,
+          "unwritable": 0,
+          "missing_catalog": 42
+        },
+        "wc1:culverts": {
+          "scopes": 2334,
+          "readonly": 0,
+          "writable": 2334,
+          "unwritable": 0,
+          "missing_catalog": 1894
+        },
+        "legacy:runs": {
+          "scopes": 8709,
+          "readonly": 5978,
+          "writable": 2731,
+          "unwritable": 0,
+          "missing_catalog": 8625
+        }
+      },
+      "profiled": 17430,
+      "discovered": 30734,
+      "inventory_completed": [
+        false,
+        true
+      ],
+      "sample_method": "12 smallest SHA256 path digests per namespace, writable non-READONLY only; raw sample paths private",
+      "error_count": 0
+    },
+    "snapshot_epoch": 1793064972.550932,
+    "selection": "exploratory snapshot; digest-selected sample in incomplete classification",
+    "sample_digests": {
+      "wc1:runs": [
+        "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+        "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+        "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+        "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+        "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+        "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+        "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+        "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+        "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+        "00972b3ec9e0bde4e8e18ba3b808f0bfe77d83d159f3def3a3f19edaeff9526b",
+        "00aa3deaaebc5f09d2fba330f082ef5c0a33ef4e5402e662668400014e79f7d0",
+        "00cdf5cf69f49d2d04673d876ecdfac0bec39efad6d5f2d5ed506bffbe7ab39e"
+      ],
+      "wc1:batch": [
+        "0062e3b14f00d2e150587e5c208a9f7cb1e22796d7d43d7a48d8c811e70e6934",
+        "0067565bf11e7c1a061e3ab6f1934df988f9edd0e3f0114ef8b0b8a4666b402e",
+        "007e1d061baf4feeb31de902f237ffc25db3482c7666ebfc96b6da28b08162cc",
+        "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+        "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+        "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+        "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+        "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+        "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+        "01830c72f105b653376ce85f8a38fa516dbcbac9912b5526292f9e09e54ab34b",
+        "01f38606f990610aa616d3e7c0fb9c8e5a18dd5292aa8c6ad053fbb534a5ed29",
+        "01f6df5997ed510fa94a806839e4ce698d5e14dc4b3e82e851f7c9d010edb8b7"
+      ],
+      "wc1:culverts": [
+        "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+        "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+        "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+        "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+        "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+        "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+        "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+        "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+        "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+        "0117218ac0ca4baa32d81fc874d913849b04d0d867aab3f69a457ec3ce5f7a6b",
+        "016dd50bf8c3774880449ce4f2027d3ea08a4c6efc2900bf07e9a2f4ef0f7816",
+        "01aa25c4a92919830f8d746c40aa38a9c117fd1cd99a19338711f9a27889189c"
+      ],
+      "legacy:runs": [
+        "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+        "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+        "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+        "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+        "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+        "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+        "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+        "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+        "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+        "0160c4c91e8411ced559a91b76246935b722ea8399ecbe3a39a33ecc43f18cd5",
+        "01b19ab1f6a84a9eea9b05e5ccd12ea7229f37996ee2a20571ec9e76046ebf0d",
+        "01ceeace8bb2b69b4d0459ed372d7ad17bf015a23f3af84373c57167756eed1f"
+      ]
+    },
+    "per_process_seconds": 60,
+    "overall_seconds": 720
+  },
+  "results": [
+    {
+      "namespace": "wc1:runs",
+      "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 5.946540335193276,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.5362059399485588,
+          "entry_count": 14
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.5362059399485588,
+          "verify_seconds": 0.047232115641236305,
+          "component_seconds": 0.5834380555897951,
+          "entry_count": 14,
+          "entries_sha256": "f5b948cb08444248aac19a68d45094376604c896444679eb92f4908658098ad5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.04814163036644459,
+          "entry_count": 14
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.04814163036644459,
+          "verify_seconds": 0.061456749215722084,
+          "component_seconds": 0.10959837958216667,
+          "entry_count": 14,
+          "entries_sha256": "f5b948cb08444248aac19a68d45094376604c896444679eb92f4908658098ad5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0019080ff6e2a01e917c5076a79754aba07569551edfb4b3764a6355f8ba9edf",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.5362059399485588,
+              "verify_seconds": 0.047232115641236305,
+              "component_seconds": 0.5834380555897951,
+              "entry_count": 14,
+              "entries_sha256": "f5b948cb08444248aac19a68d45094376604c896444679eb92f4908658098ad5"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.04814163036644459,
+              "verify_seconds": 0.061456749215722084,
+              "component_seconds": 0.10959837958216667,
+              "entry_count": 14,
+              "entries_sha256": "f5b948cb08444248aac19a68d45094376604c896444679eb92f4908658098ad5"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0062e3b14f00d2e150587e5c208a9f7cb1e22796d7d43d7a48d8c811e70e6934",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 60.08584460243583,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0062e3b14f00d2e150587e5c208a9f7cb1e22796d7d43d7a48d8c811e70e6934",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0062e3b14f00d2e150587e5c208a9f7cb1e22796d7d43d7a48d8c811e70e6934",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 11.331623582169414,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 4.449208751320839,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 4.449208751320839,
+          "verify_seconds": 0.28609528206288815,
+          "component_seconds": 4.735304033383727,
+          "entry_count": 50,
+          "entries_sha256": "da8c967546c6da3b299cdfc3ae4b4f7a92769ae58f6d904af1dd01b037471355"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.3084396477788687,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.3084396477788687,
+          "verify_seconds": 0.27305199578404427,
+          "component_seconds": 0.5814916435629129,
+          "entry_count": 50,
+          "entries_sha256": "da8c967546c6da3b299cdfc3ae4b4f7a92769ae58f6d904af1dd01b037471355"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0012930ee7bcfb778750550c9c0723a79503cc6aa76426da30410f5fd815355e",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 4.449208751320839,
+              "verify_seconds": 0.28609528206288815,
+              "component_seconds": 4.735304033383727,
+              "entry_count": 50,
+              "entries_sha256": "da8c967546c6da3b299cdfc3ae4b4f7a92769ae58f6d904af1dd01b037471355"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.3084396477788687,
+              "verify_seconds": 0.27305199578404427,
+              "component_seconds": 0.5814916435629129,
+              "entry_count": 50,
+              "entries_sha256": "da8c967546c6da3b299cdfc3ae4b4f7a92769ae58f6d904af1dd01b037471355"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 60.066363014280796,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0009e8a1302d79eb944f5438ef00b85640b62581379e5d1b127a0ee0da53585b",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 21.768650082871318,
+          "entry_count": 40
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.014582894742489,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.6022668238729239,
+          "entry_count": 11
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.6022668238729239,
+          "verify_seconds": 0.025034263730049133,
+          "component_seconds": 0.627301087602973,
+          "entry_count": 11,
+          "entries_sha256": "02af0c3864d55a35f17088462f007fb0fabf51e2beae34ff392e86395a4b8ee5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.011749779805541039,
+          "entry_count": 11
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.011749779805541039,
+          "verify_seconds": 0.022474491968750954,
+          "component_seconds": 0.03422427177429199,
+          "entry_count": 11,
+          "entries_sha256": "02af0c3864d55a35f17088462f007fb0fabf51e2beae34ff392e86395a4b8ee5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0030969c9d695f88a28d80e8f86c466157cb7682ecab5416d29229a4836ea982",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.6022668238729239,
+              "verify_seconds": 0.025034263730049133,
+              "component_seconds": 0.627301087602973,
+              "entry_count": 11,
+              "entries_sha256": "02af0c3864d55a35f17088462f007fb0fabf51e2beae34ff392e86395a4b8ee5"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.011749779805541039,
+              "verify_seconds": 0.022474491968750954,
+              "component_seconds": 0.03422427177429199,
+              "entry_count": 11,
+              "entries_sha256": "02af0c3864d55a35f17088462f007fb0fabf51e2beae34ff392e86395a4b8ee5"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0067565bf11e7c1a061e3ab6f1934df988f9edd0e3f0114ef8b0b8a4666b402e",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 60.09958627820015,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0067565bf11e7c1a061e3ab6f1934df988f9edd0e3f0114ef8b0b8a4666b402e",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0067565bf11e7c1a061e3ab6f1934df988f9edd0e3f0114ef8b0b8a4666b402e",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 16.563566075637937,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 8.631360743194818,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 8.631360743194818,
+          "verify_seconds": 0.5475757457315922,
+          "component_seconds": 9.17893648892641,
+          "entry_count": 50,
+          "entries_sha256": "2c8266f63ece7b101d884952a3da242a54ef7977bcc36e66508704f34f895adb"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.838889678940177,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.838889678940177,
+          "verify_seconds": 0.3979067914187908,
+          "component_seconds": 1.2367964703589678,
+          "entry_count": 50,
+          "entries_sha256": "2c8266f63ece7b101d884952a3da242a54ef7977bcc36e66508704f34f895adb"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "002fd9946b1266374c83ecfbbb8cc84a63d4c040c9f3510593bbf9643518769d",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 8.631360743194818,
+              "verify_seconds": 0.5475757457315922,
+              "component_seconds": 9.17893648892641,
+              "entry_count": 50,
+              "entries_sha256": "2c8266f63ece7b101d884952a3da242a54ef7977bcc36e66508704f34f895adb"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.838889678940177,
+              "verify_seconds": 0.3979067914187908,
+              "component_seconds": 1.2367964703589678,
+              "entry_count": 50,
+              "entries_sha256": "2c8266f63ece7b101d884952a3da242a54ef7977bcc36e66508704f34f895adb"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 21.372834160923958,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 9.34818603657186,
+          "entry_count": 104
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 9.34818603657186,
+          "verify_seconds": 5.249123644083738,
+          "component_seconds": 14.597309680655599,
+          "entry_count": 104,
+          "entries_sha256": "ea4e7236322441ba3ad5ba8c0ec1fe9f809a841d23ebafaf00b250faade1c227"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.7648440282791853,
+          "entry_count": 104
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.7648440282791853,
+          "verify_seconds": 1.3953408915549517,
+          "component_seconds": 2.160184919834137,
+          "entry_count": 104,
+          "entries_sha256": "ea4e7236322441ba3ad5ba8c0ec1fe9f809a841d23ebafaf00b250faade1c227"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00512f24a71a13e9e3701c77608cf484dd929e5c75f38cedb7561add6c136828",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 9.34818603657186,
+              "verify_seconds": 5.249123644083738,
+              "component_seconds": 14.597309680655599,
+              "entry_count": 104,
+              "entries_sha256": "ea4e7236322441ba3ad5ba8c0ec1fe9f809a841d23ebafaf00b250faade1c227"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.7648440282791853,
+              "verify_seconds": 1.3953408915549517,
+              "component_seconds": 2.160184919834137,
+              "entry_count": 104,
+              "entries_sha256": "ea4e7236322441ba3ad5ba8c0ec1fe9f809a841d23ebafaf00b250faade1c227"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.087723147124052,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.766947915777564,
+          "entry_count": 11
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.766947915777564,
+          "verify_seconds": 0.04788213409483433,
+          "component_seconds": 0.8148300498723984,
+          "entry_count": 11,
+          "entries_sha256": "9b6e8b26cabaf08d44893a925f99c89413301558cb242bd01f7bb3aee446ba21"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.041166508570313454,
+          "entry_count": 11
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.041166508570313454,
+          "verify_seconds": 0.03037959523499012,
+          "component_seconds": 0.07154610380530357,
+          "entry_count": 11,
+          "entries_sha256": "9b6e8b26cabaf08d44893a925f99c89413301558cb242bd01f7bb3aee446ba21"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0031ff6c8c35fcddd22c9d320880f1b4db83783c81369a7ebba33a97475a936b",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.766947915777564,
+              "verify_seconds": 0.04788213409483433,
+              "component_seconds": 0.8148300498723984,
+              "entry_count": 11,
+              "entries_sha256": "9b6e8b26cabaf08d44893a925f99c89413301558cb242bd01f7bb3aee446ba21"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.041166508570313454,
+              "verify_seconds": 0.03037959523499012,
+              "component_seconds": 0.07154610380530357,
+              "entry_count": 11,
+              "entries_sha256": "9b6e8b26cabaf08d44893a925f99c89413301558cb242bd01f7bb3aee446ba21"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "007e1d061baf4feeb31de902f237ffc25db3482c7666ebfc96b6da28b08162cc",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 60.04239897802472,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "007e1d061baf4feeb31de902f237ffc25db3482c7666ebfc96b6da28b08162cc",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "007e1d061baf4feeb31de902f237ffc25db3482c7666ebfc96b6da28b08162cc",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 13.228074695914984,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 6.516650475561619,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 6.516650475561619,
+          "verify_seconds": 0.6662973910570145,
+          "component_seconds": 7.182947866618633,
+          "entry_count": 50,
+          "entries_sha256": "06b8b424319d7e55861ba79db8edd646fb32e6b129ff6a32d0c7fe1d0aac005e"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.6644960939884186,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.6644960939884186,
+          "verify_seconds": 0.24494931660592556,
+          "component_seconds": 0.9094454105943441,
+          "entry_count": 50,
+          "entries_sha256": "06b8b424319d7e55861ba79db8edd646fb32e6b129ff6a32d0c7fe1d0aac005e"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0051c6f5c894edbb95d63db2264f749c63b9586694229720f50e7e605cefbbf9",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 6.516650475561619,
+              "verify_seconds": 0.6662973910570145,
+              "component_seconds": 7.182947866618633,
+              "entry_count": 50,
+              "entries_sha256": "06b8b424319d7e55861ba79db8edd646fb32e6b129ff6a32d0c7fe1d0aac005e"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.6644960939884186,
+              "verify_seconds": 0.24494931660592556,
+              "component_seconds": 0.9094454105943441,
+              "entry_count": 50,
+              "entries_sha256": "06b8b424319d7e55861ba79db8edd646fb32e6b129ff6a32d0c7fe1d0aac005e"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 5.997936386615038,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.8289112914353609,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 0.8289112914353609,
+          "verify_seconds": 0.07015686668455601,
+          "component_seconds": 0.8990681581199169,
+          "entry_count": 15,
+          "entries_sha256": "0222eadac42b9a9cc916956d06db6955214a3157a21242abffa3c4c2535629f5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.054943542927503586,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.054943542927503586,
+          "verify_seconds": 0.04458974115550518,
+          "component_seconds": 0.09953328408300877,
+          "entry_count": 15,
+          "entries_sha256": "0222eadac42b9a9cc916956d06db6955214a3157a21242abffa3c4c2535629f5"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0087266682d47874ed1a7634e7563b3475e772257aac06e1d9af4046157dca4e",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.8289112914353609,
+              "verify_seconds": 0.07015686668455601,
+              "component_seconds": 0.8990681581199169,
+              "entry_count": 15,
+              "entries_sha256": "0222eadac42b9a9cc916956d06db6955214a3157a21242abffa3c4c2535629f5"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.054943542927503586,
+              "verify_seconds": 0.04458974115550518,
+              "component_seconds": 0.09953328408300877,
+              "entry_count": 15,
+              "entries_sha256": "0222eadac42b9a9cc916956d06db6955214a3157a21242abffa3c4c2535629f5"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 5.48282153531909,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.5110421162098646,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.5110421162098646,
+          "verify_seconds": 0.05322672240436077,
+          "component_seconds": 0.5642688386142254,
+          "entry_count": 16,
+          "entries_sha256": "8c142c616786d27f7efcec9e3174b377ce8ac8bc1a3db353e53f31e913c457be"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.032389989122748375,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.032389989122748375,
+          "verify_seconds": 0.08100529760122299,
+          "component_seconds": 0.11339528672397137,
+          "entry_count": 16,
+          "entries_sha256": "8c142c616786d27f7efcec9e3174b377ce8ac8bc1a3db353e53f31e913c457be"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0033dce97924c5f041882581c262536847da295b713df48355d8ef9ca1b73894",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.5110421162098646,
+              "verify_seconds": 0.05322672240436077,
+              "component_seconds": 0.5642688386142254,
+              "entry_count": 16,
+              "entries_sha256": "8c142c616786d27f7efcec9e3174b377ce8ac8bc1a3db353e53f31e913c457be"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.032389989122748375,
+              "verify_seconds": 0.08100529760122299,
+              "component_seconds": 0.11339528672397137,
+              "entry_count": 16,
+              "entries_sha256": "8c142c616786d27f7efcec9e3174b377ce8ac8bc1a3db353e53f31e913c457be"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 13.457599764689803,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 4.6969152092933655,
+          "entry_count": 102
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 4.6969152092933655,
+          "verify_seconds": 2.2207658495754004,
+          "component_seconds": 6.917681058868766,
+          "entry_count": 102,
+          "entries_sha256": "5a2a0b2882dd7d01bc4212de7e9480eedf1ef6543aa5f82f27e75c0e9c3f6671"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.13916912488639355,
+          "entry_count": 102
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.13916912488639355,
+          "verify_seconds": 1.3333286233246326,
+          "component_seconds": 1.4724977482110262,
+          "entry_count": 102,
+          "entries_sha256": "5a2a0b2882dd7d01bc4212de7e9480eedf1ef6543aa5f82f27e75c0e9c3f6671"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00817f4655a4b4e5d1c625a0911723d98ac1262a4f03bbc15d3c1d1bee58cd82",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 4.6969152092933655,
+              "verify_seconds": 2.2207658495754004,
+              "component_seconds": 6.917681058868766,
+              "entry_count": 102,
+              "entries_sha256": "5a2a0b2882dd7d01bc4212de7e9480eedf1ef6543aa5f82f27e75c0e9c3f6671"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.13916912488639355,
+              "verify_seconds": 1.3333286233246326,
+              "component_seconds": 1.4724977482110262,
+              "entry_count": 102,
+              "entries_sha256": "5a2a0b2882dd7d01bc4212de7e9480eedf1ef6543aa5f82f27e75c0e9c3f6671"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 8.55680206604302,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 3.271172594279051,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 3.271172594279051,
+          "verify_seconds": 0.19705113768577576,
+          "component_seconds": 3.4682237319648266,
+          "entry_count": 50,
+          "entries_sha256": "febaa76a7deb99885ca3f2b58b47cb24c7e799e3247bdb4de9bf4d7275362765"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.26159975305199623,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.26159975305199623,
+          "verify_seconds": 0.19545289129018784,
+          "component_seconds": 0.45705264434218407,
+          "entry_count": 50,
+          "entries_sha256": "febaa76a7deb99885ca3f2b58b47cb24c7e799e3247bdb4de9bf4d7275362765"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "009a3f37265c686513ab46ec873b5f44330ba950f4bec290c5da9a07e9b1e08b",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 3.271172594279051,
+              "verify_seconds": 0.19705113768577576,
+              "component_seconds": 3.4682237319648266,
+              "entry_count": 50,
+              "entries_sha256": "febaa76a7deb99885ca3f2b58b47cb24c7e799e3247bdb4de9bf4d7275362765"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.26159975305199623,
+              "verify_seconds": 0.19545289129018784,
+              "component_seconds": 0.45705264434218407,
+              "entry_count": 50,
+              "entries_sha256": "febaa76a7deb99885ca3f2b58b47cb24c7e799e3247bdb4de9bf4d7275362765"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 36.54059308208525,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 9.838792856782675,
+          "entry_count": 55
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 9.838792856782675,
+          "verify_seconds": 18.029609141871333,
+          "component_seconds": 27.868401998654008,
+          "entry_count": 55,
+          "entries_sha256": "f554bd6c6d6e33dad972cf1afeb2b69b25a2b9759820b07d051b7ce28034f344"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 1.7196236904710531,
+          "entry_count": 55
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 1.7196236904710531,
+          "verify_seconds": 2.291070507839322,
+          "component_seconds": 4.010694198310375,
+          "entry_count": 55,
+          "entries_sha256": "f554bd6c6d6e33dad972cf1afeb2b69b25a2b9759820b07d051b7ce28034f344"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00b3e0b9f30677a64e49fe8c75ba4a69b743a2989e10015ec4b17b58d8b0edd5",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 9.838792856782675,
+              "verify_seconds": 18.029609141871333,
+              "component_seconds": 27.868401998654008,
+              "entry_count": 55,
+              "entries_sha256": "f554bd6c6d6e33dad972cf1afeb2b69b25a2b9759820b07d051b7ce28034f344"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 1.7196236904710531,
+              "verify_seconds": 2.291070507839322,
+              "component_seconds": 4.010694198310375,
+              "entry_count": 55,
+              "entries_sha256": "f554bd6c6d6e33dad972cf1afeb2b69b25a2b9759820b07d051b7ce28034f344"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 7.189292406663299,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 1.3422468546777964,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 1.3422468546777964,
+          "verify_seconds": 0.15112427435815334,
+          "component_seconds": 1.4933711290359497,
+          "entry_count": 15,
+          "entries_sha256": "12e0396b848a6670f9f27f2fbafe99ba7725ede018ec872b4463aa46c8548113"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.17540886253118515,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.17540886253118515,
+          "verify_seconds": 0.20519129931926727,
+          "component_seconds": 0.3806001618504524,
+          "entry_count": 15,
+          "entries_sha256": "12e0396b848a6670f9f27f2fbafe99ba7725ede018ec872b4463aa46c8548113"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00509eeeafc924d1af17b624666710dceff0026e7455397d970995cf876723e3",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 1.3422468546777964,
+              "verify_seconds": 0.15112427435815334,
+              "component_seconds": 1.4933711290359497,
+              "entry_count": 15,
+              "entries_sha256": "12e0396b848a6670f9f27f2fbafe99ba7725ede018ec872b4463aa46c8548113"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.17540886253118515,
+              "verify_seconds": 0.20519129931926727,
+              "component_seconds": 0.3806001618504524,
+              "entry_count": 15,
+              "entries_sha256": "12e0396b848a6670f9f27f2fbafe99ba7725ede018ec872b4463aa46c8548113"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 19.419362047687173,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 11.014692075550556,
+          "entry_count": 135
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 11.014692075550556,
+          "verify_seconds": 2.494227558374405,
+          "component_seconds": 13.508919633924961,
+          "entry_count": 135,
+          "entries_sha256": "03965773533f43429d9ac301459fed454327592cabb5702dfaa787a3d0a50dd3"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.41545336320996284,
+          "entry_count": 135
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.41545336320996284,
+          "verify_seconds": 0.5008861254900694,
+          "component_seconds": 0.9163394887000322,
+          "entry_count": 135,
+          "entries_sha256": "03965773533f43429d9ac301459fed454327592cabb5702dfaa787a3d0a50dd3"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00ee189efa8d352762c1de8115cc94fc949a9213f1102f191396c9020f19b267",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 11.014692075550556,
+              "verify_seconds": 2.494227558374405,
+              "component_seconds": 13.508919633924961,
+              "entry_count": 135,
+              "entries_sha256": "03965773533f43429d9ac301459fed454327592cabb5702dfaa787a3d0a50dd3"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.41545336320996284,
+              "verify_seconds": 0.5008861254900694,
+              "component_seconds": 0.9163394887000322,
+              "entry_count": 135,
+              "entries_sha256": "03965773533f43429d9ac301459fed454327592cabb5702dfaa787a3d0a50dd3"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 5.755014261230826,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.5024839621037245,
+          "entry_count": 12
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 0.5024839621037245,
+          "verify_seconds": 0.035452987998723984,
+          "component_seconds": 0.5379369501024485,
+          "entry_count": 12,
+          "entries_sha256": "5bbdb0b2049a39de97629e37a2ceff365f2629792a8cc7d5207614e4bba010ab"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.01568678393959999,
+          "entry_count": 12
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.01568678393959999,
+          "verify_seconds": 0.0341863427311182,
+          "component_seconds": 0.04987312667071819,
+          "entry_count": 12,
+          "entries_sha256": "5bbdb0b2049a39de97629e37a2ceff365f2629792a8cc7d5207614e4bba010ab"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "009f5603ff1732779d91a676a19880838772c4a8540079f0ffc27e181765f235",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.5024839621037245,
+              "verify_seconds": 0.035452987998723984,
+              "component_seconds": 0.5379369501024485,
+              "entry_count": 12,
+              "entries_sha256": "5bbdb0b2049a39de97629e37a2ceff365f2629792a8cc7d5207614e4bba010ab"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.01568678393959999,
+              "verify_seconds": 0.0341863427311182,
+              "component_seconds": 0.04987312667071819,
+              "entry_count": 12,
+              "entries_sha256": "5bbdb0b2049a39de97629e37a2ceff365f2629792a8cc7d5207614e4bba010ab"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 41.65141081996262,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 14.216452026739717,
+          "entry_count": 113
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 14.216452026739717,
+          "verify_seconds": 12.42555089853704,
+          "component_seconds": 26.642002925276756,
+          "entry_count": 113,
+          "entries_sha256": "861f254e964f9fafd9cb204c5effbf0eaf11acd4688812cbddc467aa9c4bc9b8"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 4.306720215827227,
+          "entry_count": 113
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 4.306720215827227,
+          "verify_seconds": 5.782879933714867,
+          "component_seconds": 10.089600149542093,
+          "entry_count": 113,
+          "entries_sha256": "861f254e964f9fafd9cb204c5effbf0eaf11acd4688812cbddc467aa9c4bc9b8"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00bc50b77c477917c1821d0d09f4e5838ddec043a3020e8eec2e5d5c6afaec08",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 14.216452026739717,
+              "verify_seconds": 12.42555089853704,
+              "component_seconds": 26.642002925276756,
+              "entry_count": 113,
+              "entries_sha256": "861f254e964f9fafd9cb204c5effbf0eaf11acd4688812cbddc467aa9c4bc9b8"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 4.306720215827227,
+              "verify_seconds": 5.782879933714867,
+              "component_seconds": 10.089600149542093,
+              "entry_count": 113,
+              "entries_sha256": "861f254e964f9fafd9cb204c5effbf0eaf11acd4688812cbddc467aa9c4bc9b8"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.4088913686573505,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.4700748957693577,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.4700748957693577,
+          "verify_seconds": 0.04119063541293144,
+          "component_seconds": 0.5112655311822891,
+          "entry_count": 15,
+          "entries_sha256": "d644e9b50e8fe592471c2eee4d970088e21edee02d0fe10311daa2211a43595a"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.05272316746413708,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.05272316746413708,
+          "verify_seconds": 0.05998851731419563,
+          "component_seconds": 0.11271168477833271,
+          "entry_count": 15,
+          "entries_sha256": "d644e9b50e8fe592471c2eee4d970088e21edee02d0fe10311daa2211a43595a"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0065124febf366a470115ea9b46e5e880a6e25bc19f728f9e3049f6c7b61c88c",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.4700748957693577,
+              "verify_seconds": 0.04119063541293144,
+              "component_seconds": 0.5112655311822891,
+              "entry_count": 15,
+              "entries_sha256": "d644e9b50e8fe592471c2eee4d970088e21edee02d0fe10311daa2211a43595a"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.05272316746413708,
+              "verify_seconds": 0.05998851731419563,
+              "component_seconds": 0.11271168477833271,
+              "entry_count": 15,
+              "entries_sha256": "d644e9b50e8fe592471c2eee4d970088e21edee02d0fe10311daa2211a43595a"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 11.282592423260212,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 4.085106359794736,
+          "entry_count": 118
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 4.085106359794736,
+          "verify_seconds": 0.5890499241650105,
+          "component_seconds": 4.674156283959746,
+          "entry_count": 118,
+          "entries_sha256": "f55c1083d567bb8b1a9946fd28667bb964429520bace03cf8594f5b533485f33"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.5063324645161629,
+          "entry_count": 118
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.5063324645161629,
+          "verify_seconds": 0.6092602051794529,
+          "component_seconds": 1.1155926696956158,
+          "entry_count": 118,
+          "entries_sha256": "f55c1083d567bb8b1a9946fd28667bb964429520bace03cf8594f5b533485f33"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0106b0904ac6056a6d2ba73076731a9f1d9c0d17bfaa19969037279f6e43cc17",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 4.085106359794736,
+              "verify_seconds": 0.5890499241650105,
+              "component_seconds": 4.674156283959746,
+              "entry_count": 118,
+              "entries_sha256": "f55c1083d567bb8b1a9946fd28667bb964429520bace03cf8594f5b533485f33"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.5063324645161629,
+              "verify_seconds": 0.6092602051794529,
+              "component_seconds": 1.1155926696956158,
+              "entry_count": 118,
+              "entries_sha256": "f55c1083d567bb8b1a9946fd28667bb964429520bace03cf8594f5b533485f33"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 17.93029818125069,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 8.309628227725625,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 8.309628227725625,
+          "verify_seconds": 1.7387627437710762,
+          "component_seconds": 10.048390971496701,
+          "entry_count": 50,
+          "entries_sha256": "ae6387b13b6614e1551d4018a304f2f67fb39c6edf9fa9306c06d98f43f7d808"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 2.104732006788254,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 2.104732006788254,
+          "verify_seconds": 0.34564463421702385,
+          "component_seconds": 2.4503766410052776,
+          "entry_count": 50,
+          "entries_sha256": "ae6387b13b6614e1551d4018a304f2f67fb39c6edf9fa9306c06d98f43f7d808"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00b687c3256a644c37f98fc9841abb16428546ef303ceaf7f826be3f8e0911ff",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 8.309628227725625,
+              "verify_seconds": 1.7387627437710762,
+              "component_seconds": 10.048390971496701,
+              "entry_count": 50,
+              "entries_sha256": "ae6387b13b6614e1551d4018a304f2f67fb39c6edf9fa9306c06d98f43f7d808"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 2.104732006788254,
+              "verify_seconds": 0.34564463421702385,
+              "component_seconds": 2.4503766410052776,
+              "entry_count": 50,
+              "entries_sha256": "ae6387b13b6614e1551d4018a304f2f67fb39c6edf9fa9306c06d98f43f7d808"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.659680662676692,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.9575800895690918,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 0.9575800895690918,
+          "verify_seconds": 0.02769753336906433,
+          "component_seconds": 0.9852776229381561,
+          "entry_count": 16,
+          "entries_sha256": "a641ae1e9cce735389380dd100b57957cfbf21792d2e5f4fd23f79623eade755"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.03225373104214668,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.03225373104214668,
+          "verify_seconds": 0.02850324474275112,
+          "component_seconds": 0.060756975784897804,
+          "entry_count": 16,
+          "entries_sha256": "a641ae1e9cce735389380dd100b57957cfbf21792d2e5f4fd23f79623eade755"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0101f98f6277ce07387c19ade3eec7691a775fae7eb282775cdbac5ff9395c7d",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.9575800895690918,
+              "verify_seconds": 0.02769753336906433,
+              "component_seconds": 0.9852776229381561,
+              "entry_count": 16,
+              "entries_sha256": "a641ae1e9cce735389380dd100b57957cfbf21792d2e5f4fd23f79623eade755"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.03225373104214668,
+              "verify_seconds": 0.02850324474275112,
+              "component_seconds": 0.060756975784897804,
+              "entry_count": 16,
+              "entries_sha256": "a641ae1e9cce735389380dd100b57957cfbf21792d2e5f4fd23f79623eade755"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 5.850759057328105,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.6130595207214355,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 0.6130595207214355,
+          "verify_seconds": 0.03896396793425083,
+          "component_seconds": 0.6520234886556864,
+          "entry_count": 15,
+          "entries_sha256": "a0cdf46ad5f7cbd2989db3db96d037ba4b66f15f5f03627495e698c797916aaa"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.00976535864174366,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.00976535864174366,
+          "verify_seconds": 0.03030267357826233,
+          "component_seconds": 0.04006803222000599,
+          "entry_count": 15,
+          "entries_sha256": "a0cdf46ad5f7cbd2989db3db96d037ba4b66f15f5f03627495e698c797916aaa"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "007496eb4b670eee7d2e8bfedeae34b7bee9ebd8c5dca3403e4fcdebaf6e3906",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.6130595207214355,
+              "verify_seconds": 0.03896396793425083,
+              "component_seconds": 0.6520234886556864,
+              "entry_count": 15,
+              "entries_sha256": "a0cdf46ad5f7cbd2989db3db96d037ba4b66f15f5f03627495e698c797916aaa"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.00976535864174366,
+              "verify_seconds": 0.03030267357826233,
+              "component_seconds": 0.04006803222000599,
+              "entry_count": 15,
+              "entries_sha256": "a0cdf46ad5f7cbd2989db3db96d037ba4b66f15f5f03627495e698c797916aaa"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 18.343012759462,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 12.624251836910844,
+          "entry_count": 25
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 12.624251836910844,
+          "verify_seconds": 0.31697315722703934,
+          "component_seconds": 12.941224994137883,
+          "entry_count": 25,
+          "entries_sha256": "817466c1a4719c52e161c1587800dc5dad4630cdccd8744712f9f32db3485f3b"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.25693432055413723,
+          "entry_count": 25
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.25693432055413723,
+          "verify_seconds": 0.17935139685869217,
+          "component_seconds": 0.4362857174128294,
+          "entry_count": 25,
+          "entries_sha256": "817466c1a4719c52e161c1587800dc5dad4630cdccd8744712f9f32db3485f3b"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "01511d22702c09068998e29297d1c41688891b6e7bf971ced510f187e88daf81",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 12.624251836910844,
+              "verify_seconds": 0.31697315722703934,
+              "component_seconds": 12.941224994137883,
+              "entry_count": 25,
+              "entries_sha256": "817466c1a4719c52e161c1587800dc5dad4630cdccd8744712f9f32db3485f3b"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.25693432055413723,
+              "verify_seconds": 0.17935139685869217,
+              "component_seconds": 0.4362857174128294,
+              "entry_count": 25,
+              "entries_sha256": "817466c1a4719c52e161c1587800dc5dad4630cdccd8744712f9f32db3485f3b"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.921839969232678,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 1.2097453568130732,
+          "entry_count": 24
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 1.2097453568130732,
+          "verify_seconds": 0.20647861063480377,
+          "component_seconds": 1.416223967447877,
+          "entry_count": 24,
+          "entries_sha256": "7425535accb45606551e70b421a7d5bb7e722d9d055348d123294199b016bd1b"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.14656798355281353,
+          "entry_count": 24
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.14656798355281353,
+          "verify_seconds": 0.0868943091481924,
+          "component_seconds": 0.23346229270100594,
+          "entry_count": 24,
+          "entries_sha256": "7425535accb45606551e70b421a7d5bb7e722d9d055348d123294199b016bd1b"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00bfa5636d5951bd46516df2bf825664fd89eccf0a9a1d8b2c1509bd244a4cab",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 1.2097453568130732,
+              "verify_seconds": 0.20647861063480377,
+              "component_seconds": 1.416223967447877,
+              "entry_count": 24,
+              "entries_sha256": "7425535accb45606551e70b421a7d5bb7e722d9d055348d123294199b016bd1b"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.14656798355281353,
+              "verify_seconds": 0.0868943091481924,
+              "component_seconds": 0.23346229270100594,
+              "entry_count": 24,
+              "entries_sha256": "7425535accb45606551e70b421a7d5bb7e722d9d055348d123294199b016bd1b"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 39.47282385826111,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 15.786395564675331,
+          "entry_count": 182
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 15.786395564675331,
+          "verify_seconds": 14.204078827053308,
+          "component_seconds": 29.99047439172864,
+          "entry_count": 182,
+          "entries_sha256": "c1569125b514a41209a42899384caed277527e523d863174c57272b7a7b3effd"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.9781277198344469,
+          "entry_count": 182
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.9781277198344469,
+          "verify_seconds": 3.416255610063672,
+          "component_seconds": 4.394383329898119,
+          "entry_count": 182,
+          "entries_sha256": "c1569125b514a41209a42899384caed277527e523d863174c57272b7a7b3effd"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0105fdb780267ef74a980b7c548863eb0e7a486e36a730ff3b9a24a8e2f46408",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 15.786395564675331,
+              "verify_seconds": 14.204078827053308,
+              "component_seconds": 29.99047439172864,
+              "entry_count": 182,
+              "entries_sha256": "c1569125b514a41209a42899384caed277527e523d863174c57272b7a7b3effd"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.9781277198344469,
+              "verify_seconds": 3.416255610063672,
+              "component_seconds": 4.394383329898119,
+              "entry_count": 182,
+              "entries_sha256": "c1569125b514a41209a42899384caed277527e523d863174c57272b7a7b3effd"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 7.655336217954755,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 1.8483019191771746,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 1.8483019191771746,
+          "verify_seconds": 0.2498095240443945,
+          "component_seconds": 2.098111443221569,
+          "entry_count": 16,
+          "entries_sha256": "e0d65e96db55ed6fca546d377e289a7d8f629ff8842e6b591b6d8d21a4a9d081"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.12944389134645462,
+          "entry_count": 16
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.12944389134645462,
+          "verify_seconds": 0.15245801769196987,
+          "component_seconds": 0.2819019090384245,
+          "entry_count": 16,
+          "entries_sha256": "e0d65e96db55ed6fca546d377e289a7d8f629ff8842e6b591b6d8d21a4a9d081"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0087186ed2a132c6dc8e309e7669daef9db857a9c7c3a7bded4e580a639e38a7",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 1.8483019191771746,
+              "verify_seconds": 0.2498095240443945,
+              "component_seconds": 2.098111443221569,
+              "entry_count": 16,
+              "entries_sha256": "e0d65e96db55ed6fca546d377e289a7d8f629ff8842e6b591b6d8d21a4a9d081"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.12944389134645462,
+              "verify_seconds": 0.15245801769196987,
+              "component_seconds": 0.2819019090384245,
+              "entry_count": 16,
+              "entries_sha256": "e0d65e96db55ed6fca546d377e289a7d8f629ff8842e6b591b6d8d21a4a9d081"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 12.20909808576107,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 5.063108801841736,
+          "entry_count": 118
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 5.063108801841736,
+          "verify_seconds": 0.669641874730587,
+          "component_seconds": 5.732750676572323,
+          "entry_count": 118,
+          "entries_sha256": "87a147814b4fd8292a6c9586acfa013abc4e9b136739731cd0ac06e381a2060e"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.4488655347377062,
+          "entry_count": 118
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.4488655347377062,
+          "verify_seconds": 0.43954275362193584,
+          "component_seconds": 0.888408288359642,
+          "entry_count": 118,
+          "entries_sha256": "87a147814b4fd8292a6c9586acfa013abc4e9b136739731cd0ac06e381a2060e"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "015411231994b425dbec0e8ed26e333804183ae4378bfaa2cfee4645f91919ab",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 5.063108801841736,
+              "verify_seconds": 0.669641874730587,
+              "component_seconds": 5.732750676572323,
+              "entry_count": 118,
+              "entries_sha256": "87a147814b4fd8292a6c9586acfa013abc4e9b136739731cd0ac06e381a2060e"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.4488655347377062,
+              "verify_seconds": 0.43954275362193584,
+              "component_seconds": 0.888408288359642,
+              "entry_count": 118,
+              "entries_sha256": "87a147814b4fd8292a6c9586acfa013abc4e9b136739731cd0ac06e381a2060e"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 9.12725032120943,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 3.1749698501080275,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 3.1749698501080275,
+          "verify_seconds": 0.1916683129966259,
+          "component_seconds": 3.3666381631046534,
+          "entry_count": 50,
+          "entries_sha256": "0ec48a1349079d8bc63606f2256c1f2937aec3a59aad3559b23914d64559b747"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.19974489882588387,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.19974489882588387,
+          "verify_seconds": 0.15368957445025444,
+          "component_seconds": 0.3534344732761383,
+          "entry_count": 50,
+          "entries_sha256": "0ec48a1349079d8bc63606f2256c1f2937aec3a59aad3559b23914d64559b747"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "00c6c704cd1bd4c0c3a99f330dd2663c1e3d659ed35a6523fc8680b547c03135",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 3.1749698501080275,
+              "verify_seconds": 0.1916683129966259,
+              "component_seconds": 3.3666381631046534,
+              "entry_count": 50,
+              "entries_sha256": "0ec48a1349079d8bc63606f2256c1f2937aec3a59aad3559b23914d64559b747"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.19974489882588387,
+              "verify_seconds": 0.15368957445025444,
+              "component_seconds": 0.3534344732761383,
+              "entry_count": 50,
+              "entries_sha256": "0ec48a1349079d8bc63606f2256c1f2937aec3a59aad3559b23914d64559b747"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 6.9008791372179985,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.7108349781483412,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 0.7108349781483412,
+          "verify_seconds": 0.031227435916662216,
+          "component_seconds": 0.7420624140650034,
+          "entry_count": 15,
+          "entries_sha256": "7b252f7b2d399bd320641fb6bce0ac7feee570a6af64ecfcfcb8983f94bea609"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.02181154303252697,
+          "entry_count": 15
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.02181154303252697,
+          "verify_seconds": 0.038347212597727776,
+          "component_seconds": 0.060158755630254745,
+          "entry_count": 15,
+          "entries_sha256": "7b252f7b2d399bd320641fb6bce0ac7feee570a6af64ecfcfcb8983f94bea609"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0110270c9e3d2e437f47dcf5fe34eb36b5489cc6736500cb832911d08382795e",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.7108349781483412,
+              "verify_seconds": 0.031227435916662216,
+              "component_seconds": 0.7420624140650034,
+              "entry_count": 15,
+              "entries_sha256": "7b252f7b2d399bd320641fb6bce0ac7feee570a6af64ecfcfcb8983f94bea609"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.02181154303252697,
+              "verify_seconds": 0.038347212597727776,
+              "component_seconds": 0.060158755630254745,
+              "entry_count": 15,
+              "entries_sha256": "7b252f7b2d399bd320641fb6bce0ac7feee570a6af64ecfcfcb8983f94bea609"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 8.19654288329184,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 1.990800529718399,
+          "entry_count": 34
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "collect_seconds": 1.990800529718399,
+          "verify_seconds": 0.18792040459811687,
+          "component_seconds": 2.178720934316516,
+          "entry_count": 34,
+          "entries_sha256": "e462692e4e1f506f8ab04602c0a51767ca24547d6774661b72639672013fd6bd"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.09171857126057148,
+          "entry_count": 34
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "attempt": 2,
+          "collect_seconds": 0.09171857126057148,
+          "verify_seconds": 0.19237458892166615,
+          "component_seconds": 0.2840931601822376,
+          "entry_count": 34,
+          "entries_sha256": "e462692e4e1f506f8ab04602c0a51767ca24547d6774661b72639672013fd6bd"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0087269be1830214ad2832ad4c6959f0e69238485fd2a0b76ad074466719c33f",
+          "namespace": "wc1:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 1.990800529718399,
+              "verify_seconds": 0.18792040459811687,
+              "component_seconds": 2.178720934316516,
+              "entry_count": 34,
+              "entries_sha256": "e462692e4e1f506f8ab04602c0a51767ca24547d6774661b72639672013fd6bd"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.09171857126057148,
+              "verify_seconds": 0.19237458892166615,
+              "component_seconds": 0.2840931601822376,
+              "entry_count": 34,
+              "entries_sha256": "e462692e4e1f506f8ab04602c0a51767ca24547d6774661b72639672013fd6bd"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 7.458615345880389,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 0.9574552029371262,
+          "entry_count": 21
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 1,
+          "collect_seconds": 0.9574552029371262,
+          "verify_seconds": 0.10325912572443485,
+          "component_seconds": 1.060714328661561,
+          "entry_count": 21,
+          "entries_sha256": "af3564a36ffffb1a341831b19ab9fb0e058c07c2697d256b33ca1e0f62ce28f6"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.07444636151194572,
+          "entry_count": 21
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "attempt": 2,
+          "collect_seconds": 0.07444636151194572,
+          "verify_seconds": 0.10363958962261677,
+          "component_seconds": 0.1780859511345625,
+          "entry_count": 21,
+          "entries_sha256": "af3564a36ffffb1a341831b19ab9fb0e058c07c2697d256b33ca1e0f62ce28f6"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0164c2e02ebf199213324752762d7a35ae2f3b10c99629ba3fb58c2a9f186bee",
+          "namespace": "wc1:batch",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 0.9574552029371262,
+              "verify_seconds": 0.10325912572443485,
+              "component_seconds": 1.060714328661561,
+              "entry_count": 21,
+              "entries_sha256": "af3564a36ffffb1a341831b19ab9fb0e058c07c2697d256b33ca1e0f62ce28f6"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.07444636151194572,
+              "verify_seconds": 0.10363958962261677,
+              "component_seconds": 0.1780859511345625,
+              "entry_count": 21,
+              "entries_sha256": "af3564a36ffffb1a341831b19ab9fb0e058c07c2697d256b33ca1e0f62ce28f6"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:culverts",
+      "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 10.52671828866005,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 3.8191758561879396,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 1,
+          "collect_seconds": 3.8191758561879396,
+          "verify_seconds": 0.2611299566924572,
+          "component_seconds": 4.080305812880397,
+          "entry_count": 50,
+          "entries_sha256": "0fb6ae95d0a7a8385bbc83426ad70874f2c5c9a4eea98a8c2823251934a296cb"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.2528470456600189,
+          "entry_count": 50
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "attempt": 2,
+          "collect_seconds": 0.2528470456600189,
+          "verify_seconds": 0.23316022381186485,
+          "component_seconds": 0.4860072694718838,
+          "entry_count": 50,
+          "entries_sha256": "0fb6ae95d0a7a8385bbc83426ad70874f2c5c9a4eea98a8c2823251934a296cb"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "0106ca9a54b5e3e31d8ea0426b23b2171d25abb9c238427ff36175b2180bf27c",
+          "namespace": "wc1:culverts",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 3.8191758561879396,
+              "verify_seconds": 0.2611299566924572,
+              "component_seconds": 4.080305812880397,
+              "entry_count": 50,
+              "entries_sha256": "0fb6ae95d0a7a8385bbc83426ad70874f2c5c9a4eea98a8c2823251934a296cb"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.2528470456600189,
+              "verify_seconds": 0.23316022381186485,
+              "component_seconds": 0.4860072694718838,
+              "entry_count": 50,
+              "entries_sha256": "0fb6ae95d0a7a8385bbc83426ad70874f2c5c9a4eea98a8c2823251934a296cb"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "legacy:runs",
+      "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+      "execution_status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 17.786265341565013,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "phase": "verify",
+          "collect_seconds": 8.245041016489267,
+          "entry_count": 92
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 1,
+          "collect_seconds": 8.245041016489267,
+          "verify_seconds": 2.1477650981396437,
+          "component_seconds": 10.392806114628911,
+          "entry_count": 92,
+          "entries_sha256": "3eedadfc68aed8bff2e85285c970d2fd96e5ff975d92d39d837f74778863db64"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "collect"
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "phase": "verify",
+          "collect_seconds": 0.9654793776571751,
+          "entry_count": 92
+        },
+        {
+          "marker": "component-profile",
+          "event": "pass",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "attempt": 2,
+          "collect_seconds": 0.9654793776571751,
+          "verify_seconds": 0.8532020915299654,
+          "component_seconds": 1.8186814691871405,
+          "entry_count": 92,
+          "entries_sha256": "3eedadfc68aed8bff2e85285c970d2fd96e5ff975d92d39d837f74778863db64"
+        },
+        {
+          "marker": "component-profile",
+          "event": "result",
+          "digest": "01321e85d19b41ecdd33e08303104a548e8f4a4e7726d5ebba52321f5014290a",
+          "namespace": "legacy:runs",
+          "status": "passed",
+          "passes": [
+            {
+              "attempt": 1,
+              "collect_seconds": 8.245041016489267,
+              "verify_seconds": 2.1477650981396437,
+              "component_seconds": 10.392806114628911,
+              "entry_count": 92,
+              "entries_sha256": "3eedadfc68aed8bff2e85285c970d2fd96e5ff975d92d39d837f74778863db64"
+            },
+            {
+              "attempt": 2,
+              "collect_seconds": 0.9654793776571751,
+              "verify_seconds": 0.8532020915299654,
+              "component_seconds": 1.8186814691871405,
+              "entry_count": 92,
+              "entries_sha256": "3eedadfc68aed8bff2e85285c970d2fd96e5ff975d92d39d837f74778863db64"
+            }
+          ],
+          "blocked_mutations": []
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:runs",
+      "digest": "00972b3ec9e0bde4e8e18ba3b808f0bfe77d83d159f3def3a3f19edaeff9526b",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 60.070169696584344,
+      "events": [
+        {
+          "marker": "component-profile",
+          "event": "start",
+          "digest": "00972b3ec9e0bde4e8e18ba3b808f0bfe77d83d159f3def3a3f19edaeff9526b",
+          "namespace": "wc1:runs",
+          "uid": 1002,
+          "gid": 130,
+          "source_sha256": {
+            "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+            "activate": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+            "rust_boundary": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+            "native": {
+              "wepppyo3.wepp_interchange.wepp_interchange_rust": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+            }
+          }
+        },
+        {
+          "marker": "component-profile",
+          "event": "phase",
+          "digest": "00972b3ec9e0bde4e8e18ba3b808f0bfe77d83d159f3def3a3f19edaeff9526b",
+          "namespace": "wc1:runs",
+          "attempt": 1,
+          "phase": "collect"
+        }
+      ],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "namespace": "wc1:batch",
+      "digest": "01830c72f105b653376ce85f8a38fa516dbcbac9912b5526292f9e09e54ab34b",
+      "execution_status": "timeout",
+      "exit_code": null,
+      "wall_seconds": 2.1383495163172483,
+      "events": [],
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "selected": 48,
+  "attempted": 38,
+  "elapsed_seconds": 720.0163753125817
+}

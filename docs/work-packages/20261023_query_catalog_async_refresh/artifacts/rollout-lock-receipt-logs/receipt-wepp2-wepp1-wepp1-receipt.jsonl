@@ -1,0 +1,9 @@
+{"event": "identity", "role": "receipt", "epoch": 1793058895.9430342, "elapsed": 0.13339664787054062, "hostname": "7cda8f7b4275", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 248998786, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "receipt_start", "role": "receipt", "epoch": 1793058895.9435592, "elapsed": 0.13392167910933495}
+{"event": "lockf_enter", "role": "receipt", "epoch": 1793058896.269377, "elapsed": 0.459738926962018, "operation": 2}
+{"event": "lockf_exit", "role": "receipt", "epoch": 1793058903.3711982, "elapsed": 7.561560088768601, "operation": 2, "seconds": 7.101813055574894}
+{"event": "lockf_enter", "role": "receipt", "epoch": 1793058903.4431212, "elapsed": 7.633483177050948, "operation": 8}
+{"event": "lockf_exit", "role": "receipt", "epoch": 1793058903.44702, "elapsed": 7.637381812557578, "operation": 8, "seconds": 0.0039015766233205795}
+{"event": "receipt_complete", "role": "receipt", "epoch": 1793058903.451658, "elapsed": 7.6420197281986475, "seconds": 7.508053705096245, "receipt": {"protocol": 1, "scope_id": "107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57", "incarnation": "8f5fc48d-847a-4731-820d-3445d290dedb", "request_id": "17b88740-34a4-496d-b009-d2251f4fa3cc", "asset_path": "probe.parquet", "created_at": "2026-10-26T23:55:03.392576+00:00", "state": "pending"}}
+{"event": "success", "role": "receipt", "epoch": 1793058903.4517467, "elapsed": 7.642108552157879, "inode_unchanged": true}
+{"event": "heartbeat", "role": "receipt", "epoch": 1793058903.4520729, "elapsed": 7.6424347795546055, "samples": 73, "max_gap_seconds": 0.2346173543483019, "wait_channels": {"nfs4_retry_setlk": 7}}

@@ -1,0 +1,27 @@
+{"event": "identity", "role": "uncontended", "epoch": 1793058671.3778186, "elapsed": 0.11971309781074524, "hostname": "7cda8f7b4275", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 248998786, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "guard_request", "role": "uncontended", "epoch": 1793058671.3783367, "elapsed": 0.12023056484758854, "repeat": 0}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.4988887, "elapsed": 0.24078232236206532, "operation": 2}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.4998245, "elapsed": 0.2417182493954897, "operation": 2, "seconds": 0.0009363200515508652}
+{"event": "acquired", "role": "uncontended", "epoch": 1793058671.499906, "elapsed": 0.24179990217089653, "repeat": 0, "wait_seconds": 0.12156961113214493}
+{"event": "release_start", "role": "uncontended", "epoch": 1793058671.4999473, "elapsed": 0.24184119328856468, "repeat": 0}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.500004, "elapsed": 0.2418977338820696, "operation": 8}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.5007987, "elapsed": 0.24269241839647293, "operation": 8, "seconds": 0.0007928051054477692}
+{"event": "released", "role": "uncontended", "epoch": 1793058671.5083191, "elapsed": 0.2502133846282959, "repeat": 0}
+{"event": "guard_request", "role": "uncontended", "epoch": 1793058671.508458, "elapsed": 0.25035162828862667, "repeat": 1}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.5114484, "elapsed": 0.2533419281244278, "operation": 2}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.5120556, "elapsed": 0.25394923612475395, "operation": 2, "seconds": 0.0005769021809101105}
+{"event": "acquired", "role": "uncontended", "epoch": 1793058671.5121067, "elapsed": 0.2540002390742302, "repeat": 1, "wait_seconds": 0.003652414306998253}
+{"event": "release_start", "role": "uncontended", "epoch": 1793058671.5121257, "elapsed": 0.254019346088171, "repeat": 1}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.5121613, "elapsed": 0.25405487418174744, "operation": 8}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.5126007, "elapsed": 0.2544943019747734, "operation": 8, "seconds": 0.0004362240433692932}
+{"event": "released", "role": "uncontended", "epoch": 1793058671.5144951, "elapsed": 0.2563893310725689, "repeat": 1}
+{"event": "guard_request", "role": "uncontended", "epoch": 1793058671.5147405, "elapsed": 0.2566341273486614, "repeat": 2}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.5183032, "elapsed": 0.26019679568707943, "operation": 2}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.5191002, "elapsed": 0.2609937060624361, "operation": 2, "seconds": 0.0007977522909641266}
+{"event": "acquired", "role": "uncontended", "epoch": 1793058671.5191534, "elapsed": 0.2610468417406082, "repeat": 2, "wait_seconds": 0.004413522779941559}
+{"event": "release_start", "role": "uncontended", "epoch": 1793058671.519173, "elapsed": 0.2610664442181587, "repeat": 2}
+{"event": "lockf_enter", "role": "uncontended", "epoch": 1793058671.519192, "elapsed": 0.26108549535274506, "operation": 8}
+{"event": "lockf_exit", "role": "uncontended", "epoch": 1793058671.5213273, "elapsed": 0.2632209975272417, "operation": 8, "seconds": 0.0021339859813451767}
+{"event": "released", "role": "uncontended", "epoch": 1793058671.522621, "elapsed": 0.2645151223987341, "repeat": 2}
+{"event": "success", "role": "uncontended", "epoch": 1793058671.5227153, "elapsed": 0.2646094746887684, "inode_unchanged": true}
+{"event": "heartbeat", "role": "uncontended", "epoch": 1793058671.5229545, "elapsed": 0.26484850980341434, "samples": 1, "max_gap_seconds": 0.2203946653753519}

@@ -1,0 +1,38 @@
+{
+  "scope": "completed hillslope consumers after full pipeline",
+  "catalog_query": [
+    {
+      "hillslopes": 1908,
+      "rows": 9540
+    }
+  ],
+  "water_balance_report": {
+    "rows": 1908,
+    "cache_status": "current",
+    "seconds": 14.963758094003424
+  },
+  "anonymous_status": 404,
+  "authenticated_routes": [
+    {
+      "path": "/runs/qcat-mill-creek-20261026/disturbed9002_wbt/report/wepp/avg_annual_watbal",
+      "status": 200,
+      "seconds": 52.08297869306989,
+      "bytes": 4174517,
+      "sha256": "a21cc7469b1a3c39a4ac61fd847261dcd79bf751acb5b48e4fe002fedeeac92e"
+    },
+    {
+      "path": "/runs/qcat-mill-creek-20261026/disturbed9002_wbt/report/wepp/avg_annual_watbal?format=csv&table=hillslopes",
+      "status": 200,
+      "seconds": 25.451549402903765,
+      "bytes": 164584,
+      "sha256": "94835b2e5c18bf20ac8a464b24a5cf03266ba0af23e0db10eb186d3093aad80f",
+      "rows": 1908
+    }
+  ],
+  "live_download": {
+    "status": 200,
+    "bytes": 3837823,
+    "sha256": "01de4b7d4c0fe6ca4b8da2acbdf43621b1c17299e88946dac497f1f8d37f988c"
+  },
+  "pending_receipts": 0
+}

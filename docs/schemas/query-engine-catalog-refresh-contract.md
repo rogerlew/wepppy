@@ -198,6 +198,15 @@ proved. Per-scope coalescing does not consume a second permit or cumulative job
 budget. Permit/budget reservation and RQ enqueue commit together; contention,
 Redis failures and missing/corrupt accounting fail closed with intent retained.
 
+RQ cancellation alone is not execution-exit proof: the installed `Job.cancel()`
+can mark a running job canceled without stopping its workhorse. A claimed,
+canceled job remains outstanding and uncertain until its worker records exit
+after all scope/inventory work. Admission and drain observations use the same
+classification. Unclaimed canceled work may retire because the atomic execution
+claim watches job status. Genuine RQ finished/failed/stopped work retains normal
+workhorse-completion/death recovery, including timeout and killed-worker retries;
+missing exit proof for a claimed cancellation requires explicit recovery.
+
 Ordinary ready jobs waiting on the batch queue prevent new catalog admission.
 Inspect raw job identifiers, states and timestamps without executing task payloads
 or invoking registry cleanup; unknown/corrupt classification is conservative.

@@ -1,5 +1,12 @@
 # Execution evidence ledger
 
+October 26 update: code is deployed on wepp1–3 with async disabled. Fresh
+`wepp_261021` acceptance is running; see [resumed acceptance](20261026_resumed_acceptance.md).
+[Production preflight](20261026_production_preflight.md) now establishes matching
+fleet protocol/native builds and scoped production-identity publication/exclusion.
+Contended lock handoff latency and complete-cycle capacity remain open. The table
+below retains the October 23 checkpoint; failed gates are not relabeled passed.
+
 Status: implementation, reviews and local segmented validation complete, 2026-10-23 UTC; full scientific acceptance failed. Contract ancestor: `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`. Pending or failed rows are not passed; release remains HOLD.
 
 | Gate | Required evidence | Status |
@@ -62,3 +69,42 @@ Terminal environment result: watershed failed at 22:59:54 UTC at simulation year
 Final regression remainder: **5,108 passed, 18 skipped in 546.59 seconds**, using actual disposable Redis and the installed browser path. This includes the corrected real actor/WATCH test, worker isolation, readonly return-period fixture, auth import isolation and browser workflow. Exact command and summary retained in `regression_validation.txt`. Security independently passed 17 metadata/disclosure cases and closed SEC-10. Queue graph, broad-exception gate and documentation checks passed. Temporary Redis was shut down after its ownership marker was verified and its task-only directory removed; diagnostic project artifacts remain. Source hashes are current in `implementation_source_manifest.json`; paired native binary hash remains `7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811`. Runtime remains uncommitted and undeployed; M4/M6 acceptance remains open.
 
 Commit/push handoff: user authorized committing and pushing the implementation. This checkpoint includes the reviewed task files and retained validation evidence; paired native commit is `47e51b8e73146872056b68934977db56d91c9119`. Earlier uncommitted-state notes are chronological. Scientific acceptance remains blocked, async rollout remains disabled, and no deployment or production repair is authorized by this push.
+
+## October 26 terminal acceptance and rollout gates
+
+Full fresh local acceptance passed at 21:38:50 UTC: all 18 jobs finished, all five
+artifact/report checks passed, 1,908 profiles contain all 67,205 unique daily keys
+and pending receipts are zero. See [terminal evidence](20261026_terminal_acceptance/acceptance-supervisor.json). Earlier running/blocked
+statements describe prior checkpoints. Operator requested remaining rollout gates;
+production latency, inventory/capacity and explicit namespace/workflow parity are
+under measurement. Async production remains disabled pending those results.
+
+Production gate result: **HOLD**. Representative receipt-free reconciliation
+passed under uid1002/gid130 with a normal forking RQ worker (7.762 s); all 79
+selected Parquet tables read back. Active legacy ownership, stalled legacy
+enumeration and conditional HTTP event-loop contention prevent unrestricted
+enablement. [Gate disposition](20261026_rollout_gate_disposition.md) records
+exact evidence, limitations and remaining work. M6 remains open.
+
+## October 27 remediation evidence
+
+The [current gate disposition](20261027_remediation_gate_disposition.md) records
+reviewed streaming inventory and HTTP offload, complete discovery/classification,
+actual RQ timeout recovery, scheduler tick canaries, the final censored component
+profile and segmented regression. Implementation checks pass; shared-worker
+capacity and controlled enablement remain open. The operator excludes the
+preexisting legacy mount limitation from this release; no routing/mount changes
+were made. Final role readback confirms remediation remains undeployed and async
+disabled. Earlier evidence remains historical, not a conflicting current status.
+
+## October 27 bounded pilot preparation
+
+The operator authorized the bounded pilot. Contract checkpoint `5c1edb22a`
+precedes implementation. Final local correctness/security reviews pass,
+including the actual-process cancellation defect reproduction and correction.
+The [pilot gate status](20261027_bounded_pilot_gate_status.md) distinguishes
+final focused tests, broad regression, exact source-only image proof and the
+pending production run. The prepared candidate changes only seven approved
+files on the retained production baseline. A live default watershed job blocks
+the canonical deployment gate; no production source/image/service mutation or
+shared-batch pilot has occurred. General asynchronous refresh remains disabled.

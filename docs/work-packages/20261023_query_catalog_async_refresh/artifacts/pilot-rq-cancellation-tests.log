@@ -1,0 +1,43 @@
+INFO:wctl2:docker compose exec -e BATCH_BOUNDARY_TEST_REDIS_SOCKET=/workdir/wepppy/.pytest_cache/pilot-test.sock weppcloud /opt/venv/bin/python -m pytest tests/rq/test_query_catalog_pilot.py -q
+.....................                                                    [100%]
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/rq/test_query_catalog_pilot.py: 1017 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.datetime.utcnow()
+
+tests/rq/test_query_catalog_pilot.py: 65 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/utils.py:227: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_observer_loss_blocks_new_work_but_admitted_job_drains
+tests/rq/test_query_catalog_pilot.py::test_same_id_manual_reexecution_cannot_reuse_authority
+tests/rq/test_query_catalog_pilot.py::test_same_id_manual_reexecution_cannot_reuse_authority
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:58: DeprecationWarning: The `push_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_disabled_pilot_real_workers_exact_inventory_and_catalogs
+tests/rq/test_query_catalog_pilot.py::test_observer_loss_blocks_new_work_but_admitted_job_drains
+tests/rq/test_query_catalog_pilot.py::test_same_id_manual_reexecution_cannot_reuse_authority
+tests/rq/test_query_catalog_pilot.py::test_same_id_manual_reexecution_cannot_reuse_authority
+  /opt/venv/lib/python3.12/site-packages/rq/connections.py:72: DeprecationWarning: The `pop_connection` function is deprecated. Pass the `connection` explicitly instead.
+    warnings.warn(
+
+tests/rq/test_query_catalog_pilot.py::test_running_cancellation_retains_capacity_until_execution_exits
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3088603) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+21 passed, 1097 warnings in 15.62s

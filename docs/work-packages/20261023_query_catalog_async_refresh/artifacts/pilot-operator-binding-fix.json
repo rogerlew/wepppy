@@ -1,0 +1,6 @@
+{
+  "edited_at": "2026-10-27T03:39:42.540107+00:00",
+  "file": "tools/query_catalog_pilot.py",
+  "sha256": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5",
+  "reason": "Readback must match immutable admitted scope/incarnation/inode before and after queries."
+}

@@ -1,0 +1,27 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: f8f956c7ad0234a06d62757cc5ea40a4799b0719
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 6
+
+Files:
+  M wepppy/query_engine/app/mcp/router.py
+  M wepppy/query_engine/app/server.py
+  A wepppy/rq/_query_catalog_admission.py
+  A wepppy/rq/_query_catalog_inventory.py
+  A wepppy/rq/_query_catalog_pilot.py
+  M wepppy/rq/query_catalog_rq.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/query_engine/app/mcp/router.py (base=3 current=3 delta=+0)
+  M wepppy/query_engine/app/server.py (base=6 current=6 delta=+0)
+  A wepppy/rq/_query_catalog_admission.py (base=0 current=0 delta=+0)
+  A wepppy/rq/_query_catalog_inventory.py (base=0 current=0 delta=+0)
+  A wepppy/rq/_query_catalog_pilot.py (base=0 current=0 delta=+0)
+  M wepppy/rq/query_catalog_rq.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

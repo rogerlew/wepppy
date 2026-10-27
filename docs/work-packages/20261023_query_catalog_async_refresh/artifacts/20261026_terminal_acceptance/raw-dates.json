@@ -1,0 +1,23 @@
+{
+  "scope": "three raw hillslope samples; strict water-balance report checks all hillslopes",
+  "files": [
+    {
+      "path": "H1.wat.dat",
+      "rows": 67205,
+      "years": 184,
+      "unique_and_complete": true
+    },
+    {
+      "path": "H955.wat.dat",
+      "rows": 67205,
+      "years": 184,
+      "unique_and_complete": true
+    },
+    {
+      "path": "H1908.wat.dat",
+      "rows": 67205,
+      "years": 184,
+      "unique_and_complete": true
+    }
+  ]
+}

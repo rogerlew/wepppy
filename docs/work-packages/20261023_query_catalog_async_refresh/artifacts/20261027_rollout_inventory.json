@@ -1,0 +1,707 @@
+{
+  "status": "HOLD_incomplete_inventory_and_legacy_lease_failure",
+  "utc_reported": "2026-10-27T00:05:57.465332+00:00",
+  "identity": {
+    "host": "wepp1",
+    "container": "docker-rq-worker-batch-1",
+    "uid": 1002,
+    "gid": 130,
+    "groups": [
+      130
+    ]
+  },
+  "inventory_code_sha256": "b8b8e9a9cae212333d694e2e1f56df5fdd313a611f09bd5aea0d35f07d0bfa5c",
+  "method": "actual _inventory_step with100nodes, nofollow unchanged; no resolve_scope,receipt,refresh,admission or Redis calls",
+  "primary": {
+    "status": "incomplete_operator_bounded_stop",
+    "namespace": "wc1:runs",
+    "layout": "sharded",
+    "completed_ticks": 46,
+    "completed_directory_nodes": 4600,
+    "unique_candidate_project_scopes": 2735,
+    "top_level_project_scopes_observed": 2192,
+    "nested_project_scopes_observed": 543,
+    "distinct_project_owners_observed": 2192,
+    "pending_directory_nodes": 125,
+    "pending_nodes_by_depth": {
+      "1": 121,
+      "2": 4
+    },
+    "enumeration_seconds_completed_ticks": 705.681313002482,
+    "tick_seconds": {
+      "min": 4.066503154113889,
+      "median": 15.049068868160248,
+      "p95": 30.076035073027015,
+      "max": 42.88346979394555
+    },
+    "ticks_over_30_seconds": 3,
+    "ticks_over_60_second_lease": 0,
+    "completed_tick_errors": 0,
+    "private_candidate_list_sha256": "068890c9c18a5a223f1711824a8da80a89b49b22051e2ad092636c55105335f2",
+    "cursor_sha256": "0065f7c5160bfdea8f6d982d54935827feb8bb580d073eb27ddb068403731eee",
+    "ticks_sha256": "a0944a5b6cceb64a4a58d0f9259f4057cd0e3c9ffb7fcdf9c8449bc22e87ff5e",
+    "full_project_count": null,
+    "complete_cycle_duration_seconds": null,
+    "minimum_admission_ticks_for_observed_scopes": 110,
+    "minimum_admission_cadence_seconds_for_observed_scopes": 3300,
+    "limitations": "Only completed ticks counted. Following in-flight work is excluded; original source may change concurrently. No admission, scope creation, refresh or Redis operation performed."
+  },
+  "other_proposed_roots": [
+    {
+      "namespace": "wc1:batch",
+      "layout": "batch",
+      "status": "not_enumerated",
+      "full_project_count": null
+    },
+    {
+      "namespace": "wc1:culverts",
+      "layout": "culverts",
+      "status": "not_enumerated",
+      "full_project_count": null
+    }
+  ],
+  "legacy": {
+    "namespace": "legacy:runs",
+    "layout": "flat",
+    "path": "/geodata/weppcloud_runs",
+    "inventory_status": "first_tick_incomplete_no_cursor_publication",
+    "completed_ticks": 0,
+    "elapsed_lower_bound_seconds": 137,
+    "tick_bound_nodes": 100,
+    "diagnostic_python_alarm_seconds": 120,
+    "termination": "SIGTERM owned diagnostic exit143; blocked NFS call prevented timely Python alarm handling",
+    "metadata_name_only_probe": {
+      "operation": "os.listdir",
+      "deadline_seconds": 65,
+      "exit_code": 124,
+      "status": "incomplete"
+    },
+    "scandir_first_page_probe": {
+      "entries": 100,
+      "directories": 38,
+      "open_seconds": 0.007895069196820259,
+      "names_seconds": 0.00034199096262454987,
+      "nofollow_classification_seconds": 4.4832006096839905e-05,
+      "path_classification_seconds": 0.10708595812320709,
+      "same_filter": true,
+      "scope": "warm firstpage only"
+    },
+    "scandir_full_probe": {
+      "operation": "full scandir entry.is_dir(follow_symlinks=False)",
+      "deadline_seconds": 60,
+      "exit_code": 124,
+      "status": "incomplete",
+      "last_progress_entries": 10000,
+      "last_progress_directories": 3308,
+      "last_progress_seconds": 33.53529668971896,
+      "traceback_30s": "blocked at iterator advancement, before next entry classification",
+      "conclusion": "scandir alone not proven to fit inventory lease"
+    },
+    "catalog_and_filesystem_witnesses": {
+      "utc": "2026-10-26T23:55:30.774703+00:00",
+      "uid": 1002,
+      "gid": 130,
+      "read_only_transaction": true,
+      "catalog_aggregate": [
+        {
+          "location": "legacy",
+          "catalog_rows": 12931,
+          "owned_rows": 5403,
+          "accessed_90d": 33,
+          "modified_90d": 27,
+          "latest_accessed": "2026-10-26 17:33:49.729128",
+          "latest_modified": "2026-10-26 17:33:54.691708"
+        },
+        {
+          "location": "null",
+          "catalog_rows": 18840,
+          "owned_rows": 1147,
+          "accessed_90d": 0,
+          "modified_90d": 0,
+          "latest_accessed": "2025-10-30 04:08:28.399456",
+          "latest_modified": "2026-01-22 09:34:45.804650"
+        },
+        {
+          "location": "primary",
+          "catalog_rows": 1690,
+          "owned_rows": 1689,
+          "accessed_90d": 1255,
+          "modified_90d": 1233,
+          "latest_accessed": "2026-10-26 20:13:43.161156",
+          "latest_modified": "2026-10-26 22:37:30.335251"
+        }
+      ],
+      "sample_count": 10,
+      "sample_legacy_present": 10,
+      "sample_primary_present": 0,
+      "sample_alias_same_inode": 0,
+      "sample_legacy_symlinks": 0,
+      "sample_project_marker_present": 10,
+      "private_sample_sha256": "c8c58b77d99b6e0ec77dd98a8e3485ca1807a0e65d39c7bb004ffd93790f63f5",
+      "elapsed_seconds": 3.807568432763219,
+      "scope": "PostgreSQL run catalog location observations plus 10 most recently active owned legacy filesystem witnesses; not full legacy inventory"
+    },
+    "sample_permissions": {
+      "samples": 10,
+      "readable_executable": 10,
+      "writable": 10,
+      "with_catalog": 6,
+      "owner_mode_counts": {
+        "(1002, 130, '0o755')": 8,
+        "(1002, 130, '0o777')": 2
+      },
+      "note": "os.access metadata predicates only; no write or refresh was attempted"
+    },
+    "owned_activity": {
+      "owned_sample_count": 10,
+      "last_accessed_within_90d": 10,
+      "last_accessed_latest": "2026-10-22T06:35:16.572761+00:00",
+      "last_modified_within_90d": 5,
+      "last_modified_latest": "2026-10-20T20:24:16.029101+00:00"
+    }
+  },
+  "alias_identity_probes": {
+    "wepp1": {
+      "utc": "2026-10-26T23:56:25.980672+00:00",
+      "container_hostname": "7cda8f7b4275",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "paths": {
+        "/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/runs",
+          "dev": 105,
+          "inode": 91507529,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/runs",
+          "dev": 105,
+          "inode": 91507529,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/batch",
+          "dev": 105,
+          "inode": 192812452,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/batch",
+          "dev": 105,
+          "inode": 192812452,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/culverts",
+          "dev": 105,
+          "inode": 225434314,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/culverts",
+          "dev": 105,
+          "inode": 225434314,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/weppcloud_runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/weppcloud_runs",
+          "dev": 105,
+          "inode": 562380,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o777",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination",
+          "dev": 105,
+          "inode": 209679974,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination",
+          "dev": 105,
+          "inode": 209679974,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination/locks",
+          "dev": 105,
+          "inode": 209679975,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination/locks",
+          "dev": 105,
+          "inode": 209679975,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        }
+      }
+    },
+    "wepp2": {
+      "utc": "2026-10-26T23:56:33.916493+00:00",
+      "container_hostname": "1281c0dad239",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "paths": {
+        "/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/runs",
+          "dev": 68,
+          "inode": 91507529,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/runs",
+          "dev": 68,
+          "inode": 91507529,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/batch",
+          "dev": 68,
+          "inode": 192812452,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/batch",
+          "dev": 68,
+          "inode": 192812452,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/culverts",
+          "dev": 68,
+          "inode": 225434314,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/culverts",
+          "dev": 68,
+          "inode": 225434314,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/weppcloud_runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/weppcloud_runs",
+          "dev": 68,
+          "inode": 562380,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o777",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination",
+          "dev": 68,
+          "inode": 209679974,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination",
+          "dev": 68,
+          "inode": 209679974,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination/locks",
+          "dev": 68,
+          "inode": 209679975,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination/locks",
+          "dev": 68,
+          "inode": 209679975,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        }
+      }
+    },
+    "wepp3": {
+      "utc": "2026-10-26T23:56:55.786720+00:00",
+      "container_hostname": "39ca2ed3f7fa",
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "paths": {
+        "/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/runs",
+          "dev": 50,
+          "inode": 4129835849,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/runs",
+          "dev": 50,
+          "inode": 4129835849,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o775",
+          "read": true,
+          "write": false,
+          "execute": true
+        },
+        "/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/batch",
+          "dev": 50,
+          "inode": 4162983332,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/batch": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/batch",
+          "dev": 50,
+          "inode": 4162983332,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": false,
+          "execute": true
+        },
+        "/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/culverts",
+          "dev": 50,
+          "inode": 4264811210,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/culverts": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/culverts",
+          "dev": 50,
+          "inode": 4264811210,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2775",
+          "read": true,
+          "write": false,
+          "execute": true
+        },
+        "/geodata/weppcloud_runs": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/weppcloud_runs",
+          "dev": 50,
+          "inode": 4082406604,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o777",
+          "read": true,
+          "write": false,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination",
+          "dev": 50,
+          "inode": 4280514150,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination",
+          "dev": 50,
+          "inode": 4280514150,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": false,
+          "execute": true
+        },
+        "/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/wc1/query-engine-coordination/locks",
+          "dev": 50,
+          "inode": 4280514151,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": true,
+          "execute": true
+        },
+        "/geodata/wc1/query-engine-coordination/locks": {
+          "exists": true,
+          "directory": true,
+          "symlink": false,
+          "resolved": "/geodata/wc1/query-engine-coordination/locks",
+          "dev": 50,
+          "inode": 4280514151,
+          "uid": 1002,
+          "gid": 130,
+          "mode": "0o2755",
+          "read": true,
+          "write": false,
+          "execute": true
+        }
+      }
+    }
+  },
+  "nominal_limits": {
+    "nodes_per_tick": 100,
+    "admissions_per_tick": 25,
+    "interval_seconds": 30,
+    "lease_seconds": 60,
+    "nodes_per_day_arithmetic_ceiling": 288000,
+    "admissions_per_day_arithmetic_ceiling": 72000,
+    "observed_primary_scopes_only_admission_floor_seconds": 3300,
+    "full_cycle_bound_seconds": null,
+    "measured_refresh_service_capacity": false,
+    "reason": "Primary incomplete, other two roots unmeasured, legacy firsttick exceedslease. No fleet freshness SLA can be established."
+  },
+  "private_scratch": [
+    "/wc1/query-catalog-validation/20261026/inventory-20261026T235058Z",
+    "/wc1/query-catalog-validation/20261026/inventory-20261026T235625Z-legacy"
+  ],
+  "cleanup": {
+    "primary_stop": {
+      "utc": "2026-10-27T00:02:49.446265+00:00",
+      "initial_completed_ticks": 45,
+      "completed_ticks_at_stop": 46,
+      "wait_seconds": 6.0755633525550365,
+      "signal_sent": true,
+      "pid": 1963,
+      "reason": "parent requested bounded stop after next observed completed tick; following in-flight work is not counted"
+    },
+    "known_diagnostic_pids_absent": [
+      1963,
+      2410
+    ],
+    "all_diagnostic_commands_exited": true,
+    "remaining_batch_processes": "existing docker-init/RQ workers only",
+    "no_service_restart_or_config_change": true
+  },
+  "evidence_sha256": {
+    "qcat_inventory_20261026.py": "6659e17e7dd97840fb08cb3c1fdad0544f88f6f0d174fa301e0dc262890f107c",
+    "qcat_inventory_20261026.log": "cd729b1eb2b7aa2ead0bb8c90fffb0f6dcfd458a9ac38182b1ae76f1a0337874",
+    "qcat_inventory_legacy_20261026.py": "7aa60ebf201d5eea1f051155a4347f66e6309a1ff890e1ed5469d1fc95908645",
+    "qcat_inventory_legacy_20261026.log": "a3272a082267b14f66e5afd9791227897b544715310bf46b83d331f496a1991b",
+    "qcat_legacy_names_probe.py": "3447e004e9965a2a89a75630a0721c63ec9a7a8402819240bfe237c3dfac74d0",
+    "qcat_legacy_names_probe.log": "6259305d6fc9d65af6df03e1da02fd9a23736ab127d78219e3b918dd76c89832",
+    "qcat_legacy_scandir_probe.py": "f3e4275d6072d1d8c81573039134ea799e70500677a729f55ecbfce72f6bab63",
+    "qcat_legacy_scandir_probe.log": "53181153640bcad6495794ee3d5122b75d4834e72d0ede5c5db1ce0e1d1d4839",
+    "qcat_legacy_scandir_full_probe.py": "aa9e844e059a795502774af0d034f0944e18e0e44c658c81020b3ebd52a78732",
+    "qcat_legacy_scandir_full_probe.log": "c5c0d1699a2d9e674a1e1190cb3c9061c9b00bf2da7ac83d1d7bea12d5bc31c7",
+    "qcat_inventory_cleanup.txt": "25c9e776a0f04660f5e2ee8f6a2bd4629bf8e396c6f75eebaa061c69a64a7cd5"
+  }
+}

@@ -1,0 +1,11 @@
+{"event": "identity", "role": "holder", "epoch": 1793058693.2870564, "elapsed": 0.0997220054268837, "hostname": "39ca2ed3f7fa", "uid": 1002, "gid": 130, "groups": [130], "lock_path": "/wc1/query-catalog-validation/20261026/async-preflight-1719/locks/107fb753d19a29b7c91a89a990284911c286b231bcaaac913458bde238fcac57.lock", "inode": 4253772674, "mode": "0o640", "source_sha256": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5"}
+{"event": "guard_request", "role": "holder", "epoch": 1793058693.2877176, "elapsed": 0.10038165375590324, "repeat": 0}
+{"event": "lockf_enter", "role": "holder", "epoch": 1793058693.344359, "elapsed": 0.15702300146222115, "operation": 2}
+{"event": "lockf_exit", "role": "holder", "epoch": 1793058693.3509364, "elapsed": 0.1636002417653799, "operation": 2, "seconds": 0.006577234715223312}
+{"event": "acquired", "role": "holder", "epoch": 1793058693.3510969, "elapsed": 0.1637606266885996, "repeat": 0, "wait_seconds": 0.06338246166706085}
+{"event": "release_start", "role": "holder", "epoch": 1793058701.351289, "elapsed": 8.163957921788096, "repeat": 0}
+{"event": "lockf_enter", "role": "holder", "epoch": 1793058701.3514447, "elapsed": 8.164108598604798, "operation": 8}
+{"event": "lockf_exit", "role": "holder", "epoch": 1793058701.3529348, "elapsed": 8.165598707273602, "operation": 8, "seconds": 0.001484522596001625}
+{"event": "released", "role": "holder", "epoch": 1793058701.3530962, "elapsed": 8.165759906172752, "repeat": 0}
+{"event": "success", "role": "holder", "epoch": 1793058701.3542242, "elapsed": 8.166888678446412, "inode_unchanged": true}
+{"event": "heartbeat", "role": "holder", "epoch": 1793058701.3545094, "elapsed": 8.167173068970442, "samples": 80, "max_gap_seconds": 0.2005084529519081}

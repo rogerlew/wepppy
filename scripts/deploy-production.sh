@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 # The installed wctl preset selects full production, worker-pool, or the
 # dedicated wepp3 fork/archive deployment automatically.
 
@@ -260,6 +260,9 @@ SKIP_DOCKER_PRUNE=false
 DOCKER_PRUNE_VOLUMES=false
 TARGETED_WEB=false
 TARGETED_CAP=false
+TARGETED_BATCH=false
+SOURCE_OVERLAY_MANIFEST=""
+BATCH_ROLLBACK_IMAGE_ID=""
 PRINT_PLAN=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
@@ -280,6 +283,18 @@ while [[ $# -gt 0 ]]; do
         --targeted-cap)
             TARGETED_CAP=true
             shift
+            ;;
+        --targeted-batch)
+            TARGETED_BATCH=true
+            shift
+            ;;
+        --source-overlay-manifest)
+            SOURCE_OVERLAY_MANIFEST="${2:?--source-overlay-manifest requires a path}"
+            shift 2
+            ;;
+        --batch-rollback-image-id)
+            BATCH_ROLLBACK_IMAGE_ID="${2:?--batch-rollback-image-id requires an image ID}"
+            shift 2
             ;;
         --print-plan)
             PRINT_PLAN=true
@@ -414,6 +429,18 @@ configure_deploy_topology() {
         EXPECTED_RUNNING_SERVICES=(cap)
     fi
 
+    if [ "${TARGETED_BATCH}" = true ]; then
+        if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
+            || ! echo "${COMPOSE_SERVICES}" | grep -qx "rq-worker-batch" \
+            || ! printf "%s\n" "${EXPECTED_RUNNING_SERVICES[@]}" | grep -qx "rq-worker-batch"; then
+            echo "✗ --targeted-batch requires an existing batch worker service." >&2
+            exit 1
+        fi
+        BUILD_SERVICES=(rq-worker-batch)
+        RECREATED_SERVICES=(rq-worker-batch)
+        EXPECTED_RUNNING_SERVICES=(rq-worker-batch)
+    fi
+
     # Validate only this deployment's cutover set; preserve targeted repairs.
     RUNTIME_SERVICE_ARGS=()
     for service in "${RECREATED_SERVICES[@]}"; do
@@ -427,6 +454,24 @@ configure_deploy_topology() {
 configure_deploy_topology
 
 validate_deploy_topology() {
+    if [ "${TARGETED_BATCH}" = true ]; then
+        if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
+            || [ "${DOCKER_PRUNE_VOLUMES}" = true ]; then
+            echo "✗ --targeted-batch conflicts with other targeted modes or volume pruning." >&2
+            exit 1
+        fi
+        if [ -n "${SOURCE_OVERLAY_MANIFEST}" ] && [ -n "${BATCH_ROLLBACK_IMAGE_ID}" ]; then
+            echo "✗ Select source derivation or exact-image rollback, not both." >&2
+            exit 1
+        fi
+        if [ "${PRINT_PLAN}" = false ] && [ -z "${SOURCE_OVERLAY_MANIFEST}${BATCH_ROLLBACK_IMAGE_ID}" ]; then
+            echo "✗ Targeted batch activation requires a source manifest or exact rollback image ID." >&2
+            exit 1
+        fi
+    elif [ -n "${SOURCE_OVERLAY_MANIFEST}${BATCH_ROLLBACK_IMAGE_ID}" ]; then
+        echo "✗ Source derivation and batch rollback require --targeted-batch." >&2
+        exit 1
+    fi
     if [ "${FLUSH_RQ_DB}" = true ]; then
         echo "✗ Deploy-time Redis flushing is incompatible with the global RQ cutover fence." >&2
         echo "  Perform destructive queue maintenance as a separate, explicitly fenced operation." >&2
@@ -495,6 +540,8 @@ if [ "${TARGETED_WEB}" = true ]; then
     echo "Scope: targeted weppcloud + rq-engine recreation; dependencies remain running"
 elif [ "${TARGETED_CAP}" = true ]; then
     echo "Scope: targeted CAP recreation; all other services remain running"
+elif [ "${TARGETED_BATCH}" = true ]; then
+    echo "Scope: targeted batch worker recreation; all other services remain running"
 fi
 echo "Timestamp: $(date --iso-8601=seconds)"
 echo ""
@@ -891,7 +938,24 @@ trap recover_targeted_cap ERR
 trap 'echo "✗ Deployment interrupted" >&2; false' INT TERM
 
 # Build Docker images
-if [ "${SKIP_BUILD}" = false ]; then
+if [ "${TARGETED_BATCH}" = true ]; then
+    BATCH_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["rq-worker-batch"]["image"])')"
+    BATCH_CONTAINER="$(wctl docker compose ps -q rq-worker-batch)"
+    if [ -n "${SOURCE_OVERLAY_MANIFEST}" ]; then
+        OVERLAY_RESULT_DIR="$(mktemp -d "${DEPLOY_STATE_DIR%/}/wepppy-batch-source.XXXXXX")"
+        python3 "${SCRIPT_DIR}/build_source_overlay.py" \
+            --manifest "${SOURCE_OVERLAY_MANIFEST}" --source-root "${PROJECT_ROOT}" \
+            --image "${BATCH_IMAGE}" --container "${BATCH_CONTAINER}" \
+            --result "${OVERLAY_RESULT_DIR}/result.json"
+        echo "    Source derivation evidence: ${OVERLAY_RESULT_DIR}/result.json"
+    else
+        [[ "${BATCH_ROLLBACK_IMAGE_ID}" =~ ^sha256:[a-f0-9]{64}$ ]]
+        [ "$(docker image inspect --format '{{.Id}}' "${BATCH_IMAGE}")" = "${BATCH_ROLLBACK_IMAGE_ID}" ]
+        echo "    Verified exact retained rollback image ${BATCH_ROLLBACK_IMAGE_ID}"
+    fi
+    wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
+        rq-worker-batch -B -c 'from wepppy.rq import query_catalog_rq; import wepppyo3; print(query_catalog_rq.catalog_worker_configuration())'
+elif [ "${SKIP_BUILD}" = false ]; then
     echo ">>> Step 2: Building Docker images..."
     BASE_BUILD_SERVICES=()
     DEPENDENT_BUILD_SERVICES=()
@@ -940,12 +1004,16 @@ if [ "${DEPLOY_MODE}" = "full" ] && [ "${FLUSH_RQ_DB}" = true ]; then
     assert_no_active_rq_jobs
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
-if [ "${DEPLOY_MODE}" = "worker" ]; then
+if [ "${DEPLOY_MODE}" = "worker" ] && [ "${TARGETED_BATCH}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
-if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
+if [ "${TARGETED_BATCH}" = true ]; then
+    suspend_rq_dequeue
+    assert_no_active_rq_jobs
+    run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker-batch
+elif [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
     echo "    Skipping stack shutdown; workers and dependencies remain running."
 elif [ "${DEPLOY_MODE}" = "full" ]; then
     echo "    Skipping full-stack down; services will be force-recreated in place."
@@ -962,7 +1030,7 @@ elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
         rq-worker-fork-archive
 fi
 if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
-    && [ "${DEPLOY_MODE}" != "full" ]; then
+    && [ "${TARGETED_BATCH}" = false ] && [ "${DEPLOY_MODE}" != "full" ]; then
     run_wctl_with_retry \
         "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
         "${WCTL_COMPOSE_RETRIES}" \
@@ -1031,7 +1099,7 @@ else
 fi
 
 # Build static assets (controllers and themes)
-if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_CAP}" = false ]; then
+if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_CAP}" = false ] && [ "${TARGETED_BATCH}" = false ]; then
     echo ">>> Step 4: Building static assets..."
 
     # Build controllers-gl.js
@@ -1062,7 +1130,7 @@ fi
 echo ">>> Step 5: Starting services..."
 if [ "${DEPLOY_MODE}" = "full" ] \
     && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
-    && [ "${FLUSH_RQ_DB}" = false ]; then
+    && [ "${TARGETED_BATCH}" = false ] && [ "${FLUSH_RQ_DB}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
@@ -1103,6 +1171,11 @@ elif [ "${TARGETED_CAP}" = true ]; then
         "${WCTL_COMPOSE_RETRIES}" \
         "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
         docker compose up -d --no-deps --force-recreate cap
+elif [ "${TARGETED_BATCH}" = true ]; then
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        docker compose up -d --no-deps --force-recreate rq-worker-batch
 else
     if [ -n "${CAP_RESCUE_IMAGE}" ]; then
         CAP_ACTIVATION_STARTED=true
@@ -1116,7 +1189,7 @@ fi
 echo ""
 
 # Wait for health check
-if [ "${HAS_WEPPCLOUD}" = true ]; then
+if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
     echo ">>> Step 6: Waiting for services to be healthy..."
     sleep 5
 
@@ -1354,7 +1427,7 @@ if [ -n "${BACKUP_CONTROLLERS_JS}" ]; then
 fi
 
 if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
-    || [ -n "${CAP_RESCUE_IMAGE}" ]; then
+    || [ "${TARGETED_BATCH}" = true ] || [ -n "${CAP_RESCUE_IMAGE}" ]; then
     echo ""
     echo ">>> Step 7: Skipping broad Docker runtime prune after targeted deployment"
 elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
@@ -1379,7 +1452,7 @@ echo ""
 echo "============================================"
 echo "Deployment complete!"
 echo "============================================"
-if [ "${HAS_WEPPCLOUD}" = true ]; then
+if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
     echo "Controllers bundle: wepppy/weppcloud/static/js/controllers-gl.js"
     echo "Theme CSS: wepppy/weppcloud/static/css/themes/"
     echo ""

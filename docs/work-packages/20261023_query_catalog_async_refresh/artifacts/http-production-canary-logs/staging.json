@@ -1,0 +1,9 @@
+{
+  "host": "wepp3",
+  "private_directory": "/tmp/qcat-http-canary-ks6ovxwk",
+  "source_sha256": {
+    "probe.py": "5d294e945f61464999381dbf3b5f4e8cb5b760515cdaeed8a4e9ab292f64daa8",
+    "server.py": "68f94495468b67069093a6a27adff2f1494bb301b328b360d88b558a65484797",
+    "router.py": "550642bebb640ce490124b71a2af5758e927cc34e6f1e203146a97f107d96d31"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "state": "local_artifact_and_report_checks_passed",
+  "runid": "qcat-mill-creek-20261026",
+  "started_at": 1793036426.5321887,
+  "checks": [
+    {
+      "name": "raw_dates",
+      "returncode": 0,
+      "log": "/tmp/qcat-20261026-raw_dates.log"
+    },
+    {
+      "name": "all_daily_coverage",
+      "returncode": 0,
+      "log": "/tmp/qcat-20261026-all_daily_coverage.log"
+    },
+    {
+      "name": "final_artifacts",
+      "returncode": 0,
+      "log": "/tmp/qcat-20261026-final_artifacts.log"
+    },
+    {
+      "name": "hillslope_reports",
+      "returncode": 0,
+      "log": "/tmp/qcat-20261026-hillslope_reports.log"
+    },
+    {
+      "name": "session_report",
+      "returncode": 0,
+      "log": "/tmp/qcat-20261026-session_report.log"
+    }
+  ],
+  "updated_at": 1793050730.832756,
+  "job_statuses": [
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished",
+    "finished"
+  ]
+}

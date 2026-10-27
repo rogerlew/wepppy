@@ -105,3 +105,30 @@ def test_targeted_cap_does_not_gate_unrelated_browse_configuration(tmp_path: Pat
     result = _run_plan(tmp_path, services, "--targeted-cap")
     assert result.returncode == 0, result.stderr
     assert "recreate=cap" in result.stdout
+
+
+@pytest.mark.parametrize("worker_only", [False, True])
+def test_targeted_batch_plan_has_only_batch_boundary(tmp_path: Path, worker_only: bool) -> None:
+    services = _full_services()
+    services["rq-worker-batch"] = dict(services["rq-worker"])
+    if worker_only:
+        services = {k: v for k, v in services.items() if k in {"rq-worker", "rq-worker-batch", "weppcloudr"}}
+    result = _run_plan(tmp_path, services, "--targeted-batch")
+    assert result.returncode == 0, result.stderr
+    assert "build=rq-worker-batch\nrecreate=rq-worker-batch\nexpected-running=rq-worker-batch" in result.stdout
+
+
+@pytest.mark.parametrize("other", ["--targeted-web", "--targeted-cap", "--docker-prune-volumes"])
+def test_targeted_batch_rejects_conflicting_modes(tmp_path: Path, other: str) -> None:
+    services = _full_services()
+    services["rq-worker-batch"] = dict(services["rq-worker"])
+    result = _run_plan(tmp_path, services, "--targeted-batch", other)
+    assert result.returncode != 0
+
+
+def test_targeted_batch_rejects_inactive_replica(tmp_path: Path) -> None:
+    services = _full_services()
+    services['rq-worker-batch'] = {**services['rq-worker'], 'deploy': {'replicas': 0}}
+    result = _run_plan(tmp_path, services, '--targeted-batch')
+    assert result.returncode != 0
+    assert 'requires an existing batch worker service' in result.stderr
