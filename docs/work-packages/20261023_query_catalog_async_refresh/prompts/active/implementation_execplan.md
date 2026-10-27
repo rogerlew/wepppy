@@ -6,46 +6,32 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep P
 
 Remove catalog traversal from eligible artifact-producing requests without losing updates, breaking immediate reports, or allowing old background work to publish into a replaced project. Reproduce the Mill Creek submission failure on an isolated copy; prove responsive submission, actual model execution and correct catalog-backed consumption after repair.
 
-The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. The operator subsequently instructed execution of this plan; implementation and validation are now active. Production deployment/repair remain separately authorized. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
+The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. The operator subsequently instructed execution of this plan; implementation and bounded validation are now complete, including the separately authorized full deployment. General enablement and user-project repair remain excluded. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
 
 ## Progress
-- [x] 2026-10-27 UTC: Operator selected standby followed by full canonical deployment after jobs clear; no one-job exception or scoped cutover will be executed for this rollout.
-- [x] 2026-10-27 UTC: Bounded-pilot checkpoint `5c1edb22a` committed after two PASS reviews; includes exact-image source-only activation correction.
-- [x] Implement bounded guard/controller and source-only targeted batch deployment. RQ integration 72 passes; operator 24 passes; independent deployment 56 passes. Independent correctness/security review and exact source manifest pass; broad regression completed with 11,862 passes/201 skips; final RQ source separately passed 72 tests.
-- [ ] On operator resumption after jobs clear, execute full canonical deployment and actual shared-batch pilot. Preserve the active-job gate; no production mutations have occurred.
 
-- [x] 2026-10-27 UTC: Operator authorized bounded-pilot execution; disabled-mode isolation, atomic queue-wide cap, retry-inclusive budgets and scoped deployment ratified in checkpoint `5c1edb22a`.
+- [x] M0–M3: reviewed contracts, native/publication/queue/lifecycle/reader implementation and local regression gates complete.
+- [x] M4–M5: producer migrations and fresh October 26 full scientific/report acceptance complete; earlier October 23 failure retained as historical evidence.
+- [x] October 27 remediation: all four roots/30,891 scopes discovered, bounded RQ timeout recovery, HTTP responsiveness and independent reviews passed.
+- [x] Bounded admission/controller implementation and independent local gates complete; broad baseline 11,862 passed/201 skipped with final-source focused gates retained separately.
+- [x] Full canonical deployment of `0da9c9071` completed on wepp1–3; source-only candidate and active-job hold superseded by authorized deployment.
+- [x] Deployed pilot preflight: eight compatible consumers, production identity and matching source/native configuration across both batch hosts.
+- [x] Actual shared-batch pilot: one inventory plus 16 refresh jobs, both eight-scope artifact waves, 48 query checks, receipt acknowledgment and sentinel noninterference passed.
+- [x] Explicit pause, retained lease rejection and post-expiry resume preserved original budgets/window; all admitted work drained. No active-job exception was used.
+- [x] Nine scratch scopes retired under lifecycle guards to private evidence storage; 711 source hashes and eight catalog hashes preserved, old managed paths absent.
+- [x] Independent execution correctness/security review complete; exact evidence limits retained. Secondary QA documented separately.
+- [ ] M6 general fleet rollout: complete-cycle/oldest-pending-age and new ordinary-arrival delay acceptance remain unproved and outside the authorized pilot. General async stays disabled.
+- [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
-- [x] 2026-10-27 UTC: Inventory contract checkpoint `09ce55d1d` committed after independent correctness/security PASS; implementation now uses existing-batch streaming discovery and fenced Redis checkpoints.
-- [x] 2026-10-27 UTC: HTTP/MCP offload passed 199 local tests and independent review; final-source private production ASGI canary preserved health responsiveness during 30 s cross-host guard waits with a saturated one-token test pool.
-- [x] 2026-10-27 UTC: Independent inventory review passed 66 real-Redis/filesystem/privacy tests. Three-primary-root real-RQ discovery completed 10,192 scopes with no errors; terminal artifact readback passed after correcting a harness-only RQ status type assumption.
-- [x] 2026-10-27 UTC: Complete discovery passed for all four roots: 30,891 distinct scopes with zero errors and empty frontiers; legacy retained checkpoints across deliberate replacement. Normal forking RQ timeout/retry canary passed on owned scratch data.
-- [x] 2026-10-27 UTC: Broad regression passed in segments: initial 11,621 passes/170 skips, then 183 failed-module/remainder passes after correcting only a stale process-local Playwright path. Final-source focused tests cover intervening remediation edits.
-- [x] 2026-10-27 UTC: Classification completed: 18,514 writable and 12,377 READONLY scopes; zero errors or unwritable scopes.
-- [x] 2026-10-27 UTC: Final 48-scope component profile and full25-candidate tick canaries complete; retain two300-second verification censors and exact component limits.
-- [ ] 2026-10-27 UTC: Shared-worker capacity and bounded rollout policy remain open; seven-job admission/pilot proposal is authorized and implementation is active. Operator excludes the preexisting legacy read-only mount limitation from this catalog release; routing proposal is deferred, with no mount or routing edits.
-
-- [ ] 2026-10-27 UTC: Operator approved recommended remediation: resumable large-directory inventory, four-namespace/legacy-role parity, HTTP event-loop isolation preserving synchronous freshness, then full capacity/rollout gates. Production enablement remains conditional on passing gates.
-
-- [x] 2026-10-26 21:38:50 UTC: Fresh full local model and all five artifact/report checks passed; all 18 jobs finished, 1,908 profiles/184 years complete and zero pending receipts. Retained terminal JSON supersedes earlier M4 failure for the fresh case.
-- [ ] 2026-10-26 UTC: Operator requested completion of remaining rollout gates; measured production lock latency, inventory/capacity, explicit namespace parity and production workflow validation active.
-
-- [x] 2026-10-26 17:41 UTC: Independent acceptance-harness review closed six findings. First raw hillslope has all 67,205 unique Gregorian days across 184 years; full pipeline and automatic all-profile checks remain running.
-- [x] 2026-10-26 UTC: Verified `wepp_261021` release hashes; prepared fresh isolated case, obtained authenticated 200 in 0.95 s, recovered strict initial catalog refresh, and launched full pipeline plus completion validator. Production fleet/publication/exclusion preflight retained; latency and capacity remain open.
-- [ ] 2026-10-26 UTC: Resume M4/M6 with operator-selected `wepp_261021` on a fresh isolated copy; validate the full 184-year model and consumers, then production compatibility/capacity. Code is deployed to wepp1–3; async remains disabled.
-
-- [x] 2026-10-23 UTC: Contract and independent reviews committed as standalone ancestor `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`.
-- [x] 2026-10-23 UTC: Caller inventory and all ten review dispositions retained; execution plan, launch prompt and evidence matrix scaffolded.
-- [x] 2026-10-23 UTC: Reviewed implementation clarification checkpoint `9435cd2cb` preserves explicit source authority and concurrent Roads reads; independent correctness/security evidence retained.
-- [x] 2026-10-23 UTC: M0 ancestry/source/host baseline and explicit agent ownership recorded; additional lifecycle entry points incorporated. Production-equivalent acceptance remains in M6.
-- [x] 2026-10-23 UTC: M1 implemented and locally validated, including native parity/GIL tests, cross-host NFS and thread guards, lifecycle/READONLY/archive regressions. Production identity parity remains a rollout gate.
-- [x] 2026-10-23 UTC: M2 implemented; 26 real Redis tests plus actual producer SIGKILL-before-receipt recovery and malformed-catalog repair passed. Fleet capacity and companion configuration remain rollout preflights.
-- [x] 2026-10-23 UTC: M3 barriers, malformed-catalog repair and sanitized maintenance status implemented. Final consolidated suite: 293 passed, 2 opt-in benchmark skips, including real Redis, query/report, producer and readonly tests.
-- [x] M4: Producer migration and full fresh October 26 model/artifact/report acceptance passed. Preserve October 23 failed case as historical evidence.
-- [x] 2026-10-23 UTC: M5 family dispositions and explicit producer migrations complete; 162 focused plus 32 RUSLE/Omni tests passed, retained synchronous callers documented.
-- [ ] M6: Local full scientific workflow, failure/race, browser/archive, segmented regression and prior implementation reviews complete. Production controlled reconciliation and exclusion pass; fleet capacity, legacy compatibility and HTTP contention acceptance remain open.
-- [x] 2026-10-23 UTC: M7 handoff records release HOLD, exact source/native provenance and recovery/preflight requirements; no deployment or production repair.
 ## Surprises & Discoveries
+
+2026-10-27 completed execution: source/native hashes and genuine worker capabilities
+matched after the full deployment. An early controller resume was correctly
+rejected while its old lease remained; explicit post-expiry resume preserved the
+manifest, budgets and deadline. Artifact checks passed before consumer calls.
+Post-acceptance canonical invalidation overwrites status metadata, so future
+retirement needs a raw metadata snapshot before invalidation; never reconstruct
+missing status bytes from a successful result.
 
 2026-10-27 security reproduction: installed RQ `Job.cancel()` can label running
 work canceled without stopping the process. A claimed canceled job now retains
@@ -60,9 +46,9 @@ namespace/incarnation/marker, excluding host-local device numbering. A final
 claim transaction watches job status as well as the admission ledger.
 
 2026-10-27 pilot: local development images omit the bind-mounted native scanner;
-the source-image gate correctly rejected that image. Real image derivation is
-being tested against an existing local production-style image. Production
-backport is isolated at retained `813d912be`, excluding unrelated local history.
+the source-image gate correctly rejected that image. At that preparation checkpoint, real image derivation was being tested against
+an existing local production-style image and a backport was isolated at `813d912be`.
+The later full deployment superseded that optional activation path.
 
 2026-10-27 remediation: complete discovery now passes for all four roots, but
 legacy needed 4,032.650 cumulative process seconds across a deliberate fenced
@@ -99,6 +85,7 @@ Existing report helpers generally check missing catalog membership, not freshnes
 The unchanged 184-year isolated model produced duplicate daily observations in raw `H1.wat.dat` beginning simulation year 104. The strict water-balance report rejects those observations; catalog query, authenticated summary and exact-byte download pass. The watershed then failed at simulation year 100 at 22:59:54 UTC with `PASS components error: SOURCES3 date mismatch` and `STOP 1`. Original production raw output is absent, so baseline attribution is unproved; the paired native build also includes explicitly recorded preexisting calendar/HBP edits. The scoped supervisor stopped on failure without finalization. Retain these acceptance limitations without changing scientific inputs or weakening validation.
 
 ## Decision Log
+- 2026-10-27 / operator: “complete pending work” resumes the bounded pilot after the separately authorized full canonical deployment completed on all three hosts. Reuse the existing controller and normal batch workers; no source overlay, service restart, broader namespace mutation or general async enablement is needed. The canonical pilot explicitly excludes general enablement even after success; finish its evidence and disposition the distinct whole-fleet capacity gate honestly.
 - 2026-10-27 / operator: “standby. we will do a full deploy when the jobs clear”. Preserve the active-job gate and select the full canonical deployment path after quiescence. The one-job exception proposal is not approved; retain the scoped candidate as historical preparation. Commit/push authorization does not resume deployment.
 - 2026-10-27 / operator: “execute the bounded pilot” authorizes the proposed guard and actual shared-batch pilot. General enablement remains excluded; ordinary disabled-mode behavior must remain unchanged.
 
@@ -131,38 +118,27 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
-Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
-2026-10-27 bounded-pilot implementation is locally validated: broad baseline
-11,862 passed/201 skipped, final RQ 72, operator 24 and independent deployment 56;
-independent security 86 RQ/disclosure plus 80 operator/deployment checks pass. Final
-seven-file production payload and exact-image recovery are prepared. The live
-default watershed job blocks activation under the existing gate. Production
-is unchanged; actual shared-batch pilot acceptance is not complete. See
-[current pilot gates](../../artifacts/20261027_bounded_pilot_gate_status.md).
 
-Final October 27 bounded capacity assessment: all 30,891 scopes classified and
-all 48 selected source components attempted; retain one incomplete first
-verification and one incomplete repeat. Tick canaries fit nominal cadence for
-scratch cohorts, but the minimum 49,405 considerations already require about
-16.47 hours. General enablement remains HOLD. The next concrete proposal is
-bounded outstanding admission on the existing batch queue plus a finite pilot;
-operator approval is resolved and contract checkpoint `5c1edb22a` precedes active implementation.
-No further component-only measurement is planned.
+The authorized implementation, full deployment and actual bounded pilot are
+complete. See [production acceptance](../../artifacts/20261027_shared_pilot_acceptance.md)
+and [sanitized results](../../artifacts/20261027_shared_pilot/summary.json).
+The pilot finished 17 jobs on seven genuine workers across both batch hosts,
+verified both artifact waves and preserved ordinary disabled-mode behavior.
+The reconstructed outstanding peak was seven; ten-second samples peaked at four.
 
-2026-10-27 remediation: inventory and HTTP correctness/security findings are
-closed. Complete four-root discovery and real-RQ timeout recovery pass; private
-production ASGI health responsiveness passes even with a saturated test pool.
-The new remediation is not deployed. Fleet capacity still prevents general enablement. The operator excludes the
-preexisting legacy mount/workflow limitation from this release scope.
+General fleet enablement remains HOLD. The one ordinary job observed was already
+running, so this is not new-arrival delay evidence. The intentional drained
+controller restart left a 90.32-second observation gap. Lifecycle retirement
+preserved source/catalog bytes and receipt histories but replaced original
+refresh-status bytes before a separate snapshot; exact status replay is unavailable.
+Future cleanup must snapshot that metadata first. The independent reviewer also
+retained an unexercised low-priority late-deadline readback limitation.
 
-2026-10-26 update: code is deployed but async remains disabled on all three hosts.
-Fresh isolated `wepp_261021` pipeline started at 17:29:04 UTC after a responsive
-0.95 s authenticated submission and successful catalog recovery. All local checks
-passed at 21:38:50 UTC; production publication/exclusion passed with latency and
-capacity gates still under measurement.
-The following paragraph records the prior October 23 checkpoint.
+Earlier scientific, inventory, HTTP and local regression evidence remains valid
+for its recorded scope. No user project was repaired or mutated by this pilot,
+and no general async configuration was enabled. Whole-fleet capacity requires a
+separately bounded rollout acceptance, not another equivalent component probe.
 
-Runtime implementation complete across native/publication/queue/lifecycle/readers/polling/producers; correctness, security and QA findings closed. Consolidated suite passed 293 tests (2 opt-in benchmark skips); final metadata fix passed 70 focused tests and 17 independent security cases. Broad coverage completed in segments: the last full attempt passed 7,629 tests before exposing the corrected transaction-metadata bug, then the final remaining segment passed 5,108 tests/18 skips. This is not one green full-suite run. The unchanged Mill Creek model reached a terminal watershed date-mismatch failure at year 100; full workflow acceptance remains blocked, while submission and hillslope catalog consumers passed. No production deployment or repair. Runtime changes are committed with this implementation checkpoint; exact task-file hashes and paired native provenance are retained. Release remains on hold pending scientific acceptance and production parity.
 ## Context and Orientation
 
 Authoritative specification: `docs/schemas/query-engine-catalog-refresh-contract.md`; five related canonical amendments are enumerated in `artifacts/2026-10-23_contract_decision.md`. Evidence inventory: `artifacts/caller_matrix.md` (79 calls, 41 files, transitive wrappers and direct readers/writers). Independent contract reviews and disposition are in the same artifacts directory.
@@ -281,3 +257,5 @@ root/configuration/rollback proposal. Reconcile deployment chronology in package
 status without treating deployed-but-disabled code as async acceptance.
 
 2026-10-26 revision: refreshed deployment chronology and retained the strict clone-cache failure/recovery and production latency limitation while full model acceptance executes.
+
+Revision (2026-10-27): reconciled the completed full deployment and bounded shared-batch pilot; retained the separate general-capacity hold and exact observation/retirement evidence limits. No runtime code or general enablement changed.

@@ -2,14 +2,16 @@
 
 ## Status
 
-2026-10-27 UTC: **Rollout HOLD.** Fresh full scientific/report acceptance passed
-on October 26. The original code is deployed to wepp1–3 with async disabled and
-explicit roots unset. New streaming-inventory and HTTP remediation is reviewed
-and validated, but not deployed. Complete discovery and bounded RQ timeout
-recovery pass. Fleet capacity remains open. The operator excludes the preexisting legacy
-mount/workflow limitation from this release scope; no routing change is planned. Historical blocked/undeployed statements below describe earlier checkpoints.
+2026-10-27 UTC: **Authorized bounded execution complete; general enablement HOLD.**
+Full canonical deployment of `0da9c9071` completed on wepp1–3. The actual shared
+batch pilot passed 17 jobs, both eight-scope artifact waves and 48 query checks,
+receipt acknowledgment, sentinel isolation and explicit pause/resume recovery.
+All nine scratch scopes are retired outside managed roots; eight compatible
+batch consumers remain healthy. General async is disabled and roots are unset.
+See [acceptance](artifacts/20261027_shared_pilot_acceptance.md).
 
-October 23 checkpoint (historical): implementation and local validation complete; full-workflow acceptance blocked. Reviewed contract ancestor: `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`; clarification checkpoint: `9435cd2cb`. Runtime changes are committed with this implementation checkpoint. M4/M6 remain open after the isolated model's terminal scientific failure. No production deployment or repair performed.
+Earlier undeployed/active-job-hold statements below are historical checkpoints;
+the full deployment superseded source-only candidate preparation.
 
 ## Progress
 
@@ -24,20 +26,29 @@ October 23 checkpoint (historical): implementation and local validation complete
 
 ## Review and validation
 
-Contract and implementation reviews and post-fix confirmations are retained.
-Final remediation inventory/HTTP reviews pass; local and production-equivalent
-failure/race, NFS, HTTP and segmented regression evidence is retained. Fresh full
-scientific acceptance passed. Capacity remains a separate open operational gate.
+Contract and implementation reviews, scientific/report acceptance, four-root
+discovery, timeout recovery and HTTP responsiveness evidence remain retained.
+The deployed pilot adds genuine shared-worker lineage, raw artifact-before-consumer
+readback, seven-job reconstructed peak, explicit pause/resume and guarded scratch
+retirement. Independent correctness and security execution reviews pass; the
+secondary QA artifact records final documentation consistency. This operational
+completion changed no executable code and requires no repeat of prior code suites.
 
 ## Remaining gates
 
-Classification and bounded profiling are complete, with censoring retained. Establish
-shared-worker backlog/wait and complete-cycle acceptance before enablement.
-The operator has excluded the preexisting legacy mount limitation; the routing
-proposal is deferred. After capacity acceptance, perform canonical coordinated
-deployment with explicit namespace/capability parity.
-New remediation is not deployed; production async remains disabled. No affected
-user project has been repaired or mutated by this validation.
+No implementation, deployment or bounded-pilot execution remains pending in the
+authorized slice. Whole-fleet enablement remains a distinct HOLD: establish
+complete-cycle progress/oldest unreconciled age and ordinary-arrival queue delay
+under an explicitly bounded rollout before enabling general async. The pilot
+contract does not authorize broad enablement after success. The preexisting
+legacy mount limitation remains outside scope; no routing change is planned.
+
+Retained limitations: no new ordinary batch arrivals were observed during this pilot;
+a drained controller restart created a 90.32-second observation gap; original
+refresh-status bytes were overwritten by legitimate post-acceptance retirement,
+so their exact independent replay is unavailable. A low-priority expired-controller
+readback limitation was not exercised. These do not convert this pilot into
+whole-fleet acceptance. See the independent correctness/security/QA artifacts.
 
 ## Handoff evidence
 
@@ -181,8 +192,8 @@ proposal and pilot bounds are in
 Operator subsequently authorized this additional admission policy; guard and
 pilot implementation are active, with no general enablement. No more component-only probes are planned.
 
-## Authorized bounded pilot execution
-Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
+## Historical bounded-pilot preparation
+Historical pre-deployment operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
 Operator instructed “execute the bounded pilot.” Admission-policy approval is
 resolved. Contract checkpoint, disabled-mode owned-scope isolation, authentic
 worker deployment, implementation and shared-batch acceptance are active.
@@ -212,3 +223,10 @@ Production remains at clean revision 813d on both hosts and the same default wat
 continues heartbeating. The prepared pilot is held at that explicit active-job
 gate; a one-job exception requires operator approval and is not implemented.
 [Current pilot disposition](artifacts/20261027_bounded_pilot_gate_status.md).
+
+## October 27 completed shared-batch execution
+
+The later full deployment and resumed pilot supersede the immediately preceding
+standby statements. [Acceptance](artifacts/20261027_shared_pilot_acceptance.md) and
+[sanitized results](artifacts/20261027_shared_pilot/summary.json) are current.
+General enablement remains excluded; whole-fleet capacity is not declared passed.

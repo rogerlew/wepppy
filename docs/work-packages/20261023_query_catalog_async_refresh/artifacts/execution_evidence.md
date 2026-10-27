@@ -1,5 +1,11 @@
 # Execution evidence ledger
 
+Current October 27 disposition: full deployment and actual bounded shared-batch
+pilot complete. See [acceptance](20261027_shared_pilot_acceptance.md) and
+[sanitized results](20261027_shared_pilot/summary.json). General async remains
+disabled; whole-fleet capacity remains unproved. The dated checkpoints below
+retain their historical outcomes and are not current deployment status.
+
 October 26 update: code is deployed on wepp1–3 with async disabled. Fresh
 `wepp_261021` acceptance is running; see [resumed acceptance](20261026_resumed_acceptance.md).
 [Production preflight](20261026_production_preflight.md) now establishes matching

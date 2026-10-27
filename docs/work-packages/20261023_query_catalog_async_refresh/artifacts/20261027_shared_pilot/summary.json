@@ -1,0 +1,87 @@
+{
+  "deployed_revision": "0da9c9071069c37fdcf3df5a74b28d161b1af458",
+  "outcome": "completed",
+  "admission_started_utc": "2026-10-27T16:53:25.856648+00:00",
+  "last_observation_utc": "2026-10-27T16:56:40.498053+00:00",
+  "scopes": 8,
+  "parquets_per_scope": 79,
+  "source_bytes_per_scope": 73328103,
+  "excluded_sentinels": 1,
+  "jobs": {
+    "inventory": 1,
+    "refresh": 16
+  },
+  "all_jobs_finished": true,
+  "outstanding": 0,
+  "failures": [],
+  "global_uncertain": 0,
+  "configured_outstanding_cap": 7,
+  "peak_outstanding_reconstructed_from_job_timestamps": 7,
+  "max_outstanding_in_10second_samples": 4,
+  "compatible_workers": 8,
+  "executing_workers": 7,
+  "executing_containers": 2,
+  "jobs_per_container_sorted": [
+    6,
+    11
+  ],
+  "artifact_readbacks": {
+    "waves": 2,
+    "query_checks": 48,
+    "schema_source_hash_and_catalog_checks": "passed",
+    "receipt_acknowledgments": 8,
+    "sentinel_unchanged_during_execution": true
+  },
+  "recovery": {
+    "pause_outcome": "safely_stopped",
+    "pause_counters": {
+      "inventory": 1,
+      "refresh": 0
+    },
+    "pause_outstanding": 0,
+    "lease_takeover_rejected": true,
+    "same_manifest": true,
+    "max_observation_gap_seconds": 90.32122611999512,
+    "gap_disposition": "intentional paused/drained controller restart; no admitted execution spanned gap"
+  },
+  "ordinary_work": {
+    "preexisting_running_jobs_observed": 1,
+    "new_arrivals_observed": 0,
+    "historical_enqueue_wait_seconds": 0.008013010025024414,
+    "new_arrival_latency_proven": false
+  },
+  "cleanup": {
+    "at": 1793120459.9537961,
+    "consumers": {
+      "compatible": 8,
+      "incompatible": [],
+      "suspended": false
+    },
+    "fixture_count": 9,
+    "general_enabled": false,
+    "observer_lease_present": false,
+    "old_paths_absent": true,
+    "original_refresh_status_bytes_separately_snapshotted": false,
+    "outstanding": 0,
+    "retained_catalog_hashes_verified": 8,
+    "retained_parquet_hashes_verified": 711,
+    "state": "paused"
+  },
+  "scope_limit": "Bounded pilot only. Whole-fleet capacity and general enablement remain unproved and excluded.",
+  "private_evidence_sha256": {
+    "cleanup-readback.json": "58bbf0e6123ef22bd996552e89204edf83274cb01510297343a19c5ec0bd3b80",
+    "cleanup.json": "7a6f4a7487d340d992e182309a822433c8a1a6550ab698a03a38a98ad81d503c",
+    "inventory-readback.json": "235dcd4d74d097ce141f2aeaf40b73e35cbf592e5745bf6049150fea2eb22e7c",
+    "lease-rejection.log": "c32bdcd1557e72e81a6c1a2b041c58453cd7d477c65d1a96c9b6d5f638d1c4c3",
+    "observations.jsonl": "3e9dac90e3885bf1791977c213ee97c02ac663e679fbb62bc7bc7f7811de0ca6",
+    "pause-preflight.json": "73ae8f93b8affc8c20171d32a8aadc043d145052db40eed3afa9ca3911c3dea0",
+    "pause-result.json": "cca6897fab54d80df713fb1f2ef25db0dae0bb6092912114deba107d549cf6ac",
+    "preflight-register.json": "73ae8f93b8affc8c20171d32a8aadc043d145052db40eed3afa9ca3911c3dea0",
+    "preflight.json": "73ae8f93b8affc8c20171d32a8aadc043d145052db40eed3afa9ca3911c3dea0",
+    "receipt-readback.json": "ee257f14af9b0859fbe5787d7bad030eb9bf361d510a93964eb5295020fb6501",
+    "registration.json": "4ef66a4e385e6393db69095f5042bccfe86aae631c44f2aec90f2f86aaf556a9",
+    "result.json": "a940ebc78d12d43970feb3916f80b00c925506a234679c0974b82dcab8bc8710",
+    "setup.json": "32899dde99cc847b5906956836396a93af9399092fa19c59a9a60e8048d71a25",
+    "worker-registrations.json": "6d831d642122f0df121e47c78aa6b9e6dc8ba6514f92bc59ee4c901e9d104a21"
+  }
+}

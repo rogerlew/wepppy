@@ -1,29 +1,30 @@
 # Query catalog asynchronous refresh
-Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
-Status (2026-10-27): original implementation/reviews and local segmented regression complete;
-original code deployed to wepp1–3, async disabled and managed roots unset.
-October 27 remediation is locally implemented and under final validation, not
-deployed; inventory checkpoint `09ce55d1d` is committed. Operator-selected
-`wepp_261021` full local acceptance passed on a fresh isolated copy. Production
-scratch publication, lock exclusion and a representative complete reconciliation
-cycle passed. Complete four-root discovery, bounded RQ timeout recovery and
-private HTTP contention/readiness checks now pass; fleet capacity remains open.
-The operator excludes the preexisting legacy mount limitation from this release. See [current acceptance](artifacts/20261026_resumed_acceptance.md)
-and [production preflight](artifacts/20261026_production_preflight.md).
 
-The subsequently authorized bounded pilot is locally implemented and independently
-reviewed; source-only batch cutover and actual shared-queue execution remain
-pending the production active-job gate. See [pilot gates](artifacts/20261027_bounded_pilot_gate_status.md).
+Status (2026-10-27): **authorized implementation, deployment and bounded shared-batch
+pilot complete; general fleet enablement HOLD.** Full canonical deployment of
+`0da9c9071` completed on wepp1–3. The actual pilot passed one inventory and
+16 refresh jobs on both production batch hosts, both eight-scope artifact waves,
+48 query checks, receipt acknowledgment, held-out sentinel isolation and explicit
+pause/resume recovery. Scratch scopes are retired into private evidence storage.
+General async remains disabled; whole-fleet capacity is not inferred from this pilot.
+
+Current authority and evidence: [shared pilot acceptance](artifacts/20261027_shared_pilot_acceptance.md),
+[tracker](tracker.md), and [active plan](prompts/active/implementation_execplan.md).
+Historical undeployed/source-only-candidate statements in retained artifacts are
+superseded by the separately authorized full deployment and this acceptance.
+Scientific/report, four-root discovery, inventory-timeout and HTTP contention
+acceptance already passed. The preexisting legacy mount limitation remains
+excluded by operator decision.
 
 ## Purpose and scope
 
 Make asynchronous query-engine catalog refresh the preferred artifact-writer path while preserving freshness-sensitive consumers. Diagnose and prevent the observed wepp1 submission 502: a missing catalog invokes a native full scan that holds the GIL long enough to starve the web-worker heartbeat.
 
-Deliverables: canonical contract, comprehensive caller/reader disposition, independent contract reviews and disposition, and a prepared pre-implementation checkpoint. The contract-only phase made no runtime changes. The operator subsequently authorized checkpoint commit and execution scaffolding: contract ancestor `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`. Canonical design and caller matrix are reviewed; runtime changes are undergoing focused, environment and independent review validation.
+Deliverables: canonical contract, comprehensive caller/reader disposition, independent contract reviews and disposition, and a prepared pre-implementation checkpoint. The contract-only phase made no runtime changes. The operator subsequently authorized checkpoint commit and execution scaffolding: contract ancestor `dc2b2ddbe8cfedbd4bae024310f03447ca813c32`. Canonical design, caller matrix, runtime implementation and the bounded production pilot are reviewed and validated; whole-fleet enablement remains separate.
 
 ## Authority and complexity budget
 
-The operator requested: “we need a comprehensive analysis to figure out where the async can be safely deployed. that should be the preferred route. let's do this contract first. author the contract and dispatch agents to review and disposition changes”. This authorizes analysis, contract authorship and independent reviews; it does not assert implementation conformance or authorize deployment. The subsequent instruction “commit and scaffold work-package for execution” authorizes the checkpoint and execution documentation now retained here. The later explicit instruction to execute the implementation ExecPlan authorizes runtime implementation and isolated validation. Subsequent operator instructions authorized production deployment (completed October 26) and renewed isolated acceptance with `wepp_261021`. Async enablement remains gated on acceptance; affected-run repair remains outside this execution. The October 27 instruction “execute the bounded pilot” authorizes the finite owned-scope pilot and scoped batch activation in the pilot deployment contract, preserving the existing active-job gate and disabled general mode.
+The operator requested: “we need a comprehensive analysis to figure out where the async can be safely deployed. that should be the preferred route. let's do this contract first. author the contract and dispatch agents to review and disposition changes”. This authorizes analysis, contract authorship and independent reviews; it does not assert implementation conformance or authorize deployment. The subsequent instruction “commit and scaffold work-package for execution” authorizes the checkpoint and execution documentation now retained here. The later explicit instruction to execute the implementation ExecPlan authorizes runtime implementation and isolated validation. Subsequent operator instructions authorized production deployment (completed October 26) and renewed isolated acceptance with `wepp_261021`. Async enablement remains gated on acceptance; affected-run repair remains outside this execution. The October 27 instruction “execute the bounded pilot” authorized the finite owned-scope pilot. Later full-deployment authorization selected the canonical full path, and “complete pending work” resumed the pilot after deployment. Those authorized steps are complete, preserving disabled general mode.
 
 Use existing Redis, RQ queues, workers and scheduler. Permit per-project coordination records and visible refresh diagnostics. No new service, queue topology, datastore, dependency, auth policy, model parameterization, or model-output schema. Existing synchronous APIs remain compatible; caller migration is explicit.
 
@@ -40,11 +41,11 @@ High: queued work crosses web/worker filesystem boundaries, including nested pro
 
 ## Acceptance and follow-through
 
-This phase passes when all discovered call sites/readers have an explicit disposition, the canonical design covers concurrency and recovery, independent reviews close medium/high findings, and documentation lint passes. Future runtime acceptance must prove authenticated submission remains responsive, refresh convergence and catalog semantic readback under production-equivalent NFS/identities; queue success alone is insufficient.
+The initial contract phase required explicit call-site/reader dispositions, concurrency and recovery design, independent findings closure and documentation lint. Those gates passed. Subsequent runtime acceptance proved responsive authenticated submission, refresh convergence and semantic artifact readback under production-equivalent identities; queue success alone was not credited as artifact correctness. The current shared-pilot acceptance and remaining fleet boundary are linked above.
 
 The October 23 scientific acceptance failed at watershed year 100 and rejected duplicate raw daily records; retain that [historical evidence](artifacts/2026-10-23_environment_probes.md#terminal-outcome--full-scientific-acceptance-failed). The fresh October 26 case passed all 18 jobs, complete Gregorian coverage for 1,908 hillslopes over 184 years, strict reports and authenticated downloads. October 27 remediation passed independent inventory/security and HTTP reviews. Production-equivalent HTTP probes retain responsiveness under cross-host contention and a saturated test pool; full discovery and timeout recovery pass. Shared-worker capacity remains open. The operator excludes the preexisting legacy mount limitation from this release scope.
 
-Healthy signals: bounded web admission, one admitted refresh per scope, dirty revision convergence, readable atomic catalog and accurate freshness. Danger signals: growing dirty age, missing eligible workers, repeated failures, old-generation publication, duplicate writers or hidden synchronous scans. Future rollout must define its observation window and rollback evidence before deployment; no temporary mitigation is installed here.
+Healthy signals: bounded web admission, one admitted refresh per scope, dirty revision convergence, readable atomic catalog and accurate freshness. Danger signals: growing dirty age, missing eligible workers, repeated failures, old-generation publication, duplicate writers or hidden synchronous scans. A general fleet rollout must define its acceptance scope, observation window and rollback evidence before enablement; no temporary mitigation is installed here.
 
 ## Execution entry points
 

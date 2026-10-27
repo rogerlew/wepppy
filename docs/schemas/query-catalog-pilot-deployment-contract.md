@@ -1,10 +1,16 @@
 # Query-catalog pilot: scoped batch deployment
-Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
-Status: operator-authorized pilot intent, implementation/acceptance pending
-(2026-10-27 UTC). Applies with the bounded-pilot section of
-[query catalog refresh](query-engine-catalog-refresh-contract.md) and the existing
-canonical `scripts/deploy-production.sh` entry point. No general enablement or
-unrelated source deployment is authorized.
+
+Current operator decision (2026-10-27): the separately authorized full canonical
+deployment of `0da9c9071` completed on wepp1–3, followed by a passing bounded
+shared-batch pilot. General async remains disabled. See
+[execution acceptance](../work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md).
+
+The optional scoped/source-only mechanisms below remain valid, but were not the
+selected activation path. Their retained `813d` baseline/backport instructions
+are historical preparation, not a requirement to downgrade the deployed fleet.
+The later explicit full-deployment authorization superseded that source scope;
+no additional source installation or restart was needed to run the pilot.
+General enablement remains excluded by the [pilot contract](query-engine-catalog-refresh-contract.md).
 
 ## Opt-in targeted batch mode
 

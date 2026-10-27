@@ -1,9 +1,9 @@
 # Query catalog refresh operations
 
-Status (2026-10-27): original code deployed to wepp1–3 with async disabled.
-Streaming-inventory and HTTP-readiness remediation is validated locally and in
-private production-equivalent probes, but not deployed. Complete discovery and
-bounded timeout recovery pass; fleet capacity remains a rollout gate.
+Status (2026-10-27): full implementation/remediation deployed to wepp1–3 at
+`0da9c9071`; the actual bounded shared-batch pilot passed. General async remains
+disabled. Complete discovery, timeout recovery and HTTP acceptance pass; whole-fleet
+cycle capacity and new-arrival delay remain separate enablement gates.
 Authority: [refresh contract](../schemas/query-engine-catalog-refresh-contract.md).
 Execution and evidence: [work package](../work-packages/20261023_query_catalog_async_refresh/package.md).
 
@@ -209,3 +209,24 @@ until the worker records execution exit after all scoped work. Keep observing;
 do not delete the job or ledger to manufacture a drain. A missing exit marker
 requires explicit operator reconciliation. Normal RQ finished/failed/stopped
 workhorse completion and timeout/death retry behavior remains unchanged.
+
+## Completed pilot and owned-fixture retirement
+
+The October 27 pilot passed both artifact waves on the existing shared batch
+pool; [acceptance and limits](../work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md)
+remain authoritative. Passing a bounded pilot does not enable general mode.
+
+After acceptance, pause new pilot admission and confirm all bound work is
+terminal, with zero outstanding/uncertain work. Under each exact scope's canonical
+lifecycle guard, verify its marker, registered scope/incarnation and inode.
+Before invalidation, snapshot original incarnation/status bytes and receipt
+metadata in private evidence. Canonical lifecycle invalidation overwrites status;
+a success record cannot reconstruct its original bytes. Then invalidate and
+atomically rename only owned fixtures to absent private destinations on the same
+filesystem outside managed roots. Preserve external guard inodes, Redis budgets,
+ledger and receipt histories. Recheck old paths absent and retained scientific
+source/catalog hashes; do not delete evidence to manufacture a clean result.
+
+The first execution retained the readback/manifest/catalog/receipt chain but did
+not separately snapshot original status bytes before retirement. That limitation
+is recorded; do not claim exact original-status replay from its retained files.

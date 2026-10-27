@@ -1,0 +1,196 @@
+{
+  "wepp1": {
+    "host": "wepp1",
+    "uid": 1002,
+    "gid": 130,
+    "groups": [
+      130
+    ],
+    "consumers": {
+      "compatible": 8,
+      "incompatible": [],
+      "suspended": false
+    },
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/geodata/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/geodata/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": false,
+      "inventory_protocol": 1,
+      "admission_protocol": 1,
+      "pilot_protocol": 1
+    },
+    "source_sha256": {
+      "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "query_catalog_rq": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9",
+      "pilot": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5"
+    },
+    "operator_tool_sha256": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5",
+    "sources": {
+      "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "wepppy/rq/query_catalog_rq.py": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9",
+      "wepppy/rq/_query_catalog_pilot.py": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5",
+      "wepppy/rq/_query_catalog_admission.py": "ccf94032d46ec7038017a4f219b13e1d288b59753412ea3b9fdcf60abfecaf80",
+      "wepppy/rq/_query_catalog_inventory.py": "f023fc55743141705aa964baf9ded6a4d031319c8b247f90c95583daa31de1b4",
+      "tools/query_catalog_pilot.py": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5"
+    },
+    "queued_batch": 0,
+    "versions": {
+      "rq": "1.16.2",
+      "redis": "6.2.0",
+      "duckdb": "1.1.1",
+      "pyarrow": "23.0.1"
+    },
+    "native": {
+      "swat_interchange_rust.so": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275",
+      "swat_utils_rust.so": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676",
+      "cli_revision_rust.so": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
+      "watershed_abstraction_rust.so": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80",
+      "roads_flowpath_rust.so": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+      "wepp_interchange_rust.so": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+      "wepp_viz_rust.so": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301",
+      "sbs_map_rust.so": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45",
+      "raster_characteristics_rust.so": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+    },
+    "source_matches_checkout": true
+  },
+  "wepp2": {
+    "host": "wepp2",
+    "uid": 1002,
+    "gid": 130,
+    "groups": [
+      130
+    ],
+    "consumers": {
+      "compatible": 8,
+      "incompatible": [],
+      "suspended": false
+    },
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/geodata/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/geodata/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": false,
+      "inventory_protocol": 1,
+      "admission_protocol": 1,
+      "pilot_protocol": 1
+    },
+    "source_sha256": {
+      "catalog_refresh": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "query_catalog_rq": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9",
+      "pilot": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5"
+    },
+    "operator_tool_sha256": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5",
+    "sources": {
+      "wepppy/query_engine/catalog_refresh.py": "1f19401a875246e621fdeea398cf4f42d6fb288eef591ad5d611c19b6fd3dcd5",
+      "wepppy/rq/query_catalog_rq.py": "6de79801a17428df2caccd8fb7a449dfa1bf960b6b6bbd7dfa2fa397a4222ce9",
+      "wepppy/rq/_query_catalog_pilot.py": "c85de18002b08dd5fc9d69f4bb597df0a03bb2b18f2e333d838f401881fbb0c5",
+      "wepppy/rq/_query_catalog_admission.py": "ccf94032d46ec7038017a4f219b13e1d288b59753412ea3b9fdcf60abfecaf80",
+      "wepppy/rq/_query_catalog_inventory.py": "f023fc55743141705aa964baf9ded6a4d031319c8b247f90c95583daa31de1b4",
+      "tools/query_catalog_pilot.py": "1f22c196845ff394747b6286593a7f69329430b2cea507d6550ccb9b084ea1c5"
+    },
+    "queued_batch": 0,
+    "versions": {
+      "rq": "1.16.2",
+      "redis": "6.2.0",
+      "duckdb": "1.1.1",
+      "pyarrow": "23.0.1"
+    },
+    "native": {
+      "swat_interchange_rust.so": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275",
+      "swat_utils_rust.so": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676",
+      "cli_revision_rust.so": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882",
+      "watershed_abstraction_rust.so": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80",
+      "roads_flowpath_rust.so": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45",
+      "wepp_interchange_rust.so": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+      "wepp_viz_rust.so": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301",
+      "sbs_map_rust.so": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45",
+      "raster_characteristics_rust.so": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+    },
+    "source_matches_checkout": true
+  }
+}

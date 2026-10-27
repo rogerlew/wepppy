@@ -181,7 +181,8 @@ Rollback stops new async admission, reconciles/drains active maintenance and pre
 
 ## Bounded admission and disabled-mode pilot (October 27)
 
-Status: operator-approved intent; implementation and pilot conformance pending.
+Status: implemented; bounded production pilot conformance passed October 27.
+See [acceptance](../work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md) for scope and evidence limits.
 The operator authorized execution of the bounded pilot on October 27, 2026.
 This section does not authorize general async enablement.
 

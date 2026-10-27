@@ -1,4 +1,16 @@
 # Bounded pilot gate status
+
+Current disposition (2026-10-27): **bounded execution PASS; general enablement HOLD**.
+Full canonical deployment of `0da9c9071` and actual shared-batch execution are
+complete. The active-job deployment hold below is historical. All local gates
+remain passed; deployed source/configuration, genuine worker lineage, both
+artifact waves, pause/resume, budgets and scratch retirement now pass.
+[Acceptance](20261027_shared_pilot_acceptance.md) retains the exact limits;
+[results](20261027_shared_pilot/summary.json) retain sanitized evidence.
+Whole-fleet capacity and new-arrival delay are not established.
+
+## Historical pre-deployment checkpoint
+
 Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
 The operator authorized implementation and an actual pilot on the existing batch
 queue. General asynchronous refresh remains disabled. This file does not claim

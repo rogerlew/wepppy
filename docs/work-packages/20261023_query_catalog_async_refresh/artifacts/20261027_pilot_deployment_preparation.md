@@ -1,5 +1,5 @@
 # Bounded pilot deployment preparation
-Current operator decision (2026-10-27 UTC): remain on standby and use the full canonical deployment after default and batch jobs clear. No active-job exception is approved or implemented. The scoped batch candidate remains retained evidence, not the selected rollout path. Deployment and actual pilot execution remain pending; general asynchronous refresh stays disabled.
+Historical source-only preparation. The later operator-authorized full canonical deployment and bounded pilot are complete; see [current acceptance](20261027_shared_pilot_acceptance.md). The retained baseline/backport instructions below were not the selected activation path. General async remains disabled.
 Production remains at `813d912be1c8f6f13b6fc60cecebbef9259cd36e` on both hosts,
 with clean tracked source (read back before staging). The detached local
 candidate checkout starts at that revision; only the task delta is backported.
