@@ -178,3 +178,120 @@ Required implementation evidence:
 - Queue wiring catalog, `wctl check-rq-graph`, live job-tree inspection, focused tests and substantive broad gates. Paired native GIL release for retained serving scans is a required compatible prerequisite, not a substitute for async/readiness evidence.
 
 Rollback stops new async admission, reconciles/drains active maintenance and preserves receipts/diagnostics before restoring synchronous producers. Mixed-version publishers must not run without common publication/lifecycle coordination. Existing catalogs remain schema-compatible; rollback cannot silently discard unacknowledged changes.
+
+## Bounded admission and disabled-mode pilot (October 27)
+
+Status: operator-approved intent; implementation and pilot conformance pending.
+The operator authorized execution of the bounded pilot on October 27, 2026.
+This section does not authorize general async enablement.
+
+### Shared batch admission
+
+All inventory and refresh admission paths, including producers, reconciliation
+and retries, MUST share one atomic queue-wide admission decision. At most seven
+catalog-maintenance jobs may be outstanding; admission also respects the current
+compatible live consumer count. Count queued, started, deferred, scheduled and
+reserved work across configurations/pilots, not only one project or current
+configuration. Worker disappearance does not release a permit. Existing
+nonterminal or unresolved records remain counted until their disposition can be
+proved. Per-scope coalescing does not consume a second permit or cumulative job
+budget. Permit/budget reservation and RQ enqueue commit together; contention,
+Redis failures and missing/corrupt accounting fail closed with intent retained.
+
+Ordinary ready jobs waiting on the batch queue prevent new catalog admission.
+Inspect raw job identifiers, states and timestamps without executing task payloads
+or invoking registry cleanup; unknown/corrupt classification is conservative.
+Do not suspend ordinary queues, preempt scientific work, discard receipts, or
+invoke inline refresh as an enabled-mode admission fallback. Already-admitted
+maintenance may drain; a job-count cap is not an elapsed-delay guarantee.
+
+Trusted operator APIs may pause/resume catalog admission independently of
+ordinary RQ execution. No new public endpoint or authentication authority is
+introduced. A pilot pause is latched until an explicit operator resume; resume
+cannot extend its original admission deadline, reset consumed budgets or erase
+failure evidence. Missing accounting never implicitly creates a fresh budget.
+Reconstruction requires explicit operator recovery against retained job evidence.
+
+### Disabled-mode pilot authority and isolation
+
+General `QUERY_CATALOG_REFRESH_ENABLED=false` retains existing synchronous
+producer behavior. Only explicitly pilot-tagged admission and recorded pilot
+jobs may use a bounded exception. They MUST present an existing operator-created
+pilot manifest; a caller-provided pilot ID alone is not authority.
+
+The immutable manifest binds the pilot generation, queue/configuration,
+capability version, owned fixture paths, scope IDs, namespace, incarnation and
+directory identity, original deadline and cumulative budgets. Fixtures MUST be
+new owned validation projects in existing canonical namespaces; an ownership
+marker and exclusive creation are required. An unrelated valid project is not
+implicitly authorized by sharing a root, prefix, owner or parent. Reject symlink
+redirection, changed identities and unlisted descendants before initialization,
+receipt creation or publication. Initialization of only the approved fixture
+metadata is an explicit operator preparation step, not a public disabled-mode
+bypass.
+
+Each admitted job ID is recorded atomically with its pilot generation, kind and
+scope/identity binding. Workers validate this binding, authentic compatible
+parent registration and current filesystem identity before scope/receipt access.
+Job arguments or metadata cannot enlarge the manifest. Retired job IDs cannot be
+revived without a new budgeted admission. Admission pause/deadline expiry permits
+already-recorded jobs to execute/drain; it does not permit replacement jobs or
+retries. Missing/malformed manifests or uncertain authority fail closed.
+
+Pilot inventory seeds only approved canonical-root locators. It MUST NOT traverse
+all production roots, expand an approved parent into unlisted scopes, or consume
+ordinary dirty indexes. Its checkpoint/stream state is isolated by pilot
+identity. The ordinary scheduler continues returning disabled; only explicit
+pilot reconciliation uses the exception. Worker capability advertisement comes
+from installed candidate code; do not spoof registration or bootstrap arbitrary
+source into a normal worker to bypass compatibility checks.
+
+### Pilot limits and acceptance
+
+The first pilot admits at most 25 new refresh job IDs and two inventory job IDs,
+including retries in each cumulative budget, within a fixed 1,800-second
+admission window. The window is not a completion deadline: drain and artifact
+readback may finish later. Controller restart, cancellation, failure and retry do
+not reset these counters. Keep the existing 25-candidate/100-record budgets,
+30-second cadence, 3,600-second job timeout and 86,400-second cycle spacing.
+
+Stop new pilot admission on ordinary backlog, configuration mismatch, artifact
+failure, uncertain accounting or unexpected outstanding-job growth. An ordinary
+job waiting 300 seconds is a retained pilot failure, not a promise that running
+maintenance can finish in that interval. A cleared queue does not automatically
+resume a paused pilot. End-of-window or exhausted-budget state retains unfinished
+receipts and discovery checkpoints. Never label a stopped partial cycle complete.
+
+Acceptance uses actual existing batch workers and queue, actual production
+identity/mounts, sanitized live job trees and direct generated-artifact readback.
+Verify expected schemas, source lineage and query results, remaining receipts,
+held-out-project noninterference, capacity counters, pause/drain/restart recovery,
+ordinary waiting time and owned-resource cleanup. A private-queue canary alone
+cannot satisfy this shared-queue pilot. Success does not certify whole-fleet
+capacity or authorize general enablement.
+
+Pilot participant deployment follows the
+[scoped batch deployment contract](query-catalog-pilot-deployment-contract.md).
+Its opt-in canonical target and candidate-only source closure do not authorize
+unrelated rollout or changes to default deployment behavior.
+
+### Pilot observation and controller loss
+
+The operator controller observes raw ordinary-job waiting state and pilot job,
+budget and artifact outcomes throughout admission, pause and drain, until every
+admitted job is terminal and readback is complete. Its observation interval is
+10 seconds, with a 60-second owned observation lease. Renew only after a
+successful observation; a separate blind heartbeat is insufficient. Admission
+requires a current observation and matching owner token/generation. Expired or
+lost ownership cannot be revived by the stale controller. Loss latches pilot
+admission paused on the next attempted admission; admitted work still drains.
+An unavailable observer is not proof of healthy queue delay or successful pilot
+completion. Recovery obtains fresh explicit operator ownership, reconciles prior
+jobs/counters, and retains observation gaps and failures. Original window and
+budgets remain fixed; no automatic restart/resume or deadline extension.
+
+A recorded ordinary-wait, artifact, scope or accounting failure cannot become a
+passed pilot merely because observation resumes or the queue later clears.
+Explicit operator resume is a trusted control operation, not an automatic loop;
+it may resume an otherwise valid pause within the original window but cannot
+resurrect terminal/retired job IDs or reset failure evidence.

@@ -1,0 +1,122 @@
+{
+  "scope": "read-only production batch runtime baseline before pilot changes",
+  "hosts": {
+    "wepp1": {
+      "module_path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/__init__.py",
+      "uid": 1002,
+      "gid": 130,
+      "python_distribution_count": 307,
+      "python_distribution_fingerprint": "09be4942c99f1ebddaeaecf033da4669e9bc6e9d7de59e7a9e834a2ebf11860a",
+      "native": [
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_interchange/swat_interchange_rust.so",
+          "sha256": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_utils/swat_utils_rust.so",
+          "sha256": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so",
+          "sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/watershed_abstraction/watershed_abstraction_rust.so",
+          "sha256": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so",
+          "sha256": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+          "sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_viz/wepp_viz_rust.so",
+          "sha256": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/sbs_map/sbs_map_rust.so",
+          "sha256": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+          "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+        }
+      ],
+      "vendor_revisions": {
+        "wepppyo3": "unavailable",
+        "weppcloud-wbt": "unavailable",
+        "weppcloud2": "unavailable"
+      },
+      "image_id": "sha256:0901418ba9207cc0e0d55b2d05301f0143a64a16a1e7889ae556b5af93b3b1a2",
+      "image_tag": "wepppy:latest",
+      "repository_mount_present": false
+    },
+    "wepp2": {
+      "module_path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/__init__.py",
+      "uid": 1002,
+      "gid": 130,
+      "python_distribution_count": 307,
+      "python_distribution_fingerprint": "09be4942c99f1ebddaeaecf033da4669e9bc6e9d7de59e7a9e834a2ebf11860a",
+      "native": [
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_interchange/swat_interchange_rust.so",
+          "sha256": "fb7d1eaaeb9b4ba2df452b07e9d01479fb5fe526f67dfb08f1247dc032129275"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/swat_utils/swat_utils_rust.so",
+          "sha256": "58c80622da9bef7f08c239a02a37c089143e22e4168d19efa96e692b486c5676"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/climate/cli_revision_rust.so",
+          "sha256": "da1c323a7fa95f147b825a0fa38cfb006ef4f8319b489eb6f77ac7c4f49f7882"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/watershed_abstraction/watershed_abstraction_rust.so",
+          "sha256": "fdfc13683d700a9456a517d30f4d2b359f8b8529598704aca686c11c2117dc80"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/roads_flowpath/roads_flowpath_rust.so",
+          "sha256": "58d0433a52d99630d607f6e5be198b8bcf2e3fb0d93cb395e29027c2e4968e45"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+          "sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/wepp_viz/wepp_viz_rust.so",
+          "sha256": "a0e06b79c8ecd7b13616eecb1280e41543939d7114e1532f09bf95494160d301"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/sbs_map/sbs_map_rust.so",
+          "sha256": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45"
+        },
+        {
+          "path": "/opt/vendor/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+          "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+        }
+      ],
+      "vendor_revisions": {
+        "wepppyo3": "unavailable",
+        "weppcloud-wbt": "unavailable",
+        "weppcloud2": "unavailable"
+      },
+      "image_id": "sha256:e8cb0d8f38e481694ac9abe3f06f90486beb4ebfabb4014cff7b322358a8241a",
+      "image_tag": "wepppy:latest",
+      "repository_mount_present": false
+    }
+  },
+  "vendor_git_metadata": "Dockerfile clone_repo removes .git; exact vendor refs cannot be recovered using git in runtime",
+  "dockerfile_baseline": "813d912be1c8f6f13b6fc60cecebbef9259cd36e",
+  "mutable_build_inputs": [
+    "node:20-alpine",
+    "python:3.12-slim",
+    "apt repositories",
+    "WEPPPYO3_REF=main",
+    "WBT_REF=master",
+    "WEPPCLOUD2_REF=main",
+    "UV_INSTALLER_URL"
+  ]
+}

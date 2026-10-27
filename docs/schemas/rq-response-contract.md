@@ -660,3 +660,14 @@ current receipt and terminal-state comparison and failure update MUST be
 atomic; failure publication MUST occur only for an accepted association/state,
 never after a rejected update. Status messages carry job identifiers and a
 bounded generic explanation, not raw filesystem paths or exception payloads.
+
+## Bounded query-catalog pilot maintenance
+
+The query-catalog contract's manifest-bound disabled-mode pilot uses the existing
+sanitized maintenance-ID classification and existing batch queue. No new public
+pilot control API or caller authorization is introduced. Open job polling MUST
+NOT disclose pilot manifests, fixture paths, accounting state, raw task payloads
+or exceptions; existing maintenance cancellation authority remains Admin/Root.
+Operator-only admission results may distinguish capacity, ordinary backlog,
+paused/exhausted/expired pilot and invalid authority as pending/unavailable
+conditions. They never acknowledge durable intent or imply artifact freshness.

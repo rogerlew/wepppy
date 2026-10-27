@@ -108,3 +108,71 @@ Checkpointed directory replay preserves emitted work without relying on opaque
 filesystem cookies. One occupied batch worker and Redis frontier/batch storage
 are the explicit operational costs; measure their capacity before enablement.
 This clarifies implementation intent; production conformance remains pending.
+
+## October 27 bounded pilot decision
+
+Decision venue: operator execution conversation, 2026-10-27 UTC (October 26
+America/Los_Angeles). Participants: requesting operator and Codex implementation,
+correctness and security reviewers. Decision owner: operator, “execute the bounded
+pilot.” Implementers: Codex agents. Implementation conformance remains pending.
+
+Add a queue-wide cap of seven outstanding maintenance jobs, further bounded by
+compatible live consumers, plus pause on ordinary ready backlog. The first
+owned-scope pilot has retry-inclusive budgets of 25 refresh and two inventory
+job IDs, a fixed 1,800-second admission window and a 300-second ordinary-wait
+failure trigger. These are operational limits, not scientific parameters or
+unconditional latency/freshness guarantees. Original cadence, consideration,
+checkpoint, timeout and cycle-spacing settings remain unchanged.
+
+Measured discovery/classification found 18,514 writable scopes. The scheduler
+requires at least 49,405 considerations (about 16.47 hours at nominal cadence).
+Actual 25-candidate scratch ticks fit the cadence, but real-source component
+measurements include a 277.591-second collection/verification and an unresolved
+verification after a 256.494-second collection. Per-tick limits alone do not bound
+distinct-project queue accumulation. More component-only measurements cannot
+supply that bound. Seven leaves one consumer outside catalog work when the
+observed eight-consumer fleet is healthy; it is not a universal reservation.
+
+Use authentic deployed capability and a manifest-bound disabled-mode exception
+for owned fixtures so ordinary producers stay synchronous and unrelated scopes
+cannot be released. Reject unbounded general enablement, a new queue/worker pool,
+registration spoofing, arbitrary source bootstrap and weakening freshness checks.
+See the canonical bounded-pilot section and the package's capacity assessment.
+
+Pause only catalog admission on stop, retain receipts/checkpoints and let admitted
+work drain. Explicit operator recovery/resume preserves original budgets and
+failure evidence; it does not silently reset or extend a pilot. General async
+remains disabled. Scope/capability/identity failures block acceptance; pilot
+success is not whole-fleet capacity acceptance.
+
+Pilot observation runs every 10 seconds with a 60-second owned observation lease,
+reusing the existing lease-duration precedent and leaving multiple observations
+before the 300-second wait-failure trigger. Renewal follows successful observation,
+not an independent blind heartbeat. Controller loss pauses new admission without
+stopping ordinary work or already-admitted jobs; gaps remain acceptance evidence.
+These timings do not promise instantaneous reaction or automatic recovery.
+
+The pilot's necessary participant cutover adds only an opt-in targeted batch
+mode to the canonical deploy entry point, governed by
+[the scoped deployment contract](../schemas/query-catalog-pilot-deployment-contract.md).
+Source staging is a manifest-reviewed task-only patch on each existing production
+baseline followed by canonical `--skip-pull`; unrelated local history is excluded.
+If deployment source requires backporting the opt-in target to that baseline,
+retain and validate the exact production candidate separately from local HEAD.
+Default deployment modes and unrelated services remain unchanged.
+
+Correctness review verified that production batch containers do not bind-mount
+repository source. A host patch followed by `--skip-build` would run old code.
+The scoped target therefore builds its image from the production baseline plus
+the task-only patch, with verified existing native/dependency inputs and an
+owned old-image rollback reference. Candidate image imports/source hashes must
+pass before batch cutover. This corrects activation mechanics; it does not
+authorize unrelated code, dependency or scientific changes.
+
+Baseline provenance additionally shows mutable vendor branch/base references and
+uncached installers in the ordinary image build. The pilot uses a source-only
+derivative of each exact running local batch image inside the canonical targeted
+mode, replacing only manifest-approved Python files and stale derived bytecode.
+No network/installer/vendor/native step is permitted. This preserves the measured
+nine native modules and 307-distribution runtime fingerprint instead of assuming
+a mutable rebuild is equivalent. General build/deploy defaults remain unchanged.
