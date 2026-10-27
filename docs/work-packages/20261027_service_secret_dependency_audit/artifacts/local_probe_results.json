@@ -1,0 +1,52 @@
+{
+  "host": "forest",
+  "date_utc": "2026-10-27",
+  "private_fixture": "qcat-archive-20261023",
+  "writes": "none to accounts or run data",
+  "nonowner": "existing active unrelated account",
+  "credentials": "short-lived user tokens with empty privileged roles; not retained",
+  "results": [
+    {
+      "cold_ownership_lookup": "passed",
+      "gid": 993,
+      "http_owner": 200,
+      "http_unrelated_user": 403,
+      "owner": "allowed",
+      "response_content": "validated",
+      "service": "browse",
+      "uid": 1000,
+      "unrelated_user": "denied"
+    },
+    {
+      "cold_ownership_lookup": "passed",
+      "gid": 993,
+      "http_owner": 206,
+      "http_unrelated_user": 403,
+      "owner": "allowed",
+      "response_content": "validated",
+      "service": "download",
+      "uid": 1000,
+      "unrelated_user": "denied"
+    },
+    {
+      "cold_ownership_lookup": "passed",
+      "dtale_foreign_app_identity": "passed",
+      "dtale_owner": true,
+      "dtale_unrelated_user": false,
+      "gid": 993,
+      "owner": "allowed",
+      "service": "dtale",
+      "uid": 1000,
+      "unrelated_user": "denied"
+    },
+    {
+      "cold_ownership_lookup": "passed",
+      "gid": 993,
+      "legacy_mcp_identity": "known resolved; unknown rejected",
+      "owner": "allowed",
+      "service": "query-engine",
+      "uid": 1000,
+      "unrelated_user": "denied"
+    }
+  ]
+}

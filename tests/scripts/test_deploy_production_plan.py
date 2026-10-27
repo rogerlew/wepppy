@@ -48,7 +48,7 @@ fi
 
 
 def _full_services() -> dict[str, object]:
-    return {
+    services = {
         "weppcloud": {"image": "wepppy:latest", "build": {"context": ".."}},
         "rq-engine": {"image": "wepppy:latest", "build": {"context": ".."}},
         "rq-worker": {"image": "wepppy:latest", "build": {"context": ".."}},
@@ -61,6 +61,13 @@ def _full_services() -> dict[str, object]:
             "deploy": {"replicas": 0},
         },
     }
+
+    for name in ("weppcloud", "rq-engine", "rq-worker"):
+        services[name]["environment"] = {
+            "SECRET_KEY": "test-only", "SECURITY_PASSWORD_SALT": "test-only",
+            "POSTGRES_PASSWORD": "test-only",
+        }
+    return services
 
 
 def test_full_plan_builds_each_local_image_and_validates_full_recreate_set(tmp_path: Path) -> None:
@@ -81,3 +88,20 @@ def test_targeted_modes_have_narrow_recreate_and_acceptance_sets(tmp_path: Path)
     assert cap.returncode == 0, cap.stderr
     assert "build=cap" in cap.stdout
     assert "recreate=cap" in cap.stdout
+
+
+def test_plan_rejects_missing_consumer_configuration_before_build(tmp_path: Path) -> None:
+    services = _full_services()
+    services["browse"] = {"image": "wepppy:latest", "build": {"context": ".."}}
+    result = _run_plan(tmp_path, services)
+    assert result.returncode != 0
+    assert "service 'browse': missing SECRET_KEY" in result.stderr
+    assert "build=" not in result.stdout
+
+
+def test_targeted_cap_does_not_gate_unrelated_browse_configuration(tmp_path: Path) -> None:
+    services = _full_services()
+    services["browse"] = {"image": "wepppy:latest", "build": {"context": ".."}}
+    result = _run_plan(tmp_path, services, "--targeted-cap")
+    assert result.returncode == 0, result.stderr
+    assert "recreate=cap" in result.stdout

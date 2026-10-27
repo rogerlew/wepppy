@@ -34,8 +34,8 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 
 | Secret ID | Used By | Notes |
 | --- | --- | --- |
-| `flask_secret_key` | `weppcloud`, `browse`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match across services that mint/validate session cookies and worker paths that import Flask app config. |
-| `flask_security_password_salt` | `weppcloud`, `browse`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match where password hashing/session logic depends on it, including worker-side run-sync paths. |
+| `flask_secret_key` | `weppcloud`, `browse`, `download`, `dtale`, `query-engine`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match across services that mint/validate session cookies and worker paths that import Flask app config. |
+| `flask_security_password_salt` | `weppcloud`, `browse`, `download`, `dtale`, `query-engine`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match where password hashing/session logic depends on it, including worker-side run-sync paths. |
 | `wepp_auth_jwt_secrets` | API services that issue/validate JWTs | File contains either a single secret or a comma-delimited rotation list (first is active). |
 | `wepp_mcp_jwt_secret` | `query-engine` | Enables MCP routes; can be the same value as `wepp_auth_jwt_secrets` but does not have to be. |
 | `agent_jwt_secret` | agent auth paths | Keep distinct from Flask secret key. |
@@ -58,9 +58,38 @@ Notes:
 - A “one secret per file” rule holds naturally when each Secret key maps to one file.
 - For rotation lists (for example JWT secrets), a single file may contain a comma-delimited list if the application expects a list.
 
-Browse requires both Flask secrets because non-admin run ownership checks import the Flask app through `get_run_owners_lazy`. Mount the existing `flask_secret_key` and `flask_security_password_salt` files and set `SECRET_KEY_FILE` and `SECURITY_PASSWORD_SALT_FILE` in both dev and production Compose. This preserves the existing authorization path; no secret rotation or authorization bypass is needed.
+Browse and download require both Flask secrets because user-token ownership checks import the Flask app through `get_run_owners_lazy`. D-Tale private viewer reauthorization shares that path. Query-engine also imports Flask when resolving legacy MCP identities through `get_user_models`. Mount the existing `flask_secret_key` and `flask_security_password_salt` files and set `SECRET_KEY_FILE` and `SECURITY_PASSWORD_SALT_FILE` in each consumer, including the retained HPC configuration. Download also requires `POSTGRES_PASSWORD_FILE` and its mount. This preserves the existing authorization path; no secret rotation or authorization bypass is needed.
 
 Incident evidence: on wepp1, October 26, 2026 at 16:31:10 PDT, `/weppcloud/runs/mdobre-shattering-jockey/cfg/aria2c.spec` failed with `RuntimeError: SECRET_KEY (or SECRET_KEY_FILE) must be configured`. Both Flask secret bindings were absent from browse. Before rollout, validate an authenticated non-admin owner request to `aria2c.spec` under the candidate Compose configuration and confirm unauthorized access remains rejected. Container health alone does not exercise this lazy import.
+
+### Shared-consumer regression gate
+
+`wctl docker compose config --format json` piped to
+`scripts/compose_deploy_contract.py validate-runtime-config` with one
+`--active-service NAME` per effective service validates the required bindings
+without printing values. The canonical production deploy entry point runs this
+check before build/cutover for the selected recreate set, including effective
+overrides. Targeted CAP/web repairs do not gate unrelated services. Maintain its consumer
+inventory when shared helpers acquire new dependencies. It checks configuration;
+exact-host file readability and authenticated workflow checks remain mandatory.
+
+Shared ownership and identity helpers must use the WEPPcloud Flask app context
+for its ORM models, even when called inside another Flask app such as D-Tale.
+The caller's context must be restored after lookup. Secrets alone do not make
+another Flask app's database session valid.
+
+Do not grant Flask secrets to every service using the same image. The restricted
+fork/archive worker and scheduler use database configuration without reaching the
+inspected Flask-dependent task bodies. General workers already require Flask.
+Isolated test/smoke stacks intentionally use disposable inline credentials.
+The [2026-10-27 assessment](../work-packages/20261027_service_secret_dependency_audit/artifacts/assessment.md)
+records dependency paths, variants, validation boundaries and exclusions.
+
+The regression browser environment in development and retained HPC Compose uses
+`PLAYWRIGHT_BROWSERS_PATH=/workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers`.
+The repeated `wepppy` component is required by the source-tree mount. The isolated
+CI image uses its own `/opt/wepppy-ci/browsers` installation. A missing browser
+executable is an environment failure, not evidence that application checks passed.
 
 ## Phase 0 Inventory (Current Consumers + Env Names)
 This section is the Phase 0 “inventory” deliverable for the secrets migration work package.
@@ -68,8 +97,8 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 ### Secret Map
 | Secret ID | Current env var(s) | Proposed `*_FILE` env var(s) | Primary consumers | Notes |
 | --- | --- | --- | --- | --- |
-| `flask_secret_key` | `SECRET_KEY` | `SECRET_KEY_FILE` | Flask `weppcloud`; browse ownership-check Flask import; FastAPI `rq-engine` session validation; worker run-sync import path (`rq-worker*`) | Signs Flask session cookies via `itsdangerous.Signer`. Must be identical between `weppcloud` and `rq-engine` for `/rq-engine/api/.../session-token` flows. |
-| `flask_security_password_salt` | `SECURITY_PASSWORD_SALT` | `SECURITY_PASSWORD_SALT_FILE` | Flask `weppcloud`; browse ownership-check Flask import; worker run-sync import path (`rq-worker*`) | Flask-Security password hashing salt/pepper input. Treat as auth-critical and stable. |
+| `flask_secret_key` | `SECRET_KEY` | `SECRET_KEY_FILE` | Flask `weppcloud`; browse/download ownership and D-Tale/legacy MCP Flask imports; FastAPI `rq-engine` session validation; worker run-sync import path (`rq-worker*`) | Signs Flask session cookies via `itsdangerous.Signer`. Must be identical between `weppcloud` and `rq-engine` for `/rq-engine/api/.../session-token` flows. |
+| `flask_security_password_salt` | `SECURITY_PASSWORD_SALT` | `SECURITY_PASSWORD_SALT_FILE` | Flask `weppcloud`; browse/download ownership and D-Tale/legacy MCP Flask imports; worker run-sync import path (`rq-worker*`) | Flask-Security password hashing salt/pepper input. Treat as auth-critical and stable. |
 | `wepp_auth_jwt_secrets` | `WEPP_AUTH_JWT_SECRETS`, `WEPP_AUTH_JWT_SECRET` | `WEPP_AUTH_JWT_SECRETS_FILE`, `WEPP_AUTH_JWT_SECRET_FILE` | `weppcloud` token issuance; `rq-engine`/`browse` token validation | Prefer `WEPP_AUTH_JWT_SECRETS` (comma-delimited rotation list; first is active). |
 | `wepp_mcp_jwt_secret` | `WEPP_MCP_JWT_SECRET` | `WEPP_MCP_JWT_SECRET_FILE` | `query-engine` MCP mount | Enables `/mcp` routes when configured. Compose mounts `/run/secrets/wepp_mcp_jwt_secret` and sets `WEPP_MCP_JWT_SECRET_FILE`. |
 | `agent_jwt_secret` | `AGENT_JWT_SECRET` (dev `.env` also uses `AGENT_JWT_SECRET_KEY`) | `AGENT_JWT_SECRET_FILE` | `weppcloud` agent JWT issuance; `wepppy/mcp/*` tool auth | Code expects `AGENT_JWT_SECRET`. `AGENT_JWT_SECRET_KEY` is a legacy/dev key name; do not treat it as a runtime env var. |

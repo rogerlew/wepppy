@@ -546,6 +546,11 @@ def test_resolve_user_id_from_fs_uniquifier_with_app_context(
     query = DummyQuery()
     user_model = type("DummyUserModel", (), {"fs_uniquifier": DummyField(), "query": query})
 
+    import wepppy.weppcloud.app as weppcloud_app
+    from types import SimpleNamespace
+    monkeypatch.setattr(session_routes, "current_app", SimpleNamespace(
+        _get_current_object=lambda: weppcloud_app.app,
+    ))
     monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
     monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
 
@@ -623,6 +628,11 @@ def test_resolve_user_id_from_fs_uniquifier_returns_none_when_missing(
     query = DummyQuery()
     user_model = type("DummyUserModel", (), {"fs_uniquifier": DummyField(), "query": query})
 
+    import wepppy.weppcloud.app as weppcloud_app
+    from types import SimpleNamespace
+    monkeypatch.setattr(session_routes, "current_app", SimpleNamespace(
+        _get_current_object=lambda: weppcloud_app.app,
+    ))
     monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
     monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
 
@@ -651,6 +661,11 @@ def test_resolve_roles_for_user_id_reads_current_user_record(
 
     query = DummyQuery()
     user_model = type("DummyUserModel", (), {"id": DummyField(), "query": query})
+    import wepppy.weppcloud.app as weppcloud_app
+    from types import SimpleNamespace
+    monkeypatch.setattr(session_routes, "current_app", SimpleNamespace(
+        _get_current_object=lambda: weppcloud_app.app,
+    ))
     monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
     monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
 

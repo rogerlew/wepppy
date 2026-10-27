@@ -875,10 +875,10 @@ def get_run_owners_lazy(runid: str) -> Any:
         Whatever `get_run_owners` returns (typically a collection of users).
     """
     from flask import has_app_context
-    from wepppy.weppcloud.app import get_run_owners
-    if has_app_context():
+    from wepppy.weppcloud.app import app as flask_app, get_run_owners
+    # D-Tale has its own Flask app; its context does not own these models.
+    if has_app_context() and current_app._get_current_object() is flask_app:
         return get_run_owners(runid)
-    from wepppy.weppcloud.app import app as flask_app
     with flask_app.app_context():
         return get_run_owners(runid)
 

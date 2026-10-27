@@ -413,6 +413,15 @@ configure_deploy_topology() {
         RECREATED_SERVICES=(cap)
         EXPECTED_RUNNING_SERVICES=(cap)
     fi
+
+    # Validate only this deployment's cutover set; preserve targeted repairs.
+    RUNTIME_SERVICE_ARGS=()
+    for service in "${RECREATED_SERVICES[@]}"; do
+        RUNTIME_SERVICE_ARGS+=(--active-service "${service}")
+    done
+    wctl docker compose config --format json \
+        | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+            validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"
 }
 
 configure_deploy_topology

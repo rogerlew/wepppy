@@ -1,0 +1,18 @@
+{
+  "base_commit": "917fa52cf057b4056878ee279cec0175ccc9ee98",
+  "sha256": {
+    "docker/docker-compose.dev.yml": "42e5485ace361a87c36ce42eb8e697b1d357b932eeeb2dc57ef23bf2ccd0403b",
+    "docker/docker-compose.prod.yml": "d760e806f11813c8e56a43f032ede8d8cfef45ea920fb7be0dd8e42f03658f77",
+    "docker/docker-compose.dev.hpc.yml": "fb81712c4dde0bab8bfaaf3a64d34f3ed308644fa9236ffcf70cb6637649e716",
+    "scripts/compose_deploy_contract.py": "a469afd93277e04ba222a4b2c443be4d5f45ad6646328b20a53e7fe013581861",
+    "scripts/deploy-production.sh": "8223e16c72a29b36d5a75f1cacc98cb63a770ef467299eeb490088218c6ccbc0",
+    "wepppy/weppcloud/utils/helpers.py": "e0766b48fd4d77b62f4ebce80df90e3f847f3123504d65b7dacb85416c7f2070",
+    "wepppy/microservices/rq_engine/session_routes.py": "8d9534d0fbd5e34dcc5fa9999e501c4fda2baf460fb64d70a3e3ccf594056f75",
+    "tests/scripts/test_compose_deploy_contract.py": "822f909563e450616723f6f1ae81828a0b1e6dd350e6ba7f68c9fb2372299a40",
+    "tests/scripts/test_deploy_production_execution.py": "2293b02e3095f9bf814948eb79de1fb5ba2df9fb3f3c0527649ecb3a1dd00119",
+    "tests/scripts/test_deploy_production_plan.py": "5d8f3d707de948aa67c57cf88e0792232cb9ac1ddc0983d29e5d99c109f2c54f",
+    "tests/microservices/test_shared_flask_context.py": "aabbc70e8e38a746c98ae3a234e514650ab868bfc4168550fd903f5047e4e18f",
+    "tests/microservices/test_rq_engine_session_routes.py": "507d1da3469657111a9ff7085a5972c275cad8ab665b56dbaecfd148a1713ec3",
+    "docs/work-packages/20261027_service_secret_dependency_audit/artifacts/consumer_probe.py": "e988acebcdaad1745b376b1af19ff9d0fcc6476610371d39570cbed697a144c3"
+  }
+}

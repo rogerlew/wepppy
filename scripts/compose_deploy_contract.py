@@ -101,6 +101,62 @@ def validate_ps(records: Iterable[dict[str, Any]], expected: set[str]) -> list[s
     return errors
 
 
+# Audited dependency paths and exclusions: docs/infrastructure/secrets.md.
+# Ordinary ownership and legacy MCP identity checks lazily import Flask.
+FLASK_CONSUMERS = frozenset({
+    "weppcloud", "browse", "download", "dtale", "query-engine",
+    "rq-engine", "rq-worker", "rq-worker-batch",
+})
+DATABASE_CONSUMERS = FLASK_CONSUMERS | {"scheduler", "rq-worker-fork-archive"}
+
+
+def validate_runtime_config(config: dict[str, Any], active: set[str]) -> list[str]:
+    """Validate required bindings in rendered Compose JSON, without logging values.
+
+    This checks wiring, not file readability or authenticated workflow success.
+    Those remain candidate-container and exact-host acceptance requirements.
+    """
+    services = config.get("services")
+    if not isinstance(services, dict):
+        raise ValueError("Compose config has no services object")
+    definitions = config.get("secrets") or {}
+    errors: list[str] = []
+    for name in sorted(active):
+        service = services.get(name)
+        if not isinstance(service, dict):
+            errors.append(f"service {name!r} is absent from Compose config")
+            continue
+        env = service.get("environment") or {}
+        if not isinstance(env, dict):
+            raise ValueError(f"service {name!r} environment must be rendered as an object")
+        env = {key: value.strip() if isinstance(value, str) else value
+               for key, value in env.items()}
+        mounts: set[str] = set()
+        for secret in service.get("secrets") or []:
+            source = secret if isinstance(secret, str) else secret.get("source")
+            target = source if isinstance(secret, str) else secret.get("target", source)
+            if source not in definitions:
+                errors.append(f"service {name!r} references undefined secret {source!r}")
+                continue
+            if isinstance(target, str):
+                mounts.add(target if target.startswith("/") else f"/run/secrets/{target}")
+        required = []
+        if name in FLASK_CONSUMERS:
+            required.extend(("SECRET_KEY", "SECURITY_PASSWORD_SALT"))
+        if name in DATABASE_CONSUMERS and not (
+            env.get("SQLALCHEMY_DATABASE_URI") or env.get("DATABASE_URL")
+        ):
+            required.append("POSTGRES_PASSWORD")
+        for key in required:
+            file_key = key + "_FILE"
+            if env.get(file_key):
+                if env[file_key] not in mounts:
+                    errors.append(f"service {name!r}: {file_key} has no matching secret mount")
+            elif not env.get(key):
+                errors.append(f"service {name!r}: missing {key} or {file_key}")
+    return errors
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -110,6 +166,9 @@ def _parser() -> argparse.ArgumentParser:
 
     expected = subparsers.add_parser("expected-services")
     expected.add_argument("--active-service", action="append", default=[])
+
+    runtime = subparsers.add_parser("validate-runtime-config")
+    runtime.add_argument("--active-service", action="append", required=True)
 
     state = subparsers.add_parser("validate-ps")
     state.add_argument("--expected-service", action="append", default=[])
@@ -133,6 +192,15 @@ def main() -> int:
             if not services:
                 raise ValueError(f"effective topology produced no {args.command}")
             print("\n".join(services))
+            return 0
+
+        if args.command == "validate-runtime-config":
+            if not isinstance(payload, dict):
+                raise ValueError("Compose config must be one JSON object")
+            errors = validate_runtime_config(payload, set(args.active_service))
+            if errors:
+                print("\n".join(errors), file=sys.stderr)
+                return 1
             return 0
 
         if args.command == "candidate-images":

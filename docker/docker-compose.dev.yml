@@ -138,7 +138,7 @@ services:
       ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
-      PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/weppcloud/static-src/.playwright-browsers
+      PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers
       PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
 
   status:
@@ -318,10 +318,16 @@ services:
     <<: *wepppy-service
     container_name: wepppy-download
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
+      - postgres_password
       - redis_password
       - wepp_auth_jwt_secrets
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
     ulimits:
       nofile:
@@ -356,6 +362,8 @@ services:
     <<: *wepppy-service
     container_name: wepppy-dtale
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - dtale_internal_token
@@ -378,6 +386,8 @@ services:
       - wepppy.webservices.dtale:app
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -494,12 +504,16 @@ services:
         soft: 65536
         hard: 65536
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - wepp_auth_jwt_secrets
       - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       EXTERNAL_HOST: ${EXTERNAL_HOST}
       EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets

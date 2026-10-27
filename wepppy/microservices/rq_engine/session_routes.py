@@ -12,7 +12,7 @@ from typing import Any, Mapping, Sequence
 from urllib.parse import urlparse
 
 import redis
-from flask import has_app_context
+from flask import current_app, has_app_context
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, Signer
@@ -510,16 +510,16 @@ def _resolve_user_id_from_fs_uniquifier(raw: Any) -> int | None:
     if fs_uniquifier is None:
         return None
 
+    from wepppy.weppcloud.app import app as flask_app
+
     _, User, _ = get_user_models()
 
     def _lookup() -> Any | None:
         return User.query.filter(User.fs_uniquifier == fs_uniquifier).first()
 
-    if has_app_context():
+    if has_app_context() and current_app._get_current_object() is flask_app:
         match = _lookup()
     else:
-        from wepppy.weppcloud.app import app as flask_app
-
         with flask_app.app_context():
             match = _lookup()
 
@@ -529,6 +529,8 @@ def _resolve_user_id_from_fs_uniquifier(raw: Any) -> int | None:
 
 
 def _resolve_roles_for_user_id(user_id: int) -> list[str]:
+    from wepppy.weppcloud.app import app as flask_app
+
     _, User, _ = get_user_models()
 
     def _lookup() -> list[str]:
@@ -539,10 +541,8 @@ def _resolve_roles_for_user_id(user_id: int) -> list[str]:
             [getattr(role, "name", role) for role in (getattr(match, "roles", None) or [])]
         )
 
-    if has_app_context():
+    if has_app_context() and current_app._get_current_object() is flask_app:
         return _lookup()
-
-    from wepppy.weppcloud.app import app as flask_app
 
     with flask_app.app_context():
         return _lookup()

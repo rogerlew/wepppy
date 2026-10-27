@@ -220,11 +220,17 @@ services:
         soft: 1000000
         hard: 1000000
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
+      - postgres_password
       - redis_password
       - *discord-bot-token-secret
       - wepp_auth_jwt_secrets
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       REDIS_URL: ${DOWNLOAD_REDIS_URL:-redis://redis:6379/0}
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
     command:
@@ -259,12 +265,16 @@ services:
         soft: 65536
         hard: 65536
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - *discord-bot-token-secret
       - postgres_password
       - dtale_internal_token
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -417,6 +427,8 @@ services:
         soft: 65536
         hard: 65536
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - *discord-bot-token-secret
@@ -424,6 +436,8 @@ services:
       - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       EXTERNAL_HOST: ${EXTERNAL_HOST}
       EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets

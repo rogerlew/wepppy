@@ -24,7 +24,10 @@ def _write_executable(path: Path, source: str) -> None:
 
 
 def _service(image: str, *, build: bool = True) -> dict[str, object]:
-    result: dict[str, object] = {"image": image}
+    result: dict[str, object] = {"image": image, "environment": {
+        "SECRET_KEY": "test-only", "SECURITY_PASSWORD_SALT": "test-only",
+        "POSTGRES_PASSWORD": "test-only",
+    }}
     if build:
         result["build"] = {"context": ".."}
     return result

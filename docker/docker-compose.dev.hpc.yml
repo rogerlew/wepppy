@@ -120,7 +120,7 @@ services:
       SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
       SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
       SESSION_COOKIE_MIGRATION_ENABLED: ${SESSION_COOKIE_MIGRATION_ENABLED:-true}
-      PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/weppcloud/static-src/.playwright-browsers
+      PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers
       PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
 
   status:
@@ -256,12 +256,16 @@ services:
     <<: *wepppy-service
     container_name: wepppy-browse
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - wepp_auth_jwt_secrets
       - dtale_internal_token
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -296,6 +300,8 @@ services:
     <<: *wepppy-service
     container_name: wepppy-dtale
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - dtale_internal_token
@@ -318,6 +324,8 @@ services:
       - wepppy.webservices.dtale:app
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -434,12 +442,16 @@ services:
         soft: 65536
         hard: 65536
     secrets:
+      - flask_secret_key
+      - flask_security_password_salt
       - redis_password
       - postgres_password
       - wepp_auth_jwt_secrets
       - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       EXTERNAL_HOST: ${EXTERNAL_HOST}
       EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets

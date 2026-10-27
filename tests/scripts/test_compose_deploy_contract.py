@@ -146,3 +146,81 @@ def test_candidate_images_reports_only_locally_built_expected_services() -> None
     )
     assert result.returncode == 0, result.stderr
     assert result.stdout == "weppcloud\twepppy:latest\n"
+
+
+@pytest.mark.parametrize("service", [
+    "weppcloud", "browse", "download", "dtale", "query-engine",
+    "rq-engine", "rq-worker", "rq-worker-batch",
+])
+def test_runtime_contract_rejects_lazy_flask_consumer_without_secrets(service: str) -> None:
+    result = _run("validate-runtime-config", {"services": {service: {}}},
+                  "--active-service", service)
+    assert result.returncode == 1
+    assert "missing SECRET_KEY" in result.stderr
+    assert "missing SECURITY_PASSWORD_SALT" in result.stderr
+    assert "missing POSTGRES_PASSWORD" in result.stderr
+
+
+def test_runtime_contract_checks_mount_targets_and_does_not_print_values() -> None:
+    service = {"environment": {
+        "SECRET_KEY_FILE": "/run/secrets/flask_key",
+        "SECURITY_PASSWORD_SALT": "private-salt-do-not-print",
+        "DATABASE_URL": "postgresql://private-do-not-print",
+    }, "secrets": [{"source": "key", "target": "flask_key"}]}
+    config = {"services": {"browse": service}, "secrets": {"key": {"file": "hidden"}}}
+    good = _run("validate-runtime-config", config, "--active-service", "browse")
+    assert good.returncode == 0, good.stderr
+    service["secrets"] = []
+    bad = _run("validate-runtime-config", config, "--active-service", "browse")
+    assert bad.returncode == 1
+    assert "no matching secret mount" in bad.stderr
+    assert "private" not in bad.stderr + bad.stdout
+
+
+def test_runtime_contract_rejects_undefined_secret_and_empty_binding() -> None:
+    config = {"services": {"browse": {
+        "environment": {"SECRET_KEY": "", "SECURITY_PASSWORD_SALT_FILE": "/run/secrets/salt"},
+        "secrets": ["salt"],
+    }}}
+    result = _run("validate-runtime-config", config, "--active-service", "browse")
+    assert result.returncode == 1
+    assert "undefined secret" in result.stderr
+    assert "missing SECRET_KEY" in result.stderr
+
+
+def test_runtime_contract_preserves_database_only_and_nonconsumer_services() -> None:
+    config = {"services": {
+        "scheduler": {"environment": {"POSTGRES_PASSWORD": "test-only"}},
+        "rq-worker-fork-archive": {"environment": {"POSTGRES_PASSWORD": "test-only"}},
+        "profile-playback": {},
+    }}
+    result = _run("validate-runtime-config", config,
+                  "--active-service", "scheduler", "--active-service", "rq-worker-fork-archive",
+                  "--active-service", "profile-playback")
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("filename", [
+    "docker-compose.dev.yml", "docker-compose.prod.yml", "docker-compose.dev.hpc.yml",
+    "docker-compose.prod.worker.yml", "docker-compose.prod.wepp3.yml",
+    "docker-compose.test.yml", "docker-compose.canary-smoke.yml",
+])
+def test_repository_topologies_supply_consumer_dependencies(filename: str) -> None:
+    import yaml
+    # Source anchors resolve here; production also checks fully rendered overrides.
+    config = yaml.safe_load((_REPO_ROOT / "docker" / filename).read_text())
+    arguments = [arg for name in config["services"] for arg in ("--active-service", name)]
+    result = _run("validate-runtime-config", config, *arguments)
+    assert result.returncode == 0, result.stderr
+
+
+def test_runtime_contract_rejects_blank_values_and_requires_explicit_scope() -> None:
+    config = {"services": {"browse": {"environment": {
+        "SECRET_KEY": " ", "SECURITY_PASSWORD_SALT_FILE": "\t", "DATABASE_URL": " ",
+    }}}}
+    result = _run("validate-runtime-config", config, "--active-service", "browse")
+    assert result.returncode == 1
+    assert "missing SECRET_KEY" in result.stderr
+    assert "missing SECURITY_PASSWORD_SALT" in result.stderr
+    assert "missing POSTGRES_PASSWORD" in result.stderr
+    assert _run("validate-runtime-config", config).returncode == 2

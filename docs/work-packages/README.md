@@ -109,7 +109,8 @@ for the evidence matrix, comparison rules, and blocked-validation policy.
 
 When a package is incident-driven or primarily remediation hardening:
 
-1. Follow `docs/standards/hardening-lifecycle-standard.md`.
+1. Follow `docs/standards/hardening-lifecycle-standard.md`, including the required
+   failure-class consumer/variant assessment and confirmed peer repairs in section 2a.
 2. Capture explicit failure signatures and impact in `package.md`.
 3. Link related prior hardening efforts (from `PROJECT_TRACKER.md`, `docs/work-packages/`, and `docs/mini-work-packages/`).
 4. Document health signals, danger signals, and observation window.

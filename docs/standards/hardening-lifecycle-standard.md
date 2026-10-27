@@ -101,6 +101,46 @@ Required output in package docs:
 - what was reused,
 - what was intentionally different and why.
 
+### 2a) Failure-Class Assessment (Required)
+
+A reported failure identifies a starting point, not the complete repair scope.
+Before closing an incident fix, state the broken shared assumption in general
+terms and search every repository-owned consumer that relies on it. Follow
+indirect helpers, lazy imports, callers, generated artifacts, deployment variants
+and overrides; a same-name text search alone is insufficient. Use prior repairs
+as evidence for other exposed consumers, not as proof those consumers are safe.
+
+Retain a bounded coverage matrix in the repair artifact. For each consumer or
+variant, record the dependency path, relevant configuration or state, validation
+evidence, and one disposition: confirmed defect, verified unaffected, or
+unresolved. State the search boundary and exclusions. An untested path is not
+verified unaffected. Expand the search when evidence reveals another shared
+boundary; do not claim exhaustive system coverage from a bounded assessment.
+
+Repair all confirmed instances within the authorized failure class in the same
+change set. If a repair needs different authority or an unavailable dependency,
+record the concrete blocker and remaining affected workflows; do not silently
+close the class. This requirement authorizes investigation and equivalent fixes,
+not unrelated refactoring, new privileges, or changes to working behavior.
+
+Add regression evidence at the shared boundary and exercise representative real
+consumers under their actual runtime configuration. Include normal-user and
+valid-state paths that privileged accounts, mocks, or startup health checks can
+bypass, plus relevant rejection/failure cases. For configuration incidents,
+validate effective deployment configuration and real consumer behavior; unit
+coverage in another service's environment is insufficient. When a prior point
+fix missed peers, explicitly verify those peers before calling the class repaired.
+
+Handoff must distinguish the reported instance from the assessed class, list
+remaining unknowns, and name the executable check that detects recurrence.
+Implemented, locally validated, deployed, and incident resolved remain separate
+claims. A deployment hold does not excuse missing local assessment or patching.
+
+Rationale (operator decision, 2026-10-27): the March worker secret repair missed
+browse's identical lazy Flask dependency, allowing an ordinary-user download
+failure to recur. Prefer a narrow implementation backed by a comprehensive
+search of the same failure class over repeated point fixes or speculative redesign.
+
 ### 3) Hardening Hypothesis and Signals (Required)
 
 For each hardening change, record:
@@ -273,9 +313,10 @@ Softening is accepted only if:
 
 - [ ] Captured incident signature and impact.
 - [ ] Searched and linked prior hardening precedent.
+- [ ] Retained failure-class consumer/variant coverage, peer repairs and unresolved cases.
 - [ ] Wrote hypothesis, health signals, guardrails, and either an elapsed-time
   or stateless recurrence-triggered observation model.
-- [ ] Added regression tests for exact failure path.
+- [ ] Added regression evidence for the shared boundary and representative affected consumers.
 - [ ] Ran required validation and review gates.
 - [ ] Updated package docs, artifacts, and `PROJECT_TRACKER.md`.
 

@@ -21,6 +21,14 @@
 - **Failures that may reach the user**: [Error classes/messages/states]
 - **Partial-state behavior**: [What remains after failure and how it is surfaced]
 
+## Failure-Class Coverage (Required for Incident Repairs)
+
+Apply [failure-class assessment](../standards/hardening-lifecycle-standard.md#2a-failure-class-assessment-required).
+Name the broken shared assumption and link the consumer/variant coverage matrix.
+Verify indirect consumers and prior repair precedents, disposition every confirmed
+peer defect, and name the regression check plus unresolved/excluded environments.
+Reject class-wide closure based only on the originally reported instance.
+
 ## Valid-State Matrix
 
 Enumerate system state independently from request/input combinations. Do not
