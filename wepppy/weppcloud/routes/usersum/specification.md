@@ -19,7 +19,7 @@ Primary module: `wepppy/weppcloud/routes/usersum/`
 
 ## Public Feature Catalog
 
-Accepted intent 2026-10-27; implementation conformance pending.
+Accepted 2026-10-27 at checkpoint `96f7df370`; implemented and locally validated (not deployed).
 `GET /usersum/features/` renders a public Jinja page in the existing Usersum
 shell. It lists every feature and interface configuration returned by the
 validated registry loaders, in registry order, without filtering by login,
@@ -148,6 +148,7 @@ PostgreSQL bootstrap/migration discoverability:
 Implemented routes in `wepppy/weppcloud/routes/usersum/usersum.py`:
 
 - `GET /usersum/`
+- `GET /usersum/features/` (public dynamic registry catalog; trailing slash optional)
 - `GET /usersum/doc/<doc_id>` (canonical identity route)
 - `GET /usersum/view/<category>/<path:filename>` (compatibility alias)
 - `GET /usersum/vendor/<vendor_id>/<path:filename>`

@@ -11,6 +11,8 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request  # type: ignore[import-not-found]
 
+from wepppy.weppcloud.feature_registry.runtime import load_config_registry, load_feature_registry
+from wepppy.weppcloud.feature_registry.schema import ROLE_AUDIENCES
 from wepppy.weppcloud.usersum_anchors import usersum_anchor_slug
 from wepppy.weppcloud.usersum_docs.pg_search import (
     PostgresUsersumSearchBackend,
@@ -596,6 +598,22 @@ def usersum_index():
         "usersum/index.htm",
         caller_max_role=caller_max_role,
         title="WEPPcloud UserSummary Documentation",
+    )
+
+
+@usersum_bp.route("/usersum/features/", strict_slashes=False)
+def feature_catalog():
+    return _render_with_usersum_shell(
+        "usersum/features.htm",
+        caller_max_role=_caller_max_role(),
+        title="WEPPcloud Feature Catalog",
+        features=load_feature_registry(),
+        configs=load_config_registry(),
+        role_audiences={role: sorted(audience) for role, audience in ROLE_AUDIENCES.items()},
+        breadcrumbs=[
+            {"title": "Usersum", "href": url_for_run("usersum.usersum_index")},
+            {"title": "Feature catalog", "href": None},
+        ],
     )
 
 

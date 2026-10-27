@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import replace
+from html import escape
 from pathlib import Path
+import re
 from types import SimpleNamespace
 
 import pytest
@@ -59,6 +62,86 @@ def test_usersum_view_rewrites_repo_markdown_links(usersum_client) -> None:
     body = response.get_data(as_text=True)
     assert 'href="/usersum/doc/usersum.source.openet"' in body
     assert 'href="../../../../nodb/mods/openet/README.md"' not in body
+
+
+@pytest.mark.parametrize("roles,authenticated,query", [
+    ((), False, ""),
+    ((), False, "?role=internal"),
+    (("User",), True, ""),
+    (("PowerUser",), True, "?role=user"),
+    (("Root",), True, "?role=internal"),
+])
+def test_feature_catalog_public_complete_real_registries(
+    usersum_client, set_usersum_current_user, roles, authenticated, query,
+) -> None:
+    from wepppy.weppcloud.feature_registry.runtime import load_config_registry, load_feature_registry
+
+    set_usersum_current_user(roles=roles, is_authenticated=authenticated)
+    response = usersum_client.get("/usersum/features/" + query)
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    for prefix, entries in (("feature", load_feature_registry()), ("config", load_config_registry())):
+        rows = re.findall(r'<tr id="' + prefix + r'-([^"]+)">(.*?)</tr>', body, re.S)
+        assert [row_id for row_id, _ in rows] == [entry.id for entry in entries]
+        for (_, row), entry in zip(rows, entries):
+            assert escape(entry.label) in row
+            assert f'Maturity: {entry.maturity.capitalize()}' in row
+            if entry.internal_reason:
+                assert entry.internal_reason.replace("_", " ") in row
+            if entry.embargo_until:
+                assert entry.embargo_until in row
+            if getattr(entry, "access_mode", None) == "group_only":
+                assert f'Group only: <code>{entry.access_group}</code>' in row
+                assert "Roles alone do not grant access." in row
+                assert "role policy" not in row
+            elif getattr(entry, "access_mode", None) == "role_or_group":
+                assert f'Or membership in <code>{entry.access_group}</code>' in row
+            elif entry.min_role == "user":
+                assert "Includes anonymous users; operation and launch permissions still apply." in row
+    roads_row = re.search(r'<tr id="feature-roads">(.*?)</tr>', body, re.S).group(1)
+    assert "Experimental" in roads_row
+    assert "PowerUser role policy" in roads_row
+    assert ('id="usersum-header-role"' in body) == (roles in (("PowerUser",), ("Root",)))
+
+
+def test_feature_catalog_links_use_site_prefix(usersum_client) -> None:
+    usersum_client.application.config["SITE_PREFIX"] = "/weppcloud"
+    index = usersum_client.get("/usersum/").get_data(as_text=True)
+    assert 'href="/weppcloud/usersum/features/"' in index
+    response = usersum_client.get("/usersum/features")
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert 'href="/weppcloud/usersum/"' in body
+    assert 'href="/weppcloud/usersum/view/weppcloud/user-guide.md#feature-maturity-labels"' in body
+
+
+def test_feature_catalog_empty_and_escaped_metadata(usersum_client, monkeypatch) -> None:
+    features = usersum_routes.load_feature_registry()
+    monkeypatch.setattr(usersum_routes, "load_feature_registry", lambda: ())
+    monkeypatch.setattr(usersum_routes, "load_config_registry", lambda: ())
+    body = usersum_client.get("/usersum/features/").get_data(as_text=True)
+    assert "No registered features." in body
+    assert "No registered interface configurations." in body
+
+    entry = replace(features[0], label='<script>alert("catalog")</script>',
+                    internal_reason=None, embargo_until=None, requires_features=())
+    monkeypatch.setattr(usersum_routes, "load_feature_registry", lambda: (entry,))
+    body = usersum_client.get("/usersum/features/").get_data(as_text=True)
+    assert '<script>alert("catalog")</script>' not in body
+    assert '&lt;script&gt;alert(&#34;catalog&#34;)&lt;/script&gt;' in body
+    assert "Reason:" not in body
+    assert "Embargo until:" not in body
+
+
+def test_feature_catalog_registry_error_is_not_partial_success(usersum_client, monkeypatch) -> None:
+    from wepppy.weppcloud.feature_registry.schema import FeatureRegistryValidationError
+
+    def invalid_registry():
+        raise FeatureRegistryValidationError("Invalid registry")
+
+    monkeypatch.setattr(usersum_routes, "load_config_registry", invalid_registry)
+    with pytest.raises(FeatureRegistryValidationError, match="Invalid registry"):
+        usersum_client.get("/usersum/features/")
 
 
 def test_usersum_view_rewrites_cross_category_markdown_links(usersum_client) -> None:

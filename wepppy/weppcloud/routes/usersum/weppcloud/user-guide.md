@@ -69,6 +69,11 @@ For software bugs and feature requests, submit an issue on the WEPPcloud GitHub 
 
 ## Feature Maturity Labels
 
+For the complete list of registered features and interface configurations, open
+**Feature catalog** from the Usersum home page. The catalog is public and shows
+each entry's maturity, access requirements, and backend, including internal
+features. Listing a feature does not grant permission to use it.
+
 WEPPcloud uses the following maturity labels for user-facing features and interface configs. These labels communicate release readiness, support expectations, and change risk.
 
 | Label | Classification guidance | User expectation |

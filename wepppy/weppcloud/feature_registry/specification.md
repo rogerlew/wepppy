@@ -83,7 +83,7 @@ Classification rules for maintainers/implementers:
 
 ## Public Metadata Catalog
 
-Accepted intent 2026-10-27; implementation conformance pending.
+Accepted 2026-10-27 at checkpoint `96f7df370`; implemented and locally validated (not deployed).
 All validated feature and config registry metadata is public, including
 Internal and publication-embargo entries. The Usersum catalog at
 `/usersum/features/` lists every loaded entry in source order, without applying

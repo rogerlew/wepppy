@@ -1,4 +1,4 @@
-Active: [Public Usersum feature registry](docs/work-packages/20261027_usersum_feature_registry/package.md) — public Jinja catalog; contract checkpoint preparation, implementation pending.
+Completed locally: [Public Usersum feature registry](docs/work-packages/20261027_usersum_feature_registry/package.md) — public Jinja catalog of 18 features and 16 configurations; 219 focused tests pass, independent reviews approved. Not deployed.
 
 Implementation validated; deployment HOLD: [Service secret dependency audit](docs/work-packages/20261027_service_secret_dependency_audit/package.md) — failure-class governance; download/D-Tale/legacy MCP/HPC dependency repairs and foreign Flask context correction; 218 focused tests, real consumer probes and independent reviews pass. Segmented broad validation: 11,821 passed, 181 skipped.
 

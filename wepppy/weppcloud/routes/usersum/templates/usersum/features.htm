@@ -1,0 +1,80 @@
+{% extends "usersum/layout.j2" %}
+{% import "shared/maturity_pill_macros.htm" as maturity_ui %}
+{% set maturity_href = url_for_run('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels' %}
+{% set role_labels = {'user': 'User', 'poweruser': 'PowerUser', 'dev': 'Dev', 'admin': 'Admin', 'root': 'Root'} %}
+{% set backend_labels = {'any': 'Any', 'wbt': 'WhiteboxTools (WBT)', 'topaz': 'TOPAZ'} %}
+
+{% macro catalog_table(entries, kind) %}
+{% if entries %}
+<div class="wc-table-wrapper" role="region" aria-label="{{ kind|capitalize }} catalog" tabindex="0">
+  <table class="wc-table wc-table--striped">
+    <caption>{{ entries|length }} registered {{ kind }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Name and ID</th>
+        <th scope="col">Maturity</th>
+        <th scope="col">Access policy</th>
+        <th scope="col">Backend</th>
+        <th scope="col">{{ 'Prerequisites' if kind == 'features' else 'Replacement' }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+      <tr id="{{ 'feature' if kind == 'features' else 'config' }}-{{ entry.id }}">
+        <th scope="row">{{ entry.label }}<br><code>{{ entry.id }}</code></th>
+        <td>
+          {{ maturity_ui.maturity_pill(entry.maturity|capitalize, href=maturity_href) }}
+          {% if entry.internal_reason %}<div>Reason: {{ entry.internal_reason|replace('_', ' ') }}</div>{% endif %}
+          {% if entry.embargo_until %}<div>Embargo until: {{ entry.embargo_until }}</div>{% endif %}
+        </td>
+        <td>
+          {% if kind == 'features' and entry.access_mode == 'group_only' %}
+          Group only: <code>{{ entry.access_group }}</code>
+          <div>Roles alone do not grant access.</div>
+          {% elif entry.min_role == 'user' and (kind != 'features' or not entry.access_mode) %}
+          User policy: no elevated role required
+          <div>Includes anonymous users; operation and launch permissions still apply.</div>
+          {% else %}
+          {{ role_labels[entry.min_role] }} role policy
+          <div>Roles: {{ role_audiences[entry.min_role]|join(', ') }}</div>
+          {% if kind == 'features' and entry.access_mode == 'role_or_group' %}
+          <div>Or membership in <code>{{ entry.access_group }}</code></div>
+          {% endif %}
+          {% endif %}
+        </td>
+        <td>{{ backend_labels[entry.requires_backend] }}</td>
+        <td>
+          {% if kind == 'features' %}
+            {% for prerequisite in entry.requires_features %}
+            <code>{{ prerequisite }}</code>{% if not loop.last %}, {% endif %}
+            {% else %}None{% endfor %}
+          {% else %}
+            {% if entry.replaced_by %}<code>{{ entry.replaced_by }}</code>{% else %}None{% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>No registered {{ kind }}.</p>
+{% endif %}
+{% endmacro %}
+
+{% block body_content %}
+<h1>WEPPcloud Feature Catalog</h1>
+<p>Browse every registered feature and interface configuration, including internal and experimental capabilities.
+  This public catalog shows maturity and access requirements; listing a feature does not grant permission to use it.</p>
+<p><a href="{{ maturity_href }}">What the maturity labels mean</a> ·
+  <a href="#features">Features</a> · <a href="#interfaces">Interface configurations</a></p>
+<p>Access also depends on the project's permissions, backend, and prerequisites.
+  Group-only features require group membership even for elevated roles. Interface launch permissions still apply.
+  The header's role selector filters documentation navigation, not this catalog.</p>
+<h2 id="features">Features</h2>
+{{ catalog_table(features, 'features') }}
+<h2 id="interfaces">Interface configurations</h2>
+<p>Maturity includes configuration-specific overrides. Project-owned Config Builder configurations and
+  capabilities outside the registries are not listed here.</p>
+{{ catalog_table(configs, 'interface configurations') }}
+{% endblock %}

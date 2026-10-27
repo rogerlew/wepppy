@@ -25,6 +25,19 @@ Do not use `ENDUSER.md` for:
 
 If the content should appear in usersum, publish it through `docs_manifest.yaml` and `nav_tree.yaml`. This guide is itself a developer-only usersum page because it defines the convention rather than serving end users directly.
 
+## Dynamic registry catalog
+
+The public `/usersum/features/` page is a Jinja view in the existing Usersum
+shell, like the index and search pages. It reads the validated feature/config
+runtime loaders, including config maturity overrides. Update the authoritative
+registry YAML when metadata changes; do not maintain a duplicate Markdown table
+or add this dynamic page to the Markdown manifest/search index. The index links
+to it outside curated document sections. Registry loaders cache per process;
+operators must reload web workers through the normal deployment workflow after
+registry changes. Malformed metadata fails explicitly instead of showing a
+partial catalog. The page requires no membership lookup or feature entitlement;
+ordinary document and execution permissions remain separate.
+
 ## Core Audience Contract
 
 Every `ENDUSER.md` should help a reader answer seven questions as quickly as possible:

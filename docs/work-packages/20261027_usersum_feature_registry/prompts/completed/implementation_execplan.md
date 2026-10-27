@@ -14,9 +14,9 @@ including Internal entries, but displaying it grants no feature permissions.
 - [x] Inspect Usersum Jinja precedent and registry loaders.
 - [x] Scaffold package and amend current contracts before code.
 - [x] Obtain two independent contract reviews and disposition findings.
-- [ ] Obtain commit authority and create standalone contract ancestor.
-- [ ] Implement route, template, discovery link, and supporting docs.
-- [ ] Validate rendered output, run gates, and close review findings.
+- [x] Obtain commit authority and create standalone contract ancestor `96f7df370`.
+- [x] Implement route, template, discovery link, and supporting docs.
+- [x] Validate rendered output, run focused gates, and close review findings.
 
 ## Surprises & Discoveries
 
@@ -73,8 +73,8 @@ Test anonymous rendering, identical rows under role filters, complete real
 registry coverage, effective config maturity, group policy, empty collections,
 escaping, and prefix-safe links. Keep at least one real loader/renderer test.
 Run `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py tests/weppcloud/routes/test_feature_registry_runtime.py`,
-then `wctl run-pytest tests --maxfail=1`, `wctl run-npm lint`, and
-`wctl run-npm test`. Lint changed docs with `wctl doc-lint --path <file>`.
+with light final gates per the operator's follow-up instruction. Skip the broad
+Python and unrelated frontend suites for this bounded Jinja route. Lint changed docs with `wctl doc-lint --path <file>`.
 Retain direct HTTP HTML evidence and final independent correctness/security
 reviews in artifacts, using repository review templates. Record limitations
 honestly and update package, plan, tracker, and root board before handoff.
@@ -87,8 +87,8 @@ shows Experimental and PowerUser. Internal and group-only entries are present;
 group-only labels do not promise role-based entitlement. Config maturity agrees
 with runtime overrides. Empty state is explicit, malformed loader input fails
 rather than producing a partial success, and hostile text remains escaped.
-No run initialization or membership lookup is introduced. Browser inspection
-checks readable tables at narrow widths and keyboard-accessible links.
+No run initialization or membership lookup is introduced. Responsive tables reuse the established shared overflow pattern. Browser visual
+inspection was omitted under the operator-requested light final gates.
 
 ## Idempotence and Recovery
 
@@ -107,7 +107,16 @@ are needed. Current shell APIs and URL helpers own rendering/prefix behavior.
 ## Outcomes & Retrospective
 
 
-Checkpoint prepared and approved by two independent reviewers. Documentation lint passes. Route implementation and validation pending required commit authority.
+Completed locally after ancestor `96f7df370`: public route and complete tables,
+index discovery, guides, 219 focused passes and eight catalog passes after the
+anonymous-policy correction. Independent correctness/security reviews approve.
+Production deployment and browser visual validation remain outside this claim.
 
 Revision note: 2026-10-27 UTC, initial plan and contract checkpoint prepared from
 operator-approved public catalog intent; commit authority remains outstanding.
+
+Revision note: operator authorized commit and implementation, then requested light
+final gates. Checkpoint `96f7df370` precedes all route/template/test edits.
+
+Revision note: local implementation complete; COR-01 closed and final independent
+reviews approved. Plan archived with validation limitations retained.

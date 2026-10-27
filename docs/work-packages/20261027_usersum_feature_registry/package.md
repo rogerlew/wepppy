@@ -1,6 +1,6 @@
 # Public Usersum feature registry
 
-**Status**: Open, contract checkpoint prepared (2026-10-27)
+**Status**: Closed locally (2026-10-27); not deployed
 **Timezone**: UTC
 
 ## Overview
@@ -38,8 +38,7 @@ Anonymous and authenticated readers see the same complete catalog regardless
 of role filters. Roads displays Experimental and PowerUser; group-only rows
 must not imply a role alone grants access. Config rows reflect runtime maturity
 overrides. The index link works behind `/weppcloud`. Real loader/template HTTP
-readback and focused tests pass; broad and frontend gates are recorded with
-any limitations. Independent correctness/security reviews close findings.
+readback and focused tests pass; gates remain focused per the operator's explicit follow-up. Independent correctness/security reviews close findings.
 
 ## Evidence and Parameterization
 
@@ -50,6 +49,13 @@ HTML, checked against actual validated registry entries. Deployment is separate.
 ## Dependencies and Deliverables
 
 The existing Usersum and feature registry specifications are amended first.
-Follow [the active plan](prompts/active/implementation_execplan.md) and
-[tracker](tracker.md). The standalone contract ancestor requires explicit commit
-authority, which has not yet been granted in this conversation.
+Follow [the completed plan](prompts/completed/implementation_execplan.md) and
+[tracker](tracker.md). The operator authorized the standalone checkpoint commit `96f7df370` before
+implementation.
+
+## Closure Notes
+
+Implemented and locally validated: 18 feature and 16 configuration rows, public
+Jinja view, index discovery, user/developer guidance. 219 focused tests passed;
+eight catalog cases passed again after the review correction. Correctness and
+security reviews approved. No deployment or browser visual validation claimed.
