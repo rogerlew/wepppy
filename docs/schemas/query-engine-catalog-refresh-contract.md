@@ -80,6 +80,41 @@ An existing scheduler task reconciles pending receipt scopes against admission/j
 
 The same background reconciler also revisits every registered/configured supported project scope on a resumable recurring source-reconciliation cycle, including scopes with no receipt. It compares source metadata/catalog dependencies and requests or performs a full index-only refresh when freshness cannot be established. It MUST discover changes after a producer dies between artifact rename and receipt persistence, without a later user action. Root/child enumeration must cover supported nested projects and durable registry gaps; progress cursors and failures cannot silently skip scopes. Use bounded per-tick admission and per-scope work to preserve fairness. Configure and report the target complete-cycle interval and actual oldest unreconciled scope; capacity evidence must show that this target is attainable before rollout. No unconditional time bound is promised during storage/worker outage. This recurring inventory cost is explicit and must be measured against the incident workload; it cannot run in HTTP handlers.
 
+Inventory execution clarification (2026-10-27; conformance pending): large-directory
+discovery runs as at most one active maintenance job per configured inventory
+cycle on the existing batch queue. Scheduler ticks admit/recover that job and
+drain checkpointed discovery batches; they do not enumerate entire directories.
+Inventory jobs use the existing `query_catalog_refresh_` maintenance-ID privacy
+classification, matching worker capabilities, and existing maintenance timeout
+and retention bounds. Worker capability advertisements distinguish support for
+this inventory protocol; mixed consumers block admission. Filesystem receipt and
+catalog protocols remain unchanged.
+
+Discovery streams directory entries and checkpoints its directory frontier,
+current directory identity, emitted-child deduplication and sequenced scope
+batches in Redis. These checkpoints survive worker restart, not Redis loss;
+filesystem roots/receipts remain authoritative and reconstruct discovery. A
+restarted stream may replay a directory prefix: no portable durable filesystem
+offset is claimed. A child is marked seen atomically with its frontier/scope
+publication. Directory exhaustion is committed only after all prior discoveries.
+Every worker checkpoint is fenced by the current admitted job identity and cycle;
+a stale worker may not publish progress or completion after replacement. Slow
+filesystem I/O holds no scheduler inventory lease.
+
+Scheduler consumption acknowledges a discovery batch only in the same fenced
+transaction that incorporates it into its pending scope cursor; trimming occurs
+after that commit. Discovery completion requires exhausting the full frontier
+with no unresolved required-root/directory traversal failures; retain and retry
+failed frontier items and block completion while they remain unresolved. Full-cycle
+completion additionally requires all
+discovered scopes to reconcile. Timeout/error retains incomplete progress and
+retries with existing bounds. Directory replacement triggers revalidation/replay;
+ordinary mutation does not continuously reset a busy root. Inventory is eventual,
+not a scientific snapshot: later cycles cover additions missed by an active
+stream. Nofollow/containment and scope identity are revalidated before traversal,
+admission and publication. Actual legacy full-listing and worker-kill/restart
+acceptance are mandatory before enablement; a first-page benchmark is insufficient.
+
 Retry failed/stopped/canceled/abandoned maintenance with bounded backoff and retained diagnostics; distinguish deliberate operator suspension from recoverable failure. There is no unconditional freshness deadline when workers/storage are unavailable. Expose pending age, last success, last error, queue delay and reconciliation health. Recovery must prove convergence after worker death, enqueue failure, Redis restart and temporary storage outage. Exact scheduling/backoff limits require measured acceptance and documented configuration before implementation rollout; no new hard-coded scientific thresholds are introduced here.
 
 Admission release and successor admission must check ownership atomically. A finishing old job cannot clear a newer job's reservation. Producers arriving at the final worker check must either join the active job's pending work or leave durable discoverable work for a successor. False job completion cannot acknowledge pending requests.

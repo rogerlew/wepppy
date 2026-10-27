@@ -52,12 +52,14 @@ Creation access policy and its conditional 403/503 errors are defined in
 ## Query-engine catalog maintenance (specified; implementation pending)
 
 [Query-engine catalog refresh](query-engine-catalog-refresh-contract.md) defines
-per-project coalesced maintenance on existing infrastructure. Its internal
+per-project coalesced refresh and configuration-wide inventory maintenance on
+existing infrastructure. Inventory details are operator-only diagnostics; scope
+paths and discovery batches are never exposed through public polling. Its internal
 refresh receipt does not replace the primary domain job response. Durable
 pending intent without enqueue must not fabricate a job ID.
 
 Reserve `query_catalog_refresh_<canonical-hyphenated-UUID>` exclusively for
-this maintenance task; the suffix comes from `new_rq_job_id()`. Preserve exact
+these maintenance tasks; the suffix comes from `new_rq_job_id()`. Preserve exact
 IDs. This is a bounded exception to ordinary UUID IDs, distinct from the
 Runs-catalog sweep prefix. Classify this prefix before payload deserialization
 in single, batch and recursive polling, including retained jobs after rollback.

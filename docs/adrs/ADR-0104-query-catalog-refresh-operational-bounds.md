@@ -87,3 +87,24 @@ Disable new admission only after coordinating producer mode, drain/reconcile
 active work, preserve durable requests and use the common publication guard.
 Retain maintenance-ID disclosure classification for job retention lifetime.
 Do not remove guard inodes or discard unacknowledged requests.
+
+## October 27 inventory execution clarification
+
+The original scheduler-side eager directory expansion failed measured production
+acceptance: legacy enumeration exceeded both the 60-second lease and a bounded
+full-stream probe. Raising the lease or replacing listdir with scandir alone is
+not evidenced remediation. Move streaming discovery into one existing-batch
+maintenance job per inventory cycle, with fenced Redis progress batches drained
+by the scheduler. No new queue, service, datastore or dependency.
+
+Reuse the existing 3600-second maintenance job timeout and 86400-second retention
+as candidate bounds; require complete legacy enumeration and kill/restart
+acceptance before rollout. The inventory limit of 100 becomes the maximum
+streaming checkpoint batch (up to 100 discovered entry records) and scheduler
+discovery-drain budget (up to 100 scope records per tick, not 100 batches), rather than
+permission for one node to enumerate unlimited children within a scheduler
+lease. The admission limit, retry values and cycle target remain unchanged.
+Checkpointed directory replay preserves emitted work without relying on opaque
+filesystem cookies. One occupied batch worker and Redis frontier/batch storage
+are the explicit operational costs; measure their capacity before enablement.
+This clarifies implementation intent; production conformance remains pending.
