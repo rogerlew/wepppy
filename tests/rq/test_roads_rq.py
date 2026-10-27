@@ -167,3 +167,18 @@ def test_run_roads_rq_fails_when_runtime_lock_busy(
 
     assert clear_calls == []
     assert any("EXCEPTION run_roads_rq(demo)" in message for _, message in published)
+
+
+@pytest.mark.parametrize("status", ["queued", "started", "scheduled", "finished"])
+def test_active_roads_job_handles_rq_status_enum(monkeypatch, status):
+    from rq.job import JobStatus
+
+    prep = SimpleNamespace(get_rq_job_id=lambda key: "roads-job")
+    monkeypatch.setattr(roads_rq.Job, "fetch", lambda *args, **kwargs: SimpleNamespace(
+        get_status=lambda refresh=False: getattr(JobStatus, status.upper())
+    ))
+    active = roads_rq.get_active_roads_job(prep, object())
+    if status == "finished":
+        assert active is None
+    else:
+        assert active == {"key": roads_rq.ROADS_RQ_JOB_KEYS[0], "job_id": "roads-job", "status": status}

@@ -319,7 +319,7 @@ def test_unknown_prefix_jobs_remain_ordinary_for_raw_wait_evidence(monkeypatch):
     known = 'query_catalog_refresh_known'
     unknown = 'query_catalog_refresh_unowned'
     connection = SimpleNamespace(lrange=lambda *args: [known.encode(), unknown.encode()], zrange=lambda *args: [])
-    monkeypatch.setattr(rq.registry, 'StartedJobRegistry', lambda *args, **kwargs: SimpleNamespace(key='started'))
+    monkeypatch.setattr(rq.registry, 'StartedJobRegistry', lambda *args, **kwargs: SimpleNamespace(get_job_ids=lambda **kwargs: []))
     runtime = pilot.Runtime.__new__(pilot.Runtime)
     runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key='batch'), set()
     runtime.raw_jobs = lambda state: {jid: {'enqueued_at': '2026-10-27T00:00:00Z'} for jid in state['jobs']}
@@ -385,3 +385,26 @@ def test_republished_new_incarnation_cannot_pass_old_admission_binding(prepared,
     monkeypatch.setattr(core, 'run_query', lambda *args, **kwargs: pytest.fail('consumer ran with replaced authority'))
     with pytest.raises(ValueError, match='differs from admitted manifest'):
         pilot.verify_artifacts(setup, cr, bindings=bindings)
+
+
+def test_raw_ordinary_uses_public_started_ids_without_cleanup(monkeypatch):
+    import rq.registry
+
+    calls = []
+    def get_job_ids(*, cleanup):
+        calls.append(cleanup)
+        return ["ordinary", "query_catalog_refresh_known"]
+    connection = SimpleNamespace(lrange=lambda *args: [])
+    monkeypatch.setattr(rq.registry, "StartedJobRegistry", lambda *args, **kwargs: SimpleNamespace(
+        get_job_ids=get_job_ids
+    ))
+    runtime = pilot.Runtime.__new__(pilot.Runtime)
+    runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key="batch"), set()
+    runtime.raw_jobs = lambda state: {job_id: {
+        "enqueued_at": "2026-10-27T00:00:00Z", "started_at": "2026-10-27T00:01:00Z"
+    } for job_id in state["jobs"]}
+    result = runtime.raw_ordinary({"global_job_ids": ["query_catalog_refresh_known"]})
+    assert calls == [False]
+    assert result["started_ids"] == ["ordinary", "query_catalog_refresh_known"]
+    assert set(result["jobs"]) == {"ordinary"}
+    assert result["wait_seconds"] == {"ordinary": 60.0}

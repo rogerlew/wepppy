@@ -279,7 +279,7 @@ class Runtime:
         from rq.registry import StartedJobRegistry
         decode = lambda value: value.decode() if isinstance(value, bytes) else str(value)
         waiting = [decode(value) for value in self.connection.lrange(self.queue.key, 0, -1)]
-        started = [decode(value) for value in self.connection.zrange(StartedJobRegistry('batch', connection=self.connection).key, 0, -1)]
+        started = StartedJobRegistry('batch', connection=self.connection).get_job_ids(cleanup=False)
         admitted = status['global_job_ids']
         self.ordinary_seen.update(jid for jid in waiting + started if jid not in admitted)
         jobs = self.raw_jobs({'jobs': {jid: {} for jid in sorted(self.ordinary_seen)}})

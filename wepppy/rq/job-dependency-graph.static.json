@@ -362,7 +362,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 269,
+    "source_lineno": 272,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -372,7 +372,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 277,
+    "source_lineno": 280,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -384,7 +384,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 308,
+    "source_lineno": 311,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -486,7 +486,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_ag_fields_watershed_suite_rq",
-    "source_lineno": 488,
+    "source_lineno": 489,
     "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {
@@ -498,7 +498,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_ag_fields_watershed_suite_rq",
-    "source_lineno": 514,
+    "source_lineno": 515,
     "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {
@@ -510,7 +510,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 643,
+    "source_lineno": 644,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -522,7 +522,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 653,
+    "source_lineno": 654,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -534,7 +534,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 672,
+    "source_lineno": 673,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {

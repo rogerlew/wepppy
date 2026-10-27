@@ -217,10 +217,12 @@ def test_lookup_job_status_validates_job_ownership(
     args: tuple[str, str, str],
     expected: str,
 ) -> None:
+    from rq.job import JobStatus
+
     job = SimpleNamespace(
         func_name=func_name,
         args=args,
-        get_status=lambda: "started",
+        get_status=lambda: JobStatus.STARTED,
     )
     monkeypatch.setattr(
         deval_module.Job,
@@ -228,13 +230,15 @@ def test_lookup_job_status_validates_job_ownership(
         lambda _job_id, connection: job,
     )
 
-    assert deval_module._lookup_job_status(
+    status = deval_module._lookup_job_status(
         object(),
         "job-1",
         "run-1",
         "cfg",
         Path("/runs/run-1"),
-    ) == expected
+    )
+    assert status == expected
+    assert type(status) is str
 
 
 def test_pup_validation_error_does_not_disclose_paths(tmp_path: Path) -> None:
@@ -613,3 +617,26 @@ def test_deval_route_renders_loading_context_and_preserves_pup_refresh(
         "refresh_url": "/weppcloud.deval_details?pup=pup-a",
         "skip_cache": True,
     }
+
+
+def test_deval_loading_chip_renders_rq_status_value(monkeypatch):
+    from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
+    from rq.job import JobStatus
+
+    root = Path("/runs/run-1")
+    render = deval_module.render_deval_details_rq
+    monkeypatch.setattr(deval_module.Job, "fetch", lambda *args, **kwargs: SimpleNamespace(
+        func_name=f"{render.__module__}.{render.__name__}", origin="default",
+        args=("run-1", "cfg", str(root)), get_status=lambda: JobStatus.STARTED,
+    ))
+    status = deval_module._lookup_job_status(object(), "job-1", "run-1", "cfg", root)
+    templates = Path(deval_module.__file__).parents[1] / "templates"
+    environment = Environment(loader=ChoiceLoader([
+        DictLoader({"base_pure.htm": "{% block body %}{% endblock %}"}),
+        FileSystemLoader(str(templates)),
+    ]))
+    html = environment.get_template("reports/deval_loading.htm").render(
+        job_status=status, job_id="job-1", runid="run-1", config="cfg", refresh_url="/retry"
+    )
+    assert 'data-state="started">STARTED</div>' in html
+    assert "JobStatus" not in html

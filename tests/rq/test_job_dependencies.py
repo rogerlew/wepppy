@@ -120,3 +120,64 @@ def test_release_deferred_job_if_ready_rejects_missing_dependency(rq_connection)
 def test_release_deferred_job_if_ready_skips_jobs_without_dependencies() -> None:
     independent = SimpleNamespace(_dependency_ids=[])
     job_dependencies.release_deferred_job_if_ready(SimpleNamespace(), independent)
+
+
+@pytest.mark.parametrize(
+    ("allow_failure", "other_status", "cancel_observer", "expected"),
+    [
+        (True, JobStatus.FINISHED, False, JobStatus.QUEUED),
+        (True, JobStatus.FAILED, False, JobStatus.QUEUED),
+        (False, JobStatus.FINISHED, False, JobStatus.DEFERRED),
+        (True, JobStatus.QUEUED, False, JobStatus.DEFERRED),
+        (True, JobStatus.CANCELED, False, JobStatus.DEFERRED),
+        (True, JobStatus.STOPPED, False, JobStatus.DEFERRED),
+        (True, JobStatus.FINISHED, True, JobStatus.CANCELED),
+    ],
+)
+def test_stopped_parent_release_only_admits_authorized_terminal_observers(
+    rq_connection, allow_failure, other_status, cancel_observer, expected,
+):
+    queue = Queue(f"stop-observer-{uuid.uuid4().hex}", connection=rq_connection)
+    parent = queue.create_job(_noop)
+    parent.set_status(JobStatus.STOPPED)
+    parent.save()
+    other = queue.create_job(_noop)
+    other.set_status(other_status)
+    other.save()
+    observer = queue.enqueue(
+        _noop,
+        depends_on=Dependency(jobs=[parent, other], allow_failure=allow_failure),
+    )
+    try:
+        assert observer.get_status() == JobStatus.DEFERRED
+        if cancel_observer:
+            observer.cancel()
+        job_dependencies.release_deferred_job_if_ready(
+            queue, observer, stopped_parent_id=parent.id,
+        )
+        assert observer.get_status(refresh=True) == expected
+        if expected == JobStatus.QUEUED:
+            assert queue.job_ids.count(observer.id) == 1
+            job_dependencies.release_deferred_job_if_ready(
+                queue, observer, stopped_parent_id=parent.id,
+            )
+            assert queue.job_ids.count(observer.id) == 1
+    finally:
+        for job in (observer, other, parent):
+            job.delete(remove_from_queue=True)
+        queue.delete(delete_jobs=True)
+
+
+def test_failed_prerequisite_never_released_by_strict_helper(rq_connection):
+    queue = Queue(f"strict-helper-{uuid.uuid4().hex}", connection=rq_connection)
+    parent = queue.create_job(_noop)
+    parent.set_status(JobStatus.FAILED)
+    parent.save()
+    child = queue.enqueue(_noop, depends_on=parent)
+    try:
+        job_dependencies.release_deferred_job_if_ready(queue, child)
+        assert child.get_status(refresh=True) == JobStatus.DEFERRED
+    finally:
+        child.delete(remove_from_queue=True)
+        parent.delete(remove_from_queue=True)
+        queue.delete(delete_jobs=True)

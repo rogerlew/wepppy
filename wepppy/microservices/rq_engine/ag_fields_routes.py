@@ -390,7 +390,8 @@ def _rq_job_status(key: str, job_id: str, redis_conn: redis.Redis) -> str:
         job = Job.fetch(job_id, connection=redis_conn)
     except NoSuchJobError:
         return "missing"
-    return str(job.get_status(refresh=False) or "").lower()
+    status = job.get_status(refresh=False) or ""
+    return str(getattr(status, "value", status)).lower()
 
 
 def _reconcile_interrupted_watershed_jobs(
@@ -414,7 +415,8 @@ def _reconcile_interrupted_watershed_jobs(
         except NoSuchJobError:
             rq_status = "missing"
         else:
-            rq_status = str(job.get_status(refresh=False) or "").lower()
+            rq_status = job.get_status(refresh=False) or ""
+            rq_status = str(getattr(rq_status, "value", rq_status)).lower()
         if rq_status not in TERMINAL_RQ_JOB_STATUSES:
             continue
         if ag_fields.mark_watershed_integration_interrupted(

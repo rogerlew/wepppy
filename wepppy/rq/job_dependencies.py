@@ -396,7 +396,12 @@ def failure_tolerant_depends_on(depends_on: Any) -> Optional[Dependency]:
     return Dependency(jobs=job_ids, allow_failure=True)
 
 
-def release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
+def release_deferred_job_if_ready(
+    queue: Queue,
+    deferred_job: Job,
+    *,
+    stopped_parent_id: str | None = None,
+) -> None:
     """Enqueue a job whose dependencies were already terminal when it was created.
 
     ``Queue.setup_dependencies`` defers a new job when any dependency is not
@@ -406,6 +411,10 @@ def release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
 
     A job enqueued without dependencies is never deferred, so skip the status
     round-trip entirely -- most pipeline stages call this on every enqueue.
+
+    The worker's terminal stop handler may identify its stopped parent so an
+    explicitly failure-tolerant observer retains the RQ 1.x release behavior.
+    Strict dependencies and canceled prerequisites never receive that exception.
     """
     if not getattr(deferred_job, "_dependency_ids", None):
         return
@@ -444,13 +453,21 @@ def release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
             )
             if any(dependency is None for dependency in dependencies):
                 return
-            statuses = {
-                dependency.get_status(refresh=True)
-                for dependency in dependencies
-                if dependency is not None
-            }
-            if not statuses.issubset({JobStatus.FINISHED, JobStatus.FAILED}):
+            allowed_statuses = {JobStatus.FINISHED}
+            if deferred_job.allow_dependency_failures:
+                allowed_statuses.add(JobStatus.FAILED)
+            if stopped_parent_id is not None and (
+                not deferred_job.allow_dependency_failures
+                or stopped_parent_id not in expected_ids
+            ):
                 return
+            for dependency in dependencies:
+                status = dependency.get_status(refresh=True)
+                if stopped_parent_id is not None and dependency.id == stopped_parent_id:
+                    if status != JobStatus.STOPPED:
+                        return
+                elif status not in allowed_statuses:
+                    return
 
             pipeline.multi()
             for dependents_key in dependent_set_keys:

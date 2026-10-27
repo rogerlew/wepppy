@@ -7,14 +7,13 @@ gate access (admin UI, admin FastAPI routes, etc.) because the payloads may be
 augmented with user/run metadata at higher layers.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable, Mapping, Sequence
 
 import redis
 from rq import Queue, Worker
 from rq.job import Job
 from rq.registry import FailedJobRegistry, FinishedJobRegistry, StartedJobRegistry
-from rq.utils import utcnow
 
 DEFAULT_QUEUES: tuple[str, ...] = ("default", "batch", "fork-archive")
 DEFAULT_RECENT_LOOKBACK_SECONDS = 2 * 60 * 60  # 2 hours
@@ -24,6 +23,8 @@ DEFAULT_RECENT_SCAN_LIMIT = 2000
 def _as_iso(value: datetime | None) -> str | None:
     if value is None:
         return None
+    if value.tzinfo is not None:
+        value = value.astimezone(timezone.utc).replace(tzinfo=None)
     return value.isoformat()
 
 
@@ -141,6 +142,7 @@ def list_active_jobs(
             continue
 
         auth_actor = _resolve_auth_actor(job)
+        status = job.get_status(refresh=False)
         worker = None
         if state == "started":
             worker = _format_worker(worker_map.get(job_id))
@@ -150,7 +152,7 @@ def list_active_jobs(
                 "job_id": job.id,
                 "queue": (job.origin or queue_name or "-").strip() or "-",
                 "state": state,
-                "status": job.get_status(refresh=False),
+                "status": getattr(status, "value", status),
                 "worker": worker,
                 "worker_name": getattr(job, "worker_name", None),
                 "func_name": _resolve_func_name(job),
@@ -185,7 +187,7 @@ def list_recently_completed_jobs(
     scan the most recent entries and filter by ``job.ended_at``.
     """
 
-    now = utcnow()
+    now = datetime.now(timezone.utc)
     cutoff = now - timedelta(seconds=int(lookback_seconds))
 
     queues = [Queue(name, connection=redis_conn) for name in queue_names]
@@ -219,16 +221,21 @@ def list_recently_completed_jobs(
         if job is None:
             continue
         ended_at = getattr(job, "ended_at", None)
-        if ended_at is None or ended_at < cutoff:
+        if ended_at is None:
+            continue
+        # RQ 1.x persisted naive UTC; 2.x returns aware UTC for the same records.
+        ended_at_utc = ended_at.replace(tzinfo=timezone.utc) if ended_at.tzinfo is None else ended_at
+        if ended_at_utc < cutoff:
             continue
 
         auth_actor = _resolve_auth_actor(job)
+        status = job.get_status(refresh=False)
         payloads.append(
             {
                 "job_id": job.id,
                 "queue": (job.origin or queue_name or "-").strip() or "-",
                 "registry": registry_label,
-                "status": job.get_status(refresh=False),
+                "status": getattr(status, "value", status),
                 "worker": getattr(job, "worker_name", None),
                 "worker_name": getattr(job, "worker_name", None),
                 "func_name": _resolve_func_name(job),

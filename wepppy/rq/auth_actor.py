@@ -135,6 +135,22 @@ def install_rq_auth_actor_hook() -> None:
         def wrapper(self, *args, **kwargs):
             depth_token = _ENQUEUE_TRACE_DEPTH.set(_ENQUEUE_TRACE_DEPTH.get() + 1)
             try:
+                if method_name == "enqueue_call":
+                    actor = _AUTH_ACTOR.get()
+                    correlation_id = normalize_correlation_id(current_correlation_id())
+                    if actor or correlation_id:
+                        # meta is positional argument 11 in RQ 1.16 and 2.12.
+                        # Populate it before RQ publishes the job so workers and
+                        # caller-owned transactions observe one complete record.
+                        meta = dict((args[11] if len(args) > 11 else kwargs.get("meta")) or {})
+                        if actor and "auth_actor" not in meta:
+                            meta["auth_actor"] = actor
+                        if correlation_id and normalize_correlation_id(meta.get("correlation_id")) is None:
+                            meta["correlation_id"] = correlation_id
+                        if len(args) > 11:
+                            args = (*args[:11], meta, *args[12:])
+                        else:
+                            kwargs["meta"] = meta
                 try:
                     job = func(self, *args, **kwargs)
                 except redis.exceptions.RedisError:
@@ -163,40 +179,6 @@ def install_rq_auth_actor_hook() -> None:
                     ):
                         raise
                     job = committed
-                actor = _AUTH_ACTOR.get()
-                correlation_id = normalize_correlation_id(current_correlation_id())
-                if job is not None:
-                    try:
-                        meta = dict(job.meta or {})
-                    except AttributeError:  # pragma: no cover - defensive guard
-                        meta = None
-                    if isinstance(meta, dict):
-                        should_save_meta = False
-                        if actor and "auth_actor" not in meta:
-                            meta["auth_actor"] = actor
-                            should_save_meta = True
-                        if correlation_id:
-                            existing_correlation = normalize_correlation_id(meta.get("correlation_id"))
-                            if existing_correlation is None:
-                                meta["correlation_id"] = correlation_id
-                                should_save_meta = True
-                        if should_save_meta:
-                            job.meta = meta
-                            try:
-                                pipeline = kwargs.get("pipeline")
-                                if pipeline is None:
-                                    job.save_meta()
-                                else:
-                                    # Metadata belongs to the caller's enqueue
-                                    # transaction; an aborted WATCH must leave
-                                    # neither a job nor a metadata-only hash.
-                                    pipeline.hset(job.key, "meta", job.serializer.dumps(job.meta))
-                            except (redis.exceptions.RedisError, OSError) as exc:  # pragma: no cover - logging only
-                                _LOGGER.debug(
-                                    "Unable to persist enqueue metadata for job %s: %s",
-                                    getattr(job, "id", "?"),
-                                    exc,
-                                )
                 if job is None:
                     return job
                 # Log only once at the outermost enqueue wrapper invocation.

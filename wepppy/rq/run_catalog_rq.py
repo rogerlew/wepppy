@@ -61,8 +61,8 @@ def safe_job_details(job_id, job=None):
     status = getattr(status, "value", status)
     result = dict(job_id=job_id, runid=None, status=status, result=None, exc_info=None,
                   description=DESCRIPTION, children={}, auth_actor=None,
-                  started_at=str(job.started_at) if job is not None and job.started_at else None,
-                  ended_at=str(job.ended_at) if job is not None and job.ended_at else None)
+                  started_at=str(job.started_at.replace(tzinfo=None)) if job is not None and job.started_at else None,
+                  ended_at=str(job.ended_at.replace(tzinfo=None)) if job is not None and job.ended_at else None)
     if status in {"failed", "stopped", "canceled"}:
         result.update(maintenance_error())
     return result

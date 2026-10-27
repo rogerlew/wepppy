@@ -577,10 +577,12 @@ def test_watershed_suite_finalizer_reports_failed_children_without_failing(
         def __exit__(self, exc_type, exc, tb):
             return False
 
+    from rq.job import JobStatus
+
     statuses = {
-        "child-c1": "failed",
-        "child-c2": "finished",
-        "child-hybrid": "finished",
+        "child-c1": JobStatus.FAILED,
+        "child-c2": JobStatus.FINISHED,
+        "child-hybrid": JobStatus.FINISHED,
     }
     monkeypatch.setattr(ag_fields_rq.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(

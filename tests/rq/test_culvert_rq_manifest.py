@@ -89,3 +89,18 @@ def test_write_runs_manifest_includes_summary_and_run_rows(
     assert "finished" in text
     assert "RuntimeError: landuse fail" in text
     assert redis_conn.closed
+
+
+@pytest.mark.parametrize("aware", [False, True])
+def test_job_manifest_keeps_status_and_creation_wire_values(monkeypatch, aware):
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+    from rq.job import JobStatus
+
+    created = datetime(2026, 10, 27, 12, 0, tzinfo=timezone.utc if aware else None)
+    monkeypatch.setattr(manifest.Job, "fetch", lambda *args, **kwargs: SimpleNamespace(
+        get_status=lambda: JobStatus.STARTED, created_at=created
+    ))
+    assert manifest._fetch_job_info("owned-job", redis_conn=object()) == (
+        "started", "2026-10-27T12:00:00"
+    )

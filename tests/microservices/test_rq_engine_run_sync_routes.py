@@ -238,3 +238,20 @@ def test_run_sync_status_returns_payload(monkeypatch: pytest.MonkeyPatch) -> Non
     payload = response.json()
     assert payload["jobs"] == [{"id": "job-1"}]
     assert payload["migrations"] == [{"id": 1}]
+
+
+@pytest.mark.parametrize("aware", [False, True])
+def test_run_sync_job_timestamps_preserve_wire_shape(aware):
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+    from rq.job import JobStatus
+
+    timestamp = datetime(2026, 10, 27, 12, 0, tzinfo=timezone.utc if aware else None)
+    job = SimpleNamespace(id="sync-job", meta={}, args=("run", "source"),
+                          get_status=lambda refresh=False: JobStatus.FINISHED,
+                          enqueued_at=timestamp, started_at=timestamp, ended_at=timestamp)
+    row = run_sync_routes._serialize_job(job, "finished")
+    assert row["job_status"] == "finished"
+    assert row["enqueued_at"] == row["started_at"] == row["ended_at"] == "2026-10-27T12:00:00"
+    # Non-RQ database timestamps retain their preexisting serialization.
+    assert run_sync_routes._as_iso(timestamp) == timestamp.isoformat()

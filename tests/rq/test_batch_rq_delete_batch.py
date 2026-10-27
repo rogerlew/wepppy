@@ -136,3 +136,20 @@ def test_delete_batch_rq_raises_when_batch_jobs_active(
 
     assert batch_wd.exists()
     assert any("TRIGGER batch BATCH_DELETE_FAILED" in message for message in published)
+
+
+@pytest.mark.parametrize("terminal", [False, True])
+def test_active_batch_summaries_use_rq_status_values(monkeypatch, terminal):
+    from types import SimpleNamespace
+    from rq.job import JobStatus
+
+    queue = SimpleNamespace(get_job_ids=lambda: ["batch-job"])
+    monkeypatch.setattr(batch_rq, "Queue", lambda *args, **kwargs: queue)
+    for registry in ("StartedJobRegistry", "DeferredJobRegistry", "ScheduledJobRegistry"):
+        monkeypatch.setattr(batch_rq, registry, lambda **kwargs: SimpleNamespace(get_job_ids=lambda: []))
+    job = SimpleNamespace(id="batch-job", args=("demo",), meta={}, origin="batch", func_name="wepppy.rq.batch_rq.run_batch_rq",
+                          get_status=lambda refresh=False: JobStatus.FINISHED if terminal else JobStatus.STARTED)
+    monkeypatch.setattr(batch_rq.Job, "fetch", lambda *args, **kwargs: job)
+    assert batch_rq._active_batch_job_summaries("demo", redis_conn=object()) == (
+        [] if terminal else ["batch-job:started:run_batch_rq"]
+    )

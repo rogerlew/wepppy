@@ -13,7 +13,6 @@ import redis
 from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
-from rq.utils import utcnow
 from wepppy.rq.run_catalog_rq import is_catalog_job, safe_job_details
 from wepppy.rq.query_catalog_disclosure import (
     is_query_catalog_job, get_query_catalog_job_details,
@@ -32,6 +31,13 @@ UNKNOWN_PROGRESS_UPDATED_AT = "1970-01-01T00:00:00Z"
 QUEUE_RANK_BASIS = "next_queued_job_in_tree"
 
 logger = logging.getLogger(__name__)
+
+
+def _utc_naive(value: datetime) -> datetime:
+    """Keep legacy UTC wire values while accepting RQ 2's aware timestamps."""
+    if value.tzinfo is not None:
+        value = value.astimezone(timezone.utc)
+    return value.replace(tzinfo=None)
 
 
 def _normalize_job_status(value: Any) -> str:
@@ -91,7 +97,7 @@ def _build_queue_snapshot(
         return None
 
     position_job_id, jobs_ahead = min(offsets.items(), key=lambda item: item[1])
-    observed = observed_at or utcnow()
+    observed = observed_at or datetime.now(timezone.utc)
     if observed.tzinfo is None:
         observed = observed.replace(tzinfo=timezone.utc)
     else:
@@ -152,14 +158,14 @@ def recursive_get_job_details(
     elapsed_s = None
     if job.started_at:
         if job.ended_at:
-            elapsed_s = (job.ended_at - job.started_at).total_seconds()
+            elapsed_s = (_utc_naive(job.ended_at) - _utc_naive(job.started_at)).total_seconds()
         else:
-            elapsed_s = (now - job.started_at).total_seconds()
+            elapsed_s = (_utc_naive(now) - _utc_naive(job.started_at)).total_seconds()
 
     culvert_batch_uuid = (
         job.meta.get("culvert_batch_uuid") if isinstance(job.meta, dict) else None
     )
-    raw_status = job.get_status()
+    raw_status = _normalize_job_status(job.get_status())
     if queue_candidates is not None:
         queue_candidates.append(
             (
@@ -173,8 +179,8 @@ def recursive_get_job_details(
         "runid": _resolve_runid(job),
         "status": raw_status,
         "result": job.result,
-        "started_at": str(job.started_at) if job.started_at else None,
-        "ended_at": str(job.ended_at) if job.ended_at else None,
+        "started_at": str(_utc_naive(job.started_at)) if job.started_at else None,
+        "ended_at": str(_utc_naive(job.ended_at)) if job.ended_at else None,
         "description": job.description,
         "elapsed_s": elapsed_s,
         "exc_info": _extract_exc_info(job),
@@ -270,7 +276,7 @@ def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
         except Exception:  # broad-except: reserved-job disclosure boundary for every helper caller.
             logger.exception("Catalog job polling failed job_id=%s", job_id)
             return safe_job_details(job_id)
-    now = utcnow()
+    now = datetime.now(timezone.utc)
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
         try:
@@ -309,7 +315,7 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
     if not normalized_ids:
         return {}
 
-    now = utcnow()
+    now = datetime.now(timezone.utc)
     results: Dict[str, Dict[str, Any]] = {}
 
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -450,7 +456,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         if "error" in details:
             result.update(error=details["error"], error_id=details["error_id"])
         return result
-    now = utcnow()
+    now = datetime.now(timezone.utc)
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
         try:
@@ -497,7 +503,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         completed_jobs = sum(
             1
             for status in statuses
-            if str(status or "").strip().lower() in {'finished', 'failed', 'stopped', 'canceled'}
+            if _normalize_job_status(status) in {'finished', 'failed', 'stopped', 'canceled'}
         )
         progress_total = max(1, total_jobs_count)
         progress_updated_at = _latest_timestamp_iso(*valid_end_times, *valid_started_times) or UNKNOWN_PROGRESS_UPDATED_AT
@@ -506,7 +512,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
             "job_id": job.id,
             "runid": _resolve_runid(job),
             "status": aggregated_status,
-            "started_at": str(job.started_at) if job.started_at else None,
+            "started_at": str(_utc_naive(job.started_at)) if job.started_at else None,
             "ended_at": last_ended_at,
             "progress": {
                 "completed": completed_jobs,

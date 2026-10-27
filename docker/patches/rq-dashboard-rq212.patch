@@ -1,0 +1,81 @@
+diff --git a/rq_dashboard/web.py b/rq_dashboard/web.py
+index 2f03adc..15e0c22 100644
+--- a/rq_dashboard/web.py
++++ b/rq_dashboard/web.py
+@@ -41,7 +41,7 @@ from rq import (
+     requeue_job,
+ )
+ from rq.exceptions import NoSuchJobError
+-from rq.job import Job
++from rq.job import Job, parse_job_id
+ from rq.registry import (
+     DeferredJobRegistry,
+     FailedJobRegistry,
+@@ -423,7 +423,9 @@ def delete_job_view(job_id, registry=None):
+         job = Job.fetch(job_id, connection=current_app.redis_conn)
+         job.delete()
+     except NoSuchJobError:
+-        if registry:
++        if isinstance(registry, StartedJobRegistry):
++            registry.remove_executions(Job(parse_job_id(job_id), connection=current_app.redis_conn))
++        elif registry:
+             registry.remove(job_id)
+         return dict(status="ERROR")
+ 
+@@ -614,7 +616,11 @@ def job_info(instance_number, job_id):
+         description=job.description,
+         metadata=json.dumps(job.get_meta()),
+     )
+-    dep_ids = [di.decode("utf-8").split(':')[-1].strip() for di in job.dependency_ids]
++    # RQ 2.0 returns encoded Redis job keys; 2.12 returns exact string IDs.
++    dep_ids = [
++        di.decode("utf-8")[len("rq:job:"):] if isinstance(di, bytes) else di
++        for di in job.dependency_ids
++    ]
+     if len(dep_ids) > 0:
+         result["depends_on"] = dep_ids
+         status = []
+diff --git a/tests/test_basic.py b/tests/test_basic.py
+index 757a165..a2e1b5d 100644
+--- a/tests/test_basic.py
++++ b/tests/test_basic.py
+@@ -153,6 +153,39 @@ class BasicTestCase(unittest.TestCase):
+         response_info = self.client.get(job_info_url)
+         self.assertEqual(response_info.status_code, HTTP_OK)
+ 
++    def test_job_info_preserves_dependency_ids(self):
++        import math
++        q = Queue(connection=self.app.redis_conn)
++        parent = q.enqueue(math.sqrt, 4)
++        child = q.enqueue(math.sqrt, 9, depends_on=parent)
++        try:
++            response = self.client.get(f'/0/data/job/{child.id}.json')
++            self.assertEqual(response.status_code, HTTP_OK)
++            data = json.loads(response.data.decode('utf8'))
++            self.assertEqual(data['depends_on'], [parent.id])
++            self.assertEqual(data['depends_on_status'], ['active'])
++        finally:
++            child.delete()
++            parent.delete()
++
++    def test_empty_started_registry_removes_missing_job_execution(self):
++        import math
++        from rq.executions import Execution
++        q = Queue(connection=self.app.redis_conn)
++        job = q.create_job(math.sqrt, args=(4,))
++        job.save()
++        pipeline = self.app.redis_conn.pipeline()
++        execution = Execution.create(job, ttl=60, pipeline=pipeline)
++        pipeline.execute()
++        self.app.redis_conn.delete(job.key)
++        try:
++            response = self.client.post(f'/queue/{q.name}/started/empty')
++            self.assertEqual(response.status_code, HTTP_OK)
++            self.assertEqual(self.app.redis_conn.zcard(q.started_job_registry.key), 0)
++        finally:
++            execution.delete(job=job, pipeline=self.app.redis_conn)
++            self.app.redis_conn.delete(job.execution_registry.key)
++
+     def test_compact_queue(self):
+         def some_work():
+             return

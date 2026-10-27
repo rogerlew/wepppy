@@ -638,6 +638,8 @@ def test_reconcile_interrupted_watershed_job_uses_matching_terminal_rq_state(
     rq_status: str,
     expected_status: str,
 ) -> None:
+    from rq.job import JobStatus
+
     states = {
         scheme: {
             "status": "not_run",
@@ -676,7 +678,7 @@ def test_reconcile_interrupted_watershed_job_uses_matching_terminal_rq_state(
         ag_fields_routes.Job,
         "fetch",
         lambda job_id, connection: SimpleNamespace(
-            get_status=lambda refresh=False: rq_status
+            get_status=lambda refresh=False: getattr(JobStatus, rq_status.upper())
         ),
     )
 
@@ -1256,3 +1258,13 @@ def test_agfields_actual_producer_failure_postconditions(
     else:
         assert any(event[0] == "hint" for event in events)
         assert any(event[0] == "enqueue" for event in events)
+
+
+@pytest.mark.parametrize("status", ["queued", "started", "scheduled", "failed"])
+def test_leaf_job_status_uses_enum_value(monkeypatch, status):
+    from rq.job import JobStatus
+
+    monkeypatch.setattr(ag_fields_routes.Job, "fetch", lambda *args, **kwargs: SimpleNamespace(
+        get_status=lambda refresh=False: getattr(JobStatus, status.upper())
+    ))
+    assert ag_fields_routes._rq_job_status("agfields_run_wepp", "leaf", object()) == status

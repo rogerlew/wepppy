@@ -48,44 +48,26 @@ def install_rq_hooks() -> None:
     if getattr(Queue, "_profile_trace_wrapped", False):
         return
 
-    def _wrap_enqueue(func: Callable[..., Any]) -> Callable[..., Any]:
+    def _wrap_enqueue(func: Callable[..., Any], method_name: str) -> Callable[..., Any]:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            job = func(self, *args, **kwargs)
             slug = _PROFILE_TRACE_SLUG.get()
-            if not slug or job is None:
-                if not slug:
-                    _LOGGER.debug("Profile coverage enqueue: no active slug for job %s", getattr(job, "id", "?"))
-                return job
-            try:
-                meta = dict(job.meta or {})
-            except AttributeError:  # pragma: no cover - defensive guard
-                return job
-            if meta.get("profile_trace_slug") == slug:
-                _LOGGER.debug("Profile coverage enqueue: slug already set on job %s", getattr(job, "id", "?"))
-                return job
-            meta["profile_trace_slug"] = slug
-            job.meta = meta
-            try:
-                job.save_meta()
-            except Exception as exc:  # broad-except: telemetry must not break enqueue  # pragma: no cover
-                _LOGGER.debug(
-                    "Unable to persist profile trace slug for job %s (slug=%s): %s",
-                    job.id,
-                    slug,
-                    exc,
-                    exc_info=True,
-                )
-            else:
-                _LOGGER.info(
-                    "Profile coverage enqueue: tagged job %s with slug=%s", job.id, slug
-                )
-            return job
+            if slug and method_name == "enqueue_call":
+                # RQ 1.16 and 2.12 accept meta at position 11. Keep profile
+                # metadata in RQ's enqueue transaction, including caller-owned
+                # pipelines, rather than publishing an independent hash write.
+                meta = dict((args[11] if len(args) > 11 else kwargs.get("meta")) or {})
+                meta["profile_trace_slug"] = slug
+                if len(args) > 11:
+                    args = (*args[:11], meta, *args[12:])
+                else:
+                    kwargs["meta"] = meta
+            return func(self, *args, **kwargs)
 
         return wrapper
 
-    Queue.enqueue_call = _wrap_enqueue(Queue.enqueue_call)
-    Queue.enqueue = _wrap_enqueue(Queue.enqueue)
+    Queue.enqueue_call = _wrap_enqueue(Queue.enqueue_call, "enqueue_call")
+    Queue.enqueue = _wrap_enqueue(Queue.enqueue, "enqueue")
     setattr(Queue, "_profile_trace_wrapped", True)
 
 

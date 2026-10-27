@@ -31,6 +31,7 @@ from wepppy.observability.correlation import (
 
 import rq
 from rq import Worker, Queue
+from rq.defaults import DEFAULT_LOGGING_DATE_FORMAT, DEFAULT_LOGGING_FORMAT
 from rq.job import Job
 from rq.registry import StartedJobRegistry
 from rq.exceptions import NoSuchJobError
@@ -129,6 +130,24 @@ class WepppyRqWorker(Worker):
                 "protocol": 1, "database": deployment_identity(),
                 "write_mode": os.getenv("WEPPCLOUD_RUN_CATALOG_WRITE_MODE", "timestamp_only"),
             }))
+
+    def _start_scheduler(
+        self,
+        burst: bool = False,
+        logging_level: str | None = "INFO",
+        date_format: str = DEFAULT_LOGGING_DATE_FORMAT,
+        log_format: str = DEFAULT_LOGGING_FORMAT,
+    ) -> None:
+        # A forked scheduler must not retain the supervisor's future blocking
+        # dequeue socket: after supervisor SIGKILL it would consume an orphan job.
+        # Leave the in-use pubsub connection and its subscription thread intact.
+        self.connection.connection_pool.disconnect(inuse_connections=False)
+        super()._start_scheduler(burst, logging_level, date_format, log_format)
+
+    def run_maintenance_tasks(self) -> None:
+        # Maintenance can fork a replacement scheduler without _start_scheduler.
+        self.connection.connection_pool.disconnect(inuse_connections=False)
+        super().run_maintenance_tasks()
 
     def _start_job_coverage(self, job: Job):
         if not PROFILE_COVERAGE_SETTINGS.enabled:
@@ -250,6 +269,7 @@ class WepppyRqWorker(Worker):
         exc_string: str = '',
     ) -> None:
         """Publish job failure events while preserving the superclass behavior."""
+        job_was_stopped = getattr(self, "_stopped_job_id", None) == job.id
         controlled_error = (
             job.meta.get("error")
             if isinstance(job.meta, dict)
@@ -272,6 +292,23 @@ class WepppyRqWorker(Worker):
                 started_job_registry,
                 exc_string=exc_string,
             )
+        if job_was_stopped:
+            # RQ 2.12 blocks every stopped-parent edge. Preserve the approved
+            # terminal observers without releasing strict scientific work.
+            from wepppy.rq.job_dependencies import release_deferred_job_if_ready
+
+            for dependent in Job.fetch_many(
+                job.dependent_ids, connection=job.connection, serializer=job.serializer,
+            ):
+                if dependent is None or not dependent.allow_dependency_failures:
+                    continue
+                dependent_queue = Queue(
+                    dependent.origin, connection=job.connection,
+                    job_class=type(dependent), serializer=dependent.serializer,
+                )
+                release_deferred_job_if_ready(
+                    dependent_queue, dependent, stopped_parent_id=job.id,
+                )
         if isinstance(job.meta, dict) and isinstance(job.meta.get("fork_failure"), dict):
             # RQ's per-job failure callback is skipped when the work horse dies
             # (for example OOM/SIGKILL). Reconcile from the surviving supervisor.

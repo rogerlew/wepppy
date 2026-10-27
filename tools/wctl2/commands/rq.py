@@ -16,11 +16,12 @@ _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
 _RQ_REGISTRY_SYNC_SNIPPET = """
 import inspect
 import re
+from datetime import datetime, timezone
 
 import redis
 from rq import Queue, Worker, worker_registration
 from rq.job import Job
-from rq.utils import utcformat, utcnow
+from rq.utils import utcformat
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
@@ -57,7 +58,7 @@ for key in worker_keys:
     worker_registration.register(worker)
 
 if conn.scard(Worker.redis_workers_keys) == 0:
-    now = utcformat(utcnow())
+    now = utcformat(datetime.now(timezone.utc))
     uuid_pattern = re.compile(r"^[0-9a-f]{32}$")
     recovered = set()
     for queue_name in queue_names:

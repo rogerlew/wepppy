@@ -230,8 +230,8 @@ def _fetch_job_info(
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:217", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         status = None
-    created_at = job.created_at.isoformat() if job.created_at else None
-    return str(status) if status is not None else None, created_at
+    created_at = job.created_at.replace(tzinfo=None).isoformat() if job.created_at else None
+    return str(getattr(status, "value", status)) if status is not None else None, created_at
 
 
 def _write_runs_manifest(

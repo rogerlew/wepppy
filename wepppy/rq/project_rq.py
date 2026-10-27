@@ -797,9 +797,9 @@ def _enqueue_serial_subcatchment_tree(
 
             # Prime version caches before MULTI so every subsequent operation
             # contributes only commands to the one admission transaction.
-            queue.get_redis_server_version()
-            child.get_redis_server_version()
-            receipt.get_redis_server_version()
+            redis_server_version = queue.get_redis_server_version()
+            child.redis_server_version = redis_server_version
+            receipt.redis_server_version = redis_server_version
 
             parent_job.meta[_WBT_BUILD_LINK_KEY] = child.id
             parent_job.meta[_WBT_RECEIPT_LINK_KEY] = receipt.id

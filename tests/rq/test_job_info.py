@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import pytest
@@ -250,6 +250,8 @@ def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferr
     second_child_status: str,
     expected_status: str,
 ) -> None:
+    from rq.job import JobStatus
+
     root_job = _FakeJob(id="root", meta={"runid": "run-1"}, status="finished")
 
     class _FakeRedisContext:
@@ -270,14 +272,14 @@ def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferr
         lambda job, redis_conn, now, **kwargs: {
             "job_id": "root",
             "runid": "run-1",
-            "status": "finished",
+            "status": JobStatus.FINISHED,
             "started_at": "2026-07-15T20:00:00Z",
             "ended_at": "2026-07-15T20:00:01Z",
             "children": {
                 "0": [
                     {
                         "job_id": "child-1",
-                        "status": "failed",
+                        "status": JobStatus.FAILED,
                         "started_at": "2026-07-15T20:00:02Z",
                         "ended_at": "2026-07-15T20:00:03Z",
                         "children": {},
@@ -286,7 +288,7 @@ def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferr
                 "1": [
                     {
                         "job_id": "child-2",
-                        "status": second_child_status,
+                        "status": getattr(JobStatus, second_child_status.upper()),
                         "started_at": "2026-07-15T20:00:04Z",
                         "ended_at": (
                             "2026-07-15T20:00:05Z"
@@ -306,6 +308,8 @@ def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferr
     assert payload["ended_at"] == (
         "2026-07-15T20:00:05Z" if second_child_status == "finished" else None
     )
+
+    assert payload["progress"]["completed"] == (3 if second_child_status == "finished" else 2)
 
 
 @pytest.mark.parametrize("case", ["missing", "multiple", "wrong_root", "valid"])
@@ -410,3 +414,26 @@ def test_jobinfo_overlays_aggregate_conditioning_failure() -> None:
     assert details["error"] == status["error"]
     assert details["error_id"] == status["error_id"]
     assert details["exc_info"] is None
+
+
+@pytest.mark.parametrize("aware", [False, True])
+@pytest.mark.parametrize("finished", [False, True])
+def test_rq_timestamps_preserve_elapsed_and_legacy_wire_values(aware, finished):
+    from rq.job import JobStatus
+
+    started = datetime(2026, 10, 27, 12, 0, 0)
+    if aware:
+        started = started.replace(tzinfo=timezone.utc)
+    job = _FakeJob(
+        status=JobStatus.FINISHED if finished else JobStatus.STARTED,
+        started_at=started,
+        ended_at=started + timedelta(seconds=5) if finished else None,
+    )
+    payload = recursive_get_job_details(
+        job, redis_conn=object(), now=datetime(2026, 10, 27, 12, 0, 10, tzinfo=timezone.utc)
+    )
+    assert type(payload["status"]) is str
+    assert payload["status"] == ("finished" if finished else "started")
+    assert payload["elapsed_s"] == (5 if finished else 10)
+    assert payload["started_at"] == "2026-10-27 12:00:00"
+    assert payload["ended_at"] == ("2026-10-27 12:00:05" if finished else None)

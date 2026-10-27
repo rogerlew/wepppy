@@ -238,6 +238,11 @@ cd /workdir/wepppy
 docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
 ```
 
+The exact RQ 2.12.0 migration requires rebuilding the shared Python image and
+the separate dashboard image, then draining and recreating affected services.
+Follow [RQ migration and recovery](../docs/dev-notes/rq-2-12-migration.md);
+retained Redis jobs must survive, and native webhooks remain disabled.
+
 ## Dev vs Prod Differences
 
 | Aspect | Dev (`docker-compose.dev.yml`) | Prod (`docker-compose.prod.yml`) |

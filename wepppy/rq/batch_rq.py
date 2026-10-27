@@ -284,7 +284,8 @@ def _active_batch_job_summaries(
                 if not _job_targets_batch(job, batch_name):
                     continue
 
-                status = str(job.get_status(refresh=False) or registry_label).lower()
+                status = job.get_status(refresh=False) or registry_label
+                status = str(getattr(status, "value", status)).lower()
                 if status in _TERMINAL_JOB_STATUSES:
                     continue
 

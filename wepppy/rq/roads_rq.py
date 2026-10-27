@@ -96,7 +96,8 @@ def get_active_roads_job(prep: Optional[RedisPrep], redis_conn: redis.Redis) -> 
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:
             continue
-        status = str(job.get_status(refresh=False) or "").lower()
+        status = job.get_status(refresh=False) or ""
+        status = str(getattr(status, "value", status)).lower()
         if status in ACTIVE_RQ_JOB_STATUSES:
             return {
                 "key": key,

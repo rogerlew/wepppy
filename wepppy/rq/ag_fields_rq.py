@@ -379,7 +379,8 @@ def finalize_ag_fields_watershed_suite_rq(
                 except NoSuchJobError:
                     statuses[scheme] = "missing"
                     continue
-                statuses[scheme] = str(child_job.get_status(refresh=False) or "unknown").lower()
+                status = child_job.get_status(refresh=False) or "unknown"
+                statuses[scheme] = str(getattr(status, "value", status)).lower()
 
         result: Dict[str, Any] = {
             "job_ids": dict(planned_job_ids),

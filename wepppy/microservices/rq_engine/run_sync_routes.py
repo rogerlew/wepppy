@@ -62,9 +62,12 @@ def _redis_conn():
             logger.debug("rq-engine failed to close Redis connection", exc_info=exc)
 
 
-def _as_iso(value: datetime | None) -> str | None:
+def _as_iso(value: datetime | None, *, rq_timestamp: bool = False) -> str | None:
     if value is None:
         return None
+    if rq_timestamp:
+        # RQ timestamps are UTC; retain the existing offset-free wire shape.
+        value = value.replace(tzinfo=None)
     return value.isoformat()
 
 
@@ -86,9 +89,9 @@ def _serialize_job(job: Job, status_label: str) -> Dict[str, Any]:
         "runid": runid,
         "config": config,
         "source_host": source_host,
-        "enqueued_at": _as_iso(getattr(job, "enqueued_at", None)),
-        "started_at": _as_iso(getattr(job, "started_at", None)),
-        "ended_at": _as_iso(getattr(job, "ended_at", None)),
+        "enqueued_at": _as_iso(getattr(job, "enqueued_at", None), rq_timestamp=True),
+        "started_at": _as_iso(getattr(job, "started_at", None), rq_timestamp=True),
+        "ended_at": _as_iso(getattr(job, "ended_at", None), rq_timestamp=True),
     }
 
 

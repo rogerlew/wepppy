@@ -477,7 +477,7 @@ def _lookup_job_status(
     ):
         return 'foreign'
     status = job.get_status()
-    return status or 'unknown'
+    return getattr(status, 'value', status) or 'unknown'
 
 
 def _clear_tracked_job(prep: RedisPrep, job_key: str) -> None:

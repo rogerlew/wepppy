@@ -10,7 +10,7 @@ from rq.suspension import WORKERS_SUSPENDED, resume, suspend
 
 from wepppy.rq.run_catalog_rq import enqueue_sweep, is_catalog_job, deployment_identity
 from wepppy.rq.job_info import recursive_get_job_details
-from rq.utils import utcnow
+from datetime import datetime, timezone
 from tests.weppcloud.test_run_catalog_postgres import database
 from tests.rq.test_batch_task_boundary import isolated_rq
 
@@ -79,7 +79,7 @@ def test_real_queued_sweep_publishes_sql_and_safe_tree(database, tmp_path, monke
         job = queue.fetch_job(identifier)
         assert job.get_status() == JobStatus.FINISHED
         assert job.return_value() is None
-        tree = recursive_get_job_details(job, connection, utcnow())
+        tree = recursive_get_job_details(job, connection, datetime.now(timezone.utc))
         assert tree["job_id"] == identifier
         assert tree["description"] == "Run catalog maintenance"
         assert "RQ source" not in str(tree)
@@ -122,7 +122,7 @@ def test_real_rq_atomic_admission_and_private_terminal_record(monkeypatch, isola
         job.meta["error"] = {"message": "private-path-canary"}
         job.save_meta()
         connection.hset(job.key, "exc_info", "private-database-canary")
-        details = recursive_get_job_details(job, connection, utcnow())
+        details = recursive_get_job_details(job, connection, datetime.now(timezone.utc))
         assert details["exc_info"] is None
         assert details["result"] is None
         assert "private" not in str(details)
@@ -273,3 +273,16 @@ def test_redis_observation_error_is_not_silenced(admission_queue, monkeypatch):
         with pytest.raises(redis.ConnectionError, match="injected unavailable registry"):
             enqueue_sweep(admission_queue)
     assert admission_queue.count == 0
+
+
+@pytest.mark.parametrize("aware", [False, True])
+def test_safe_catalog_details_preserve_utc_timestamp_shape(aware):
+    from types import SimpleNamespace
+    from wepppy.rq.run_catalog_rq import safe_job_details
+
+    timestamp = datetime(2026, 10, 27, 12, 0, tzinfo=timezone.utc if aware else None)
+    job = SimpleNamespace(get_status=lambda: JobStatus.FINISHED,
+                          started_at=timestamp, ended_at=timestamp)
+    details = safe_job_details("run_catalog_sweep_fixture", job)
+    assert details["status"] == "finished"
+    assert details["started_at"] == details["ended_at"] == "2026-10-27 12:00:00"

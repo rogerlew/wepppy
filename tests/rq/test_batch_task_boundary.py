@@ -264,10 +264,12 @@ def test_invalid_identity_failure_handler_cannot_write(workflow, attack, monkeyp
 
 
 def test_stopped_hillslope_releases_failure_observer(workflow):
+    from wepppy.rq.rq_worker import WepppyRqWorker
+
     w = workflow
     root, hills, water = w.dispatch()
     w.queue.remove(hills)
-    worker = SimpleWorker([w.queue], connection=w.connection)
+    worker = WepppyRqWorker([w.queue], connection=w.connection)
     worker._stopped_job_id = hills.id
     worker.handle_job_failure(hills, w.queue, exc_string="injected worker stop")
     assert hills.get_status(refresh=True) == JobStatus.STOPPED

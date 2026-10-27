@@ -93,7 +93,9 @@ def _serial_policy_abstract_job(
 
 
 class _InlineWepppyWorker(WepppyRqWorker, SimpleWorker):
-    pass
+    # RQ 2.x makes Worker and SimpleWorker siblings. Select the intended inline
+    # executor explicitly so monkeypatched tasks/log capture stay in this process.
+    execute_job = SimpleWorker.execute_job
 
 
 class _PipelineExecuteFault:

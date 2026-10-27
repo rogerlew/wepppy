@@ -435,3 +435,32 @@ def test_running_cancellation_retains_capacity_until_execution_exits(catalog_que
     status = pilot.pilot_status(queue.connection, identifier)
     assert status['global_outstanding'] == 6 and not status['global_uncertain']
     assert not guard.execution_outstanding(binding, 'canceled')
+
+
+def test_pilot_observes_plain_job_id_from_real_execution_registry(catalog_queue):
+    executions = pytest.importorskip("rq.executions")
+    from tools.query_catalog_pilot import Runtime
+
+    _root, queue, _worker = catalog_queue
+    job = queue.enqueue(sum, [1, 2])
+    job.started_at = job.enqueued_at
+    job.set_status(JobStatus.STARTED)
+    job.save()
+    queue.remove(job.id)
+    with queue.connection.pipeline() as pipeline:
+        execution = executions.Execution.create(job, ttl=60, pipeline=pipeline)
+        pipeline.execute()
+    assert execution.composite_key.encode() in queue.connection.zrange(job.started_job_registry.key, 0, -1)
+    runtime = Runtime.__new__(Runtime)
+    runtime.connection, runtime.queue, runtime.ordinary_seen = queue.connection, queue, set()
+    try:
+        result = runtime.raw_ordinary({"global_job_ids": []})
+        assert job.id in result["started_ids"]
+        assert execution.composite_key not in result["jobs"]
+        assert result["jobs"][job.id]["status"] == "started"
+        assert result["wait_seconds"][job.id] == 0.0
+        assert runtime.raw_ordinary({"global_job_ids": [job.id]})["started_ids"] == result["started_ids"]
+    finally:
+        with queue.connection.pipeline() as pipeline:
+            execution.delete(job, pipeline)
+            pipeline.execute()

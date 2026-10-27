@@ -604,9 +604,9 @@ def test_dependency_graph_auth_actor_hook_persists_correlation_id(
     from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
 
     class _FakeJob:
-        def __init__(self, job_id: str) -> None:
+        def __init__(self, job_id: str, meta: dict) -> None:
             self.id = job_id
-            self.meta: dict[str, str] = {}
+            self.meta = dict(meta)
             self.save_meta_calls = 0
 
         def save_meta(self) -> None:
@@ -616,7 +616,7 @@ def test_dependency_graph_auth_actor_hook_persists_correlation_id(
         name = "default"
 
         def enqueue_call(self, *args, **kwargs):
-            return _FakeJob("child-job")
+            return _FakeJob("child-job", kwargs["meta"])
 
         def enqueue(self, *args, **kwargs):
             return self.enqueue_call(*args, **kwargs)
@@ -632,7 +632,7 @@ def test_dependency_graph_auth_actor_hook_persists_correlation_id(
         reset_correlation_id(token)
 
     assert child_job.meta["correlation_id"] == "cid-rq-propagation-01"
-    assert child_job.save_meta_calls == 1
+    assert child_job.save_meta_calls == 0
 
 
 def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
@@ -642,9 +642,9 @@ def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
     from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
 
     class _FakeJob:
-        def __init__(self, job_id: str) -> None:
+        def __init__(self, job_id: str, meta: dict) -> None:
             self.id = job_id
-            self.meta: dict[str, str] = {"correlation_id": "invalid correlation id !!!"}
+            self.meta = dict(meta)
             self.save_meta_calls = 0
 
         def save_meta(self) -> None:
@@ -654,7 +654,7 @@ def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
         name = "default"
 
         def enqueue_call(self, *args, **kwargs):
-            return _FakeJob("child-job")
+            return _FakeJob("child-job", kwargs["meta"])
 
         def enqueue(self, *args, **kwargs):
             return self.enqueue_call(*args, **kwargs)
@@ -665,9 +665,9 @@ def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
     token = set_correlation_id("cid-rq-propagation-02")
     try:
         queue = _FakeQueue()
-        child_job = queue.enqueue_call(lambda: None)
+        child_job = queue.enqueue_call(lambda: None, meta={"correlation_id": "invalid correlation id !!!"})
     finally:
         reset_correlation_id(token)
 
     assert child_job.meta["correlation_id"] == "cid-rq-propagation-02"
-    assert child_job.save_meta_calls == 1
+    assert child_job.save_meta_calls == 0

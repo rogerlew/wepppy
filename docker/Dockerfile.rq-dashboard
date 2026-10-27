@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     RQ_DASHBOARD_URL_PREFIX=/rq-dashboard
@@ -13,7 +13,10 @@ WORKDIR /rq-dashboard
 
 COPY rq-dashboard/requirements.txt /tmp/rq-dashboard-requirements.txt
 
-RUN pip3 install --no-cache-dir -r /tmp/rq-dashboard-requirements.txt \
-    && pip3 install --no-cache-dir gunicorn
+# The sibling dashboard lock targets RQ 2.0; keep its other pins and align the
+# observer with the application runtime. Fail explicitly if that input changes.
+RUN python -c "from pathlib import Path; p=Path('/tmp/rq-dashboard-requirements.txt'); s=p.read_text(); assert s.count('rq==2.0.0\\n') == 1; p.write_text(s.replace('rq==2.0.0\\n', 'rq==2.12.0\\ncroniter==6.0.0\\npytz==2022.1\\n'))" \
+    && pip3 install --no-cache-dir -r /tmp/rq-dashboard-requirements.txt \
+    && pip3 install --no-cache-dir gunicorn==23.0.0
 
 EXPOSE 9181
