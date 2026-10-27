@@ -1,3 +1,5 @@
+Scaffolded; contract decisions pending: [RQ client webhook delivery](docs/work-packages/20261027_rq_webhooks/package.md) - reviewed draft and 13 dispositions carried into implementation plan; product scope, durable grants, storage/execution placement and canonical checkpoint remain open. No runtime changes or webhook activation.
+
 Completed on forest: [RQ 2.12.0 upgrade](docs/work-packages/20261027_rq_2_12_upgrade/package.md) — exact 2.12.0 across 17 runtimes; model/API/artifact acceptance, 598 targeted + 13 lifecycle tests, isolated full suite (11,948 passed; 226 skipped), and independent reviews pass. Unrelated working-tree Roads provenance failure retained separately. Production unchanged; native webhooks disabled.
 
 Completed locally: [Public Usersum feature registry](docs/work-packages/20261027_usersum_feature_registry/package.md) — public Jinja catalog of 18 features and 16 configurations; 219 focused tests pass, independent reviews approved. Not deployed.
