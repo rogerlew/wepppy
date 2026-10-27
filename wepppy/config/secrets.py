@@ -13,6 +13,24 @@ import os
 from pathlib import Path
 
 
+class SecretConfigurationError(RuntimeError):
+    """Configuration failure with a public description that excludes file paths."""
+
+    def __init__(self, message: str, setting: str, reason: str) -> None:
+        super().__init__(message)
+        self.setting = setting
+        self.reason = reason
+        self.public_message = (
+            f"Server configuration error: {setting} {reason}. "
+            "The service operator must correct this configuration before retrying."
+        )
+
+    def __reduce__(self):
+        # Process pools transport exceptions through pickle; RuntimeError's
+        # default reducer supplies only message and would lose required metadata.
+        return type(self), (self.args[0], self.setting, self.reason), self.__dict__
+
+
 def get_secret(
     env_name: str,
     *,
@@ -26,14 +44,21 @@ def get_secret(
     """
 
     file_key = file_env_name or f"{env_name}_FILE"
+    value: str | None
     file_path = (os.getenv(file_key) or "").strip()
     if file_path:
         try:
             value = Path(file_path).read_text(encoding="utf-8").strip()
-        except OSError as exc:  # pragma: no cover - exercised via integration/env
-            raise RuntimeError(f"Unable to read {file_key} at '{file_path}': {exc}") from exc
+        except (OSError, UnicodeError) as exc:
+            raise SecretConfigurationError(
+                f"Unable to read {file_key} at '{file_path}': {exc}",
+                setting=file_key, reason="could not be read",
+            ) from exc
         if not value:
-            raise RuntimeError(f"{file_key} at '{file_path}' is empty")
+            raise SecretConfigurationError(
+                f"{file_key} at '{file_path}' is empty",
+                setting=file_key, reason="is empty",
+            )
         return value
 
     value = os.getenv(env_name)
@@ -43,7 +68,10 @@ def get_secret(
             return stripped
 
     if required:
-        raise RuntimeError(f"{env_name} (or {file_key}) must be configured")
+        raise SecretConfigurationError(
+            f"{env_name} (or {file_key}) must be configured",
+            setting=f"{env_name} (or {file_key})", reason="is not configured",
+        )
     return None
 
 

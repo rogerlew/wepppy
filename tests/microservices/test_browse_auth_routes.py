@@ -2417,3 +2417,104 @@ def test_physical_roads_files_remain_browsable_without_current_results(
         entries = {line.removeprefix(" out=") for line in manifest.text.splitlines()
                    if line.startswith(" out=")}
         assert {relative, "alias.txt", "watershed.nodir"} <= entries
+
+@pytest.mark.parametrize('endpoint', ['aria2c.spec', 'download/demo.txt', 'files/', 'browse/'])
+@pytest.mark.parametrize('failure', ['missing', 'empty', 'unreadable', 'unexpected'])
+def test_download_failures_have_safe_correlated_diagnostics(
+    tmp_path, load_secure_browse, monkeypatch, caplog, endpoint, failure,
+):
+    from wepppy.config.secrets import require_secret
+    runid = 'diagnostic-run'
+    root = tmp_path / runid
+    _touch(root / 'demo.txt', 'successful bytes')
+    browse = load_secure_browse({runid: root}, SITE_PREFIX='/weppcloud')
+    monkeypatch.delenv('SECRET_KEY', raising=False)
+    monkeypatch.delenv('SECRET_KEY_FILE', raising=False)
+    private_path = tmp_path / 'private-secret-location'
+    if failure in ('empty', 'unreadable'):
+        monkeypatch.setenv('SECRET_KEY_FILE', str(private_path))
+        if failure == 'empty':
+            private_path.write_text('')
+
+    def fail_decode(*args, **kwargs):
+        if failure == 'unexpected':
+            raise ValueError('private-exception-sentinel')
+        require_secret('SECRET_KEY')
+
+    monkeypatch.setattr(auth_tokens, 'decode_token', fail_decode)
+    headers = {'Authorization': 'Bearer diagnostic-token', 'X-Request-Id': 'diagnostic-reference'}
+    if endpoint == 'browse/':
+        headers['Accept'] = 'text/html'
+    with TestClient(browse.create_app(), raise_server_exceptions=False) as client:
+        response = client.get(f'/weppcloud/runs/{runid}/cfg/{endpoint}', headers=headers)
+    assert response.status_code == 500
+    assert response.headers['x-request-id'] == 'diagnostic-reference'
+    assert 'diagnostic-reference' in response.text
+    assert 'diagnostic-reference' in caplog.text
+    assert str(private_path) not in response.text
+    assert 'diagnostic-token' not in response.text
+    assert 'private-exception-sentinel' not in response.text
+    if failure != 'unexpected':
+        assert 'SECRET_KEY' in response.text
+        assert 'operator' in response.text
+    else:
+        assert 'private-exception-sentinel' in caplog.text
+    if endpoint != 'browse/':
+        assert response.json()['error']['code'] == (
+            'internal_error' if failure == 'unexpected' else 'server_configuration_error')
+
+
+def test_upstream_http_500_detail_stays_in_correlated_log(tmp_path, load_secure_browse, monkeypatch, caplog):
+    from starlette.exceptions import HTTPException
+    browse = load_secure_browse({}, SITE_PREFIX='/weppcloud')
+    def fail_decode(*args, **kwargs):
+        raise HTTPException(500, detail={'error': {'message': 'private-upstream-traceback'}})
+    monkeypatch.setattr(auth_tokens, 'decode_token', fail_decode)
+    with TestClient(browse.create_app()) as client:
+        response = client.get('/weppcloud/runs/example/cfg/aria2c.spec',
+                              headers={'Authorization': 'Bearer test'})
+    assert response.status_code == 500
+    assert 'private-upstream-traceback' not in response.text
+    assert 'private-upstream-traceback' in caplog.text
+    assert response.json()['request_id'] in caplog.text
+
+
+@pytest.mark.parametrize('module_name,helper', [
+    ('browse', '_raise_nodir_http_exception'), ('dtale', '_raise_nodir_http_exception'),
+    ('_download', '_raise_nodir_error'), ('files_api', '_raise_nodir_error'),
+    ('_gdalinfo', '_raise_nodir_http_exception'),
+])
+@pytest.mark.parametrize('status,code', [(500, 'NODIR_INVALID_ARCHIVE'), (503, 'NODIR_LOCKED')])
+def test_runtime_path_5xx_codes_survive_without_private_details(load_secure_browse, module_name, helper, status, code):
+    from starlette.routing import Route
+    from wepppy.runtime_paths.errors import NoDirError
+    browse = load_secure_browse({})
+    prefix = 'wepppy.microservices.' if module_name == '_gdalinfo' else 'wepppy.microservices.browse.'
+    module = importlib.import_module(prefix + module_name)
+    async def fail(request):
+        getattr(module, helper)(NoDirError(status, code, 'private-path-detail'))
+    app = browse.create_app()
+    app.router.routes.append(Route('/error-probe', fail))
+    with TestClient(app) as client:
+        response = client.get('/error-probe')
+    assert response.status_code == status
+    assert response.json()['error']['code'] == code
+    assert response.json()['request_id']
+    assert 'private-path-detail' not in response.text
+
+
+@pytest.mark.parametrize('family', ['culverts', 'batch'])
+@pytest.mark.parametrize('endpoint', ['browse/', 'browse/demo.txt', 'schema/demo.txt', 'download/demo.txt', 'dtale/demo.txt', 'gdalinfo/demo.tif'])
+def test_group_jwt_configuration_error_keeps_recovery_message(load_secure_browse, monkeypatch, family, endpoint):
+    browse = load_secure_browse({}, DTALE_SERVICE_URL='http://unused-dtale')
+    def fail_decode(*args, **kwargs):
+        raise JWTConfigurationError('private-jwt-configuration-detail')
+    monkeypatch.setattr(auth_tokens, 'decode_token', fail_decode)
+    with TestClient(browse.create_app()) as client:
+        response = client.get(f'/weppcloud/{family}/example/{endpoint}',
+                              headers={'Authorization': 'Bearer test'})
+    assert response.status_code == 500
+    assert 'WEPP_AUTH_JWT' in response.text
+    assert 'operator' in response.text
+    assert 'private-jwt-configuration-detail' not in response.text
+    assert response.json()['request_id']

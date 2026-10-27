@@ -6,6 +6,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active: [Download error observability](docs/work-packages/20261027_download_error_observability/package.md) — safe correlated server failures, bootstrap terminal reporting and failure exit propagation; implementation and cross-platform validation complete; broad assessment retains one unrelated Roads provenance blocker. Deployment held.
+
 Completed (local implementation): [Roads WBT flow-direction repair](docs/work-packages/20261026_roads_wbt_flow_direction/package.md) — paired native encoding fix; 35 modeled segments versus 30 on isolated clogging-starch, all five recovered. Native 23 and broad 11,795 passes; independent reviews closed. Historical report staleness disclosed; no deployment.
 
 Completed (released; not deployed): [WEPP 261026 release](docs/work-packages/20261026_wepp_261026_release/package.md) — paired late-return metadata repair, both affected watersheds validated, 534 native and 11,791 WEPPpy passes, reviewed 49-page cumulative report. Defaults unchanged.

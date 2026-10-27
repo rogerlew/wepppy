@@ -109,6 +109,9 @@ from wepppy.microservices.browse.auth import (
     authorize_run_request,
     handle_auth_error,
 )
+from wepppy.microservices.browse.errors import (
+    nodir_server_exception, failure_payload, download_http_exception_handler,
+)
 from wepppy.microservices.browse.files_api import (
     FilesApiDependencies,
     accepts_json as _accepts_json,
@@ -292,6 +295,8 @@ def _allowlisted_raw_nodir_path(rel_path: str) -> str | None:
 
 
 def _raise_nodir_http_exception(err: NoDirError) -> None:
+    if err.http_status >= 500:
+        raise nodir_server_exception(err) from err
     raise HTTPException(
         status_code=err.http_status,
         detail=_build_error_payload(err.message, code=err.code, details=err.message),
@@ -845,6 +850,8 @@ def _path_not_found_response(runid, subpath, wd, request, config):
 
 
 async def browse_http_exception_handler(request: StarletteRequest, exc: HTTPException):
+    if exc.status_code >= 500:
+        return await download_http_exception_handler(request, exc)
     detail = exc.detail
     if isinstance(detail, (dict, list)):
         response = JSONResponse(detail, status_code=exc.status_code)
@@ -903,6 +910,7 @@ def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
                 _logger.warning('Unable to append to run exception log for %s', runid, exc_info=True)
 
 async def browse_exception_handler(request: StarletteRequest, exc: Exception):
+    payload = failure_payload(request, exc)
     stacktrace_text: str | None = None
     stacktrace_display: str | None = None
     if BROWSE_DEBUG_ERRORS or BROWSE_WRITE_RUN_EXCEPTIONS_LOG:
@@ -915,24 +923,25 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
     diff_runid = request.query_params.get('diff', '')
     subpath = request.path_params.get('subpath') or ''
 
-    _logger.exception('Unhandled exception for %s', request.url.path)
     if stacktrace_text:
         _log_exception_details(stacktrace_text, runid)
 
-    if _is_files_request(request):
+    if (_is_files_request(request) or request.url.path.endswith('/aria2c.spec')
+            or '/download/' in request.url.path
+            or 'application/json' in request.headers.get('accept', '')):
+        if BROWSE_DEBUG_ERRORS and stacktrace_display:
+            payload['error']['details'] = stacktrace_display
         return JSONResponse(
-            _build_error_payload(
-                'Internal server error',
-                code='internal_error',
-                details=stacktrace_display if BROWSE_DEBUG_ERRORS else None,
-            ),
+            payload,
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            headers={"X-Request-Id": payload["request_id"]},
         )
 
     if BROWSE_DEBUG_ERRORS:
         message = _format_exception_message(exc)
     else:
-        message = "Internal server error"
+        message = payload["error"]["message"]
+    message += f' Request ID: {payload["request_id"]}'
     escaped_message = html_escape(message)
 
     if BROWSE_DEBUG_ERRORS and stacktrace_display:
@@ -987,7 +996,8 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
         page_title='Server Error',
     )
 
-    return HTMLResponse(page_html, status_code=500)
+    return HTMLResponse(page_html, status_code=500,
+                        headers={"X-Request-Id": payload["request_id"]})
 
 
 async def _browse_tree_helper(
@@ -1314,7 +1324,7 @@ async def browse_culvert_root(request: StarletteRequest):
             allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
     batch_root = _resolve_culvert_batch_root(batch_uuid)
     return await _handle_browse_request(
         request,
@@ -1337,7 +1347,7 @@ async def browse_culvert_subpath(request: StarletteRequest):
             allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
     batch_root = _resolve_culvert_batch_root(batch_uuid)
     return await _handle_browse_request(
         request,
@@ -1452,7 +1462,7 @@ async def schema_culvert_subpath(request: StarletteRequest):
             allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
     batch_root = _resolve_culvert_batch_root(batch_uuid)
     return await _handle_schema_request(
         request,

@@ -37,6 +37,29 @@ not-found response; read/parse/I/O errors remain honest errors, never silent
 empty success or false absence. Listings are observations, not transactional
 snapshots: producers can change a file between listing and reading.
 
+## Failure observability
+
+Browse, manifests and download services must return meaningful failure responses.
+Known required-secret failures identify the configuration variable and whether it
+is missing, unreadable or empty, with an operator recovery instruction. Do not
+return secret values, secret file paths or arbitrary exception text. Unexpected
+failures include a safe explanation and a request ID linked to full server logs.
+Machine 500 responses use `error.message`, `error.code`, `error.details`, and
+top-level `request_id`; the same ID appears in `X-Request-Id`. Browser error pages
+also display the safe explanation and ID. Existing non-500 access decisions stay
+unchanged. Once streaming headers have been sent, a failed stream cannot become
+a new JSON response: clients must treat interruption as failure.
+
+Bootstrap clients must display the returned explanation and reference, stop on
+failed manifest retrieval, never consume a failed/stale manifest, and propagate
+nonzero transfer exits. This applies to Windows and shell wrappers and the legacy
+Python archive client. A bare status or apparent empty success is insufficient.
+Bound diagnostic bodies; do not print authorization headers or tokens.
+
+Rationale (2026-10-27): a configuration fix alone left the server-to-user failure
+path unobservable and prolonged diagnosis. Safe classification plus correlated
+logs preserves diagnostics without exposing private exception contents.
+
 ## Model consumers and previews
 
 Roads and other model-specific reports, computations, query-backed scientific

@@ -14,6 +14,7 @@ from typing import Awaitable, Callable
 from urllib.parse import quote
 
 from starlette.exceptions import HTTPException
+from wepppy.microservices.browse.errors import nodir_server_exception
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import JSONResponse
 
@@ -130,6 +131,8 @@ def _raise_files_error(
 
 
 def _raise_nodir_error(err: NoDirError) -> None:
+    if err.http_status >= 500:
+        raise nodir_server_exception(err) from err
     _raise_files_error(
         err.http_status,
         err.message,
@@ -902,9 +905,15 @@ async def _handle_files_request(
         )
     except BrowseAuthError as exc:
         if exc.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR:
+            if exc.public_safe:
+                from wepppy.microservices.browse.errors import PublicHTTPException
+                raise PublicHTTPException(
+                    status_code=exc.status_code,
+                    detail=build_error_payload(exc.message, code=exc.code),
+                ) from exc
             _raise_files_error(
                 HTTPStatus.INTERNAL_SERVER_ERROR,
-                "Internal server error.",
+                exc.message,
                 code="internal_error",
                 details=exc.message,
             )

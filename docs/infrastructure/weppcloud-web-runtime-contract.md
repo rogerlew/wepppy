@@ -188,3 +188,22 @@ belong in the environment manifests, not in the secret object.
   common image entrypoint
 - `docker/docker-compose.canary-smoke.yml` — isolated compatibility evidence
 - `docs/infrastructure/secrets.md` — full multi-service secret catalog
+
+## Download failure diagnostics
+
+Browse manifests, file requests and dedicated archive downloads return safe
+configuration diagnostics and an `X-Request-Id`/`request_id` for server failures.
+The bootstrap client prints that message/reference and exits nonzero. Search
+browse/download service logs for the request ID to retrieve the full traceback.
+A missing/unreadable/empty secret message identifies the setting to repair;
+never request the user's token or publish secret-file contents. Correct the
+canonical service configuration and verify the ordinary-user download workflow
+before claiming recovery. Do not use a root-only token as that acceptance test.
+
+Health signal: a failed request reaches the user's terminal with its safe cause
+and log reference; a successful manifest and payload preserve bytes. Danger
+signals: bare 500, private details in responses, zero exit after failure, or
+changed valid access. Any recurrence reopens the error-observability assessment.
+No production failure injection or unattended monitoring is required; retain the
+normal logs and use a disposable local failure fixture for regression checks.
+See [failure observability](../schemas/browse-filesystem-contract.md#failure-observability).

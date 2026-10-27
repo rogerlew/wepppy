@@ -14,6 +14,7 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import RedirectResponse
 
 from wepppy.config.secrets import get_secret
+from wepppy.microservices.browse.errors import PublicHTTPException, nodir_server_exception
 from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     USER_SERVICE_TOKEN_CLASSES,
@@ -75,6 +76,8 @@ def _nodir_error_payload(err: NoDirError) -> dict:
 
 
 def _raise_nodir_http_exception(err: NoDirError) -> None:
+    if err.http_status >= 500:
+        raise nodir_server_exception(err) from err
     raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
 
 
@@ -119,7 +122,7 @@ def build_handlers(
         group_public_runid: str | None = None,
     ):
         if not _DTALE_SERVICE_URL:
-            raise HTTPException(
+            raise PublicHTTPException(
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 detail='D-Tale integration is not configured.',
             )
@@ -156,7 +159,7 @@ def build_handlers(
                     public_runid=group_public_runid,
                 )
             except BrowseAuthError as exc:
-                raise HTTPException(status_code=exc.status_code, detail=exc.message)
+                raise exc.to_http_exception() from exc
 
         allow_recorder = auth_context.is_root
         raw_violation = validate_raw_subpath(rel_path)
@@ -229,7 +232,7 @@ def build_handlers(
                 try:
                     dtale_rel_path = materialized_path.relative_to(Path(wd)).as_posix()
                 except ValueError as exc:
-                    raise HTTPException(
+                    raise PublicHTTPException(
                         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                         detail='Failed to prepare materialized file path.',
                     ) from exc

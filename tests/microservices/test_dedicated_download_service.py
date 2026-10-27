@@ -298,3 +298,28 @@ def test_public_contrast_bundle_returns_original_archive_bytes(tmp_path, load_do
     with zipfile.ZipFile(BytesIO(response.content)) as archive:
         assert archive.read("omni/contrasts.out.parquet") == b"retained contrast result"
         assert archive.read("path_ce/results.json") == b'{"total_cost":9000}'
+
+@pytest.mark.parametrize('known', [True, False])
+def test_archive_failure_returns_safe_diagnostic(tmp_path, load_download, monkeypatch, caplog, known):
+    from wepppy.config.secrets import require_secret
+    runid = 'archive-error'
+    root = tmp_path / runid
+    _make_public(root)
+    download_mod = load_download({runid: root})
+    monkeypatch.delenv('SECRET_KEY', raising=False)
+    monkeypatch.delenv('SECRET_KEY_FILE', raising=False)
+
+    def failure(*args, **kwargs):
+        if known:
+            require_secret('SECRET_KEY')
+        raise ValueError('private-archive-error')
+
+    monkeypatch.setattr(download_mod, 'authorize_run_request', failure)
+    with TestClient(download_mod.create_app(), raise_server_exceptions=False) as client:
+        response = client.get(f'/weppcloud/runs/{runid}/cfg/download/archives/result.zip')
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload['request_id'] == response.headers['x-request-id']
+    assert payload['request_id'] in caplog.text
+    assert 'private-archive-error' not in response.text
+    assert payload['error']['code'] == ('server_configuration_error' if known else 'internal_error')

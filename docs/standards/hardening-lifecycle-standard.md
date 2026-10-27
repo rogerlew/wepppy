@@ -136,6 +136,15 @@ remaining unknowns, and name the executable check that detects recurrence.
 Implemented, locally validated, deployed, and incident resolved remain separate
 claims. A deployment hold does not excuse missing local assessment or patching.
 
+For HTTP/client incidents, validate the error through the actual response and
+client presentation boundary, including the exit/status seen by the user. A
+server log alone, a bare status code or a client that continues into apparent
+success is insufficient. Known failures need safe actionable descriptions;
+unexpected failures need a reference linking the response to full server logs.
+Keep credentials and private exception contents out of public diagnostics. Test
+both failed metadata/manifest retrieval and failed payload transfer when the
+workflow has those stages. Reuse the real transfer tool's output format in tests.
+
 Rationale (operator decision, 2026-10-27): the March worker secret repair missed
 browse's identical lazy Flask dependency, allowing an ordinary-user download
 failure to recur. Prefer a narrow implementation backed by a comprehensive

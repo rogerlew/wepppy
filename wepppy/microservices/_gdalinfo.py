@@ -29,6 +29,7 @@ from wepppy.microservices.browse.security import (
     validate_resolved_target,
 )
 from wepppy.runtime_paths.errors import NoDirError
+from wepppy.microservices.browse.errors import nodir_server_exception
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.runtime_paths.fs import stat as nodir_stat
 from wepppy.runtime_paths.materialize import materialize_file
@@ -48,6 +49,8 @@ def _nodir_error_payload(err: NoDirError) -> dict:
 
 
 def _raise_nodir_http_exception(err: NoDirError) -> None:
+    if err.http_status >= 500:
+        raise nodir_server_exception(err) from err
     raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
 
 
@@ -170,7 +173,7 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
             allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
 
     allow_recorder = auth_context.is_root
     raw_violation = validate_raw_subpath(subpath)
@@ -217,7 +220,7 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
             public_runid=base_runid,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
 
     allow_recorder = auth_context.is_root
     raw_violation = validate_raw_subpath(subpath)

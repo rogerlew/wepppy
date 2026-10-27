@@ -6,7 +6,6 @@ import asyncio
 import logging
 import os
 import time
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncIterator, BinaryIO
@@ -16,6 +15,11 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response, StreamingResponse
 from starlette.routing import Route
+from wepppy.microservices.browse.errors import (
+    request_id as _request_id,
+    download_exception_handler,
+    download_http_exception_handler,
+)
 
 from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
@@ -63,14 +67,6 @@ class RangeNotSatisfiable(ValueError):
 
 def _health(_: Request) -> PlainTextResponse:
     return PlainTextResponse("OK")
-
-
-def _request_id(request: Request) -> str:
-    return (
-        request.headers.get("X-Request-Id")
-        or request.headers.get("X-Correlation-Id")
-        or uuid.uuid4().hex
-    )
 
 
 def _client_host(request: Request) -> str:
@@ -444,6 +440,8 @@ async def archive_download(request: Request) -> Response:
 
 def create_app() -> Starlette:
     return Starlette(
+        exception_handlers={HTTPException: download_http_exception_handler,
+                            Exception: download_exception_handler},
         routes=[
             Route("/health", _health, methods=["GET"]),
             Route(

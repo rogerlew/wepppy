@@ -54,3 +54,27 @@ def test_require_secret_raises_when_missing(monkeypatch: pytest.MonkeyPatch) -> 
     with pytest.raises(RuntimeError, match=r"UNIT_TEST_SECRET .* must be configured"):
         require_secret("UNIT_TEST_SECRET")
 
+
+def test_malformed_secret_encoding_has_safe_configuration_message(monkeypatch, tmp_path):
+    from wepppy.config.secrets import SecretConfigurationError
+    secret = tmp_path / 'private-location'
+    secret.write_bytes(b'\xff')
+    monkeypatch.setenv('UNIT_TEST_SECRET_FILE', str(secret))
+    with pytest.raises(SecretConfigurationError) as failure:
+        get_secret('UNIT_TEST_SECRET')
+    assert 'UNIT_TEST_SECRET_FILE could not be read' in failure.value.public_message
+    assert str(secret) not in failure.value.public_message
+
+
+def test_secret_error_survives_process_exception_serialization(monkeypatch, tmp_path):
+    import pickle
+    from wepppy.config.secrets import SecretConfigurationError
+    private_path = tmp_path / 'private-secret-location'
+    monkeypatch.setenv('UNIT_TEST_SECRET_FILE', str(private_path))
+    with pytest.raises(SecretConfigurationError) as failure:
+        get_secret('UNIT_TEST_SECRET')
+    restored = pickle.loads(pickle.dumps(failure.value))
+    assert type(restored) is SecretConfigurationError
+    assert restored.args == failure.value.args
+    assert restored.public_message == failure.value.public_message
+    assert str(private_path) not in restored.public_message

@@ -22,6 +22,7 @@ from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError, JWTDecodeError
 from wepppy.weppcloud.utils.browse_cookie import browse_cookie_name_candidates
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.microservices.browse.errors import PublicHTTPException
 
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
@@ -66,11 +67,17 @@ class BrowseAuthError(Exception):
         *,
         status_code: int = 401,
         code: str = "unauthorized",
+        public_safe: bool = False,
     ) -> None:
         super().__init__(message)
         self.message = message
         self.status_code = status_code
         self.code = code
+        self.public_safe = public_safe
+
+    def to_http_exception(self) -> HTTPException:
+        exception_type = PublicHTTPException if self.public_safe else HTTPException
+        return exception_type(status_code=self.status_code, detail=self.message)
 
 
 
@@ -217,9 +224,11 @@ def _decode_token(token: str) -> Mapping[str, Any]:
         claims = auth_tokens.decode_token(token, audience=audience)
     except JWTConfigurationError as exc:
         raise BrowseAuthError(
-            f"JWT configuration error: {exc}",
+            "JWT configuration error: server token verification is not configured correctly. "
+            "The service operator must check WEPP_AUTH_JWT configuration before retrying.",
             status_code=500,
             code="internal_error",
+            public_safe=True,
         ) from exc
     except JWTDecodeError as exc:
         raise BrowseAuthError(f"Invalid token: {exc}") from exc
@@ -554,7 +563,7 @@ def handle_auth_error(
                 status_code=302,
             )
 
-    raise HTTPException(status_code=error.status_code, detail=error.message)
+    raise error.to_http_exception() from error
 
 
 __all__ = [

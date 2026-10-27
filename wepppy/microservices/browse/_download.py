@@ -21,6 +21,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.config.secrets import get_secret
+from wepppy.microservices.browse.errors import PublicHTTPException, nodir_server_exception
 from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     USER_SERVICE_TOKEN_CLASSES,
@@ -198,7 +199,7 @@ def _issue_internal_public_export_token(runid: str) -> str:
     )
     token = token_payload.get("token")
     if not isinstance(token, str) or not token:
-        raise HTTPException(
+        raise PublicHTTPException(
             status_code=500,
             detail="ERMiT export token unavailable.",
         )
@@ -237,7 +238,7 @@ async def _proxy_legacy_ermit_export(request: Request, *, runid: str, config: st
                 headers={"Authorization": f"Bearer {token}"},
             )
     except httpx.HTTPError as exc:
-        raise HTTPException(
+        raise PublicHTTPException(
             status_code=502,
             detail="ERMiT export service unavailable.",
         ) from exc
@@ -260,6 +261,8 @@ def _nodir_error_payload(err: NoDirError) -> dict:
 
 
 def _raise_nodir_error(err: NoDirError) -> None:
+    if err.http_status >= 500:
+        raise nodir_server_exception(err) from err
     raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
 
 
@@ -470,7 +473,7 @@ async def download_culvert_with_subpath(request: Request) -> Response:
             required_service_groups=("culverts",),
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
 
     allow_recorder = auth_context.is_root
     violation = validate_raw_subpath(subpath)
@@ -508,7 +511,7 @@ async def download_batch_with_subpath(request: Request) -> Response:
             public_runid=base_runid,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        raise exc.to_http_exception() from exc
 
     allow_recorder = auth_context.is_root
     violation = validate_raw_subpath(subpath)
