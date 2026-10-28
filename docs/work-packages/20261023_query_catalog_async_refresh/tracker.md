@@ -2,7 +2,7 @@
 
 ## Status
 
-2026-10-28: operator authorized moving query-catalog refresh/inventory to default workers because batch backlog can last days. Contract checkpoint/reviews in progress; implementation and production migration pending. October 27 deployment/pilot status below is historical for batch routing.
+2026-10-28: operator authorized moving query-catalog refresh/inventory to default workers because batch backlog can last days. Contract checkpoint `0e6302905` passed independent correctness/security reviews and was committed before runtime edits. Implementation, 129 focused real-Redis tests and local forking-worker job-tree/artifact readback pass. Broad Python sweep stopped at preexisting Roads provenance mismatch after 6,810 passed/61 skipped; not a full-suite pass. Local implementation complete; production migration pending. See [validation](artifacts/20261028_default_queue_validation.md). October 27 deployment/pilot status below is historical for batch routing.
 
 2026-10-27 UTC: **Authorized bounded execution complete; general enablement HOLD.**
 Full canonical deployment of `0da9c9071` completed on wepp1–3. The actual shared

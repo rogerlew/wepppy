@@ -47,6 +47,60 @@ def work(queue, worker):
     worker.set_state('idle')
 
 
+def test_legacy_batch_pilot_is_readable_but_cannot_resume_or_admit(catalog_queue, monkeypatch):
+    import hashlib
+
+    root, queue, worker = catalog_queue
+    identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
+    data = pilot.read(queue.connection, identifier)
+    data['manifest']['queue'] = 'batch'
+    data['manifest']['configuration'].pop('queue')
+    data['manifest_sha256'] = hashlib.sha256(json.dumps(data['manifest'], sort_keys=True).encode()).hexdigest()
+    retained = json.dumps(data).encode()
+    queue.connection.set(pilot.key(identifier), retained)
+    assert pilot.read(queue.connection, identifier)['manifest']['queue'] == 'batch'
+    with pytest.raises(RuntimeError, match='configuration changed'):
+        pilot.resume_pilot(queue.connection, identifier, token)
+    with pytest.raises(RuntimeError, match='configuration changed'):
+        pilot.authorize_receipt(queue.connection, identifier, str(paths[0]), token)
+    assert queue.connection.get(pilot.key(identifier)) == retained
+
+
+@pytest.mark.parametrize('uncertain', [False, True])
+def test_legacy_ledger_keeps_permits_across_queue_change(catalog_queue, uncertain):
+    from rq import Queue
+
+    root, queue, _ = catalog_queue
+    for i in range(7):
+        path = project(root, str(i))
+        core.record_catalog_refresh(path)
+        assert tasks.enqueue_catalog_refresh(path, queue=queue)['state'] == 'queued'
+    ledger = json.loads(queue.connection.get(guard.LEDGER_KEY))
+    batch = Queue('batch', connection=queue.connection)
+    for jid, binding in ledger['jobs'].items():
+        binding['configuration'].pop('queue')
+        queue.connection.hset(Job.key_for(jid), 'origin', 'batch')
+        queue.connection.lrem(queue.key, 0, jid)
+        queue.connection.rpush(batch.key, jid)
+    if uncertain:
+        jid = next(iter(ledger['jobs']))
+        ledger['jobs'][jid]['claimed'] = True
+        queue.connection.hset(Job.key_for(jid), 'status', 'canceled')
+    retained = json.dumps(ledger).encode()
+    queue.connection.set(guard.LEDGER_KEY, retained)
+    try:
+        guard.initialize_admission(queue.connection, queue)
+        path = project(root, 'new')
+        core.record_catalog_refresh(path)
+        result = tasks.enqueue_catalog_refresh(path, queue=queue)
+        expected = 'query_catalog_accounting_uncertain' if uncertain else 'query_catalog_capacity_pending'
+        assert result['error_code'] == expected
+        assert queue.connection.get(guard.LEDGER_KEY) == retained
+        assert queue.count == 0
+    finally:
+        batch.delete(delete_jobs=True)
+
+
 def test_disabled_pilot_real_workers_exact_inventory_and_catalogs(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
     identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
@@ -209,7 +263,7 @@ def test_duplicate_known_queue_entries_cannot_mask_ordinary_tail(catalog_queue, 
     queue.connection.lrem(queue.key, 0, admitted['job_id'])
 
 
-def test_pilot_requires_all_eight_real_registered_consumers(catalog_queue, monkeypatch):
+def test_pilot_requires_all_twelve_real_registered_consumers(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
     identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
     worker._catalog_test_companions[0].register_death()

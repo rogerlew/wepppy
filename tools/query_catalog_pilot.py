@@ -256,7 +256,7 @@ class Runtime:
         from wepppy.query_engine import catalog_refresh
         from wepppy.rq import query_catalog_rq, _query_catalog_pilot
         self.connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-        self.queue = Queue('batch', connection=self.connection)
+        self.queue = Queue('default', connection=self.connection)
         self.cr = catalog_refresh
         self.cq = query_catalog_rq
         self.pilot = _query_catalog_pilot
@@ -267,8 +267,8 @@ class Runtime:
     def preflight(self, *, require_all: bool = True) -> dict[str, Any]:
         import socket
         status = self.cq.consumer_status(self.queue)
-        if require_all and (status['compatible'] != 8 or status['incompatible'] or status['suspended']):
-            raise RuntimeError('Pilot requires the eight existing compatible unsuspended consumers')
+        if require_all and (status['compatible'] != self.pilot.EXPECTED_CONSUMERS or status['incompatible'] or status['suspended']):
+            raise RuntimeError('Pilot requires the twelve existing compatible unsuspended default consumers')
         return dict(host=socket.gethostname(), uid=os.getuid(), gid=os.getgid(), groups=os.getgroups(),
                     consumers=status, configuration=self.cq.catalog_worker_configuration(),
                     source_sha256={name: digest(Path(module.__file__)) for name, module in
@@ -279,7 +279,7 @@ class Runtime:
         from rq.registry import StartedJobRegistry
         decode = lambda value: value.decode() if isinstance(value, bytes) else str(value)
         waiting = [decode(value) for value in self.connection.lrange(self.queue.key, 0, -1)]
-        started = StartedJobRegistry('batch', connection=self.connection).get_job_ids(cleanup=False)
+        started = StartedJobRegistry(self.queue.name, connection=self.connection).get_job_ids(cleanup=False)
         admitted = status['global_job_ids']
         self.ordinary_seen.update(jid for jid in waiting + started if jid not in admitted)
         jobs = self.raw_jobs({'jobs': {jid: {} for jid in sorted(self.ordinary_seen)}})
@@ -330,6 +330,7 @@ class Observer:
             raise
 
     def _sample(self) -> dict[str, Any]:
+        from wepppy.rq._query_catalog_pilot import EXPECTED_CONSUMERS
         status = self.runtime.observe(self.pilot_id, self.token)
         if status['global_uncertain'] or status['global_outstanding'] is None or status['global_outstanding'] > 7:
             self.runtime.pause(self.pilot_id, 'accounting_failure')
@@ -337,7 +338,7 @@ class Observer:
             self.runtime.pause(self.pilot_id, 'accounting_failure')
         participants = self.runtime.preflight(require_all=False)
         live = participants['consumers']
-        if live['compatible'] != 8 or live['incompatible'] or live['suspended']:
+        if live['compatible'] != EXPECTED_CONSUMERS or live['incompatible'] or live['suspended']:
             self.runtime.pause(self.pilot_id, 'configuration_mismatch')
         ordinary = self.runtime.raw_ordinary(status)
         if ordinary.get('unavailable_timestamps'):

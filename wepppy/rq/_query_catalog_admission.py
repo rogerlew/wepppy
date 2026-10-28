@@ -1,4 +1,4 @@
-"""One Redis admission ledger for every catalog job on shared batch."""
+"""One Redis admission ledger for every catalog job on shared default."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -11,6 +11,7 @@ from rq import Queue, worker_registration
 from rq.job import Job
 from rq.suspension import WORKERS_SUSPENDED
 
+# Retain the historical key across queue migration; never reset retained permits.
 LEDGER_KEY = 'query-catalog:batch-admission:v1'
 PAUSE_KEY = LEDGER_KEY + ':paused'
 TERMINAL = frozenset({'finished', 'failed', 'stopped', 'canceled'})
@@ -55,18 +56,22 @@ def execution_outstanding(binding: dict[str, Any], status: str | None) -> bool:
 
 def initialize_admission(connection: Any, queue: Queue) -> None:
     """Explicit operator bootstrap; never reset an existing or uncertain ledger."""
-    if queue.name != 'batch':
-        raise ValueError('Catalog admission requires shared batch')
+    if queue.name != 'default':
+        raise ValueError('Catalog admission requires shared default')
     with connection.pipeline() as pipe:
-        keys = [queue.key] + ['rq:' + name + ':batch' for name in ('wip', 'deferred', 'scheduled')]
+        queue_keys = [queue.key, Queue('batch', connection=connection).key]
+        registry_keys = ['rq:' + name + ':' + origin
+                         for origin in ('default', 'batch')
+                         for name in ('wip', 'deferred', 'scheduled')]
+        keys = queue_keys + registry_keys
         pipe.watch(LEDGER_KEY, *keys)
         if pipe.exists(LEDGER_KEY):
             _ledger(pipe)
             return
         if next(connection.scan_iter('query-catalog:pilot:*'), None) is not None:
             raise AdmissionDenied('Lost ledger requires explicit operator recovery')
-        identifiers = list(pipe.lrange(queue.key, 0, -1))
-        for registry in keys[1:]:
+        identifiers = [jid for queue_key in queue_keys for jid in pipe.lrange(queue_key, 0, -1)]
+        for registry in registry_keys:
             identifiers.extend(pipe.zrange(registry, 0, -1))
         if any((_text(jid) or '').startswith('query_catalog_refresh_') for jid in identifiers):
             raise AdmissionDenied('Existing maintenance requires explicit ledger recovery')
@@ -109,7 +114,7 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
     """Read all policy inputs under WATCH; caller enqueues and commits ticket."""
     from . import _query_catalog_pilot as pilot
     from .query_catalog_rq import WORKER_FIELD
-    if queue.name != 'batch' or kind not in {'refresh', 'inventory'}:
+    if queue.name != 'default' or kind not in {'refresh', 'inventory'}:
         raise AdmissionDenied('query_catalog_queue_invalid')
     pipe.watch(LEDGER_KEY, PAUSE_KEY, queue.key, WORKERS_SUSPENDED)
     try:
@@ -137,13 +142,13 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
         _deny(queue, pilot_id, 'query_catalog_ordinary_backlog')
     if any(_text(pipe.hget(Job.key_for(jid), 'status')) != 'queued' for jid in queued):
         _deny(queue, pilot_id, 'accounting_failure')
-    pipe.watch('rq:workers', 'rq:workers:batch')
+    pipe.watch('rq:workers', 'rq:workers:default')
     registrations = list(worker_registration.get_keys(queue=queue))
     compatible = 0
     for registration in registrations:
         pipe.watch(registration)
         queues, advertised, death = pipe.hmget(registration, 'queues', WORKER_FIELD, 'death')
-        if death is not None or pipe.ttl(registration) <= 0 or 'batch' not in (_text(queues) or '').split(','):
+        if death is not None or pipe.ttl(registration) <= 0 or 'default' not in (_text(queues) or '').split(','):
             continue
         try:
             observed = json.loads(advertised) if advertised else None
@@ -152,7 +157,7 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
         if observed != configuration:
             _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
         compatible += 1
-    if pilot_id and compatible != 8:
+    if pilot_id and compatible != pilot.EXPECTED_CONSUMERS:
         _deny(queue, pilot_id, 'configuration_mismatch')
     if not compatible:
         _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
@@ -204,7 +209,7 @@ def _authorize_job_once(connection: Any, job: Job, *, kind: str, pilot_id: str |
         if (not binding or binding['kind'] != kind or binding.get('pilot_id') != pilot_id or
                 binding['configuration'] != catalog_worker_configuration() or binding.get('claimed')):
             raise ValueError('Catalog job has no unused admitted execution authority')
-        if job.origin != 'batch' or _text(pipe.hget(Job.key_for(job.id), 'status')) != 'started':
+        if job.origin != 'default' or _text(pipe.hget(Job.key_for(job.id), 'status')) != 'started':
             raise ValueError('Catalog job is not started')
         if kind == 'refresh' and (binding['scope']['scope_id'] != scope_id or binding['scope']['wd'] != str(wd)):
             raise ValueError('Catalog scope argument changed')

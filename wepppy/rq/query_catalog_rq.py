@@ -1,4 +1,4 @@
-"""Coalesced query-catalog maintenance on the existing batch queue.
+"""Coalesced query-catalog maintenance on the existing default queue.
 
 Filesystem receipts are authoritative pending intent. Redis reservations and the
 resumable inventory cursor are recoverable accelerators, never acknowledgment.
@@ -68,7 +68,7 @@ class QueryCatalogSettings:
 def catalog_worker_configuration() -> dict[str, Any]:
     from wepppy.query_engine.catalog_refresh import catalog_worker_configuration as configuration
     return {**configuration(), "enabled": QueryCatalogSettings.from_environ().enabled,
-            "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1}
+            "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1, "queue": "default"}
 
 
 def _configuration_id() -> str:
@@ -95,7 +95,7 @@ def _suspension_key(scope_id: str) -> str:
 
 
 def _default_queue() -> Queue:
-    return Queue("batch", connection=redis.Redis(**redis_connection_kwargs(RedisDB.RQ)))
+    return Queue("default", connection=redis.Redis(**redis_connection_kwargs(RedisDB.RQ)))
 
 
 def consumer_status(queue: Queue) -> dict[str, Any]:

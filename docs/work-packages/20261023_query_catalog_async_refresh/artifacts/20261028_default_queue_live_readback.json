@@ -1,0 +1,34 @@
+{
+  "worker_class": "WepppyRqWorker",
+  "queue": "default",
+  "refresh": {
+    "job_id": "query_catalog_refresh_5e67526f-1265-413e-86eb-ccb44ff5ddc8",
+    "status": "finished",
+    "description": "Query catalog maintenance",
+    "started_at": "2026-10-28 17:59:42.977673+00:00",
+    "ended_at": "2026-10-28 17:59:43.023143+00:00",
+    "runid": null,
+    "result": null,
+    "exc_info": null,
+    "auth_actor": null,
+    "children": {}
+  },
+  "inventory": {
+    "job_id": "query_catalog_refresh_fe351ccb-6aea-40ae-a419-d3d6d1218e3e",
+    "status": "finished",
+    "description": "Query catalog maintenance",
+    "started_at": "2026-10-28 17:59:43.082310+00:00",
+    "ended_at": "2026-10-28 17:59:43.092433+00:00",
+    "runid": null,
+    "result": null,
+    "exc_info": null,
+    "auth_actor": null,
+    "children": {}
+  },
+  "pending_receipts": 0,
+  "batch_backlog_unchanged": true,
+  "catalog_files": [
+    "ron.nodb",
+    "values.csv"
+  ]
+}

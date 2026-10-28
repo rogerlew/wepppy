@@ -10,7 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
-- [ ] October 28 default-queue amendment: contract reviews/checkpoint, runtime wiring, real-Redis/artifact/job-tree regressions and documentation. General enablement remains excluded.
+- [x] October 28 default-queue contract checkpoint `0e6302905`, independent reviews, runtime wiring and 129 focused real-Redis/artifact regressions; local normal-worker live job-tree readback passed.
+- [x] October 28 broad sweep attempted: 6,810 passed/61 skipped, stopped by preexisting Roads provenance mismatch; explicitly not a full-suite pass. Final bounded implementation handoff complete; production migration/general enablement remain excluded.
 
 - [x] M0–M3: reviewed contracts, native/publication/queue/lifecycle/reader implementation and local regression gates complete.
 - [x] M4–M5: producer migrations and fresh October 26 full scientific/report acceptance complete; earlier October 23 failure retained as historical evidence.
@@ -124,6 +125,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+2026-10-28: default routing is implemented and focused/local normal-worker checks pass. Admission history survives migration and legacy authority is rejected. [Validation](../../artifacts/20261028_default_queue_validation.md) retains evidence and review dispositions; full pytest stopped at preexisting Roads provenance mismatch after 6,810 passed/61 skipped. No full-suite pass is claimed; production unchanged.
 
 The authorized implementation, full deployment and actual bounded pilot are
 complete. See [production acceptance](../../artifacts/20261027_shared_pilot_acceptance.md)

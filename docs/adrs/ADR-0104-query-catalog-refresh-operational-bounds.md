@@ -181,7 +181,8 @@ a mutable rebuild is equivalent. General build/deploy defaults remain unchanged.
 
 Decision owner: requesting operator, 2026-10-28 execution conversation:
 “we need to make the catalog update jobs run on default workers. the batch
-workers can get backed up for days”. Implementation conformance pending.
+workers can get backed up for days”. Local implementation validated; production
+cutover remains pending.
 
 Move refresh, discovery, retry and pilot execution to existing default workers.
 Keep the cap at seven and all numerical scheduling bounds unchanged. The pilot

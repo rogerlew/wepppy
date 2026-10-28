@@ -308,7 +308,7 @@ resurrect terminal/retired job IDs or reset failure evidence.
 
 ## October 28 default-worker routing amendment
 
-Status: operator-approved intent; implementation and production cutover pending.
+Status: implemented with local default-worker validation; production cutover pending.
 The operator requires catalog update jobs on default workers because batch work
 can remain queued for days. Both refresh and inventory jobs MUST use the existing
 `default` queue, including retries and the owned-scope pilot. Batch backlog and

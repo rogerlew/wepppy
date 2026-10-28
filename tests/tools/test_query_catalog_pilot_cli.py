@@ -153,7 +153,7 @@ class ControllerRuntime:
         self.cq = SimpleNamespace(reconcile_query_catalogs=self.reconcile, enqueue_catalog_refresh=self.enqueue)
 
     def preflight(self, **kwargs):
-        return {'consumers': {'compatible': 8, 'incompatible': [], 'suspended': False}}
+        return {'consumers': {'compatible': 12, 'incompatible': [], 'suspended': False}}
 
     def status(self, _):
         return self.copy(self.data)
@@ -284,7 +284,7 @@ def test_observer_missing_global_ledger_pauses_and_keeps_observing(tmp_path):
     pauses = []
     state = {'global_outstanding': None, 'global_uncertain': True, 'counters': {'refresh': 0, 'inventory': 0}, 'jobs': {}}
     runtime = SimpleNamespace(observe=lambda *args: state, pause=lambda *args: pauses.append(args),
-                              preflight=lambda **kwargs: {'consumers': {'compatible': 8, 'incompatible': [], 'suspended': False}},
+                              preflight=lambda **kwargs: {'consumers': {'compatible': 12, 'incompatible': [], 'suspended': False}},
                               raw_jobs=lambda *_: {}, raw_ordinary=lambda *_: {})
     observer = pilot.Observer(runtime, PILOT_ID, 'token', tmp_path)
     assert observer.once() is state
@@ -321,7 +321,7 @@ def test_unknown_prefix_jobs_remain_ordinary_for_raw_wait_evidence(monkeypatch):
     connection = SimpleNamespace(lrange=lambda *args: [known.encode(), unknown.encode()], zrange=lambda *args: [])
     monkeypatch.setattr(rq.registry, 'StartedJobRegistry', lambda *args, **kwargs: SimpleNamespace(get_job_ids=lambda **kwargs: []))
     runtime = pilot.Runtime.__new__(pilot.Runtime)
-    runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key='batch'), set()
+    runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key='rq:queue:default', name='default'), set()
     runtime.raw_jobs = lambda state: {jid: {'enqueued_at': '2026-10-27T00:00:00Z'} for jid in state['jobs']}
     result = runtime.raw_ordinary({'jobs': {}, 'global_job_ids': [known]})
     assert set(result['jobs']) == {unknown}
@@ -335,7 +335,7 @@ def test_post_renewal_raw_read_failure_pauses_in_observer_thread(tmp_path, monke
     def failed(_):
         raise OSError('raw job metadata unavailable')
     runtime = SimpleNamespace(observe=lambda *args: state, pause=lambda *args: paused.set(),
-                              preflight=lambda **kwargs: {'consumers': {'compatible': 8, 'incompatible': [], 'suspended': False}},
+                              preflight=lambda **kwargs: {'consumers': {'compatible': 12, 'incompatible': [], 'suspended': False}},
                               raw_jobs=lambda *_: {}, raw_ordinary=failed)
     observer = pilot.Observer(runtime, PILOT_ID, 'token', tmp_path)
     monkeypatch.setattr(pilot, 'OBSERVE_SECONDS', 0.001)
@@ -399,7 +399,7 @@ def test_raw_ordinary_uses_public_started_ids_without_cleanup(monkeypatch):
         get_job_ids=get_job_ids
     ))
     runtime = pilot.Runtime.__new__(pilot.Runtime)
-    runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key="batch"), set()
+    runtime.connection, runtime.queue, runtime.ordinary_seen = connection, SimpleNamespace(key="rq:queue:default", name="default"), set()
     runtime.raw_jobs = lambda state: {job_id: {
         "enqueued_at": "2026-10-27T00:00:00Z", "started_at": "2026-10-27T00:01:00Z"
     } for job_id in state["jobs"]}

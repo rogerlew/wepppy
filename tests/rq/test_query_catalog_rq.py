@@ -30,11 +30,11 @@ def catalog_queue(tmp_path, monkeypatch, isolated_rq):
         "coordination": str(tmp_path / "coordination"), "layout": "flat",
     }]))
     monkeypatch.setenv("QUERY_CATALOG_REFRESH_ENABLED", "true")
-    queue = Queue("batch", connection=isolated_rq)
+    queue = Queue("default", connection=isolated_rq)
     worker = CatalogWorker([queue], connection=isolated_rq, name="query-catalog-test-" + uuid4().hex)
     worker.register_birth()
     worker.set_state("idle")
-    companions = [CatalogWorker([queue], connection=isolated_rq, name="query-catalog-companion-" + uuid4().hex) for _ in range(7)]
+    companions = [CatalogWorker([queue], connection=isolated_rq, name="query-catalog-companion-" + uuid4().hex) for _ in range(11)]
     for companion in companions:
         companion.register_birth()
         companion.set_state("idle")
@@ -73,6 +73,133 @@ def discover(queue, worker):
     drain(queue, worker)
     worker.register_birth()
     worker.set_state("idle")
+
+
+def test_default_dispatch_and_inventory_ignore_batch_backlog(catalog_queue, monkeypatch):
+    from datetime import datetime, timezone
+    from rq.job import Job
+    from wepppy.rq.job_info import recursive_get_job_details
+
+    root, queue, worker = catalog_queue
+    # Redirect only the connection: exercise the actual production queue factory.
+    monkeypatch.setattr(tasks, "redis_connection_kwargs", lambda _: {"unix_socket_path": queue.connection.connection_pool.connection_kwargs["path"]})
+    batch = Queue("batch", connection=queue.connection)
+    ordinary = batch.enqueue_call("builtins.str", args=("long batch backlog",))
+    # A legacy batch-only consumer must not veto default admission.
+    old_worker = SimpleWorker([batch], connection=queue.connection, name="old-batch-" + uuid4().hex)
+    old_worker.register_birth()
+    try:
+        path = project(root)
+        core.record_catalog_refresh(path, "values.csv")
+        result = tasks.enqueue_catalog_refresh(path)
+        job = Job.fetch(result["job_id"], connection=queue.connection)
+        assert job.origin == "default"
+        assert recursive_get_job_details(job, queue.connection, datetime.now(timezone.utc))["status"] == "queued"
+        drain(queue, worker)
+        assert not core.pending_catalog_requests(path)
+        assert "values.csv" in {item["path"] for item in json.loads((path / "_query_engine/catalog.json").read_text())["files"]}
+        worker.register_birth()
+        worker.set_state("idle")
+        discovery = tasks.reconcile_query_catalogs()
+        inventory_job = Job.fetch(discovery["inventory_job_id"], connection=queue.connection)
+        assert inventory_job.origin == "default"
+        drain(queue, worker)
+        inventory_job.refresh()
+        assert inventory_job.get_status() == JobStatus.FINISHED
+        assert batch.get_job_ids() == [ordinary.id]
+    finally:
+        old_worker.register_death()
+        batch.delete(delete_jobs=True)
+
+
+def test_default_ordinary_backlog_defers_refresh(catalog_queue):
+    root, queue, _ = catalog_queue
+    path = project(root)
+    core.record_catalog_refresh(path)
+    ordinary = queue.enqueue_call("builtins.str", args=("ordinary",))
+    result = tasks.enqueue_catalog_refresh(path, queue=queue)
+    assert result["error_code"] == "query_catalog_ordinary_backlog"
+    assert queue.get_job_ids() == [ordinary.id]
+    assert core.pending_catalog_requests(path)
+
+
+def test_pre_migration_default_worker_blocks_admission(catalog_queue):
+    root, queue, worker = catalog_queue
+    legacy = tasks.catalog_worker_configuration()
+    legacy.pop("queue")
+    queue.connection.hset(worker.key, tasks.WORKER_FIELD, json.dumps(legacy))
+    path = project(root)
+    core.record_catalog_refresh(path)
+    result = tasks.enqueue_catalog_refresh(path, queue=queue)
+    assert result["error_code"] == "query_catalog_workers_unavailable"
+    assert queue.count == 0
+    assert core.pending_catalog_requests(path)
+
+
+@pytest.mark.parametrize("legacy_configuration", [False, True])
+def test_default_worker_rejects_legacy_execution_authority(catalog_queue, legacy_configuration):
+    from rq.job import Job
+    from wepppy.rq import _query_catalog_admission as guard
+
+    root, queue, worker = catalog_queue
+    path = project(root)
+    core.record_catalog_refresh(path)
+    result = tasks.enqueue_catalog_refresh(path, queue=queue)
+    ledger = json.loads(queue.connection.get(guard.LEDGER_KEY))
+    if legacy_configuration:
+        ledger['jobs'][result['job_id']]['configuration'].pop('queue')
+    else:
+        queue.connection.hset(Job.key_for(result['job_id']), 'origin', 'batch')
+    retained = json.dumps(ledger).encode()
+    queue.connection.set(guard.LEDGER_KEY, retained)
+    drain(queue, worker)
+    job = Job.fetch(result['job_id'], connection=queue.connection)
+    assert job.get_status() == JobStatus.FAILED
+    assert not (path / '_query_engine/catalog.json').exists()
+    assert core.pending_catalog_requests(path)
+    assert queue.connection.get(guard.LEDGER_KEY) == retained
+
+
+@pytest.mark.parametrize("origin", ["default", "batch"])
+@pytest.mark.parametrize("registry", [None, "wip", "deferred", "scheduled"])
+def test_missing_ledger_checks_both_queue_histories(catalog_queue, origin, registry):
+    from wepppy.rq import _query_catalog_admission as guard
+
+    _, queue, _ = catalog_queue
+    queue.connection.delete(guard.LEDGER_KEY)
+    identifier = tasks.PREFIX + str(uuid4())
+    key = "rq:queue:" + origin if registry is None else "rq:" + registry + ":" + origin
+    if registry is None:
+        queue.connection.rpush(key, identifier)
+    else:
+        queue.connection.zadd(key, {identifier: 1})
+    try:
+        with pytest.raises(guard.AdmissionDenied, match="Existing maintenance"):
+            guard.initialize_admission(queue.connection, queue)
+        assert not queue.connection.exists(guard.LEDGER_KEY)
+    finally:
+        queue.connection.delete(key)
+
+
+def test_new_configuration_inventory_rediscovers_legacy_receipts(catalog_queue):
+    import hashlib
+
+    root, queue, worker = catalog_queue
+    path = project(root)
+    core.record_catalog_refresh(path)
+    legacy = tasks.catalog_worker_configuration()
+    legacy.pop("queue")
+    old_id = hashlib.sha256(json.dumps(legacy, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    old_key = "query-catalog:inventory:" + old_id
+    retained = b'{"legacy_evidence":true}'
+    queue.connection.set(old_key, retained)
+    assert old_id != tasks._configuration_id()
+    discover(queue, worker)
+    assert tasks.reconcile_query_catalogs(queue=queue)["admitted"] == 1
+    drain(queue, worker)
+    assert not core.pending_catalog_requests(path)
+    assert (path / "_query_engine/catalog.json").exists()
+    assert queue.connection.get(old_key) == retained
 
 
 def test_concurrent_admission_coalesces_one_job(catalog_queue):

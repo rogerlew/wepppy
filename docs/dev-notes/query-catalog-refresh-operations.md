@@ -9,6 +9,25 @@ Execution and evidence: [work package](../work-packages/20261023_query_catalog_a
 
 ## Scope and rollout
 
+October 28 routing amendment: new refresh, inventory and pilot jobs use `default`
+and its compatible consumers. Batch backlog no longer delays catalog admission;
+ordinary waiting work on default still defers it. The cap remains seven jobs.
+The pilot requires all twelve configured default consumers, six per host, with
+queue-bound capability. The October 27 shared-batch acceptance above is historical;
+default routing is not yet deployed or production-accepted.
+
+Before migration, pause catalog admission and drain/reconcile old batch catalog
+jobs. Keep the historical `query-catalog:batch-admission:v1` ledger and its pause
+key; do not rename/delete them or reset retained permits. Old batch pilot manifests
+remain evidence and cannot resume on default. Use a new pilot ID. New queue-bound
+configuration starts a new discovery identity; durable receipts are rediscovered,
+while old Redis inventory/dirty history remains intact.
+
+Use the full canonical deployment for all participants; `--targeted-batch` cannot
+activate this change. Verify genuine default registrations and queue identity,
+then observe publication artifacts and ordinary default-job delay. General async
+enablement remains a separate acceptance decision.
+
 This maintenance indexes project artifacts; it does not generate model/interchange
 outputs. Existing synchronous APIs remain available for tools and freshness
 barriers. The new producer notification path uses asynchronous durable requests
@@ -16,7 +35,7 @@ only for managed roots when `QUERY_CATALOG_REFRESH_ENABLED=true`. Disabled rollo
 mode retains synchronous behavior. Enabled-mode queue/Redis failure retains
 pending intent; it never invokes a synchronous scan as an outage fallback.
 
-Before enabling, every eligible batch consumer must advertise matching protocol,
+Before enabling, every eligible default consumer must advertise matching protocol,
 root/storage namespace and shared coordination settings. Deploy the paired native
 scanner release, publication/lifecycle guards, reader barriers, polling classifier
 and scheduler together. Keep existing identities, mounts and permissions; an
@@ -29,7 +48,7 @@ this document does not authorize rollout or prescribe an alternate deployment. T
 Operational limits and rationale are in
 [ADR-0104](../adrs/ADR-0104-query-catalog-refresh-operational-bounds.md). Default
 rollout is disabled. Scheduler cadence, inventory/admission bounds, retry delays
-and full-cycle target are configurable. Inventory discovery now uses an existing-batch
+and full-cycle target are configurable. Inventory discovery now uses an existing-default
 maintenance job with `inventory_protocol: 1` in worker capabilities. The inventory
 limit is up to 100 entry records per worker checkpoint and up to 100 scope records
 drained per scheduler tick; the separate admission limit remains 25. Checkpoints
@@ -41,9 +60,9 @@ cycle interval starts from previous completion; it is not a strict per-scope
 freshness bound. Record traversal/reconciliation time separately from the delay
 before the next cycle.
 
-Enabled mode requires `QUERY_CATALOG_ROOTS_JSON`; missing configuration fails before admission. Use the same explicit configuration in producers, scheduler and every eligible batch consumer. The [queue catalog](../../wepppy/rq/job-dependencies-catalog.md) provides a three-namespace example, not a complete fleet configuration. October 26 production evidence confirms active owned projects under `/geodata/weppcloud_runs`; excluding that legacy namespace would break existing workflows. Verify its identity, coordination and participant access before enablement. Include all deployment-owned namespaces; a missing configured namespace is degraded storage evidence, not a completed cycle.
+Enabled mode requires `QUERY_CATALOG_ROOTS_JSON`; missing configuration fails before admission. Use the same explicit configuration in producers, scheduler and every eligible default consumer. The [queue catalog](../../wepppy/rq/job-dependencies-catalog.md) provides a three-namespace example, not a complete fleet configuration. October 26 production evidence confirms active owned projects under `/geodata/weppcloud_runs`; excluding that legacy namespace would break existing workflows. Verify its identity, coordination and participant access before enablement. Include all deployment-owned namespaces; a missing configured namespace is degraded storage evidence, not a completed cycle.
 
-The existing development, production, worker-pool and dedicated wepp3 Compose definitions supply service settings through `${WEPPPY_ENV_FILE:-defaults.env}`. Stage these settings in that existing service env file; a shell variable used only for Compose interpolation is not sufficient. Verify the effective configuration in web producers, query services, scheduler and every eligible worker before enabling. All synchronous publishers also need the common guard release, even when they do not consume the batch queue. No extra Compose override or service is required.
+The existing development, production, worker-pool and dedicated wepp3 Compose definitions supply service settings through `${WEPPPY_ENV_FILE:-defaults.env}`. Stage these settings in that existing service env file; a shell variable used only for Compose interpolation is not sufficient. Verify the effective configuration in web producers, query services, scheduler and every eligible worker before enabling. All synchronous publishers also need the common guard release, even when they do not consume the default queue. No extra Compose override or service is required.
 
 `QUERY_CATALOG_ROOTS_JSON` explicitly maps managed root path, storage namespace,
 external coordination directory and layout. Canonical mappings preserve equivalent
@@ -137,7 +156,7 @@ readbacks. General asynchronous refresh stays false; the tool refuses general
 enablement, alternative queue/root inputs, and identities other than UID1002/GID130.
 No source overlay, extra worker or fake worker registration is used.
 
-Run inside an existing batch container, as UID1002/GID130, against its installed
+Run inside an existing default-worker container, as UID1002/GID130, against its installed
 checkout. Choose a unique lowercase pilot ID (8–64 characters) and an absolute
 private evidence directory. The directory must belong to that operator and have
 no group/other permissions. Exact IDs, owned paths and raw observations are

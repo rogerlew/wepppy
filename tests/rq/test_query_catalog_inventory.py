@@ -463,13 +463,13 @@ def test_inventory_protocol_capability_blocks_mixed_live_consumers(catalog_queue
     path = project(root)
     core.record_catalog_refresh(path)
     try:
-        assert tasks.consumer_status(queue)['compatible'] == 8
+        assert tasks.consumer_status(queue)['compatible'] == 12
         assert tasks.consumer_status(queue)['incompatible']
         assert tasks.reconcile_query_catalogs(queue=queue)['state'] == 'degraded'
         assert tasks.enqueue_catalog_refresh(path, queue=queue)['error_code'] == 'query_catalog_workers_unavailable'
         assert queue.count == 0
         queue.connection.hset(old.key, tasks.WORKER_FIELD, json.dumps(tasks.catalog_worker_configuration()))
-        assert tasks.consumer_status(queue)['compatible'] == 9
+        assert tasks.consumer_status(queue)['compatible'] == 13
         assert not tasks.consumer_status(queue)['incompatible']
         assert tasks.reconcile_query_catalogs(queue=queue)['inventory_job_id']
         assert queue.count == 2

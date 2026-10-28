@@ -10,14 +10,14 @@
 ## Query-engine asset catalog maintenance
 
 `wepppy.rq.query_catalog_rq.enqueue_catalog_refresh` admits one
-`refresh_query_catalog_rq` job per exact scope/incarnation on the existing batch
+`refresh_query_catalog_rq` job per exact scope/incarnation on the existing default
 queue. Producer requests persist filesystem receipts before admission. Active
 queued/started/deferred/scheduled work coalesces; reservations remain through
 RQ terminal transition so late invalidations cannot create a second active job.
 Auth-actor and correlation metadata use the same Redis transaction as admission;
 a WATCH conflict must not leave a metadata-only job hash.
 The scheduler invokes `reconcile_query_catalogs` to admit one active
-`inventory_query_catalog_rq` per configured inventory cycle on batch and drain
+`inventory_query_catalog_rq` per configured inventory cycle on default and drain
 its durable Redis discoveries. The inventory worker streams configured roots,
 checkpoints its frontier and fences every publication by current job/cycle.
 Scheduler ticks acknowledge discovered scopes atomically with their pending
@@ -27,14 +27,15 @@ writes no project files. No model dependency edges are added.
 
 Maintenance IDs use `query_catalog_refresh_<canonical UUID>` and generic
 metadata. Polling classification precedes deserialization. Every live eligible
-batch consumer must advertise matching protocol/storage/root/coordination and
-`inventory_protocol: 1`, `admission_protocol: 1`, and `pilot_protocol: 1` in
+default consumer must advertise matching protocol/storage/root/coordination and
+`inventory_protocol: 1`, `admission_protocol: 1`, `pilot_protocol: 1`, and
+`queue: default` in
 `query_catalog_configuration`; missing/incompatible/suspended capacity leaves
 durable requests pending. Execution revalidates configuration and incarnation.
 
 The global Redis admission ledger caps outstanding catalog work at seven across
 configurations and pilots; reservations and uncertain job records retain capacity.
-The explicit operator pilot requires all eight compatible consumers, exact owned
+The explicit operator pilot requires all twelve compatible default consumers, exact owned
 scopes, a live observation lease, and immutable retry-inclusive budgets (25 refresh,
 two inventory). Ordinary waiting work pauses admission. Pilot inventory enumerates
 only approved locators; admitted jobs may drain after pause or expiry.
@@ -58,7 +59,7 @@ scheduler lease is 60 seconds; expired owners cannot overwrite newer cursors.
 
 Enabled mode requires explicit `QUERY_CATALOG_ROOTS_JSON`; missing configuration
 fails preflight rather than guessing which legacy namespaces are active. Set the
-same configuration in producers, scheduler, and every eligible batch consumer.
+same configuration in producers, scheduler, and every eligible default consumer.
 For a deployment using the three canonical `/wc1` namespaces, the JSON value is:
 
 ```json
