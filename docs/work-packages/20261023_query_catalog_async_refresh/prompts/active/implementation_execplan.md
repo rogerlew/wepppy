@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [ ] October 28 default-queue amendment: contract reviews/checkpoint, runtime wiring, real-Redis/artifact/job-tree regressions and documentation. General enablement remains excluded.
+
 - [x] M0–M3: reviewed contracts, native/publication/queue/lifecycle/reader implementation and local regression gates complete.
 - [x] M4–M5: producer migrations and fresh October 26 full scientific/report acceptance complete; earlier October 23 failure retained as historical evidence.
 - [x] October 27 remediation: all four roots/30,891 scopes discovered, bounded RQ timeout recovery, HTTP responsiveness and independent reviews passed.
@@ -24,6 +26,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+2026-10-28: routing is also enforced in admission, execution claims and pilot manifests, not just the Queue constructor. Preserve the historically named ledger to avoid resetting permits. Production defaults have twelve default consumers, versus eight batch consumers.
 
 2026-10-27 completed execution: source/native hashes and genuine worker capabilities
 matched after the full deployment. An early controller resume was correctly
@@ -85,6 +89,8 @@ Existing report helpers generally check missing catalog membership, not freshnes
 The unchanged 184-year isolated model produced duplicate daily observations in raw `H1.wat.dat` beginning simulation year 104. The strict water-balance report rejects those observations; catalog query, authenticated summary and exact-byte download pass. The watershed then failed at simulation year 100 at 22:59:54 UTC with `PASS components error: SOURCES3 date mismatch` and `STOP 1`. Original production raw output is absent, so baseline attribution is unproved; the paired native build also includes explicitly recorded preexisting calendar/HBP edits. The scoped supervisor stopped on failure without finalization. Retain these acceptance limitations without changing scientific inputs or weakening validation.
 
 ## Decision Log
+
+- 2026-10-28: operator directs catalog maintenance onto default because batch backlog can last days. Execute the October 28 contract decision; retain cap, timing, guards and disabled production mode.
 - 2026-10-27 / operator: “complete pending work” resumes the bounded pilot after the separately authorized full canonical deployment completed on all three hosts. Reuse the existing controller and normal batch workers; no source overlay, service restart, broader namespace mutation or general async enablement is needed. The canonical pilot explicitly excludes general enablement even after success; finish its evidence and disposition the distinct whole-fleet capacity gate honestly.
 - 2026-10-27 / operator: “standby. we will do a full deploy when the jobs clear”. Preserve the active-job gate and select the full canonical deployment path after quiescence. The one-job exception proposal is not approved; retain the scoped candidate as historical preparation. Commit/push authorization does not resume deployment.
 - 2026-10-27 / operator: “execute the bounded pilot” authorizes the proposed guard and actual shared-batch pilot. General enablement remains excluded; ordinary disabled-mode behavior must remain unchanged.
@@ -165,7 +171,7 @@ Acceptance: real concurrent publishers never expose partial JSON or overwrite ne
 
 ### M2 — Durable request, queue admission and recovery
 
-Add `request_catalog_refresh(wd, asset_path=None)` without changing the synchronous API return shapes. Persist unique request receipts after artifact publication; return durable intent/admission distinctly. Implement one active admission per exact scope using existing Redis/RQ transactions and canonical prefixed maintenance IDs. Use existing batch queue and scheduler dispatch; verify every eligible consumer's protocol/storage/coordination compatibility.
+Add `request_catalog_refresh(wd, asset_path=None)` without changing the synchronous API return shapes. Persist unique request receipts after artifact publication; return durable intent/admission distinctly. Implement one active admission per exact scope using existing Redis/RQ transactions and canonical prefixed maintenance IDs. Use existing default queue and scheduler dispatch; verify every eligible consumer's protocol/storage/coordination compatibility.
 
 Worker snapshots finite receipt IDs, coalesces paths, performs index-only scan/update, publishes under the shared guard with current revision/incarnation checks, records acknowledgment and removes only incorporated receipts. Failed or late requests remain pending. Implement ownership-safe release/successor and bounded passes. Reconciliation discovers durable requests despite Redis loss and performs recurring source reconciliation for changes with no receipt. Define measured cycle/backoff/budget configuration and operator visibility; assess ADR requirements before introducing thresholds/defaults under the parameterization standard.
 
@@ -259,3 +265,19 @@ status without treating deployed-but-disabled code as async acceptance.
 2026-10-26 revision: refreshed deployment chronology and retained the strict clone-cache failure/recovery and production latency limitation while full model acceptance executes.
 
 Revision (2026-10-27): reconciled the completed full deployment and bounded shared-batch pilot; retained the separate general-capacity hold and exact observation/retirement evidence limits. No runtime code or general enablement changed.
+
+## October 28 execution sequence
+
+Review and commit `artifacts/20261028_default_queue_contract_decision.md` with
+canonical amendments first. Update `query_catalog_rq.py`, `_query_catalog_admission.py`,
+`_query_catalog_pilot.py` and `tools/query_catalog_pilot.py` for default routing,
+queue-bound compatibility and historical evidence retention. Update actual Redis
+worker fixtures and add backlog/isolation/legacy regressions. Run focused tests,
+`wctl check-rq-graph`, local live job-tree/artifact checks and broad pytest. Update
+the queue catalog, operations guide and this plan/tracker with exact results.
+Rollback local code through an ordinary revert; production queue migration is
+separate, requires old-work drain, and must preserve receipts/ledger/pilot history.
+
+Acceptance means jobs actually run on default with verified catalog artifacts
+while batch backlog exists, default backlog defers admission, and incompatible
+workers cannot execute. No production deploy or general enablement is claimed.

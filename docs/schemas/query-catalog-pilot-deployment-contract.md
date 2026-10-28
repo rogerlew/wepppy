@@ -121,3 +121,12 @@ sha256:<original-id> --skip-pull --skip-themes --no-flush-rq-db`. This path veri
 the exact tag/ID and performs the same fenced cutover without a build. Restore
 the deployment script/helper bytes/absences last, after original-image runtime
 acceptance; restoring the old script first would remove the scoped rollback mode.
+
+## October 28 routing boundary
+
+The [default-worker amendment](query-engine-catalog-refresh-contract.md#october-28-default-worker-routing-amendment)
+moves new query-catalog maintenance to default workers. This document retains
+the existing targeted-batch deployment interface and October 27 provenance;
+`--targeted-batch` is insufficient for the new routing. Use the full canonical
+deployment for participating producers, scheduler and default workers. No new
+targeted mode, worker pool or production activation is authorized by this change.

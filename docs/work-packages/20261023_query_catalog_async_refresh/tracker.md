@@ -2,6 +2,8 @@
 
 ## Status
 
+2026-10-28: operator authorized moving query-catalog refresh/inventory to default workers because batch backlog can last days. Contract checkpoint/reviews in progress; implementation and production migration pending. October 27 deployment/pilot status below is historical for batch routing.
+
 2026-10-27 UTC: **Authorized bounded execution complete; general enablement HOLD.**
 Full canonical deployment of `0da9c9071` completed on wepp1–3. The actual shared
 batch pilot passed 17 jobs, both eight-scope artifact waves and 48 query checks,

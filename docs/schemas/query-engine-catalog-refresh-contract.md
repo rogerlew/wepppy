@@ -8,7 +8,7 @@ Asynchronous refresh is the preferred path for artifact producers that do not co
 
 The observed wepp1 failure is a missing catalog triggering a full native scan inside an HTTP submission. The native scan holds the GIL and can starve the serving process heartbeat. Artifact publication, catalog publication, and consumer readiness are distinct outcomes. A successful artifact write MUST NOT be advertised as a fresh catalog.
 
-Use existing Redis/RQ, batch workers and scheduler infrastructure. No new queue, service, database, dependency or deployment topology is authorized. Existing model artifacts, filenames, column schemas, runtime identities, permissions and authorization remain unchanged. Canonical cross-cutting authorities include [NoDb persistence](nodb-persistence-concurrency-contract.md), [RQ responses](rq-response-contract.md), [report cache freshness](report-cache-freshness-contract.md), [artifact observability](../standards/artifact-observability-standard.md) and [generated artifact validation](../standards/generated-artifact-validation-standard.md).
+Use existing Redis/RQ, default workers and scheduler infrastructure. No new queue, service, database, dependency or deployment topology is authorized. Existing model artifacts, filenames, column schemas, runtime identities, permissions and authorization remain unchanged. Canonical cross-cutting authorities include [NoDb persistence](nodb-persistence-concurrency-contract.md), [RQ responses](rq-response-contract.md), [report cache freshness](report-cache-freshness-contract.md), [artifact observability](../standards/artifact-observability-standard.md) and [generated artifact validation](../standards/generated-artifact-validation-standard.md).
 
 The WMesque and Runs catalog queue implementations are precedents for transactional admission and concurrent invalidation handling, not a shared catalog data model. Mere duplicate suppression does not establish eventual consistency.
 
@@ -41,7 +41,7 @@ For each scope, admit at most one queued/started/deferred/scheduled refresh job.
 
 Do not require an idle worker to record invalidation. Capacity shortages leave explicit pending work. Bounded admission/retry must return promptly without invoking a catalog scan in the producer/request process. Multiple changes to one project coalesce; distinct projects remain independent.
 
-All consumers eligible for the shared batch queue must advertise the refresh protocol version, configured storage namespace/root mapping and publication-coordination compatibility. Admission checks the queue's eligible consumers; incompatible consumers block new maintenance admission, while durable requests remain pending. Execution revalidates these properties before opening a project. Startup and deployment preflight must detect companion/off-host or mixed-version consumers lacking the protocol. This is not authority to change identities, privileges, mounts or queue topology. Absence of compatible consumers is visible pending/unavailable capacity, never permission for inline scan fallback.
+All consumers eligible for the shared default queue must advertise the refresh protocol version, configured storage namespace/root mapping and publication-coordination compatibility. Admission checks the queue's eligible consumers; incompatible consumers block new maintenance admission, while durable requests remain pending. Execution revalidates these properties before opening a project. Startup and deployment preflight must detect companion/off-host or mixed-version consumers lacking the protocol. This is not authority to change identities, privileges, mounts or queue topology. Absence of compatible consumers is visible pending/unavailable capacity, never permission for inline scan fallback.
 
 ## Durable invalidation and no lost updates
 
@@ -82,7 +82,7 @@ The same background reconciler also revisits every registered/configured support
 
 Inventory execution clarification (2026-10-27; conformance pending): large-directory
 discovery runs as at most one active maintenance job per configured inventory
-cycle on the existing batch queue. Scheduler ticks admit/recover that job and
+cycle on the existing default queue. Scheduler ticks admit/recover that job and
 drain checkpointed discovery batches; they do not enumerate entire directories.
 Inventory jobs use the existing `query_catalog_refresh_` maintenance-ID privacy
 classification, matching worker capabilities, and existing maintenance timeout
@@ -186,7 +186,7 @@ See [acceptance](../work-packages/20261023_query_catalog_async_refresh/artifacts
 The operator authorized execution of the bounded pilot on October 27, 2026.
 This section does not authorize general async enablement.
 
-### Shared batch admission
+### Shared default admission
 
 All inventory and refresh admission paths, including producers, reconciliation
 and retries, MUST share one atomic queue-wide admission decision. At most seven
@@ -208,7 +208,7 @@ claim watches job status. Genuine RQ finished/failed/stopped work retains normal
 workhorse-completion/death recovery, including timeout and killed-worker retries;
 missing exit proof for a claimed cancellation requires explicit recovery.
 
-Ordinary ready jobs waiting on the batch queue prevent new catalog admission.
+Ordinary ready jobs waiting on the default queue prevent new catalog admission.
 Inspect raw job identifiers, states and timestamps without executing task payloads
 or invoking registry cleanup; unknown/corrupt classification is conservative.
 Do not suspend ordinary queues, preempt scientific work, discard receipts, or
@@ -272,7 +272,7 @@ maintenance can finish in that interval. A cleared queue does not automatically
 resume a paused pilot. End-of-window or exhausted-budget state retains unfinished
 receipts and discovery checkpoints. Never label a stopped partial cycle complete.
 
-Acceptance uses actual existing batch workers and queue, actual production
+Acceptance uses actual existing default workers and queue, actual production
 identity/mounts, sanitized live job trees and direct generated-artifact readback.
 Verify expected schemas, source lineage and query results, remaining receipts,
 held-out-project noninterference, capacity counters, pause/drain/restart recovery,
@@ -280,10 +280,10 @@ ordinary waiting time and owned-resource cleanup. A private-queue canary alone
 cannot satisfy this shared-queue pilot. Success does not certify whole-fleet
 capacity or authorize general enablement.
 
-Pilot participant deployment follows the
-[scoped batch deployment contract](query-catalog-pilot-deployment-contract.md).
-Its opt-in canonical target and candidate-only source closure do not authorize
-unrelated rollout or changes to default deployment behavior.
+Pilot participant deployment uses the full canonical deployment entry point.
+The [scoped batch deployment contract](query-catalog-pilot-deployment-contract.md)
+records the earlier batch-only mechanism; that target cannot activate this
+default-worker migration.
 
 ### Pilot observation and controller loss
 
@@ -305,3 +305,36 @@ passed pilot merely because observation resumes or the queue later clears.
 Explicit operator resume is a trusted control operation, not an automatic loop;
 it may resume an otherwise valid pause within the original window but cannot
 resurrect terminal/retired job IDs or reset failure evidence.
+
+## October 28 default-worker routing amendment
+
+Status: operator-approved intent; implementation and production cutover pending.
+The operator requires catalog update jobs on default workers because batch work
+can remain queued for days. Both refresh and inventory jobs MUST use the existing
+`default` queue, including retries and the owned-scope pilot. Batch backlog and
+batch-only worker registrations no longer govern catalog admission. Ordinary
+ready work on default still blocks new maintenance; no priority or latency
+guarantee is introduced. The seven-job cap and all timing/budget bounds remain.
+
+Advertised catalog configuration MUST bind the execution queue so pre-migration
+workers cannot pass compatibility checks. Queue binding changes the configuration
+identity: retain old dirty/inventory keys as history and rediscover durable
+pending receipts through the new configuration inventory. Every eligible default consumer must
+match. The pilot requires the existing twelve default consumers (six per host),
+replacing the old eight-batch-consumer check without changing worker counts.
+Retain the historical Redis ledger key `query-catalog:batch-admission:v1` and
+its pause key: their names are storage compatibility, not routing. Outstanding
+and uncertain old jobs continue consuming capacity; never create a second ledger
+or reset budgets to switch queues. Bootstrap must inspect default and legacy
+batch maintenance registries before creating a missing ledger. Historical batch
+pilot manifests remain readable evidence but cannot authorize new default work;
+create a fresh pilot rather than rewriting their queue/configuration or counters.
+
+Before production migration, pause catalog admission and drain/reconcile old
+batch maintenance, preserve receipts and accounting, and deploy all participants
+through the canonical full deployment with its existing drain/fence gates.
+General async stays disabled pending separately authorized rollout acceptance.
+The October 27 batch pilot is historical evidence, not default-queue acceptance.
+Validate real default-worker inventory/refresh artifacts, batch-backlog isolation,
+default ordinary-backlog deferral, mixed-version rejection and retained-accounting
+behavior. No other catalog subsystem or scientific-job routing changes.

@@ -5,7 +5,7 @@ Date: 2026-10-23
 
 ## Context and decision
 
-Use the existing batch queue and scheduler for the async-preferred query catalog
+Use the existing default queue and scheduler for the async-preferred query catalog
 refresh contract. Bound enumeration/admission and retry to avoid replacing one
 request-time scan problem with unbounded background backlog. These are workflow
 operational settings; no model parameterization or scientific output changes.
@@ -176,3 +176,24 @@ mode, replacing only manifest-approved Python files and stale derived bytecode.
 No network/installer/vendor/native step is permitted. This preserves the measured
 nine native modules and 307-distribution runtime fingerprint instead of assuming
 a mutable rebuild is equivalent. General build/deploy defaults remain unchanged.
+
+## October 28 queue selection amendment
+
+Decision owner: requesting operator, 2026-10-28 execution conversation:
+“we need to make the catalog update jobs run on default workers. the batch
+workers can get backed up for days”. Implementation conformance pending.
+
+Move refresh, discovery, retry and pilot execution to existing default workers.
+Keep the cap at seven and all numerical scheduling bounds unchanged. The pilot
+requires all twelve existing default consumers rather than eight batch consumers;
+this changes the checked fleet, not deployed worker counts. Batch remains for
+its existing scientific jobs. Default backlog still blocks new catalog admission.
+Reject a new priority queue, worker pool or bypass of ordinary-job protection:
+changing the selected existing queue is the smallest authorized solution.
+
+Preserve the existing ledger and pause keys, old job evidence and pilot budgets.
+Queue-bound capability checks exclude old workers. Pause/drain old maintenance
+before coordinated deployment; validate default queue artifacts and new-arrival
+delay before general enablement. Moving queues does not establish capacity or
+a refresh latency guarantee. Earlier batch deployment/capacity observations above
+remain historical, not acceptance of default routing.
