@@ -5902,6 +5902,16 @@ class Roads(NoDbBase):
         )
         return status_payload
 
+    def query_inputs(self) -> Dict[str, Any]:
+        """Read saved form inputs without requiring access to model results."""
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        return {
+            "roads_params": params,
+            "attribute_field_map": dict(params["attribute_field_map"]),
+            "discovered_attribute_catalog": getattr(self, "_uploaded_attribute_catalog", None),
+            "uploaded_geojson_relpath": getattr(self, "_uploaded_geojson_relpath", None),
+        }
+
     @roads_lifecycle.inspection
     def query_summary(self) -> Dict[str, Any]:
         params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))

@@ -353,6 +353,12 @@ wctl run-pytest tests --maxfail=1
 - Warning diagnostics are summarized in prepare/run outputs when mapped fields are missing or invalid.
 - Roads requires baseline WEPP outputs and does not replace the baseline `wepp/output/` dataset tree.
 
+Project-page rendering reads saved upload and mapping inputs through `query_inputs()`.
+It does not acquire the Roads lifecycle lock or inspect result artifacts, so an
+active Roads operation cannot block loading the project. Result queries and reports
+still use lifecycle admission. If a Roads report is busy, wait for the operation
+to finish; do not delete the coordination lock.
+
 ## Further Reading
 
 - [specification.md](specification.md)

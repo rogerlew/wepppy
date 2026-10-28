@@ -1711,6 +1711,48 @@ def test_landuse_modifier_template_renders_selection_and_submit_contract(
     assert 'id="modify_landuse_stacktrace_panel"' in rendered
 
 
+@pytest.mark.parametrize("populated", [False, True])
+@pytest.mark.parametrize("lifecycle_state", ["absent", "busy", "invalid_receipt"])
+def test_roads_form_renders_without_result_admission(
+    jinja_env: Environment, tmp_path: Path, populated: bool, lifecycle_state: str,
+) -> None:
+    import fcntl
+
+    from wepppy.nodb.mods.roads import Roads
+    from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
+
+    roads = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    if populated:
+        with roads.locked():
+            roads._uploaded_geojson_relpath = "roads/roads.uploaded.geojson"
+            roads._uploaded_attribute_catalog = {"field_names": ["ROADTYPE"]}
+            roads._roads_params["attribute_field_map"] = {"design": "ROADTYPE"}
+            roads._roads_params["surface_default"] = "paved"
+
+    if lifecycle_state == "invalid_receipt":
+        receipt = tmp_path / lifecycle.RECEIPT
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        receipt.write_text("invalid receipt")
+
+    def render_and_check():
+        rendered = jinja_env.get_template("controls/roads_pure.htm").render(roads=roads)
+        assert '<form id="roads_form"' in rendered
+        assert 'id="run_roads_wepp"' in rendered
+        if populated:
+            assert "roads/roads.uploaded.geojson" in rendered
+            assert re.search(r'<option\s+value="ROADTYPE"\s+selected', rendered)
+            assert re.search(r'<option\s+value="paved"\s+selected', rendered)
+
+    if lifecycle_state == "busy":
+        with (tmp_path / lifecycle.LOCK).open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with pytest.raises(lifecycle.RoadsResultsUnavailable, match="Roads is busy"):
+                roads.query_summary()
+            render_and_check()
+    else:
+        render_and_check()
+
+
 def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/roads_pure.htm")
     rendered = template.render()

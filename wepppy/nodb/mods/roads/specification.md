@@ -107,7 +107,15 @@ Suggested public controller surface (phase 1):
 - `prepare_segments() -> dict` (writes `wepp/roads/segments/*`, updates `last_prepare_summary`)
 - `run_roads_wepp() -> dict` (writes `wepp/roads/{runs,output}/*`, updates `last_run_summary`)
 - `query_status() -> dict`
+- `query_inputs() -> dict` (saved form inputs; no result admission or lifecycle lock)
 - `query_summary() -> dict`
+
+Project-page controls use `query_inputs()`: loading saved upload/mapping settings
+does not consume model results and must remain possible during Roads execution.
+This implements baseline independence in the upstream lifecycle contract. Do not
+use guarded result summaries to populate input forms; doing so made normal
+exclusive-lock contention fail the entire project render (2026-10-27,
+`clogging-starch`). Result summaries retain their existing admission behavior.
 
 Upstream lifecycle amendment (operator-approved 2026-10-22; implementation pending):
 [Roads preparation and result lifecycle](../../../../docs/schemas/roads-preparation-lifecycle-contract.md)
