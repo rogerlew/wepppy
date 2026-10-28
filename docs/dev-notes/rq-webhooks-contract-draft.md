@@ -1,292 +1,285 @@
 # RQ webhook contract and implementation planning draft
 
-Status: discussion draft, 2026-10-27. Not an accepted contract or authorization
-to implement. RQ 2.12.0 remains the runtime target; native RQ webhooks remain
-disabled. The completed upgrade package is historical evidence, not an amendment
-target. This draft will be promoted into `docs/schemas/` after scope agreement.
+Status: revised discussion draft, 2026-10-28. Operator direction below supersedes
+conflicting 2026-10-27 recommendations. Not yet a ratified canonical contract or
+permission to implement. RQ native webhooks remain disabled.
 
-## Confirmed requirement
+## Client-facing contract
 
-API clients can request webhook notifications. Delivery success, failure,
-timeouts, retries, and dispatcher outages must not alter computation job status,
-release or block dependencies, change computation retries, or occupy computation
-workers with HTTP requests. Shared datastore resource use must be bounded and
-measured; absolute isolation from shared infrastructure outages is not promised.
+A client supplies an optional `webhook_url` with an authenticated operation
+submission. Accepting that submission authorizes notification for that operation;
+later token expiry must not prevent delivery. No endpoint-registration
+API, separate subscription request, destination challenge or ongoing token
+validation is required for the initial design.
 
-## Product choices awaiting agreement
+The notification describes the outcome of the operation the client requested.
+For culverts this means the batch; for running WEPP it means the complete selected
+workflow, including its required postprocessing. Submission acknowledgment and
+orchestrator-job completion are not useful completion notifications. Simple
+single-job operations can use their own terminal outcome.
 
-| Choice | Proposed starting point | Alternative |
-| --- | --- | --- |
-| Event scope | Explicit individual jobs | Domain workflow completion, or both |
-| Reliability | Persisted events, bounded retries, history and manual replay | Best effort with polling recovery |
-| Destination | Register an owned endpoint, reference its ID | URL on every submission |
+URLs are freely supplied HTTPS destinations. Audit submission, destination,
+delivery attempts and outcome so operators can investigate abuse and tighten
+policy if needed. This removes destination-control challenges and operator
+allowlists, not baseline HTTPS/SSRF handling: the proposed sender still rejects
+credentials in URLs, unsafe internal destinations and redirects, and validates
+the connected address while preserving hostname TLS verification. Any requirement
+for private destinations must be explicit rather than accidentally bypassing these
+checks. Sanitize audit records and restrict access; never log bearer tokens or
+secret URL query values. Treat the entire raw URL as sensitive outside the
+restricted delivery-intent record, since paths can contain capabilities too. Audit
+with sanitized host plus opaque destination fingerprint. Inventory request capture,
+profile-recorder playback, dry-run printing, task descriptions, public jobinfo,
+archives and exception logs. Recorded playback must omit callback intent or require
+an explicit test-destination override; it must not resend a captured production URL.
 
-These are recommendations, not decisions already made by the operator. API
-shape, storage, delivery capacity and numeric policies remain provisional.
+Delivery must not block normal computational tasks, change their outcomes,
+release dependencies or cause computation retries. Use a short total attempt
+budget (operator example: 10 seconds) and limited retries in documented transient
+cases. Total includes DNS/connect/TLS/read work, not merely a socket read timeout.
+Exact retry count/backoff and whether 10 seconds is the final value remain open.
 
-## Proposed event semantics
+"Honor the webhook" means retain and attempt the accepted callback independently
+of token expiry. It cannot mean guaranteed receipt from an unreachable receiver;
+exhaustion is recorded and computation remains unaffected. Ordinary token expiry
+must not be confused with an explicit operator emergency dispatch stop.
 
-Start with terminal job outcomes: `job.finished`, `job.failed`, `job.stopped`,
-and `job.canceled`. A failed attempt scheduled for retry is not final failure.
-Cancellation describes RQ state; it must not claim that every descendant process
-has exited or that directory locks have been released. Unknown, expired or
-unreadable state is an observation problem, never fabricated success or failure.
+## Consumer payload and identity proposal
 
-Job success is not proof of artifact validity or completion of dynamically
-enqueued children. Workflow events require named domain completion boundaries,
-expected child membership and artifact acceptance; do not infer them from the
-parent task returning or an empty instantaneous child list.
+Operator decision (2026-10-28 18:20 UTC): Option A. Notify execution completion
+and execution outcome; clients obtain domain results from existing APIs. Do not
+introduce a generic task-reported domain outcome convention in this release.
 
-For an initial job subscription, propose one terminal event. Close observation
-atomically with creation of that immutable event, not with HTTP acknowledgment.
-Enforce one event per subscription; competing observers recover the same event
-ID. Pending delivery cannot replace its outcome when the job is requeued.
-Requeueing after event capture requires a new subscription; retries
-before terminal completion stay within the existing subscription. Concurrent or
-repeating executions need an explicit execution-level contract before support.
-Polling can miss a transient terminal state followed by requeue; this is a
-specific acceptance risk to test, not an exactly-once promise.
+Use `event: operation.completed` once the hierarchy settles, with an explicit
+`execution_status` and immutable event ID, schema version, original submission/root
+job ID, operation name, completion/observation timestamps and authorized resource
+identifier. `execution_status: finished` means the hierarchy settled without an
+RQ-level failure; it does not mean every requested domain item succeeded. Failed
+execution also settles the operation; completion is not a success assertion.
+Exact stopped/canceled precedence remains to ratify.
 
-Use immutable event bodies with `schema_version`, `event_id`, `event_type`,
-`subscription_id`, exact `job_id`, authorized run identity when applicable,
-`status`, `subject_type: rq_job`, and `observed_at`. This status describes the
-individual persisted RQ job. Existing jobstatus can aggregate descendants: a
-parent's `job.finished` event and an aggregate running or failed polling response
-can both be correct. Include an occurrence timestamp only when reliably
-available; do not invent it from observation time. Do not include arbitrary
-results, arguments, stack traces, filesystem paths, bearer credentials, or auth
-actor metadata. Clients fetch permitted details through existing APIs.
+Do not embed domain success/partial-success classification or a batch outcome
+summary in this release's generic callback. Do not include arbitrary arguments,
+raw results, tracebacks, paths or credentials. Clients retrieve batch summaries,
+reports and other detailed outputs through the existing APIs. Preserve those APIs.
 
-Duplicate delivery is possible, including after an acknowledgment is lost.
-Receivers deduplicate by event ID. Attempts and manual replay retain the same
-event ID and body, with a new delivery attempt identity and signing timestamp.
-No global ordering guarantee is proposed.
+An event ID is stable across retries; receivers must tolerate duplicates. A
+successful HTTP acknowledgment can be lost before local persistence. Do not promise
+exactly-once delivery. The root job ID is a correlation ID, not a claim that its
+individual RQ status equals the hierarchy's execution status.
 
-Observation lifetime and delivery age are separate clocks. The proposed retry
-window starts at durable event creation, not subscription creation; long queue
-waits must not consume it. Specify supported observation deadlines, job retention
-and observer outage bounds before promising outcome capture. Durable retries
-after capture do not guarantee capture of every transition. Expose terminal
-`observation_expired` or `observation_unavailable` in subscription history when
-the outcome cannot be established, without emitting an invented job event.
+Required HC-03 acceptance: run a culvert task that catches a domain failure and
+returns "failed" normally. Once its full hierarchy settles with no RQ-level
+failure, the callback reports `operation.completed` / `execution_status: finished`;
+the existing batch-results API still exposes the failed run. Assert no callback
+field claims all-runs success. Pair with an uncaught RQ failure, where settled
+execution reports failure. Do not change task exception behavior to fit callbacks.
+Do not report completion while required work or final artifact preparation remains,
+or imply cancellation proves every descendant process has exited.
 
-For the separate-subscription candidate, propose immediate capture of a retained
-terminal job after authorization. Reject missing or unsupported jobs explicitly.
-An idempotency key scoped to principal and operation recovers the same
-subscription/event after an ambiguous commit; the same key with different input
-is a conflict. A fresh key permits a deliberate new subscription after requeue.
-Do not deduplicate subscriptions by job ID alone. These admission semantics must
-be ratified with the selected API shape.
+## Signing is a separate capability decision
 
-## Ownership and endpoint lifecycle
+A shared signing secret lets a receiver distinguish WEPPcloud callbacks from
+forged requests. It is useful, but it is not required to isolate delivery from RQ
+or to accept a client-supplied HTTPS URL. The prior design prematurely made a
+registered encrypted-secret facility mandatory. Remove that prerequisite.
 
-Every webhook operation requires authenticated authorization independent of the
-existing optional/open job polling mode. Use a stable verified client principal,
-not token `jti`, and retain ownership across token renewal. Endpoint ownership
-alone is insufficient: subscriptions also require permission for the target
-job/run and applicable feature. Public run visibility must not implicitly grant
-permission to create outbound subscriptions. Map supported token classes and
-revocation semantics explicitly before implementation.
+Whether the first release offers optional signatures, requires signatures or
+ships unsigned minimal notifications remains an explicit decision. Do not add a
+key-management subsystem by assumption. An unsigned callback is a notification,
+not authenticated evidence on which the receiver should perform sensitive actions;
+a receiver can confirm the outcome through the authenticated API. Do not put the
+submission's bearer token into the callback or treat it as a signing key.
 
-Stable identity is not durable dispatch authority. Require a bounded subscription
-grant covering the exact job/resource, endpoint version, event types, lifetime
-and revocation authority. Reuse verified identity adapters without treating them
-as scope/resource authorization. Ratify token-expiry versus renewal/revocation,
-narrower replacement credentials, removed run access and account/session changes.
-Unknown or unavailable authorization pauses delivery; it never changes RQ work.
-Reject token classes without a supported durable grant model in the first release.
+## Generalizable implementation proposal
 
-Proposed API resources under `/rq-engine/api`: endpoint registration and disable,
-job subscriptions, delivery history, and replay. Exact routes and scopes are
-pending. Registration creates no subscription to all of a client's future work.
-Subscriptions and replay are idempotent; authorization precedes lookup disclosure.
-Use the canonical RQ error envelope. Endpoint secrets and delivery records must
-never enter public jobinfo responses or downloadable run archives.
+Use three narrow responsibilities: capture the optional callback with the accepted
+submission; resolve that submission's workflow outcome; independently attempt
+HTTP delivery and record results. Keep consumer configuration the same across
+supported endpoints. No per-task HTTP handlers and no changes to model code.
 
-Prefer an immutable URL per endpoint version. A URL replacement requires a new
-version and must not silently redirect pending events. Disabling an endpoint
-prevents new sends; an already transmitted request cannot be recalled. Secret
-rotation, pending attempts, disabled records, and deletion retention require
-explicit lifecycle rules. Recheck dispatch authorization/revocation without
-requiring the original short-lived bearer token to remain valid forever.
+The terminal-state mechanism must be generic for hierarchical jobs, not selected
+by operation name or handwritten culvert/WEPP finalizer adapters. Treat one accepted
+submission as a root with owned descendants. Finalizer tasks are ordinary members
+of that hierarchy, so their work is naturally included without special completion
+hooks for each pipeline.
 
-Endpoint-record ownership does not establish control of the destination. Before
-activation, select a bounded exact-URL challenge under the same outbound security
-policy or operator-approved registration. No event data may leave before
-activation; a changed URL version requires revalidation. Any policy allowing
-unverified public destinations needs explicit operator risk acceptance and abuse
-limits, rather than describing those destinations as controlled by the client.
+Existing substrate: `job_info.py:recursive_get_job_details` follows `jobs:*` child
+references; `get_wepppy_rq_job_status` aggregates their states.
+`auth_actor.py:install_rq_auth_actor_hook` intercepts enqueue calls and already has
+access to the executing parent through `get_current_job()`. Existing pipeline
+helpers record children. Audit these before adding mechanisms. The existing poll
+formatter is not yet a reliable terminal predicate: missing children can be omitted
+and failure outranks deferred state without dependency analysis. Do not change its
+public response contract incidentally while extracting a minimal shared evaluator.
 
-Set per-principal quotas for endpoints, pending subscriptions and deliveries,
-registration/subscription/replay rates, stored payload sizes, and fair scheduling.
-Define canonical quota-exhaustion responses and numeric limits before activation.
-Quota rejection must not fail or cancel an already accepted computation job.
-Bound subscription lifetime, pending-event bytes/count and attempt-history growth
-both per principal and globally, including indefinitely deferred jobs. On overload,
-reject new webhook admission explicitly and preserve accepted records within their
-published retention policy. Do not throttle computation to free webhook capacity.
+Proposed generic predicate: a hierarchy is settled only when membership is complete
+and stable and every member is terminal or provably unable to execute in this
+submission attempt. Queued/running/scheduled jobs and pending retries keep it open.
+A deferred member is blocked only when its actual dependency rules establish that
+it cannot run because a prerequisite ended unsuccessfully; honor failure-tolerant
+edges. A missing record, incomplete enqueue registration, unknown dependency or
+unresolved external prerequisite means unknown/waiting, never completion. Propagate
+proven blocking transitively without modifying RQ states or dependencies. For
+A failed -> B strict/deferred -> C allow_failure, C remains blocked because B is
+still deferred; logical blocking is not an actual RQ failed status. Conversely,
+A failed -> C allow_failure can run and must be awaited. Include stopped/canceled
+semantics and explicitly supported stopped-observer release behavior from the
+current dependency helper, without inventing releases in the evaluator.
 
-## Delivery and destination security
+Derive aggregate outcome separately from the settled predicate: failures take
+precedence over success, with explicit stopped/canceled precedence still to ratify.
+Wait for independent branches and runnable failure-tolerant finalizers before the
+single terminal event. Manual requeue after final notification belongs to a new
+submission/attempt policy; an unresolved automatic retry is not terminal.
 
-Use HTTPS POST, verified TLS, bounded DNS/connect/read/total attempt time, bounded
-response handling, and no redirects. Reject credentials in URLs and destinations
-that resolve to prohibited internal, loopback, link-local, metadata or other
-nonpublic addresses, including IPv6 and mixed-address answers. Validate the
-address actually connected to while retaining hostname TLS verification; a
-registration-only DNS check does not prevent rebinding. Define explicit policy
-for ports, proxies, and any operator-approved private destinations. Do not allow
-arbitrary caller-supplied headers in the initial API.
+Operator clarification (2026-10-28): batch hierarchies can expose a failed parent
+while intentionally continuing their children; other hierarchies stop downstream
+execution on child failure. Neither parent failure nor first descendant failure
+is a terminal-notification trigger by itself. Continue traversal beneath failed
+parents and distinguish `has_failure` from `settled`. Evaluate actual dependency
+rules rather than selecting continuation behavior by task name.
 
-Sign the exact transmitted body together with event ID and per-attempt timestamp
-using a versioned HMAC-SHA256 envelope. Generate per-endpoint secrets and provide
-rotation and receiver examples. Inventory the existing secret facilities before
-selecting encryption: deployment secret-file lookup is not a dynamic encrypted
-credential store. Ratify separate webhook encryption keys, key versions, one-time
-secret disclosure or another explicit retrieval policy, rotation overlap, access
-boundaries and backup/restore recovery. Do not reuse JWT/session signing keys.
-Missing decryption material explicitly stops notification operations while
-computation stays available. Do not invent an unreviewed key store.
+Required paired acceptance: a continuing batch with one failed child and other
+queued/running children is failure-known but unsettled; notification waits for
+those children and runnable finalizers. A strict chain with a failed prerequisite
+and provably blocked deferred descendants becomes settled failure when no other
+branch, retry or producer can advance. Failed ancestry alone does not prove an
+independent descendant is blocked. Evaluation must not change RQ task states.
 
-Any 2xx acknowledges receipt. Retry transient network failures, 408, 429 and
-appropriate 5xx responses with bounded backoff and jitter; honor Retry-After
-within the maximum delivery age. Other 4xx and redirects end automatic delivery.
-Persist final exhaustion and permit authorized, rate-limited replay. Numeric
-limits, retry policy, retention and latency objectives need explicit decisions
-and the required parameterization ADR before implementation.
+Callback binding, accepted submission identity and root/parent membership are
+server-controlled. Clients may provide their own callback URL, not nominate an
+existing root/parent. Bind the destination once at admission; descendants inherit
+an opaque reference and cannot replace it. Verify every owned member's root
+binding. Foreign/external prerequisites are dependencies, not payload members.
+Test spoofed metadata, conflicting roots and interleaved cross-client submissions.
 
-## Smallest implementation candidates
+Membership and dependency edges are different. Jobs created by a member inherit
+the root/parent identity through the common enqueue path; an external prerequisite
+is not automatically an owned descendant. Audit bulk enqueue, explicit pipelines,
+callbacks, alternate producers and intentionally detached maintenance work before
+claiming universal coverage. Route/job-type-specific completion detectors are not
+the desired solution; shared metadata or explicit generic membership is acceptable.
 
-First evaluate an indexed observer of explicitly subscribed job IDs. It reads
-terminal RQ state and records an immutable event independently of computation
-workers. This can avoid changes to all enqueue routes and cover terminal state
-written by cancellation or abandoned-job cleanup. A separate subscription call
-after enqueue is a possible minimal API, provided retained fast-completing jobs
-remain observable. No whole-Redis scans or Redis KEYS commands are acceptable.
+The race to prove is child publication versus parent completion. Register membership
+before or atomically with job visibility, account for pending enqueue operations,
+and evaluate a consistent/version-checked snapshot after producers have settled.
+Producer closure includes pending enqueue operations, lifecycle callbacks capable
+of enqueueing, and execution-exit evidence when cancellation leaves a producer
+potentially alive. Task return, ended_at or canceled status alone is insufficient.
+A quiet moment or a parent returning is insufficient. Preserve fail-open notification
+behavior: bookkeeping uncertainty must not change computation outcomes, but must
+mark notification completeness uncertain rather than permit false completion.
+Document persistence/crash gaps and recovery instead of claiming atomic guarantees
+that the selected storage/enqueue integration cannot provide.
 
-Observation must use side-effect-free reads of committed exact-job state, not
-callback-local `job._status`. Do not invoke registry cleanup, enqueue dependents,
-retry jobs, or alter retention. RQ registry enumeration defaults can run cleanup;
-any necessary enumeration must explicitly disable it and have a bounded index.
-The observer reports state established by RQ; it does not repair tasking.
+Computation-side hooks may perform only bounded bookkeeping/signaling. Full graph
+traversal must run independently, or use an incrementally maintained implementation
+whose bounded cost is demonstrated. Never hold computation/dependency locks during
+evaluation or delivery. Measure simultaneous large-batch completion, slow/unavailable
+tracking storage, root-lock contention and evaluator crashes against disabled
+completion/next-job latency; HTTP isolation alone does not prove noninterference.
 
-Before selecting this design, test fast completion, result_ttl=0, short retention,
-job deletion, manual requeue, dispatcher outage and required notification latency.
-The current worker's default result retention is one week; it is not a guarantee
-for every job. Subscription admission must establish supported retention and
-execution semantics without silently changing task retention defaults.
+Use worker terminal transitions as candidate triggers for reevaluating the root;
+they do not themselves prove the hierarchy is terminal. Cancellation and abandonment
+also need coverage, potentially via a bounded reconciliation pass. Terminal event
+creation must be idempotent under simultaneous child completions. Event commit
+must conditionally validate the same membership revision, producer-closure evidence
+and relevant state generation used to establish settlement; a conflict forces
+reevaluation. A checked snapshot followed by an unconditional unique insert is
+insufficient. Test membership/retry/requeue changes between evaluation and commit.
+Callback delivery is outside the tracked computation hierarchy to avoid recursive notifications.
 
-If evidence shows observation cannot meet the agreed contract, evaluate bounded
-post-commit terminal receipts in WepppyRqWorker plus reconciliation. Hooks must
-never perform HTTP. Existing success/failure hooks alone do not cover queued
-cancellation, every abandonment path, or the crash between job commit and receipt.
-No catch-and-log handoff can honestly guarantee no event loss by itself.
+This generic mechanism reports persisted execution outcomes, not scientific validity
+of arbitrary returned results. If a task catches a domain failure and returns
+normally, no job graph can infer that hidden failure. Under accepted Option A,
+clients retrieve domain results separately. Do not add task-reported domain
+outcomes or domain-specific detectors to this release.
 
-Separate durable event creation from delivery attempts. Claim due deliveries
-with expiring leases, conditional updates and idempotency; tolerate worker death
-before/after HTTP acknowledgment. Schedule retries without sleeping inside
-computation workers. Record attempts separately from original RQ job state.
+Delivery runs outside computation capacity. A small dedicated RQ delivery worker
+using existing Redis is a candidate, not yet a selected topology. A separately
+executed bounded dispatcher is another candidate. Short HTTP timeouts alone do
+not make delivery on a normal computation worker nonblocking. Compare the smallest
+options and record resource, recovery and operating costs before selection.
 
-Choose existing PostgreSQL or Redis only after evaluating persistence, eviction,
-retention, access patterns, backups and recovery. Do not label Redis persistence
-as lossless without verifying deployment settings. A PostgreSQL record and an
-RQ enqueue are not one transaction; if subscriptions are attached at submission,
-specify admission and ambiguous-commit recovery rather than reporting a failed
-submission after a computation job was actually accepted.
+The earlier indexed-observer proposal meant periodically reading only explicitly
+subscribed job IDs. It is no longer the prescribed first architecture. A bounded
+read-only reconciliation pass may be useful to recover a missed handoff, but must
+be justified by failure evidence. Never use registry APIs that implicitly run
+cleanup, mutate task state or extend job retention.
 
-Define separate acknowledgment boundaries for subscription acceptance, durable
-event capture and receiver acknowledgment. Publish the selected datastore recovery
-point and possible loss window. Current Redis startup defaults include AOF
-`everysec` and snapshots; verify effective settings. An acknowledged write is not
-a zero-loss recovery guarantee. Do not change shared persistence globally to
-manufacture a webhook guarantee without separately authorized evidence.
+## Reliability and audit proposal
 
-Independent delivery execution needs a bounded deployment owner, resource budget,
-restart behavior and backlog controls. Evaluate reuse of existing scheduling and
-storage before adding a queue or service. Record evidence and operational cost
-for any escalation. Native RQ webhooks and inline callbacks fail the required
-worker-isolation condition because they perform blocking delivery.
+Retain callback intent before a worker can race ahead of submission completion.
+Specify atomicity and ambiguous-submission recovery using the existing enqueue
+patterns. Do not report "submission failed" after creating a computation job merely
+because webhook bookkeeping failed. Define whether malformed webhook admission
+rejects submission before enqueue and how webhook-store unavailability is reported.
 
-Rollback must distinguish admission disabled, dispatch paused and component
-stopped. Define in-flight attempt completion, lease drain/expiry, whether retry age
-continues during pause, retained keys/records, backward-compatible schema access
-and resumption after restore. Preserve pending and acknowledged-but-unrecorded
-deliveries, allowing deduplicated redelivery. Never flush shared Redis or downgrade
-RQ as a webhook rollback. Values and pause semantics remain ratification gates.
+Distinguish accepted callback intent, captured operation outcome and receiver
+acknowledgment. Storage/retention and crash recovery must make their loss windows
+explicit; neither log-only handoff nor Redis AOF everysec implies zero loss.
+Bound attempt history, pending count/bytes and per-client/global resource use.
+Retain a sanitized audit record including event/job ID, destination identity,
+attempt timestamps, HTTP status/error category and final delivered/exhausted state.
+Unknown membership/outcome must have a published bounded evaluation/retention
+window and an audited `outcome_unavailable` terminal notification-tracking state,
+not a fabricated computation failure. Specify which minimal membership/outcome
+records survive that window without silently extending task TTLs. Test deleted or
+expired children, result_ttl=0, orphan registrations and evaluator outages. No new
+consumer history API is required for this operator-visible resolution.
 
-## Implementation milestones after ratification
+No delivery-history API, manual replay API or endpoint management API is required
+by the current request; evaluate those separately if needed.
 
-1. Inventory pilot clients/routes, identity and retention contracts. Agree event
-   scope, delivery guarantee, subscription API, revocation and numeric limits.
-   Test the minimal observer candidate and record uncovered cases. Pre-checkpoint
-   probes are disposable synthetic experiments with isolated Redis and HTTP test
-   servers; they may not modify production paths, shared job state or forest
-   runtime, read live job data, call external client endpoints or restart stacks.
-   Scaffold the work package before sustained experimental execution. Integrated
-   activation requires the accepted checkpoint and scoped environment authority.
-2. Scaffold a work package and active ExecPlan. Promote the agreed normative
-   contract to `docs/schemas/rq-webhook-contract.md`; amend affected auth/API and
-   runtime contracts without reopening the upgrade package. Complete the
-   contract-first decision checkpoint, two independent reviews and standalone
-   ancestor commit before implementation.
-3. Implement registration/subscription authorization and durable records with
-   migrations, idempotency, secret handling and canonical errors. Preserve all
-   webhook-absent requests and existing submission responses.
-4. Implement observation or evidenced receipt/reconciliation design, then bounded
-   signed delivery, retry scheduling, history, disable and replay. Add metrics for
-   observation lag, pending age, attempts, exhausted delivery and authorization
-   rejection. Redact URLs, query credentials, secrets and response bodies.
-5. Run targeted security and lifecycle regression tests plus local integrated
-   acceptance. Keep activation opt-in. Publish client and operator documentation,
-   rollback and outstanding-event handling. Production rollout is separate.
+Proposed retry classes: transient connection failures, 408, 429 and selected 5xx;
+no ordinary 4xx or redirect retries. Honor Retry-After only inside the documented
+budget. Define explicit pause/resume and outstanding-attempt recovery. Do not alter
+shared Redis persistence or flush task data to satisfy notification durability.
 
-## Acceptance matrix
+## Implementation plan and acceptance
 
-Test endpoint absence, empty state, valid registration, token renewal, cross-client
-access, revoked access, disabled endpoint, secret rotation and repeated requests.
-Test bounded grants across token expiry, narrower renewal, credential/session
-revocation, removed run access and authorization outages. Test endpoint activation,
-cross-client fairness under quota abuse, and missing/rotated encryption keys.
-Exercise success, failure with retries, queued cancellation, running stop, timeout,
-workhorse death, abandonment, parent-before-child completion and post-terminal
-requeue. Missing/expired state must produce explicit observation failure.
-Test retained already-terminal jobs, ambiguous subscription commits, idempotency
-conflicts, simultaneous observers and delayed delivery across requeue. Assert the
-raw-parent-finished/aggregate-child-failed distinction. Prove observation performs
-no RQ writes or registry cleanup and reads only committed outcomes.
-Include an expired started-registry entry whose job and dependency graph remain
-unchanged by observation. Ordinary RQ maintenance remains responsible for it.
+The [implementation package](../work-packages/20261027_rq_webhooks/package.md)
+tracks this revised direction. First map existing hierarchy registration and dependency
+semantics across culvert and WEPP as representative cases. Define the generic
+settled predicate, root membership and minimal independent delivery placement, then settle wire payload, retry/timeout,
+retention, audit and optional-signing decisions. Retain a scoped synthetic prototype
+with no live stack changes before the canonical checkpoint.
 
-Inject hung receivers, connection refusal, TLS/DNS errors, redirect chains,
-rebinding, prohibited IPv4/IPv6 destinations, oversize/slow responses, 429 and
-5xx. Verify signatures, deduplication, retry exhaustion, crash recovery, duplicate
-dispatch claims and acknowledgment loss with actual persistence and HTTP servers.
+Promote the accepted contract to `docs/schemas/rq-webhook-contract.md`, amend current
+response/runtime/auth contracts as needed, record numeric decisions in an ADR, and
+obtain two independent contract reviews before the standalone ancestor commit.
+Earlier reviews concern the superseded design and do not approve this revision.
+The [2026-10-28 hierarchy review](../work-packages/20261027_rq_webhooks/artifacts/20261028_hierarchy_review.md)
+records current findings and their dispositions.
 
-Under receiver failure and delivery backlog, verify unchanged task outcomes,
-strict dependency release, approved failure finalizers, cancellation containment,
-worker capacity and representative generated artifacts. Measure shared datastore
-load against a webhook-disabled baseline and enforce agreed resource/latency
-bounds. Validate with actual forest identities, mounts and orchestration when
-execution is authorized. Unit tests alone cannot close these boundaries.
-Exercise sustained backlog and datastore pressure, disable/pause/restart with
-outstanding leases, and restore after receiver acknowledgment but before local
-receipt persistence. Verify retention and the published recovery loss boundary.
+Activate callback admission only after verifying instrumentation across all
+supported producers/workers, including bulk/pipeline paths. Mixed/uninstrumented
+paths must reject unsupported callback admission before computation enqueue or
+explicitly retain incomplete tracking; never claim a complete hierarchy. Admission
+disable/rollback must drain or preserve tracking for accepted callbacks. Test a
+mixed deployment and rollback while parents still create children.
 
-## Review status
+Implement only after that checkpoint and scoped execution authorization. Validate
+actual API submissions with per-request URLs, token expiry during a long workflow,
+culvert partial outcomes, full WEPP postprocessing and failing prerequisites that
+leave final jobs deferred. Test missing callback state, fast completion, retries,
+duplicate delivery, ambiguous enqueue, receiver hang/timeout/429/5xx, dispatcher
+crashes and audit loss/recovery. Test SSRF/TLS/redirect controls and quota fairness.
 
-Independent correctness, security and operations findings and their drafting-stage
-dispositions are retained in the [review record](rq-webhooks-draft-review-20261027.md).
-Resolving wording and decision gates is not runtime validation, operator
-ratification, or the formal contract-first checkpoint review.
+Compare computational throughput and model input/output/report artifacts with a
+webhook-disabled baseline under hung receivers and backlog. Use real storage and
+HTTP boundaries, then authorized forest identities/mounts/orchestration. Native
+RQ webhooks remain excluded. Do not close on unit tests or job success alone.
 
-## References
+## References and review status
 
-- [RQ response and runtime contract](../schemas/rq-response-contract.md)
-- [RQ migration and recovery](rq-2-12-migration.md)
-- [Earlier integration proposal](webhook_integration_strategy.md)
-- [Earlier implementation guide](webhook_implementation_guide.md)
-- [RQ native webhook documentation](https://python-rq.org/docs/#webhooks)
-- [OWASP webhook security guidance](https://cheatsheetseries.owasp.org/cheatsheets/Webhook_Security_Cheat_Sheet.html)
+- [RQ response/runtime contract](../schemas/rq-response-contract.md)
+- [Historical draft review](rq-webhooks-draft-review-20261027.md)
+- [Current decision register](../work-packages/20261027_rq_webhooks/artifacts/decision_register.md)
 
-The earlier proposal and guide contain illustrative, unimplemented callback-based
-designs. They are historical design context, not instructions to enable inline
-HTTP delivery or evidence that their listed routes already support webhooks.
+The 2026-10-27 review findings retain useful correctness/noninterference tests.
+Registered endpoints, mandatory durable grant/revalidation infrastructure,
+destination challenges and mandatory secret encryption are no longer selected
+requirements. The operator's 2026-10-28 client-facing direction supersedes them. Later clarification
+requires generic hierarchical terminal detection, not per-workflow completion adapters.

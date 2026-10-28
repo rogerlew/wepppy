@@ -14,6 +14,12 @@
 Creation access policy and its conditional 403/503 errors are defined in
 [Project Creation Access Policy](project-creation-policy.md).
 
+RQ-WH-01 accepted amendment (2026-10-28 19:56 UTC; implementation pending):
+[operation webhooks](rq-webhook-contract.md) specify optional callback admission,
+idempotent receipt recovery and an additive `webhook` response object for the
+named routes. Existing no-callback responses and polling remain unchanged. Native
+RQ webhooks remain disabled; the independent application dispatcher is separate
+from the closed runtime migration. No deployment authority follows from this text.
 ## Auth expectations
 - Export endpoints require `rq:export` and run access checks.
 - Job polling endpoints are open by default under

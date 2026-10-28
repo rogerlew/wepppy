@@ -190,6 +190,12 @@ Rules:
 - `token_class=mcp` uses `sub` only.
 - Never store JWTs, email, or Authorization headers in job metadata.
 
+RQ-WH-01 accepted amendment (2026-10-28 19:56 UTC; implementation pending):
+[operation callback authority](../schemas/rq-webhook-contract.md) is captured
+after normal submission authorization. Dispatch does not revalidate an expired
+submission token; it uses the accepted intent, never the credential. This grants
+no additional token scopes or resource access and does not change polling or
+new-request authentication. Emergency dispatch pause is an operator control.
 ## Token issuance utility
 
 The script `_scripts/issue_auth_token.py` issues tokens from the CLI:

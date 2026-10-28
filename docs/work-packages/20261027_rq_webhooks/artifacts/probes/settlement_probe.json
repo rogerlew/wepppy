@@ -1,0 +1,21 @@
+{
+  "actor_capture": {
+    "enqueue_call": true,
+    "enqueue_job": false,
+    "enqueue_many": false
+  },
+  "caller_pipeline": "returned object precedes publication",
+  "canceled_allow_failure": "deferred",
+  "conditional_commit": "WATCH rejects stale revision; unique insert alone is insufficient",
+  "post_enqueue_parent_registration": "visible child absent from parent metadata",
+  "redis_server": "7.0.15",
+  "redis_version": "6.2.0",
+  "rq_version": "2.12.0",
+  "stopped_observer": "deferred until explicit existing helper release",
+  "strict_and_allow_failure": {
+    "A": "failed",
+    "B": "deferred",
+    "C": "deferred",
+    "D": "finished"
+  }
+}

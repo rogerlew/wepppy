@@ -57,6 +57,13 @@ These routes combine non-file params with optional/conditional upload parts.
 | `/api/runs/{runid}/{config}/run-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Required for `user_defined_areas` when no path provided |
 | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Same upload rules as `run-omni-contrasts` |
 
+RQ-WH-01 accepted amendment (2026-10-28 19:56 UTC; implementation pending):
+`/api/culverts-wepp-batch/` accepts an optional multipart `webhook_url` text field
+and, when present, requires the Idempotency-Key header under the
+[webhook admission contract](rq-webhook-contract.md#Admission-and-recovery-matrix).
+Validate callback syntax before extraction; bind the computed upload digest for
+recovery. Existing archive limits, upload aliases and semantic validation remain
+mandatory. Do not retain the raw callback in project uploads or archives.
 ## Error Contract Requirements
 - Upload validation failures must return canonical 4xx responses with `error.message`, `error.details`, `error.code`, and top-level `error_id` consistent with `docs/schemas/rq-response-contract.md`.
 - MUST return specific user-visible failure reasons (`error.message`) for validation/business failures.

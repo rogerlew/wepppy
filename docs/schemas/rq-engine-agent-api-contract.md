@@ -83,6 +83,12 @@ Polling hardening:
   - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT`
   - `RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS`
 
+RQ-WH-01 accepted amendment (2026-10-28 19:56 UTC; implementation pending):
+[operation webhooks](rq-webhook-contract.md) bind one callback at authenticated
+submission. Later token expiry does not revoke that accepted callback. New
+submissions and idempotent retries still authenticate and authorize normally;
+callbacks carry no bearer token and confer no resource access. Only named
+submission routes accept the proposed field/header and additive response.
 ## Scope Contract
 Core scopes used by agent-facing routes:
 
