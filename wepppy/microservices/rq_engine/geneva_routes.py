@@ -37,6 +37,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
 from wepppy.rq.job_dependencies import reconcile_deferred_workflow
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -509,6 +510,10 @@ async def prepare_hrus(runid: str, config: str, request: Request) -> JSONRespons
             details="Failed to authorize request",
         )
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         payload = await parse_request_payload(request, boolean_fields=("force_rebuild",))
         normalized_payload = _normalize_prepare_request(payload)
@@ -575,6 +580,10 @@ async def build_frequency_panel(runid: str, config: str, request: Request) -> JS
             details="Failed to authorize request",
         )
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         payload = await parse_request_payload(request, boolean_fields=("rebuild",))
         geneva = _ensure_geneva_controller(runid, config)
@@ -640,6 +649,10 @@ async def run_batch(runid: str, config: str, request: Request) -> JSONResponse:
             details="Failed to authorize request",
         )
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         payload = await parse_request_payload(request)
         geneva = _ensure_geneva_controller(runid, config)
@@ -700,6 +713,10 @@ async def run_workflow(runid: str, config: str, request: Request) -> JSONRespons
             code="unauthorized",
             details="Failed to authorize request",
         )
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         payload = await parse_request_payload(request)

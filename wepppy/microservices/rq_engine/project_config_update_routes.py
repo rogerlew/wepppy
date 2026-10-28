@@ -41,6 +41,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, authorize_run_mutation, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, validation_error_response
+from .webhooks import reject_unsupported_payload
 
 __all__ = ["router"]
 
@@ -625,10 +626,14 @@ async def update_apply(runid: str, config: str, request: Request) -> JSONRespons
     _claims, failure = _authorize(request, runid, mutation=True)
     if failure is not None:
         return failure
+
     if not project_config_update_enabled():
         return error_response("Project config updates are disabled.", status_code=409, code="config_update_unavailable")
     try:
         payload = await request.json()
+        webhook_error = reject_unsupported_payload(payload)
+        if webhook_error is not None:
+            return webhook_error
         if not isinstance(payload, dict) or not isinstance(payload.get("preview_id"), str):
             raise ConfigUpdateError("Request requires preview_id")
     except (ConfigUpdateError, ValueError) as exc:

@@ -41,6 +41,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 from .upload_helpers import UploadError, save_upload_file
+from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
@@ -569,6 +570,9 @@ async def _run_omni(
     omni = Omni.getInstance(wd)
 
     payload = await parse_request_payload(request)
+    webhook_error = reject_unsupported_payload(payload)
+    if webhook_error is not None:
+        return webhook_error
     try:
         raw_json = await request.json()
     except (ValueError, UnicodeDecodeError):
@@ -656,6 +660,9 @@ async def _run_omni_contrasts(
     omni = Omni.getInstance(wd)
 
     payload = await parse_request_payload(request)
+    webhook_error = reject_unsupported_payload(payload)
+    if webhook_error is not None:
+        return webhook_error
     try:
         raw_json = await request.json()
     except (ValueError, UnicodeDecodeError):
@@ -1096,6 +1103,10 @@ async def delete_omni_contrasts(runid: str, config: str, request: Request) -> JS
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine delete-omni-contrasts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     return await _delete_omni_contrasts(runid, config)
 

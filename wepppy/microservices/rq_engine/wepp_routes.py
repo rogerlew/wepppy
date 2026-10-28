@@ -28,6 +28,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from . import webhooks
 from .wepp_run_payload import (
     WEPP_BOOLEAN_FIELDS,
     WeppRunPayloadValidationError,
@@ -112,6 +113,7 @@ async def _handle_run_wepp_request(
     job_fn,
     job_key: str,
     require_watershed_abstraction: bool = False,
+    claims: dict | None = None,
 ) -> JSONResponse:
     try:
         wd = get_wd(runid)
@@ -129,7 +131,28 @@ async def _handle_run_wepp_request(
         if invalid_abstraction_response is not None:
             return invalid_abstraction_response
 
-    payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+    callback = None
+    try:
+        operation = request.url.path.rstrip('/').rsplit('/', 1)[-1]
+        options = await webhooks.request_options(request, operation=operation)
+        if options and (_is_base_project_context(runid, config)
+                        or getattr(Wepp.getInstance(wd), 'run_group', '') == 'batch'):
+            raise webhooks.AdmissionError('webhook_not_supported', 400)
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        if options:
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+                callback = webhooks.Submission(connection, options=options, claims=claims or {},
+                                               operation=operation, resource={'type': 'run', 'id': runid},
+                                               payload={key: value for key, value in payload.items() if key != 'webhook_url'})
+                request.state.webhook_submission = callback
+                replay = callback.replay()
+                if replay is not None:
+                    return replay
+        payload.pop('webhook_url', None)
+    except webhooks.AdmissionError as exc:
+        return webhooks.response_error(exc)
+    except redis.RedisError:
+        return webhooks.response_error(webhooks.AdmissionError('webhook_unavailable', 503))
     try:
         wepp = apply_wepp_run_payload(
             wd,
@@ -178,21 +201,29 @@ async def _handle_run_wepp_request(
                 prep.remove_timestamp(TaskEnum.run_omni_scenarios)
                 prep.remove_timestamp(TaskEnum.run_path_cost_effective)
                 q = Queue(connection=redis_conn)
-                replacement_job_id = new_rq_job_id()
+                replacement_job_id = callback.job_id if callback else new_rq_job_id()
                 prep.set_rq_job_id(job_key, replacement_job_id)
                 _persist_wepp_job_hint(wepp, job_id=replacement_job_id, job_key=job_key)
                 lease.checkpoint()
-                job = q.enqueue_call(
-                    job_fn,
-                    (runid,),
-                    timeout=RQ_TIMEOUT,
-                    job_id=replacement_job_id,
-                )
+                if callback:
+                    callback.connection = redis_conn
+                    callback.store.connection = redis_conn
+                    callback.enqueue(q, job_fn, args=(runid,), timeout=RQ_TIMEOUT)
+                    return JSONResponse({'job_id': callback.job_id, 'webhook': {'status': 'accepted'}})
+                else:
+                    job = q.enqueue_call(
+                        job_fn,
+                        (runid,),
+                        timeout=RQ_TIMEOUT,
+                        job_id=replacement_job_id,
+                    )
             finally:
                 lock_context.__exit__(None, None, None)
         if job is None:
             raise RuntimeError("WEPP enqueue returned no job object")
         return JSONResponse({"job_id": job.id})
+    except webhooks.AdmissionError as exc:
+        return webhooks.response_error(exc)
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
     except (OSError, redis.RedisError):
@@ -222,6 +253,7 @@ async def _handle_run_wepp_request(
         },
     ),
 )
+@webhooks.submission_boundary
 async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -236,6 +268,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         runid,
         config,
         request,
+        claims=claims,
         job_fn=run_wepp_rq,
         job_key="run_wepp_rq",
         require_watershed_abstraction=True,
@@ -263,6 +296,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         },
     ),
 )
+@webhooks.submission_boundary
 async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -277,6 +311,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         runid,
         config,
         request,
+        claims=claims,
         job_fn=run_wepp_watershed_rq,
         job_key="run_wepp_watershed_rq",
         require_watershed_abstraction=True,
@@ -307,6 +342,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         },
     ),
 )
+@webhooks.submission_boundary
 async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -321,6 +357,7 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
         runid,
         config,
         request,
+        claims=claims,
         job_fn=prep_wepp_watershed_rq,
         job_key="prep_wepp_watershed_rq",
     )

@@ -24,6 +24,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,10 @@ async def prepare_roads(runid: str, config: str, request: Request) -> JSONRespon
         logger.exception("rq-engine prepare-roads auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         job_id = _enqueue_roads_job(runid, func=run_roads_prepare_rq, prep_key="run_roads_prepare_rq")
         return JSONResponse({"job_id": job_id}, status_code=202)
@@ -128,6 +133,10 @@ async def run_roads(runid: str, config: str, request: Request) -> JSONResponse:
     except Exception:
         logger.exception("rq-engine run-roads auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         job_id = _enqueue_roads_job(runid, func=run_roads_rq, prep_key="run_roads_rq")

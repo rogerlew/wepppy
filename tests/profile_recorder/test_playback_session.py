@@ -427,3 +427,21 @@ def test_playback_session_guard_blocks_source_run(monkeypatch: pytest.MonkeyPatc
 
     with pytest.raises(SandboxViolationError):
         session.run()
+
+
+def test_playback_omits_captured_callback_and_idempotency(tmp_path, monkeypatch):
+    callback = 'https://example.com/private-capability?secret=query-capability'
+    endpoint = 'rq-engine/api/runs/original-run/demo-config/run-wepp'
+    events = [
+        {'stage': 'request', 'id': '1', 'method': 'POST', 'endpoint_suffix': endpoint,
+         'requestMeta': {'jsonPayload': json.dumps({'webhook_url': callback,
+                           'idempotency_key': 'captured-request-key', 'other': 'retained'})}},
+        {'stage': 'response', 'id': '1', 'status': 200, 'ok': True, 'endpoint_suffix': endpoint},
+    ]
+    session, recording, _, _ = _prepare_playback_session(tmp_path, monkeypatch, event_specs=events)
+    monkeypatch.setattr(PlaybackSession, '_wait_for_job', lambda *args, **kwargs: None)
+    session.run()
+    assert recording.calls
+    assert 'private-capability' not in json.dumps(recording.calls)
+    assert 'captured-request-key' not in json.dumps(recording.calls)
+    assert PlaybackSession._extract_form_values({'formValues': {'webhook_url': callback, 'other': 'retained'}}) == {'other': 'retained'}

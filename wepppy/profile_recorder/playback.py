@@ -194,6 +194,10 @@ class PlaybackSession:
             if isinstance(summary, dict) and summary.get("jsonPayload"):
                 try:
                     json_payload = json.loads(summary["jsonPayload"])
+                    if isinstance(json_payload, dict):
+                        json_payload.pop('webhook_url', None)
+                        json_payload.pop('Idempotency-Key', None)
+                        json_payload.pop('idempotency_key', None)
                 except json.JSONDecodeError:
                     self.results.append((request_id, f"{effective_path}: invalid JSON payload"))
                     continue
@@ -812,7 +816,8 @@ class PlaybackSession:
             return {}
         values = request_meta.get("formValues")
         if isinstance(values, dict):
-            return dict(values)
+            return {key: value for key, value in values.items()
+                    if key.lower().replace('-', '_') not in {'webhook_url', 'idempotency_key'}}
         return {}
 
     def _apply_recorded_form_values(self, data: Dict[str, Any], recorded: Dict[str, Any]) -> None:

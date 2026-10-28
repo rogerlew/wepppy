@@ -78,6 +78,21 @@ def main():
     from wepppy.nodb.status_messenger import StatusMessenger
     from wepppy.rq.rq_worker import WepppyRqWorker
 
+    if os.getenv('RQ_WEBHOOK_PROFILE_HOOKS'):
+        from wepppy.rq import webhook_hooks
+        import functools
+        def timed(name, function):
+            @functools.wraps(function)
+            def measured(*args, **kwargs):
+                start = time.monotonic()
+                try:
+                    return function(*args, **kwargs)
+                finally:
+                    print('WEBHOOK_TIMING ' + json.dumps({'hook': name, 'seconds': time.monotonic() - start}), flush=True)
+            return measured
+        for name in ('begin_attempt', 'execution_returned', 'execution_exited', '_append_receipt'):
+            setattr(webhook_hooks, name, timed(name, getattr(webhook_hooks, name)))
+
     connection = redis.Redis(unix_socket_path=args.socket, db=2)
     StatusMessenger._client = connection
     queue = Queue(args.queue, connection=connection)

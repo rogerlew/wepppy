@@ -51,6 +51,7 @@ from .responses import (
     error_response_with_traceback,
     validation_error_response,
 )
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -457,6 +458,10 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
         logger.exception("rq-engine export_ermit_submit auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         wd = _resolve_export_wd(runid, request)
         job_id = await _run_sync(
@@ -789,6 +794,10 @@ async def export_features_submit(runid: str, config: str, request: Request):
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine export_features_submit auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     payload, payload_error = await _parse_features_export_submit_payload(request)
     if payload_error is not None:

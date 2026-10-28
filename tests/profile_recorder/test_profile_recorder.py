@@ -202,3 +202,35 @@ def test_append_event_allow_body_values_redacts_sensitive_fields(tmp_path, monke
         "note": "safe",
     }
     assert meta["bodyPreview"] == "preview-value"
+
+
+@pytest.mark.unit
+def test_callback_capability_not_persisted_even_with_body_capture(tmp_path, monkeypatch):
+    run_dir = tmp_path / 'callback-run'
+    run_dir.mkdir()
+    recorder = ProfileRecorder(config=RecorderConfig(data_repo_root=tmp_path / 'data',
+                                                     assembler_enabled=True, allow_body_values=True))
+    monkeypatch.setattr('wepppy.profile_recorder.profile_recorder.get_wd', lambda runid: run_dir)
+    url = 'https://example.com/private-capability?secret=query-capability'
+    body = json.dumps({'webhook_url': url, 'other': 'retained'})
+    recorder.append_event({'runId': 'callback-run', 'id': 'callback-event', 'stage': 'request',
+                           'requestMeta': {'jsonPayload': body, 'bodyPreview': body,
+                                           'formValues': {'webhook_url': url},
+                                           'headers': {'Idempotency-Key': 'callback-request-key'}}},
+                          user=SimpleNamespace(is_authenticated=False))
+    for path in tmp_path.rglob('*.jsonl'):
+        raw = path.read_text()
+        assert 'private-capability' not in raw and 'query-capability' not in raw
+        assert 'callback-request-key' not in raw
+
+
+@pytest.mark.parametrize('preview', [
+    '\ufeff{"webhook_url":"https://example.com/capability-secret"}',
+    '{"webhook_url":"https://example.com/private-capability?secret=query-capability"}',
+    'webhook_url=https%3A%2F%2Fexample.com%2Fprivate-capability%3Fsecret%3Dquery-capability',
+    '{"webhook_url":"https://example.com/private-capability',
+])
+def test_raw_string_preview_never_retains_callback(preview, tmp_path):
+    recorder = ProfileRecorder(config=RecorderConfig(data_repo_root=tmp_path, assembler_enabled=False, allow_body_values=True))
+    event = recorder._sanitize_event({'requestMeta': {'bodyType': 'string', 'bodyPreview': preview}})
+    assert 'bodyPreview' not in event['requestMeta']

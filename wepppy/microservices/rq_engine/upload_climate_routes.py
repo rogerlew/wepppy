@@ -29,6 +29,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
+from .webhooks import reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +147,9 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
             )
 
         form = await request.form()
+        webhook_error = reject_unsupported_payload(form)
+        if webhook_error is not None:
+            return webhook_error
         upload = _extract_upload(form, "input_upload_cli")
         if upload is None:
             return upload_failure("input_upload_cli must be provided")

@@ -1,6 +1,6 @@
 # ADR-0109: Bound RQ webhook tracking and delivery
 
-Status: Accepted 2026-10-28 19:56 UTC; implementation pending  
+Status: Accepted 2026-10-28 19:56 UTC; implementation under acceptance
 Date: 2026-10-28
 
 ## Context
@@ -59,7 +59,7 @@ to remaining age. Dispatch pause does not reset time or attempt counts.
 Decision Venue: user-directed kickoff execution, 2026-10-28, UTC.  
 Participants Present: requesting operator and Codex (asynchronous conversation).  
 Decision Owner(s): requesting operator; exact matrix approved 2026-10-28 19:56 UTC.  
-Implementer(s): Codex authored proposal only; implementation pending.
+Implementer(s): Codex; runtime implementation follows the approved checkpoint.
 
 Accepted direction: short independent delivery, limited retries, and suggested
 10-second budget. The operator explicitly approved all exact values with the RQ-WH-01 matrix. No model parameterization changes.
@@ -88,3 +88,26 @@ computation behavior is preserved. Disable admission first, drain accepted track
 retain sanitized audit, and keep worker instrumentation through producer drain.
 Dispatch pause is an emergency control, not retention extension. Local implementation/integration is authorized by the checkpoint approval;
 production rollout remains excluded.
+
+### Implementation budget allocation (2026-10-28)
+
+The total 50 ms hook limit is unchanged. Receipt construction has at most half
+that budget and streams JSON with deadline checks rather than recursively copying
+large dependency tuples. Notification connections use 5 ms connect/read timeouts
+and no retry. Exhaustion suppresses closure without changing computation.
+
+Actual model acceptance found a short-lived adopted multiprocessing helper after
+workhorse exit. A subscribed supervisor may spend at most 25 ms of the same total
+budget waiting on pidfds, followed by positive child/protected-scheduler checks.
+It never kills helpers or treats elapsed time as exit. Closure carries one absolute
+deadline into receipt construction and reserves the remaining half for persistence;
+worker retirement behavior is preserved. This bounded observation avoids a new
+reaper service; longer-lived or uncertain producers remain unclosed.
+
+### Evaluator scheduling allocation
+
+The existing 100 ms scheduler budget is shared across active evaluators rather
+than multiplied by the number of roots. Rotate after each bounded generator step.
+This avoids consecutive per-root bursts observed while investigating failed
+backlog measurements, preserves fairness and adds no new numeric policy. A running
+step may complete after the cooperative deadline; workers never traverse the graph.

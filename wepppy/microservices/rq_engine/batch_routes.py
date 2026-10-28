@@ -16,6 +16,9 @@ from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 
 from .feature_access import require_feature_access
+from anyio import from_thread
+from .webhooks import reject_unsupported
+
 from .auth import AuthError, require_jwt
 from .responses import error_response, error_response_with_traceback, validation_error_response
 
@@ -61,6 +64,10 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
     except Exception:
         logger.exception("rq-engine run-batch auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = from_thread.run(reject_unsupported, request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         batch_name = _validate_batch_name(batch_name)
@@ -134,6 +141,10 @@ def delete_batch(batch_name: str, request: Request) -> JSONResponse:
     except Exception:
         logger.exception("rq-engine delete-batch auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = from_thread.run(reject_unsupported, request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         batch_name = _validate_batch_name(batch_name)

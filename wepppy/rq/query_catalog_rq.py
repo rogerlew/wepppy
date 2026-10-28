@@ -193,15 +193,17 @@ def enqueue_catalog_refresh(
                 ticket = admission.prepare(pipeline, queue, job_id=identifier, kind="refresh",
                                            configuration=catalog_worker_configuration(), scope=current,
                                            pilot_id=pilot_id, controller_token=controller_token)
-                queue.enqueue_call(
-                    refresh_query_catalog_rq,
-                    kwargs={"wd": str(resolved.base), "scope_id": scope_id,
-                            "incarnation": resolved.incarnation,
-                            "configuration": catalog_worker_configuration(), "pilot_id": pilot_id},
-                    job_id=identifier, description=DESCRIPTION,
-                    timeout=timeout, result_ttl=result_ttl,
-                    meta={"query_catalog_maintenance": True}, pipeline=pipeline,
-                )
+                from wepppy.rq.webhook_hooks import detached_catalog_maintenance
+                with detached_catalog_maintenance():
+                    queue.enqueue_call(
+                        refresh_query_catalog_rq,
+                        kwargs={"wd": str(resolved.base), "scope_id": scope_id,
+                                "incarnation": resolved.incarnation,
+                                "configuration": catalog_worker_configuration(), "pilot_id": pilot_id},
+                        job_id=identifier, description=DESCRIPTION,
+                        timeout=timeout, result_ttl=result_ttl,
+                        meta={"query_catalog_maintenance": True}, pipeline=pipeline,
+                    )
                 pipeline.hset(Job.key_for(identifier), "query_catalog_scope", scope_id)
                 pipeline.set(key, identifier)
                 admission.commit(pipeline, ticket)

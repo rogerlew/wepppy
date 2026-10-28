@@ -28,6 +28,7 @@ from wepppy.rq.postfire_debris_flow_rq import upload_dnbr_rq, run_m1_rq, run_m3_
 from wepppy.rq.submission_recovery import rq_submission_lock, enqueue_tracked_rq_job, RqSubmissionConflict, RqEnqueueVerificationError
 from wepppy.weppcloud.utils.helpers import get_wd
 from rq import Queue
+from .webhooks import reject_unsupported_payload
 from .auth import AuthError, authorize_run_access, require_jwt
 from .responses import error_response
 from .openapi import agent_route_responses, rq_operation_id
@@ -208,6 +209,9 @@ async def upload(runid:str,config:str,request:Request):
         bounded=Request(request.scope,receive)
         async with upload_form(bounded) as form:
             data=pairs_unique(form.multi_items())
+            webhook_error = reject_unsupported_payload(data)
+            if webhook_error is not None:
+                return webhook_error
             if set(data)-{'file','companion','scale_mode','scale_factor','add_offset'}:invalid('Unexpected upload field.')
             values={k:v for k,v in data.items() if k not in ('file','companion')}
             if any(not isinstance(v,str) or len(v.encode())>256 for v in values.values()):invalid('Invalid upload option.')
@@ -266,7 +270,11 @@ async def upload(runid:str,config:str,request:Request):
         extra={400:'Invalid request.',404:'No accepted file or retained candidate.',409:'Busy or changed project data.',413:'Upload limit exceeded.',422:'Required project data unavailable.',503:'Service unavailable.'}))
 async def retry(runid:str,config:str,request:Request):
     try:
-        wd=context(request,runid,config,True);data=await json_body(request)
+        wd=context(request,runid,config,True)
+        data=await json_body(request)
+        webhook_error = reject_unsupported_payload(data)
+        if webhook_error is not None:
+            return webhook_error
         if set(data)-{'candidate_id','scale_mode','scale_factor','add_offset'}:invalid('Unexpected retry field.')
         selected=encoding(data)
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as conn:
@@ -295,7 +303,11 @@ async def retry(runid:str,config:str,request:Request):
         extra={400:'Invalid request.',404:'No accepted file or retained candidate.',409:'Busy or changed project data.',413:'Upload limit exceeded.',422:'Required project data unavailable.',503:'Service unavailable.'}))
 async def run(runid:str,config:str,request:Request):
     try:
-        wd=context(request,runid,config,True);data=await json_body(request)
+        wd=context(request,runid,config,True)
+        data=await json_body(request)
+        webhook_error = reject_unsupported_payload(data)
+        if webhook_error is not None:
+            return webhook_error
         legacy = request.url.path.endswith('/run-m1')
         if set(data) - ({'frequency_source'} if legacy else {'model', 'frequency_source'}):invalid('Unexpected model option.')
         model = 'M1' if legacy else data.get('model')

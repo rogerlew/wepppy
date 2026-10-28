@@ -50,6 +50,8 @@ from wepppy.weppcloud.utils.feature_access_identity import principal_claim
 from .auth import AuthError, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, validation_error_response
+from . import webhooks
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +156,7 @@ def _enqueue_culvert_job(
     args: list[str],
     meta: dict[str, str],
     before_enqueue: Callable[[], None] | None = None,
+    callback: webhooks.Submission | None = None,
 ) -> str:
     batch_uuid = _canonical_batch_uuid(batch_uuid)
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -194,10 +197,16 @@ def _enqueue_culvert_job(
                 lease.checkpoint()
                 before_enqueue()
                 lease.checkpoint()
-            job_id = new_rq_job_id()
+            job_id = callback.job_id if callback else new_rq_job_id()
             runner.set_rq_job_id(job_key, job_id)
             lease.checkpoint()
             queue = Queue("batch", connection=redis_conn)
+            if callback:
+                callback.connection = redis_conn
+                callback.store.connection = redis_conn
+                return callback.enqueue(queue, func, args=args, timeout=CULVERT_BATCH_TIMEOUT, meta=meta,
+                                        response={'job_id': job_id, 'culvert_batch_uuid': batch_uuid,
+                                                  'status_url': f'/rq-engine/api/jobstatus/{job_id}'})
             job = queue.enqueue_call(
                 func=func,
                 args=args,
@@ -226,6 +235,31 @@ def _mint_culvert_browse_token(batch_uuid: str, *, subject: str, principal) -> d
     )
 
 
+def _callback_browse_response(callback, claims, principal) -> JSONResponse:
+    try:
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+            callback.store.connection = connection
+            root = callback.store.read(callback.job_id)
+    except redis.RedisError:
+        return webhooks.response_error(webhooks.AdmissionError('webhook_admission_unknown', 503, callback.job_id))
+    if root is None:
+        return webhooks.response_error(webhooks.AdmissionError('webhook_admission_unknown', 503, callback.job_id))
+    payload = dict(root['response'])
+    try:
+        minted = _mint_culvert_browse_token(root['resource']['id'], subject=str(claims.get('sub') or 'culvert-batch'),
+                                          principal=principal)
+    except Exception:
+        # Credential issuance boundary: accepted computation must remain accepted;
+        # expose no issuer diagnostics or secrets and retry only the same receipt.
+        logger.warning('Browse credential issuance unavailable for accepted callback submission')
+        payload['warnings'] = [{'code': 'browse_credential_unavailable',
+                                'message': 'Retry the same submission key to obtain browse credentials; computation is already accepted.'}]
+        return JSONResponse(payload, status_code=202)
+    payload['browse_token'] = minted.get('token')
+    payload['browse_token_expires_at'] = (minted.get('claims') or {}).get('exp')
+    return JSONResponse(payload)
+
+
 @router.post(
     "/culverts-wepp-batch/",
     summary="Submit a culvert batch payload",
@@ -243,6 +277,7 @@ def _mint_culvert_browse_token(batch_uuid: str, *, subject: str, principal) -> d
         },
     ),
 )
+@webhooks.submission_boundary
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
     try:
         submitter_claims = require_jwt(request, required_scopes=["culvert:batch:submit"])
@@ -253,8 +288,48 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         logger.exception("rq-engine culvert batch auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
+    callback = None
+    callback_archive = None
+    try:
+        form = await request.form()
+        options = webhooks.validate_option(form, request.headers, operation='culverts-wepp-batch')
+        if options:
+            webhooks.environment()
+            upload = _extract_upload(form)
+            if upload is None:
+                return validation_error_response(format_validation_errors([
+                    ValidationIssue(code='missing_file', message='payload.zip is required.', path='payload.zip')]))
+            callback_archive = await read_upload_bytes_with_limit(upload=upload, max_bytes=MAX_PAYLOAD_BYTES)
+            candidate_uuid = str(uuid.uuid4())
+            payload = {key: form.getlist(key) for key in form if key != 'webhook_url'
+                       and not isinstance(form.get(key), UploadFile)}
+            payload['upload_sha256'] = hashlib.sha256(callback_archive).hexdigest()
+            payload['upload_name'] = _resolve_archive_name(upload)
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+                callback = webhooks.Submission(connection, options=options, claims=submitter_claims,
+                                               principal=principal, operation='culverts-wepp-batch',
+                                               resource={'type': 'culvert_batch', 'id': candidate_uuid}, payload=payload)
+                request.state.webhook_submission = callback
+                replay = callback.replay()
+                if replay is not None:
+                    if replay.status_code == 202:
+                        return replay
+                    return _callback_browse_response(callback, submitter_claims, principal)
+    except webhooks.AdmissionError as exc:
+        return webhooks.response_error(exc)
+    except ShapeConverterError as exc:
+        return _archive_error_response(exc)
+    except redis.RedisError:
+        return webhooks.response_error(webhooks.AdmissionError('webhook_unavailable', 503))
+
     culverts_root = _resolve_culverts_root()
-    culvert_batch_uuid, batch_root = _reserve_batch_root(culverts_root)
+    if callback:
+        culvert_batch_uuid = callback.root['resource']['id']
+        batch_root = culverts_root / culvert_batch_uuid
+        batch_root.mkdir(parents=True, exist_ok=False)
+        callback.prepublication_cleanup = lambda: shutil.rmtree(batch_root) if batch_root.exists() else None
+    else:
+        culvert_batch_uuid, batch_root = _reserve_batch_root(culverts_root)
     payload_zip_path = batch_root / "payload.zip"
 
     try:
@@ -297,7 +372,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
 
         archive_name = _resolve_archive_name(upload)
         try:
-            archive_bytes = await read_upload_bytes_with_limit(
+            archive_bytes = callback_archive if callback_archive is not None else await read_upload_bytes_with_limit(
                 upload=upload,
                 max_bytes=MAX_PAYLOAD_BYTES,
             )
@@ -344,6 +419,9 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
             total_bytes_value,
         )
 
+        if callback:
+            _enqueue_culvert_batch_job(culvert_batch_uuid, callback=callback)
+            return _callback_browse_response(callback, submitter_claims, principal)
         job_id = _enqueue_culvert_batch_job(culvert_batch_uuid)
         status_url = f"/rq-engine/api/jobstatus/{job_id}"
         browse_token_payload = _mint_culvert_browse_token(
@@ -361,6 +439,9 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
                 "browse_token_expires_at": browse_claims.get("exp"),
             }
         )
+    except webhooks.AdmissionError as exc:
+        # An ambiguous publication preserves staged inputs for reconciliation.
+        return webhooks.response_error(exc)
     except RqSubmissionConflict as exc:
         shutil.rmtree(batch_root, ignore_errors=True)
         return error_response(str(exc), status_code=409, code="conflict")
@@ -374,7 +455,8 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         )
         return error_response(str(exc), status_code=503, code="enqueue_unverified")
     except Exception:
-        shutil.rmtree(batch_root, ignore_errors=True)
+        if not callback or not callback.publication_attempted:
+            shutil.rmtree(batch_root, ignore_errors=True)
         logger.exception("rq-engine culvert batch ingestion failed")
         return error_response("Failed to ingest culvert batch payload", status_code=500)
 
@@ -409,6 +491,10 @@ async def culverts_retry_run(
     except Exception:
         logger.exception("rq-engine culvert retry auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         batch_uuid = _canonical_batch_uuid(batch_uuid)
@@ -519,6 +605,10 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
     except Exception:
         logger.exception("rq-engine culvert finalize auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         batch_uuid = _canonical_batch_uuid(batch_uuid)
@@ -733,13 +823,14 @@ def _write_batch_metadata(
         json.dump(payload, handle, indent=2, ensure_ascii=True)
 
 
-def _enqueue_culvert_batch_job(culvert_batch_uuid: str) -> str:
+def _enqueue_culvert_batch_job(culvert_batch_uuid: str, *, callback=None) -> str:
     return _enqueue_culvert_job(
         culvert_batch_uuid,
         job_key="run_culvert_batch_rq",
         func=run_culvert_batch_rq,
         args=[culvert_batch_uuid],
         meta={"culvert_batch_uuid": culvert_batch_uuid},
+        callback=callback,
     )
 
 

@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 
 import redis
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
+from anyio import from_thread
+from .webhooks import reject_unsupported
 from fastapi.responses import JSONResponse
 from rq import Callback, Queue
 
@@ -39,7 +41,10 @@ def report_stopped(job, connection):
 
 @router.get("/runs/{runid}/{config}/hello-world")
 @router.post("/runs/{runid}/{config}/hello-world")
-def hello_world(runid: str, config: str) -> JSONResponse:
+def hello_world(runid: str, config: str, request: Request) -> JSONResponse:
+    webhook_error = from_thread.run(reject_unsupported, request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:

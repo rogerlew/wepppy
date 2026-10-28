@@ -125,7 +125,13 @@ class ProfileRecorder:
         elif not body_capture_allowed:
             sanitized.pop("formValues", None)
 
-        if not body_capture_allowed:
+        callback_keys = set(sanitized.get('jsonKeys') or []) | set(sanitized.get('formKeys') or [])
+        preview = sanitized.get('bodyPreview')
+        # Browser raw-string previews may be truncated and have no parsed keys.
+        # Structured bodies have separately sanitized representations; a partial
+        # JSON/form preview cannot be reliably redacted.
+        structured_preview = isinstance(preview, str) and (preview.lstrip('\ufeff \t\r\n').startswith(('{', '[')) or '=' in preview)
+        if not body_capture_allowed or 'webhook_url' in callback_keys or structured_preview:
             sanitized.pop("bodyPreview", None)
 
         if body_capture_allowed:
@@ -206,7 +212,7 @@ class ProfileRecorder:
         normalized = re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_")
         if not normalized:
             return False
-        if normalized in {"email", "auth", "authorization", "cookie", "set_cookie"}:
+        if normalized in {"email", "auth", "authorization", "cookie", "set_cookie", "webhook_url", "idempotency_key"}:
             return True
         return any(
             marker in normalized

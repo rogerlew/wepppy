@@ -29,6 +29,7 @@ from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt, require_roles, require_session_marker
 from .responses import error_response, error_response_with_traceback
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +205,10 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine migrate-run auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         wd = get_wd(runid)

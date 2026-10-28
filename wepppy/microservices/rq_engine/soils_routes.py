@@ -34,6 +34,7 @@ from wepppy.wepp.single_input import SingleInputError
 from wepppy.nodb.single_input_policy import SingleInputPolicyError, require_single_input_policy, single_input_uploads_enabled
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .webhooks import reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +172,9 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
             request, "soils",
             boolean_fields={"clear_ssurgo_cache_on_rebuild"},
         ) as (payload, upload_form):
+            webhook_error = reject_unsupported_payload(payload)
+            if webhook_error is not None:
+                return webhook_error
             try:
                 initial_sat = _to_float(payload.get("initial_sat"))
             except (TypeError, ValueError):

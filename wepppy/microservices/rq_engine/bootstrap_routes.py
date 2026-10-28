@@ -44,6 +44,7 @@ from .wepp_run_payload import (
     WeppRunPayloadValidationError,
     apply_wepp_run_payload,
 )
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -443,6 +444,10 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         logger.exception("rq-engine run-wepp-npprep auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
@@ -528,6 +533,10 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         logger.exception("rq-engine run-wepp-watershed-no-prep auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
@@ -603,6 +612,10 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
     except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-swat-noprep auth failed")
         return error_response("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         return _enqueue_no_prep_job(

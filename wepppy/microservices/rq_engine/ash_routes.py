@@ -26,6 +26,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
 from .upload_helpers import UploadError, save_upload_file
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-ash auth failed")
         return error_response("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         wd = get_wd(runid)

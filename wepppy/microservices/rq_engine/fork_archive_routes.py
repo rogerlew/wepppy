@@ -61,6 +61,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -869,6 +870,10 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 cap_token = cap_token[0] if cap_token else ""
             _verify_cap_token(request, str(cap_token).strip())
 
+        webhook_error = await reject_unsupported_webhook(request)
+        if webhook_error is not None:
+            return webhook_error
+
         source_ron = Ron.getInstance(wd)
         source_config = source_ron.config_stem
         single_input_source = single_input_uploads_enabled(source_ron)
@@ -1431,6 +1436,10 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
         logger.exception("rq-engine archive auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         payload = await parse_request_payload(request)
         comment = payload.get("comment")
@@ -1528,6 +1537,10 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
     except Exception:
         logger.exception("rq-engine restore auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         payload = await parse_request_payload(request)

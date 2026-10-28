@@ -21,6 +21,10 @@ x-wepppy-service: &wepppy-service
     PRISM_CACHE_DIR: ${PRISM_CACHE_DIR:-/wc1/cache/prism}
     REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
     REDIS_HOST: redis
+    RQ_WEBHOOK_ENVIRONMENT: ${RQ_WEBHOOK_ENVIRONMENT:-}
+    RQ_WEBHOOK_ADMISSION: ${RQ_WEBHOOK_ADMISSION:-disabled}
+    RQ_WEBHOOK_INSTRUMENTATION: ${RQ_WEBHOOK_INSTRUMENTATION:-}
+    RQ_WEBHOOK_REDIS_RUN_ID: ${RQ_WEBHOOK_REDIS_RUN_ID:-}
     REDIS_PASSWORD_FILE: /run/secrets/redis_password
     GRIDMET_REDIS_ADMISSION_ENABLED: ${GRIDMET_REDIS_ADMISSION_ENABLED:-false}
     GRIDMET_REDIS_ADMISSION_LIMIT: ${GRIDMET_REDIS_ADMISSION_LIMIT:-4}
@@ -753,6 +757,27 @@ services:
       RQ_LOGGING_LEVEL: DEBUG
       REDIS_HOST: redis
       MPLCONFIGDIR: /tmp/matplotlib
+    depends_on:
+      redis:
+        condition: service_started
+
+  rq-webhook-dispatcher:
+    image: wepppy-dev
+    init: true
+    user: "${UID:-1000}:${GID:-993}"
+    working_dir: /workdir/wepppy
+    profiles: ["rq-webhooks"]
+    command: ["/opt/venv/bin/python", "-m", "wepppy.rq.webhook_dispatcher", "--environment", "${RQ_WEBHOOK_ENVIRONMENT:-unset}"]
+    environment:
+      PYTHONUNBUFFERED: "1"
+      REDIS_HOST: redis
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+      RQ_WEBHOOK_DISPATCH: ${RQ_WEBHOOK_DISPATCH:-disabled}
+      RQ_WEBHOOK_REDIS_RUN_ID: ${RQ_WEBHOOK_REDIS_RUN_ID:-}
+    secrets:
+      - redis_password
+    volumes:
+      - ../:/workdir/wepppy:ro
     depends_on:
       redis:
         condition: service_started

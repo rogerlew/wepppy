@@ -67,6 +67,7 @@ from wepppy.nodb.single_input_policy import SingleInputPolicyError, require_sing
 from .payloads import parse_request_payload
 from .responses import error_response, validation_error_response
 from .upload_helpers import UploadError, save_upload_file
+from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
@@ -571,6 +572,9 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 "burn_grass",
             ),
         ) as (payload, upload_form):
+            webhook_error = reject_unsupported_payload(payload)
+            if webhook_error is not None:
+                return webhook_error
 
             def _first(value: Any) -> Any:
                 if isinstance(value, (list, tuple)):
@@ -1059,6 +1063,10 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine modify-landuse-mapping auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         payload = await parse_request_payload(request)

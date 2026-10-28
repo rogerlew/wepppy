@@ -160,6 +160,18 @@ workhorse/supervisor lifecycle and process-exit evidence must be included. Detac
 untracked processes cannot establish complete closure. Abandonment recovery may close
 only with verified execution exit; uncertainty ages out without fabricating failure.
 
+The implementation additionally requires the actual RQ job hash when committing an
+event. Its dedicated attempt-generation field is written atomically with ordinary
+pre-fork metadata, independent of optional receipt success. The predecessor must
+match the last tracked attempt; a gap permanently invalidates closure proof, including
+overlapping retries. Older job metadata saves cannot overwrite these dedicated fields.
+Only the first publication seeds the never-started generation; recreation cannot
+reset it. Committed root publication without that initial member/generation proof
+permanently marks notification tracking incomplete while preserving computation.
+Missing hashes, including zero-TTL deletion, remain unknown: an old closure receipt
+cannot exclude an entirely missed rerun that also deleted its job. This conservative
+loss boundary preserves existing RQ retention rather than extending it for callbacks.
+
 Publication registers child identity and reservation before visibility, and commits
 publication evidence with RQ publication in the same Redis transaction. Bulk,
 deferred, direct and caller-owned pipeline paths need explicit coverage. A canceled

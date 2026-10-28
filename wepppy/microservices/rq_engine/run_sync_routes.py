@@ -33,6 +33,7 @@ from wepppy.rq.submission_recovery import (
     recover_committed_enqueue,
     rq_submission_lock,
 )
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +189,10 @@ async def run_sync(request: Request) -> JSONResponse:
     except Exception:
         logger.exception("rq-engine run-sync auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         payload = await parse_request_payload(

@@ -65,6 +65,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
 from .upload_helpers import UploadError, save_upload_file
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 
 logger = logging.getLogger(__name__)
@@ -734,6 +735,10 @@ async def build_subfields(runid: str, config: str, request: Request) -> JSONResp
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
     if auth_error is not None:
         return auth_error
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         wd = get_wd(runid)
         ag_fields = AgFields.getInstance(wd)
@@ -782,6 +787,10 @@ async def upload_plant_database(runid: str, config: str, request: Request) -> JS
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
     if auth_error is not None:
         return auth_error
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         wd = get_wd(runid)
         ag_fields = AgFields.getInstance(wd)
@@ -1056,6 +1065,10 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
     if auth_error is not None:
         return auth_error
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         wd = get_wd(runid)
         ag_fields = AgFields.getInstance(wd)
@@ -1113,6 +1126,10 @@ async def run_watershed(runid: str, config: str, request: Request) -> JSONRespon
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
     if auth_error is not None:
         return auth_error
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         wd = get_wd(runid)
         state = _state_snapshot(wd)

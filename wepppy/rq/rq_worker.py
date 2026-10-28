@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import time
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -49,6 +50,7 @@ from wepppy.rq.auth_actor import (
     reset_auth_actor,
     set_auth_actor,
 )
+from wepppy.rq import webhook_hooks
 try:
     from coverage import Coverage
     from coverage.exceptions import CoverageException
@@ -71,6 +73,7 @@ if PROFILE_COVERAGE_SETTINGS.enabled and Coverage is not None:
     install_rq_hooks()
 
 install_rq_auth_actor_hook()
+webhook_hooks.install()
 
 
 class JobCancelledException(Exception):
@@ -122,6 +125,9 @@ class WepppyRqWorker(Worker):
 
     def register_birth(self):
         super().register_birth()
+        self.connection.hset(self.key, 'webhook_configuration', json.dumps({
+            'protocol': 'rq-wh-01', 'environment': os.getenv('RQ_WEBHOOK_ENVIRONMENT', ''),
+        }))
         from wepppy.rq.query_catalog_rq import catalog_worker_configuration
         self.connection.hset(self.key, "query_catalog_configuration", json.dumps(catalog_worker_configuration()))
         if os.getenv("WEPPPY_PROJECT_COMMIT_MODE", "disabled") == "postgres":
@@ -248,10 +254,12 @@ class WepppyRqWorker(Worker):
                 file_handler = None
 
         coverage_state = self._start_job_coverage(job)
+        webhook_token = webhook_hooks.execution_started(job)
         try:
             print(f"Starting job {job.id}")
             return super().perform_job(job, queue)
         finally:
+            webhook_hooks.execution_returned(job, webhook_token)
             if coverage_state:
                 self._stop_job_coverage(coverage_state)
             if auth_token is not None:
@@ -347,6 +355,8 @@ class WepppyRqWorker(Worker):
     def handle_job_success(self, job: Job, queue: Queue, started_job_registry: StartedJobRegistry) -> None:
         """Publish job success events while preserving the superclass behavior."""
         super().handle_job_success(job, queue, started_job_registry)
+        if job.get_result_ttl(self.default_result_ttl) == 0:
+            job._webhook_zero_ttl_success = True
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'success'}))
         print(f"Finished job {job.id}")
 
@@ -397,6 +407,7 @@ class WepppyRqWorker(Worker):
 
 
     def fork_work_horse(self, job: Job, queue: Queue) -> None:
+        job._webhook_execution_id = self.execution.id if self.execution else None
         from wepppy.rq.directory_locks import prepare_containment
         from wepppy.runtime_paths.thaw_freeze import maintenance_lock_execution
 
@@ -420,8 +431,23 @@ class WepppyRqWorker(Worker):
             self._directory_lock_execution_id = execution_id
             job.meta["directory_lock_execution_id"] = execution_id
             job.meta["directory_lock_cleanup"] = {"execution_id": execution_id, "state": "not_requested"}
-            job.save_meta()
-            super().fork_work_horse(job, queue)
+            if webhook_hooks.binding(job) is None:
+                job.save_meta()
+            else:
+                # Register the attempt before fork in the existing metadata
+                # write, avoiding a separate notification round trip. Only the
+                # tagged receipt error is isolated from computation failures.
+                with job.connection.pipeline() as pipeline:
+                    webhook_hooks.save_attempt_metadata(job, pipeline)
+                    webhook_hooks.begin_attempt(job, pipeline=pipeline)
+                    pipeline.execute()
+            webhook_hooks.prepare_handoff(job)
+            try:
+                super().fork_work_horse(job, queue)
+            except OSError:
+                webhook_hooks.close_handoff(job)
+                raise
+            webhook_hooks.parent_handoff(job)
 
     def kill_horse(self, sig: signal.Signals = signal.SIGKILL) -> None:
         if self._stopped_job_id is not None:
@@ -429,16 +455,43 @@ class WepppyRqWorker(Worker):
         super().kill_horse(sig)
 
     def monitor_work_horse(self, job: Job, queue: Queue) -> None:
+        webhook_exited = False
+        webhook_supervisor_token = webhook_hooks.execution_started(job)
         try:
             super().monitor_work_horse(job, queue)
+            webhook_exited = True
         finally:
             try:
-                self._cleanup_canceled_directory_locks(job)
+                try:
+                    self._cleanup_canceled_directory_locks(job)
+                finally:
+                    producers_gone = self._retire_if_writers_remain(job)
+                    if webhook_exited and webhook_hooks.binding(job) is not None:
+                        webhook_deadline = time.monotonic() + webhook_hooks.policy.HOOK_SECONDS
+                        try:
+                            # Preserve retirement; observe brief adopted helper
+                            # exit within the approved incremental hook budget.
+                            if not self._directory_lock_containment_error:
+                                if producers_gone:
+                                    # The existing retirement check already
+                                    # positively observed no remaining writers.
+                                    # Repeating /proc traversal costs milliseconds
+                                    # per transition even for an empty hierarchy.
+                                    from wepppy.rq.directory_locks import _verify_protected_children
+                                    _verify_protected_children(self._directory_lock_protected_children)
+                                else:
+                                    producers_gone = webhook_hooks.producers_exited(self._directory_lock_protected_children)
+                        except (OSError, RuntimeError):
+                            producers_gone = False
+                            LOGGER.warning("Webhook producer exit cannot be verified job_id=%s", job.id)
+                        if producers_gone:
+                            webhook_hooks.execution_exited(job, deadline=webhook_deadline)
+                    for fd in self._directory_lock_protected_children.values():
+                        os.close(fd)
+                    self._directory_lock_protected_children = {}
             finally:
-                self._retire_if_writers_remain(job)
-                for fd in self._directory_lock_protected_children.values():
-                    os.close(fd)
-                self._directory_lock_protected_children = {}
+                webhook_hooks.close_handoff(job)
+                webhook_hooks.supervisor_finished(webhook_supervisor_token)
 
     def _cleanup_canceled_directory_locks(self, job: Job) -> None:
         if getattr(self, "_directory_lock_cancel_requested", False):
@@ -453,14 +506,14 @@ class WepppyRqWorker(Worker):
                 record_cleanup(job, self._directory_lock_execution_id,
                                "pending", reason=str(exc))
 
-    def _retire_if_writers_remain(self, job: Job) -> None:
+    def _retire_if_writers_remain(self, job: Job) -> bool:
         from wepppy.rq.directory_locks import has_remaining_writers
 
         try:
             if not self._directory_lock_containment_error and not has_remaining_writers(
                 self._directory_lock_protected_children
             ):
-                return
+                return True
         except (OSError, RuntimeError):
             LOGGER.exception("Could not inspect residual writers job_id=%s", job.id)
         # Subreaper adoption survives job failure. Never attribute a crashed
@@ -468,6 +521,7 @@ class WepppyRqWorker(Worker):
         # replaces this supervisor; failed-job locks retain existing recovery.
         self._stop_requested = True
         LOGGER.error("Retiring worker with uncertain/residual writers job_id=%s", job.id)
+        return False
 
 def start_worker() -> None:
     """Start a worker that listens on the high/default/low queues."""

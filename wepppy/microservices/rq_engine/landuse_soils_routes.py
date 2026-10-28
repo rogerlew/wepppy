@@ -13,6 +13,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.rq.land_and_soil_rq import land_and_soil_rq
 
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,9 @@ def _resolve_archive_path(job_id: str) -> Path | None:
 
 @router.post("/landuse-and-soils")
 async def build_landuse_and_soils(request: Request) -> JSONResponse:
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
     try:
         payload = await _safe_json(request)
         extent = payload.get("extent")

@@ -27,6 +27,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,10 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-swat auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         wd = get_wd(runid)

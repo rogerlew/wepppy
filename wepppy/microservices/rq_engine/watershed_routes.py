@@ -59,6 +59,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
+from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
@@ -692,6 +693,10 @@ async def fetch_dem_and_build_channels(
         logger.exception("rq-engine channel delineation auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     try:
         payload = await parse_request_payload(request)
         error, args = _parse_map_change(payload)
@@ -831,6 +836,10 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine set-outlet auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
+
     payload = await parse_request_payload(request)
 
     def _resolve_coordinate(key: str) -> Any:
@@ -929,6 +938,10 @@ async def build_subcatchments_and_abstract_watershed(
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine subcatchments auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     payload = await parse_request_payload(
         request,
