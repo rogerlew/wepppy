@@ -1,4 +1,5 @@
-Implementation scaffold ready; checkpoint pending: [RQ client webhook delivery](docs/work-packages/20261027_rq_webhooks/package.md) - generic hierarchical settlement, accepted Option A execution-only callbacks, per-submission HTTPS URLs and token-expiry-independent delivery. Fresh-agent kickoff and acceptance matrix added; no runtime activation.
+Completed locally: [RQ client webhook delivery](docs/work-packages/20261027_rq_webhooks/package.md) — optional admission, generic fenced settlement and independent delivery; canonical worker-pool model/receiver parity, verified backlog performance and independent reviews pass. Defaults remain disabled; no production deployment.
+
 
 Completed on forest: [RQ 2.12.0 upgrade](docs/work-packages/20261027_rq_2_12_upgrade/package.md) — exact 2.12.0 across 17 runtimes; model/API/artifact acceptance, 598 targeted + 13 lifecycle tests, isolated full suite (11,948 passed; 226 skipped), and independent reviews pass. Unrelated working-tree Roads provenance failure retained separately. Production unchanged; native webhooks disabled.
 

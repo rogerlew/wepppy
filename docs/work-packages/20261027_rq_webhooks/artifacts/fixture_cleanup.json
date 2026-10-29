@@ -1,0 +1,13 @@
+{
+  "closed_at": "2026-10-28T23:54:15.170348+00:00",
+  "compose_project": "wepppy-webhook-acceptance",
+  "compose_containers_remaining": 0,
+  "owned_fixture_directories_removed": [
+    ".pytest_cache/webhook-workflows",
+    ".pytest_cache/webhook-tls"
+  ],
+  "empty_mountpoint_cleanup": "One network-disabled disposable helper removed only Docker-owned empty mount-point children; no permissions or source data changed.",
+  "original_source_projects_modified": false,
+  "production_deployed": false,
+  "runtime_commit": "62b272a6c"
+}

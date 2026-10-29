@@ -4,7 +4,8 @@ Date: 2026-10-28. Starting implementation revision:
 `dd4e5381ba4e3fd66e82c0e14e8d82faa174ff47`.
 Classification: intended additive behavior, not conformance repair.
 Status: independently reviewed and operator-approved 2026-10-28 19:56 UTC.
-Standalone ancestor commit: none. Runtime implementation: none.
+Standalone ancestor commit: `6ba2d8d9d`. Runtime implementation: `62b272a6c`.
+These execution references were appended after the approved checkpoint; the matrix is unchanged.
 
 ## Exact authority and change matrix
 

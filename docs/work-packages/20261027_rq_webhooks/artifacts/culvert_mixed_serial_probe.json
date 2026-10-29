@@ -1,0 +1,51 @@
+{
+  "token_expires_at": 1793224986,
+  "submitted_at": 1793224981.980826,
+  "http_status": 200,
+  "response": {
+    "webhook": {
+      "status": "accepted"
+    },
+    "culvert_batch_uuid": "1d757617-8ea3-4929-b30d-7223f5770b73",
+    "job_id": "79eedc9c-7873-4a71-87ee-01030a8c645b",
+    "status_url": "/rq-engine/api/jobstatus/79eedc9c-7873-4a71-87ee-01030a8c645b"
+  },
+  "callback": {
+    "attempts": 1,
+    "audit": [
+      {
+        "attempt": 1,
+        "finished_at": 1793225042.5981934,
+        "http_status": 204,
+        "result": "http",
+        "started_at": 1793225042.4606
+      }
+    ],
+    "closed_at": 1793225042.5981934,
+    "created_at": 1793224982.1413,
+    "destination_id": "1909c42b-6bf0-4f5d-8090-f7af47bd41aa",
+    "event_at": 1793225042.3368,
+    "event_id": "d288d57f-73e6-4199-9159-6bb9f39e7f32",
+    "host": "webhook.test",
+    "job_id": "79eedc9c-7873-4a71-87ee-01030a8c645b",
+    "operation": "culverts-wepp-batch",
+    "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+    "publication": "published",
+    "state": "delivered"
+  },
+  "root_status": "finished",
+  "batch_summary": {
+    "culvert_batch_uuid": "1d757617-8ea3-4929-b30d-7223f5770b73",
+    "total": 36,
+    "succeeded": 0,
+    "failed": 36,
+    "skipped_no_outlet": 0
+  },
+  "receiver": [
+    {
+      "body": "{\"event\":\"operation.completed\",\"event_id\":\"d288d57f-73e6-4199-9159-6bb9f39e7f32\",\"execution_status\":\"failed\",\"job_id\":\"79eedc9c-7873-4a71-87ee-01030a8c645b\",\"observed_at\":\"2026-10-28T22:04:02.336824Z\",\"operation\":\"culverts-wepp-batch\",\"resource\":{\"id\":\"1d757617-8ea3-4929-b30d-7223f5770b73\",\"type\":\"culvert_batch\"},\"schema_version\":1,\"settled_at\":\"2026-10-28T22:03:52.460900Z\"}",
+      "event_id": "d288d57f-73e6-4199-9159-6bb9f39e7f32",
+      "received_at": 1793225042.5857081
+    }
+  ]
+}

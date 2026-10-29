@@ -1,0 +1,185 @@
+{
+  "generated_at_utc": "2026-10-28T23:21:44Z",
+  "mode": "observe-only",
+  "base_ref": "origin/master",
+  "thresholds": {
+    "python_file_sloc": {
+      "yellow": 650,
+      "red": 1200
+    },
+    "python_function_len": {
+      "yellow": 80,
+      "red": 150
+    },
+    "python_cc": {
+      "yellow": 15,
+      "red": 30
+    },
+    "js_file_sloc": {
+      "yellow": 1500,
+      "red": 2500
+    },
+    "js_cc": {
+      "yellow": 15,
+      "red": 30
+    }
+  },
+  "tooling": {
+    "radon_available": false,
+    "eslint_available": true,
+    "python_version": "Python 3.14.6"
+  },
+  "changed_files": [
+    {
+      "path": "tests/rq/rq212_tasks.py",
+      "base_path": "tests/rq/rq212_tasks.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 100.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 70.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1234.0,
+          "current": 1249.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 97.0,
+          "current": 97.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 337.0,
+          "current": 343.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 184.0,
+          "current": 188.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/rq/query_catalog_rq.py",
+      "base_path": "wepppy/rq/query_catalog_rq.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 495.0,
+          "current": 497.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 173.0,
+          "current": 173.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/rq/rq_worker.py",
+      "base_path": "wepppy/rq/rq_worker.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 387.0,
+          "current": 460.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 64.0,
+          "current": 82.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    }
+  ],
+  "rationale": "Generation and publication proof checks remain explicit at atomic boundaries. Integration coverage is intentionally centralized around the shared real-Redis/process fixture; complexity telemetry is observe-only."
+}

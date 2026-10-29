@@ -1,6 +1,6 @@
 # RQ client webhook delivery
 
-**Status**: Open; kickoff executed to independently reviewed checkpoint proposal; operator ratification pending (2026-10-28)
+**Status**: Closed 2026-10-28; local implementation and acceptance complete
 **Timezone**: UTC
 **Started**: 2026-10-27 22:09 UTC
 
@@ -13,9 +13,9 @@ through contract ratification, implementation and integrated acceptance.
 
 The operator selected workflow completion, per-submission HTTPS URLs, delivery
 authority independent of subsequent token expiry, auditability and bounded
-nonblocking delivery on 2026-10-28. Exact wire/runtime decisions remain open; this
-direction does not satisfy the contract-first implementation checkpoint. This
-package is not complete merely because its documents exist.
+nonblocking delivery on 2026-10-28. The exact matrix and authority grants were
+ratified at 19:56 UTC and committed in standalone ancestor `6ba2d8d9d` before
+runtime implementation. Final local acceptance passed under canonical worker counts.
 
 ## Objectives and scope
 
@@ -28,10 +28,9 @@ Initial workflow targets are culvert batches and complete selected WEPP pipeline
 Option A is accepted: callbacks describe execution completion/outcome only; clients
 retrieve domain success/partial-failure details through existing APIs. No generic
 task-reported domain outcome convention is required for this release.
-The [decision register](artifacts/decision_register.md) distinguishes accepted
-client direction from pending wire, failure/recovery and execution decisions.
-The [current draft](../../dev-notes/rq-webhooks-contract-draft.md) is revised design
-input, not yet canonical authority. Endpoint registration, destination challenges,
+The [approved matrix](artifacts/20261028_contract_decision.md) records the
+ratified wire, recovery and execution decisions. The canonical authority is
+[RQ-WH-01](../../schemas/rq-webhook-contract.md); earlier drafts are provenance. Endpoint registration, destination challenges,
 ongoing token-validity checks and mandatory signing-key storage are not prerequisites.
 
 Excluded: native RQ webhook activation, inline HTTP callbacks, unrelated RQ or
@@ -49,34 +48,34 @@ cases, not per-workflow completion adapters. Observation is an optional recovery
 technique, not the prescribed architecture. No all-job scans, implicit registry
 cleanup or task-state mutation by notification code.
 
-No new queue, service, datastore, daemon, dependency, privilege or topology is
-currently approved. Delivery requires independent execution capacity; its concrete
-placement remains a decision gate. Retain latency, backlog, retention and recovery
-evidence from the smallest candidate before proposing an escalation, including its
-operational cost. Do not silently add a broker or redesign computation graphs.
+The approved mechanism uses the existing Redis instance and an independent
+dispatcher process, with an opt-in development Compose profile. No computation queue,
+new datastore, external dependency, privilege or broker was added. Retain measured
+latency, backlog, retention and recovery evidence before any further escalation;
+do not redesign computation graphs to make callbacks succeed.
 
 ## Security impact and review gate
 
 Security impact is **high**: authenticated API operations, bounded persistent
 submission-to-callback authority, outbound HTTP, SSRF protection, audit data and
-shared-resource admission. Signing is an open capability decision. Dedicated
-security and correctness reviews are required
-using repository templates, with no unresolved medium/high findings at closure.
+shared-resource admission. Unsigned delivery is ratified. Dedicated
+security and correctness source/evidence reviews passed with no unresolved
+medium/high findings; final records use the repository templates.
 
 The three prior independent reviews closed 13 drafting findings; the
 [review disposition](../../dev-notes/rq-webhooks-draft-review-20261027.md) is retained
 as provenance for the earlier design. The 2026-10-28 direction supersedes its
 registration/grant/challenge/key-management recommendations. It is not review
 approval of this revision or a formal canonical-contract checkpoint.
-Create final dated correctness and security artifacts after there is a concrete
-implementation to review; do not manufacture passing placeholder reviews.
+Final implementation reviews: [correctness](artifacts/20261028_correctness_review.md) and
+[security](artifacts/20261028_security_review.md). They independently reviewed the
+concrete source, regression boundaries and retained environment evidence.
 
 ## Parameterization ADR gate
 
-New observation deadlines, retry schedules, timeout bounds, quotas, retention and
-pause-age policies will require a parameterization ADR before implementation/merge
-under the applicable standard. Values, ADR number and decision provenance remain
-pending. No numeric defaults are selected by this scaffold.
+[ADR-0109](../../adrs/ADR-0109-rq-webhook-bounds.md) records the approved deadlines,
+retry schedule, quotas, retention, resource limits and performance acceptance
+criteria. Implementation allocations preserve the approved numeric ceilings.
 
 ## Generated artifact validation gate
 
@@ -90,7 +89,9 @@ trees, content manifests, semantic comparisons and candidate runtime identities.
 Use actual Redis/storage and HTTP boundaries plus a disposable project on an
 authorized forest runtime with representative identities, groups, mounts and
 umask. A successful job or HTTP status alone does not prove acceptance. Current
-evidence supports reviewed planning only; nothing is implemented or wired.
+evidence includes wired implementation, actual WEPP/culvert outputs, exact callback
+bytes and Redis/process/TLS tests. Corrected sender-backlog performance acceptance
+passed under the canonical six-default/four-batch worker configuration.
 
 ## Success criteria
 
@@ -118,11 +119,11 @@ and scope decisions.
 
 ## Deliverables and execution
 
-Start with the [fresh-agent kickoff](prompts/active/implementation_kickoff.md),
-[active ExecPlan](prompts/active/implementation_execplan.md),
+Execution records: [kickoff](prompts/completed/implementation_kickoff.md),
+[completed ExecPlan](prompts/completed/implementation_execplan.md),
 [acceptance matrix](artifacts/acceptance_matrix.md) and [tracker](tracker.md).
-The updated scaffold carries the accepted generic hierarchy/Option A direction;
-the matrix is planned evidence, not executed validation.
+The matrix distinguishes component tests, actual workflow evidence and remaining
+acceptance gates. Source review does not waive the measured performance limits.
 Required retained artifacts are the decision/checkpoint
 record, compatibility/retention inventory, isolated candidate evidence, canonical
 contract reviews, targeted tests, integrated acceptance, independent final
@@ -144,3 +145,21 @@ RQ-WH-01 exact matrix and ADR-0109 are accepted. Package commit and scoped local
 implementation/integration/restart authority are granted; production deployment
 remains excluded. Earlier pending-approval entries above are historical and
 superseded. Create the standalone checkpoint ancestor before implementation edits.
+
+## Closure and deliverables
+
+Approved ancestor `6ba2d8d9d`; implementation `62b272a6c`. Four optional submission
+surfaces, idempotent admission/recovery, server-owned lineage, generic fenced
+settlement, independent pinned HTTPS delivery, audit and capture/playback protection
+are implemented. Canonical rules: [RQ-WH-01](../../schemas/rq-webhook-contract.md),
+[ADR-0109](../../adrs/ADR-0109-rq-webhook-bounds.md),
+[operator/client guide](../../dev-notes/rq-webhook-operations.md).
+
+[Validation](artifacts/validation_summary.md) retains final model/receiver artifacts,
+109 real-boundary and 3,020 targeted passes, verified sender load and p95 limits,
+plus independent review sign-off. The unrelated full-suite Roads provenance failure
+remains a separate repository follow-up; no Roads evidence was rewritten.
+
+Disposable fixture resources and credentials were removed after final readback.
+Defaults remain disabled. Production deployment and environment-specific activation
+are outside this package's authority, not silently completed by local acceptance.

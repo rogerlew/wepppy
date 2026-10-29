@@ -1,6 +1,8 @@
 # Webhook decision register
 
-Updated: 2026-10-28 18:20 UTC. Execution record, not canonical authority.
+Ratified 2026-10-28 19:56 UTC; checkpoint `6ba2d8d9d`, implementation `62b272a6c`.
+Execution record, not canonical authority. The table below preserves the earlier
+18:20 direction; ratification supersedes its open/proposed dispositions.
 Operator direction on 2026-10-28 supersedes conflicting initial recommendations.
 
 | ID | Decision | Disposition |

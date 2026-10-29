@@ -1,9 +1,10 @@
 # RQ operation webhooks: operation and recovery
 
 Contract: [RQ-WH-01](../schemas/rq-webhook-contract.md). Admission and dispatch
-are disabled by default. This implementation is undergoing acceptance; do not
-activate until the work package records worker coverage, performance, real workflow
-artifact parity and final correctness/security review evidence.
+are disabled by default. Local acceptance passed with canonical worker counts,
+real model artifact parity, verified sender-backlog performance and independent
+reviews. Production deployment and environment-specific activation remain separate;
+apply the coverage, identity and recovery checks below.
 
 ## Client use
 

@@ -1,0 +1,20 @@
+{
+  "baseline": {
+    "transitions": 1000,
+    "p95_seconds": 0.04534714221954346,
+    "median_seconds": 0.03746819496154785,
+    "elapsed_seconds": 48.884127386147156
+  },
+  "tracked": {
+    "transitions": 1000,
+    "p95_seconds": 0.061366164684295656,
+    "median_seconds": 0.05321311950683594,
+    "elapsed_seconds": 64.70202575088479
+  },
+  "delta_seconds": 0.016019022464752196,
+  "relative_delta": 0.3532531859934584,
+  "threshold_pass": false,
+  "scope": "Synthetic idle receiver transition baseline; not backlog or model artifact acceptance",
+  "uid": 1000,
+  "gid": 993
+}

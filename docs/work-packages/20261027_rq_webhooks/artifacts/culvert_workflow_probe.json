@@ -1,0 +1,49 @@
+{
+  "token_expires_at": 1793223249,
+  "submitted_at": 1793223244.1528502,
+  "http_status": 200,
+  "response": {
+    "webhook": {
+      "status": "accepted"
+    },
+    "culvert_batch_uuid": "86f080c6-593a-47ae-9e3b-f0e8ff13b1ca",
+    "job_id": "6b6093f0-f2fa-4e17-b6b9-01fa451075a1",
+    "status_url": "/rq-engine/api/jobstatus/6b6093f0-f2fa-4e17-b6b9-01fa451075a1"
+  },
+  "callback": {
+    "attempts": 3,
+    "audit": [
+      {
+        "attempt": 1,
+        "finished_at": 1793223246.7021,
+        "result": "dns",
+        "started_at": 1793223246.5763
+      },
+      {
+        "attempt": 2,
+        "finished_at": 1793223276.8597,
+        "result": "dns",
+        "started_at": 1793223276.7386
+      },
+      {
+        "attempt": 3,
+        "finished_at": 1793223397.0589583,
+        "result": "dns",
+        "started_at": 1793223396.9314
+      }
+    ],
+    "closed_at": 1793223397.0589583,
+    "created_at": 1793223244.2259,
+    "destination_id": "92bee891-1b98-4788-9c79-7bda65379d37",
+    "event_at": 1793223246.4724,
+    "event_id": "f07fbff5-0126-4951-bb5c-dd7af32ac10f",
+    "host": "webhook.test",
+    "job_id": "6b6093f0-f2fa-4e17-b6b9-01fa451075a1",
+    "operation": "culverts-wepp-batch",
+    "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+    "publication": "published",
+    "state": "exhausted"
+  },
+  "root_status": "failed",
+  "receiver": []
+}

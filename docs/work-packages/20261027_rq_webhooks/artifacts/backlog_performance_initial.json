@@ -1,0 +1,654 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "conditions": "1000 actual worker transitions; tracked group with 80 hung TLS events and four 5000-member evaluation roots",
+  "baseline": {
+    "transitions": 1000,
+    "p95_seconds": 0.05999222993850708,
+    "median_seconds": 0.05476701259613037,
+    "elapsed_seconds": 65.2194630629383
+  },
+  "tracked": {
+    "transitions": 1000,
+    "p95_seconds": 0.08399034738540649,
+    "median_seconds": 0.06391537189483643,
+    "elapsed_seconds": 78.34842309588566
+  },
+  "delta_seconds": 0.023998117446899413,
+  "relative_delta": 0.4000204271702825,
+  "threshold_pass": false,
+  "backlog_audits": [
+    {
+      "job_id": "7e1ef08b-5ac8-4dba-a43f-6c477de8a220",
+      "attempts": 1,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223942.8568268,
+          "result": "timeout",
+          "started_at": 1793223932.8275
+        }
+      ]
+    },
+    {
+      "job_id": "50b61895-a26c-4d20-8f86-e9d081558702",
+      "attempts": 1,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223942.8520906,
+          "result": "timeout",
+          "started_at": 1793223932.8275
+        }
+      ]
+    },
+    {
+      "job_id": "abf9a5e3-4438-4ce7-9082-80ea231b1d85",
+      "attempts": 1,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223942.8579197,
+          "result": "timeout",
+          "started_at": 1793223932.8275
+        }
+      ]
+    },
+    {
+      "job_id": "840a8047-9039-438f-aea8-22242a1fcb5e",
+      "attempts": 1,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223942.854067,
+          "result": "timeout",
+          "started_at": 1793223932.8275
+        }
+      ]
+    },
+    {
+      "job_id": "1176d6c9-0579-4718-932e-dfca04f41e7e",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223973.0865,
+          "result": "timeout",
+          "started_at": 1793223963.0513
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224013.7715495,
+          "result": "timeout",
+          "started_at": 1793224003.7347
+        }
+      ]
+    },
+    {
+      "job_id": "4062a677-6ab7-4fcf-a779-aeba08084c58",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "3edafccd-b2aa-4325-9f89-04ddcb5b090a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "f7e13ea8-fa95-4203-8834-8be7caedee7b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "6df93fb2-ec21-4d8b-a5e8-8b02bf0f1c3e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "b7716692-324b-4f6f-a67e-6cf3a2a5c55c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "914eaa55-a988-4680-992e-9f71c5cccb02",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "80f94909-35f3-41bf-a16a-f2b062895283",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "12d91292-567d-4211-bde5-eb4357c6efc4",
+      "attempts": 2,
+      "audit": [
+        {
+          "finished_at": 1793223983.2221,
+          "started_at": 1793223973.1877,
+          "result": "timeout",
+          "attempt": 1
+        },
+        {
+          "attempt": 2,
+          "started_at": 1793224013.9101,
+          "result": "interrupted"
+        }
+      ]
+    },
+    {
+      "job_id": "141ea758-a730-4e7b-8935-c01e2d44e10a",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223952.8968,
+          "result": "timeout",
+          "started_at": 1793223942.8668
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793223993.4117863,
+          "result": "timeout",
+          "started_at": 1793223983.3794
+        }
+      ]
+    },
+    {
+      "job_id": "4ef4d6ad-fb7e-49c0-aab0-19e01848e5d5",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "94daffe4-fa3e-45c8-8b0a-e73d99ea51a8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "3cd855ff-1fc8-4211-a23a-62ce4abe2476",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a9cb47dc-6f05-4f00-a946-0c855e1a9496",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a09a6648-bb78-4f0e-bdcd-4c089874e18d",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "92cbd6dd-04f2-48eb-9b7d-d3350a5bfa39",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "61ce95e8-6fe8-4068-b9cb-a9059bb9af04",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "431bbef1-ee54-461d-894d-5935639b9fb5",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "41e993a7-8c2f-4d19-af23-0fe906e26fc8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "ca444e5b-c207-48cc-9ed1-e610795ad3de",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "14c19aff-3277-4eeb-81f6-ccf717456c93",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "991b3e21-8adc-43c6-9bb0-2b4fc18e4629",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "7f7e6b40-0af4-452e-8f0a-4b09eb445cd6",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "13656f04-21b0-4617-8d40-34040ea4e924",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223962.9736,
+          "result": "timeout",
+          "started_at": 1793223952.9356
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224003.5092196,
+          "result": "timeout",
+          "started_at": 1793223993.4782
+        }
+      ]
+    },
+    {
+      "job_id": "32601570-fea6-44ae-ad68-c62dcc92d8ca",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "f04d4dd3-bbe0-4f4d-8d42-f058fdb0cf22",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a3c7d6cc-dcb1-45b6-9e17-a7fe78c93168",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "14c8581f-3134-4780-9831-b5e699a340ef",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223973.0868,
+          "result": "timeout",
+          "started_at": 1793223963.0513
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224013.7694938,
+          "result": "timeout",
+          "started_at": 1793224003.7347
+        }
+      ]
+    },
+    {
+      "job_id": "fc1f74f3-091f-410e-b632-a25f30adf2ea",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "1635a4b0-5a7a-41ad-8a91-ebf50f15dd9f",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223962.9726,
+          "result": "timeout",
+          "started_at": 1793223952.9356
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224003.5089836,
+          "result": "timeout",
+          "started_at": 1793223993.4782
+        }
+      ]
+    },
+    {
+      "job_id": "1162e8f6-1601-4b02-8a5c-dcb5231f09a1",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223962.9774,
+          "result": "timeout",
+          "started_at": 1793223952.9356
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224003.5126772,
+          "result": "timeout",
+          "started_at": 1793223993.4782
+        }
+      ]
+    },
+    {
+      "job_id": "eed750a6-a327-4854-8033-6135718a7f34",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "8eb0fbc6-037c-4a8a-b453-570293779936",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "9ae18281-040f-4631-9e0d-93279c14d8ac",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0eba72cb-d2a5-4328-bfac-b32943a97fa0",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223952.9001,
+          "result": "timeout",
+          "started_at": 1793223942.8668
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793223993.416577,
+          "result": "timeout",
+          "started_at": 1793223983.3794
+        }
+      ]
+    },
+    {
+      "job_id": "f16b6d72-2ee8-4d71-bee8-07f6fd15e5d2",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0cae6839-73f6-4bf2-b467-a6817cb4c28a",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223962.9753,
+          "result": "timeout",
+          "started_at": 1793223952.9356
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224003.5076745,
+          "result": "timeout",
+          "started_at": 1793223993.4782
+        }
+      ]
+    },
+    {
+      "job_id": "3f68e0c9-2ec4-4a69-a111-3fbde1a8e555",
+      "attempts": 2,
+      "audit": [
+        {
+          "finished_at": 1793223983.2189,
+          "started_at": 1793223973.1877,
+          "result": "timeout",
+          "attempt": 1
+        },
+        {
+          "attempt": 2,
+          "started_at": 1793224013.9101,
+          "result": "interrupted"
+        }
+      ]
+    },
+    {
+      "job_id": "31d27ea9-7a8b-4325-8fac-7216a853e19b",
+      "attempts": 2,
+      "audit": [
+        {
+          "finished_at": 1793223983.2185,
+          "started_at": 1793223973.1877,
+          "result": "timeout",
+          "attempt": 1
+        },
+        {
+          "attempt": 2,
+          "started_at": 1793224013.9101,
+          "result": "interrupted"
+        }
+      ]
+    },
+    {
+      "job_id": "a6892187-1767-4b86-9773-ce57e42862f1",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "f3fabee0-8c40-47f2-9056-b6f116f38ac9",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "54f34af6-e3fa-4f9b-8a82-bf1b765bd44c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "754c8bd6-b74c-4308-ac14-c8305e04cc31",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "579bf68f-e9ce-48a5-90ec-b476aab35b9f",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "6a922c72-2fcc-4a3c-a451-6588674ab760",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "197a252d-19f8-411c-a914-940c36b344cb",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223973.0886,
+          "result": "timeout",
+          "started_at": 1793223963.0513
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224013.7689106,
+          "result": "timeout",
+          "started_at": 1793224003.7347
+        }
+      ]
+    },
+    {
+      "job_id": "1610e31c-1ee7-4148-ac6a-a4dd2f17dccd",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223973.0887,
+          "result": "timeout",
+          "started_at": 1793223963.0513
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793224013.777663,
+          "result": "timeout",
+          "started_at": 1793224003.7347
+        }
+      ]
+    },
+    {
+      "job_id": "de7a9329-1ae9-445f-a86a-263770f45c7b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "e991a955-61fa-4efb-8765-e0984eaf5ab5",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "9d6afc02-4c55-41d3-9913-f78efd539514",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "db3266e2-2205-4a04-8c78-b42d1075cacf",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "bacdc190-9467-453a-ac4b-c5415cc4d958",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c2a2fc55-bcfb-418d-a784-406a2724ae8c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "8ba83fe1-2e92-4cdb-aaf9-e9c534fc2e70",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "59e2d2c2-967d-4916-934f-737a08904286",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a62ae5ce-a835-48c5-ae29-0cde0ade08a3",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "b441100a-14f1-4b1d-b672-cf0570ae484e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "e916b88f-ad92-44a6-a2ea-1053fdb6626a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c837f99d-c750-488e-8730-18aae2768de9",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "8c73aa6c-c96e-428e-8123-acb37f90991b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "00759c9e-1995-4534-bf3f-ac962261b05e",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223952.8991,
+          "result": "timeout",
+          "started_at": 1793223942.8668
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793223993.412036,
+          "result": "timeout",
+          "started_at": 1793223983.3794
+        }
+      ]
+    },
+    {
+      "job_id": "ffd70acf-8032-4f55-8c27-2a5ae511417c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "6f6eb435-4fc1-4c45-ad16-8360536ee866",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "2fea2a05-399d-423e-81a0-c4b70860947d",
+      "attempts": 2,
+      "audit": [
+        {
+          "finished_at": 1793223983.2207,
+          "started_at": 1793223973.1877,
+          "result": "timeout",
+          "attempt": 1
+        },
+        {
+          "attempt": 2,
+          "started_at": 1793224013.9101,
+          "result": "interrupted"
+        }
+      ]
+    },
+    {
+      "job_id": "5713df62-39c0-4938-947f-431e22569c34",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "fbbc3f75-de31-41fd-8c47-0ef1e47649ef",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "b21fc436-0598-4c17-b3f7-c6436b783730",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a9f0cdc3-3f96-402b-8c5f-a2fe7cb273c5",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "df9bfe30-4862-4584-8b93-cba2b6a69650",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "86a81ce1-79d3-4367-b6c2-fe736f8631ac",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c3f054fe-caba-4b07-97a3-f9d6d644361a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "95c78b1c-a99e-4a8b-a501-162314d8d06b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "6bc8d7c8-2c31-4c48-bfb5-add6d26b72c4",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "d5e04fde-94b6-4ed6-9f65-2b8776821fc7",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "ee10139c-021d-4104-a110-72b0c08c192d",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0e8f1db5-b9b5-48be-a158-a8f2ecd1a902",
+      "attempts": 2,
+      "audit": [
+        {
+          "attempt": 1,
+          "finished_at": 1793223952.897,
+          "result": "timeout",
+          "started_at": 1793223942.8668
+        },
+        {
+          "attempt": 2,
+          "finished_at": 1793223993.413646,
+          "result": "timeout",
+          "started_at": 1793223983.3794
+        }
+      ]
+    }
+  ]
+}

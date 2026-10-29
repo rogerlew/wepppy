@@ -1,0 +1,69 @@
+{
+  "comparisons": {
+    "ready-healthy": {
+      "mismatches": [],
+      "fresh_files": 388,
+      "exact_bytes_summary": {
+        "count": 364,
+        "sha256": "fe4d385c37e9bde08083c6bb391dc5d672e5495efdeee5d183ddb7d226c9a4a6"
+      },
+      "path_normalized_logs_summary": {
+        "count": 29,
+        "sha256": "49a6f9d36004e80137c32d1aeae8f4108d140132dc959569d80fc5fcb03da9fd"
+      },
+      "parquet_values_summary": {
+        "count": 24,
+        "sha256": "47635d48e7af8bb5b77a67ada29c12bb8b64d5e11cc06ab0d90ad66567b31369"
+      }
+    },
+    "ready-failing": {
+      "mismatches": [],
+      "fresh_files": 388,
+      "exact_bytes_summary": {
+        "count": 364,
+        "sha256": "fe4d385c37e9bde08083c6bb391dc5d672e5495efdeee5d183ddb7d226c9a4a6"
+      },
+      "path_normalized_logs_summary": {
+        "count": 29,
+        "sha256": "49a6f9d36004e80137c32d1aeae8f4108d140132dc959569d80fc5fcb03da9fd"
+      },
+      "parquet_values_summary": {
+        "count": 24,
+        "sha256": "47635d48e7af8bb5b77a67ada29c12bb8b64d5e11cc06ab0d90ad66567b31369"
+      }
+    }
+  },
+  "delivery": {
+    "ready-healthy": {
+      "receipt": {
+        "destination_id": "429cd86c-2892-44d2-8dc3-214e8e2c6276",
+        "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+        "job_id": "88ce1a7c-26ef-4aaa-8101-626a9859743e",
+        "operation": "run-wepp",
+        "created_at": 1793223719.9356,
+        "host": "webhook.test",
+        "state": "tracking",
+        "publication": "published"
+      },
+      "receiver": [],
+      "exact_persisted_event_bytes": false,
+      "after_token_expiry": false
+    },
+    "ready-failing": {
+      "receipt": {
+        "destination_id": "736da34b-a950-4d8f-9a56-fc507ceafa5d",
+        "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+        "job_id": "21458412-5a3e-4dfd-9578-b8fb493207c6",
+        "operation": "run-wepp",
+        "created_at": 1793223783.825,
+        "host": "webhook.test",
+        "state": "tracking",
+        "publication": "published"
+      },
+      "receiver": [],
+      "exact_persisted_event_bytes": false,
+      "after_token_expiry": false
+    }
+  },
+  "retention_note": "Intermediate diagnostic: original failure/success and mismatch list retained; redundant match detail consolidated. Final full comparisons are in workflow_readback_v6.json."
+}

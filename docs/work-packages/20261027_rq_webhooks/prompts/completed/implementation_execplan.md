@@ -1,5 +1,9 @@
 # Implement operation-completion webhooks for RQ API clients
 
+Completed locally 2026-10-28. Approved checkpoint `6ba2d8d9d`; runtime `62b272a6c`.
+Final evidence: [validation summary](../../artifacts/validation_summary.md).
+No production deployment occurred. Earlier pending entries are execution history.
+
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log and Outcomes & Retrospective
 current. Revised 2026-10-28 to reflect explicit operator direction; no runtime
@@ -29,13 +33,15 @@ row-level evidence in `../../artifacts/acceptance_matrix.md`.
   and execution_status only; domain results remain in existing APIs (HC-03).
 - [x] (2026-10-28 18:47 UTC) Refreshed implementation scaffold with fresh-agent
   kickoff and concrete acceptance matrix; no runtime implementation performed.
-- [ ] Specify remaining execution failure/cancel precedence and callback admission behavior.
-- [ ] Evaluate independent delivery placement and capture/recovery tradeoffs.
-- [ ] Finalize wire contract, signing decision, audit and numeric policies.
-- [ ] Ratify canonical contracts/ADR, obtain two independent contract reviews and
-  commit the standalone ancestor checkpoint before source implementation.
-- [ ] Implement accepted mechanism; validate API/worker/receiver behavior and parity.
-- [ ] Complete regression gates, final reviews, documentation and closure.
+- [x] Specified and ratified execution precedence and callback admission behavior.
+- [x] Evaluated independent dispatcher placement and capture/recovery tradeoffs.
+- [x] Ratified wire contract, unsigned delivery, audit and ADR-0109 bounds.
+- [x] Ratified contracts/ADR after two independent reviews; committed ancestor `6ba2d8d9d`.
+- [x] Implement accepted mechanism and complete independent source reviews.
+- [x] Validate actual WEPP API/worker/receiver bytes, token expiry and artifact parity.
+- [x] Validate mixed-result culvert: 38 finished nodes, one success, 35 caught failures, exact callback.
+- [x] Meet approved backlog performance limits: canonical-pool p95 +0.849% / +0.637 ms.
+- [x] Complete regression gates, final reviews, documentation and local closure; unrelated full-suite roads baseline failure isolated.
 
 - [x] (2026-10-28 kickoff execution) Recorded HEAD and preexisting working tree;
   audited shared publication/lifecycle/cancellation/recording boundaries.
@@ -45,10 +51,9 @@ row-level evidence in `../../artifacts/acceptance_matrix.md`.
   proposed canonical contract/amendments, ADR-0109 and dated checkpoint matrix.
 - [x] (2026-10-28 kickoff execution) Two independent contract reviews and post-fix
   confirmation complete; no unresolved high/medium drafting findings.
-- [ ] Obtain exact operator approval and package commit authority before creating
-  the standalone ancestor checkpoint.
-- [ ] Complete generic closure/concurrency and independent HTTP/performance proof
-  during authorized implementation; current probes are substrate evidence only.
+- [x] Operator approved exact matrix and authority; checkpoint committed before implementation.
+- [x] Complete generic closure/concurrency and independent HTTP/performance proof
+  with final real Redis, API/model/receiver and canonical-pool evidence.
 ## Surprises & Discoveries
 
 `enqueue_culvert_batch_jobs` returns a failure-tolerant finalizer that writes
@@ -99,16 +104,21 @@ new independent review of the exact final canonical contract.
 
 ## Outcomes & Retrospective
 
-Current outcome is revised planning and concrete source evidence for workflow
-boundaries. No runtime source, stack or database was changed. At the scaffold stage no implementation, synthetic experiment or integrated
-acceptance had been performed; the kickoff update below records subsequent probes.
+The approved checkpoint is committed and the opt-in implementation is wired.
+Independent source reviews have closed the generation/continuity and publication
+findings. Actual WEPP and mixed-domain culvert output/callback readbacks passed;
+final source verification and the corrected hung-receiver performance measurement
+passed. The local implementation package is complete; production deployment remains excluded.
 
-Kickoff execution now advances the package to a concrete proposed checkpoint.
-Real isolated substrate probes passed; production source, application stack and
-shared data remain unchanged. Canonical materials are proposed, not ratified.
-Full producer-closure protocol, HTTP deadline, noninterference and actual workflow
-artifact parity remain unproven. Missing exact operator approval and commit authority
-prevent implementation; scoped stack authority is a separate later integration gate.
+The main discovery is that current RQ status cannot certify an earlier producer's
+exit. Ordinary attempt-generation continuity, one-time publication evidence, actual
+job fences and positive process exit must agree. Missing job hashes remain unknown
+rather than extending RQ TTLs. Early-return evaluation of active receipts avoids
+unnecessary Redis WATCH pressure without weakening terminal-candidate fences.
+
+Historical scaffold and pending-approval entries below/above are provenance. The
+operator ratification and later implementation updates supersede them.
+
 ## Context and Orientation
 
 Work in `/home/workdir/wepppy`. Runtime is RQ 2.12.0; current response/runtime
@@ -383,3 +393,166 @@ RQ-WH-01 exact matrix and ADR-0109 are accepted. Package commit and scoped local
 implementation/integration/restart authority are granted; production deployment
 remains excluded. Earlier pending-approval entries above are historical and
 superseded. Create the standalone checkpoint ancestor before implementation edits.
+
+## Active implementation sequence
+
+Accepted ancestor `6ba2d8d9d` precedes all runtime edits. Build and test
+`webhook_policy.py`, `webhook_http.py`, `webhook_settlement.py`,
+`webhook_tracking.py`, `webhook_hooks.py`, `webhook_dispatcher.py`, and
+`rq_engine/webhooks.py`; wire the four admitted routes and worker lifecycle,
+then capture/playback protections. Keep admission disabled until writer coverage,
+real Redis/process/HTTP security, bounded scheduling/performance, and actual
+API/model-artifact acceptance pass. The initial substrate tests are not closure.
+Intermediate correctness/security findings require attempt-fenced closure, atomic
+terminal delivery, exact envelope/principal cleanup, IPv6 special-address rejection
+and bounded evaluator scheduling. Record fixes and post-fix review before closure.
+
+## Implementation validation update
+
+Admission/receipt recovery, server-owned lineage, per-execution closure, incremental
+settlement, conditional event creation, fenced independent delivery and capture/
+playback protections are implemented but not activated. Existing route/recorder
+regression suite: 137 passed. Disposable Redis API/tracking suite: 25 passed.
+The full repository gate is running. These counts precede later hierarchy tests.
+
+Intermediate reviews found and drove fixes for bounded-upload parser consumption,
+prepublication retry ownership/expiry, raw preview leakage and reserve-to-enqueue
+restore races. RQ 2.12 prepares explicit MULTI before enqueue returns; publication
+now transfers buffered commands into a fresh WATCH transaction to retain existing
+auth-actor hooks while fencing the exact intent. Callback staging cleanup precedes
+making known nonpublication retryable. Final review is still required.
+
+Development Compose includes an opt-in dispatcher profile with disabled defaults.
+Client/operator guidance: `docs/dev-notes/rq-webhook-operations.md`. No production
+deployment, local admission activation, model artifact parity or full acceptance
+is claimed. Outstanding work includes controlled TLS/process fault evidence,
+performance/fairness, actual workflows, remaining gates and final review closure.
+
+### Bounded closure handoff decision
+
+Retained 1,000-transition probes exceeded the approved 5% p95 overhead: initial
+23.6%, cached connection 35.3%, and coalesced receipt 12.0%. Each was under the
+absolute 50 ms delta, which does not satisfy the conjunction. Do not activate.
+Diagnostic timings identify extra lifecycle Redis calls as avoidable overhead.
+The next smallest implementation is a nonblocking close-on-exec pipe carrying one
+completion byte from workhorse to supervisor, followed by one atomic durable
+returned/exited receipt only after waitpid and existing containment checks.
+No queue, daemon or datastore is added. Operational cost: two transient descriptors
+per subscribed execution; missing signal or supervisor death remains unknown.
+The pipe is execution-specific, never an alternative source of RQ outcome. State
+receipts and conditional actual-job WATCH checks remain required. Source/process
+regression and renewed performance evidence must confirm this change.
+
+Broad targeted gate: 3,018 passed, 188 skipped. Full gate attempts exposed parser
+ordering regressions subsequently fixed and covered in that targeted run. Full
+suite must be repeated after source stabilization. Scoped worker stubtest and
+check-test-stubs passed. Exception enforcement needs exact existing allowlist line
+relocation plus the two documented new credential/sender boundaries.
+
+### Actual workflow and final review progress
+
+Disposable API/worker runs on path-rebased continuous-model copies completed all
+18 RQ nodes and regenerated 388 artifacts each (disabled, healthy-destination and
+failing-destination submissions). Artifact semantic comparison and actual delivery
+remain separate gates. Copied catalog identity requires configured managed roots
+and canonical incarnation invalidation; raw directory copying was insufficient.
+The first culvert attempt exposed a missing fixture base mount and an unavailable
+receiver; retained evidence records failed execution and three bounded DNS retries,
+not successful domain or receiver acceptance.
+
+Final correctness review found omitted helper-thread producers, fork-local failure
+state, missing verified external prerequisites, unaudited catalog detachment and
+large dependency serialization exceeding the hook budget. Fixes add process-wide
+ownership, live-thread closure suppression, inherited pipe poison, watched foreign
+receipts, explicit catalog-only detached context and deadline-checked serialization.
+Actual model process helpers require bounded positive pidfd exit observation (ADR
+allocation above); no inference from status or elapsed time replaces closure.
+These changes require fresh process regressions, performance and workflow evidence.
+
+### Final review and acceptance update
+
+Both independent source reviewers report no remaining high/medium findings.
+Late review fixes preserve exact 410 publication evidence, postcommit culvert Redis
+recovery, retryable-admission replay and monotonic generic scheduling. Eight focused
+boundary regressions pass. Six thread/fork lifetime regressions and 39 real catalog
+queue regressions pass. Real Redis RDB restart rejects old reservation publication
+and stale dispatch arming with zero attempts while paused.
+
+`workflow_readback_v3.json` proves 388 fresh files per actual WEPP run, zero semantic
+mismatches, exact persisted callback bytes, token-expiry independence, HTTP 204 and
+three-attempt HTTP 503 exhaustion. All-failed culvert submissions correctly report
+failed execution because their existing finalizer raises, even though children
+catch domain validation failures. A mixed-result case remains under acceptance.
+
+Full suite: 6,826 passed, 64 skipped before an unchanged roads publication-provenance
+failure; isolated reproduction confirms the preexisting blocker. Initial and
+reconciled backlog probes failed the relative limit (40.0%, 27.6%); root state
+signals now preserve reconciliation deadlines and full delivery slots no longer
+hot-poll waiting roots. A new measurement remains required. Admission stays disabled
+outside the explicitly authorized disposable fixture.
+
+### Latest source validation and actual mixed outcome
+
+Actual mixed culvert evidence (`artifacts/culvert_mixed_egress_probe.json`) now
+proves the required execution/domain distinction: 38 finished RQ jobs, one model
+success, 35 caught domain validation failures and exact `finished` callback bytes
+after token expiry. Fresh parquet content and actual job-tree state were read back.
+The disposable fixture used one batch slot to isolate a preexisting parent/finalizer
+lock race and normal model-data egress for USDA. No production defaults changed.
+
+Immediate WATCH without MULTI cannot carry a buffered atomic receipt: tracking
+now marks uncertainty while preserving ordinary RQ errors and repeated saves.
+Profiling identified duplicate containment scans; reuse the existing positive
+retirement observation, retaining scheduler verification and uncertain-child checks.
+Attempt registration shares the existing pre-fork metadata transaction with exactly
+RQ's serializer and meta field; tagged notification errors alone are isolated.
+These are measured reductions of existing work, not a topology change. Ten real
+process-boundary tests passed; both independent reviewers passed the final deltas.
+The 100-transition diagnostic remains insufficient for the 1,000-transition gate.
+
+The batched-start backlog run still failed: p95 77.7 ms disabled versus 98.9 ms
+tracked, a 27.3% increase. Retained as `backlog_performance_batched_start.json`.
+The scheduler previously multiplied its 100 ms budget by four evaluators; now all
+active roots share one budget and rotate every bounded generator step. Three real
+Redis scheduler regressions passed and both independent source reviews passed.
+A fresh full-size backlog measurement follows; no threshold was relaxed.
+
+### Final generation and benchmark review disposition
+
+Both independent reviewers closed the lost-bookkeeping findings after adding an
+ordinary pre-fork atomic metadata/current/predecessor write, a one-time unstarted
+publication seed, sticky generation-gap detection and root publication proof checks.
+A known older overlapping producer's state is ignored without discarding its exit
+obligation. A completely missed attempt cannot disappear behind a successful retry.
+Zero-TTL/missing hashes remain unknown, including later hash recreation; no RQ TTL
+is extended. API computation acceptance survives missing initial notification proof.
+Canonical rationale: `docs/schemas/rq-webhook-contract.md`, Membership, settlement and event commit.
+
+The former late-WATCH optimization was rejected for an ABA race. The retained fix
+returns immediately on an active page and keeps early WATCH/current-generation
+checks for every page that could contribute to an event. Real process/regression
+runs progressed from 47 to 49 to 51 passing tests; final combined gates follow.
+
+Review also found the older backlog probes had zero actual sender attempts. Four
+stale terminal due entries starved later roots for the same principals; terminal
+recovery now repairs their retention deadline. Historical JSON explicitly records
+its evaluator-only scope. The corrected probe requires four initial active senders
+and actual hung-receiver traffic during the measured 1,000 transitions. A passing
+old idle/evaluator-only sample cannot satisfy this gate.
+
+### Closure (2026-10-28)
+
+Canonical six-default/four-batch orchestration passed: v6 WEPP runs each have 18
+finished jobs and 388 fresh artifacts with exact/semantic parity; parallel culvert
+has 38 finished jobs, one model success and 35 caught failures. Healthy and exhausted
+callback bytes match persisted events after token expiry. Final 1,000-transition
+p95 is 75.064 → 75.701 ms (+0.849% / +0.637 ms), with 11 receiver observations
+during timing and 15 audited attempts. Both independent reviewers verified these
+artifacts. Final tests: 109 real boundaries and 3,020 targeted passes/223 skips.
+
+The full-suite run stopped after 6,826 passes on unchanged Roads source-provenance
+evidence; isolated reproduction and matching source hashes are retained. This is
+a separate repository issue, not a webhook change or a reason to rewrite scientific
+evidence. No production activation is authorized. Disposable Compose containers,
+networks, copied data and private credentials were removed after readback; originals
+remain untouched. See `artifacts/fixture_cleanup.json`.

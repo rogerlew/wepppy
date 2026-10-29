@@ -31,7 +31,7 @@ destination challenges, recurring token validation or mandatory key infrastructu
 [Current draft](../../../dev-notes/rq-webhooks-contract-draft.md): Client-facing
 contract, Consumer payload and identity proposal, Generalizable implementation
 proposal, Reliability and audit proposal, Implementation plan and acceptance.
-[Active plan](../prompts/active/implementation_execplan.md): Milestone 1 and
+[Active plan](../prompts/completed/implementation_execplan.md): Milestone 1 and
 Validation and Acceptance, plus review disposition.
 
 Nine findings have drafting remedies; HC-03 was an open high-severity semantic

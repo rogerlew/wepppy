@@ -1,0 +1,59 @@
+{
+  "ack": {
+    "status": 204,
+    "transient": false,
+    "retry_after": null,
+    "elapsed_seconds": 0.13259664783254266
+  },
+  "redirect": {
+    "status": 302,
+    "transient": false,
+    "retry_after": null,
+    "elapsed_seconds": 0.11639707814902067
+  },
+  "retry": {
+    "status": 503,
+    "transient": true,
+    "retry_after": 300,
+    "elapsed_seconds": 0.11712458403781056
+  },
+  "deny": {
+    "status": 403,
+    "transient": false,
+    "retry_after": null,
+    "elapsed_seconds": 0.11687343311496079
+  },
+  "oversize": {
+    "error": "response_headers",
+    "transient": false,
+    "elapsed_seconds": 0.1474611631128937
+  },
+  "hang": {
+    "error": "timeout",
+    "transient": true,
+    "elapsed_seconds": 1.50483382306993
+  },
+  "slow": {
+    "error": "timeout",
+    "transient": true,
+    "elapsed_seconds": 1.5048493349459022
+  },
+  "invalid_tls": {
+    "error": "tls",
+    "transient": false
+  },
+  "mixed_dns": {
+    "error": "unsafe_destination",
+    "transient": false
+  },
+  "provenance": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "network": "isolated internal Docker network; no public egress",
+    "sender": "production deliver subprocess, unchanged DNS/TLS/address policy",
+    "trust": "disposable test CA via SSL_CERT_FILE; no production trust changes"
+  }
+}

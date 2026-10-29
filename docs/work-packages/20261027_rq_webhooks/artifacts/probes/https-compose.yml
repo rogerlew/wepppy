@@ -1,0 +1,77 @@
+name: wepppy-webhook-acceptance
+x-workflow: &workflow
+  image: wepppy-dev
+  user: "1000:993"
+  working_dir: /workdir/wepppy
+  env_file: [/home/workdir/wepppy/.pytest_cache/webhook-workflows/runtime.env]
+  volumes:
+    - /home/workdir/wepppy:/workdir/wepppy:ro
+    - /home/workdir/rosetta:/workdir/rosetta:ro
+    - /home/workdir/peridot:/workdir/peridot:ro
+    - /home/workdir/weppcloud-wbt:/workdir/weppcloud-wbt:ro
+    - /home/workdir/wepppyo3:/workdir/wepppyo3:ro
+    - /home/workdir/wepppy-test-engine-data:/workdir/wepppy-test-engine-data:ro
+    - /wc1/geodata:/geodata:ro
+    - /wc1/runs/rq/rq212-20261027-upgraded:/fixtures/source:ro
+    - /wc1/batch/culvert_base/_base:/wc1/batch/culvert_base/_base:ro
+    - /home/workdir/wepppy/.pytest_cache/webhook-workflows:/acceptance
+    - /home/workdir/wepppy/.pytest_cache/webhook-workflows/wc1:/wc1
+    - /home/workdir/wepppy/.pytest_cache/webhook-tls:/tls:ro
+    - /home/workdir/wepppy/docs/work-packages/20261027_rq_webhooks/artifacts:/evidence
+  networks: [acceptance]
+services:
+  redis:
+    image: redis:latest
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks: [acceptance]
+  worker:
+    <<: *workflow
+    command: ["/opt/venv/bin/rq", "worker-pool", "-n", "6", "--url", "redis://redis:6379/9", "--worker-class", "wepppy.rq.WepppyRqWorker", "default"]
+  batch-worker:
+    <<: *workflow
+    networks: [acceptance, model-data]
+    command: ["/opt/venv/bin/rq", "worker-pool", "-n", "4", "--url", "redis://redis:6379/9", "--worker-class", "wepppy.rq.WepppyRqWorker", "batch"]
+  api:
+    <<: *workflow
+    command: ["/opt/venv/bin/uvicorn", "wepppy.microservices.rq_engine:app", "--host", "0.0.0.0", "--port", "8050"]
+  dispatcher:
+    <<: *workflow
+    command: ["/opt/venv/bin/python", "-m", "wepppy.rq.webhook_dispatcher", "--environment", "disposable-workflow-acceptance"]
+  driver:
+    <<: *workflow
+    command: ["/opt/venv/bin/python", "docs/work-packages/20261027_rq_webhooks/artifacts/probes/workflow_probe.py"]
+  receiver:
+    image: wepppy-dev
+    user: "1000:993"
+    working_dir: /workdir/wepppy
+    command: ["/opt/venv/bin/python", "docs/work-packages/20261027_rq_webhooks/artifacts/probes/https_receiver.py"]
+    volumes:
+      - /home/workdir/wepppy:/workdir/wepppy:ro
+      - /home/workdir/wepppy/.pytest_cache/webhook-tls:/tls:ro
+      - /home/workdir/wepppy/docs/work-packages/20261027_rq_webhooks/artifacts:/evidence
+    networks:
+      acceptance:
+        ipv4_address: 11.203.247.14
+        aliases: [webhook.test, wrong.webhook.test]
+  sender:
+    image: wepppy-dev
+    user: "1000:993"
+    working_dir: /workdir/wepppy
+    command: ["/opt/venv/bin/python", "docs/work-packages/20261027_rq_webhooks/artifacts/probes/https_probe.py"]
+    environment:
+      SSL_CERT_FILE: /tls/cert.pem
+    volumes:
+      - /home/workdir/wepppy:/workdir/wepppy:ro
+      - /home/workdir/wepppy/.pytest_cache/webhook-tls:/tls:ro
+      - /home/workdir/wepppy/docs/work-packages/20261027_rq_webhooks/artifacts:/evidence
+    extra_hosts:
+      - "mixed.webhook.test=127.0.0.1"
+      - "mixed.webhook.test=11.203.247.14"
+    networks: [acceptance]
+networks:
+  model-data: {}
+  acceptance:
+    internal: true
+    ipam:
+      config:
+        - subnet: 11.203.247.0/28

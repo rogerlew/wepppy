@@ -1,0 +1,8 @@
+{
+  "real_rdb_restore": true,
+  "redis_identity_changed": true,
+  "publication_rejected": "webhook_admission_unknown",
+  "published_jobs": 0,
+  "stale_dispatch_arm_rejected": true,
+  "paused_restore_attempts": 0
+}

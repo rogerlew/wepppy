@@ -1,0 +1,542 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "conditions": "1000 actual worker transitions; tracked group with 80 hung TLS events and four 5000-member evaluation roots",
+  "baseline": {
+    "transitions": 1000,
+    "p95_seconds": 0.07630420923233032,
+    "median_seconds": 0.06234729290008545,
+    "elapsed_seconds": 75.05194331682287,
+    "redis_calls": {
+      "cmdstat_hset": 21197,
+      "cmdstat_persist": 1002,
+      "cmdstat_hmget": 0,
+      "cmdstat_unwatch": 2870,
+      "cmdstat_type": 0,
+      "cmdstat_exec": 4162,
+      "cmdstat_config|get": 0,
+      "cmdstat_hincrby": 1002,
+      "cmdstat_smembers": 1004,
+      "cmdstat_xrevrange": 0,
+      "cmdstat_hvals": 0,
+      "cmdstat_zadd": 3060,
+      "cmdstat_lrem": 1002,
+      "cmdstat_zrangebyscore": 863,
+      "cmdstat_del": 1004,
+      "cmdstat_hexists": 0,
+      "cmdstat_hscan": 14,
+      "cmdstat_hgetall": 1016,
+      "cmdstat_pttl": 0,
+      "cmdstat_unlink": 0,
+      "cmdstat_ping": 6,
+      "cmdstat_pexpire": 0,
+      "cmdstat_client|setinfo": 4026,
+      "cmdstat_client|setname": 1,
+      "cmdstat_client|list": 1,
+      "cmdstat_zrem": 2004,
+      "cmdstat_hdel": 1002,
+      "cmdstat_zcard": 0,
+      "cmdstat_blpop": 0,
+      "cmdstat_rpush": 2002,
+      "cmdstat_xadd": 1002,
+      "cmdstat_lrange": 2,
+      "cmdstat_zscore": 0,
+      "cmdstat_publish": 1002,
+      "cmdstat_script|exists": 148,
+      "cmdstat_script|load": 0,
+      "cmdstat_hget": 5974,
+      "cmdstat_select": 2012,
+      "cmdstat_zremrangebyscore": 2,
+      "cmdstat_scan": 0,
+      "cmdstat_sadd": 3,
+      "cmdstat_watch": 3886,
+      "cmdstat_lmove": 1003,
+      "cmdstat_exists": 1006,
+      "cmdstat_hincrbyfloat": 1002,
+      "cmdstat_unsubscribe": 1,
+      "cmdstat_eval": 0,
+      "cmdstat_hlen": 0,
+      "cmdstat_evalsha": 148,
+      "cmdstat_info": 716,
+      "cmdstat_multi": 4162,
+      "cmdstat_srem": 2,
+      "cmdstat_get": 148,
+      "cmdstat_blmove": 0,
+      "cmdstat_expire": 11323,
+      "cmdstat_subscribe": 1,
+      "cmdstat_set": 1
+    }
+  },
+  "tracked": {
+    "transitions": 1000,
+    "p95_seconds": 0.10016207695007324,
+    "median_seconds": 0.06266915798187256,
+    "elapsed_seconds": 78.65983175998554,
+    "redis_calls": {
+      "cmdstat_hset": 33225,
+      "cmdstat_persist": 1002,
+      "cmdstat_hmget": 0,
+      "cmdstat_unwatch": 2779,
+      "cmdstat_type": 0,
+      "cmdstat_exec": 6174,
+      "cmdstat_config|get": 0,
+      "cmdstat_hincrby": 25042,
+      "cmdstat_smembers": 1004,
+      "cmdstat_xrevrange": 0,
+      "cmdstat_hvals": 0,
+      "cmdstat_zadd": 9146,
+      "cmdstat_lrem": 1002,
+      "cmdstat_zrangebyscore": 846,
+      "cmdstat_del": 1004,
+      "cmdstat_hexists": 0,
+      "cmdstat_hscan": 175,
+      "cmdstat_hgetall": 1025,
+      "cmdstat_pttl": 0,
+      "cmdstat_unlink": 0,
+      "cmdstat_ping": 6,
+      "cmdstat_pexpire": 0,
+      "cmdstat_client|setinfo": 4046,
+      "cmdstat_client|setname": 1,
+      "cmdstat_client|list": 1,
+      "cmdstat_zrem": 2004,
+      "cmdstat_hdel": 1002,
+      "cmdstat_zcard": 0,
+      "cmdstat_blpop": 0,
+      "cmdstat_rpush": 2002,
+      "cmdstat_xadd": 1002,
+      "cmdstat_lrange": 2,
+      "cmdstat_zscore": 0,
+      "cmdstat_publish": 1002,
+      "cmdstat_script|exists": 156,
+      "cmdstat_script|load": 0,
+      "cmdstat_hget": 82244,
+      "cmdstat_select": 2022,
+      "cmdstat_zremrangebyscore": 2,
+      "cmdstat_scan": 0,
+      "cmdstat_sadd": 3,
+      "cmdstat_watch": 3956,
+      "cmdstat_lmove": 1003,
+      "cmdstat_exists": 1006,
+      "cmdstat_hincrbyfloat": 1002,
+      "cmdstat_unsubscribe": 1,
+      "cmdstat_eval": 6010,
+      "cmdstat_hlen": 1001,
+      "cmdstat_evalsha": 156,
+      "cmdstat_info": 691,
+      "cmdstat_multi": 6174,
+      "cmdstat_srem": 2,
+      "cmdstat_get": 156,
+      "cmdstat_blmove": 0,
+      "cmdstat_expire": 11339,
+      "cmdstat_subscribe": 1,
+      "cmdstat_set": 1
+    }
+  },
+  "delta_seconds": 0.023857867717742925,
+  "relative_delta": 0.3126677801627001,
+  "threshold_pass": false,
+  "backlog_audits": [
+    {
+      "job_id": "6ac13b6a-8145-4ff3-964b-6c5a53d5d191",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c0fa7907-3ac8-4f3d-a126-d5aec18a6cc6",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0e139b0c-133b-494e-ace9-1a1535f7c539",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "b69104f0-1359-40e6-858a-434d7fc59b60",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "b7c5f766-9f6a-4756-b6f4-b2f2e4aa6897",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c9d5bbd8-b1d7-4cf8-a731-d9877c0a56c8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a33aacda-8243-4725-b809-a6fbc7089070",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "2b919113-e6f0-4ea4-a26b-727deaed6317",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a3eaeee2-2cf0-4160-8d0c-253644692823",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "47722df1-2b50-4058-9644-8b0aa81919d7",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "95e34d69-e331-4550-83fe-49d5eb7017d1",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "7b110417-539a-499c-b299-8fe42b761192",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "748008c7-0f24-434d-b465-2f81bd7d835b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0b78da47-d11e-4445-b5cb-47690e1e2a8c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "9bee7093-94c1-4ae3-8048-a0c72db55f7f",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "90e577fb-b985-4105-a2c6-a9a1550b33a1",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "d6ff3c41-92f5-451e-9e77-84338cf1b0c2",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0cfdd01e-0357-4f35-985a-301aac17704b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "62de1018-6f61-441e-8569-5430a2ff9ded",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "5d9e71f9-2095-4237-ba22-01648c2fdabb",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "718b938c-9416-48ed-bc92-bb4981ae0ac8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "cfa3a761-e777-4fcb-bdf9-94ef73d3a3e6",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "cb50f41f-e609-4fb8-9954-68c49665e980",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "2ca00a8f-6a1e-4832-8553-c7ca902946ce",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "d1a14c9d-3a58-4626-8863-600cb16a4fcd",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "92f44f2a-8245-49a3-b238-dde426ca49cd",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "21728eb7-340a-4fe5-b651-0f0fd8912142",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "defc1ee7-a9c3-42a6-8a23-6ed9820b9fae",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "4d445c1b-4671-4a80-aa19-0a6e979366b2",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c2512932-8cd9-4961-9de2-d26617c6382c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "9f51f92f-ba7b-49dc-9068-bb6ef009b54e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "75f77862-fea9-4dd0-a903-de4c27123fb9",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "8df459ce-1b67-47b9-8f93-f20856c733b6",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "91252c12-f260-439c-84ca-d8f9275c8d5c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "ef8ecbe4-2634-495e-9ddb-785c6228af2d",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "ecac0b7d-a3f8-4181-b381-041c5b4b8a51",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "0a7ada27-d37b-4b9f-be10-3a12d3e5c581",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "7013cf69-7104-4169-9f6c-41af599e2f34",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "57cca453-aff7-4590-9ca5-4f0d193173e0",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "7f8cfa71-78a4-4746-b958-717b3834eafb",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "9c2d8a61-fb50-401c-9a23-9bb810ceca56",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "75c0cbeb-fc96-4d55-9d5d-6a8261a32f7e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "3e6ca3b2-2b15-40a9-be32-e984541c0ed3",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "bf0b19b2-d66a-493f-82b2-8e953ae8003e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "425cf7d8-45c8-429c-98f3-e55b73a9bd09",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "95803173-df13-4b07-b41c-126fb5c7fcc8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "dec6442d-f13c-473c-9311-ee2f0e5ee42a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "3d072f9d-4d19-4ef7-83d9-ea55e77c68c7",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "cc2fc473-9d2a-4f27-919e-eedf9b4fcacc",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "43f8607a-6630-405b-ac86-8b4d90e8762c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "df8b29e7-5689-4053-a3fb-de7207b09c84",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "3278252c-621d-4730-a6fe-b4f4d06ad348",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "f862bada-b5d3-494b-99ec-668392944ea0",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "ae3a9fbc-7d4e-4eb5-b459-cd832fc881e2",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "03779e90-6cd9-4014-b20c-b1e797021276",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "28adbbce-aa1c-44da-9e04-2663b6f054f1",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "015f6a37-10a8-4a7a-94e1-825044460c80",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "5f732884-5c71-4a8e-89d1-7f68654241b8",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "cb0648ce-d342-48e9-b917-f9ea2b981f04",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "4087f6c0-58cc-43eb-8627-59b8a0d9a2f9",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "927c4d0c-1099-465d-aac3-9f333a2acaf0",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "339708cd-c2be-454d-85a6-6e1ee6baaf0b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "547cfe8b-1ba3-4010-8d61-626a59ea348e",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "e213097a-afd9-4237-afea-fa2e418c397d",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "36bb86ee-f286-4933-9911-d2cf6ea9e6b0",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "323b662a-4f22-414b-9a92-5ee77ab52e3c",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "f4b811a2-9dd2-44af-b24f-c2b8ef1570ce",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "2fa1602e-03b0-4de0-983f-899e567dcf33",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "64be14fc-81c8-47c5-83cc-899f543d6fe9",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "5e2bb6ab-2648-42b7-9d9d-4d708933579a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "a5a99bbd-ddbc-41ff-9d1f-ffe6185c9b3a",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "1c088d62-fbc7-4e1f-820e-0210bbdc7e4b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "458db79c-582d-4a51-8cef-5bd25d278d4b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "36fb119f-245a-4f65-9a3b-f84327bfbbbc",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "472ea8fe-aaea-4f7b-aa81-8ea6bcef8363",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c0f668c1-731e-47a7-b901-b888fd73adf7",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "fddaf3e5-a897-47c9-b970-7cd3d7041357",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "c7a1caa6-dc11-46d2-93f3-0d5c55c80c3b",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "36342309-909f-4b15-82ff-2c5b0592f9de",
+      "attempts": 0,
+      "audit": []
+    },
+    {
+      "job_id": "7ced04a0-4c08-40e4-938b-43f6de751d7d",
+      "attempts": 0,
+      "audit": []
+    }
+  ],
+  "sender_load_verified": false,
+  "acceptance_scope": "Evaluator pressure only: all retained sender attempt counts are zero; not hung-receiver acceptance."
+}

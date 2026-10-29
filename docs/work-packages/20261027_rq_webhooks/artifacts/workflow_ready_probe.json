@@ -1,0 +1,937 @@
+{
+  "provenance": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0o22",
+    "rq": "2.12.0",
+    "source": "disposable copies; source mounts read-only; isolated Redis and network"
+  },
+  "ready-baseline": {
+    "submitted_at": 1793223152.4567964,
+    "http_status": 200,
+    "response": {
+      "job_id": "50496bb0-dea2-4506-a752-749db0eafb9f"
+    },
+    "job_states": {
+      "50496bb0-dea2-4506-a752-749db0eafb9f": "finished",
+      "72a56830-9a59-495c-b2f1-42f0d5a484da": "finished",
+      "4a6c8bf3-a5ab-4dcc-9e38-0bbfc4049a4e": "finished",
+      "b22ee60c-bbd0-4fea-ada6-88edc0bb9c50": "finished",
+      "5793a158-622e-414d-8705-5f7c85093721": "finished",
+      "c52f7044-2cc5-403d-ae05-f998d8e57787": "finished",
+      "c491adaa-b6ff-4f96-81ed-895bdcd8b97e": "finished",
+      "008fa47b-200c-400f-b2c1-343da8b9b80f": "finished",
+      "2696e2f2-fae6-4fb7-8dfa-5952aa30034e": "finished",
+      "5c634f2f-2b9b-4a71-91cf-81ee1fdf806d": "finished",
+      "9a30c5d1-f373-4d86-98ca-bfd79d4761f2": "finished",
+      "71bd65e9-f4d1-4225-a509-cf81f6e3bf60": "finished",
+      "1bed23a4-cf17-4ef5-a7eb-b0815ac884fd": "finished",
+      "f8a4a0be-93f1-4af2-9aa9-3570d90b6174": "finished",
+      "cac26e20-6cb6-49a3-9671-0766ad363668": "finished",
+      "5181564d-f2b3-4892-b7a3-366cff21d30d": "finished",
+      "88b43135-c576-43da-88c5-164c0416d170": "finished",
+      "4f51abf5-2eff-45e0-a070-86bd9ed46deb": "finished"
+    },
+    "job_tree": {
+      "job_id": "50496bb0-dea2-4506-a752-749db0eafb9f",
+      "runid": "profile;;tmp;;ready-baseline",
+      "status": "finished",
+      "result": "Unserializable return value",
+      "started_at": "2026-10-28 21:32:32.993384",
+      "ended_at": "2026-10-28 21:32:33.464526",
+      "description": "wepppy.rq.wepp_rq.run_wepp_rq('profile;;tmp;;ready-baseline')",
+      "elapsed_s": 0.471142,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {
+        "0": [
+          {
+            "job_id": "4f51abf5-2eff-45e0-a070-86bd9ed46deb",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:32:33.447282",
+            "ended_at": "2026-10-28 21:32:34.412755",
+            "description": "wepppy.rq.wepp_rq._prep_slopes_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.965473,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "88b43135-c576-43da-88c5-164c0416d170",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:32:33.503256",
+            "ended_at": "2026-10-28 21:32:33.902317",
+            "description": "wepppy.rq.wepp_rq._prep_managements_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.399061,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "5181564d-f2b3-4892-b7a3-366cff21d30d",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:32:33.963361",
+            "ended_at": "2026-10-28 21:33:11.211295",
+            "description": "wepppy.rq.wepp_rq._prep_soils_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 37.247934,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "cac26e20-6cb6-49a3-9671-0766ad363668",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:32:34.458973",
+            "ended_at": "2026-10-28 21:32:34.577323",
+            "description": "wepppy.rq.wepp_rq._prep_climates_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.11835,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "f8a4a0be-93f1-4af2-9aa9-3570d90b6174",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:11.248621",
+            "ended_at": "2026-10-28 21:33:11.440956",
+            "description": "wepppy.rq.wepp_rq._prep_remaining_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.192335,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "1": [
+          {
+            "job_id": "1bed23a4-cf17-4ef5-a7eb-b0815ac884fd",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:11.476882",
+            "ended_at": "2026-10-28 21:33:13.399547",
+            "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 1.922665,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "2": [
+          {
+            "job_id": "71bd65e9-f4d1-4225-a509-cf81f6e3bf60",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:13.428579",
+            "ended_at": "2026-10-28 21:33:13.652155",
+            "description": "wepppy.rq.wepp_rq._prep_watershed_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.223576,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "9a30c5d1-f373-4d86-98ca-bfd79d4761f2",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:13.450510",
+            "ended_at": "2026-10-28 21:33:14.704006",
+            "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 1.253496,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "5c634f2f-2b9b-4a71-91cf-81ee1fdf806d",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:14.757300",
+            "ended_at": "2026-10-28 21:33:15.767899",
+            "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 1.010599,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "3": [
+          {
+            "job_id": "2696e2f2-fae6-4fb7-8dfa-5952aa30034e",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": [
+              true,
+              10.544041872024536
+            ],
+            "started_at": "2026-10-28 21:33:13.702910",
+            "ended_at": "2026-10-28 21:33:24.317693",
+            "description": "wepppy.rq.wepp_rq.run_watershed_rq('profile;;tmp;;ready-baseline', wepp_bin='wepp_261026')",
+            "elapsed_s": 10.614783,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "4": [
+          {
+            "job_id": "008fa47b-200c-400f-b2c1-343da8b9b80f",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:24.351981",
+            "ended_at": "2026-10-28 21:33:24.484497",
+            "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.132516,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "c491adaa-b6ff-4f96-81ed-895bdcd8b97e",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:24.376782",
+            "ended_at": "2026-10-28 21:33:24.886659",
+            "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.509877,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "c52f7044-2cc5-403d-ae05-f998d8e57787",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:24.537730",
+            "ended_at": "2026-10-28 21:33:24.898275",
+            "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 0.360545,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "5793a158-622e-414d-8705-5f7c85093721",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:24.944060",
+            "ended_at": "2026-10-28 21:33:30.410492",
+            "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 5.466432,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "b22ee60c-bbd0-4fea-ada6-88edc0bb9c50",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:30.465905",
+            "ended_at": "2026-10-28 21:33:32.252745",
+            "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 1.78684,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "5": [
+          {
+            "job_id": "4a6c8bf3-a5ab-4dcc-9e38-0bbfc4049a4e",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:32.286324",
+            "ended_at": "2026-10-28 21:33:34.132954",
+            "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('profile;;tmp;;ready-baseline')",
+            "elapsed_s": 1.84663,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "6": [
+          {
+            "job_id": "72a56830-9a59-495c-b2f1-42f0d5a484da",
+            "runid": "profile;;tmp;;ready-baseline",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:34.174506",
+            "ended_at": "2026-10-28 21:33:34.269780",
+            "description": "wepppy.rq.wepp_rq._log_complete_rq('profile;;tmp;;ready-baseline', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+            "elapsed_s": 0.095274,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ]
+      }
+    },
+    "callback": null,
+    "artifact_count": 417,
+    "manifest_sha256": "39dfef118ecac03f0d37477e323c60522fae35d504ca0f0fa52dc1866e3c2207"
+  },
+  "ready-healthy": {
+    "submitted_at": 1793223214.9953744,
+    "http_status": 200,
+    "response": {
+      "job_id": "48287c5d-60d7-4606-8da4-9c6082e8b76d",
+      "webhook": {
+        "status": "accepted"
+      }
+    },
+    "job_states": {
+      "48287c5d-60d7-4606-8da4-9c6082e8b76d": "finished",
+      "6b1ad0bf-123c-44ca-8be1-6b168d5f739a": "finished",
+      "a57b0d65-c827-4d9d-952e-508d43851348": "finished",
+      "c32907f8-dc1e-4050-b98a-708519b489d1": "finished",
+      "83677a61-305f-40e5-b386-cab80e3ca277": "finished",
+      "86531dc6-1f9b-493b-97c8-6a53f61969ad": "finished",
+      "150bd649-c1ab-4b82-9305-1f2d05acfd54": "finished",
+      "3406eadf-2a59-4d7c-9a71-d07432d73213": "finished",
+      "fdae3572-47f3-4288-9727-9d0c498ba537": "finished",
+      "a26bb925-eea4-42e3-8dc0-0c3c5d4fdec4": "finished",
+      "804345db-04d5-40de-9b4a-5bbe56367ed4": "finished",
+      "136b7b84-ef3a-4a70-a531-9a6f9a8e935e": "finished",
+      "fb190487-d949-4ab6-a094-2ab923a526a3": "finished",
+      "8ecc8661-2f62-413c-a811-4b5f2ed9bc81": "finished",
+      "0e2aa40a-6300-4d54-8a7f-6301824d9c5b": "finished",
+      "05c6affc-29fb-4bae-9503-01a9ec1a7961": "finished",
+      "9df4c765-e292-416a-8afd-55f854aa994f": "finished",
+      "b625cdc5-f15a-42ee-b3ce-8dacd8d4b1dc": "finished"
+    },
+    "job_tree": {
+      "job_id": "48287c5d-60d7-4606-8da4-9c6082e8b76d",
+      "runid": "profile;;tmp;;ready-healthy",
+      "status": "finished",
+      "result": "Unserializable return value",
+      "started_at": "2026-10-28 21:33:35.760211",
+      "ended_at": "2026-10-28 21:33:36.186551",
+      "description": "wepppy.rq.wepp_rq.run_wepp_rq('profile;;tmp;;ready-healthy')",
+      "elapsed_s": 0.42634,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {
+        "0": [
+          {
+            "job_id": "b625cdc5-f15a-42ee-b3ce-8dacd8d4b1dc",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:36.143890",
+            "ended_at": "2026-10-28 21:33:37.141871",
+            "description": "wepppy.rq.wepp_rq._prep_slopes_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.997981,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "9df4c765-e292-416a-8afd-55f854aa994f",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:36.231124",
+            "ended_at": "2026-10-28 21:33:36.656741",
+            "description": "wepppy.rq.wepp_rq._prep_managements_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.425617,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "05c6affc-29fb-4bae-9503-01a9ec1a7961",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:36.722695",
+            "ended_at": "2026-10-28 21:34:14.476828",
+            "description": "wepppy.rq.wepp_rq._prep_soils_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 37.754133,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "0e2aa40a-6300-4d54-8a7f-6301824d9c5b",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:33:37.191211",
+            "ended_at": "2026-10-28 21:33:37.301260",
+            "description": "wepppy.rq.wepp_rq._prep_climates_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.110049,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "8ecc8661-2f62-413c-a811-4b5f2ed9bc81",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:14.510770",
+            "ended_at": "2026-10-28 21:34:14.706987",
+            "description": "wepppy.rq.wepp_rq._prep_remaining_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.196217,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "1": [
+          {
+            "job_id": "fb190487-d949-4ab6-a094-2ab923a526a3",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:14.782383",
+            "ended_at": "2026-10-28 21:34:16.719950",
+            "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 1.937567,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "2": [
+          {
+            "job_id": "136b7b84-ef3a-4a70-a531-9a6f9a8e935e",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:16.763664",
+            "ended_at": "2026-10-28 21:34:16.980683",
+            "description": "wepppy.rq.wepp_rq._prep_watershed_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.217019,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "804345db-04d5-40de-9b4a-5bbe56367ed4",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:16.779153",
+            "ended_at": "2026-10-28 21:34:17.846899",
+            "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 1.067746,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "a26bb925-eea4-42e3-8dc0-0c3c5d4fdec4",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:17.905166",
+            "ended_at": "2026-10-28 21:34:18.909830",
+            "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 1.004664,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "3": [
+          {
+            "job_id": "fdae3572-47f3-4288-9727-9d0c498ba537",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": [
+              true,
+              10.322773933410645
+            ],
+            "started_at": "2026-10-28 21:34:17.033189",
+            "ended_at": "2026-10-28 21:34:27.427551",
+            "description": "wepppy.rq.wepp_rq.run_watershed_rq('profile;;tmp;;ready-healthy', wepp_bin='wepp_261026')",
+            "elapsed_s": 10.394362,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "4": [
+          {
+            "job_id": "3406eadf-2a59-4d7c-9a71-d07432d73213",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:27.915534",
+            "ended_at": "2026-10-28 21:34:28.056085",
+            "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.140551,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "150bd649-c1ab-4b82-9305-1f2d05acfd54",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:27.462252",
+            "ended_at": "2026-10-28 21:34:28.021503",
+            "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.559251,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "86531dc6-1f9b-493b-97c8-6a53f61969ad",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:27.482202",
+            "ended_at": "2026-10-28 21:34:27.859558",
+            "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 0.377356,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "83677a61-305f-40e5-b386-cab80e3ca277",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:28.089312",
+            "ended_at": "2026-10-28 21:34:33.447797",
+            "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 5.358485,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "c32907f8-dc1e-4050-b98a-708519b489d1",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:33.484260",
+            "ended_at": "2026-10-28 21:34:35.381050",
+            "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 1.89679,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "5": [
+          {
+            "job_id": "a57b0d65-c827-4d9d-952e-508d43851348",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:35.422214",
+            "ended_at": "2026-10-28 21:34:37.212068",
+            "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('profile;;tmp;;ready-healthy')",
+            "elapsed_s": 1.789854,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "6": [
+          {
+            "job_id": "6b1ad0bf-123c-44ca-8be1-6b168d5f739a",
+            "runid": "profile;;tmp;;ready-healthy",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:37.250939",
+            "ended_at": "2026-10-28 21:34:37.345552",
+            "description": "wepppy.rq.wepp_rq._log_complete_rq('profile;;tmp;;ready-healthy', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+            "elapsed_s": 0.094613,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ]
+      }
+    },
+    "callback": {
+      "destination_id": "092e6a85-62b8-42f0-a55d-7b4626abbc73",
+      "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+      "job_id": "48287c5d-60d7-4606-8da4-9c6082e8b76d",
+      "operation": "run-wepp",
+      "created_at": 1793223215.0734,
+      "host": "webhook.test",
+      "state": "tracking",
+      "publication": "published"
+    },
+    "artifact_count": 417,
+    "manifest_sha256": "816bb37a249c0fab77ae8838e1853b2dbdb025d694db1e52cff025afca60f180"
+  },
+  "ready-failing": {
+    "submitted_at": 1793223278.5364518,
+    "http_status": 200,
+    "response": {
+      "job_id": "3ad3a8cd-1936-41ad-a10e-25c6100faddf",
+      "webhook": {
+        "status": "accepted"
+      }
+    },
+    "job_states": {
+      "3ad3a8cd-1936-41ad-a10e-25c6100faddf": "finished",
+      "7ead9100-08b0-4966-a1b0-71e251a6c54b": "finished",
+      "aa11012c-69bb-45e1-b43f-c278c27ade32": "finished",
+      "62ea02ad-b74e-495a-90e5-4675f07c1b5b": "finished",
+      "4a120106-2fbc-4f51-8a0c-a5f8d990f9d5": "finished",
+      "eaac5ffc-9418-44fc-8970-0feae4db0abd": "finished",
+      "c25b28fe-15f9-4f24-b6cf-5c262234f73e": "finished",
+      "7e0c3a7c-60f3-49ce-adb7-2630a10648bd": "finished",
+      "1138b33c-7eca-48d7-aca7-ee11604e1508": "finished",
+      "a045a00b-6982-404c-bcf3-f488729804fa": "finished",
+      "0431ff3e-e90d-482f-9368-aa4da4f43b02": "finished",
+      "1ec91ab7-2a76-4428-bf2f-7cab129df3b1": "finished",
+      "340c0439-5eee-40a2-b53a-b99ffab6e9e2": "finished",
+      "1e917d55-b9e1-448a-8f7e-449940865967": "finished",
+      "895cd625-cbea-49a4-9ec3-74fdd8459218": "finished",
+      "1b3fa396-4f77-48dd-be46-397911559e48": "finished",
+      "b153bdea-51de-4a15-934c-fc04c9602910": "finished",
+      "7fadcd7b-0ae9-48b1-a59d-970519efaf41": "finished"
+    },
+    "job_tree": {
+      "job_id": "3ad3a8cd-1936-41ad-a10e-25c6100faddf",
+      "runid": "profile;;tmp;;ready-failing",
+      "status": "finished",
+      "result": "Unserializable return value",
+      "started_at": "2026-10-28 21:34:39.139389",
+      "ended_at": "2026-10-28 21:34:39.755326",
+      "description": "wepppy.rq.wepp_rq.run_wepp_rq('profile;;tmp;;ready-failing')",
+      "elapsed_s": 0.615937,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {
+        "0": [
+          {
+            "job_id": "7fadcd7b-0ae9-48b1-a59d-970519efaf41",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:39.719173",
+            "ended_at": "2026-10-28 21:34:40.640854",
+            "description": "wepppy.rq.wepp_rq._prep_slopes_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.921681,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "b153bdea-51de-4a15-934c-fc04c9602910",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:39.801287",
+            "ended_at": "2026-10-28 21:34:40.227035",
+            "description": "wepppy.rq.wepp_rq._prep_managements_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.425748,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "1b3fa396-4f77-48dd-be46-397911559e48",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:40.277296",
+            "ended_at": "2026-10-28 21:35:18.671986",
+            "description": "wepppy.rq.wepp_rq._prep_soils_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 38.39469,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "895cd625-cbea-49a4-9ec3-74fdd8459218",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:34:40.688701",
+            "ended_at": "2026-10-28 21:34:40.804739",
+            "description": "wepppy.rq.wepp_rq._prep_climates_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.116038,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "1e917d55-b9e1-448a-8f7e-449940865967",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:18.707233",
+            "ended_at": "2026-10-28 21:35:18.906218",
+            "description": "wepppy.rq.wepp_rq._prep_remaining_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.198985,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "1": [
+          {
+            "job_id": "340c0439-5eee-40a2-b53a-b99ffab6e9e2",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:18.961672",
+            "ended_at": "2026-10-28 21:35:20.908638",
+            "description": "wepppy.rq.wepp_rq._run_hillslopes_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 1.946966,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "2": [
+          {
+            "job_id": "1ec91ab7-2a76-4428-bf2f-7cab129df3b1",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:20.954119",
+            "ended_at": "2026-10-28 21:35:21.176595",
+            "description": "wepppy.rq.wepp_rq._prep_watershed_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.222476,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "0431ff3e-e90d-482f-9368-aa4da4f43b02",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:20.974751",
+            "ended_at": "2026-10-28 21:35:22.062799",
+            "description": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 1.088048,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "a045a00b-6982-404c-bcf3-f488729804fa",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:22.116707",
+            "ended_at": "2026-10-28 21:35:23.144756",
+            "description": "wepppy.rq.wepp_rq._build_totalwatsed3_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 1.028049,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "3": [
+          {
+            "job_id": "1138b33c-7eca-48d7-aca7-ee11604e1508",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": [
+              true,
+              10.348793029785156
+            ],
+            "started_at": "2026-10-28 21:35:21.232362",
+            "ended_at": "2026-10-28 21:35:31.650440",
+            "description": "wepppy.rq.wepp_rq.run_watershed_rq('profile;;tmp;;ready-failing', wepp_bin='wepp_261026')",
+            "elapsed_s": 10.418078,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "4": [
+          {
+            "job_id": "7e0c3a7c-60f3-49ce-adb7-2630a10648bd",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:31.714361",
+            "ended_at": "2026-10-28 21:35:31.850403",
+            "description": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.136042,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "c25b28fe-15f9-4f24-b6cf-5c262234f73e",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:31.735270",
+            "ended_at": "2026-10-28 21:35:32.278356",
+            "description": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.543086,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "eaac5ffc-9418-44fc-8970-0feae4db0abd",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:31.916331",
+            "ended_at": "2026-10-28 21:35:32.275259",
+            "description": "wepppy.rq.wepp_rq._post_make_loss_grid_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 0.358928,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "4a120106-2fbc-4f51-8a0c-a5f8d990f9d5",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:32.341236",
+            "ended_at": "2026-10-28 21:35:37.831611",
+            "description": "wepppy.rq.wepp_rq._post_watershed_interchange_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 5.490375,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          },
+          {
+            "job_id": "62ea02ad-b74e-495a-90e5-4675f07c1b5b",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:37.869359",
+            "ended_at": "2026-10-28 21:35:39.669701",
+            "description": "wepppy.rq.wepp_rq._analyze_return_periods_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 1.800342,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "5": [
+          {
+            "job_id": "aa11012c-69bb-45e1-b43f-c278c27ade32",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:39.705734",
+            "ended_at": "2026-10-28 21:35:41.610733",
+            "description": "wepppy.rq.wepp_rq._post_gpkg_export_rq('profile;;tmp;;ready-failing')",
+            "elapsed_s": 1.904999,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ],
+        "6": [
+          {
+            "job_id": "7ead9100-08b0-4966-a1b0-71e251a6c54b",
+            "runid": "profile;;tmp;;ready-failing",
+            "status": "finished",
+            "result": null,
+            "started_at": "2026-10-28 21:35:41.651060",
+            "ended_at": "2026-10-28 21:35:41.752068",
+            "description": "wepppy.rq.wepp_rq._log_complete_rq('profile;;tmp;;ready-failing', auto_commit_inputs=True, commit_stage='WEPP pipeline')",
+            "elapsed_s": 0.101008,
+            "exc_info": null,
+            "auth_actor": null,
+            "culvert_batch_uuid": null,
+            "children": {}
+          }
+        ]
+      }
+    },
+    "callback": {
+      "destination_id": "dee74dfa-5e56-4315-910b-c27dda8c5afb",
+      "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+      "job_id": "3ad3a8cd-1936-41ad-a10e-25c6100faddf",
+      "operation": "run-wepp",
+      "created_at": 1793223278.5793,
+      "host": "webhook.test",
+      "state": "tracking",
+      "publication": "published"
+    },
+    "artifact_count": 417,
+    "manifest_sha256": "68452e42a097ccbb45f1f59758b32540469292ece247cd901007b6151da7d266"
+  },
+  "retention_note": "Intermediate diagnostic; definitive fresh artifact manifest and readback are workflow_v3_probe.json and workflow_readback_v3.json."
+}

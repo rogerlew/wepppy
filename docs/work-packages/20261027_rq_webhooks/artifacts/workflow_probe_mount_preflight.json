@@ -1,0 +1,24 @@
+{
+  "provenance": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0o22",
+    "rq": "2.12.0",
+    "source": "disposable copies; source mounts read-only; isolated Redis and network"
+  },
+  "baseline": {
+    "submitted_at": 1793222230.874545,
+    "http_status": 503,
+    "response": {
+      "error": {
+        "message": "Submission admission is temporarily unavailable",
+        "details": "Traceback (most recent call last):\n  File \"/workdir/wepppy/wepppy/microservices/rq_engine/__init__.py\", line 116, in run_mutation_lifecycle_middleware\n    with rq_submission_lock(\n         ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/contextlib.py\", line 137, in __enter__\n    return next(self.gen)\n           ^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/submission_recovery.py\", line 167, in rq_submission_lock\n    os.makedirs(lifecycle_dir, exist_ok=True)\n  File \"<frozen os>\", line 216, in makedirs\n  File \"<frozen os>\", line 216, in makedirs\n  File \"<frozen os>\", line 226, in makedirs\nPermissionError: [Errno 13] Permission denied: '/wc1'\n",
+        "code": "service_unavailable"
+      },
+      "error_id": "7e32d4cad0de498fbb2dcf2193f6e2d8"
+    }
+  }
+}

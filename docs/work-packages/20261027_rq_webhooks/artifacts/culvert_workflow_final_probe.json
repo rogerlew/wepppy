@@ -1,0 +1,25 @@
+{
+  "token_expires_at": 1793223651,
+  "submitted_at": 1793223646.9026804,
+  "http_status": 200,
+  "response": {
+    "webhook": {
+      "status": "accepted"
+    },
+    "culvert_batch_uuid": "23667793-8bca-4dfb-8765-542cc01a2876",
+    "job_id": "5e121601-c953-4721-869f-5a9450afbf13",
+    "status_url": "/rq-engine/api/jobstatus/5e121601-c953-4721-869f-5a9450afbf13"
+  },
+  "callback": {
+    "destination_id": "d80d1746-a675-4271-b04d-87a9cf12cd4c",
+    "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+    "job_id": "5e121601-c953-4721-869f-5a9450afbf13",
+    "operation": "culverts-wepp-batch",
+    "created_at": 1793223647.058,
+    "host": "webhook.test",
+    "state": "tracking",
+    "publication": "published"
+  },
+  "root_status": "failed",
+  "receiver": []
+}

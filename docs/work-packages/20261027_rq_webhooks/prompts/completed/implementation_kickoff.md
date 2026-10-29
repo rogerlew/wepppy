@@ -1,5 +1,10 @@
 # RQ webhook implementation kickoff
 
+Completed locally 2026-10-28: approved checkpoint `6ba2d8d9d`, implementation
+`62b272a6c`, canonical-pool model/callback/performance acceptance and independent
+reviews passed. [Outcome and limits](../../artifacts/validation_summary.md).
+Production deployment remained excluded. The prompt below is retained as history.
+
 Use the existing work package `docs/work-packages/20261027_rq_webhooks/`; do not
 create a duplicate. Follow its active `implementation_execplan.md`, updating the
 plan and tracker as execution progresses. This prompt is a handoff scaffold;

@@ -1,6 +1,6 @@
 # ADR-0109: Bound RQ webhook tracking and delivery
 
-Status: Accepted 2026-10-28 19:56 UTC; implementation under acceptance
+Status: Accepted 2026-10-28 19:56 UTC; local implementation acceptance passed
 Date: 2026-10-28
 
 ## Context
@@ -76,8 +76,10 @@ smallest candidate and explicitly does not promise durable delivery after Redis 
 ## Evidence
 
 [Source and probe evidence](../work-packages/20261027_rq_webhooks/artifacts/20261028_source_and_probe_evidence.md)
-shows current publication gaps and actual RQ dependency behavior. Numeric performance,
-HTTP deadline, quota fairness and production-equivalent tests remain unexecuted.
+shows the initial publication gaps and actual RQ dependency behavior. Final local
+[validation](../work-packages/20261027_rq_webhooks/artifacts/validation_summary.md)
+records passing deadline, quota/recovery, actual workflow and verified-sender
+performance evidence under canonical worker counts.
 The [contract](../schemas/rq-webhook-contract.md) and acceptance matrix define the
 required tests; values must be revised through this ADR if measured bounds fail.
 

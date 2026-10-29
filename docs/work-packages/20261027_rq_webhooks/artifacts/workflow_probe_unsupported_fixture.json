@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "umask": "0o22",
+    "rq": "2.12.0",
+    "source": "disposable copies; source mounts read-only; isolated Redis and network"
+  },
+  "baseline": {
+    "submitted_at": 1793222291.1166148,
+    "http_status": 200,
+    "response": {
+      "job_id": "eb677687-f1b2-48be-8953-8118bb7547ba"
+    },
+    "job_states": {
+      "eb677687-f1b2-48be-8953-8118bb7547ba": "failed"
+    },
+    "job_tree": {
+      "job_id": "eb677687-f1b2-48be-8953-8118bb7547ba",
+      "runid": "profile;;tmp;;baseline",
+      "status": "failed",
+      "result": null,
+      "started_at": "2026-10-28 21:18:11.697855",
+      "ended_at": "2026-10-28 21:18:12.045002",
+      "description": "wepppy.rq.wepp_rq.run_wepp_rq('profile;;tmp;;baseline')",
+      "elapsed_s": 0.347147,
+      "exc_info": "Traceback (most recent call last):\n  File \"/opt/venv/lib/python3.12/site-packages/rq/worker/base.py\", line 1552, in perform_job\n    return_value = job.perform()\n                   ^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1368, in perform\n    self._result = self._execute()\n                   ^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/rq/job.py\", line 1428, in _execute\n    result = self.func(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/exception_logging.py\", line 57, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq.py\", line 806, in run_wepp_rq\n    _assert_supported_climate(climate)\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq.py\", line 509, in _assert_supported_climate\n    _stage_helpers.assert_supported_climate(climate)\n  File \"/workdir/wepppy/wepppy/rq/wepp_rq_stage_helpers.py\", line 41, in assert_supported_climate\n    raise ValueError(SINGLE_STORM_DEPRECATED_MESSAGE)\nValueError: Single-storm climate modes are deprecated and unsupported. Use continuous/multi-year climate datasets for WEPP runs.\n",
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "artifacts": {},
+    "fresh_artifacts": [],
+    "callback": null
+  }
+}

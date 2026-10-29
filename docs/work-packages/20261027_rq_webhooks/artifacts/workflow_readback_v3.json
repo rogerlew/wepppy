@@ -1,0 +1,131 @@
+{
+  "comparisons": {
+    "ready-healthy": {
+      "mismatches": [],
+      "fresh_files": 388,
+      "exact_bytes_summary": {
+        "count": 364,
+        "sha256": "fe4d385c37e9bde08083c6bb391dc5d672e5495efdeee5d183ddb7d226c9a4a6"
+      },
+      "path_normalized_logs_summary": {
+        "count": 29,
+        "sha256": "49a6f9d36004e80137c32d1aeae8f4108d140132dc959569d80fc5fcb03da9fd"
+      },
+      "parquet_values_summary": {
+        "count": 24,
+        "sha256": "47635d48e7af8bb5b77a67ada29c12bb8b64d5e11cc06ab0d90ad66567b31369"
+      }
+    },
+    "ready-failing": {
+      "mismatches": [],
+      "fresh_files": 388,
+      "exact_bytes_summary": {
+        "count": 364,
+        "sha256": "fe4d385c37e9bde08083c6bb391dc5d672e5495efdeee5d183ddb7d226c9a4a6"
+      },
+      "path_normalized_logs_summary": {
+        "count": 29,
+        "sha256": "49a6f9d36004e80137c32d1aeae8f4108d140132dc959569d80fc5fcb03da9fd"
+      },
+      "parquet_values_summary": {
+        "count": 24,
+        "sha256": "47635d48e7af8bb5b77a67ada29c12bb8b64d5e11cc06ab0d90ad66567b31369"
+      }
+    }
+  },
+  "delivery": {
+    "ready-healthy": {
+      "receipt": {
+        "attempts": 1,
+        "audit": [
+          {
+            "attempt": 1,
+            "finished_at": 1793224335.2515228,
+            "http_status": 204,
+            "result": "http",
+            "started_at": 1793224335.1178
+          }
+        ],
+        "closed_at": 1793224335.2515228,
+        "created_at": 1793224244.7428,
+        "destination_id": "04d2e142-9b8f-4bc0-8545-7f5421354064",
+        "event_at": 1793224335.009,
+        "event_id": "197fd5c0-71b0-4051-8894-733220b6a9f0",
+        "host": "webhook.test",
+        "job_id": "1ed4b0c3-5780-4586-ba41-ee86a4eb95ba",
+        "operation": "run-wepp",
+        "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+        "publication": "published",
+        "state": "delivered"
+      },
+      "receiver": [
+        {
+          "body": "{\"event\":\"operation.completed\",\"event_id\":\"197fd5c0-71b0-4051-8894-733220b6a9f0\",\"execution_status\":\"finished\",\"job_id\":\"1ed4b0c3-5780-4586-ba41-ee86a4eb95ba\",\"observed_at\":\"2026-10-28T21:52:15.009018Z\",\"operation\":\"run-wepp\",\"resource\":{\"id\":\"profile;;tmp;;ready-healthy\",\"type\":\"run\"},\"schema_version\":1,\"settled_at\":\"2026-10-28T21:51:49.483100Z\"}",
+          "event_id": "197fd5c0-71b0-4051-8894-733220b6a9f0",
+          "received_at": 1793224335.238409
+        }
+      ],
+      "exact_persisted_event_bytes": true,
+      "after_token_expiry": true
+    },
+    "ready-failing": {
+      "receipt": {
+        "attempts": 3,
+        "audit": [
+          {
+            "attempt": 1,
+            "finished_at": 1793224401.0029,
+            "http_status": 503,
+            "result": "http",
+            "started_at": 1793224400.8629
+          },
+          {
+            "attempt": 2,
+            "finished_at": 1793224431.2517,
+            "http_status": 503,
+            "result": "http",
+            "started_at": 1793224431.1196
+          },
+          {
+            "attempt": 3,
+            "finished_at": 1793224551.488518,
+            "http_status": 503,
+            "result": "http",
+            "started_at": 1793224551.3587
+          }
+        ],
+        "closed_at": 1793224551.488518,
+        "created_at": 1793224310.4707,
+        "destination_id": "4c3449d3-d54c-40aa-a59e-0a47fc4cdfbf",
+        "event_at": 1793224400.7526,
+        "event_id": "f4a21728-dcb4-4e23-bb95-f8501e6d5597",
+        "host": "webhook.test",
+        "job_id": "9806652c-6cb6-4148-b921-a5a5f421e569",
+        "operation": "run-wepp",
+        "principal": "d96615eea7054c7030e7c0e0624eee3681fe439efabf3ed2368311d0d6ef22f2",
+        "publication": "published",
+        "state": "exhausted"
+      },
+      "receiver": [
+        {
+          "body": "{\"event\":\"operation.completed\",\"event_id\":\"f4a21728-dcb4-4e23-bb95-f8501e6d5597\",\"execution_status\":\"finished\",\"job_id\":\"9806652c-6cb6-4148-b921-a5a5f421e569\",\"observed_at\":\"2026-10-28T21:53:20.752611Z\",\"operation\":\"run-wepp\",\"resource\":{\"id\":\"profile;;tmp;;ready-failing\",\"type\":\"run\"},\"schema_version\":1,\"settled_at\":\"2026-10-28T21:52:54.460600Z\"}",
+          "event_id": "f4a21728-dcb4-4e23-bb95-f8501e6d5597",
+          "received_at": 1793224400.9861348
+        },
+        {
+          "body": "{\"event\":\"operation.completed\",\"event_id\":\"f4a21728-dcb4-4e23-bb95-f8501e6d5597\",\"execution_status\":\"finished\",\"job_id\":\"9806652c-6cb6-4148-b921-a5a5f421e569\",\"observed_at\":\"2026-10-28T21:53:20.752611Z\",\"operation\":\"run-wepp\",\"resource\":{\"id\":\"profile;;tmp;;ready-failing\",\"type\":\"run\"},\"schema_version\":1,\"settled_at\":\"2026-10-28T21:52:54.460600Z\"}",
+          "event_id": "f4a21728-dcb4-4e23-bb95-f8501e6d5597",
+          "received_at": 1793224431.238837
+        },
+        {
+          "body": "{\"event\":\"operation.completed\",\"event_id\":\"f4a21728-dcb4-4e23-bb95-f8501e6d5597\",\"execution_status\":\"finished\",\"job_id\":\"9806652c-6cb6-4148-b921-a5a5f421e569\",\"observed_at\":\"2026-10-28T21:53:20.752611Z\",\"operation\":\"run-wepp\",\"resource\":{\"id\":\"profile;;tmp;;ready-failing\",\"type\":\"run\"},\"schema_version\":1,\"settled_at\":\"2026-10-28T21:52:54.460600Z\"}",
+          "event_id": "f4a21728-dcb4-4e23-bb95-f8501e6d5597",
+          "received_at": 1793224551.4765573
+        }
+      ],
+      "exact_persisted_event_bytes": true,
+      "after_token_expiry": true
+    }
+  },
+  "retention_note": "Intermediate diagnostic: original failure/success and mismatch list retained; redundant match detail consolidated. Final full comparisons are in workflow_readback_v6.json."
+}
