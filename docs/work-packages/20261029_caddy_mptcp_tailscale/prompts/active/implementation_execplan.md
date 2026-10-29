@@ -121,3 +121,9 @@ Final review: all scoped source reviews and docs lint/diff checks pass. Companio
 transport is reachable but saved credentials fail Redis authentication; no running
 companion container or secret mutation. Retained as an open functional limitation.
 Operator confirmed forest email delivery as well as login.
+
+Revision 2026-10-29 20:29 UTC: operator extended scope to Caddy-only production
+rollout on wepp1 with active jobs. Applied only sysctl additions on its existing
+checkout and recreated Caddy with the existing image/no dependencies. Verified
+all other container IDs/start times unchanged, MPTCP zero and HTTPS health/login/
+job API success. Source remains otherwise at the existing production baseline.

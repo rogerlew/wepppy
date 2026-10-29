@@ -22,3 +22,7 @@ login verification and saved companion Redis credential mismatch remain open. Bo
 host sysctls are now zero and Serve MPTCP listeners were replaced; unrelated old
 listeners remain (forest loopback11434, forest1 tailnet18080). User owns pfSense
 cleanup. Kernel fixes remain required.
+
+2026-10-29 20:29 UTC: operator-authorized Caddy-only rollout completed on wepp1.
+Only Caddy changed; other 24 containers retain IDs/start times. MPTCP zero and
+HTTPS health/login/job API pass. See runtime evidence for command and scope.

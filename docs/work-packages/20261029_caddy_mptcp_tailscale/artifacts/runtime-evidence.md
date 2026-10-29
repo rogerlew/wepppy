@@ -61,3 +61,32 @@ and QA source reviews pass with no additional source changes required. Package
 closeout remains open for forest1 authenticated acceptance and the separately
 identified companion credential mismatch. All scoped docs lint and diff checks pass.
 The operator also confirmed actual mail delivery from forest.
+
+
+## Targeted wepp1 rollout — 2026-10-29 20:29 UTC
+
+Operator explicitly authorized Caddy-only deployment while production jobs run.
+Verified host wepp1 at /workdir/wepppy, baseline commit 0da9c9071. Applied only the
+three-line Caddy sysctl addition in prod.yml and prod.wepp1.yml; did not pull
+unrelated application changes or switch to homelab configuration. Host copies
+before editing are in /tmp/docker-compose.*.yml.pre-mptcp-20261029.
+
+Caddy has no build definition; reused the existing image
+sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90.
+Caddy configuration and Compose parser passed before recreation. Executed:
+`wctl docker compose up -d --no-deps --no-build --pull never --force-recreate caddy`.
+The full deployment script has no Caddy-only mode; this bounded operation follows
+the operator's explicit targeted-deployment instruction. No queue flush or prune.
+
+New Caddy container 671b1a644caa started at 2026-10-29T20:29:00.206126789Z.
+All 24 other container IDs, start timestamps and images match the saved baseline
+(/tmp/wepppy-caddy-before-20261029.json on wepp1). Effective MPTCP sysctl 0 and
+MPTCP/MPTCPv6 allocated sockets 0. Trusted HTTPS /health returned OK, login 200,
+and active-job API 200. Five batch jobs were started and nine queued at cutover;
+default and fork-archive had no started jobs. No worker restart occurred. All five previously started jobs remained started
+with fresh heartbeats between 20:29:27 and 20:29:42 UTC after the cutover.
+
+Tooling friction: installed wctl rq-info --detailed invokes an unsupported RQ flag
+and also refreshes worker-registration indexes. Used direct Redis registry reads
+for subsequent observation, avoiding registry cleanup or job mutations. A follow-up
+should make this diagnostic genuinely read-only and support the installed RQ CLI.
