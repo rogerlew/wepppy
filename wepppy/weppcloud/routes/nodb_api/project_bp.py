@@ -286,6 +286,24 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
         }
 
 
+@project_bp.route('/runs/<string:runid>/<config>/tasks/enable_developer_mode', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def enable_developer_mode(runid, config):
+    if not current_user.is_authenticated or not current_user.has_role('Dev'):
+        return error_factory('Dev role is required.', status_code=403)
+    ctx = load_run_context(runid, config)
+    if not request.is_json or request.get_json(silent=True) != {}:
+        return error_factory('Expected an empty JSON object.', status_code=400)
+    from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+    with catalog_lifecycle_guard(str(ctx.active_root)):
+        checkpoint_run_lifecycle(runid)
+        ron = Ron.getInstance(str(ctx.active_root))
+        if ron.readonly:
+            return error_factory('Project is readonly.', status_code=403)
+        ron.enable_developer_mode()
+    return success_factory({'developer_mode': True})
+
+
 @project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks', methods=['POST'])
 @roles_accepted('Admin', 'Root', 'PowerUser')
 @authorize_and_handle_with_exception_factory

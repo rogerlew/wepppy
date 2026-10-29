@@ -1,6 +1,7 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% set multi_ofe = wepp.multi_ofe | default(false) %}
 {% set hourly = wepp.run_wepp_ui | default(false) %}
+{% set developer_mode = ron.developer_mode | default(false) %}
 {% set enabled = multi_ofe and hourly %}
 {% set attrs = {"inputmode": "decimal", "step": "any"} %}
 {% if not enabled %}{% set _ = attrs.update({"disabled": "disabled"}) %}{% endif %}
@@ -8,9 +9,10 @@
   <p class="wc-text-muted">Anisotropy overrides require MOFE with hourly water balance and deep seepage enabled. Leave blank to use the source soil values. Horizon bottom depth determines the group; horizons crossing 50 cm use the lower value.</p>
   {{ ui.numeric_field("soil_anisotropy_upper", "Upper horizon anisotropy (bottom depth ≤50 cm)",
       value=wepp.soil_anisotropy_upper | default(none) if wepp.soil_anisotropy_upper | default(none) is not none else '',
-      min=1, max=100, nullable=True, unit_label="ratio", extra_control_class="disable-readonly",
+      min=1, max=none if developer_mode else 100, nullable=True, unit_label="ratio", extra_control_class="disable-readonly",
       help="Values above 10 can cause numerical instabilities.", attrs=attrs) }}
   {{ ui.numeric_field("soil_anisotropy_lower", "Lower horizon anisotropy (bottom depth >50 cm)",
       value=wepp.soil_anisotropy_lower | default(none) if wepp.soil_anisotropy_lower | default(none) is not none else '',
-      min=1, max=10, nullable=True, unit_label="ratio", extra_control_class="disable-readonly", attrs=attrs) }}
+      min=1, max=none if developer_mode else 10, nullable=True, unit_label="ratio", extra_control_class="disable-readonly",
+      help="Values above 10 can cause numerical instabilities.", attrs=attrs) }}
 </div>

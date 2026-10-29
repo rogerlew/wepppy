@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_inputs_persist_clear_and_reject_without_mutation(tmp_path, monkeypatch):
     from wepppy.nodb.core.wepp import Wepp
     monkeypatch.setattr(Wepp, 'clean', lambda self: None)
+    from wepppy.nodb.core.ron import Ron
+    Ron(str(tmp_path), 'canada-wbt-mofe.cfg', initialize_components=False)
     wepp = Wepp(str(tmp_path), 'canada-wbt-mofe.cfg')
     with wepp.locked():
         wepp._multi_ofe = True
@@ -219,15 +221,20 @@ def test_preserved_validation_keeps_canonical_error_and_source_read_errors(tmp_p
 
 
 @pytest.mark.parametrize('saved,hourly,expected', [(True, None, [25, 25, 3]), (True, False, [0, 2, 4]), (False, True, [25, 25, 3])])
-def test_facade_prep_passes_effective_options_to_real_worker(tmp_path, saved, hourly, expected):
+@pytest.mark.parametrize('developer_mode', [False, True])
+def test_facade_prep_passes_effective_options_to_real_worker(tmp_path, saved, hourly, expected, developer_mode):
     from wepppy.nodb.core.wepp import Wepp
     from wepppy.wepp.soils.utils import WeppSoilUtil
     import logging
     _soil_source(tmp_path)
     _mofe_files(tmp_path)
     runs = tmp_path / 'wepp/runs'; runs.mkdir(parents=True)
+    upper, lower = (101, 11) if developer_mode else (25, 3)
+    if developer_mode and expected == [25, 25, 3]:
+        expected = [101, 101, 11]
     context = SimpleNamespace(
-        multi_ofe=True, run_wepp_ui=saved, soil_anisotropy_upper=25, soil_anisotropy_lower=3,
+        ron_instance=SimpleNamespace(developer_mode=developer_mode),
+        multi_ofe=True, run_wepp_ui=saved, soil_anisotropy_upper=upper, soil_anisotropy_lower=lower,
         wd=str(tmp_path), logger=logging.getLogger(__name__), kslast=None, kslast_map=None,
         climate_instance=SimpleNamespace(input_years=1), runs_dir=str(runs),
         watershed_instance=SimpleNamespace(subs_summary={'101': {}}, clip_hillslopes_configured=False,

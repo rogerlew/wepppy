@@ -778,3 +778,67 @@ def test_restore_retires_catalog_receipts_and_rotates_incarnation(archive_rq_env
     retained = list((root / "_query_engine/refresh/attempts").glob("retired-*/old-request.json"))
     assert len(retained) == 1
     assert retained[0].read_text() == '{"state": "pending"}'
+
+
+@pytest.mark.parametrize('incoming_mode', [True, False, None])
+def test_developer_mode_restore_uses_incoming_state(archive_rq_environment, incoming_mode):
+    from wepppy.nodb.core.ron import Ron
+    project, tmp_path, _, _ = archive_rq_environment
+    runid = 'dm-restore'
+    wd = tmp_path / runid
+    wd.mkdir()
+    ron = Ron(str(wd), 'canada-wbt-mofe.cfg', initialize_components=False)
+    if incoming_mode is not None:
+        with ron.locked():
+            ron._developer_mode = incoming_mode
+    archived_ron = (wd / 'ron.nodb').read_bytes()
+    project.archive_rq(runid)
+    archive = next((wd / 'archives').glob('*.zip'))
+    ron.enable_developer_mode()
+    assert Ron.load_detached(str(wd)).developer_mode is True
+    project.restore_archive_rq(runid, archive.name)
+    assert (wd / 'ron.nodb').read_bytes() == archived_ron
+    assert Ron.load_detached(str(wd)).developer_mode is (incoming_mode is True)
+
+
+def test_archive_capture_serializes_activation_and_saved_overrides(archive_rq_environment, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    from wepppy.nodb.core.ron import Ron
+    from wepppy.nodb.core.wepp import Wepp
+    project, tmp_path, _, _ = archive_rq_environment
+    runid = 'dm-capture'
+    wd = tmp_path / runid
+    wd.mkdir()
+    ron = Ron(str(wd), 'canada-wbt-mofe.cfg', initialize_components=False)
+    monkeypatch.setattr(Wepp, 'clean', lambda self: None)
+    wepp = Wepp(str(wd), 'canada-wbt-mofe.cfg')
+    with wepp.locked():
+        wepp._multi_ofe = True
+        wepp._run_wepp_ui = True
+    wepp.parse_inputs({'soil_anisotropy_upper': 10, 'soil_anisotropy_lower': 1})
+    entered = Event()
+    def activate_and_save():
+        entered.set()
+        ron.enable_developer_mode()
+        wepp.parse_inputs({'soil_anisotropy_upper': 101, 'soil_anisotropy_lower': 11})
+    original_write = zipfile.ZipFile.write
+    futures = []
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        def write_with_activation(archive, filename, arcname=None, *args, **kwargs):
+            result = original_write(archive, filename, arcname, *args, **kwargs)
+            if arcname == 'ron.nodb':
+                futures.append(pool.submit(activate_and_save))
+                assert entered.wait(2)
+                assert not futures[0].done()
+            return result
+        monkeypatch.setattr(zipfile.ZipFile, 'write', write_with_activation)
+        project.archive_rq(runid)
+        assert len(futures) == 1
+        futures[0].result(timeout=10)
+    assert Ron.load_detached(str(wd)).developer_mode is True
+    assert Wepp.load_detached(str(wd)).soil_anisotropy_upper == 101
+    archive = next((wd / 'archives').glob('*.zip'))
+    project.restore_archive_rq(runid, archive.name)
+    assert Ron.load_detached(str(wd)).developer_mode is False
+    assert Wepp.load_detached(str(wd)).soil_anisotropy_upper == 10

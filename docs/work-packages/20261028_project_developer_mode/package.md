@@ -1,6 +1,6 @@
 # Project developer mode
 
-**Status**: Open — contract and implementation scaffold, 2026-10-29 UTC. Runtime implementation not started.
+**Status**: Open — implementation and local environment validation complete, 2026-10-29 UTC; full Python gate and closeout in progress. No production deployment.
 
 ## Overview
 
@@ -24,7 +24,7 @@ Add missing-false Ron state without migrations; retain all existing inputs and d
 
 ## Generated artifact validation gate
 
-Applicable: yes. Trace authorized activation and anisotropy submission through durable Ron/Wepp reload, prepared `wepp/runs/p*.sol`, actual model-consumed input, fresh execution output and normal browse/download/report presentation. Record revisions, native build hash, run id, runtime identity/groups/mounts/umask and source/output semantic comparisons. Use an isolated representative project and real native writer and clone/archive paths. Validate upper=101 and lower=11 reach the correct classes; numerical instability is reported, never silently clamped. Retain failed-job evidence and distinguish preparation acceptance from successful simulation. Highest current evidence: design/source inspection only, not implemented or deployed.
+Applicable: yes. Trace authorized activation and anisotropy submission through durable Ron/Wepp reload, prepared `wepp/runs/p*.sol`, actual model-consumed input, fresh execution output and normal browse/download/report presentation. Record revisions, native build hash, run id, runtime identity/groups/mounts/umask and source/output semantic comparisons. Use an isolated representative project and real native writer and clone/archive paths. Validate upper=101 and lower=11 reach the correct classes; numerical instability is reported, never silently clamped. Retain failed-job evidence and distinguish preparation acceptance from successful simulation. Highest current evidence: implemented and locally/environment validated for the bounded workflow in artifacts/validation.md; not deployed to production.
 
 ## Security and review gates
 

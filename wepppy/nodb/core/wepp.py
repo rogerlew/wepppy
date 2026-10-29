@@ -741,7 +741,7 @@ def prep_multi_ofe_hillslope(
 
         anisotropy = args[16] if len(args) > 16 else (None, None)
         if any(value is not None for value in anisotropy):
-            soilu.modify_anisotropy(*anisotropy)
+            soilu.modify_anisotropy(*anisotropy, developer_mode=args[17] if len(args) > 17 else False)
         soilu.write(soil_dst_fn)
 
     man_fn = f'hill_{topaz_id}.mofe.man'
@@ -2107,7 +2107,11 @@ class Wepp(NoDbBase):
         require_wepp_input_policy(self)
         self.logger.info('    Prepping _prep_multi_ofe... ')
         from .soil_anisotropy import effective_anisotropy
-        anisotropy = effective_anisotropy(self, wepp_ui)
+        developer_mode = self.ron_instance.developer_mode if any(
+            getattr(self, name, None) is not None
+            for name in ("soil_anisotropy_upper", "soil_anisotropy_lower")
+        ) else False
+        anisotropy = effective_anisotropy(self, wepp_ui, developer_mode=developer_mode)
         wd = self.wd
 
         climate = self.climate_instance
@@ -2172,6 +2176,7 @@ class Wepp(NoDbBase):
                     single_input_uploads_enabled(self),
                     single_input_uploads_enabled(self) and int(soils.mode) == 5,
                     anisotropy,
+                    developer_mode,
                 )
             )
 

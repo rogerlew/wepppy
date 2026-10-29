@@ -400,6 +400,8 @@ Adjusts soil profile depth constraints and initial soil saturation before runs a
 | **Upper horizon anisotropy (bottom depth ≤50 cm)** | Optional horizontal/vertical conductivity ratio, 1–100. |
 | **Lower horizon anisotropy (bottom depth >50 cm)** | Optional horizontal/vertical conductivity ratio, 1–10. |
 
+Projects with developer mode enabled have no maximum for either anisotropy override; finite values at least 1 are still required. A Dev user can enable this project setting in the PowerUser panel. Normal projects retain the limits above.
+
 Anisotropy fields are editable only for MOFE with hourly water balance and deep seepage enabled. Blank fields retain the source soil values. Classification uses each horizon's bottom depth after depth clipping/extension; a horizon crossing 50 cm uses the lower value, without splitting the horizon. Disabling hourly mode retains saved overrides but does not apply them. Uploaded formats without per-horizon anisotropy (including 7777 and 2006) cannot accept these overrides; preparation reports an error instead of changing their format.
 
 ### Modeling impact

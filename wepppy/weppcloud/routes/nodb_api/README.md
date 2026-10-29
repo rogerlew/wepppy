@@ -538,3 +538,13 @@ def test_with_mocked_helper(client):
 NoDb API design and implementation by the wepppy development team.
 
 License: BSD-3 Clause (see [../../../../license.txt](../../../../license.txt))
+
+### Developer-mode activation
+
+`POST /runs/<runid>/<config>/tasks/enable_developer_mode` accepts JSON `{}`
+under existing session CSRF protection. Exact Dev membership, ordinary project
+authorization and an editable project are required. Success is
+`{"Content":{"developer_mode":true}}`; repeated activation succeeds. No
+client mode/limit override or disable payload is accepted. Ron owns locked
+persistence; the project policy governs later anisotropy operations without
+another Dev-role check. See `docs/schemas/project-developer-mode-contract.md`.

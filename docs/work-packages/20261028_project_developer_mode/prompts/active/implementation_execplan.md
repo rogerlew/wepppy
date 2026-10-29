@@ -15,11 +15,12 @@ A developer can enable experimental anisotropy inputs without an off toggle on o
 - [x] (2026-10-29 UTC) Obtain and disposition independent contract/package reviews; C2/C3 design fixes confirmed.
 - [x] (2026-10-29 01:06 UTC) Operator approved incoming archive/source state replacing prior mode, including true-to-normal transitions.
 - [x] (2026-10-29 UTC) Both reviewers confirmed lifecycle clarification; all design findings closed.
-- [ ] Record reviewed contract ancestor commit before runtime edits.
-- [ ] Implement Ron lifecycle and bounded activation UI/API.
-- [ ] Propagate project policy through Python and rebuilt native preparation.
-- [ ] Validate cloning, archive/restore, generated inputs and real execution.
-- [ ] Finish docs, broad checks and independent runtime reviews.
+- [x] Record reviewed contract ancestor `44746ff63` before runtime edits.
+- [x] Implement Ron lifecycle and bounded activation UI/API.
+- [x] Propagate project policy through Python and rebuilt/published native preparation.
+- [x] Validate cloning, archive/restore, generated inputs and real execution.
+- [x] Finish docs, focused/native/frontend checks and independent runtime reviews.
+- [ ] Finish full Python suite and closeout.
 
 ## Surprises & Discoveries
 
@@ -117,3 +118,7 @@ Expose a boolean Ron getter and enable-only method; keep default native behavior
 Revision note: 2026-10-29 UTC — initial plan records operator-approved permanent project policy and required independent review, with implementation deliberately pending.
 
 Revision note: 2026-10-29 01:06 UTC — operator chose existing archive/fork replacement semantics over preserving or blocking mode transitions, prioritizing simplicity and recovery flexibility. No off toggle is added; normal bounds resume after incoming normal state.
+
+Implementation discovery: existing catalog lifecycle guard spans fork/archive capture and replacement. Ron activation acquires that guard before its lock and disk refresh, so C2 requires no queue or copy-reconciliation changes. Native validation builds a clean HEAD export plus the anisotropy change, excluding pre-existing calendar/HBP edits in the sibling working tree.
+
+Implementation outcome: Ron/route/UI/native policy is wired and validated through real preparation, a fresh successful WEPP hillslope execution, completed fork worker and normal browser/download readback. Both independent reviewers closed all findings. Full Python regression gate remains in progress; see artifacts/validation.md for exact scope and evidence limits.

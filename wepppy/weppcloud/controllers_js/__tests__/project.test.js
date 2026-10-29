@@ -1455,4 +1455,34 @@ describe("Project controller", () => {
             })
         }));
     });
+    test("developer activation refreshes limits without changing unsaved values", async () => {
+        document.body.insertAdjacentHTML("beforeend", `
+            <button data-project-action="enable-developer-mode">Enable developer mode</button>
+            <p data-project-developer-message></p><span data-project-developer-indicator hidden></span>
+            <input id="soil_anisotropy_upper" max="100" value="37">
+            <input id="soil_anisotropy_lower" max="10" value="7" disabled>
+        `);
+        postJsonMock.mockResolvedValue({ body: { Content: { developer_mode: true } } });
+        document.querySelector("[data-project-action]").click();
+        await flushPromises();
+        await flushPromises();
+        expect(postJsonMock).toHaveBeenCalledWith("tasks/enable_developer_mode", {});
+        expect(document.getElementById("soil_anisotropy_upper").hasAttribute("max")).toBe(false);
+        expect(document.getElementById("soil_anisotropy_upper").value).toBe("37");
+        expect(document.getElementById("soil_anisotropy_lower").disabled).toBe(true);
+        expect(document.querySelector("[data-project-developer-indicator]").hidden).toBe(false);
+    });
+
+    test("failed developer activation preserves limits and offers readback", async () => {
+        document.body.insertAdjacentHTML("beforeend", `
+            <button data-project-action="enable-developer-mode">Enable</button>
+            <p data-project-developer-message></p>
+            <input id="soil_anisotropy_upper" max="100" value="37">
+        `);
+        postJsonMock.mockRejectedValue(new Error("connection lost"));
+        await project.enable_developer_mode(document.querySelector("[data-project-action]"));
+        expect(document.getElementById("soil_anisotropy_upper").max).toBe("100");
+        expect(document.querySelector("[data-project-developer-message]").textContent).toMatch(/reload/i);
+    });
+
 });

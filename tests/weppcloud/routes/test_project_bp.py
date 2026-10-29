@@ -947,3 +947,97 @@ def test_set_mod_roads_conflict_is_explicit(project_client):
     assert response.status_code == 409
     assert response.get_json()['error']['code'] == 'roads_operation_busy'
     assert response.headers['Cache-Control'] == 'no-store'
+
+
+@pytest.mark.parametrize('roles,expected', [([], 403), (['PowerUser'], 403), (['Admin'], 403), (['Root'], 403), (['Dev'], 200)])
+def test_developer_mode_role_boundary(project_client, monkeypatch, roles, expected):
+    client, RonStub, _, run_dir, _ = project_client
+    project_module.current_user.roles = set(roles)
+    ron = RonStub.getInstance(run_dir)
+    calls = []
+    ron.enable_developer_mode = lambda: calls.append('enabled')
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/enable_developer_mode', json={})
+    assert response.status_code == expected
+    assert calls == (['enabled'] if expected == 200 else [])
+    if expected == 200:
+        assert response.json == {'Content': {'developer_mode': True}}
+
+
+@pytest.mark.parametrize('payload', [None, [], True, {'developer_mode': True}, {'developer_mode': False}])
+def test_developer_mode_rejects_payload_overrides(project_client, payload):
+    client, RonStub, _, run_dir, _ = project_client
+    project_module.current_user.roles = {'Dev'}
+    ron = RonStub.getInstance(run_dir)
+    ron.enable_developer_mode = lambda: pytest.fail('invalid request mutated mode')
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/enable_developer_mode', json=payload)
+    assert response.status_code == 400
+
+
+def test_developer_mode_readonly_and_csrf(project_client):
+    from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+    client, RonStub, _, run_dir, _ = project_client
+    project_module.current_user.roles = {'Dev'}
+    app = client.application
+    app.secret_key = 'test-only-csrf-key'
+    CSRFProtect(app)
+    app.register_error_handler(CSRFError, lambda error: ({"error": str(error)}, 400))
+    @app.get('/csrf-test')
+    def csrf_test():
+        return {'token': generate_csrf()}
+    ron = RonStub.getInstance(run_dir)
+    calls = []
+    ron.enable_developer_mode = lambda: calls.append('enabled')
+    url = f'/runs/{RUN_ID}/{CONFIG}/tasks/enable_developer_mode'
+    assert client.post(url, json={}).status_code == 400
+    assert calls == []
+    token = client.get('/csrf-test').json['token']
+    ron.readonly = True
+    assert client.post(url, json={}, headers={'X-CSRFToken': token}).status_code == 403
+    assert calls == []
+    ron.readonly = False
+    assert client.post(url, json={}, headers={'X-CSRFToken': token}).status_code == 200
+    assert calls == ['enabled']
+
+
+def test_developer_activation_real_authorization_and_persistence(tmp_path, monkeypatch):
+    """Real auth predicate, CSRF and locked Ron; only identity/path lookup is scoped."""
+    from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+    from flask_login import current_user
+    from types import SimpleNamespace
+    import importlib
+    from wepppy.nodb.core.ron import Ron
+    from wepppy.weppcloud.utils import helpers
+    app_module = importlib.import_module('wepppy.weppcloud.app')
+    app = Flask(__name__)
+    app.config.update(TESTING=True, SECRET_KEY='test-only-dm-secret')
+    app.register_blueprint(project_module.project_bp)
+    login = LoginManager(app)
+    CSRFProtect(app)
+    app.register_error_handler(CSRFError, lambda exc: ({'error': str(exc)}, 400))
+    app.register_error_handler(Forbidden, lambda exc: ({'error': str(exc)}, 403))
+    user = SimpleNamespace(is_authenticated=True, id=12, has_role=lambda role: role == 'Dev')
+    login.request_loader(lambda request: user)
+    monkeypatch.setattr(project_module, 'current_user', current_user)
+    monkeypatch.setattr(helpers, 'get_wd', lambda *args, **kw: str(tmp_path))
+    monkeypatch.setattr(project_module, 'load_run_context', lambda *args: SimpleNamespace(active_root=tmp_path))
+    owners = [object()]
+    monkeypatch.setattr(app_module, 'get_run_owners', lambda runid: owners)
+    @app.get('/dm-csrf')
+    def token():
+        return {'token': generate_csrf()}
+    ron = Ron(str(tmp_path), 'canada-wbt-mofe.cfg', initialize_components=False)
+    (tmp_path / 'PUBLIC').unlink(missing_ok=True)
+    before = (tmp_path / 'ron.nodb').read_bytes()
+    client = app.test_client()
+    headers = {'X-CSRFToken': client.get('/dm-csrf').json['token']}
+    url = '/runs/dm-private/cfg/tasks/enable_developer_mode'
+    assert client.post(url, json={}, headers=headers).status_code == 403
+    assert (tmp_path / 'ron.nodb').read_bytes() == before
+    owners[:] = [user]
+    (tmp_path / 'READONLY').touch()
+    assert client.post(url, json={}, headers=headers).status_code == 403
+    (tmp_path / 'READONLY').unlink()
+    assert client.post(url, json={}).status_code == 400
+    assert Ron.load_detached(str(tmp_path)).developer_mode is False
+    assert client.post(url, json={}, headers=headers).status_code == 200
+    assert Ron.load_detached(str(tmp_path)).developer_mode is True

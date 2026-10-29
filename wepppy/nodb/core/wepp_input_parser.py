@@ -32,7 +32,10 @@ def _coerce_optional_bool(value: Any) -> bool | None:
 
 class WeppInputParser:
     def parse(self, wepp: "Wepp", kwds: dict[str, Any]) -> None:
-        anisotropy = parse_anisotropy_inputs(wepp, kwds)
+        anisotropy = parse_anisotropy_inputs(
+            wepp, kwds, developer_mode=wepp.ron_instance.developer_mode
+            if any(key in kwds for key in ("soil_anisotropy_upper", "soil_anisotropy_lower")) else False,
+        )
         requested_binary = kwds.get("wepp_bin")
         if isinstance(requested_binary, (list, tuple, set)):
             requested_binary = next((item for item in requested_binary if item not in (None, "")), None)

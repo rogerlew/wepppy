@@ -124,7 +124,8 @@
                  data-open-tab-pref>
                 GL Dashboard
               </a>
-              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
+              <span data-project-developer-indicator {% if not ron.developer_mode %}hidden{% endif %}>Developer mode</span>
+              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') or user.has_role('Dev') %}
               <button type="button" class="pure-button" data-modal-open="puModal">PowerUser Panel</button>
               {% endif %}
               {% if 'disturbed' in (ron.mods or []) %}

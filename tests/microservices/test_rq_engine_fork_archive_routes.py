@@ -1504,15 +1504,25 @@ def test_delete_archive_reconciles_before_destructive_mutation(
         assert events == ["reconcile"]
 
 
+@pytest.mark.parametrize('incoming_mode', [True, False, None])
 def test_fork_existing_target_reconciles_and_records_before_replacement(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path,
+    tmp_path, incoming_mode,
 ) -> None:
     source_dir = tmp_path / "source"
     target_dir = tmp_path / "target"
     source_dir.mkdir()
     target_dir.mkdir()
     (target_dir / "old.txt").write_text("old", encoding="utf-8")
+    from wepppy.nodb.core.ron import Ron
+    from wepppy.rq.project_rq_fork import _build_fork_rsync_cmd, _run_rsync_with_bounded_output
+    source_ron = Ron(str(source_dir), 'canada-wbt-mofe.cfg', initialize_components=False)
+    if incoming_mode is not None:
+        with source_ron.locked():
+            source_ron._developer_mode = incoming_mode
+    target_ron = Ron(str(target_dir), 'canada-wbt-mofe.cfg', initialize_components=False)
+    target_ron.enable_developer_mode()
+    expected_ron = (source_dir / 'ron.nodb').read_bytes()
     events: list[str] = []
     receipt_key = (
         f"{fork_archive_routes.FORK_DESTINATION_RECEIPT_KEY_PREFIX}:target-run"
@@ -1612,6 +1622,12 @@ def test_fork_existing_target_reconciles_and_records_before_replacement(
         def __init__(self, *_args, **_kwargs): pass
         def enqueue_call(self, *_args, **kwargs):
             events.append("enqueue")
+            # Exercise the same real rsync copy boundary as the queued fork worker.
+            from wepppy.rq.project_rq_fork import _clean_env_for_system_tools
+            _run_rsync_with_bounded_output(
+                cmd=_build_fork_rsync_cmd(str(target_dir) + '/', undisturbify=False),
+                run_left=str(source_dir), status_channel='test:fork',
+                publish_status=lambda *_: None, env=_clean_env_for_system_tools())
             return SimpleNamespace(id=kwargs["job_id"])
 
     monkeypatch.setattr(fork_archive_routes, "Queue", Queue)
@@ -1629,3 +1645,5 @@ def test_fork_existing_target_reconciles_and_records_before_replacement(
     assert events.index("planned") < events.index("replace")
     assert events.index("replace") < events.index("enqueue")
     assert not (target_dir / "old.txt").exists()
+    assert (target_dir / 'ron.nodb').read_bytes() == expected_ron
+    assert Ron.load_detached(str(target_dir)).developer_mode is (incoming_mode is True)

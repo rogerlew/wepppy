@@ -296,6 +296,37 @@ class Ron(NoDbBase):
             self.trigger(TriggerEvents.ON_INIT_FINISH)
 
     @property
+    def developer_mode(self) -> bool:
+        """DM-01: legacy projects are normal; corrupt policy never grants access."""
+        value = getattr(self, '_developer_mode', False)
+        if type(value) is not bool:
+            raise ValueError("Invalid persisted Ron developer_mode: expected a boolean")
+        return value
+
+    def enable_developer_mode(self) -> None:
+        """Enable only; serialize with archive/fork capture before locking Ron."""
+        from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
+        with catalog_lifecycle_guard(self.wd):
+            committed = False
+            acquired = False
+            try:
+                with self.locked(validate_on_success=False):
+                    acquired = True
+                    fresh = type(self)._hydrate_instance(
+                        os.path.abspath(self.wd), False, False, False, use_redis_cache=False
+                    )
+                    if fresh._distributed_lock_key != self._distributed_lock_key:
+                        raise RuntimeError("Developer mode controller identity changed during hydration")
+                    self.__dict__.clear()
+                    self.__dict__.update(fresh.__dict__)
+                    if not self.developer_mode:
+                        self._developer_mode = True
+                committed = True
+            finally:
+                if acquired and not committed:
+                    self._nodb_mtime = None
+
+    @property
     def profile_recorder_assembler_enabled(self) -> bool:
         return getattr(self, '_profile_recorder_assembler_enabled', False)
 
@@ -1143,6 +1174,7 @@ class RonViewModel(object):
         self.config_stem = _try_str(ron.config_stem)
         self.readonly = _try_bool(ron.readonly)
         self.public = _try_bool(ron.public)
+        self.developer_mode = ron.developer_mode
         self.pup_relpath = ron.pup_relpath
         self.mods = [mod for mod in ron.mods]
         self.nodb_version = read_version(ron.wd)

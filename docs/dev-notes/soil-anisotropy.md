@@ -11,3 +11,24 @@ Deploy the paired WEPPpy and rebuilt wepppyo3 revisions. Update `docker/wepppyo3
 Validation reads `wepp/runs/p*.sol` through the real writer/native path and counts source opens and destination writes. Tests cover multiple OFEs, exact 500 mm boundary, crossing horizons, clipped duplicate depths, original zero values, inactive state, blank clearing and canonical native-format errors. The [work package](../work-packages/20261012_soil_anisotropy/package.md) retains current evidence and deployment limits.
 
 The validated runtime pair is WEPPpy `e6004b118` (or its reviewed descendants) with wepppyo3 `822b6fe`. The native artifact SHA-256 is `103f209676425ae2bcf7fbde0c31b6d7bbe9ca0a5779d766297a4af9cd92c633`. The [build receipt](../work-packages/20261012_soil_anisotropy/artifacts/native-build.json) records source hashes. Forest's actual default RQ worker produced byte-identical prepared output under UID 1000/GID 993, mode 0644; the [validation record](../work-packages/20261012_soil_anisotropy/artifacts/validation.md) distinguishes completed checks from baseline gate limitations. No production deployment or full WEPP simulation was performed for this acceptance.
+
+## Project developer mode (DM-01)
+
+[DM-01](../schemas/project-developer-mode-contract.md) adds `Ron.developer_mode`,
+missing-false for legacy projects. Exact Dev membership is checked only by the
+activation action; ordinary authorized anisotropy submissions and preparation
+resolve Ron policy. Developer mode removes both maxima while keeping finite
+values >=1, MOFE/hourly eligibility and normal source/depth semantics.
+
+Activation holds the existing catalog lifecycle guard before the Ron lock and
+fresh disk hydration. Fork/archive capture already uses that guard, avoiding
+inconsistent Ron/Wepp snapshots without queue or copy changes. Archive restore
+and existing failed-fork recovery intentionally use incoming mode, even normal
+mode. There is no off setter or sticky history.
+
+The native function takes a keyword-only `developer_mode=False`; WEPPpy passes
+an explicit snapshot through preparation. Pair the caller with wepppyo3
+`4d4c075` or a compatible descendant and the corresponding startup artifact pin.
+An old native library fails explicitly rather than silently ignoring policy.
+See the [implementation evidence](../work-packages/20261028_project_developer_mode/tracker.md)
+for current validation and deployment status.

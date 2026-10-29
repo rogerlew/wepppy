@@ -1427,6 +1427,31 @@ var Project = (function () {
             project.setScenario(value, opts);
         };
 
+        project.enable_developer_mode = function (button) {
+            if (button.disabled) {
+                return Promise.resolve();
+            }
+            button.disabled = true;
+            var messages = dom.qsa("[data-project-developer-message]");
+            return http.postJson(url_for_run("tasks/enable_developer_mode"), {}).then(function (result) {
+                if (!result.body || !result.body.Content || result.body.Content.developer_mode !== true) {
+                    throw new Error("Activation was not confirmed");
+                }
+                dom.qsa("[data-project-developer-indicator]").forEach(function (element) {
+                    dom.show(element);
+                });
+                dom.qsa("#soil_anisotropy_upper, #soil_anisotropy_lower").forEach(function (element) {
+                    element.removeAttribute("max");
+                });
+                button.hidden = true;
+                messages.forEach(function (element) { element.textContent = "Developer mode enabled."; });
+            }).catch(function () {
+                messages.forEach(function (element) {
+                    element.textContent = "Developer mode activation was not confirmed. Reload the page to check project state before retrying.";
+                });
+            });
+        };
+
         project.set_readonly_controls = function (readonly) {
             applyReadonlyState(dom, Boolean(readonly));
         };
@@ -2144,7 +2169,9 @@ var Project = (function () {
                 return;
             }
             event.preventDefault();
-            if (action === "clear-locks") {
+            if (action === "enable-developer-mode") {
+                project.enable_developer_mode(target);
+            } else if (action === "clear-locks") {
                 project.clear_locks();
             } else if (action === "recorder-promote") {
                 project.promote_recorder_profile();

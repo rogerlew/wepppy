@@ -39,7 +39,7 @@
 {% set can_use_poweruser_panel = current_user.has_role('PowerUser')
     or current_user.has_role('Admin')
     or current_user.has_role('Root') %}
-{% if can_use_poweruser_panel %}
+{% if can_use_poweruser_panel or current_user.has_role('Dev') %}
 <div class="wc-modal" id="puModal" data-modal hidden>
   <style>
     .pu-modal__dialog {
@@ -191,6 +191,17 @@
     </header>
     <div class="wc-modal__body">
       <p>{{ usersum_doc_link('weppcloud', 'poweruser-getting-started.md', 'Getting started with PowerUser tools') }}</p>
+      {% if current_user.has_role('Dev') %}
+      <section class="wc-stack" aria-label="Project developer mode">
+        <p>No off toggle. Clones inherit mode; archive restore and failed-fork recovery use incoming state and may return to normal mode. Developer mode removes anisotropy upper limits.</p>
+        {% if not ron.developer_mode %}
+        <button type="button" class="pure-button pure-button-primary disable-readonly"
+                data-project-action="enable-developer-mode" {% if ron.readonly %}disabled{% endif %}>Enable developer mode</button>
+        {% endif %}
+        <p data-project-developer-message role="status">{% if ron.developer_mode %}Developer mode enabled.{% elif ron.readonly %}Project is readonly.{% endif %}</p>
+      </section>
+      {% endif %}
+      {% if can_use_poweruser_panel %}
       <div class="pu-modal__grid">
         <section class="pu-modal__column" aria-labelledby="puBrowseColumn">
           <h3 class="pu-modal__section-title" id="puBrowseColumn">Inspect inputs and outputs</h3>
@@ -356,6 +367,7 @@
 
         </div>
       </details>
+      {% endif %}
     </div>
     <footer class="wc-modal__footer">
       <span class="pu-modal__footer-doc">

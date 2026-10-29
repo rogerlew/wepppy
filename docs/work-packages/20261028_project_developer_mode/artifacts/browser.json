@@ -1,0 +1,18 @@
+{
+  "upper": {
+    "value": "101.0",
+    "max": null
+  },
+  "lower": {
+    "value": "11.0",
+    "max": null
+  },
+  "indicator": true,
+  "unauthorizedActivation": false,
+  "downloadStatus": 200,
+  "downloadUrl": "https://wc.bearhive.duckdns.org/weppcloud/runs/dm-anisotropy-validation/disturbed9002/download/wepp/runs/p1.sol",
+  "downloadSha256": "5e6eba8a25cc83f09253b552468ffd650a7880dcfceb9f3d39f4795d25b03010",
+  "lossReportStatus": 200,
+  "lossReportSha256": "30037d695ae3d816b78626d52c92577a851ac678a47730c2655a7874eeed1ed3",
+  "browseStatus": 200
+}

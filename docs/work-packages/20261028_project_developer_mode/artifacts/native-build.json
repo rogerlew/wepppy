@@ -1,0 +1,17 @@
+{
+  "native_base": "dfad984f4e8172a42dd5d1ffc4f405442b9de9dd",
+  "contract_ancestor": "44746ff63",
+  "sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+  "previous_sha256": "7908a4fa667b149f4eee5a827dfb65c39c0c080369459b659c68cec26f411811",
+  "source_sha256": "c1e5d792da45295b3a0e554de751f076015db4548545c82ebff696b44f84d2b5",
+  "cargo_lock_sha256": "8135dc7071158b42d6382e5089b0510ef9017a0e6be4e3f9c7cbf1e963f26155",
+  "build": "clean git archive HEAD plus only soil_anisotropy.rs change; existing Cargo.lock; PYO3_PYTHON=/usr/bin/python3.12 cargo build --locked --release -p wepp_interchange_rust",
+  "native_tests": "110 unit + 17 integration passed",
+  "excluded_preexisting_dirty_files": [
+    "docs/module-registry.md",
+    "wepp_interchange/src/calendar.rs",
+    "wepp_interchange/src/hill_hbp.rs"
+  ],
+  "native_revision": "4d4c075421c4013cba99a0addc76482229e7f3f7",
+  "upstream_verified": true
+}

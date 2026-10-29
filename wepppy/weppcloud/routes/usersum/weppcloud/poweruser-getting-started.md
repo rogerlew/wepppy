@@ -52,3 +52,23 @@ If you have no internal memberships, the statement remains available under
 **Profile → Internal feature access → Internal feature memberships and acknowledgment**;
 accepting it alone grants no membership. Assigned memberships that need your
 acknowledgment are shown open on Profile.
+
+## Project developer mode
+
+Users with the Dev role can select **Enable developer mode** in the PowerUser
+panel on an editable project. This removes the maximum values for upper- and
+lower-horizon soil anisotropy; both must still be finite numbers at least 1.
+MOFE and hourly water balance/deep seepage must still be enabled. Values above
+10 can cause numerical instabilities.
+
+The project displays **Developer mode** while enabled. Other users with normal
+permission to edit/run the project can use the expanded values without a Dev
+role. Existing PowerUser, Admin or Root membership alone does not grant the
+activation action.
+
+There is no off toggle. Clones inherit the source mode. Restoring an archive or
+recovering an existing failed fork uses the incoming project state and can
+return the project to normal mode; those operations are not blocked by this
+setting. A Dev user can enable it again. Enabling mode does not rerun the model
+or change historical results. If activation cannot be confirmed, reload the
+page to check saved state before retrying.

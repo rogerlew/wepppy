@@ -463,7 +463,7 @@ class WeppSoilUtil(object):
         if self.fn.endswith('.sol'):
             self._parse_sol(self.fn)
 
-    def modify_anisotropy(self, upper: Optional[float], lower: Optional[float]) -> None:
+    def modify_anisotropy(self, upper: Optional[float], lower: Optional[float], *, developer_mode: bool = False) -> None:
         """Apply SA-01 in Rust after depth edits, before the sole soil write."""
         if upper is None and lower is None:
             return
@@ -473,7 +473,7 @@ class WeppSoilUtil(object):
         values = soil_anisotropy_values([
             [(horizon['solthk'], horizon['anisotropy']) for horizon in ofe['horizons']]
             for ofe in self.obj['ofes']
-        ], upper, lower)
+        ], upper, lower, developer_mode=developer_mode)
         for ofe, ratios in zip(self.obj['ofes'], values):
             for horizon, ratio in zip(ofe['horizons'], ratios):
                 horizon['anisotropy'] = ratio

@@ -1,0 +1,78 @@
+{
+  "runid": "dm-anisotropy-validation",
+  "config": "disturbed9002",
+  "root": "/wc1/runs/dm/dm-anisotropy-validation",
+  "source_sha256": "7f6efd4c102c0b17aafd85b448dfebf27bbf31ce186576358f07ac86b6052880",
+  "prep_job": "dm-prep-0a9be12c7f904cdabc35ed748e4f3d19",
+  "model_job": "dm-model-424d24743e044fafa5f940d5a34a9c18",
+  "overrides": [
+    101.0,
+    11.0
+  ],
+  "activation": "actual Flask route and CSRF, synthetic Dev request principal; no account mutation",
+  "submission": "ordinary no-Dev principal context; real Wepp parser/persistence",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "prep_job_status": "JobStatus.FINISHED",
+  "prep_job_result": [
+    "101",
+    0.013416290283203125
+  ],
+  "model_job_status": "JobStatus.FINISHED",
+  "model_job_result": [
+    true,
+    1,
+    0.1807413101196289
+  ],
+  "source_unchanged": true,
+  "ratios": [
+    [
+      101.0,
+      101.0,
+      11.0
+    ],
+    [
+      101.0,
+      101.0,
+      11.0
+    ]
+  ],
+  "prepared_sha256": "5e6eba8a25cc83f09253b552468ffd650a7880dcfceb9f3d39f4795d25b03010",
+  "artifact_identity": {
+    "uid": 1000,
+    "gid": 993,
+    "mode": "0o644"
+  },
+  "output_files": {
+    "wepp/output/H1.element.dat": 9589,
+    "wepp/output/H1.wat.dat": 180021,
+    "wepp/output/H1.soil.dat": 78561,
+    "wepp/output/H1.loss.dat": 9514,
+    "wepp/output/H1.pass.dat": 18880,
+    "wepp/output/H1.ebe.dat": 200,
+    "wepp/output/H1.graph.dat": 799588,
+    "wepp/output/H1.plot.dat": 6873
+  },
+  "clone_job": "dm-fork-8a11178523bc49a29ec7f7d92972abaf",
+  "clone_runid": "dm-anisotropy-clone",
+  "clone_status": "JobStatus.FINISHED",
+  "clone_mode": true,
+  "clone_overrides": [
+    101.0,
+    11.0
+  ],
+  "output_hashes": {
+    "wepp/output/H1.element.dat": "7da008f0c6ae56ed66e0ffadb8285563530fb869a42c1c6a66d1dcb62cabac2e",
+    "wepp/output/H1.wat.dat": "4dfdd76d0d0604d0502c691fe38c5d4dfda70a688e36ccfc199f09a3cb54860d",
+    "wepp/output/H1.soil.dat": "da8e0dd98982a64a3223abadc3cf7137f8a97fbd0d732b212643591eeea45cd9",
+    "wepp/output/H1.loss.dat": "30037d695ae3d816b78626d52c92577a851ac678a47730c2655a7874eeed1ed3",
+    "wepp/output/H1.pass.dat": "2d9cdfb4d02a63cad7d32b28dcce3082c81bb5994d98b3aacd85e846b5f29d5e",
+    "wepp/output/H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+    "wepp/output/H1.graph.dat": "527e4a011c6972404f42ea28db80ec904a556b34afccf84101026ca54fed556b",
+    "wepp/output/H1.plot.dat": "8fd780e2e0595216286b29da9d3c37c2731acb9b8d35497c53ebd0a8e34dcce8"
+  },
+  "umask": "0o22"
+}

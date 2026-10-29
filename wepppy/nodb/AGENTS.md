@@ -16,6 +16,9 @@ Canonical behavioral contract:
 * Future MACA selection/default/member behavior follows
   `docs/schemas/maca-cmip5-selection-contract.md`; preserve the saved projection
   through parser rollback and generated/prepared climate readback.
+* Project developer mode follows `docs/schemas/project-developer-mode-contract.md`;
+  Ron activation takes the catalog lifecycle guard before its NoDb lock and fresh
+  hydration. Archive/fork replacement uses incoming mode, with no sticky state.
 * Uploaded soil preparation follows `docs/schemas/single-user-defined-inputs-contract.md`;
   preserve admitted versions and explicit hydraulic values through single/MOFE preparation.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:

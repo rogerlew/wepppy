@@ -10,8 +10,10 @@ Updated: 2026-10-29 01:06 UTC.
 - [x] Obtain two independent contract/package reviews and disposition every finding; reviewers confirmed C2/C3 design fixes and open lifecycle findings.
 - [x] Operator approved incoming-state replacement, including true-to-normal; contract/plan amended.
 - [x] Both independent reviewers confirmed all design findings closed.
-- [ ] Commit reviewed checkpoint as a standalone ancestor (future implementation prerequisite).
-- [ ] Implement and validate runtime behavior; obtain final correctness/security reviews.
+- [x] Commit reviewed checkpoint as standalone ancestor `44746ff63`.
+- [x] Implement runtime behavior and complete focused/native/frontend/local-worker/browser validation.
+- [x] Independent correctness/security reviews closed all implementation findings.
+- [ ] Finish full Python suite and package closeout.
 
 ## Decisions
 
@@ -27,7 +29,7 @@ Operator decision recorded: old-archive restore and failed-fork recovery may ove
 ## Verification and handoff
 
 Starting implementation revision: `cebb4b4283e408fd270126811f4dbbd1a8dfd8e2`.
-Contract ancestor revision: not committed; implementation must not start until it exists.
+Contract ancestor revision: `44746ff63`; implementation started after this standalone checkpoint.
 Documentation validation: scoped `wctl doc-lint` passes; final rerun recorded in review artifacts. Spelling preview found only existing PROJECT_TRACKER text changes (including the `axe` tool name); none applied. Runtime validation: not run (documentation-only scope).
 
 Next: prepare a standalone reviewed contract commit and future execution of the [ExecPlan](prompts/active/implementation_execplan.md). Implementation must maintain this tracker and plan and retain separate implemented/local/environment/deployed evidence claims.
@@ -35,3 +37,9 @@ Next: prepare a standalone reviewed contract commit and future execution of the 
 ## Lifecycle decision — 2026-10-29 01:06 UTC
 
 The operator rejected preserving destination mode or blocking archive/failed-fork recovery. Incoming state wins, even when normal; no off toggle is added. Rationale: simpler implementation and maximum user recovery flexibility; blocking recovery could make projects unusable.
+
+Implementation note: Ron activation takes the existing catalog lifecycle guard before the NoDb lock and fresh hydration. Independent correctness inspection confirms fork/archive already use this guard; no queue/copy changes are necessary to preserve capture consistency.
+
+## Implementation evidence — 2026-10-29 UTC
+
+See [validation](artifacts/validation.md), [runtime receipt](artifacts/runtime.json), [browser receipt](artifacts/browser.json), and final correctness/security artifacts. Actual preparation, model execution and fork succeeded. Native `4d4c075` is published and verified upstream; unrelated sibling edits are untouched. Full Python suite is in progress.

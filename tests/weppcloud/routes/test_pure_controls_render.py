@@ -5178,3 +5178,37 @@ def test_roads_water_help_available_with_pending_or_ready_resources(jinja_env, r
     )
     assert "Understanding water balance and runoff" in rendered
     assert ('href="/roads-scoped-report?output_scope=roads"' in rendered) == ready
+
+
+@pytest.mark.parametrize('roles', [{'Dev'}, {'Dev', 'PowerUser'}])
+def test_developer_panel_preserves_other_action_gates(jinja_env, roles):
+    user = SimpleNamespace(has_role=lambda role: role in roles, is_authenticated=True, roles=list(roles))
+    rendered = jinja_env.get_template('controls/poweruser_panel.htm').render(
+        current_user=user, user=user, ron=SimpleNamespace(developer_mode=False, readonly=False, mods=[], profile_recorder_assembler_enabled=False))
+    assert 'data-project-action="enable-developer-mode"' in rendered
+    assert ('data-project-action="clear-locks"' in rendered) == ('PowerUser' in roles)
+    assert 'Mint Run Token' not in rendered
+    assert 'no off toggle' in rendered.lower()
+
+
+def test_developer_soil_inputs_remove_only_maxima(jinja_env):
+    rendered = jinja_env.get_template('controls/wepp_pure_advanced_options/soil_anisotropy.htm').render(
+        ron=SimpleNamespace(developer_mode=True),
+        wepp=SimpleNamespace(multi_ofe=True, run_wepp_ui=True, soil_anisotropy_upper=101, soil_anisotropy_lower=11))
+    inputs = re.findall(r'<input\b[^>]*>', rendered)
+    for field in ('soil_anisotropy_upper', 'soil_anisotropy_lower'):
+        tag = next(tag for tag in inputs if f'id="{field}"' in tag)
+        assert 'max=' not in tag
+        assert 'min="1"' in tag
+        assert 'disable-readonly' in tag
+    assert rendered.count('Values above 10 can cause numerical instabilities.') == 2
+
+
+@pytest.mark.parametrize('template_name', ['header/_run_header_fixed.htm', 'reports/_base_report.htm'])
+def test_dev_only_header_does_not_grant_ttl_control(jinja_env, template_name):
+    user = SimpleNamespace(has_role=lambda role: role == 'Dev', roles=['Dev'], is_authenticated=True)
+    rendered = jinja_env.get_template(template_name).render(
+        user=user, current_user=user,
+        request=SimpleNamespace(view_args={'runid': 'test-run', 'config': 'test-config'}))
+    assert 'data-modal-open="puModal"' in rendered
+    assert 'id="checkbox_ttl_disabled"' not in rendered
