@@ -1,0 +1,327 @@
+{
+  "config": "disturbed9002",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "identity": "scoped synthetic principal, real authorization/CSRF; no account or role mutation",
+  "projects": [
+    "d2-landsoil-base",
+    "d2-landsoil-legacy",
+    "d2-landsoil-developer"
+  ],
+  "layouts": {
+    "normal_base": {
+      "run": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      }
+    },
+    "normal_explicit_base_with_file": {
+      "run": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      }
+    },
+    "normal_extended": {
+      "run": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      }
+    },
+    "legacy_no_selector": {
+      "run": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      }
+    },
+    "normal_returned_to_base": {
+      "run": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      }
+    },
+    "normal_deleted_extended": {
+      "run": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup"
+        ],
+        "editors": [
+          "base"
+        ],
+        "radios": []
+      }
+    },
+    "developer_base": {
+      "run": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      },
+      "report_shell": {
+        "actions": [
+          "reset-lookup",
+          "load-extended-lookup",
+          "delete-extended-lookup",
+          "sync-base-to-extended-lookup"
+        ],
+        "editors": [
+          "base",
+          "extended"
+        ],
+        "radios": [
+          "base",
+          "extended"
+        ]
+      }
+    }
+  },
+  "operations": [
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/modify_disturbed?lookup=base",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/reset_disturbed",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/load_extended_land_soil_lookup",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/set_lookup_variant",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/modify_disturbed?lookup=extended",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/set_lookup_variant",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-base",
+      "operation": "tasks/delete_extended_land_soil_lookup",
+      "status": 200,
+      "roles": []
+    },
+    {
+      "project": "d2-landsoil-developer",
+      "operation": "tasks/enable_developer_mode",
+      "status": 200,
+      "roles": [
+        "Dev"
+      ]
+    }
+  ],
+  "base_edit": {
+    "rows": 104,
+    "value_readback": "7.0",
+    "sha256": "41a27fdf141c0a4afa5ec3d2a790d23e24e88900112e7a45d54ecf3254059ad3"
+  },
+  "base_reset_matches_defaults": true,
+  "csrf_denial_unchanged": true,
+  "extended_edit": {
+    "rows": 96,
+    "value_readback": "7.0",
+    "sha256": "ff0f48df6a2c5fb105f10064ce6e47356be7085c0b94a50a595b53a3b1457da1"
+  },
+  "activation_only_changed_ron": true,
+  "source_unchanged": true,
+  "final_hashes": {
+    "d2-landsoil-base": {
+      "landuse.nodb": "d59a994a44c82671d149ccc833174fe8dd90a619063c6c27aa775a02748d3119",
+      "soils.nodb": "4233ea8e835b1ce82b8275d59001fc1b85f81f681fc8a0ec430c697618c41326",
+      "observed.nodb": "526625fd84e56dddc29255c6b5552d2c93c9fedcf430d573666f7f11ebaad14a",
+      "ron.nodb": "e29b16492253f99b1dff5c6922e12f82f61364f8099b9df2c39779758aa93789",
+      "ash.nodb": "e90f7561deb32ad47e8c33981e1f143edac72e6bc73771c4db8bb96f767da200",
+      "ashpost.nodb": "3d8cde96472c8c4b49255aed5fb744180f69f9a2ea93ffc73b10f863041ffe88",
+      "disturbed.nodb": "fcd4a5d8cbd0d9267d68ee5f1e492ab485304a46ee753aeb81c0413db5ce9608",
+      "watershed.nodb": "b0b78bdb31f2f904d79835a845bb3fa3f57c3e30cdbc3a17b9133390a27a483e",
+      "unitizer.nodb": "44b6ab7b5b8cd07478e0c5767d21c3ffac76fcf773ef6743e856f883480917c5",
+      "wepp.nodb": "be48093c19f286d9273ec8af169ad08cabd3ea7ce9c74b7cacabadde173758b5",
+      "topaz.nodb": "5de9bd0daa72ae69863f34ed92ee8db84aa3d2a30e0169d6d30056f97ccd9e6f",
+      "climate.nodb": "0e19b355f9e3d8a6d9c441141129f2c156c45182c2bee17a94ddec6f35fe2bf5",
+      "treatments.nodb": "32fe4de3418a0325add4534c377ba7b5ab6db5476baedd58cfefda07eaaabcd7",
+      "debris_flow.nodb": "1f6b0c02a0b5e4bf8ae1df74ab01851b4320a1bb64b68abe84f0a07db0c6b886",
+      "disturbed/disturbed_land_soil_lookup.csv": "bf4b38fbcb16643345b29e24a1ace6afd8409695cf0b27dbbb707e4707620a67",
+      "soils/hill_101.mofe.sol": "7f6efd4c102c0b17aafd85b448dfebf27bbf31ce186576358f07ac86b6052880",
+      "wepp/runs/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828",
+      "wepp/runs-rq-validation/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828"
+    },
+    "d2-landsoil-legacy": {
+      "ashpost.nodb": "3d8cde96472c8c4b49255aed5fb744180f69f9a2ea93ffc73b10f863041ffe88",
+      "debris_flow.nodb": "1f6b0c02a0b5e4bf8ae1df74ab01851b4320a1bb64b68abe84f0a07db0c6b886",
+      "landuse.nodb": "d59a994a44c82671d149ccc833174fe8dd90a619063c6c27aa775a02748d3119",
+      "unitizer.nodb": "44b6ab7b5b8cd07478e0c5767d21c3ffac76fcf773ef6743e856f883480917c5",
+      "topaz.nodb": "5de9bd0daa72ae69863f34ed92ee8db84aa3d2a30e0169d6d30056f97ccd9e6f",
+      "observed.nodb": "526625fd84e56dddc29255c6b5552d2c93c9fedcf430d573666f7f11ebaad14a",
+      "watershed.nodb": "b0b78bdb31f2f904d79835a845bb3fa3f57c3e30cdbc3a17b9133390a27a483e",
+      "disturbed.nodb": "2fa8fcce40f2319b5ae669f842b8b19a1c86e1719769c54af2a02d2ffe33bd89",
+      "climate.nodb": "0e19b355f9e3d8a6d9c441141129f2c156c45182c2bee17a94ddec6f35fe2bf5",
+      "ash.nodb": "e90f7561deb32ad47e8c33981e1f143edac72e6bc73771c4db8bb96f767da200",
+      "treatments.nodb": "32fe4de3418a0325add4534c377ba7b5ab6db5476baedd58cfefda07eaaabcd7",
+      "ron.nodb": "e29b16492253f99b1dff5c6922e12f82f61364f8099b9df2c39779758aa93789",
+      "soils.nodb": "4233ea8e835b1ce82b8275d59001fc1b85f81f681fc8a0ec430c697618c41326",
+      "wepp.nodb": "be48093c19f286d9273ec8af169ad08cabd3ea7ce9c74b7cacabadde173758b5",
+      "disturbed/disturbed_land_soil_lookup_extended.csv": "ff0f48df6a2c5fb105f10064ce6e47356be7085c0b94a50a595b53a3b1457da1",
+      "disturbed/disturbed_land_soil_lookup.csv": "bf4b38fbcb16643345b29e24a1ace6afd8409695cf0b27dbbb707e4707620a67",
+      "soils/hill_101.mofe.sol": "7f6efd4c102c0b17aafd85b448dfebf27bbf31ce186576358f07ac86b6052880",
+      "wepp/runs-rq-validation/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828",
+      "wepp/runs/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828"
+    },
+    "d2-landsoil-developer": {
+      "unitizer.nodb": "44b6ab7b5b8cd07478e0c5767d21c3ffac76fcf773ef6743e856f883480917c5",
+      "landuse.nodb": "d59a994a44c82671d149ccc833174fe8dd90a619063c6c27aa775a02748d3119",
+      "ashpost.nodb": "3d8cde96472c8c4b49255aed5fb744180f69f9a2ea93ffc73b10f863041ffe88",
+      "debris_flow.nodb": "1f6b0c02a0b5e4bf8ae1df74ab01851b4320a1bb64b68abe84f0a07db0c6b886",
+      "observed.nodb": "526625fd84e56dddc29255c6b5552d2c93c9fedcf430d573666f7f11ebaad14a",
+      "watershed.nodb": "b0b78bdb31f2f904d79835a845bb3fa3f57c3e30cdbc3a17b9133390a27a483e",
+      "disturbed.nodb": "fcd4a5d8cbd0d9267d68ee5f1e492ab485304a46ee753aeb81c0413db5ce9608",
+      "topaz.nodb": "5de9bd0daa72ae69863f34ed92ee8db84aa3d2a30e0169d6d30056f97ccd9e6f",
+      "climate.nodb": "0e19b355f9e3d8a6d9c441141129f2c156c45182c2bee17a94ddec6f35fe2bf5",
+      "ash.nodb": "e90f7561deb32ad47e8c33981e1f143edac72e6bc73771c4db8bb96f767da200",
+      "ron.nodb": "bd0f7ae0e9a7f9dfa3d563e516ac07c5648260900830c8efab13fa095ae4e961",
+      "wepp.nodb": "be48093c19f286d9273ec8af169ad08cabd3ea7ce9c74b7cacabadde173758b5",
+      "soils.nodb": "4233ea8e835b1ce82b8275d59001fc1b85f81f681fc8a0ec430c697618c41326",
+      "treatments.nodb": "32fe4de3418a0325add4534c377ba7b5ab6db5476baedd58cfefda07eaaabcd7",
+      "soils/hill_101.mofe.sol": "7f6efd4c102c0b17aafd85b448dfebf27bbf31ce186576358f07ac86b6052880",
+      "disturbed/disturbed_land_soil_lookup.csv": "bf4b38fbcb16643345b29e24a1ace6afd8409695cf0b27dbbb707e4707620a67",
+      "wepp/runs/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828",
+      "wepp/runs-rq-validation/p1.sol": "7a1711219830e2e6ca82384edf1ad9f98b597568f7e19b99a4c87b6b8e6e1828"
+    }
+  }
+}

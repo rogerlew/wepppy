@@ -12,14 +12,16 @@ Normal Base projects get a simpler Disturbed Panel with Reset Base and Modify Ba
 - [x] (2026-10-29 UTC) Record DM-02, Usersum instructions and compatibility matrix.
 - [x] (2026-10-29 UTC) Record operator approval for Extended-to-Base/delete loss of full layout after reload.
 - [x] (2026-10-29 UTC) Complete independent contract reviews; C1–C3 closed and security approval reconfirmed.
-- [ ] After execution is requested, commit reviewed checkpoint as ancestor.
-- [ ] Implement conditional template and necessary tests.
-- [ ] Validate real base/extended workflows and complete independent implementation review.
-- [ ] Update user docs status, package, tracker and final evidence.
+- [x] (2026-10-29 UTC) Reviewed checkpoint committed as `2fb0a4dd245af6097c009612bccb15f98a729641`.
+- [x] (2026-10-29 UTC) Conditional template, bounded report helper and sparse-panel/state tests implemented.
+- [x] (2026-10-29 UTC) Real API/CSV/render/browser acceptance and independent correctness/security reviews pass; full Python gate passes (12,072 passed, 298 skipped).
+- [x] (2026-10-29 UTC) User docs, contract status, package/tracker and final evidence updated; all gates pass and plan archived.
 
 ## Surprises & Discoveries
 
 `Disturbed.active_lookup_variant` honors explicit Base even when an extended file exists. When stored selection is absent/invalid, it infers Extended from file existence. Explicit Extended with a missing file still resolves Extended; do not hide its recovery controls. `disturbed.js` captures controls at initialization and queries metadata even with only the base modify link; test the sparse layout without rewriting that behavior. The existing header exposes Disturbed for enabled modules independently of PowerUser access.
+
+The report-context helper uses the existing detached reader and authoritative getter; missing state is not created and corrupt persisted objects remain explicit failures. No production controller change was needed. Browser acceptance confirms full current DOM persists until reload after selecting Base.
 
 ## Decision Log
 
@@ -29,7 +31,7 @@ Normal Base projects get a simpler Disturbed Panel with Reset Base and Modify Ba
 
 ## Outcomes & Retrospective
 
-Assessment supports a small template change with targeted compatibility tests. No runtime implementation or generated-artifact acceptance has occurred. Both independent contract reviews passed after C1–C3 corrections; no open operator decision remains. Later execution must update this section.
+Assessment supports a small template change with targeted compatibility tests. Implementation and runtime/browser acceptance are complete; the full Python suite passes (12,072 passed, 298 skipped). Both independent contract reviews passed after C1–C3 corrections; no open operator decision remains. See `../../artifacts/validation.md` for receipts and phase-specific limits.
 
 ## Context and Orientation
 
@@ -82,3 +84,5 @@ Reuse Ron's existing boolean getter, Disturbed's existing string-valued selectio
 Revision note (2026-10-29 UTC): initial scaffold records the operator-approved presentation policy and transition tradeoff; implementation deliberately pending.
 
 Review revision (2026-10-29 UTC): include report-shell state resolution and real report-context tests (C1), correct loading/selection guidance for legacy fallback (C2), and require frontend lint/tests for template changes (C3). These are conformance corrections; no new operator decision.
+
+Completion (2026-10-29 UTC): all four milestones accepted. Production changes remain limited to conditional template groups, a bounded existing-state reader for reports and reload guidance. No backend enforcement, production JS change, persistence migration or open operator decision. Runtime and browser receipts prove compatibility; independent correctness/security reviews pass. Frontend tests: 1,021 passed. Production deployment remains separate.

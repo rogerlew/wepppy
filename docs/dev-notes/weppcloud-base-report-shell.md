@@ -37,6 +37,13 @@ Routes rendering templates that extend `_base_report.htm` must provide these con
 
 If any are missing, Jinja can raise `UndefinedError` while rendering shared header/modal partials.
 
+For the Disturbed modal, pass `ron` for the authorized active run root. If no
+`disturbed` controller is supplied, the shared context helper reads an existing
+Disturbed snapshot from `ron.wd`; it never creates a missing controller. Missing
+state resolves Base; malformed existing state still fails explicitly. The
+resolved selection and project mode determine presentation under
+[DM-02](../schemas/project-developer-mode-contract.md#extended-landsoil-panel-presentation-dm-02).
+
 ## Minimal route pattern
 
 ```python

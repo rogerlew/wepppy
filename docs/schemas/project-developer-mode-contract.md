@@ -49,7 +49,7 @@ Blank/omitted semantics, validation-before-mutation, minimum 1, NaN/infinity and
 
 ## Extended landsoil panel presentation (DM-02)
 
-Accepted design, 2026-10-29 UTC; implementation conformance pending in the
+Implemented, 2026-10-29 UTC; local validation evidence is retained in the
 [implementation package](../work-packages/20261029_extended_landsoil_developer_panel/package.md).
 The operator requested a simpler Disturbed Panel for normal base-table projects,
 continued operation of existing extended-table projects, and no new backend

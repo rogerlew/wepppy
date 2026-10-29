@@ -352,6 +352,38 @@ describe("Disturbed lookup variant persistence", () => {
         return window.Disturbed.getInstance();
     }
 
+    test.each([true, false])("simple panel works with SBS form present=%s", async (hasForm) => {
+        document.querySelectorAll("[data-disturbed-lookup-variant], [data-disturbed-requires-extended]")
+            .forEach((element) => element.remove());
+        if (!hasForm) {
+            document.querySelector("#sbs_upload_form").remove();
+        }
+        const baseLink = document.querySelector('[data-disturbed-modify-link="base"]');
+        baseLink.href = "/runs/test-run/test-config/modify_disturbed?lookup=base";
+        document.body.insertAdjacentHTML("beforeend", '<button data-disturbed-action="reset-lookup">Reset Base</button>');
+        getController();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(baseLink.dataset.selected).toBe("true");
+        expect(baseLink.getAttribute("href")).toContain("lookup=base");
+        expect(baseLink.hasAttribute("aria-disabled")).toBe(false);
+
+        document.querySelector('[data-disturbed-action="reset-lookup"]').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(httpRequestMock).toHaveBeenCalledWith("tasks/reset_disturbed", expect.objectContaining({ method: "POST" }));
+        expect(document.querySelector("[data-disturbed-lookup-status]").textContent).toContain("reset to defaults");
+        expect(httpRequestMock.mock.calls.filter(([url]) => url === "api/disturbed/lookup_meta")).toHaveLength(2);
+        expect(document.querySelector('[data-disturbed-modify-link="extended"]')).toBeNull();
+
+        httpRequestMock.mockImplementation((url) => Promise.resolve({ body: url === "tasks/reset_disturbed"
+            ? { error: { message: "Reset refused" } }
+            : { Content: { lookup_variant: "base", has_extended_lookup: false } } }));
+        document.querySelector('[data-disturbed-action="reset-lookup"]').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(document.querySelector("[data-disturbed-lookup-status]").textContent).toContain("Reset refused");
+        expect(baseLink.getAttribute("href")).toContain("lookup=base");
+    });
+
     test("bootstrap requests lookup metadata and applies server variant", async () => {
         getController();
         await Promise.resolve();

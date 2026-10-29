@@ -193,7 +193,8 @@
       <p>{{ usersum_doc_link('weppcloud', 'poweruser-getting-started.md', 'Getting started with PowerUser tools') }}</p>
       {% if current_user.has_role('Dev') %}
       <section class="wc-stack" aria-label="Project developer mode">
-        <p>No off toggle. Clones inherit mode; archive restore and failed-fork recovery use incoming state and may return to normal mode. Developer mode removes anisotropy upper limits.</p>
+        <p>No off toggle. Clones inherit mode; archive restore and failed-fork recovery use incoming state and may return to normal mode. Developer mode removes anisotropy upper limits and makes extended landsoil controls available.</p>
+        <p>After enabling, save any pending edits and reload the project page to show extended landsoil controls.</p>
         {% if not ron.developer_mode %}
         <button type="button" class="pure-button pure-button-primary disable-readonly"
                 data-project-action="enable-developer-mode" {% if ron.readonly %}disabled{% endif %}>Enable developer mode</button>

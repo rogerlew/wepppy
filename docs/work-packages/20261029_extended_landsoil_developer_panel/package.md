@@ -1,12 +1,12 @@
 # Extended landsoil developer-project panel
 
-Status: Open — assessed and scaffolded, 2026-10-29 UTC; implementation not started.
+Status: Closed — implemented and locally validated, 2026-10-29 UTC. Production deployment remains separate.
 
 ## Scope and authority
 
 Implement the [DM-02 presentation amendment](../../schemas/project-developer-mode-contract.md#extended-landsoil-panel-presentation-dm-02): full Disturbed Panel for developer projects or the resolved Extended selection; otherwise only Reset Base and Modify Base lookup actions. Preserve all backend operations and active extended projects. The operator explicitly accepts that selecting Base/deleting Extended on a normal project loses full-panel access after reload and will arrange Dev roles for those users.
 
-The operator has now authorized execution of the [plan](prompts/active/implementation_execplan.md), including the reviewed contract ancestor commit and isolated validation. Production deployment and role assignment remain outside scope. Starting revision: `981caadf553c12b1199b9d76f5a28c100b6722e3`.
+The operator has now authorized execution of the [plan](prompts/completed/implementation_execplan.md), including the reviewed contract ancestor commit and isolated validation. Production deployment and role assignment remain outside scope. Starting revision: `981caadf553c12b1199b9d76f5a28c100b6722e3`.
 
 ## Assessment and complexity budget
 
@@ -44,10 +44,12 @@ Security impact: low. This intentionally changes discovery without changing any 
 - [x] Inspect source and record compatibility assessment.
 - [x] Amend DM-02 and Usersum guide, clearly marking rollout pending.
 - [x] Independent contract reviews and disposition complete; all three correctness findings closed, security reconfirmed.
-- [ ] Reviewed contract ancestor committed before runtime implementation.
-- [ ] Template/controller regression matrix and real CSV/browser evidence pass.
-- [ ] Implementation review, docs, tracker and final gates complete.
+- [x] Reviewed contract ancestor `2fb0a4dd2` committed before runtime implementation.
+- [x] Template/controller regression matrix and real CSV/browser evidence pass.
+- [x] Implementation review, docs, tracker and final gates complete.
 
-Owner: requesting operator. Implementation and rollout remain pending; no existing project or account has been changed.
+Owner: requesting operator. Implementation and local runtime/browser acceptance complete; full Python gate passed (12,072 passed, 298 skipped). Only disposable validation projects were mutated; source projects and real account roles are unchanged. Production rollout remains separate.
 
 Review evidence: [correctness](artifacts/20261029_contract_correctness_review.md), [security/noninterference](artifacts/20261029_contract_security_review.md), and [disposition](artifacts/20261029_review_disposition.md). No operator decision remains open.
+
+Completion evidence: [validation](artifacts/validation.md), [implementation correctness](artifacts/implementation_correctness_review.md), and [implementation security](artifacts/implementation_security_review.md). Both reviews passed without findings.

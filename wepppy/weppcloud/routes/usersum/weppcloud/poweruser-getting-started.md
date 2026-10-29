@@ -73,5 +73,11 @@ setting. A Dev user can enable it again. Enabling mode does not rerun the model
 or change historical results. If activation cannot be confirmed, reload the
 page to check saved state before retrying.
 
-See the [Project Developer Mode contract (DM-01)](../../../../../docs/schemas/project-developer-mode-contract.md)
+Developer mode also reveals the full Disturbed Panel. Save pending edits and
+reload the project page after enabling it to see the extended lookup controls.
+Projects already using Extended retain those controls without enabling mode;
+a normal project that switches back to Base gets the simple panel on reload.
+See [Land/Soil Lookup Tables](disturbed-land-soil-lookup.md) for the workflow.
+
+See the [Project Developer Mode contract (DM-01/DM-02)](../../../../../docs/schemas/project-developer-mode-contract.md)
 for the authoritative activation permissions, project policy, and clone/recovery rules.

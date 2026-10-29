@@ -1,0 +1,33 @@
+{
+  "identity": "existing smoke account; no account or role mutations",
+  "layouts": {
+    "base": {
+      "full": false,
+      "editorStatus": 200,
+      "helpStatuses": [
+        200,
+        200
+      ],
+      "screenshot": "panel-base.png"
+    },
+    "legacy": {
+      "full": true,
+      "editorStatus": 200,
+      "helpStatuses": [
+        200,
+        200
+      ],
+      "screenshot": "panel-legacy.png"
+    },
+    "developer": {
+      "full": true,
+      "editorStatus": 200,
+      "helpStatuses": [
+        200,
+        200
+      ],
+      "screenshot": "panel-developer.png"
+    }
+  },
+  "transition": "legacy project: Base selection retains full current DOM; reload renders simple panel"
+}

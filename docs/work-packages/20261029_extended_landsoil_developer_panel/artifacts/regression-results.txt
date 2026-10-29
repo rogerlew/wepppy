@@ -1,0 +1,10 @@
+Full Python: wctl run-pytest tests --maxfail=1
+======== 12072 passed, 298 skipped, 5830 warnings in 3328.47s (0:55:28) ========
+
+Focused Python: 326 passed, 6 warnings in 15.75s
+Final policy Python: 22 passed, 4 warnings in 9.57s
+Full frontend: 121 suites, 1021 tests passed
+Disturbed Jest: 18 tests passed
+Frontend lint: passed
+Test-stub check: passed
+Broad exception enforcement: passed, zero introductions

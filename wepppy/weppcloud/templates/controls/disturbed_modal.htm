@@ -21,6 +21,7 @@
   }
 ] %}
 {% if disturbed_mod_enabled %}
+{% set show_extended_lookup = ron.developer_mode or ((disturbed.active_lookup_variant if disturbed is defined and disturbed is not none else disturbed_lookup_variant(ron.wd)) == 'extended') %}
 <div class="wc-modal" id="disturbedModal" data-modal hidden>
   <style>
     .disturbed-modal__dialog {
@@ -158,6 +159,7 @@
                 Restore the base lookup CSV to default values.
               </p>
             </div>
+            {% if show_extended_lookup %}
             <div class="disturbed-panel__action">
               <button type="button"
                       class="pure-button pure-button-secondary"
@@ -181,6 +183,7 @@
                 Remove the extended lookup file and return default selection behavior to base.
               </p>
             </div>
+            {% endif %}
           </div>
           <div class="pu-action-feedback"
                data-disturbed-lookup-status
@@ -189,6 +192,7 @@
                aria-atomic="true"></div>
         </section>
 
+        {% if show_extended_lookup %}
         <section class="disturbed-panel__section" aria-labelledby="disturbedLookupSelectHeading">
           <h3 class="disturbed-panel__section-title" id="disturbedLookupSelectHeading">Select Landsoil Lookup Table Resource</h3>
           {{ ui.radio_group(
@@ -200,6 +204,7 @@
                max_width=None
              ) }}
         </section>
+        {% endif %}
 
         <section class="disturbed-panel__section" aria-labelledby="disturbedLookupModifyHeading">
           <h3 class="disturbed-panel__section-title" id="disturbedLookupModifyHeading">Modify Landsoil Lookup Tables</h3>
@@ -218,6 +223,7 @@
                 Open the lookup editor scoped to the base table (`lookup=base`).
               </p>
             </div>
+            {% if show_extended_lookup %}
             <div class="disturbed-panel__action">
               <a class="pure-button pure-button-secondary disturbed-panel__modify-link"
                  href="{{ url_for_run('disturbed.modify_disturbed', runid=disturbed_runid, config=disturbed_config, lookup='extended') }}"
@@ -245,6 +251,7 @@
                 Regenerate the extended table from the current base table values.
               </p>
             </div>
+            {% endif %}
           </div>
         </section>
 

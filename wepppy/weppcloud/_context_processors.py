@@ -259,7 +259,8 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                     get_last_modified=_get_last_modified,
                     get_all_runs=get_all_runs,
                     get_all_users=_get_all_users,
-                    url_for_run=url_for_run)
+                    url_for_run=url_for_run,
+                    disturbed_lookup_variant=_disturbed_lookup_variant)
 
     @app.context_processor
     def oauth_provider_processor():
@@ -290,3 +291,11 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     def pup_context_processor():
         from flask import g
         return dict(pup_relpath=getattr(g, 'pup_relpath', None))
+
+
+def _disturbed_lookup_variant(wd):
+    """Read existing DM-02 panel state when a report omits Disturbed context."""
+    from wepppy.nodb.mods.disturbed import Disturbed
+
+    disturbed = Disturbed.load_detached(wd, allow_nonexistent=True)
+    return disturbed.active_lookup_variant if disturbed is not None else 'base'

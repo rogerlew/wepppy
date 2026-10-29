@@ -145,6 +145,7 @@ def jinja_env() -> Environment:
         url_for_run=lambda *args, **kwargs: "",
         static_url=lambda *args, **kwargs: "",
         site_prefix="",
+        disturbed_lookup_variant=lambda wd: "base",
         usersum_doc_link=lambda category, filename, label, *args, **kwargs: (
             f'<a href="/usersum/view/{category}/{filename}" target="_blank" rel="noopener">📄 {label}</a>'
         ),
@@ -2414,7 +2415,7 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
     rendered = template.render(
         runid="test-run",
         config="test-config",
-        ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config"),
+        ron=SimpleNamespace(mods={"disturbed"}, developer_mode=True, runid="test-run", config_stem="test-config"),
     )
 
     assert 'id="disturbedModal"' in rendered

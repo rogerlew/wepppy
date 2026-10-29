@@ -8,9 +8,6 @@ This page is the parameter reference. For the recommended calibration order, wha
 
 ## Making the extended table available
 
-**Planned panel update:** the following presentation change is specified but not
-yet implemented. Existing extended-table processing continues unchanged.
-
 Projects in developer mode, and projects currently using Extended, retain the
 full Disturbed Panel. Other projects show **Reset Base Landsoil Lookup Table**
 and **Modify Base Table**, along with help and operation feedback.
