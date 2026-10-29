@@ -26,3 +26,7 @@ The actual archive interleaving captures a consistent normal Ron/Wepp pair while
 `runtime.json` traces activation through Ron/Wepp persistence, default RQ preparation, rebuilt Rust, generated p1.sol, a successful fresh WEPP hillslope execution and a completed fork. Ratios are 101/101/11 in both OFEs, source hash is unchanged, and output ownership is UID 1000/GID 993/mode 0644. `browser.json` records the actual project page, absent maxima, mode indicator, no activation control for an ordinary viewer, and matching soil/loss-report download hashes. `prepared-p1.sol`, `fresh-H1.loss.dat` and `model-execution.log` retain inspectable evidence.
 
 Highest claim: locally/environment validated bounded preparation and one fresh hillslope simulation on an isolated MOFE project, not broad scientific stability or production deployment. Synthetic activation identity avoids account mutation; the browser checks use ordinary project access. Runtime security review is additional, not a substitute for this review.
+
+## Broad-gate follow-up
+
+The independent reviewer confirmed the one-line `developer_mode=False` addition to the SRID test stand-in; no runtime fallback is needed. Real Ron retains missing-false and malformed-state rejection. The reviewer also confirmed `roads-provenance-baseline.json` supports the unrelated pre-existing Roads source-provenance disposition. No new findings.

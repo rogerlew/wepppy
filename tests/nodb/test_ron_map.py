@@ -40,6 +40,7 @@ def test_ron_view_model_exposes_assigned_project_srid(
         config_stem="test-config",
         readonly=False,
         public=False,
+        developer_mode=False,
         pup_relpath=None,
         mods=[],
         wd="/runs/test-run",

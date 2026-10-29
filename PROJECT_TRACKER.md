@@ -11,7 +11,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-Design/review: [Project developer mode](docs/work-packages/20261028_project_developer_mode/package.md) — Ron-owned policy with enable-only editing, Dev-only activation, inherited clone mode and project-controlled anisotropy maxima. Contract/scaffold independently reviewed; clone/archive consistency and immediate UI refresh clarified. Operator permits restore/failed-fork replacement to restore normal mode; all design findings closed. No runtime changes.
+Completed locally: [Project developer mode](docs/work-packages/20261028_project_developer_mode/package.md) — Ron-owned enable-only mode, Dev-only PowerUser activation and project-controlled anisotropy maxima; clone inheritance and incoming recovery state preserved. Real native/worker/browser artifacts and independent reviews pass. Segmented Python: 12,047 passed / 298 skipped; existing Roads provenance failure retained. Native published; no production deployment.
 
 Active: [Download error observability](docs/work-packages/20261027_download_error_observability/package.md) — safe correlated server failures, bootstrap terminal reporting and failure exit propagation; implementation and cross-platform validation complete; broad assessment retains one unrelated Roads provenance blocker. Deployment held.
 

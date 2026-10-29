@@ -2,7 +2,7 @@
 
 Status: implemented and artifact-validated on forest; production rollout pending. Broad gate results and limitations are retained in the work package.
 
-DM-01 amendment (2026-10-29 UTC): operator-approved project developer-mode exception below; implementation conformance pending. Prior implementation evidence does not cover this amendment.
+DM-01 amendment (2026-10-29 UTC): project developer-mode exception implemented and locally artifact-validated. Amendment evidence is retained in the [developer-mode package](../work-packages/20261028_project_developer_mode/artifacts/validation.md); production deployment remains separate.
 
 ## User inputs and eligibility
 

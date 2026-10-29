@@ -1,6 +1,6 @@
 # Project developer mode
 
-**Status**: Open — implementation and local environment validation complete, 2026-10-29 UTC; full Python gate and closeout in progress. No production deployment.
+**Status**: Closed 2026-10-29 — implementation and local environment validation complete; known pre-existing Roads provenance failure retained. No production deployment.
 
 ## Overview
 
@@ -8,7 +8,7 @@ Allow a Dev user to activate developer mode without an off toggle on a project t
 
 ## Authority and scope
 
-[DM-01](../../schemas/project-developer-mode-contract.md) owns lifecycle and activation; [SA-01](../../schemas/soil-anisotropy-contract.md) owns soil behavior; [ADR-0088](../../adrs/ADR-0088-soil-anisotropy-overrides.md) records parameterization rationale. Execute only the [implementation ExecPlan](prompts/active/implementation_execplan.md) for this package, not unrelated active plans.
+[DM-01](../../schemas/project-developer-mode-contract.md) owns lifecycle and activation; [SA-01](../../schemas/soil-anisotropy-contract.md) owns soil behavior; [ADR-0088](../../adrs/ADR-0088-soil-anisotropy-overrides.md) records parameterization rationale. Execution is recorded in the [implementation ExecPlan](prompts/completed/implementation_execplan.md) for this package.
 
 Included: Ron state/stubs, one activation route and panel action, visible mode status, policy propagation to Python/Rust, cloning and archive/restore conformance, tests and user/operator/developer docs. Excluded: deployment, account-role assignment, scientific model changes, new generic developer bypasses, queue topology, bulk project migration and edits to closed work packages.
 
@@ -32,19 +32,19 @@ Security impact: **high**, because a new privileged public route and panel-acces
 
 ## Parameterization ADR gate
 
-Parameterization threshold change: yes. ADR required: yes. Amend existing ADR-0088 with DM-01 scope and conversation provenance; implementation conformance remains pending. This changes accepted experimental inputs, not defaults or model equations.
+Parameterization threshold change: yes. ADR required: yes. Amend existing ADR-0088 with DM-01 scope and conversation provenance; implementation conformance is demonstrated by the retained local artifact evidence. This changes accepted experimental inputs, not defaults or model equations.
 
 ## Stakeholders and success criteria
 
-Decision owner: requesting operator. Intended experimenter: Anurag. Implementer: future assigned agent/developer. Reviewers: independent correctness and security agents.
+Decision owner: requesting operator. Intended experimenter: Anurag. Implementer: Codex. Reviewers: independent correctness and security agents.
 
-- [ ] Reviewed contract checkpoint committed before implementation.
-- [ ] Dev-only activation is enable-only, idempotent and durable; no unrelated privilege expansion.
-- [ ] Ordinary authorized non-Dev callers can submit elevated overrides on activated projects.
-- [ ] Clones inherit source mode/settings; archive restore and failed-fork recovery use incoming state, including normal mode, through real boundaries.
-- [ ] Real generated input, fresh execution and project-tool evidence retained.
-- [ ] Focused/native/frontend/broad checks and independent runtime reviews complete.
-- [ ] Affected user/operator/developer docs updated and deployment status explicit.
+- [x] Reviewed contract checkpoint committed before implementation.
+- [x] Dev-only activation is enable-only, idempotent and durable; no unrelated privilege expansion.
+- [x] Ordinary authorized non-Dev callers can submit elevated overrides on activated projects.
+- [x] Clones inherit source mode/settings; archive restore and failed-fork recovery use incoming state, including normal mode, through real boundaries.
+- [x] Real generated input, fresh execution and project-tool evidence retained.
+- [x] Broad Python coverage complete with the recorded pre-existing provenance limitation; focused/native/frontend checks and independent runtime reviews complete.
+- [x] Affected user/operator/developer docs updated and deployment status explicit.
 
 ## Related work and tracking
 
@@ -53,3 +53,7 @@ The original soil-anisotropy package is historical provenance only. Feature acce
 ## Approved lifecycle replacement exception
 
 On 2026-10-29 UTC the operator approved incoming archive/source mode replacing the destination mode during archive restore and existing failed-fork recovery. Do not add sticky-state preservation, mode-based denial or extra Dev checks to recovery. No off toggle exists; a recovered normal project follows normal bounds and Dev can enable it again. This keeps established recovery available and minimizes implementation risk.
+
+## Delivered and follow-up
+
+Contract `44746ff63`, implementation `9516fd7f3`, native `4d4c075` and this closeout deliver DM-01 with reviewed tests and local artifact evidence. Broad coverage: 12,047 passes / 298 skips; frontend: 1,019 passes; native: 110 unit / 17 integration passes. See [validation](artifacts/validation.md) for the segmented gate and unrelated Roads provenance failure. No unresolved developer-mode decision or blocking review finding remains. Production rollout and the existing Roads publication-evidence maintenance remain separate work.

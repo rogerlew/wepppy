@@ -34,7 +34,7 @@ This specification covers two registries in one subsystem:
 
 ## Canonical Authority
 
-[DM-01](../../../docs/schemas/project-developer-mode-contract.md) owns project developer-mode activation and inherited parameter policy outside this registry. It is not a new feature/group entitlement or a change to `min_role` ordering. Its Dev-only PowerUser-panel action must not expose unrelated privileged actions. Implementation is pending.
+[DM-01](../../../docs/schemas/project-developer-mode-contract.md) owns project developer-mode activation and inherited parameter policy outside this registry. It is not a new feature/group entitlement or a change to `min_role` ordering. Its Dev-only PowerUser-panel action must not expose unrelated privileged actions. DM-01 is implemented and locally validated; its contract links the evidence and deployment status.
 
 The registry authority lives here:
 

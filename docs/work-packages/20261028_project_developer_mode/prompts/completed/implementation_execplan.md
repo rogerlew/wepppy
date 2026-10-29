@@ -20,22 +20,24 @@ A developer can enable experimental anisotropy inputs without an off toggle on o
 - [x] Propagate project policy through Python and rebuilt/published native preparation.
 - [x] Validate cloning, archive/restore, generated inputs and real execution.
 - [x] Finish docs, focused/native/frontend checks and independent runtime reviews.
-- [ ] Finish full Python suite and closeout.
+- [x] Finish segmented broad Python coverage and closeout; retain pre-existing Roads publication-provenance failure.
 
 ## Surprises & Discoveries
 
 
 Current upper/lower maxima are duplicated in the numeric-field template, `wepppy/nodb/core/soil_anisotropy.py` and sibling wepppyo3 `wepp_interchange/src/soil_anisotropy.rs`. Direct saved-state edits cannot bypass preparation validation. The PowerUser panel currently admits PowerUser/Admin/Root but not Dev-only accounts; simply broadening its outer gate could expose unrelated controls.
 
+Broad validation exposed an old SRID test stand-in without the newly required Ron property; adding `developer_mode=False` fixes the fixture without weakening real malformed-state checks. The Roads publication gate also has pre-existing source-provenance drift: starting and current Roads source hashes match. Retain this limitation and continue remaining coverage. A long per-file ignore list made pytest collection slow; an explicit remaining-path argument file avoids it.
+
 ## Decision Log
 
 
-2026-10-29 UTC, operator/Codex: use permanent Ron boolean, exact Dev activation, no additional role check for anisotropy submission, and clone inheritance. This avoids reset/clamping semantics and user-dependent background validation. Retain all soil behavior except explicit-override maxima. No runtime edits in the scaffolding task.
+2026-10-29 UTC, operator/Codex: use permanent Ron boolean, exact Dev activation, no additional role check for anisotropy submission, and clone inheritance. This avoids reset/clamping semantics and user-dependent background validation. Retain all soil behavior except explicit-override maxima. The later instruction to execute authorizes runtime implementation and local acceptance. Production rollout remains separate.
 
 ## Outcomes & Retrospective
 
 
-Design and implementation sequence prepared. Runtime conformance, generated artifacts, native compatibility and deployment are not yet validated. Review dispositions and evidence will update this section; this scaffold alone cannot close the package.
+Implementation `9516fd7f3` follows contract ancestor `44746ff63`; native `4d4c075` is published. Ron/route/UI/native propagation passes local generated-input, successful fresh worker execution, clone and browser/download validation. Segmented broad Python coverage completed with 12,047 distinct passes / 298 skips and one pre-existing Roads provenance failure; focused/native/frontend checks and independent reviews pass. Production deployment is outside this package.
 
 Independent correctness/security reviews are complete. Mode/value consistency during cloning/archive creation and immediate UI refresh were added and confirmed. The operator explicitly permits archive restore and failed-fork recovery to replace mode with incoming state, including normal mode. No preservation or rejection mechanism is required. Both reviewers confirmed this clarification; all design findings are closed and no operator decision remains open.
 
@@ -121,4 +123,6 @@ Revision note: 2026-10-29 01:06 UTC — operator chose existing archive/fork rep
 
 Implementation discovery: existing catalog lifecycle guard spans fork/archive capture and replacement. Ron activation acquires that guard before its lock and disk refresh, so C2 requires no queue or copy-reconciliation changes. Native validation builds a clean HEAD export plus the anisotropy change, excluding pre-existing calendar/HBP edits in the sibling working tree.
 
-Implementation outcome: Ron/route/UI/native policy is wired and validated through real preparation, a fresh successful WEPP hillslope execution, completed fork worker and normal browser/download readback. Both independent reviewers closed all findings. Full Python regression gate remains in progress; see artifacts/validation.md for exact scope and evidence limits.
+Implementation outcome: Ron/route/UI/native policy is wired and validated through real preparation, a fresh successful WEPP hillslope execution, completed fork worker and normal browser/download readback. Both independent reviewers closed all findings. Broad Python regression coverage is complete with the documented pre-existing Roads provenance limitation; see artifacts/validation.md for exact scope and evidence limits.
+
+Closeout revision, 2026-10-29 UTC: completed all implementation/local acceptance milestones. Broad testing required two test-only conformance updates, independently reviewed. Production rollout and unrelated Roads provenance maintenance remain separate; no developer-mode decision is pending.

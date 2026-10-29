@@ -1,6 +1,6 @@
 # DM-01 validation
 
-Contract ancestor: `44746ff63`. Native release: `4d4c075421c4013cba99a0addc76482229e7f3f7`, pushed and verified equal to upstream. WEPPpy implementation revision is recorded in tracker at handoff. No production deployment.
+Contract ancestor: `44746ff63`. Native release: `4d4c075421c4013cba99a0addc76482229e7f3f7`, pushed and verified equal to upstream. WEPPpy implementation revision: `9516fd7f3`. No production deployment.
 
 ## Checks
 
@@ -20,7 +20,7 @@ Contract ancestor: `44746ff63`. Native release: `4d4c075421c4013cba99a0addc76482
 | Broad-exception changed-code enforcement | Passed; no added broad catches. |
 | Code-quality observability | Completed, observe-only reports generated. |
 | Docs lint / diff check | Passed for changed docs; spelling preview made no unrelated replacements. |
-| Full Python suite | Running; final outcome below will distinguish regressions from unrelated baseline failures. |
+| Broad Python regression coverage | 12,047 distinct passed / 298 distinct skipped across three segments after two reviewed test updates. One pre-existing Roads publication-provenance failure remains. |
 
 Counts overlap across selections and must not be summed as unique tests.
 
@@ -39,3 +39,17 @@ Independent security review closed the accidental TTL-control exposure with regr
 Initial tests intentionally failed before JS implementation. Native-dependent tests failed explicitly against the old extension until the paired rebuild was installed. Test fixture adjustments supplied Ron policy to old facade fakes and used writable hydration for a stale-controller mutation test. The browser initially used an unreachable loopback address, then waited for a collapsed control to be visible; final checks use the canonical local-domain page and open its details before the screenshot. These failed attempts are not represented as successful checks.
 
 Local web/API/default-worker services were restarted after idle-worker inspection to load paired source/native code. This is local development acceptance, not production rollout. Existing archive/fork recovery behavior and queue topology are unchanged.
+
+## Existing broad-gate limitation
+
+The isolated Roads publication check fails at `tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale`: its reviewed stale-evidence receipt expects an older `roads.py` hash. `roads-provenance-baseline.json` proves that the current Roads source is byte-identical to starting revision `cebb4b4283e408fd270126811f4dbbd1a8dfd8e2`. This task does not alter that source or rewrite historical publication evidence. All remaining coverage completed as recorded below.
+
+Broad-run fixture correction: `tests/nodb/test_ron_map.py` used a `SimpleNamespace` without the new `developer_mode` public property. Added `developer_mode=False` to that stand-in; real Ron already implements missing-persisted-state behavior. No production fallback was added. Continuation uses pytest's argument-file support with the 67 remaining file/directory paths, resumes at `test_ron_map.py`, and deselects only the independently reproduced Roads provenance failure. An initial 323-file ignore-list attempt was interrupted during slow collection before test execution; explicit remaining paths avoid that collection overhead. Earlier review-only test additions were validated separately.
+
+The second segment passed 5,048 tests with 245 skipped before an old PowerUser onboarding test expected the Dev report-panel trigger to remain hidden. Updated that expectation to DM-01 and added an assertion that Dev sees activation but not clear-locks. Independent security review confirmed conformance. `remaining-pytest-args.txt` and `final-pytest-args.txt` retain the continuation selections; final segment starts at the corrected presentation file, so its earlier 17 passing cases overlap the second segment.
+
+## Final broad results
+
+`wctl run-pytest tests --maxfail=1`: 5,655 passed / 54 skipped before the corrected Ron stand-in. First continuation: 5,048 passed / 245 skipped / 1 deselected before the corrected Dev visibility expectation. Final continuation: 1,361 passed. Removing 17 repeated passing presentation cases and one repeated collection skip gives **12,047 distinct passes and 298 distinct skips**. The independently reproduced Roads provenance assertion is the sole remaining failure. These are segmented coverage results, not an uninterrupted green full run. No production changes were required by the broad gate; both test-only updates received independent reviewer confirmation.
+
+Contract and implementation commits are `44746ff63` and `9516fd7f3`; the closeout commit contains the two existing-test conformance updates and final evidence. Production rollout remains outside scope.

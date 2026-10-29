@@ -68,10 +68,13 @@ def test_internal_statement_remains_reachable_without_grant(jinja_env, membershi
     assert 'Accept internal access statement' in html
 
 
-@pytest.mark.parametrize('role,visible', [(None, False), ('anonymous', False), ('Dev', False),
+@pytest.mark.parametrize('role,visible', [(None, False), ('anonymous', False), ('Dev', True),
                                          ('PowerUser', True), ('Admin', True), ('Root', True)])
 def test_report_trigger_matches_guarded_panel(jinja_env, role, visible):
     html = jinja_env.get_template('reports/_base_report.htm').render(
         user=viewer(role), current_user=viewer(role))
     assert ('data-modal-open="puModal"' in html) is visible
     assert ('id="puModal"' in html) is visible
+    if role == 'Dev':
+        assert 'data-project-action="enable-developer-mode"' in html
+        assert 'data-project-action="clear-locks"' not in html

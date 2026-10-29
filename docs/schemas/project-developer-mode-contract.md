@@ -1,6 +1,6 @@
 # Project developer mode (DM-01)
 
-Status: operator-approved design, 2026-10-29 UTC; implementation conformance pending.
+Status: implemented and locally artifact-validated, 2026-10-29 UTC; production deployment remains separate. See [validation evidence](../work-packages/20261028_project_developer_mode/artifacts/validation.md) for regression results and scope limits.
 
 ## Purpose and decision provenance
 

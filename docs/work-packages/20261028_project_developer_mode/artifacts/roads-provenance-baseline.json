@@ -1,0 +1,10 @@
+{
+  "test": "tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale",
+  "starting_revision": "cebb4b4283e408fd270126811f4dbbd1a8dfd8e2",
+  "path": "wepppy/nodb/mods/roads/roads.py",
+  "starting_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
+  "implementation_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
+  "unchanged": true,
+  "reviewed_stale_receipt_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+  "disposition": "Pre-existing Roads publication provenance failure; do not rewrite historical evidence or change Roads runtime as part of DM-01."
+}

@@ -25,3 +25,7 @@ SEC-IMP-01 (medium): initial header edits inadvertently exposed the TTL control 
 `runtime.json` and `validate_runtime.py` retain actual local Flask activation with CSRF and a synthetic request principal, ordinary no-Dev parsing, completed RQ preparation/model/fork jobs and real output readback. No database accounts or roles were changed. `browser.json` verifies public project presentation and normal browse/download hashes. This does not establish a separately provisioned Dev account's login flow; existing authentication is unchanged. Production deployment remains separate.
 
 Reviewer sign-off: independent security reviewer confirmed implementation pass and SEC-IMP-01 closure; generated-output/browser evidence and correctness acceptance remain separately recorded in the validation/correctness artifacts.
+
+## Broad-gate follow-up
+
+The independent security reviewer confirmed the existing report-panel test now correctly expects Dev visibility under DM-01, while asserting that the clear-locks action remains absent. Both-header TTL exclusion tests remain in place. This test-only adjustment leaves security approval unchanged; no new findings.
