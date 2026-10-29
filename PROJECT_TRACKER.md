@@ -11,6 +11,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Design/review: [Project developer mode](docs/work-packages/20261028_project_developer_mode/package.md) — Ron-owned policy with enable-only editing, Dev-only activation, inherited clone mode and project-controlled anisotropy maxima. Contract/scaffold independently reviewed; clone/archive consistency and immediate UI refresh clarified. Operator permits restore/failed-fork replacement to restore normal mode; all design findings closed. No runtime changes.
+
 Active: [Download error observability](docs/work-packages/20261027_download_error_observability/package.md) — safe correlated server failures, bootstrap terminal reporting and failure exit propagation; implementation and cross-platform validation complete; broad assessment retains one unrelated Roads provenance blocker. Deployment held.
 
 Completed (local implementation): [Roads WBT flow-direction repair](docs/work-packages/20261026_roads_wbt_flow_direction/package.md) — paired native encoding fix; 35 modeled segments versus 30 on isolated clogging-starch, all five recovered. Native 23 and broad 11,795 passes; independent reviews closed. Historical report staleness disclosed; no deployment.

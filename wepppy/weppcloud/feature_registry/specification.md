@@ -34,6 +34,8 @@ This specification covers two registries in one subsystem:
 
 ## Canonical Authority
 
+[DM-01](../../../docs/schemas/project-developer-mode-contract.md) owns project developer-mode activation and inherited parameter policy outside this registry. It is not a new feature/group entitlement or a change to `min_role` ordering. Its Dev-only PowerUser-panel action must not expose unrelated privileged actions. Implementation is pending.
+
 The registry authority lives here:
 
 - `wepppy/weppcloud/feature_registry/feature_registry.yaml` (authoritative feature data)

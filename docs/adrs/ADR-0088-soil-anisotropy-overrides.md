@@ -2,6 +2,20 @@
 
 Status: accepted and implemented on forest; production rollout pending.
 
+Amendment DM-01, accepted 2026-10-29 UTC; implementation pending: [project developer mode](../schemas/project-developer-mode-contract.md) removes override maxima only for projects with developer mode enabled. The original implementation evidence below does not cover this amendment.
+
+## DM-01 development exception
+
+Decision venue: user/Codex workspace conversation, 2026-10-28 America/Los_Angeles (recorded 2026-10-29 UTC). Participants present: requesting operator and Codex. Decision owner: requesting operator. Implementer: not yet assigned; Codex authored the contract and scaffold. Anurag is the intended experimenter, not an inferred approver.
+
+Normal projects retain upper [1,100] and lower [1,10]. Ron-owned developer mode permits finite overrides >=1 without either maximum. Only the exact Dev role plus ordinary project mutation authority can activate mode in the PowerUser panel. Thereafter project mode, not the submitter's role, dictates limits. Clones inherit mode and settings. Defaults, source ratios, MOFE/hourly eligibility and horizon classification remain unchanged.
+
+Rationale: bounded project experiments should survive cloning and background execution without user-role-dependent validation. Instance-wide changes affect unrelated projects; reversible mode needs destructive clamping or invalid-saved-state policy; a user-only bypass cannot consistently govern queued preparation. All were rejected in favor of enable-only project state with the lifecycle exceptions below. This is not permission to bypass other feature entitlements.
+
+Evidence: [implementation package](../work-packages/20261028_project_developer_mode/package.md) records source inspection and review, not experimental stability. Extreme finite values may destabilize simulations; retain warnings and failures without clamping. Paired Python/native rollback may reject experimental inputs, so preserve activated state and document that limitation rather than resetting projects. No deployment or bulk data mutation is part of the documentation task.
+
+Lifecycle clarification, same operator/Codex conversation, 2026-10-29 UTC: “permanent” means no dedicated off toggle, not a sticky flag across project replacement. Archive restore uses archived Ron state; existing failed-fork recovery uses copied source state. Both may return an activated project to normal mode, without a new Dev check or downgrade rejection. The operator chose existing recovery flexibility and simpler implementation over destination-state preservation or blocking restore/fork functionality, which could prevent project recovery. Normal limits apply after replacement to normal mode; reactivation still requires Dev. Runtime conformance remains pending.
+
 ## Context and decision provenance
 
 Decision venue: user/Codex workspace conversation, 2026-10-12, America/Los_Angeles. Participants: requesting operator and Codex. Decision owner: requesting operator; implementer: Codex. No additional meeting participants or scientific validation are inferred.

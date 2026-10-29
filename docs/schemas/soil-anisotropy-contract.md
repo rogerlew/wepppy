@@ -2,9 +2,11 @@
 
 Status: implemented and artifact-validated on forest; production rollout pending. Broad gate results and limitations are retained in the work package.
 
+DM-01 amendment (2026-10-29 UTC): operator-approved project developer-mode exception below; implementation conformance pending. Prior implementation evidence does not cover this amendment.
+
 ## User inputs and eligibility
 
-The Soil Options section of WEPP Advanced Options exposes optional dimensionless `soil_anisotropy_upper` and `soil_anisotropy_lower` numeric overrides. Blank means retain original values for that depth class. Missing legacy attributes read None; omitted request keys preserve saved settings; explicit null or blank clears that override. No override is enabled by default. Upper values must be finite numbers in [1,100], lower in [1,10]; reject booleans, malformed/multiple values, NaN and infinities without changing saved settings.
+The Soil Options section of WEPP Advanced Options exposes optional dimensionless `soil_anisotropy_upper` and `soil_anisotropy_lower` numeric overrides. Blank means retain original values for that depth class. Missing legacy attributes read None; omitted request keys preserve saved settings; explicit null or blank clears that override. No override is enabled by default. In normal projects, upper values must be finite numbers in [1,100], lower in [1,10]. In projects with developer mode enabled under [DM-01](project-developer-mode-contract.md), both must be finite and >=1 with no maximum. Project mode alone determines maximum enforcement; no additional Dev-role check applies to submission or execution. Reject booleans, malformed/multiple values, NaN and infinities without changing saved settings.
 
 Editing requires both MOFE (`multi_ofe`) and hourly water balance/deep seepage (`run_wepp_ui`). The controls remain visible but disabled with an eligibility explanation otherwise. Existing read-only controls remain authoritative. The UI says “Values above 10 can cause numerical instabilities.” Enforce eligibility server-side before mutation; nonempty submitted overrides on an ineligible run fail using the existing validation error contract. Explicit clearing is safe even if the run is ineligible. Saved overrides remain stored when eligibility is turned off, but do not affect prepared soil files until eligibility returns. The existing routine-toggle request must succeed before inputs become editable; failure must not imply saved eligibility.
 
@@ -17,6 +19,8 @@ Support per-horizon anisotropy formats 7778 and 9001/9002/9003/9005. A requested
 ## Native and persistence boundaries
 
 WEPPpy owns requests, current eligibility, NoDb locking and file orchestration. A narrow Rust function in wepppyo3 owns finite range checks, depth validation and horizon value selection. Pass parsed depths and optional original ratios in memory, validate the whole request before returning values, then update the existing parsed soil object. No Python numerical fallback if the required native function is unavailable. Do not create a second soil-file transformation pass.
+
+DM-01 policy is resolved from authoritative Ron state for submissions and once per preparation, then passed explicitly to Rust. Native callers default to normal bounds via a backward-compatible optional policy argument. Neither request fields nor environment/user-role inference may substitute for persisted mode. Preserve minimum/finite validation and expose the above-10 warning for both developer-mode inputs. Clones retain mode and saved values; activation alone does not regenerate outputs.
 
 For advanced-option preparation, read each selected source once and write its prepared destination once. Native upload validation and parsing share the same source snapshot. Symbolic parameter resolution reuses the already-read source snapshot, preserving existing formulas and rounding; no second source open. File copies needed to materialize archives and separate consumers such as soil-version detection are not a new advanced-option pass. Prepared `wepp/runs/p*.sol` is the acceptance artifact; original `soils/*` inputs stay unchanged. Existing browse/download/archive visibility, error, locking and response contracts remain in force.
 

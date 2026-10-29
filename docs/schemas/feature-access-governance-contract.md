@@ -12,6 +12,8 @@ The approved directions concern read-only visibility of limited-access features 
 
 ## Public project visibility and action permissions
 
+[DM-01 project developer mode](project-developer-mode-contract.md) is a bounded project-parameter policy, not a limited-access registry feature: exact Dev membership is required only to activate it; ordinary authorized parameter submission/execution then follows persisted project mode, and clones inherit it. This operator-approved distinction does not grant any other feature entitlement or alter ordinary project authorization. Implementation of DM-01 is pending.
+
 Only features with limited access become read-only for callers who lack that feature's entitlement. On a public project, those callers can inspect the feature's existing state/results, including Omni Contrasts and derived PATH-CE outputs, but cannot activate, configure, acquire data for, execute, retry, delete or otherwise mutate that restricted feature through UI or direct endpoints. Publicity does not grant restricted-feature entitlement.
 
 **Scope clarification, 2026-10-01:** anonymous project creation and existing anonymous functionality remain unchanged. FA-01 does not introduce a project-wide owner/writer gate, creator credential, legacy ownerless-run migration, recovery process, new login requirement or different ordinary public-editing policy. Existing ordinary project authorization remains the baseline; feature entitlement is an additional check only for a limited-access operation or protected data surface. Existing explicit project `readonly`, run/resource, CAP, scope, CSRF and capability checks still apply where they already apply.
