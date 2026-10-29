@@ -47,6 +47,65 @@ Keep default native calls normal-mode and preserve existing positional callers w
 
 Blank/omitted semantics, validation-before-mutation, minimum 1, NaN/infinity and boolean rejection, MOFE/hourly eligibility, original source ratios, horizon boundaries, file formats and single-read/single-write preparation remain unchanged. No clamping is permitted. Retain the numerical-instability warning for both controls when developer mode allows either value above 10. Activation alone neither rewrites soils nor reruns WEPP nor relabels historical results as freshly generated.
 
+## Extended landsoil panel presentation (DM-02)
+
+Accepted design, 2026-10-29 UTC; implementation conformance pending in the
+[implementation package](../work-packages/20261029_extended_landsoil_developer_panel/package.md).
+The operator requested a simpler Disturbed Panel for normal base-table projects,
+continued operation of existing extended-table projects, and no new backend
+restriction on extended lookup use.
+
+When the Disturbed module is enabled, render the current full Disturbed Panel
+if `Ron.developer_mode` is true **or** the existing
+`Disturbed.active_lookup_variant` getter resolves to `extended`. Otherwise,
+render a simple panel with exactly two lookup actions: **Reset Base Landsoil
+Lookup Table** and **Modify Base Table**. Retain normal dialog close controls,
+status/error feedback and documentation links; omit the Base/Extended selector,
+extended load/delete/edit/sync controls, and empty advanced sections. Preserve
+existing project access, readonly handling, module eligibility and action
+semantics. A user's Dev role alone does not select the full layout.
+
+Apply the predicate to every modal consumer, including the run page and report
+shell. Missing template context is not proof that the project has no Disturbed
+state: report routes may omit a `disturbed` variable. Resolve existing state for
+the active page/run root through the normal NoDb read path without constructing
+missing state, rather than defaulting those report pages to Base.
+
+Use the existing resolved variant, not the raw persisted field or file existence
+alone. The getter honors explicit Base even when an extended file exists, and
+recognizes legacy extended files when no valid selector is stored. Explicit
+Extended with a missing file still gets the full panel so existing load/repair
+controls remain reachable; existing file-availability and validation behavior
+continues. Missing optional Disturbed state must not be created or mutated just
+to decide presentation. Malformed Ron mode retains DM-01's explicit failure;
+legacy Disturbed selector interpretation remains unchanged.
+
+Layout is a page-render snapshot. Enabling developer mode requires a page reload
+to reveal extended lookup controls; existing immediate anisotropy/status updates
+remain intact. Selecting Base or deleting the extended table on a normal project
+retains the currently rendered panel until reload, then shows the simple panel.
+There is no automatic page reload that could discard unsaved inputs. On
+2026-10-29 the operator explicitly accepted loss of full-panel access after this
+transition and will give the affected users the Dev role to enable project mode.
+Role assignment is outside this package. Do not add a sticky legacy grant or
+remember whether the project previously used Extended.
+
+This is UI discovery policy, **not backend authorization**. Do not add a
+Dev-role or developer-mode requirement to existing extended lookup routes,
+editors, direct URLs, generation, selection, deletion, synchronization, saved
+state validation, or workers. Ordinary authorization, CSRF, locking and input
+validation remain applicable. Direct authorized operations can still configure
+Extended on a normal project; its next page render then uses the full panel.
+No table is deleted, reset, converted or rewritten by rendering or activation.
+Clone/archive recovery uses incoming Ron and Disturbed state under existing
+lifecycle rules; there is no additional migration or recovery restriction.
+
+Rationale: conditional presentation keeps normal-project controls simple and
+preserves active extended workflows without changing model behavior. Render-time
+selection minimizes controller and persistence risk; backend enforcement and
+permanent grandfather flags add complexity the operator expressly does not want.
+No numeric defaults, formulas, table schemas or native policy change.
+
 ## Compatibility and regression obligations
 
 The additive boolean requires no bulk data migration and removes no existing keys. Normal and legacy runs retain current behavior. Validate durable reload, real locked concurrent updates, repeated activation, role combinations, readonly/CSRF failures and direct spoofed payloads. Validate Dev-only panel access without widening unrelated actions and non-Dev submission to activated projects under existing access rules.
@@ -59,6 +118,6 @@ Read real generated `wepp/runs/p*.sol` after native preparation with upper=101 a
 
 ## Governing boundaries
 
-Existing [NoDb persistence](nodb-persistence-concurrency-contract.md), [CSRF](weppcloud-csrf-contract.md), [RQ responses](rq-response-contract.md), [feature access](feature-access-governance-contract.md), and [controller behavior](../ui-docs/controller-contract.md) remain in force. Developer mode is a project parameter policy, not a registry feature entitlement, account group, project-config field or broad role hierarchy change. Future developer-mode effects require their own explicit contract amendment.
+Existing [NoDb persistence](nodb-persistence-concurrency-contract.md), [CSRF](weppcloud-csrf-contract.md), [RQ responses](rq-response-contract.md), [feature access](feature-access-governance-contract.md), and [controller behavior](../ui-docs/controller-contract.md) remain in force. Developer mode is a project parameter and presentation policy, not a registry feature entitlement, account group, project-config field or broad role hierarchy change. Future developer-mode effects require their own explicit contract amendment.
 
 Rationale: an enable-only control avoids destructive clamping/reset semantics; inherited mode keeps experimental clones runnable; checking roles only at activation keeps queued execution independent of the initiating user's later roles. Instance-wide maxima, user-specific parameter validation and an ordinary off toggle were rejected. The operator explicitly rejected preserving destination mode or blocking existing restore/fork recovery: incoming project state wins for simplicity and recovery flexibility.

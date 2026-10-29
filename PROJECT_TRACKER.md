@@ -1,3 +1,5 @@
+Reviewed scaffold: [Extended landsoil developer panel](docs/work-packages/20261029_extended_landsoil_developer_panel/package.md) — full Disturbed controls for developer projects or current Extended selection; simple Base controls otherwise. Existing backend/legacy behavior preserved; operator accepts loss of full layout after Base/delete and reload. Run/report compatibility reviewed; all findings closed. Implementation pending.
+
 Completed locally: [RQ client webhook delivery](docs/work-packages/20261027_rq_webhooks/package.md) — optional admission, generic fenced settlement and independent delivery; canonical worker-pool model/receiver parity, verified backlog performance and independent reviews pass. Defaults remain disabled; no production deployment.
 
 

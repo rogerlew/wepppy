@@ -6,6 +6,38 @@ Each project has its own lookup files under the run's `disturbed/` folder and ca
 
 This page is the parameter reference. For the recommended calibration order, what to calibrate first, and how to think about undisturbed versus post-fire tuning, see [WEPPcloud Calibration Guidance](./weppcloud-calibration-guidance.md).
 
+## Making the extended table available
+
+**Planned panel update:** the following presentation change is specified but not
+yet implemented. Existing extended-table processing continues unchanged.
+
+Projects in developer mode, and projects currently using Extended, retain the
+full Disturbed Panel. Other projects show **Reset Base Landsoil Lookup Table**
+and **Modify Base Table**, along with help and operation feedback.
+
+To make the extended controls available on a normal Base project:
+
+1. Have a user with the **Dev** role and normal permission to modify the project
+   open **PowerUser Panel → Enable developer mode**. Other roles alone cannot
+   enable it; ask a Dev user if you do not have that role.
+2. Reload the project page, saving any pending form edits first.
+3. Open **Disturbed Panel → Load Extended Landsoil Lookup Table**, then select
+   **Extended** if needed. Verify that Extended is selected: loading may already
+   activate it through the existing legacy selection rules.
+
+Project developer mode also removes the anisotropy maximum limits; it has no off
+toggle. See [Project Developer Mode (DM-01/DM-02)](../../../../../docs/schemas/project-developer-mode-contract.md)
+for its effects and archive/fork recovery exceptions. Enabling mode does not
+create an extended table, change parameter values or rerun the model.
+
+Existing projects actively using Extended do not need developer mode to continue.
+Legacy projects with an extended file and no saved table selector are recognized
+by the existing selection rules. An extended file alongside an explicit Base
+selection does not retain the full panel on a normal project. If you select Base
+or delete the extended table, the simple panel appears on the next page reload;
+enable project developer mode to regain the full controls. Existing authorized
+editor/API workflows remain supported without a new developer-mode check.
+
 ### Table Schemes
 
 | Lookup variant | Runtime file | Row identity fields | Intended use |
