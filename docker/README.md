@@ -727,3 +727,17 @@ For AI agents performing deployments:
 - [ ] Redis operational
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
+
+### CI native alignment acceptance (2026-10-29)
+
+The [common-image build for `84412a38b`](https://github.com/rogerlew/wepppy/actions/runs/40813271338)
+published digest `sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb`,
+now pinned by `Dockerfile.test`. The isolated test Compose project accepted the
+required interchange SHA from `/opt/vendor/wepppyo3/release/linux/py312/`.
+Startup-contract, anisotropy, developer-mode and Roads publication checks passed
+(62 tests), as did the complete eight-module stubtest suite and test-stub checks.
+Focused startup-file isolation passed with one unchanged-order iteration and
+per-file state checks; this is not exhaustive randomized isolation evidence.
+The separate [Roads receipt follow-up](../docs/dev-notes/roads-project-render-contention.md#publication-provenance-follow-up-2026-10-29)
+records the previously unacknowledged render-only source delta without changing
+historical model results. No production deployment is part of this CI repair.

@@ -57,3 +57,16 @@ Health signal after rollout: project reload succeeds during active Roads work.
 Recurrence of this stacktrace requires checking for another result reader in the
 page-render path. Preserve the real-lock regression; no temporary mitigation
 needs retirement.
+
+## Publication provenance follow-up (2026-10-29)
+
+The CI baseline's exact-source-drift check caught the missing receipt update for
+commit `2fff37a75`. Inspection from the previously reviewed `8593a2995` source
+shows only the additive `query_inputs` method above. The current stale-evidence
+receipt now records that reviewed source delta and its predecessor hash.
+Historical report bytes, result values, execution provenance and the explicit
+full-project routing staleness notice are unchanged. This acknowledges the
+render-only repair; it does not certify fresh routing results.
+
+Follow-up validation: publication-provenance and real-lock form-render tests
+passed (9 selected cases). No test assertions or model outputs were changed.

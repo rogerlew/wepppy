@@ -1,6 +1,6 @@
 # CI-only extension of the accepted common runtime; no image publication.
 FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS node_runtime
-FROM ghcr.io/rogerlew/wepppy@sha256:5f46ed689b3d6e604c732ed68ddacde264abc804b852c68a65bb26c519ece9bc
+FROM ghcr.io/rogerlew/wepppy@sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb
 USER root
 COPY --from=node_runtime /usr/local/bin/node /usr/local/bin/node
 COPY --from=node_runtime /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm

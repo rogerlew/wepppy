@@ -10,8 +10,18 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201"
+      "current": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978"
     }
   },
-  "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails."
+  "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale.",
+  "subsequent_source_reviews": [
+    {
+      "commit": "2fff37a75f445fc09521782c771748a525c9f9b6",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "25cbde5447e20110b52e3781a3046b4dda5bc026bc10f64fed68bba150a42201",
+      "current_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
+      "scope": "Add query_inputs only; saved input-form presentation, no model-result changes.",
+      "evidence": "docs/dev-notes/roads-project-render-contention.md"
+    }
+  ]
 }
