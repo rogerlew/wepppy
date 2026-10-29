@@ -303,6 +303,17 @@ isolation gate retains its five iterations and per-file checks; its longer job
 does not change test thresholds or claim randomized coverage when the optional
 randomization plugin is absent.
 
+When the interchange API or startup artifact hash changes, first update
+`WEPPPYO3_REF` in `.github/workflows/publish-weppcloud-image.yml` to the paired
+published native commit. After that workflow succeeds, verify its image against
+`docker/wepppyo3-interchange-preflight.py` and update the common-image digest in
+`Dockerfile.test`. A source checkout bind mount does not update image-native
+dependencies. The 2026-10-29 CI failure exposed both stale pins: the old image
+lacked the required Roads geometry/water APIs. Native commit
+`4d4c075421c4013cba99a0addc76482229e7f3f7` supplies those APIs and the DM-01
+anisotropy policy, with interchange SHA256
+`7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad`.
+
 ## Redis durability policy + RQ DB9 deploy flush policy
 
 WEPPcloud uses a single Redis instance with multiple logical databases (DBs). Stacks that run a `redis` service enable Redis persistence by default so non-RQ state (especially Flask sessions in DB 11) survives routine redeploys and host restarts. Separately, deploy automation can intentionally clear only the RQ database (DB 9) during a deploy to drop queued/active jobs without wiping other Redis DBs.
