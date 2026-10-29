@@ -43,6 +43,9 @@ services:
       - /geodata:/geodata
 
   caddy:
+    # Reduce CVE-2026-98432 exposure; host kernel patching is still required.
+    sysctls:
+      net.mptcp.enabled: "0"
     image: caddy:2-alpine
     ports:
       - "80:80"

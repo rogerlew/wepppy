@@ -2,9 +2,14 @@
 	auto_https off
 }
 
+# Homelab Serve uses CADDY_UPSTREAM_SCHEME=https with loopback-only published ports.
+# The default preserves the HTTP backend scheme for existing deployments.
 # add backend rule: http-request set-header X-Forwarded-Proto https if { ssl_fc }
 
-http://:8080 {
+http://{$CADDY_SITE_HOST:}:8080 {
+
+    # The final proxy owns origin metadata; clients cannot choose the public port.
+    request_header -X-Forwarded-Port
 
     # Bot blocking - aggressive crawlers (see docs/mini-work-packages/20260203_resource_contraints.md)
     @blocked_bots {
@@ -25,7 +30,7 @@ http://:8080 {
     handle /cap* {
         reverse_proxy cap:3000 {
             header_up X-Forwarded-Prefix /cap
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
         }
     }
@@ -44,7 +49,7 @@ http://:8080 {
     handle_path /profile-playback* {
         reverse_proxy profile-playback:8070 {
             flush_interval -1
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
             header_up Accept-Encoding identity
             header_down Content-Length {http.response.header.Content-Length}
@@ -91,7 +96,7 @@ http://:8080 {
             header_up -X-Forwarded-Proto
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Host {host}
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
             transport http {
                 read_timeout 130s
@@ -104,7 +109,7 @@ http://:8080 {
     handle_path /query-engine* {
         reverse_proxy query-engine:8041 {
             header_up X-Forwarded-Prefix /query-engine
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
             transport http {
                 read_timeout 3m
@@ -115,7 +120,7 @@ http://:8080 {
     handle_path /rq-engine* {
         reverse_proxy rq-engine:8042 {
             header_up X-Forwarded-Prefix /rq-engine
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
             transport http {
                 read_timeout 10m
@@ -131,7 +136,7 @@ http://:8080 {
             header_up Authorization {http.request.header.Authorization}
             header_up X-Forwarded-Uri {uri}
             header_up X-Forwarded-Host {host}
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
         }
         uri strip_prefix /git
         reverse_proxy fcgiwrap:9000 {
@@ -146,7 +151,7 @@ http://:8080 {
     handle_path /weppcloudr* {
         reverse_proxy weppcloudr:8050 {
             header_up X-Forwarded-Prefix /weppcloudr
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
         }
     }
@@ -192,7 +197,7 @@ http://:8080 {
         uri strip_prefix /weppcloud
         reverse_proxy dtale:9010 {
             header_up X-Forwarded-Prefix /weppcloud/dtale
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
             transport http {
                 read_timeout 5m
@@ -203,7 +208,7 @@ http://:8080 {
     handle /rq-dashboard* {
         reverse_proxy rq-dashboard:9181 {
             header_up X-Forwarded-Prefix /rq-dashboard
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
             header_up Host {host}
         }
     }
@@ -230,7 +235,7 @@ http://:8080 {
             uri strip_prefix /weppcloud
             reverse_proxy weppcloud:8000 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up Host {host}
             }
         }
@@ -240,7 +245,7 @@ http://:8080 {
             uri strip_prefix /weppcloud
             reverse_proxy weppcloud:8000 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up Host {host}
             }
         }
@@ -249,7 +254,7 @@ http://:8080 {
         handle @archive_download_proxy {
             reverse_proxy download:9011 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up X-Forwarded-Host {host}
                 header_up Host {host}
                 transport http {
@@ -262,7 +267,7 @@ http://:8080 {
         handle @browse_proxy {
             reverse_proxy browse:9009 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up X-Forwarded-Host {host}
                 header_up Host {host}
                 transport http {
@@ -275,7 +280,7 @@ http://:8080 {
         handle @culvert_browse_proxy {
             reverse_proxy browse:9009 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up X-Forwarded-Host {host}
                 header_up Host {host}
                 transport http {
@@ -288,7 +293,7 @@ http://:8080 {
         handle @batch_browse_proxy {
             reverse_proxy browse:9009 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up X-Forwarded-Host {host}
                 header_up Host {host}
                 transport http {
@@ -302,7 +307,7 @@ http://:8080 {
             uri strip_prefix /weppcloud
             reverse_proxy weppcloud:8000 {
                 header_up X-Forwarded-Prefix /weppcloud
-                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Proto {$CADDY_UPSTREAM_SCHEME:http}
                 header_up Host {host}
             }
         }

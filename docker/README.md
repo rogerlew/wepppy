@@ -655,6 +655,10 @@ wctl logs -f weppcloud
 
 ### Verify
 
+For forest/forest1, follow [homelab Tailscale access](../docs/infrastructure/homelab-tailscale.md).
+Use the configured hostname and verify the `OK` body; an unmatched localhost Host
+can receive an empty Caddy HTTP 200. Homelab login uses local passwords only.
+
 ```bash
 curl -fsS http://localhost:8000/health
 curl -fsS http://localhost:8080/health

@@ -24,12 +24,12 @@ production worker deployment.
 
 ## development
 - host: forest.bearhive.internal 
-- domain: wc.bearhive.duckdns.org
+- domain: forest.tail305ec9.ts.net (Tailscale only)
 - docker-compose.dev.yml
 
 ## test production
 - host: forest1.bearhive.internal 
-- domain: wc-prod.bearhive.duckdns.org
+- domain: forest1.tail305ec9.ts.net (Tailscale only)
 - docker-compose.prod.yml
 
 ## production
@@ -50,3 +50,6 @@ production worker deployment.
 - domain: openwepp.org
 - deployment model: Kubernetes with registry-published images
 - do not reuse this model for wepp.cloud hosts
+
+Homelab TLS, local-password-only auth and port-binding contract:
+[homelab-tailscale.md](../docs/infrastructure/homelab-tailscale.md).

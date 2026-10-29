@@ -815,6 +815,9 @@ services:
         condition: service_started
 
   caddy:
+    # Reduce CVE-2026-98432 exposure; host kernel patching is still required.
+    sysctls:
+      net.mptcp.enabled: "0"
     image: caddy:2-alpine
     container_name: wepppy-caddy
     ports:

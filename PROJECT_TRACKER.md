@@ -1,3 +1,5 @@
+Active: [Caddy MPTCP and homelab Tailscale migration](docs/work-packages/20261029_caddy_mptcp_tailscale/package.md) — patch all active Caddy Compose variants; validate private TLS and auth before homelab cutover.
+
 Completed: [Extended landsoil developer panel](docs/work-packages/20261029_extended_landsoil_developer_panel/package.md) — conditional run/report panels preserve current Extended projects and simplify normal Base projects. Runtime/browser acceptance and independent reviews pass; Python 12,072 passed / 298 skipped, frontend 1,021 passed. No backend mode enforcement or role assignment; production deployment separate.
 
 Completed locally: [RQ client webhook delivery](docs/work-packages/20261027_rq_webhooks/package.md) — optional admission, generic fenced settlement and independent delivery; canonical worker-pool model/receiver parity, verified backlog performance and independent reviews pass. Defaults remain disabled; no production deployment.

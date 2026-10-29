@@ -115,7 +115,7 @@ services:
       - "200"
       - wepppy.weppcloud.app:app
     ports:
-      - "8000:8000"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -162,7 +162,7 @@ services:
       STATUS_LOG_LEVEL: info
       STATUS_METRICS_ENABLED: "true"
     ports:
-      - "9002:9002"
+      - "${WEPPCLOUD_BIND_PREFIX:-}9002:9002"
     depends_on:
       redis:
         condition: service_healthy
@@ -214,7 +214,7 @@ services:
       PREFLIGHT_LOG_LEVEL: info
       PREFLIGHT_METRICS_ENABLED: "true"
     ports:
-      - "9001:9001"
+      - "${WEPPCLOUD_BIND_PREFIX:-}9001:9001"
     depends_on:
       redis:
         condition: service_healthy
@@ -266,7 +266,7 @@ services:
       PROFILE_PLAYBACK_BASE_URL: ${PROFILE_PLAYBACK_BASE_URL:-http://weppcloud:8000/weppcloud}
       PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
     ports:
-      - "8070:8070"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8070:8070"
     depends_on:
       weppcloud:
         condition: service_started
@@ -311,7 +311,7 @@ services:
       - "200"
       - wepppy.microservices.browse:app
     ports:
-      - "9009:9009"
+      - "${WEPPCLOUD_BIND_PREFIX:-}9009:9009"
     depends_on:
       redis:
         condition: service_started
@@ -355,7 +355,7 @@ services:
       - "200"
       - wepppy.microservices.download:app
     ports:
-      - "9011:9011"
+      - "${WEPPCLOUD_BIND_PREFIX:-}9011:9011"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9011/health || exit 1"]
       interval: 30s
@@ -396,7 +396,7 @@ services:
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     ports:
-      - "9010:9010"
+      - "${WEPPCLOUD_BIND_PREFIX:-}9010:9010"
     depends_on:
       redis:
         condition: service_started
@@ -426,7 +426,7 @@ services:
       - "200"
       - wepppy.microservices.elevationquery:app
     ports:
-      - "8002:8002"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8002:8002"
 
   metquery:
     <<: *wepppy-service
@@ -449,7 +449,7 @@ services:
       - "200"
       - wepppy.webservices.metquery:app
     ports:
-      - "8004:8004"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8004:8004"
 
   wmesque:
     <<: *wepppy-service
@@ -472,7 +472,7 @@ services:
       - "200"
       - wepppy.webservices.wmesque:app
     ports:
-      - "8003:8003"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8003:8003"
 
   wmesque2:
     <<: *wepppy-service
@@ -497,7 +497,7 @@ services:
       - "200"
       - wepppy.webservices.wmesque2:app
     ports:
-      - "8030:8030"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8030:8030"
 
   query-engine:
     <<: *wepppy-service
@@ -532,7 +532,7 @@ services:
       - --port
       - "8041"
     ports:
-      - "8041:8041"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8041:8041"
     depends_on:
       redis:
         condition: service_started
@@ -630,7 +630,7 @@ services:
       - --port
       - "8042"
     ports:
-      - "8042:8042"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8042:8042"
 
   weppcloudr:
     build:
@@ -652,7 +652,7 @@ services:
       - ${WC1_DIR}:/wc1
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
-      - "8050:8050"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8050:8050"
 
   rq-worker:
     <<: *wepppy-service
@@ -806,7 +806,7 @@ services:
       REDIS_AOF_USE_RDB_PREAMBLE: ${REDIS_AOF_USE_RDB_PREAMBLE:-yes}
     entrypoint: ["/usr/local/bin/redis-entrypoint.sh"]
     ports:
-      - "6379:6379"
+      - "${REDIS_BIND_PREFIX:-}6379:6379"
     volumes:
       - ../.docker-data/redis:/data
       - ./redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
@@ -828,7 +828,7 @@ services:
       POSTGRES_USER: wepppy
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     ports:
-      - "5432:5432"
+      - "${WEPPCLOUD_BIND_PREFIX:-}5432:5432"
     volumes:
       - ${POSTGRES_DATA_SOURCE:-../.docker-data/postgres}:/var/lib/postgresql/data
     healthcheck:
@@ -986,10 +986,16 @@ services:
         condition: service_started
 
   caddy:
+    environment:
+      CADDY_UPSTREAM_SCHEME: ${CADDY_UPSTREAM_SCHEME:-http}
+      CADDY_SITE_HOST: ${CADDY_SITE_HOST:-}
+    # Reduce CVE-2026-98432 exposure; host kernel patching is still required.
+    sysctls:
+      net.mptcp.enabled: "0"
     image: caddy:2-alpine
     container_name: wepppy-caddy
     ports:
-      - "8080:8080"
+      - "${WEPPCLOUD_BIND_PREFIX:-}8080:8080"
     volumes:
       - ${CADDY_FILE}:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro

@@ -80,6 +80,9 @@ services:
       - canary
 
   caddy:
+    # Reduce CVE-2026-98432 exposure; host kernel patching is still required.
+    sysctls:
+      net.mptcp.enabled: "0"
     image: caddy:2.10.2-alpine@sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83
     restart: "no"
     ports:

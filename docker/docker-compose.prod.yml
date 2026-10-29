@@ -160,7 +160,7 @@ services:
       - "200"
       - wepppy.weppcloud.app:app
     ports:
-      - "${WEPPCLOUD_PORT:-8000}:8000"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${WEPPCLOUD_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -206,7 +206,7 @@ services:
       - "200"
       - wepppy.microservices.browse:app
     ports:
-      - "${BROWSE_PORT:-9009}:9009"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${BROWSE_PORT:-9009}:9009"
     depends_on:
       redis:
         condition: service_started
@@ -251,7 +251,7 @@ services:
       - "200"
       - wepppy.microservices.download:app
     ports:
-      - "${DOWNLOAD_PORT:-9011}:9011"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${DOWNLOAD_PORT:-9011}:9011"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9011/health || exit 1"]
       interval: 30s
@@ -349,7 +349,7 @@ services:
       - "200"
       - wepppy.microservices.elevationquery:app
     ports:
-      - "${ELEVATIONQUERY_PORT:-8002}:8002"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${ELEVATIONQUERY_PORT:-8002}:8002"
 
   metquery:
     <<: *wepppy-service
@@ -371,7 +371,7 @@ services:
       - "200"
       - wepppy.webservices.metquery:app
     ports:
-      - "${METQUERY_PORT:-8004}:8004"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${METQUERY_PORT:-8004}:8004"
 
   wmesque:
     <<: *wepppy-service
@@ -393,7 +393,7 @@ services:
       - "200"
       - wepppy.webservices.wmesque:app
     ports:
-      - "${WMESQUE_PORT:-8003}:8003"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${WMESQUE_PORT:-8003}:8003"
 
   wmesque2:
     <<: *wepppy-service
@@ -417,7 +417,7 @@ services:
       - "200"
       - wepppy.webservices.wmesque2:app
     ports:
-      - "${WMESQUE2_PORT:-8030}:8030"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${WMESQUE2_PORT:-8030}:8030"
 
   query-engine:
     <<: *wepppy-service
@@ -572,7 +572,7 @@ services:
       - /wc1:/wc1
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
-      - "${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
     networks:
       - backend
 
@@ -733,7 +733,7 @@ services:
       STATUS_LOG_LEVEL: info
       STATUS_METRICS_ENABLED: "true"
     ports:
-      - "${STATUS_PORT:-9002}:9002"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${STATUS_PORT:-9002}:9002"
     depends_on:
       redis:
         condition: service_healthy
@@ -759,7 +759,7 @@ services:
       PREFLIGHT_LOG_LEVEL: info
       PREFLIGHT_METRICS_ENABLED: "true"
     ports:
-      - "${PREFLIGHT_PORT:-9001}:9001"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${PREFLIGHT_PORT:-9001}:9001"
     depends_on:
       redis:
         condition: service_healthy
@@ -801,10 +801,16 @@ services:
       - backend
 
   caddy:
+    environment:
+      CADDY_UPSTREAM_SCHEME: ${CADDY_UPSTREAM_SCHEME:-http}
+      CADDY_SITE_HOST: ${CADDY_SITE_HOST:-}
+    # Reduce CVE-2026-98432 exposure; host kernel patching is still required.
+    sysctls:
+      net.mptcp.enabled: "0"
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "${CADDY_PORT:-8080}:8080"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${CADDY_PORT:-8080}:8080"
     volumes:
       - ${CADDY_FILE:-./caddy/Caddyfile}:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
@@ -852,7 +858,7 @@ services:
       - redis-data:/data
       - ./redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_BIND_PREFIX:-}${REDIS_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -a \"$(cat /run/secrets/redis_password)\" -h 127.0.0.1 -p 6379 ping | grep -qx PONG"]
       interval: 10s
@@ -874,7 +880,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${WEPPCLOUD_BIND_PREFIX:-}${POSTGRES_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
