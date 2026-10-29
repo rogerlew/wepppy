@@ -72,3 +72,6 @@ return the project to normal mode; those operations are not blocked by this
 setting. A Dev user can enable it again. Enabling mode does not rerun the model
 or change historical results. If activation cannot be confirmed, reload the
 page to check saved state before retrying.
+
+See the [Project Developer Mode contract (DM-01)](../../../../../docs/schemas/project-developer-mode-contract.md)
+for the authoritative activation permissions, project policy, and clone/recovery rules.

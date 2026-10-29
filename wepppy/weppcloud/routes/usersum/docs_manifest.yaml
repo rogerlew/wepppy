@@ -234,6 +234,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.poweruser_getting_started
+  - doc_id: usersum.source.project_developer_mode
+    source: local
+    rel_path: docs/schemas/project-developer-mode-contract.md
+    title: Project Developer Mode (DM-01)
+    min_role: user
+    category: source-guides
+    audience_tags: [user, operator, developer]
+    status: active
+    nav_key: usersum.source.project_developer_mode
   - doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/profile-jwt-dataset-access-python-r.md

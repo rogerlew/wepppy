@@ -222,6 +222,8 @@ roots:
     children:
       - key: usersum.weppcloud.poweruser_getting_started
         doc_id: usersum.weppcloud.poweruser_getting_started
+      - key: usersum.source.project_developer_mode
+        doc_id: usersum.source.project_developer_mode
       - key: usersum.weppcloud.user_preferences
         doc_id: usersum.weppcloud.user_preferences
       - key: usersum.weppcloud.enduser_authoring_guide
