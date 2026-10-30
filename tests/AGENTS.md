@@ -19,6 +19,10 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; separate opt-in full-project checks; reviewed Usersum report |
 | Roads generated-soil benchmark | `tests/tools/test_roads_soil_benchmark.py` | Common native report and calendar validation; opt-in cross-binary study under `docs/work-packages/20261029_roads_soil_benchmark/` |
 | Roads prepared-soil hydraulics | `tests/tools/test_roads_prepared_soil_hydraulics.py` | Layer-depth and deeper-material preservation; isolated follow-up experiment under `docs/work-packages/20261029_roads_prepared_soil_hydraulics/` |
+| Roads OFE budgets | `tests/tools/test_roads_ofe_budget.py` | Finite/calendar checks, unequal-area water transfers, independent sediment reconciliation and factorial invariants; isolated `20261029_roads_ofe_budget` study |
+| Roads buffer drainage | `tests/tools/test_roads_buffer_drainage.py`, `test_roads_buffer_reconciliation.py` | Buffer-only material invariants, native depth threshold expectations and explicit upstream-coupling diagnostics; `20261029_roads_buffer_drainage` study |
+| Roads drainage validation | `tests/tools/test_roads_drainage_validation.py`, `test_roads_drainage_runtime.py` | Buffer-only invariants, zero references, native UI activation and runtime inventory; `20261029_roads_drainage_validation` study |
+| Roads parameterization program | `tests/tools/test_roads_parameterization_*.py`, `test_roads_engineered_surface.py` | Generated-material preservation, conductivity cap scope, numerical/physical gates and failed-case denominators; native runs remain isolated study artifacts |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
 | Go microservices | `services/status2/internal/**/_test.go` (Go) | Go-based WebSocket and checklist services (`status2`, `preflight2`) |

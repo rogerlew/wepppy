@@ -1,0 +1,91 @@
+{
+  "partitions": [
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-full.log",
+      "sha256": "de176e74c1c35a03de068b0262f62445f721dce54ba1d5b078511b5d255c6347",
+      "passed": 11320,
+      "skipped": 293
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-roads.log",
+      "sha256": "811e5bc0539cfa828deeb7d52faad40dedb66b1ddbbec7015443e7c29bdeb3ad",
+      "passed": 530,
+      "skipped": 5
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-disturbed.log",
+      "sha256": "6ae254e49fae6983b7ed6918361203bba4b9063eff5c1c77ceb40b49835e366f",
+      "passed": 99,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9002-mofe-other.log",
+      "sha256": "8ab2bc6cefd9f9f550165efc876070b6c5c1a2d31ebfb83f685d5af16da76843",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9002-mofe-thinning.log",
+      "sha256": "e6198c4b656d6b6a74b4fa55c08c71869a2da25743a277c5c0beeb86691e72ff",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9002-single-other.log",
+      "sha256": "2fab2f88c708a4e6ea57d99faa2c8223da37b64f01e7efd1f1265ba61ad8d131",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9002-single-thinning.log",
+      "sha256": "3dd73930e870cee399305c9ba750dc2c765470fa2ab0b5bc5dc3a6d0116566f1",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9005-mofe-other.log",
+      "sha256": "fac215eb5f40adf5e2aabbb52193a4c4b86cfa7cedb23d2df69465c858925c37",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9005-mofe-thinning.log",
+      "sha256": "b7d612af2c275765b423024746b97403087ac472718617776df11d9934dc8fdb",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9005-single-other.log",
+      "sha256": "fdc0353e72b151fe731d3c16f99dca7b093a0d080fc83f64d3babc0b3c27fe13",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-9005-single-thinning.log",
+      "sha256": "7a6ee93b74301da4ea68147793298c574b6312e42d63133dad28fc7c4dee65ab",
+      "passed": 27,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-treatment-rest.log",
+      "sha256": "594223e6b532f8fff079248aceb49fdcd7815007b813eb73bc715e46c842dd2b",
+      "passed": 14,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-runtime-tests.log",
+      "sha256": "460c86cda0398414ebb4c4a82c460b63f8f0fc7d0fe97a8b85c37315482d49e9",
+      "passed": 5,
+      "skipped": 0
+    },
+    {
+      "log": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/logs/roads-drainage-negative-flux-tests.log",
+      "sha256": "b71e40a38de614e3b77119605086e4c83da509e608589887bd1a9b3cfe4e34cb",
+      "passed": 2,
+      "skipped": 0
+    }
+  ],
+  "passed": 12186,
+  "skipped": 298,
+  "note": "Disjoint complete tests coverage; runtime test file was added after remainder collection and run separately. Focused tests overlap and are excluded. Two additional negative-flux tests were added after collection and run separately."
+}

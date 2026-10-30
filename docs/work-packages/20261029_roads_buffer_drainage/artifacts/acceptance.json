@@ -1,0 +1,11 @@
+{
+  "native_runs": 24,
+  "control_replays": 4,
+  "depth_readbacks": 24,
+  "upstream_input_invariance": 24,
+  "upstream_output_exact": 10,
+  "same_grid_pairs": 8,
+  "report_reconciled": 24,
+  "ebe_mismatch_events": 0,
+  "production_candidate_accepted": false
+}

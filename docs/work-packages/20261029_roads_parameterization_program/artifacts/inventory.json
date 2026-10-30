@@ -1,0 +1,1592 @@
+{
+  "source_directories": [
+    "/wc1/runs/ad/addicted-reservist/soils",
+    "/wc1/runs/cl/clogging-starch/soils"
+  ],
+  "script_sha256": "830854bb6f9159a1cba3b2bc7d33d6b1275cfb329b51abcd07edd9a81c751861",
+  "profiles": [
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718465.sol",
+      "mukey": "1718465",
+      "sha256": "21f5fa480ce15c3003106b0fd1b15e72df1e388711e937fcbe79efa662bfd0c1",
+      "material_sha256": "95da6c92efb1f5b019ea12f9d0e61cc191b0a15cd0d0035aa0d29b7258a2ff5b",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: Lithic bedrock\n#     ksat (um/s): 0.42000\n#",
+      "horizons": [
+        {
+          "depth_mm": 150.0,
+          "ksat_mm_h": 100.8,
+          "sand": 67.9,
+          "clay": 12.5
+        },
+        {
+          "depth_mm": 400.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00151
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718472.sol",
+      "mukey": "1718472",
+      "sha256": "e00dba3a4c785d8d0a2f44ba652890f450d5627a2595d74aaa12a5f11ac7d453",
+      "material_sha256": "e76cc05a102a84525b514ad5cf0b3c57aed5f3404023e22ad877139be2e9291f",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: Lithic bedrock\n#     ksat (um/s): 0.42000\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 100.8,
+          "sand": 65.9,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 280.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 380.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 530.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        },
+        {
+          "depth_mm": 800.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00151
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718473.sol",
+      "mukey": "1718473",
+      "sha256": "0cbb496c34308cbd66d76090018d0f68368cec3270a682b21f6274bd655ba941",
+      "material_sha256": "e76cc05a102a84525b514ad5cf0b3c57aed5f3404023e22ad877139be2e9291f",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: Lithic bedrock\n#     ksat (um/s): 0.42000\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 100.8,
+          "sand": 65.9,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 280.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 380.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 530.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        },
+        {
+          "depth_mm": 800.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00151
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718476.sol",
+      "mukey": "1718476",
+      "sha256": "b2b1d26582b8add39206a72177eb941d3f05542e39fa3766e1c124e41571613f",
+      "material_sha256": "3d789daed68a4cea9d5a13854a95c6311849d9f23e8cb3bfa8a1b15f0124de03",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 50.0,
+          "ksat_mm_h": 32.4,
+          "sand": 13.6,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 150.0,
+          "ksat_mm_h": 32.4,
+          "sand": 41.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 710.0,
+          "ksat_mm_h": 32.4,
+          "sand": 41.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 32.4,
+          "sand": 41.0,
+          "clay": 17.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718494.sol",
+      "mukey": "1718494",
+      "sha256": "2b5190487b248ed97e97e3483d3cb14a9752de41b563edd5bb192b518331392d",
+      "material_sha256": "66f87a362b95c7a856d78de38f2b99a9ab9de3d9ddfb8c23ad5d7dd48741cf03",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 50.0,
+          "ksat_mm_h": 100.8,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 230.0,
+          "ksat_mm_h": 100.8,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 100.8,
+          "sand": 63.5,
+          "clay": 10.0
+        },
+        {
+          "depth_mm": 760.0,
+          "ksat_mm_h": 100.8,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 860.0,
+          "ksat_mm_h": 100.8,
+          "sand": 63.5,
+          "clay": 10.0
+        },
+        {
+          "depth_mm": 990.0,
+          "ksat_mm_h": 100.8,
+          "sand": 66.6,
+          "clay": 10.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 100.8,
+          "sand": 63.5,
+          "clay": 10.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718510.sol",
+      "mukey": "1718510",
+      "sha256": "67da754d1986d189723c0eecde4629375f80ffd9c22b1d6e6c361d3c8d401785",
+      "material_sha256": "a2e8a0818ce208ef318e744c0b29afbf13e2fc8c1ded9bc7a67ad0f753bc445a",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: N/A\n#     ksat (um/s): 0.91000\n#",
+      "horizons": [
+        {
+          "depth_mm": 400.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00328
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718524.sol",
+      "mukey": "1718524",
+      "sha256": "f8019ddcd6feeae923f5218db068ca6a5ad0c2e7bb0e767c2417e153dc4bdf7b",
+      "material_sha256": "0a7d478b6ee4107d704cd42e25a87a4545233e2c505d7d24920b4fb17e1ac13b",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 130.0,
+          "ksat_mm_h": 32.4,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 430.0,
+          "ksat_mm_h": 32.4,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 920.0,
+          "ksat_mm_h": 32.4,
+          "sand": 29.1,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 1120.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 100.8,
+          "sand": 67.9,
+          "clay": 12.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1718525.sol",
+      "mukey": "1718525",
+      "sha256": "5457ec078a402cd7d35d2be794873a51429a1dc9d2ad13198a3aadaaec857dce",
+      "material_sha256": "0a7d478b6ee4107d704cd42e25a87a4545233e2c505d7d24920b4fb17e1ac13b",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 130.0,
+          "ksat_mm_h": 32.4,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 430.0,
+          "ksat_mm_h": 32.4,
+          "sand": 43.0,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 920.0,
+          "ksat_mm_h": 32.4,
+          "sand": 29.1,
+          "clay": 17.5
+        },
+        {
+          "depth_mm": 1120.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.4,
+          "clay": 31.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 100.8,
+          "sand": 67.9,
+          "clay": 12.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1856573.sol",
+      "mukey": "1856573",
+      "sha256": "4eef6111cc326d3b8fddd2ab3e8c34763227c7c56d94f5d5e6723907c60f7671",
+      "material_sha256": "c8038656a671314900ae435d561201b929f6450a27cf007c14f59306e130055b",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: Lithic bedrock\n#     ksat (um/s): 0.03500\n#",
+      "horizons": [
+        {
+          "depth_mm": 110.0,
+          "ksat_mm_h": 32.4,
+          "sand": 41.1,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 9.72,
+          "sand": 34.8,
+          "clay": 32.0
+        },
+        {
+          "depth_mm": 800.0,
+          "ksat_mm_h": 9.72,
+          "sand": 33.9,
+          "clay": 34.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00013
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/1856574.sol",
+      "mukey": "1856574",
+      "sha256": "3d44b2f109d3d1c0c9a4cb121568a755c04dc4154596ce9c609230dbed06cd8a",
+      "material_sha256": "653f0455f4eea6612f14301101ba5f4d7a3d058d0162145e594b45f40d2172e6",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 90.0,
+          "ksat_mm_h": 32.4,
+          "sand": 39.5,
+          "clay": 23.0
+        },
+        {
+          "depth_mm": 480.0,
+          "ksat_mm_h": 9.72,
+          "sand": 34.8,
+          "clay": 32.0
+        },
+        {
+          "depth_mm": 840.0,
+          "ksat_mm_h": 9.72,
+          "sand": 33.9,
+          "clay": 34.0
+        },
+        {
+          "depth_mm": 1300.0,
+          "ksat_mm_h": 9.72,
+          "sand": 31.1,
+          "clay": 38.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 9.72,
+          "sand": 34.8,
+          "clay": 32.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/2408604.sol",
+      "mukey": "2408604",
+      "sha256": "825982a24f2abc1ac9e16d1f63b42feb82fec97dad16544ba4cd2ef555349401",
+      "material_sha256": "076dcaef03ec76ef660a0a0437bed9679ec20811bfdda2fadd49f46582c5ee0e",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 140.0,
+          "ksat_mm_h": 100.8,
+          "sand": 66.8,
+          "clay": 14.0
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 100.8,
+          "sand": 65.1,
+          "clay": 16.0
+        },
+        {
+          "depth_mm": 910.0,
+          "ksat_mm_h": 100.8,
+          "sand": 65.1,
+          "clay": 16.0
+        },
+        {
+          "depth_mm": 1210.0,
+          "ksat_mm_h": 100.8,
+          "sand": 65.1,
+          "clay": 16.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 331.2,
+          "sand": 83.0,
+          "clay": 8.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53947.sol",
+      "mukey": "53947",
+      "sha256": "78a06cd67beb959ef4e0f898e917282cb9e16c6c072729c6e628b613a6297566",
+      "material_sha256": "d3982a05190f3811f3fde5488987737c95754016da27e8b551a28d5fe5ee5399",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 100.8,
+          "sand": 70.9,
+          "clay": 12.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 100.8,
+          "sand": 70.9,
+          "clay": 12.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53949.sol",
+      "mukey": "53949",
+      "sha256": "2403ed68f74634e5a0da61155ff451ee2b66b8e22f6d3d8d38a43406ca530263",
+      "material_sha256": "72152503bbd37ddea95f2dcdeca17a831a418ca12b1f4843861289a743bc3899",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: N/A\n#     ksat (um/s): 0.91000\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 400.0,
+          "ksat_mm_h": 32.4,
+          "sand": 26.5,
+          "clay": 20.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00328
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53950.sol",
+      "mukey": "53950",
+      "sha256": "0890c1aec0ceafdb96b8c1cc3dfb6aab91deff5d48c893019e2681bd106ad33c",
+      "material_sha256": "42164ec7818637a1002610d945765a7d1883ce367a02ee5463e8c99924d36b2c",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 280.0,
+          "ksat_mm_h": 32.4,
+          "sand": 26.5,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 9.72,
+          "sand": 35.8,
+          "clay": 30.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53951.sol",
+      "mukey": "53951",
+      "sha256": "b03e7b1a046672ae8350101eec41132bef5a57faf2d77b41dd66ca6203f72b25",
+      "material_sha256": "9882762f0fbc4b943b2dd1010aecb9e8d29ca73ff8c8066f429e35d6fb0ed09d",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 510.0,
+          "ksat_mm_h": 32.4,
+          "sand": 44.3,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 1020.0,
+          "ksat_mm_h": 32.4,
+          "sand": 39.8,
+          "clay": 22.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 9.72,
+          "sand": 34.7,
+          "clay": 32.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53952.sol",
+      "mukey": "53952",
+      "sha256": "9fdc61a4748dfd88051a8a830bdf916ca8e7c31e42523488910366bb8bf98707",
+      "material_sha256": "0f060ff9842fbf79aa7c076a276b5408a2a6728ed0ac97498212cebd4191ef2a",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 510.0,
+          "ksat_mm_h": 32.4,
+          "sand": 44.3,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 1020.0,
+          "ksat_mm_h": 32.4,
+          "sand": 39.8,
+          "clay": 22.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 10.8,
+          "sand": 34.7,
+          "clay": 32.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53953.sol",
+      "mukey": "53953",
+      "sha256": "3b6c0b0f92d004006f239ff20c275d2c03a39b01430a4d1d3b9fa713aa5e049d",
+      "material_sha256": "0f060ff9842fbf79aa7c076a276b5408a2a6728ed0ac97498212cebd4191ef2a",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 510.0,
+          "ksat_mm_h": 32.4,
+          "sand": 44.3,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 1020.0,
+          "ksat_mm_h": 32.4,
+          "sand": 39.8,
+          "clay": 22.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 10.8,
+          "sand": 34.7,
+          "clay": 32.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53958.sol",
+      "mukey": "53958",
+      "sha256": "d68a2afb80997087fcf1862eed3eb54994e7bd5bf70b96e5541853cf5734e0ad",
+      "material_sha256": "d3982a05190f3811f3fde5488987737c95754016da27e8b551a28d5fe5ee5399",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 100.8,
+          "sand": 70.9,
+          "clay": 12.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 100.8,
+          "sand": 70.9,
+          "clay": 12.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/53975.sol",
+      "mukey": "53975",
+      "sha256": "4716add42dc27a21573565381c6ed621b00c22a78b3de285ee0420f8c34e5c5e",
+      "material_sha256": "64b6f39983191de48aa1841bc1c882ef72cba57f15c57c178f09d3bfc09eac76",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: N/A\n#     ksat (um/s): 0.91000\n#",
+      "horizons": [
+        {
+          "depth_mm": 400.0,
+          "ksat_mm_h": 3.276,
+          "sand": 33.3,
+          "clay": 35.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.00328
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/54011.sol",
+      "mukey": "54011",
+      "sha256": "b6ea4f2e8bfb11c61e25c4bc489ee055f6c538dd5259d6d5ab3c50dbe5610e40",
+      "material_sha256": "e2a5dad607d2d12116c5bd988b4782dabe9198d2db1a3a69a2345f8a46786d53",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 250.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 1040.0,
+          "ksat_mm_h": 9.72,
+          "sand": 33.3,
+          "clay": 35.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 759.6,
+          "sand": 95.0,
+          "clay": 1.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658465.sol",
+      "mukey": "658465",
+      "sha256": "4f7b2b0e0deb3f305e5e4d35d887c11618677f318e6f11e1985a429cab3d623d",
+      "material_sha256": "b2db17f9e5bfc05ecedd87a023e7b6153db7e162299298a2f0d66c1b73fa7cda",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658489.sol",
+      "mukey": "658489",
+      "sha256": "a2c037476b3a1e58bc4e86b2c01b003e22f63b38c2c35f40d69caf008f4bc6a2",
+      "material_sha256": "17729a932cd536a4b7b8199246a7bf1cd2225bccf2d030a280509d575d7aabe0",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 42.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 560.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 66.8,
+          "clay": 22.5
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 57.0,
+          "clay": 25.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 57.0,
+          "clay": 25.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658497.sol",
+      "mukey": "658497",
+      "sha256": "26bf3aba904458b703b19a2dbe84a9b1ece67803d5d6ea2f17af989ecb6fc4a2",
+      "material_sha256": "c181da339682cfb1bf46905320b2839c8ef21a4ac0e36490499240d50e70c8d8",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 80.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 41.6,
+          "clay": 21.0
+        },
+        {
+          "depth_mm": 300.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 41.6,
+          "clay": 21.0
+        },
+        {
+          "depth_mm": 1300.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 25.7,
+          "clay": 45.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 51.5,
+          "clay": 35.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658498.sol",
+      "mukey": "658498",
+      "sha256": "3ea270e88658f69290377293910751895c7b18828caa81e3962e228b476a3fd5",
+      "material_sha256": "58b0a375076a228770f35dd59b295649cbb9daab3adaded7adacfafe29c22ebc",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 50.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 41.1,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 410.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 65.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 890.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 50.8,
+          "clay": 37.5
+        },
+        {
+          "depth_mm": 1800.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 49.8,
+          "clay": 42.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658504.sol",
+      "mukey": "658504",
+      "sha256": "b8b5a34b072581d8b843d6b678abd86967becd87a355aec7a1f4e7ba23d611e2",
+      "material_sha256": "58b0a375076a228770f35dd59b295649cbb9daab3adaded7adacfafe29c22ebc",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 50.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 41.1,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 410.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 65.1,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 890.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 50.8,
+          "clay": 37.5
+        },
+        {
+          "depth_mm": 1800.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 49.8,
+          "clay": 42.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658557.sol",
+      "mukey": "658557",
+      "sha256": "4bba5c91ff67e349651d293ac2fd47cb4046e0791dee7923c0c597df345b8556",
+      "material_sha256": "df5d131568bbdca13259f703e9abedca64da2740b98a149d44fb2e719a25c13c",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 80.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 65.9,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 280.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 68.8,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 400.0,
+          "ksat_mm_h": 21.3038,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658566.sol",
+      "mukey": "658566",
+      "sha256": "cdd297532001113ef74d134a34d51fec14088f05fd14f49a2e5c6ed33e1e4b88",
+      "material_sha256": "e76852d4ccffaa605aaa81e76202d52bb4cf121e373a306c690270136938c6a9",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 430.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 35.5,
+          "clay": 31.0
+        },
+        {
+          "depth_mm": 890.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 17.0,
+          "clay": 42.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 33.3,
+          "clay": 35.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/658580.sol",
+      "mukey": "658580",
+      "sha256": "921c375fd292660836bcbbf32d813fc4529b0707839f73c29d816d22dfc85e7b",
+      "material_sha256": "2dcbd040317590457892a038db420e29326565d101864268d8a8133691dd9aad",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 100.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 39.2,
+          "clay": 23.5
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 31.5,
+          "clay": 37.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 66.8,
+          "clay": 30.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/665727.sol",
+      "mukey": "665727",
+      "sha256": "7c2a4982dedeb8029091be5ced1c8bc5fcb0971052cc698e92962eab39386ceb",
+      "material_sha256": "4e87cfc69189c4890571456f5acbafe7a93c49fe0b77a106ec18a2ab747918f5",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 380.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 44.3,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 33.5,
+          "clay": 30.0
+        },
+        {
+          "depth_mm": 1200.0,
+          "ksat_mm_h": 21.3038,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/665730.sol",
+      "mukey": "665730",
+      "sha256": "1c5ee3b10cf839a5215fc321963963964b67bd1b1f807705c20caf327d7d33d3",
+      "material_sha256": "774f568a2b253e3fb8b732e6594f61a83fbad708afccfa53066680f9d709c740",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 37.2,
+          "clay": 27.5
+        },
+        {
+          "depth_mm": 760.0,
+          "ksat_mm_h": 8.384,
+          "sand": 27.6,
+          "clay": 42.5
+        },
+        {
+          "depth_mm": 1040.0,
+          "ksat_mm_h": 10.1624,
+          "sand": 49.8,
+          "clay": 42.5
+        },
+        {
+          "depth_mm": 1220.0,
+          "ksat_mm_h": 33.0275,
+          "sand": 60.2,
+          "clay": 21.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 330.2755,
+          "sand": 81.1,
+          "clay": 10.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/665756.sol",
+      "mukey": "665756",
+      "sha256": "0f9f05b795f749f07346cadc931dbf05cb2ea59dc365c652efa4409455d4ab67",
+      "material_sha256": "1b45a37f897a344f4915240dfe5cb327c09081a0ae28cc65e25fc45832241f6d",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 380.0,
+          "ksat_mm_h": 330.2755,
+          "sand": 66.8,
+          "clay": 14.0
+        },
+        {
+          "depth_mm": 710.0,
+          "ksat_mm_h": 330.2755,
+          "sand": 65.9,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 1000.0,
+          "ksat_mm_h": 21.3038,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/665770.sol",
+      "mukey": "665770",
+      "sha256": "48376c00437b22311b3a87c2fef6011d974981c2ca5857c4213aebdc1735d6a8",
+      "material_sha256": "290979273b0e79877e2f6419b0cc2b6af4b9163646d15d7db4a1cc0fd02cf356",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold (um/s): 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 150.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 67.5,
+          "clay": 11.5
+        },
+        {
+          "depth_mm": 560.0,
+          "ksat_mm_h": 101.6233,
+          "sand": 66.8,
+          "clay": 11.5
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 508.1159,
+          "sand": 96.0,
+          "clay": 2.5
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711184.sol",
+      "mukey": "2711184",
+      "sha256": "be583a9f9b43fe23800cdd0d7fbff9d5b29095ed8314b0d6178a77f41baf7cdd",
+      "material_sha256": "dec7f1bd1b45f664aa84ab19b285ef78e96620e06c1507d9f5cc6a3650c01b95",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 38.2,
+          "clay": 18.0
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 32.4,
+          "sand": 32.6,
+          "clay": 24.0
+        },
+        {
+          "depth_mm": 1270.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711195.sol",
+      "mukey": "2711195",
+      "sha256": "5ab78a2e6c3d8652bfab5e35da96e8599419fac3d9d7a515fa3e078d9c720609",
+      "material_sha256": "dec7f1bd1b45f664aa84ab19b285ef78e96620e06c1507d9f5cc6a3650c01b95",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 38.2,
+          "clay": 18.0
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 32.4,
+          "sand": 32.6,
+          "clay": 24.0
+        },
+        {
+          "depth_mm": 1270.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711196.sol",
+      "mukey": "2711196",
+      "sha256": "cf3eeb8e6e72504af08e942cfdba198d14def29e9b415157b866d59b85e740db",
+      "material_sha256": "8a4c9fc05770e14d7d9f69f07426af40d2e65b5f46eb7bde2c4d82b2c2fea58b",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 150.0,
+          "ksat_mm_h": 32.4,
+          "sand": 37.8,
+          "clay": 18.0
+        },
+        {
+          "depth_mm": 330.0,
+          "ksat_mm_h": 32.4,
+          "sand": 37.8,
+          "clay": 21.0
+        },
+        {
+          "depth_mm": 710.0,
+          "ksat_mm_h": 32.4,
+          "sand": 37.8,
+          "clay": 25.0
+        },
+        {
+          "depth_mm": 1350.0,
+          "ksat_mm_h": 32.4,
+          "sand": 37.8,
+          "clay": 20.0
+        },
+        {
+          "depth_mm": 1800.0,
+          "ksat_mm_h": 32.4,
+          "sand": 66.0,
+          "clay": 15.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711198.sol",
+      "mukey": "2711198",
+      "sha256": "c97207ec71d0291dd4f4a27b23d75aa7bd2d7b3eef4eb3ed776a8838d07d0f7e",
+      "material_sha256": "3d9d370752e702ee68d05896baf25190271f7a0f72dbf6e972003ba43b8e66b5",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 280.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 23.0
+        },
+        {
+          "depth_mm": 810.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 25.0
+        },
+        {
+          "depth_mm": 970.0,
+          "ksat_mm_h": 32.4,
+          "sand": 43.2,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1200.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711250.sol",
+      "mukey": "2711250",
+      "sha256": "3c6c5e85882e416d7fee4636a37597be93aadeb2f87c3dc72a4fdea3c39b0a7c",
+      "material_sha256": "58b03fba95300cdbacb3bdb464cf2efc1de07d4fec0abbcbad4ab5ed02847d41",
+      "previously_used_label": true,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 170.0,
+          "ksat_mm_h": 32.4,
+          "sand": 24.5,
+          "clay": 23.5
+        },
+        {
+          "depth_mm": 600.0,
+          "ksat_mm_h": 32.4,
+          "sand": 17.8,
+          "clay": 30.0
+        },
+        {
+          "depth_mm": 2360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 5.5,
+          "clay": 47.5
+        },
+        {
+          "depth_mm": 2600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711253.sol",
+      "mukey": "2711253",
+      "sha256": "237caacc5523afb4d1b0b56754ed6c657c37ca49cf6f576bafdbcba29825bbac",
+      "material_sha256": "ff22d15e9675f5c1baf8dcb71fbea5ca0cca68cac1ed9dfd704f7cb11502e740",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 32.4,
+          "sand": 39.2,
+          "clay": 23.5
+        },
+        {
+          "depth_mm": 1140.0,
+          "ksat_mm_h": 32.4,
+          "sand": 33.5,
+          "clay": 30.0
+        },
+        {
+          "depth_mm": 1400.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": false
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/2711254.sol",
+      "mukey": "2711254",
+      "sha256": "96bac096d85a07c0cfdaaa578ba58ab87124a52c4fc5e6215bdda215280a518c",
+      "material_sha256": "58b03fba95300cdbacb3bdb464cf2efc1de07d4fec0abbcbad4ab5ed02847d41",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 170.0,
+          "ksat_mm_h": 32.4,
+          "sand": 24.5,
+          "clay": 23.5
+        },
+        {
+          "depth_mm": 600.0,
+          "ksat_mm_h": 32.4,
+          "sand": 17.8,
+          "clay": 30.0
+        },
+        {
+          "depth_mm": 2360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 5.5,
+          "clay": 47.5
+        },
+        {
+          "depth_mm": 2600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/67141.sol",
+      "mukey": "67141",
+      "sha256": "983eb558fad308618c080dd091894f4aa3048ae1acefa2895d17884730f70472",
+      "material_sha256": "dec7f1bd1b45f664aa84ab19b285ef78e96620e06c1507d9f5cc6a3650c01b95",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 38.2,
+          "clay": 18.0
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 32.4,
+          "sand": 32.6,
+          "clay": 24.0
+        },
+        {
+          "depth_mm": 1270.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/soils/67225.sol",
+      "mukey": "67225",
+      "sha256": "deb8a3c6ee148a63b603a64662acab1d9815818ce9921f6ddaa206e4267b5bf4",
+      "material_sha256": "dec7f1bd1b45f664aa84ab19b285ef78e96620e06c1507d9f5cc6a3650c01b95",
+      "previously_used_label": false,
+      "restriction_provenance": "#     ksat threshold: 2.00000\n#     type: -\n#     ksat: -\n#",
+      "horizons": [
+        {
+          "depth_mm": 180.0,
+          "ksat_mm_h": 32.4,
+          "sand": 42.2,
+          "clay": 15.0
+        },
+        {
+          "depth_mm": 360.0,
+          "ksat_mm_h": 32.4,
+          "sand": 38.2,
+          "clay": 18.0
+        },
+        {
+          "depth_mm": 610.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1090.0,
+          "ksat_mm_h": 32.4,
+          "sand": 32.6,
+          "clay": 24.0
+        },
+        {
+          "depth_mm": 1270.0,
+          "ksat_mm_h": 32.4,
+          "sand": 36.5,
+          "clay": 22.0
+        },
+        {
+          "depth_mm": 1600.0,
+          "ksat_mm_h": 59.8734,
+          "sand": 66.8,
+          "clay": 7.0
+        }
+      ],
+      "current_boundary": {
+        "slflag": 1,
+        "ui_bdrkth": 10000.0,
+        "kslast": 0.01
+      },
+      "material_seen_in_prior_studies": true
+    }
+  ],
+  "rejected": [
+    {
+      "path": "/wc1/runs/ad/addicted-reservist/soils/779547.sol",
+      "reason": "Not a provenance-bearing generated SSURGO specimen"
+    }
+  ],
+  "inspected_native_outcomes": false,
+  "unique_material_profiles": 32,
+  "unused_unique_material_profiles": 25
+}

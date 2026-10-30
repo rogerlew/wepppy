@@ -1,0 +1,91 @@
+{
+  "passed": 12151,
+  "skipped": 298,
+  "groups": [
+    {
+      "group": "roads",
+      "passed": 530,
+      "skipped": 5,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-roads-tests.log",
+      "sha256": "84d5482d59e27bbdbe2434ee1f92c8aa5f7132f33751d400d90e6604e24bc3be"
+    },
+    {
+      "group": "remaining",
+      "passed": 11292,
+      "skipped": 293,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-remainder-tests.log",
+      "sha256": "bc8a395425682dabf19afe299c4f14df3c36f2dbaf7d5f155ee9969d2b48a84f"
+    },
+    {
+      "group": "roads-ofe-treatment-9002-mofe-other",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9002-mofe-other.log",
+      "sha256": "fe92806a9269c4f3b66f7588f813f584b4a2a16541cce4ed58aeeeedfc18ac8a"
+    },
+    {
+      "group": "roads-ofe-treatment-9002-mofe-thinning",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9002-mofe-thinning.log",
+      "sha256": "ad5a50b12cb9356177bc2b19f66508bbaebcc59b7cf74f363c81d0933f80608b"
+    },
+    {
+      "group": "roads-ofe-treatment-9002-single-other",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9002-single-other.log",
+      "sha256": "ae9db4ccec08c55a4824d83eca4b1244429464723e344988d4d159f16274337e"
+    },
+    {
+      "group": "roads-ofe-treatment-9002-single-thinning",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9002-single-thinning.log",
+      "sha256": "7666468684bdc40139ccd26e600331f7db8fb12a40c374cdeba74b12b2df3aab"
+    },
+    {
+      "group": "roads-ofe-treatment-9005-mofe-other",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9005-mofe-other.log",
+      "sha256": "52dad06caba18930bacf11ae15a7269cb94d14b30131d684f63c5bfd4e96612d"
+    },
+    {
+      "group": "roads-ofe-treatment-9005-mofe-thinning",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9005-mofe-thinning.log",
+      "sha256": "e8bb1b2c566c8038f6e9bcee46acb36dca8852f2f79ac0b8d21d12b97fd8f849"
+    },
+    {
+      "group": "roads-ofe-treatment-9005-single-other",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9005-single-other.log",
+      "sha256": "c9af9445a1f2f1e46c9c971bbbebeb9a593b565cba20f708a20b5a7cf437c702"
+    },
+    {
+      "group": "roads-ofe-treatment-9005-single-thinning",
+      "passed": 27,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-9005-single-thinning.log",
+      "sha256": "e38b2e14512907907493729b813f6ea4f65a175eca608385c5e2203fefb4825a"
+    },
+    {
+      "group": "roads-ofe-treatment-rest",
+      "passed": 14,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-treatment-rest.log",
+      "sha256": "34188401655697622f84648d48d8774bb6cf68e415a96fe27feb7c9a94738d07"
+    },
+    {
+      "group": "disturbed",
+      "passed": 99,
+      "skipped": 0,
+      "log": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/logs/roads-ofe-full-tests.log",
+      "evidence": "Complete module line: 31 + 68 passing dots before next module; partial overall summary intentionally not counted",
+      "sha256": "784f948324cb21661240917c566418ec5f99d3b093128a5db2b115b63e4d60d4"
+    }
+  ]
+}

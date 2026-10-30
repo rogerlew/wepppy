@@ -1,0 +1,55 @@
+{
+  "panel": [
+    "site-sand-outunrut-gravel-high",
+    "site-clay-outunrut-paved-high",
+    "birmingham-clay-outunrut-paved-low",
+    "denver-loam-outrut-gravel-low"
+  ],
+  "endpoints": {
+    "site-sand-outunrut-gravel-high": {
+      "current": 0.00151,
+      "source": 1.512,
+      "input_bottom_mm": 400.0
+    },
+    "site-clay-outunrut-paved-high": {
+      "current": 0.00328,
+      "source": 3.276,
+      "input_bottom_mm": 400.0
+    },
+    "birmingham-clay-outunrut-paved-low": {
+      "current": 0.00328,
+      "source": 3.276,
+      "input_bottom_mm": 400.0
+    },
+    "denver-loam-outrut-gravel-low": {
+      "current": 0.01,
+      "source": 59.8734,
+      "input_bottom_mm": 1600.0
+    }
+  },
+  "offsets": {
+    "minus": -1.0,
+    "same": 0.0,
+    "plus": 1.0
+  },
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "native_source_sha256": {
+    "input.for": "362a328510298eb86f682b248256ae43c8b36ca15b6cf2d6dd1887999ae275df",
+    "scon.for": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+    "watbal.for": "99059777f215b9b8e65f89f513c5f74ec431e1b347ad6d1e39fa7af3346f12b7"
+  },
+  "source_sha256": {
+    "docs/work-packages/20261029_roads_buffer_drainage/artifacts/experiment.py": "2545b603b6951a1716a8fb50421637a36667ff230198a0fad01e806b6e430035",
+    "docs/work-packages/20261029_roads_ofe_budget/artifacts/study.py": "ad80c6c9042f8132e256babcb7ee3a55c151efc9666b43580947c4e305a1c25f",
+    "docs/work-packages/20261029_roads_ofe_budget/artifacts/accounting.py": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+    "docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py": "274fb1bedd1538f41d7a53fe71d9e2df57a843231ab827d0588f4b8935309c4c",
+    "docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "9d6babff56f8d6e9e87c4a6abc3b48b9e9e55f98f91c532e0018bf73e1667d17",
+    "wepppy/wepp/soils/horizon_boundary.py": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
+  },
+  "binary": {
+    "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+    "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+  },
+  "prior_root": "/wc1/runs/ro/roads-ofe-budget-20261029-v2"
+}

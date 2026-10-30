@@ -1,0 +1,1848 @@
+{
+  "cases": [
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "denver",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "flagstaff",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "charleston",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "loam",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "silt",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "holdout",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lithic",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_lowk",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "current",
+      "runtime": "site-shared"
+    },
+    {
+      "climate": "site",
+      "soil": "new_open",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "drainage": "source",
+      "runtime": "site-shared"
+    }
+  ],
+  "endpoints": {
+    "sand": {
+      "current": 0.00151,
+      "source": 1.512,
+      "classification": "bedrock",
+      "policy": "current",
+      "texture": "sand",
+      "input_bottom_mm": 400.0
+    },
+    "loam": {
+      "current": 0.01,
+      "source": 59.8734,
+      "classification": "unidentified",
+      "policy": "source",
+      "texture": "loam",
+      "input_bottom_mm": 1600.0
+    },
+    "silt": {
+      "current": 0.01,
+      "source": 59.8734,
+      "classification": "unidentified",
+      "policy": "source",
+      "texture": "silt",
+      "input_bottom_mm": 2600.0
+    },
+    "clay": {
+      "current": 0.00328,
+      "source": 3.276,
+      "classification": "mineral",
+      "policy": "source",
+      "texture": "clay",
+      "input_bottom_mm": 400.0
+    },
+    "holdout": {
+      "current": 0.01,
+      "source": 59.8734,
+      "classification": "unidentified",
+      "policy": "source",
+      "texture": "loam",
+      "input_bottom_mm": 1600.0
+    },
+    "new_lithic": {
+      "current": 0.00013,
+      "source": 0.126,
+      "classification": "bedrock",
+      "policy": "current",
+      "texture": "loam",
+      "input_bottom_mm": 800.0
+    },
+    "new_lowk": {
+      "current": 0.00328,
+      "source": 3.276,
+      "classification": "mineral",
+      "policy": "source",
+      "texture": "loam",
+      "input_bottom_mm": 400.0
+    },
+    "new_open": {
+      "current": 0.01,
+      "source": 100.8,
+      "classification": "unidentified",
+      "policy": "source",
+      "texture": "loam",
+      "input_bottom_mm": 1600.0
+    }
+  },
+  "semantic_soil_signatures": {
+    "sand": "b1d1cef6e5801a07891706315b446c37b7945ebcdbeddebc1cc9f86e6ccd6920",
+    "loam": "3633226543110ee7c86a1e39de99a048db22a173697e8ea64df205743f244aca",
+    "silt": "b7754b0d3c2d4a49024be702034bb8e8a516802793d4b0950dd42b7a18edb70b",
+    "clay": "0c464a840582b9e6138da512b0aed75c5659cea9a47685fcdd2639f6d405a6a0",
+    "holdout": "3633226543110ee7c86a1e39de99a048db22a173697e8ea64df205743f244aca",
+    "new_lithic": "11e06efc56bddd381867cfbac1ee465e114773d318b9d9b76334d95211c37039",
+    "new_lowk": "5e664a86f15274f01dc6d52bc9cba5e3b21a8060512282f3ccfd433841805294",
+    "new_open": "1cefae0ac4d46fd18d8b93553f4ff42b80597db08324c75d33d029cf88566fd2"
+  },
+  "source_sha256": {
+    "docs/work-packages/20261029_roads_drainage_validation/artifacts/study.py": "194530fe41116de11d95eaa9261e47a7dfc4a95419ce70dc4a38a02b96beab7f",
+    "docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py": "274fb1bedd1538f41d7a53fe71d9e2df57a843231ab827d0588f4b8935309c4c",
+    "docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "docs/work-packages/20261029_roads_ofe_budget/artifacts/accounting.py": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "9d6babff56f8d6e9e87c4a6abc3b48b9e9e55f98f91c532e0018bf73e1667d17",
+    "wepppy/wepp/soils/horizon_boundary.py": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170",
+    "docs/work-packages/20261029_roads_drainage_validation/package.md": "6accd111e2cb9e85fd84c4442212abc4f54a7658a247093050f9b8bbab2c8132",
+    "docs/work-packages/20261029_roads_drainage_validation/prompts/active/study_execplan.md": "574178cfd288ecd7d4b7bdf351ac0fba4b9e533bc3c50bf087cace1bd9bf4677"
+  },
+  "binaries": {
+    "legacy": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "modern": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    }
+  },
+  "reference_root": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4",
+  "old_controls": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1",
+  "expected_cases": 192,
+  "acceptance": "Every positive reference within factor ten; zeros separate; physical validity requires independent evidence",
+  "runtime_shared_sha256": {
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+  },
+  "runtime_source_sha256": {
+    "docs/work-packages/20261029_roads_drainage_validation/artifacts/runtime_bridge.py": "57c54ec81bdc32a3154307f8e442f7f953cafb678beb668e463a2ec81755fc49",
+    "wepppy/nodb/mods/roads/roads.py": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b",
+    "wepppy/nodb/core/wepp_prep_service.py": "321bba4979627360ccaee6a3ded402e44fb712a4fe9eda5ad3e24fa1d1bd3701"
+  },
+  "mode": "ui-only adds only empty wepp_ui.txt; site-shared copies existing Roads fixture shared files unchanged",
+  "rationale": "Current and preceding simplified experiments omit native UI switch present in project Roads workspaces; isolate mode before claiming physical or production parity"
+}

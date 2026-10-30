@@ -1,0 +1,9 @@
+{
+  "cases": 66,
+  "modern_budgets": 60,
+  "legacy_report_controls": 6,
+  "factorials": 6,
+  "structural_checks_passed": true,
+  "report_reconciled": 53,
+  "ebe_mismatch_events": 22
+}

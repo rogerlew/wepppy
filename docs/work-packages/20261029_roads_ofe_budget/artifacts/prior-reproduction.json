@@ -1,0 +1,92 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/site-sand-outunrut-gravel-high-modern-roles/record.json",
+    "prior_record_sha256": "4968e62e2986521c43d8b1c269f74d28d7a57e0e9d3189a0c3a071520b895b37",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/site-clay-outunrut-paved-high-modern-roles/record.json",
+    "prior_record_sha256": "0fc1022a679935e5f6f3ccfce219b275c503fd8a30361d0dbfce6506a99b58a2",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/birmingham-clay-outunrut-paved-low-modern-roles/record.json",
+    "prior_record_sha256": "50df98c4b555baebd204b540dfdee1201de5e33d68f0577e8356f50c881f4468",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/site-sand-outrut-gravel-high-modern-roles/record.json",
+    "prior_record_sha256": "e970286d04b74fa2714e68dbfc67006a446cd3a3e4d5cd468cad920943ebb8f4",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/denver-loam-outrut-gravel-low-modern-roles/record.json",
+    "prior_record_sha256": "4a8995fe70a104833e7c9bb0884d4e18fd09436163b7537e53a8415d3126c983",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-111",
+    "prior_record": "/wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-v1/charleston-silt-inveg-gravel-low-modern-roles/record.json",
+    "prior_record_sha256": "56ac4d07f351548bccbd165e98860c215e73424fda3c3ef94979d37528212e43",
+    "identical_outputs": [
+      "H1.ebe.dat",
+      "H1.element.dat",
+      "H1.loss.dat",
+      "H1.pass.dat",
+      "H1.plot.dat",
+      "H1.soil.dat",
+      "H1.wat.dat"
+    ],
+    "metrics_equal": true
+  }
+]

@@ -1,0 +1,85 @@
+{
+  "passed": 12168,
+  "skipped": 298,
+  "groups": [
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-remainder-tests.log",
+      "passed": 11307,
+      "skipped": 293,
+      "sha256": "d48950696c512d37fb4734fa97eaf7a525566edbf28628b4ba99a55d76eadafa"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-roads-tests.log",
+      "passed": 530,
+      "skipped": 5,
+      "sha256": "254be317a4f6a186347582ce42c57b5bbe5ffeea7041aaeba0e1f74afc8c9291"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-disturbed-tests.log",
+      "passed": 99,
+      "skipped": 0,
+      "sha256": "7d7d9f26da7dc5bf02769fa659f41b3932b0ceca6f654a72713f058278c4d1ea"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-reconciliation-tests.log",
+      "passed": 2,
+      "skipped": 0,
+      "sha256": "c781a3075dd6f741713abd3d9f9e57e5bdcab8d0e2308df25b295b3b97ac2b4c"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9002-mofe-other.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "9b0fd663482ff7dbb43544abc2e67bcc16e44367ae43016f82868117ce4bda7e"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9002-mofe-thinning.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "923417a968b42ea7c7251309eed7e4c75922663e78ef3ff98b93cd4b6ae4b89f"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9002-single-other.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "a68b6dfc54a14aa144d49b671097be556979281af0294e7f8efb54aceeec54f7"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9002-single-thinning.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "7a088030e4e174aa1a955e3e94fa66c7778506b5641e816ea7866ffb827707f4"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9005-mofe-other.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "11f18762cead0f2ce294875593d25eebcf85639d3b37a064e8096bc950b74158"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9005-mofe-thinning.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "049590001b2d24c74e9b77d26516d715cdd779b22cd4e8e8f7203fe4aadbc226"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9005-single-other.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "525f2d5cd5d044b6a3d3d1a5aee3094728f8be93c7bfa6cef1fcd6d3cc96c3fc"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-9005-single-thinning.log",
+      "passed": 27,
+      "skipped": 0,
+      "sha256": "4b3a7d08970ddca3d43572f834122aad90d5212f2b348023a2fba869bf444099"
+    },
+    {
+      "log": "/wc1/runs/ro/roads-buffer-drainage-20261029/logs/roads-buffer-treatment-rest.log",
+      "passed": 14,
+      "skipped": 0,
+      "sha256": "8ab9af4e96683e90c15fb2c8623ee4a7c54af71f5af95615d9963e480e1092ed"
+    }
+  ],
+  "supplemental_reason": "Two reconciliation tests added after broad collection; 15 treatment tests included in remainder."
+}

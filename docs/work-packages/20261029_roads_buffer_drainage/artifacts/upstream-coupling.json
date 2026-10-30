@@ -1,0 +1,4250 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high--current--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 4,
+          "max_abs": 0.0002173999999999926,
+          "sum_delta": 2.039999999998987e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 2,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.01999999999998181
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 2,
+          "max_abs": 1.9999999999242846e-05,
+          "sum_delta": -1.69999999992676e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 4,
+          "max_abs": 0.0002662999999999971,
+          "sum_delta": 1.0300000003293786e-05
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 12,
+        "sum_delta_kg_m": -0.005999999999999915,
+        "max_abs_kg_m": 0.02299999999999991,
+        "max_common_peakro_delta_mm_hr": 72.44500000000001,
+        "max_common_effdur_delta_hr": 10.6
+      },
+      {
+        "changed_dates": 17,
+        "sum_delta_kg_m": -0.09500000000000011,
+        "max_abs_kg_m": 0.1280000000000001,
+        "max_common_peakro_delta_mm_hr": 59.42,
+        "max_common_effdur_delta_hr": 10.6
+      }
+    ],
+    "element_date_symmetric_difference": 38
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--current--same",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--current--plus",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 6,
+          "max_abs": 0.0008087999999999984,
+          "sum_delta": 6.780000000300435e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 3,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.029999999999972715
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 4,
+          "max_abs": 3.0000000002416982e-05,
+          "sum_delta": -1.900000000265578e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 6,
+          "max_abs": 0.0009910000000000196,
+          "sum_delta": 6.400000000456041e-05
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 1,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": 0.009999999999990905
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 61,
+        "sum_delta_kg_m": 0.494,
+        "max_abs_kg_m": 0.083,
+        "max_common_peakro_delta_mm_hr": 214.556,
+        "max_common_effdur_delta_hr": 23.354
+      },
+      {
+        "changed_dates": 86,
+        "sum_delta_kg_m": 3.9559999999999995,
+        "max_abs_kg_m": 0.653,
+        "max_common_peakro_delta_mm_hr": 127.653,
+        "max_common_effdur_delta_hr": 23.354
+      }
+    ],
+    "element_date_symmetric_difference": 72
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--same",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 6,
+          "max_abs": 0.0008070000000000022,
+          "sum_delta": 6.60000000030081e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 3,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.029999999999972715
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 4,
+          "max_abs": 3.0000000002416982e-05,
+          "sum_delta": -1.900000000265578e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 6,
+          "max_abs": 0.000988800000000012,
+          "sum_delta": 6.180000000455266e-05
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 1,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": 0.009999999999990905
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 59,
+        "sum_delta_kg_m": 0.528,
+        "max_abs_kg_m": 0.083,
+        "max_common_peakro_delta_mm_hr": 214.556,
+        "max_common_effdur_delta_hr": 23.354
+      },
+      {
+        "changed_dates": 84,
+        "sum_delta_kg_m": 4.154999999999999,
+        "max_abs_kg_m": 0.653,
+        "max_common_peakro_delta_mm_hr": 127.37500000000001,
+        "max_common_effdur_delta_hr": 23.354
+      }
+    ],
+    "element_date_symmetric_difference": 72
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--plus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 6,
+          "max_abs": 0.0008070000000000022,
+          "sum_delta": 6.60000000030081e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 3,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.029999999999972715
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 4,
+          "max_abs": 3.0000000002416982e-05,
+          "sum_delta": -1.900000000265578e-05
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 6,
+          "max_abs": 0.000988800000000012,
+          "sum_delta": 6.180000000455266e-05
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 1,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": 0.009999999999990905
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 59,
+        "sum_delta_kg_m": 0.528,
+        "max_abs_kg_m": 0.083,
+        "max_common_peakro_delta_mm_hr": 214.556,
+        "max_common_effdur_delta_hr": 23.354
+      },
+      {
+        "changed_dates": 84,
+        "sum_delta_kg_m": 4.154999999999999,
+        "max_abs_kg_m": 0.653,
+        "max_common_peakro_delta_mm_hr": 127.37500000000001,
+        "max_common_effdur_delta_hr": 23.354
+      }
+    ],
+    "element_date_symmetric_difference": 72
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 41,
+        "sum_delta_kg_m": -0.02299999999999996,
+        "max_abs_kg_m": 0.056999999999999995,
+        "max_common_peakro_delta_mm_hr": 65.59,
+        "max_common_effdur_delta_hr": 17.867
+      },
+      {
+        "changed_dates": 52,
+        "sum_delta_kg_m": 0.049000000000000196,
+        "max_abs_kg_m": 0.19000000000000006,
+        "max_common_peakro_delta_mm_hr": 59.279999999999994,
+        "max_common_effdur_delta_hr": 17.867
+      }
+    ],
+    "element_date_symmetric_difference": 46
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--same",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--plus",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 409,
+        "sum_delta_kg_m": -0.44999999999999957,
+        "max_abs_kg_m": 0.221,
+        "max_common_peakro_delta_mm_hr": 297.005,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      },
+      {
+        "changed_dates": 413,
+        "sum_delta_kg_m": -0.8590000000000001,
+        "max_abs_kg_m": 0.796,
+        "max_common_peakro_delta_mm_hr": 272.842,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      }
+    ],
+    "element_date_symmetric_difference": 113
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--same",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 406,
+        "sum_delta_kg_m": -0.321,
+        "max_abs_kg_m": 0.221,
+        "max_common_peakro_delta_mm_hr": 372.79499999999996,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      },
+      {
+        "changed_dates": 409,
+        "sum_delta_kg_m": -0.27800000000000014,
+        "max_abs_kg_m": 0.796,
+        "max_common_peakro_delta_mm_hr": 294.609,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      }
+    ],
+    "element_date_symmetric_difference": 113
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--plus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 1,
+          "max_abs": 1.000000000139778e-06,
+          "sum_delta": -1.000000000139778e-06
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 406,
+        "sum_delta_kg_m": -0.321,
+        "max_abs_kg_m": 0.221,
+        "max_common_peakro_delta_mm_hr": 372.79499999999996,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      },
+      {
+        "changed_dates": 409,
+        "sum_delta_kg_m": -0.27800000000000014,
+        "max_abs_kg_m": 0.796,
+        "max_common_peakro_delta_mm_hr": 294.609,
+        "max_common_effdur_delta_hr": 23.302999999999997
+      }
+    ],
+    "element_date_symmetric_difference": 113
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 73,
+          "max_abs": 0.0028600000000054138,
+          "sum_delta": -0.004069730000011207
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 1,
+          "max_abs": 0.010000000000000009,
+          "sum_delta": 0.010000000000000009
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 29,
+          "max_abs": 0.010000000000047748,
+          "sum_delta": 0.2899999999999636
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 415,
+          "max_abs": 0.11991989999999997,
+          "sum_delta": -0.12892956999998162
+        },
+        "Ep": {
+          "changed_days": 3,
+          "max_abs": 0.010000000000000009,
+          "sum_delta": 0.030000000000000027
+        },
+        "Es": {
+          "changed_days": 12,
+          "max_abs": 0.10999999999999999,
+          "sum_delta": 0.18999999999999928
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 72,
+          "max_abs": 0.003500000000002501,
+          "sum_delta": -0.005009949999989639
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 3,
+          "max_abs": 0.02999999999999936,
+          "sum_delta": 0.05999999999999872
+        },
+        "SoilWaterTotal": {
+          "changed_days": 150,
+          "max_abs": 0.2400000000000091,
+          "sum_delta": 6.559999999999775
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 162,
+        "sum_delta_kg_m": 0.04699999999999942,
+        "max_abs_kg_m": 0.068,
+        "max_common_peakro_delta_mm_hr": 590.027,
+        "max_common_effdur_delta_hr": 9.0
+      },
+      {
+        "changed_dates": 397,
+        "sum_delta_kg_m": -5.649999999999998,
+        "max_abs_kg_m": 0.421,
+        "max_common_peakro_delta_mm_hr": 589.534,
+        "max_common_effdur_delta_hr": 9.0
+      }
+    ],
+    "element_date_symmetric_difference": 10
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--same",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--plus",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 71,
+          "max_abs": 0.0028600000000054138,
+          "sum_delta": -0.0012572299999996372
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 31,
+          "max_abs": 0.010000000000047748,
+          "sum_delta": 0.17000000000001592
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 413,
+          "max_abs": 0.0038061000000000067,
+          "sum_delta": -0.020463499999981614
+        },
+        "Ep": {
+          "changed_days": 3,
+          "max_abs": 0.010000000000000009,
+          "sum_delta": 0.030000000000000027
+        },
+        "Es": {
+          "changed_days": 8,
+          "max_abs": 0.010000000000000231,
+          "sum_delta": 0.019999999999999532
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 68,
+          "max_abs": 0.003500000000002501,
+          "sum_delta": -0.0015958099999957877
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 100,
+          "max_abs": 0.010000000000047748,
+          "sum_delta": 0.4800000000001887
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 181,
+        "sum_delta_kg_m": 0.39499999999999974,
+        "max_abs_kg_m": 0.07899999999999996,
+        "max_common_peakro_delta_mm_hr": 590.027,
+        "max_common_effdur_delta_hr": 23.16
+      },
+      {
+        "changed_dates": 414,
+        "sum_delta_kg_m": -4.870999999999998,
+        "max_abs_kg_m": 0.31199999999999994,
+        "max_common_peakro_delta_mm_hr": 589.534,
+        "max_common_effdur_delta_hr": 23.16
+      }
+    ],
+    "element_date_symmetric_difference": 17
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--same",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 28,
+          "max_abs": 0.0020260000000003053,
+          "sum_delta": 0.00013853999999902805
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 1,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.009999999999990905
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 114,
+          "max_abs": 0.00010499999999957765,
+          "sum_delta": 0.00012956999999816712
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 26,
+          "max_abs": 0.0024839999999999307,
+          "sum_delta": 0.00014168999999845944
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 7,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.049999999999954525
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 62,
+        "sum_delta_kg_m": 0.20400000000000015,
+        "max_abs_kg_m": 0.07899999999999996,
+        "max_common_peakro_delta_mm_hr": 852.329,
+        "max_common_effdur_delta_hr": 23.16
+      },
+      {
+        "changed_dates": 96,
+        "sum_delta_kg_m": 0.8070000000000005,
+        "max_abs_kg_m": 0.267,
+        "max_common_peakro_delta_mm_hr": 538.098,
+        "max_common_effdur_delta_hr": 23.16
+      }
+    ],
+    "element_date_symmetric_difference": 17
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--plus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 28,
+          "max_abs": 0.0020260000000003053,
+          "sum_delta": 0.00013853999999902805
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 1,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.009999999999990905
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 114,
+          "max_abs": 0.00010499999999957765,
+          "sum_delta": 0.00012956999999816712
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 26,
+          "max_abs": 0.0024839999999999307,
+          "sum_delta": 0.00014168999999845944
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 7,
+          "max_abs": 0.009999999999990905,
+          "sum_delta": -0.049999999999954525
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 62,
+        "sum_delta_kg_m": 0.20400000000000015,
+        "max_abs_kg_m": 0.07899999999999996,
+        "max_common_peakro_delta_mm_hr": 852.329,
+        "max_common_effdur_delta_hr": 23.16
+      },
+      {
+        "changed_dates": 96,
+        "sum_delta_kg_m": 0.8070000000000005,
+        "max_abs_kg_m": 0.267,
+        "max_common_peakro_delta_mm_hr": 538.098,
+        "max_common_effdur_delta_hr": 23.16
+      }
+    ],
+    "element_date_symmetric_difference": 17
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 9,
+          "max_abs": 0.020000000000000462,
+          "sum_delta": 0.019999999999999796
+        },
+        "Q": {
+          "changed_days": 239,
+          "max_abs": 0.38388800000000023,
+          "sum_delta": 0.834181324000002
+        },
+        "Ep": {
+          "changed_days": 217,
+          "max_abs": 0.1499999999999999,
+          "sum_delta": 0.13999999999999987
+        },
+        "Es": {
+          "changed_days": 161,
+          "max_abs": 1.4800000000000004,
+          "sum_delta": -6.860000000000001
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 4163,
+          "max_abs": 0.0933736,
+          "sum_delta": -4.717244258000001
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 4161,
+          "max_abs": 5.669999999999959,
+          "sum_delta": -879.8900000000015
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 73,
+        "sum_delta_kg_m": -0.052000000000000685,
+        "max_abs_kg_m": 0.07499999999999996,
+        "max_common_peakro_delta_mm_hr": 1.5980000000000025,
+        "max_common_effdur_delta_hr": 0.03300000000000003
+      },
+      {
+        "changed_dates": 131,
+        "sum_delta_kg_m": 1.6510000000000016,
+        "max_abs_kg_m": 0.26500000000000057,
+        "max_common_peakro_delta_mm_hr": 3.2219999999999978,
+        "max_common_effdur_delta_hr": 0.286
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--same",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--plus",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--minus",
+    "upstream_exact": false,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 9,
+          "max_abs": 0.020000000000000462,
+          "sum_delta": 0.019999999999999796
+        },
+        "Q": {
+          "changed_days": 239,
+          "max_abs": 0.38388800000000023,
+          "sum_delta": 0.834181324000002
+        },
+        "Ep": {
+          "changed_days": 217,
+          "max_abs": 0.1499999999999999,
+          "sum_delta": 0.13999999999999987
+        },
+        "Es": {
+          "changed_days": 161,
+          "max_abs": 1.4800000000000004,
+          "sum_delta": -6.860000000000001
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 4163,
+          "max_abs": 0.0933736,
+          "sum_delta": -4.717244258000001
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 4161,
+          "max_abs": 5.669999999999959,
+          "sum_delta": -879.8900000000015
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 73,
+        "sum_delta_kg_m": -0.052000000000000685,
+        "max_abs_kg_m": 0.07499999999999996,
+        "max_common_peakro_delta_mm_hr": 1.5980000000000025,
+        "max_common_effdur_delta_hr": 0.03300000000000003
+      },
+      {
+        "changed_dates": 131,
+        "sum_delta_kg_m": 1.6510000000000016,
+        "max_abs_kg_m": 0.26500000000000057,
+        "max_common_peakro_delta_mm_hr": 3.2219999999999978,
+        "max_common_effdur_delta_hr": 0.286
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--same",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--plus",
+    "upstream_exact": true,
+    "water": [
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      },
+      {
+        "P": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "RM": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Q": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Ep": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Es": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Er": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "Dp": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "UpStrmQ": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SubRIn": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "latqcc": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "SoilWaterTotal": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileDepth": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfilePorosityCap": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileFCStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        },
+        "ProfileWPStore": {
+          "changed_days": 0,
+          "max_abs": 0.0,
+          "sum_delta": 0.0
+        }
+      }
+    ],
+    "sediment": [
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      },
+      {
+        "changed_dates": 0,
+        "sum_delta_kg_m": 0.0,
+        "max_abs_kg_m": 0.0,
+        "max_common_peakro_delta_mm_hr": 0.0,
+        "max_common_effdur_delta_hr": 0.0
+      }
+    ],
+    "element_date_symmetric_difference": 0
+  }
+]

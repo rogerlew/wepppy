@@ -1,0 +1,5810 @@
+[
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 582.6546,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1378.9234800000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1306.26144,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 469.83024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 502.4448,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 465.62868,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 582.6546,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1244.1567599999998,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1089.98604,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 469.83024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 336.0258,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 266.3298,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 582.6546,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 424.51992,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 446.64840000000004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 469.83024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 339.55415999999997,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 340.42535999999996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 582.6546,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 271.23624,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 262.04112,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 469.83024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 170.05427999999998,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 163.69056,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1017.60516,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1348.8354,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1194.9497999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 973.65708,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 494.802,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 418.68684,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1017.60516,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1092.36996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 835.37388,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 973.65708,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 357.78996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 277.4772,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1017.60516,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 565.2622799999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 666.13932,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 973.65708,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 359.65116,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 364.28436,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1017.60516,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 301.57776,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 304.13988,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 973.65708,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 221.98968,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 222.80148,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 208.07423999999997,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 366.49404000000004,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 276.74856,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 120.65328,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 98.30304000000001,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 157.0734,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 208.07423999999997,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 330.25212,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 216.28728,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 120.65328,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 63.07092,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 55.455839999999995,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 208.07423999999997,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 111.85812,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 137.016,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 120.65328,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 61.81164,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 129.5316,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 208.07423999999997,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 73.12931999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 74.78855999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 120.65328,
+    "negative_fluxes": [],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 26.4726,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 27.763560000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 388.13148,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 540.67464,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 609.1628400000001,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 474.80004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 292.81824,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 294.55668,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 388.13148,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 336.5208,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 339.7878,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 474.80004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 89.28612,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 90.41472,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 388.13148,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 306.9792,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 367.97112,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 474.80004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 250.45812,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 252.50544000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 388.13148,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 100.23156,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 99.99792,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 474.80004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 46.45476,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 46.92996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-gravel-high-roles-project",
+    "inputs": {
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.element.dat": "4aa3a501b667209d7fc930ead362008f719b1878f5a093fd2e63b66efbce887d",
+      "H1.pass.dat": "c024bff6e10f059d806bd49c5d37a199ccbeef65f64554c4ce8d28ebc3f3b2c1",
+      "H1.loss.dat": "31451fce9e1cc9a0d0a7a971c9846cfa9008662c5d29159f617216343c337f14",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.soil.dat": "d4db1277d1864fe0438f2e0f11ba54e1b6f84829995f135a8bafb65119a8e7a5",
+      "H1.ebe.dat": "b5ce4a85e90b40d9f61843a2b0fa768a0eb0cd54929f5873e3914d1890f30fc2"
+    },
+    "source_record_sha256": "a3e1a20a588f7331b789289a4409fc6b483ed126af922af3708ce28edfd39c08",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-gravel-high-erosion-project",
+    "inputs": {
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "dd278e386bfa7eac1dca6d9594ddea66d681d8f439ca7c2b4cf941a2e0d77a57",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+    },
+    "outputs": {
+      "H1.loss.dat": "6824cc1fa67d4a2b805f29fdd2b36d6d512a9cc0aaa6f6957561ed948cc3e70e",
+      "H1.element.dat": "9d123424f92e43bec46e6c6a6bc65e6cd2a4f4eeebc0b9018491ff233b7c37d8",
+      "H1.pass.dat": "d02f81aabb64fcdde69f9f77b9d19458bf84dcedb5f35d41d3e0a69ddb460839",
+      "H1.ebe.dat": "88eab6bc6c9ffa1a89f2fdef4c6fe4afa4197b5b6ffa5acab75f0ce2343380f9",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.soil.dat": "c04f1273b6604a933d30bc4377a3c764ac56f05aa88b3507e6bee9aac36f06d0",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467"
+    },
+    "source_record_sha256": "021acb8be9ae3a91d424cec1eac5862e194b4037839d53dad23b99e7eb6b1c71",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 857.0232,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 380.28672,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 421.30836,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 422.42904000000004,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-paved-high-roles-project",
+    "inputs": {
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.element.dat": "4aa3a501b667209d7fc930ead362008f719b1878f5a093fd2e63b66efbce887d",
+      "H1.soil.dat": "d4db1277d1864fe0438f2e0f11ba54e1b6f84829995f135a8bafb65119a8e7a5",
+      "H1.ebe.dat": "b5ce4a85e90b40d9f61843a2b0fa768a0eb0cd54929f5873e3914d1890f30fc2",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "c024bff6e10f059d806bd49c5d37a199ccbeef65f64554c4ce8d28ebc3f3b2c1",
+      "H1.loss.dat": "31451fce9e1cc9a0d0a7a971c9846cfa9008662c5d29159f617216343c337f14"
+    },
+    "source_record_sha256": "f8486134e37079e5288df56c0737e22455fd38411539d4a649737c3fec93d9f0",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-paved-high-erosion-project",
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "52fa9600252ce8a7c1ee0c36cc41533efbcce3f4cdbb215a37f75ec0e27e27d1",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+    },
+    "outputs": {
+      "H1.ebe.dat": "5a01b532cbac672181730541a52885ddeb112fa499421dd43027318613daef1d",
+      "H1.pass.dat": "78e38f898d8631876d0b639598f4df7fc37619d7450ffcec1c4a4dc2d2ffabac",
+      "H1.loss.dat": "17ca185ce1fccdc77618e168b9b3e8bbeb3c354d3f4f2f68bf550627848721f6",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.soil.dat": "d4db1277d1864fe0438f2e0f11ba54e1b6f84829995f135a8bafb65119a8e7a5",
+      "H1.element.dat": "74f47ac4717351b2a436a79d0c6d8b8705933b12a5d243f7dbbf7a718e9c874e"
+    },
+    "source_record_sha256": "37a72059ec95d6c91673057215c156a72314bcbde85ce50ee1e792e74e4a70a4",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 620.65476,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 380.28672,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 209.76912000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 192.27779999999998,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inveg-gravel-high-roles-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs": {
+      "H1.ebe.dat": "b5ce4a85e90b40d9f61843a2b0fa768a0eb0cd54929f5873e3914d1890f30fc2",
+      "H1.loss.dat": "31451fce9e1cc9a0d0a7a971c9846cfa9008662c5d29159f617216343c337f14",
+      "H1.pass.dat": "c024bff6e10f059d806bd49c5d37a199ccbeef65f64554c4ce8d28ebc3f3b2c1",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.element.dat": "4aa3a501b667209d7fc930ead362008f719b1878f5a093fd2e63b66efbce887d",
+      "H1.soil.dat": "d4db1277d1864fe0438f2e0f11ba54e1b6f84829995f135a8bafb65119a8e7a5"
+    },
+    "source_record_sha256": "18e15e2b507b2e378fed45f514b55800c73e3d9c23bbe6b371d7baffa7820161",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inveg-gravel-high-erosion-project",
+    "inputs": {
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "0e2b00069fc73af6cf45864720ef9aa26bf3e84e68e3e6168809e3a662da9ef8",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "82e8b43d3e915421287e6592380194cb550a89021e6a31b60b54c3f6dc09390d",
+      "H1.element.dat": "c4af9538eec4c4f3f5b0a78ac4713652e15a61bbc7f290033fbc26dd4c8f1121",
+      "H1.loss.dat": "2a3bc9747b8100aa4aad077682c1ec7c3769ad90019964326f75424180509642",
+      "H1.ebe.dat": "0bbee0f010e75f125c0cdd190b2cfef3dd6d9eaf10e2629738ce721b6de4f594",
+      "H1.soil.dat": "9483dd38e946388526a63cb92ea65c682fb478cabf14ee728c60f93b15635e28"
+    },
+    "source_record_sha256": "4f16b63331730506c5695c6e5ca961adfdbf9a7f5d31cc21820e806c9e153e67",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 561.33396,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 380.28672,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 311.80644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 324.56556,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inveg-paved-high-roles-project",
+    "inputs": {
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.element.dat": "4aa3a501b667209d7fc930ead362008f719b1878f5a093fd2e63b66efbce887d",
+      "H1.pass.dat": "c024bff6e10f059d806bd49c5d37a199ccbeef65f64554c4ce8d28ebc3f3b2c1",
+      "H1.loss.dat": "31451fce9e1cc9a0d0a7a971c9846cfa9008662c5d29159f617216343c337f14",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.soil.dat": "d4db1277d1864fe0438f2e0f11ba54e1b6f84829995f135a8bafb65119a8e7a5",
+      "H1.ebe.dat": "b5ce4a85e90b40d9f61843a2b0fa768a0eb0cd54929f5873e3914d1890f30fc2"
+    },
+    "source_record_sha256": "c3a22a65b6ee0c301dacb0e1edb3dba486aaf8b5a519db08217a860a9092b0e6",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inveg-paved-high-erosion-project",
+    "inputs": {
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.sol": "5ac55057ba4197f4df636790a55e906f8d0ac3e5e2156c1e4c41ad8f972330b7",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs": {
+      "H1.soil.dat": "df3c7791197119bc10e0c26496c0f318ed59ee17a6136f99cadc2cceb3c89abf",
+      "H1.wat.dat": "29abca98cef8ac40437f2b809e9313f257398c4c4266f4c1e4b73f741ad19467",
+      "H1.element.dat": "864cf9d11a088fefbb11487b2f5d20e9ec8c4a766f854f4bf8da51b727e8ad45",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "1b7e7f48c0692a69e1c64763e407349d4dd23cf0c26f3ab853fe0e56185e5310",
+      "H1.ebe.dat": "46b75092f81bcca57c51be141c02f0abe190b5548a9390561b7768634751b08b",
+      "H1.loss.dat": "cfea34dc68397e7522fcd0636143e0bb4d5c4d1b8ead3b4882345edce3118340"
+    },
+    "source_record_sha256": "bc127fa361c97019c02715e13d6157aa1e6cec683e6a6f8770de7730a7bf90c1",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          19  -3.39507707E-03   7.6343375258147717E-004",
+    "stdout_sha256": "52174b63ea7981bbf4d34fb092589474a4a8084795e975fd5d2b9dbc3045be84",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 318.87504,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 380.28672,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 91.76112,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 98.38224000000001,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inbare-gravel-high-roles-project",
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "ff8d1ae3c3f2146c8477ffef38c5fc8935d148943aa9684c0325c1ee73abac8d",
+      "H1.pass.dat": "2678f692f00cd3078c4777a61bd28122751c69a0db4fa0b283651ec9d2e37fc9",
+      "H1.loss.dat": "c4711c613e6ff297946b1cacaf15340f4f5c84fc311a6a9861fdc5fad803aff5",
+      "H1.element.dat": "b19fb8f16d165accc675aa816be8bbda9e7234e0b69207902e9900d164fc9c5d",
+      "H1.soil.dat": "3f432350b37a7d6c17cebbf04b8702dcdb48ca8b16857cd10951609a2ce5f662",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be"
+    },
+    "source_record_sha256": "9f91e3a397c3a0fcebae2161cbcb31906177935b5af9f4c0005ad0e8a9d4aa45",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inbare-gravel-high-erosion-project",
+    "inputs": {
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.sol": "10380a79c3cd7bc15ef4a482f7e4aaa484cdcd7bb49b705079589e0ada2fab38",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+    },
+    "outputs": {
+      "H1.element.dat": "4f9b1953030373ce325f0f2ae6e7f17c38b0a5eb88aa76885447ac47979e3423",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.loss.dat": "285a12cdd58b1d4043cd262eed4e3881d7f84bee0f114e87f6628e5226eda466",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.pass.dat": "ffc81a02f12ec4f1c0db802ff0d6fd79425461b8a5c78f7982e6fae8cb80516a",
+      "H1.soil.dat": "fdae5e510019345ece39a9e4eb3b2d23ad4fa40c70064b33f1c801d3ec3b0b0c",
+      "H1.ebe.dat": "206f4b890f5b529efaffabdfa640941d0fc426da96cdaca3a7e1af956bf6e392"
+    },
+    "source_record_sha256": "b80055000c73e5c8599eafbb2ce23e1198b280853c706761b942060cf65e2499",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inbare-gravel-high-rock-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.sol": "abdea225d336c2611ce42506685e7e0d9c94a03213754cbb58312a17df7c7a67",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "4f6776bd413f4e21778e3b9c2c15683734c84300e605eb37945bb297d74461da",
+      "H1.loss.dat": "d0fdcb42d3ea3d2db89f286c940890f8320b78d8635229467c6a1e291e1d66a0",
+      "H1.ebe.dat": "898fba8b30a9e54bd32207dc451fd4c90d4b71d5f3fb504d8024610352b62d02",
+      "H1.soil.dat": "3c1349752bb8d47f8babce622f250a1dcb206676645b49a3822587758ebe843b",
+      "H1.element.dat": "e1f540654311c8a3878a56a965aff844b40de5c235dac5025b6ac8fca174ac6e",
+      "H1.wat.dat": "7913dd3abb96e775b25fd376b0af63219857f800e8a885c99bc19183a5dc2098"
+    },
+    "source_record_sha256": "a726d428fca424a3cac0cbd383c286edb1f7da1e0cb4e70c49851a5859deefab",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          15  -7.28291459E-03   4.6921689063310623E-003",
+    "stdout_sha256": "cd4dc4bf344c67c9294f98e27cde6470945c5cc43e59e393136e0ef05970b981",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 611.56656,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 321.32628,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 337.58208,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inbare-paved-high-roles-project",
+    "inputs": {
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs": {
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.soil.dat": "3f432350b37a7d6c17cebbf04b8702dcdb48ca8b16857cd10951609a2ce5f662",
+      "H1.loss.dat": "c4711c613e6ff297946b1cacaf15340f4f5c84fc311a6a9861fdc5fad803aff5",
+      "H1.ebe.dat": "ff8d1ae3c3f2146c8477ffef38c5fc8935d148943aa9684c0325c1ee73abac8d",
+      "H1.pass.dat": "2678f692f00cd3078c4777a61bd28122751c69a0db4fa0b283651ec9d2e37fc9",
+      "H1.element.dat": "b19fb8f16d165accc675aa816be8bbda9e7234e0b69207902e9900d164fc9c5d",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "67b22c467e36b7f134f31e399512390beb6082d6cb42c2de8a026413666f9b33",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inbare-paved-high-erosion-project",
+    "inputs": {
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "49ba77fc65f8b61d898f2c12e3ac752c944a2a7cec00b24d52d4b5d04297d3fa",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "917391a75e8008e14cdd24e134166d91a81541c8bb72724c1dec85daf0fcb6ef",
+      "H1.element.dat": "1796a41ff6db961497b030d03154e7b68c758513fa568a5131e5df61dbf765da",
+      "H1.pass.dat": "ce25b6458c7786cc802f5f70f7addb522ea6a4a0660055502e5c558aa97d674e",
+      "H1.loss.dat": "91b8e4cfdcb20b69bf918e806ce424fc817991d7fec0dc2c92d7ebe917d7e68b",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.soil.dat": "1c036229faa977d412c03a1deb3114c63fb90e0372bae214687441a1bf436a27"
+    },
+    "source_record_sha256": "d225ff5770d95864be14c2bc01824a6bc093002990ec1fcd03bb57e8510966c7",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 439.5006,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 611.56656,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 168.96132,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 159.71472,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inveg-gravel-high-roles-project",
+    "inputs": {
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5"
+    },
+    "outputs": {
+      "H1.ebe.dat": "ff8d1ae3c3f2146c8477ffef38c5fc8935d148943aa9684c0325c1ee73abac8d",
+      "H1.pass.dat": "2678f692f00cd3078c4777a61bd28122751c69a0db4fa0b283651ec9d2e37fc9",
+      "H1.loss.dat": "c4711c613e6ff297946b1cacaf15340f4f5c84fc311a6a9861fdc5fad803aff5",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.soil.dat": "3f432350b37a7d6c17cebbf04b8702dcdb48ca8b16857cd10951609a2ce5f662",
+      "H1.element.dat": "b19fb8f16d165accc675aa816be8bbda9e7234e0b69207902e9900d164fc9c5d"
+    },
+    "source_record_sha256": "f21b69e2bbc8a1b7a30d107752a1932522c8658bd1916973afed1a64ae0943fe",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inveg-gravel-high-erosion-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.sol": "eed7b154231780423af732be258a28cc170ac1b2eeb9275d561b47b986ad597e",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs": {
+      "H1.soil.dat": "f37520c9bc6666b53b44315cd6bb09b73b7c9fed7cd94c876fac9e948e4acc88",
+      "H1.ebe.dat": "edf914e6ba73e3fa56b069bee381064bcbf1c5da71aa6a1f7a39063ca674b3a4",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "bce6a7a5600aa1414b9d7e8444412772e5856dec376d23c9ee02e476218e1787",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.loss.dat": "af22a671e6b78a47f6c60ff4f8058cb390a37c946a63dae3bca0b4176f9edf2b",
+      "H1.element.dat": "1807eed3f29427ecd6e423619ba3d92a22f5da12067500d9a445231bf2430340"
+    },
+    "source_record_sha256": "4f6492c563b334b5ce88f97a705faf656a19f7004a89bf09afaf2a983fd78643",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inveg-gravel-high-rock-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.sol": "a51073b9365a19469cf3e795dc88762b70b3696c4b710f79ee176cc7c2ccf0c8",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.soil.dat": "3b1562a7c010934af00c8b686b098954832c443f7e615992d747a9fa3df08333",
+      "H1.ebe.dat": "8623e35593470e587c47b8597775694ebeeb341fe260d6d367b0c9979ef19a30",
+      "H1.wat.dat": "7913dd3abb96e775b25fd376b0af63219857f800e8a885c99bc19183a5dc2098",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.element.dat": "2d8abfd59a037c2e3619039bb63c8973115db4a585ebca41420a0ccc4e244497",
+      "H1.loss.dat": "28463fe1d9fdb572e99538136253d00a619d85073dcce93b9fc4c1db6d14203c",
+      "H1.pass.dat": "363fb6ed1b968822dffdf07fa637ea404ce6f26fe3d2609d11000d308221c551"
+    },
+    "source_record_sha256": "e1216aa1ea52d9e6756ac4ec59e1a3d463a047c361a6489496648c1c2d627d72",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          15  -7.28291459E-03   4.6921689063310623E-003",
+    "stdout_sha256": "cd4dc4bf344c67c9294f98e27cde6470945c5cc43e59e393136e0ef05970b981",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 611.56656,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 252.5292,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 285.22692,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inveg-paved-high-roles-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.loss.dat": "c4711c613e6ff297946b1cacaf15340f4f5c84fc311a6a9861fdc5fad803aff5",
+      "H1.pass.dat": "2678f692f00cd3078c4777a61bd28122751c69a0db4fa0b283651ec9d2e37fc9",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.element.dat": "b19fb8f16d165accc675aa816be8bbda9e7234e0b69207902e9900d164fc9c5d",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "ff8d1ae3c3f2146c8477ffef38c5fc8935d148943aa9684c0325c1ee73abac8d",
+      "H1.soil.dat": "3f432350b37a7d6c17cebbf04b8702dcdb48ca8b16857cd10951609a2ce5f662"
+    },
+    "source_record_sha256": "a989c968b7a848050ae9b50435123881617a64542ab64ba9278ef6d43f146d12",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "birmingham-clay-inveg-paved-high-erosion-project",
+    "inputs": {
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.sol": "97d2e21825d67895fa9d672801a3b86e2a0edb2b163978368f0ae367fe5434f9",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+    },
+    "outputs": {
+      "H1.soil.dat": "f8e03b19963f956101abe51f7d9ac81fce88147aac89606598ed3fbcc17a796e",
+      "H1.ebe.dat": "efa406712a4e2cbc3b3066c988abc4a27547bae94505cc46dc799f6c0ae8c879",
+      "H1.element.dat": "65d4004576be81725115f6f6ae17d558674e57dedf406602ba19c7e9b21ddf06",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "33cb30da199b77757eff637dd31aaada80d7a317b64fa1bc8ca9e0aaedd632be",
+      "H1.loss.dat": "b411690de68209d9fd657a1b5313c51ab70b19b3c71360c5b210843b0ce40c1b",
+      "H1.pass.dat": "32176551e27aab21382afbe528e9a8185f4a0dc2ab2c3663e47c65e39d062d2e"
+    },
+    "source_record_sha256": "0377263bfd483c58bc5a44ceb847d32c48a6ac6b6e4c8a93c78a81aab1101934",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            6           2          17  -6.38169050E-03   4.2110960930585861E-003",
+    "stdout_sha256": "c6b378369e1903de699ff5214b6b6e93c14be602bab25810e336c0bff5bf100c",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 238.56228000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 611.56656,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 97.76447999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 106.46856,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 142.11648,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 318.17807999999997,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 342.82512,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 109.51776,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 96.88536,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 145.92996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 142.11648,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 289.99476,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 299.52252,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 109.51776,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 73.39068,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 70.587,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 142.11648,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 166.96944,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 203.1678,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 109.51776,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 45.80136,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 100.36224,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 142.11648,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 132.6996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 138.35052,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 109.51776,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 21.3444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 24.22728,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 227.78316,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 359.0136,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 468.93528000000003,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 242.75196,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 157.32684,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 217.40796,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 227.78316,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 253.7964,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 302.6826,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 242.75196,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 61.68096,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 73.23624,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 227.78316,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 238.16232000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 340.71444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 242.75196,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 119.88504,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 179.09496,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 227.78316,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 125.92008,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 145.06271999999998,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 242.75196,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 23.67288,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 28.58724,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 20.74644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 45.50436,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 50.84244,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-gravel-none-roles-project",
+    "inputs": {
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4"
+    },
+    "outputs": {
+      "H1.pass.dat": "52392916a9fc5d9eb9ab8d30933d94b495c05115a5c26f5a41d6086560f6deee",
+      "H1.loss.dat": "f81e1420613184c232a2e003fad67a82a6e213813dfa6e062d337136c011704f",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.element.dat": "d5abbb935771ce25c1f2be8880b46dafc6c6022eb9757f745d45d8a519030659",
+      "H1.ebe.dat": "aa74c5af4f0696c6ac55de92b3935c18df809c3afe02062390dfb50f950c28b7",
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838"
+    },
+    "source_record_sha256": "113fa54b7ff9e18feac01b314ab806c2c57c9c9d1a7641ecf66400beacdbaf1e",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-gravel-none-erosion-project",
+    "inputs": {
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "0af5244d735721d33b4e796ece3893bf812135c07075c0f8e956ae2655419497",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+    },
+    "outputs": {
+      "H1.ebe.dat": "09f1eb6884c5206443ba2dfe7fb5d2ed3e524059642c5592cf484b116d16674a",
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838",
+      "H1.pass.dat": "dc48091495c8f91265a1aaecd2bc165cb99feffe255b9f57974d45dd9abf205e",
+      "H1.element.dat": "8bf612b6fefe2b2549b0a23aea733283d0ddd4ff53e0c84d90e29678483a5802",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.loss.dat": "bbcbfba0a6404ad7f388facf20e931a7b0d7579f47a95332289d52387683b052",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "584fa637f14647d68671b982d34b46301bd1c7723605903663622f8735452ee6",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-gravel-none-rock-project",
+    "inputs": {
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "c0595e151ef8f5141c457a0ad18135882dd274d82f1648af95b76013c1b4cdf9"
+    },
+    "outputs": {
+      "H1.loss.dat": "9f11011c9caf4928851504c4c43ffbbea755df8670d5f5150dc548272982f0a3",
+      "H1.pass.dat": "9d2f51c280fe13bdc4d208d2267ae96a570e5bfb1b1b93483b825a5e96a75536",
+      "H1.element.dat": "4c3c6a22bfeb198b50f00377d232f759dbf6f13d159cb86b651ff33e1cf881e7",
+      "H1.wat.dat": "cc457e47ddc290e0e1885861d83a8ac516db0638290f6414dbf8ca543454ac6f",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.soil.dat": "6d23e4265d5ae2fc85d95a20e18a046c8714f6fb26d4903736b43ff3c2e2f171",
+      "H1.ebe.dat": "ed240727f8bc9f4ce7fb455cf0e071934ca3595c46efdf866150c0ab6e097f3a"
+    },
+    "source_record_sha256": "f72cd7263f39eb93d640aec5f0d0576b18080f90b4fc9dffad8751c21dbedd62",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          11  -5.49830729E-03   2.8343191370368004E-003",
+    "stdout_sha256": "4fa21fc97142e5ebdba9a0424b2d1cfb56170266bd02e9d5a6d012c200b52b9b",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 20.74644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 37.62396,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-paved-high-rock-project",
+    "inputs": {
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "4dbdb4523e1321f2ef50ae5b3fd5ed179e399835cb9cd1c50d956d6ab2ca9115",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.ebe.dat": "ef59be4f6d688a4a858bd504c8b15f526a498e862767265d19795bf99756e5d3",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.loss.dat": "a003d02f4eb3538340d7fe7179fbef28af0d7e3d227f214faf713357f8e6740c",
+      "H1.pass.dat": "bf0a29312dc08b995fff17fbb86552b54466b8d0a7ae49db06982df72a60712c",
+      "H1.element.dat": "0919d069c935c690900e66f14502e7fdeb959d44a9f68ebfc586471cbdc88f0e",
+      "H1.soil.dat": "0d142cc56d1bac268602e19ec8104eddd615f34d0ac6b00df7c59722561c397d",
+      "H1.wat.dat": "f0daf70ff963aa9cd58cb10cd577ce120f3a1fb02927243dba8708b4a217c552"
+    },
+    "source_record_sha256": "ebfc2f60c99398013089c27dc2e0bce822899eafb137a372fa5ad4fd07889d81",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:          341           2          24  -2.65902258E-03   1.0988495778292418E-003",
+    "stdout_sha256": "71ff798938e873e7f65c955ffc33718bdb1322d49456fd993d7f944a08c19de6",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-paved-none-roles-project",
+    "inputs": {
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc"
+    },
+    "outputs": {
+      "H1.element.dat": "d5abbb935771ce25c1f2be8880b46dafc6c6022eb9757f745d45d8a519030659",
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838",
+      "H1.ebe.dat": "aa74c5af4f0696c6ac55de92b3935c18df809c3afe02062390dfb50f950c28b7",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.loss.dat": "f81e1420613184c232a2e003fad67a82a6e213813dfa6e062d337136c011704f",
+      "H1.pass.dat": "52392916a9fc5d9eb9ab8d30933d94b495c05115a5c26f5a41d6086560f6deee"
+    },
+    "source_record_sha256": "df9a7a16d37893df56d8149f342fd557982003438f0feccc9b4db688af8a991d",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inbare-paved-none-erosion-project",
+    "inputs": {
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.sol": "0dee53dec7ac661e241d78b934f2ebf4c63d19e6ba596f8d048d9fa3ac02d00f",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.element.dat": "4d344dd11ba410bca76120a3f20978975318f2779ff7f8985acfe1a43f640660",
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838",
+      "H1.pass.dat": "14a4dec4e70712c90b61f71ee78ef6c71134cad2e57029a9bd1a93a4023ff7a1",
+      "H1.loss.dat": "76157affe7c49e479e1d6544e369ea66b92669aad0db96512c63ba6dbb5d344e",
+      "H1.ebe.dat": "d64e1104bef4db2612a576fda96bb4e91b5ff7f6baf8599d3657a204c600e333",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "61f5990c83c1ed88fb1acbaed88b2b0fed23e792b019efb3aa6449e216297c61",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.50192,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 20.74644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 27.866519999999998,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 33.83424,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-gravel-none-roles-project",
+    "inputs": {
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4"
+    },
+    "outputs": {
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838",
+      "H1.ebe.dat": "aa74c5af4f0696c6ac55de92b3935c18df809c3afe02062390dfb50f950c28b7",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.loss.dat": "f81e1420613184c232a2e003fad67a82a6e213813dfa6e062d337136c011704f",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.element.dat": "d5abbb935771ce25c1f2be8880b46dafc6c6022eb9757f745d45d8a519030659",
+      "H1.pass.dat": "52392916a9fc5d9eb9ab8d30933d94b495c05115a5c26f5a41d6086560f6deee"
+    },
+    "source_record_sha256": "d371821ba1e6cb71bcaa08dfff2496fa2cf84b7653e80e44766fa5275cd5d739",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-gravel-none-erosion-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "8c22238254616863dbb628ca1eb2ee9106fd4f37b5dc98380828f617a82dde10",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+    },
+    "outputs": {
+      "H1.element.dat": "ce4e2ac07ed6d5c1e5e7abe9b134fac083519d18f4db353f97dc06cf183780a9",
+      "H1.soil.dat": "fd35a7001e11696839d4422d746e9488ff273ac568cab44622aead0d2820ec87",
+      "H1.ebe.dat": "66671c55c38e72cf5ca4fbfdd663de53f854ecddef5e0230198596eaeac072ed",
+      "H1.loss.dat": "5fdaadc1080a137790ccc3b5faa122c381f9396d4e3c0444be8414017751f4c4",
+      "H1.pass.dat": "48e3d12e77052fbeaa43c37908984fc448ce688b01af27bd5c3be1629f34af6c",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "683657d0641b0d7c2811e9d65fa5bdb62dfa5e7fb99d70b3d79c7c22af55bf05",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-gravel-none-rock-project",
+    "inputs": {
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.sol": "d83cafe0d345eda1ec471b7d46f7d840d6f7b8477674c7ae0bf6f4abc70d443b",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc"
+    },
+    "outputs": {
+      "H1.soil.dat": "7c7176aabfafdbf2c5d6859e31c79c39b3dc774f0c1949a58873e95a8689a67e",
+      "H1.wat.dat": "cc457e47ddc290e0e1885861d83a8ac516db0638290f6414dbf8ca543454ac6f",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.loss.dat": "0924d4bd6facd2a00faf13ff6523731a64f14e886709f6218e0588f2bc729ebe",
+      "H1.ebe.dat": "b0bd6dd8f22112f7977f663bd569e55334190393ebca2c784981d44fc13c85ec",
+      "H1.element.dat": "0c5fe5acdd8df774773e863c6f77cb0eebda09faca8479b40db718e1e794a6dc",
+      "H1.pass.dat": "412084fca4d507e36b6f71d0268a5877f09d90015140cd368fec1c17f81c229c"
+    },
+    "source_record_sha256": "4eaf600368a3316f44e87f99f2f0ae51cf5230faaeff0ba5df6858c83e72d425",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          11  -5.49830729E-03   2.8343191370368004E-003",
+    "stdout_sha256": "4fa21fc97142e5ebdba9a0424b2d1cfb56170266bd02e9d5a6d012c200b52b9b",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 20.74644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 14.061960000000001,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-paved-high-rock-project",
+    "inputs": {
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "0f7e7ad5a28c2e34ff1e8c85db927d8a40c9ad0c71247fe9cc48fabe7d4bdeee",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+    },
+    "outputs": {
+      "H1.wat.dat": "f0daf70ff963aa9cd58cb10cd577ce120f3a1fb02927243dba8708b4a217c552",
+      "H1.soil.dat": "5f2596c2a678e44e91c18654de98d7fb3db11f88bbfd2789b2bd6df3b7d4b24a",
+      "H1.loss.dat": "1e0c8b35d8afcf6c4ab2d5e2e23e9dde38f069ef00ef27b99c82ce908961382e",
+      "H1.element.dat": "c19f6c09d674f0637790592dee0ab633b914a77105c1ddc666b3437f9c611c99",
+      "H1.ebe.dat": "cb9928ae1c1380ef6dd4a9915ca55866fcdf766483c2d0401f9656ff9b494954",
+      "H1.pass.dat": "9d17cfe17aa7605e01ee443c835ad28afba64a1c1a8f6d856f953c0bf9f15764",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "b7dafed13fe4d48a4a08a19094a36960717fe219d617ec32cfc89b49990618cb",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:          341           2          24  -2.65902258E-03   1.0988495778292418E-003",
+    "stdout_sha256": "71ff798938e873e7f65c955ffc33718bdb1322d49456fd993d7f944a08c19de6",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-paved-none-roles-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5"
+    },
+    "outputs": {
+      "H1.pass.dat": "52392916a9fc5d9eb9ab8d30933d94b495c05115a5c26f5a41d6086560f6deee",
+      "H1.loss.dat": "f81e1420613184c232a2e003fad67a82a6e213813dfa6e062d337136c011704f",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "aa74c5af4f0696c6ac55de92b3935c18df809c3afe02062390dfb50f950c28b7",
+      "H1.element.dat": "d5abbb935771ce25c1f2be8880b46dafc6c6022eb9757f745d45d8a519030659",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.soil.dat": "a3e26e74b9b52130ca10257d32f044c0a7e152d3e3de1c2a7714bff7da53e838"
+    },
+    "source_record_sha256": "25f809de2289e8617366ed9faf7e3ac34d255e3c777b9f4651f6408d78893008",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-sand-inveg-paved-none-erosion-project",
+    "inputs": {
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "3d192c6b6dab723fece66f2a910077f2a4aca625ac9df1e5ad71ca6a125f38cc",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+    },
+    "outputs": {
+      "H1.element.dat": "4597407e2f3603c0f53747b955a2886fbf2f906817a98d7e72be67a0f000166e",
+      "H1.soil.dat": "fd35a7001e11696839d4422d746e9488ff273ac568cab44622aead0d2820ec87",
+      "H1.wat.dat": "4e62d294f7452f9499e130ed672ad78cb7b3168d5ad91676d9054498ac340bcc",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "2ec7370a6ae0952fc6e48a5fe956929075cf5960d036bf0773e5f97ac3587c38",
+      "H1.ebe.dat": "720fe6a3e0cd762521e7d44c8fe63a097fd7ee4538e58ca02dbb0b2cc8751a79",
+      "H1.loss.dat": "d779b21ad27dae3cdfe9bac2b8f4c12bbb2851eac0a81f9c79ea4274edb15f15"
+    },
+    "source_record_sha256": "ff5f59b2f3a2c4e415d16bc440c8e51c7d7a75d7eee7d5d13fa2276334a1aac4",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          12  -4.97633079E-03   2.8540524654090405E-003",
+    "stdout_sha256": "b12ab924a36174f87605c912bd55de16ba669ff2a28696057a2b9fdaceca3109",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 2.36808,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 35.79444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 43.55604,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 55.733039999999995,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inbare-gravel-none-roles-project",
+    "inputs": {
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.pass.dat": "fadcc7d3820c7a3c40ac0bc5d6198da86ded6880930453ef8116ae90445b09c0",
+      "H1.ebe.dat": "911b6333042327b944e6aec8743ce98581eb1ac305e725b7ec206992981609e7",
+      "H1.loss.dat": "fd63c54881dcaaf2ed66a679313a24fd55c54fb8e9fcee6671573b7f217de30b",
+      "H1.soil.dat": "70868f86f65c9d0c03cca0141175efcfa9d2e98ad84d206549ae2c1e280e4111",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.element.dat": "32bdefbff6318bb99d172ac7b015f8a0b402750854d9d5838f3f3087378f48db"
+    },
+    "source_record_sha256": "26455c80b3393792afcdcefefa2cb99973fbde97d2cf4ae244f16547e0cf21b3",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inbare-gravel-none-erosion-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.sol": "7f601471bf27cbe76a57a33875cdeb7c90244cf785661fd262b34e2ea50ed928",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+    },
+    "outputs": {
+      "H1.pass.dat": "c9dd8fe1cade4a5254122cbd88bb05cacc7cee4bac78131f8ec70a0d43bf328d",
+      "H1.ebe.dat": "713af7a286dca395e23363b06ea1f80e205dbf73ae9a215327000d4cf6b568b2",
+      "H1.loss.dat": "dad54f33b1ec1040468de269c7f2134ea74c27e1970c0124771c437f3c9ffa18",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.element.dat": "51dfdeeee748fe1572b0f7e37c787730dbb98b6696e46c9d783d4768ff12a67a",
+      "H1.soil.dat": "9a2e3f68e0b10998647476fa345a18a7ef98970f0125b9a858f2bb1f8d3ce722"
+    },
+    "source_record_sha256": "915dcdb2098543db4094dc2f4fdf994b3ade72941849eef35bd889a94e64690a",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 23.85504,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 35.79444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 27.260640000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 27.87444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inbare-paved-none-roles-project",
+    "inputs": {
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc"
+    },
+    "outputs": {
+      "H1.ebe.dat": "911b6333042327b944e6aec8743ce98581eb1ac305e725b7ec206992981609e7",
+      "H1.element.dat": "32bdefbff6318bb99d172ac7b015f8a0b402750854d9d5838f3f3087378f48db",
+      "H1.soil.dat": "70868f86f65c9d0c03cca0141175efcfa9d2e98ad84d206549ae2c1e280e4111",
+      "H1.pass.dat": "fadcc7d3820c7a3c40ac0bc5d6198da86ded6880930453ef8116ae90445b09c0",
+      "H1.loss.dat": "fd63c54881dcaaf2ed66a679313a24fd55c54fb8e9fcee6671573b7f217de30b",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3"
+    },
+    "source_record_sha256": "c35f40a3953154b00d8fc264533a05d59b2af7bd7b458297e1a1c610439ddc77",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inbare-paved-none-erosion-project",
+    "inputs": {
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "09ef2ed7e12feec8ce113c655ef7cb7b3cd00d611d5323ade54df4af7986cf3a",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645"
+    },
+    "outputs": {
+      "H1.ebe.dat": "e15fa1f1caf568d477ea0274150d6c9a6a623b057932139d2c233c9b770d98ca",
+      "H1.soil.dat": "9a2e3f68e0b10998647476fa345a18a7ef98970f0125b9a858f2bb1f8d3ce722",
+      "H1.element.dat": "091e01d41a842729bf10d5a3b71211790225b1efd76caa353586b0ff5a94f5c8",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.loss.dat": "d32998adb74a97f39ac110f2cfa131b0c1373c848a7a79fa1921f979004ada06",
+      "H1.pass.dat": "97f938eb259b79a2eb1a89f69c1592bfffc5a63c22bc1b4974f9e1b2892d3a03",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "03e822b5c9fb6d4e70c593d997aa55e0265e1c159ff91e2870375ba0ec4ec805",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.28244,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 35.79444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 26.722080000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 41.73444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inveg-gravel-none-roles-project",
+    "inputs": {
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4"
+    },
+    "outputs": {
+      "H1.pass.dat": "fadcc7d3820c7a3c40ac0bc5d6198da86ded6880930453ef8116ae90445b09c0",
+      "H1.loss.dat": "fd63c54881dcaaf2ed66a679313a24fd55c54fb8e9fcee6671573b7f217de30b",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.element.dat": "32bdefbff6318bb99d172ac7b015f8a0b402750854d9d5838f3f3087378f48db",
+      "H1.ebe.dat": "911b6333042327b944e6aec8743ce98581eb1ac305e725b7ec206992981609e7",
+      "H1.soil.dat": "70868f86f65c9d0c03cca0141175efcfa9d2e98ad84d206549ae2c1e280e4111"
+    },
+    "source_record_sha256": "c22d74c2a8a3f95a68ac2aae52066cf384b4ee9066849425f36a5b6313731f4e",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inveg-gravel-none-erosion-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "7d71e5153ba6851bdbf3f2d9d8dee655e4ed6d90b4502e745dd1d008ff9a86d4",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.element.dat": "b4efa7f1bd8975f2ad2d62f1b37baf971e86d559ced50b929c07a55ab7ae2a6e",
+      "H1.soil.dat": "d494e6304c045768219224d1948fea7e7346e6cd232e44b7d446272477a0a80b",
+      "H1.loss.dat": "37da6d98cf01ccbb04fc483f94a0c338c61b03cc8f595366626abdebd74f19b4",
+      "H1.pass.dat": "773042cd4ae94ed35da3fde899565bc10ed48c8ec0b1fc10ba228e6835131026",
+      "H1.ebe.dat": "c5257ded26cfb9f4e43695234a30751b5b5ef664fbfe4f51e9dc76153da709c9",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "35e6b33fd80a16824d2a0c90be2983bce328eeab614fda14c4ca79be388d34bf",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 19.64952,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 35.79444,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 8.034839999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.6722,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inveg-paved-none-roles-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "bd8e90cadf2d1b80f4d1929cf718b2ba15294991bd4a55b6e1c9f43bce2d8042",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "911b6333042327b944e6aec8743ce98581eb1ac305e725b7ec206992981609e7",
+      "H1.pass.dat": "fadcc7d3820c7a3c40ac0bc5d6198da86ded6880930453ef8116ae90445b09c0",
+      "H1.loss.dat": "fd63c54881dcaaf2ed66a679313a24fd55c54fb8e9fcee6671573b7f217de30b",
+      "H1.soil.dat": "70868f86f65c9d0c03cca0141175efcfa9d2e98ad84d206549ae2c1e280e4111",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.element.dat": "32bdefbff6318bb99d172ac7b015f8a0b402750854d9d5838f3f3087378f48db"
+    },
+    "source_record_sha256": "9dd63939f7b28cfdecd3ac8fe225dac0df86f2035e9d42f1bae585439f52dfa2",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "name": "flagstaff-clay-inveg-paved-none-erosion-project",
+    "inputs": {
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "bd766f5c3be3ae2f0b41a91d047d812b8eb1d8636252a86ad737e00305952641",
+      "p1.cli": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5"
+    },
+    "outputs": {
+      "H1.soil.dat": "d494e6304c045768219224d1948fea7e7346e6cd232e44b7d446272477a0a80b",
+      "H1.element.dat": "10156ee45fa39934aa7ba7b4fdc7dfcc5605070a41744e8c7a1500ed5b50f217",
+      "H1.wat.dat": "eb7e7a40a14aa80cdc881579d4f9cb6ee34772b70f779759de2bb614921d23e3",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.ebe.dat": "cf741f9113e2bdb09c2821c7119911c7c7b3e417a0bd9be63e5707de17517d18",
+      "H1.loss.dat": "7ef3009d2321965d01498d88a44c86102bdb7bd42144b68ba7c1632875275577",
+      "H1.pass.dat": "4a827fe0f98f6c195cadded4c722b9fcf29e4c3a13bd0cd3ceacd7dd2f8fcb11"
+    },
+    "source_record_sha256": "9bae45860a4954f8dc2d717a4b0712211690ae8e518f15d4ff724c85bfe445dc",
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:           87           2          20  -5.34911314E-03   1.4637438580393791E-003",
+    "stdout_sha256": "4d0ec2488ae03624dea6cee273a8a324ce27579e1c4a0a1e1ce9409a11e0b350",
+    "stderr_sha256": "84caf851125a860cf4bd6128d8582ed0240682fbc4a1fb4acb5c8f1cff8edd7a"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 2.6017200000000003,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.81308,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 19.40796,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 17.08344,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 6.181559999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 5.243040000000001,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.5042,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.81308,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 18.18432,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 13.47984,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 6.181559999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 3.9996,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 3.0848400000000002,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.81308,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 5.17572,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 8.32392,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 6.181559999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1.82556,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 4.9381200000000005,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.81308,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 3.465,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 4.257,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 6.181559999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 0.57024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "loam",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 0.64548,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 9.6228,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 16.02612,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 21.42756,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.84644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 7.40916,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 8.20116,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 9.6228,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 12.418560000000001,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 13.66992,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.84644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 3.04128,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inbare",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 3.16404,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 9.6228,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 9.48024,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 13.09176,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.84644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 5.19552,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 6.221159999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 9.6228,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 4.8430800000000005,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "high",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 4.22136,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "roles",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 10.84644,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "erosion",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 0.8078399999999999,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "paved",
+      "traffic": "none",
+      "variant": "rock",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 0.72864,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "pmet_fallback_notices": 3
+  }
+]

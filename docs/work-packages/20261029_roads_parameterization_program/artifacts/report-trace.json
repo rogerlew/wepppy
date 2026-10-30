@@ -1,0 +1,39 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261029/report-trace-v7",
+  "outputs_byte_identical": {
+    "H1.plot.dat": true,
+    "H1.pass.dat": true,
+    "H1.loss.dat": true,
+    "H1.wat.dat": true,
+    "H1.soil.dat": true,
+    "H1.ebe.dat": true,
+    "H1.element.dat": true
+  },
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+  "source_sha256": {
+    "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+    "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+  },
+  "runtime_libraries": {
+    "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+    "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+    "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+    "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+    "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+    "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+  },
+  "debugger_script_sha256": "42822ca247c7d7ff9229455a660e6373ec7d7bb13996438520624e48d9e1f6aa",
+  "debugger_log_sha256": "a708454958e10718611b299efe10f3f8f605b426829c88deab37a2cf5630c991",
+  "events": [
+    [
+      "0",
+      "3.23706",
+      "0",
+      "3",
+      "2003",
+      "5"
+    ]
+  ],
+  "scope": "One fully parity-verified case, not blanket reconciliation"
+}

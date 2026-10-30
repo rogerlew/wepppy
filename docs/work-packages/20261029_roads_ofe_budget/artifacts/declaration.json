@@ -1,0 +1,88 @@
+{
+  "panel": [
+    [
+      "site",
+      "sand",
+      "outunrut",
+      "gravel",
+      "high"
+    ],
+    [
+      "site",
+      "clay",
+      "outunrut",
+      "paved",
+      "high"
+    ],
+    [
+      "birmingham",
+      "clay",
+      "outunrut",
+      "paved",
+      "low"
+    ],
+    [
+      "site",
+      "sand",
+      "outrut",
+      "gravel",
+      "high"
+    ],
+    [
+      "denver",
+      "loam",
+      "outrut",
+      "gravel",
+      "low"
+    ],
+    [
+      "charleston",
+      "silt",
+      "inveg",
+      "gravel",
+      "low"
+    ]
+  ],
+  "variants": [
+    "000",
+    "001",
+    "010",
+    "011",
+    "100",
+    "101",
+    "110",
+    "111",
+    "format"
+  ],
+  "factor_order": [
+    "road",
+    "fill",
+    "buffer"
+  ],
+  "hydraulic_fields": [
+    "ksatadj",
+    "ksatfac",
+    "ksatrec",
+    "horizon.ksat"
+  ],
+  "fixed_erosion": "bare road, bare fill, forest buffer; format anchor separate",
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "native_source_sha256": {
+    "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+    "watbal_hourly.for": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+    "outfil.for": "bee4ec4ec33e7702d146e424a87bb9669542523f5946b26784d8180479fc53b2",
+    "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0",
+    "sedout.for": "3e05e4594c56c2b05eaa24f5ed2de8d1c2db39565131783ea6907f1648d13120",
+    "cavloss.inc": "4aaba2e93bf707747962df0747e385f1f708520982c29e5403a88e2077aa99a2",
+    "watbal.for": "99059777f215b9b8e65f89f513c5f74ec431e1b347ad6d1e39fa7af3346f12b7"
+  },
+  "source_sha256": {
+    "docs/work-packages/20261029_roads_ofe_budget/artifacts/study.py": "ad80c6c9042f8132e256babcb7ee3a55c151efc9666b43580947c4e305a1c25f",
+    "docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py": "274fb1bedd1538f41d7a53fe71d9e2df57a843231ab827d0588f4b8935309c4c",
+    "docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "9d6babff56f8d6e9e87c4a6abc3b48b9e9e55f98f91c532e0018bf73e1667d17",
+    "wepppy/wepp/soils/horizon_boundary.py": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170",
+    "wepp_runner/wepp_runner.py": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+    "wepp_runner/templates/hillslope.template": "b9af5a0098758c2d53d66d98d5c09bba7327f5a43ffed531e6fe986f63e680db"
+  }
+}

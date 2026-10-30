@@ -1,0 +1,22 @@
+{
+  "output-semantics.md": "59fcf2e554942d0c3fc718308c6d1e14c187589efbb31b33343bbbd71ff556b9",
+  "summary.csv": "8b72af84023b9567087fae385ca6a8c838b3dd8423530e79c6a6adccf37d54d4",
+  "profile-depth-audit.json": "27896d9eab7c4e86766cf3f81af372f82b4e914d0631edcac8f58406d2714500",
+  "study.py": "ad80c6c9042f8132e256babcb7ee3a55c151efc9666b43580947c4e305a1c25f",
+  "summarize.py": "f228e1a65869caea83a91367d46f4f5ec1d2272253dc97419aca07bf247c3020",
+  "lower-boundary-source-audit.json": "cc391ad05e20379f3a411658272528a5b7441b5ae917d333ffa31eaf699eae0f",
+  "test-results.json": "bf76f6ca66d909228fa3b0cf247b72a22fa7552546c23e66b2dc3c02dc8a52f3",
+  "results.json": "4cff79d2718f77aaaa41c9cd817590236f221bc7ddd93389a9476e46e4c99ad7",
+  "native-reader-provenance.json": "d38bee39018ac19f0ca315f44d8aaf687f68b4009ca651992cf48d4c26fa6690",
+  "provenance.json": "5ff8b1f9ea62d53af319b652bf6087a004ff9d326e0c5e8a3c51aa5be2167b6d",
+  "accounting.py": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+  "ofe-budgets.png": "54ca2c5eea8f10b56f832efe4eb685553b47a309b4fd1f6f2d30ccc0acb71aa7",
+  "analysis-attempts.json": "94495953c48b131f8f414b508303daf39b62ee2d85518ec7686fdeec380f7071",
+  "independent-reaggregation.json": "08b720755374b8bbb0761ec31125b025d6979aa4acf0b0f6d9038c97e17ae7f8",
+  "prior-reproduction.json": "bbfb03d92b1ce5b2dcba80fc9d6132a4d2395af880db11e22cfb816a70b1f5cb",
+  "review.md": "a5aa4d7b5f6de5f990435e752767520c1fed9037e69a811410160bd65fa53d35",
+  "acceptance.json": "ac451dbeaf5efa79e80ff2f7dcfcf5c2ce616b3e9a6316ed379e31a6cc905587",
+  "run-evidence.json": "99a093c447f5be1e6a0a72331f3ed80d4a89d9d8de7a45f14d61681ab71b1d47",
+  "effects.json": "f1e4655202727026eb27a7dd6e3fb8e734406926a8934d473847fa3a0c4928df",
+  "declaration.json": "2d363acc43b5aebfb60fb756c83c2f3898d02718ab0ee0b2eebf62c571ff5c98"
+}

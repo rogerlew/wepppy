@@ -1,0 +1,53 @@
+{
+  "trace_root": "/wc1/runs/ro/roads-parameterization-program-20261029/hourly-water-trace-v2",
+  "before": {
+    "fin": -0.022576984,
+    "rain(iplane)": 0.0412000045,
+    "plaint(iplane)": 0.0,
+    "resint(iplane)": 0.00262361835,
+    "pintlv(iplane)": 0.0,
+    "wmelt(iplane)": 0.0,
+    "irdept(iplane)": 0.0,
+    "iraplo(iplane)": 0.0,
+    "ui_HUrunf": 0.00584476441,
+    "runoff(iplane-1)": 0.00584476441,
+    "runoff(iplane)": 0.00970193464,
+    "efflen(iplane-1)": 60.9599991,
+    "efflen(iplane)": 65.5299988,
+    "slplen(iplane)": 4.57000017
+  },
+  "after": {
+    "fin": -0.0611533709,
+    "rain(iplane)": 0.0412000045,
+    "plaint(iplane)": 0.0,
+    "resint(iplane)": 0.00262361835,
+    "pintlv(iplane)": 0.0,
+    "wmelt(iplane)": 0.0,
+    "irdept(iplane)": 0.0,
+    "iraplo(iplane)": 0.0,
+    "ui_HUrunf": 0.00584476441,
+    "runoff(iplane-1)": 0.00584476441,
+    "runoff(iplane)": 0.00970193464,
+    "efflen(iplane-1)": 60.9599991,
+    "efflen(iplane)": 65.5299988,
+    "slplen(iplane)": 4.57000017
+  },
+  "discarded_input_mm": 38.576386899999996,
+  "net_local_input_mm": 38.57638615,
+  "identity_residual_mm": 7.499999996052331e-07,
+  "initial_mobile_storage_mm": 50.23150611668825,
+  "outputs_byte_identical": {
+    "H1.loss.dat": true,
+    "H1.pass.dat": true,
+    "H1.wat.dat": true,
+    "H1.plot.dat": true,
+    "H1.soil.dat": true,
+    "H1.element.dat": true,
+    "H1.ebe.dat": true
+  },
+  "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+  "source_sha256": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+  "debugger_log_sha256": "dd91caba7549d97c0a2c45aa310998d121137f845c32c7941f3661313230cf3c",
+  "proposed_patch_sha256": "a29b63f4ca843efb739f79da89a3c015f61b053a5c97089eba58c491bb9fa445",
+  "limitation": "Observed defect proven; proposed source patch has not been built or evaluated. Daily counterpart has analogous formula and different allocation semantics; non-Roads regression scope required."
+}

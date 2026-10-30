@@ -1,0 +1,434 @@
+{
+  "roles": {
+    "cases": 96,
+    "within": 88,
+    "native_failures": 8,
+    "negative_cases": 0,
+    "unreconciled": 16,
+    "ebe_mismatch_cases": 8,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 32
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 24
+        },
+        "site": {
+          "cases": 32,
+          "within": 32
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 20
+        },
+        "loam": {
+          "cases": 24,
+          "within": 24
+        },
+        "sand": {
+          "cases": 24,
+          "within": 20
+        },
+        "silt": {
+          "cases": 24,
+          "within": 24
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 44
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 44
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 44
+        },
+        "paved": {
+          "cases": 48,
+          "within": 44
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 48
+        },
+        "none": {
+          "cases": 48,
+          "within": 40
+        }
+      }
+    }
+  },
+  "erosion": {
+    "cases": 96,
+    "within": 85,
+    "native_failures": 8,
+    "negative_cases": 0,
+    "unreconciled": 13,
+    "ebe_mismatch_cases": 5,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 31
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 23
+        },
+        "site": {
+          "cases": 32,
+          "within": 31
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 20
+        },
+        "loam": {
+          "cases": 24,
+          "within": 21
+        },
+        "sand": {
+          "cases": 24,
+          "within": 20
+        },
+        "silt": {
+          "cases": 24,
+          "within": 24
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 44
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 41
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 44
+        },
+        "paved": {
+          "cases": 48,
+          "within": 41
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 48
+        },
+        "none": {
+          "cases": 48,
+          "within": 37
+        }
+      }
+    }
+  },
+  "rock": {
+    "cases": 96,
+    "within": 89,
+    "native_failures": 6,
+    "negative_cases": 0,
+    "unreconciled": 10,
+    "ebe_mismatch_cases": 4,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 30
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 28
+        },
+        "site": {
+          "cases": 32,
+          "within": 31
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 22
+        },
+        "loam": {
+          "cases": 24,
+          "within": 23
+        },
+        "sand": {
+          "cases": 24,
+          "within": 20
+        },
+        "silt": {
+          "cases": 24,
+          "within": 24
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 45
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 44
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 44
+        },
+        "paved": {
+          "cases": 48,
+          "within": 45
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 44
+        },
+        "none": {
+          "cases": 48,
+          "within": 45
+        }
+      }
+    }
+  },
+  "compact1": {
+    "cases": 96,
+    "within": 75,
+    "native_failures": 20,
+    "negative_cases": 0,
+    "unreconciled": 20,
+    "ebe_mismatch_cases": 0,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 28
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 16
+        },
+        "site": {
+          "cases": 32,
+          "within": 31
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 16
+        },
+        "loam": {
+          "cases": 24,
+          "within": 23
+        },
+        "sand": {
+          "cases": 24,
+          "within": 12
+        },
+        "silt": {
+          "cases": 24,
+          "within": 24
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 38
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 37
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 38
+        },
+        "paved": {
+          "cases": 48,
+          "within": 37
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 40
+        },
+        "none": {
+          "cases": 48,
+          "within": 35
+        }
+      }
+    }
+  },
+  "compact3": {
+    "cases": 96,
+    "within": 78,
+    "native_failures": 18,
+    "negative_cases": 0,
+    "unreconciled": 18,
+    "ebe_mismatch_cases": 0,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 22
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 28
+        },
+        "site": {
+          "cases": 32,
+          "within": 28
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 18
+        },
+        "loam": {
+          "cases": 24,
+          "within": 20
+        },
+        "sand": {
+          "cases": 24,
+          "within": 16
+        },
+        "silt": {
+          "cases": 24,
+          "within": 24
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 39
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 39
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 44
+        },
+        "paved": {
+          "cases": 48,
+          "within": 34
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 38
+        },
+        "none": {
+          "cases": 48,
+          "within": 40
+        }
+      }
+    }
+  },
+  "compact10": {
+    "cases": 96,
+    "within": 86,
+    "native_failures": 6,
+    "negative_cases": 0,
+    "unreconciled": 10,
+    "ebe_mismatch_cases": 5,
+    "groups": {
+      "climate": {
+        "birmingham": {
+          "cases": 32,
+          "within": 27
+        },
+        "flagstaff": {
+          "cases": 32,
+          "within": 28
+        },
+        "site": {
+          "cases": 32,
+          "within": 31
+        }
+      },
+      "soil": {
+        "clay": {
+          "cases": 24,
+          "within": 24
+        },
+        "loam": {
+          "cases": 24,
+          "within": 21
+        },
+        "sand": {
+          "cases": 24,
+          "within": 18
+        },
+        "silt": {
+          "cases": 24,
+          "within": 23
+        }
+      },
+      "design": {
+        "inbare": {
+          "cases": 48,
+          "within": 45
+        },
+        "inveg": {
+          "cases": 48,
+          "within": 41
+        }
+      },
+      "surface": {
+        "gravel": {
+          "cases": 48,
+          "within": 46
+        },
+        "paved": {
+          "cases": 48,
+          "within": 40
+        }
+      },
+      "traffic": {
+        "high": {
+          "cases": 48,
+          "within": 46
+        },
+        "none": {
+          "cases": 48,
+          "within": 40
+        }
+      }
+    }
+  }
+}

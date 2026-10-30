@@ -1,0 +1,17 @@
+{
+  "soil-survey-manual": {
+    "url": "https://www.nrcs.usda.gov/sites/default/files/2022-09/The-Soil-Survey-Manual.pdf",
+    "sha256": "3a47659a14a8d9f39afb32116d316d5097ab406886e3269cb2fc5794b538b931",
+    "bytes": 18096773
+  },
+  "soil-survey-handbook": {
+    "url": "https://directives.nrcs.usda.gov/sites/default/files2/1725389663/National%20Soil%20Survey%20Handbook%20%28entire%20handbook%29.pdf",
+    "sha256": "3a4ca129f6e2442b0dec21e5dc1fed3d4d20002a328234834af1baaf4e3b5260",
+    "bytes": 11795683
+  },
+  "wu-dun-2005": {
+    "url": "https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/subsurface.pdf",
+    "sha256": "516e09da626321f0c9093f995e78f5899ce58c5da63e64ff0a1d2302c147600e",
+    "bytes": 89760
+  }
+}

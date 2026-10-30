@@ -1,0 +1,12 @@
+{
+  "root": "/wc1/runs/ro/roads-ofe-budget-20261029-v2",
+  "batch": "factorial-v1",
+  "hashes": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_ofe_budget/artifacts/accounting.py": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+    "/workdir/wepppyo3/release/linux/py312/wepppyo3/__init__.py": "de19b64c347a426430b7242a85768149a306d63bf8124b3f02e05f3d1905ea1b",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_element_interchange.py": "3ef87fd496be28350d7ef404242ee2fc2baeeee8e48a756d5dba1400ce7e8a07",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_wat_interchange.py": "3435339407ed768adf5378be2b1d52ee54100fdfb58daabb687317f9ade0820a",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_ebe_interchange.py": "7439dcf7faf97208cac29db6f0eb99159347a2c4c30ff46d521c4b5c96ca8bc4"
+  },
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd"
+}

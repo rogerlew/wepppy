@@ -1,0 +1,13 @@
+{
+  "hashes": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/analyze.py": "a6e8d930114af96680392c1f667e9ce1a0ed05168f36ac368f4c0dc439390fc2",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/study.py": "194530fe41116de11d95eaa9261e47a7dfc4a95419ce70dc4a38a02b96beab7f",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_ofe_budget/artifacts/accounting.py": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "/workdir/wepppyo3/release/linux/py312/wepppyo3/__init__.py": "de19b64c347a426430b7242a85768149a306d63bf8124b3f02e05f3d1905ea1b",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_element_interchange.py": "3ef87fd496be28350d7ef404242ee2fc2baeeee8e48a756d5dba1400ce7e8a07",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_wat_interchange.py": "3435339407ed768adf5378be2b1d52ee54100fdfb58daabb687317f9ade0820a",
+    "/workdir/wepppy/wepppy/wepp/interchange/hill_ebe_interchange.py": "7439dcf7faf97208cac29db6f0eb99159347a2c4c30ff46d521c4b5c96ca8bc4"
+  },
+  "declaration_sha256": "8f78d2d0a78b7b750ae4e27a0e7ee320b9b97072783e6b906193aee9f35e2f34"
+}

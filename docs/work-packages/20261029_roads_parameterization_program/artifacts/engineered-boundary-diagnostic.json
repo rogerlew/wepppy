@@ -1,0 +1,971 @@
+[
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 395.09316,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "70a7282f81cc5e6072c0748bd956ffb75969e50d0221cf1303063fe0630822ef"
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 378.90864,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "7175e7d5e66b9bf90c006e9aac94149eca41e0410baad23a546c360904d3fd75"
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "loam",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 393.01812,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "14589e84a2ba7af5b7971b8bcdc43a7e8b722b4915f5fffe31c0038203f205c3"
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 1351.95984,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "63b52a447f2d42d7a5c0a245a8cda3de9ff656943488050ee8689e40135c4f45"
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 842.69592,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "0644fe7cc2f5fe06a0cc973770101ceae8f75b10d4cce42f006ddc78a954eab7"
+  },
+  {
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 862.44048,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "ef99e4981917aeaa111dd64b7a973cc34e21c8b54ccad25e679cd63230640059"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-gravel-none-erosion_road_cap_fill-project",
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "0114b09e8538c6ba57e1717edd9757ae154acc56a2fdc5a6c7660a5ea8bad83d",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4"
+    },
+    "outputs": {
+      "H1.element.dat": "05b8d17ada26b6369aeb3fb494d11ba574ee83ed0a55e9f27638cafaa5396e24",
+      "H1.ebe.dat": "c12c19033ef2e7ba1832477cdf9259a0ac47c2d91eda3917b72559762d1bd859",
+      "H1.soil.dat": "0c747cc37a95bfe6190c257843dda7d276db54a0a2188c508fd0d6e20748bd0f",
+      "H1.pass.dat": "36f52b754e35619a910cea9fda20e37121cb501f4eef709850d35b7c06e457f7",
+      "H1.loss.dat": "e5de09c64d7a359fd413c8b6360415d5fbac3df4665f44ea5946dc94e4787db6",
+      "H1.wat.dat": "987d871d3b1c7a568dcb568e4b5d5a9eb95b0f5dfa581e21042d6c8afec62ff2",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "d31a76bb325a694d539ce4edc67922636a8ad875deacc71088752e539a84e4ea",
+    "soil_readback": [
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 500000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "1",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 1.512
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 8e-05,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "forest",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "1.5",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      }
+    ],
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            9           2          17  -2.47022673E-03   2.1058658603578806E-003",
+    "stdout_sha256": "065c074f324800e72fb8a37a33577d36224015edf90ba7cb47b6e9f9dd8fef97",
+    "stderr_sha256": "cb94cd747dbb27448580efc7f8b50b9194eda7cb2f1929f344ee2f852b2ad358"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-gravel-none-erosion_road_cap_buffer-project",
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "p1.sol": "0cd336d535e7d29dc577e4f37a41a20c04b6429c472d99ba729e551f0520d666",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs": {
+      "H1.ebe.dat": "c12c19033ef2e7ba1832477cdf9259a0ac47c2d91eda3917b72559762d1bd859",
+      "H1.soil.dat": "c1167ec0f8a0218d5f4d0bebc4f7f37f6597d88f0621d24826bd9ecd0ec2e657",
+      "H1.element.dat": "51b245efbdbeb66ef06a357ca2d249b0dcdc2e4489ac3ad5f48d87624397598b",
+      "H1.pass.dat": "23ab65d8cb9710bf9ca141048d568b8575ff757485c5eee3637bf9ac5cb3c549",
+      "H1.loss.dat": "e5de09c64d7a359fd413c8b6360415d5fbac3df4665f44ea5946dc94e4787db6",
+      "H1.wat.dat": "933bc86707eab80de809cf07bd3ac9ac4da4e988d291b0396c4c9933eb350016",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+    },
+    "source_record_sha256": "d31a76bb325a694d539ce4edc67922636a8ad875deacc71088752e539a84e4ea",
+    "soil_readback": [
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 500000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "1",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 8e-05,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "forest",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "1.5",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 1.512
+        }
+      }
+    ],
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            9           2          20  -2.46943883E-03   2.4257467593997717E-003",
+    "stdout_sha256": "0211e67c9b84ebee33c8ff880e9f68c160b8fc6202db410913c1e77b5f5cbfb4",
+    "stderr_sha256": "cb94cd747dbb27448580efc7f8b50b9194eda7cb2f1929f344ee2f852b2ad358"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "name": "birmingham-sand-inbare-gravel-none-erosion_road_cap_both-project",
+    "inputs": {
+      "p1.man": "2ba5f7daaf00dca177d765d5f0f9ccb8425d51def78473f4442e89a31bcc39d4",
+      "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+      "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+      "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+      "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "d3d61720c4f04ca29d074b51ad1faeb2bf18710f72bee511b38226f68b259da0",
+      "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.loss.dat": "e5de09c64d7a359fd413c8b6360415d5fbac3df4665f44ea5946dc94e4787db6",
+      "H1.pass.dat": "f10ca088551cb288480d7f416696d57fb6e904bdb324da9a9c27a3f4ee4a6902",
+      "H1.ebe.dat": "c12c19033ef2e7ba1832477cdf9259a0ac47c2d91eda3917b72559762d1bd859",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.element.dat": "8beca5ec05ad8d96f744d00efa2b524ffe5027a904dac13f12fc0bbcc675ed6a",
+      "H1.wat.dat": "a9f81d154e917fe275051662c048cdf7fd75d35ce430d9b861a3ef2348d3c4aa",
+      "H1.soil.dat": "5bf4652cd487662e586a3658c259729794ab05da91e7023877d0f9ad2480a6f7"
+    },
+    "source_record_sha256": "d31a76bb325a694d539ce4edc67922636a8ad875deacc71088752e539a84e4ea",
+    "soil_readback": [
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 500000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 0.0001,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "1",
+        "luse": "bare",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "100",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 1.512
+        }
+      },
+      {
+        "slid": "Bushvalley cobbly sandy loam, 5 to 40 percent slopes",
+        "texid": "CB-SL",
+        "nsl": 3,
+        "salb": 0.16,
+        "sat": 0.75,
+        "ki": 400000,
+        "kr": 8e-05,
+        "shcrit": 2,
+        "avke": null,
+        "horizons": [
+          {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          {
+            "solthk": 200.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          },
+          {
+            "solthk": 400.0,
+            "bd": 1.4,
+            "ksat": 9.72,
+            "anisotropy": 10.0,
+            "fc": 0.314,
+            "wp": 0.198,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 68.5
+          }
+        ],
+        "ksatadj": "0",
+        "luse": "forest",
+        "stext": "sand loam",
+        "uksat": null,
+        "texid_enum": null,
+        "lkeff": null,
+        "ksatfac": "1.5",
+        "ksatrec": "0.3",
+        "res_lyr": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 1.512
+        }
+      }
+    ],
+    "status": "native_failure",
+    "returncode": 1,
+    "reason": " HOURLY_WATER_UNMET day,ofe,hour,demand,available:            9           2          17  -2.47022673E-03   2.1058658603578806E-003",
+    "stdout_sha256": "065c074f324800e72fb8a37a33577d36224015edf90ba7cb47b6e9f9dd8fef97",
+    "stderr_sha256": "cb94cd747dbb27448580efc7f8b50b9194eda7cb2f1929f344ee2f852b2ad358"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 632.80404,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "1e77ebcf563a2c9040b5bd07b941a3810bf3c221bb2b8aed2a99a26773424852"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 650.30328,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "caa24f18683526813ff6d9b331df487ba8cb4afc3b45902435188bec75568df2"
+  },
+  {
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 633.67128,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "a553f22c9d289055852b657675c9f454e8f87276a34280e1677d75451ca4bbfb"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 23.64912,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "1c9ec2af2c66e2a4bfcd30ebae4d0790a5e3acac2c9fd4a98572c5d1f98b7aba"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 23.84712,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "36b394dbb6049c906a81b730a26927a37553c202dd0108865a10d9e251f506c1"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 23.65308,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "52ae9c84453fea4496af8197488226fec9c13c8b6b6ceef73a31ff25d571b60f"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_fill",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 16.224120000000003,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "dbef411c157665b22aed2e23506136ddb11b516829ecac751bcfbb60c326c093"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_buffer",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 16.25976,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "764ea01dfde6935db4c021b0a396f9a4e219e5cc4e94f5061693345d5d87985e"
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "clay",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap_both",
+      "runtime": "project"
+    },
+    "status": "completed",
+    "export_kg_yr": 16.22016,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "record_sha256": "04bd808bf95919f73557914be801296d77e50e3e373872ac3da7567c0647fa23"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "profile": "site-sand-outunrut-gravel-high",
+    "path": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/factorial-v1/site-sand-outunrut-gravel-high-legacy-legacy/record.json",
+    "sha256": "89edbe0aec3f4473907ff7be7bb86c065c74a1ccfe021f87da24ce3d7c9a068f",
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    }
+  },
+  {
+    "profile": "site-clay-outunrut-paved-high",
+    "path": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/factorial-v1/site-clay-outunrut-paved-high-legacy-legacy/record.json",
+    "sha256": "f15d1b0ee7f02d69808220a5993227512aa86dfc0548507595fcfe97133822df",
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    }
+  },
+  {
+    "profile": "birmingham-clay-outunrut-paved-low",
+    "path": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/factorial-v1/birmingham-clay-outunrut-paved-low-legacy-legacy/record.json",
+    "sha256": "36307e6ee991df14fdf57ba3e2af34d80ec0c1715d24c0faad2239607ddd69c0",
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    }
+  },
+  {
+    "profile": "denver-loam-outrut-gravel-low",
+    "path": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/factorial-v1/denver-loam-outrut-gravel-low-legacy-legacy/record.json",
+    "sha256": "71900bfa5417fe9e9d3d6075427eff31dad365329d2c6b93c3a61b2031fb47ae",
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    }
+  }
+]

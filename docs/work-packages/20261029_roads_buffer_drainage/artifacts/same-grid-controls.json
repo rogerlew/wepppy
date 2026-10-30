@@ -1,0 +1,42 @@
+[
+  {
+    "profile": "site-sand-outunrut-gravel-high",
+    "drainage": "current",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "site-sand-outunrut-gravel-high",
+    "drainage": "source",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "site-clay-outunrut-paved-high",
+    "drainage": "current",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "site-clay-outunrut-paved-high",
+    "drainage": "source",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "birmingham-clay-outunrut-paved-low",
+    "drainage": "current",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "birmingham-clay-outunrut-paved-low",
+    "drainage": "source",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "denver-loam-outrut-gravel-low",
+    "drainage": "current",
+    "native_outputs_identical": true
+  },
+  {
+    "profile": "denver-loam-outrut-gravel-low",
+    "drainage": "source",
+    "native_outputs_identical": true
+  }
+]

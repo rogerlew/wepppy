@@ -1,0 +1,17 @@
+[
+  {
+    "attempt": "analysis-v1",
+    "executed_source_sha256": "8971aa1c18d761700eb21ab17a927fd330ceb5800e822ad9542f3de4beb8579e",
+    "status": "failed_retained"
+  },
+  {
+    "attempt": "analysis-v2",
+    "executed_source_sha256": "4fbb980b988f0af683117a1c17762841e966ef0a9b7c25c3a6d9605a8abea1f3",
+    "status": "failed_retained"
+  },
+  {
+    "attempt": "analysis-v3",
+    "executed_source_sha256": "ddafcac72d8f467b1ad0ca97cf27a5425f65c452d16f78edaf1a8123629ac383",
+    "status": "complete_with_explicit_reconciliation_failures"
+  }
+]

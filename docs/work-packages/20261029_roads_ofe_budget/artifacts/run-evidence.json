@@ -1,0 +1,2334 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-000",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "8566f4604bea57301fc0cc3f480fd783323036e925aa182503c2ae02f519c1e6"
+    },
+    "outputs": {
+      "H1.soil.dat": "0745be14e7b98994f21ae1c326e08a5cc58f4a5b1e300682d13994551f560f0b",
+      "H1.element.dat": "963010fd95e6a68d1131b34f88ba91cc8b993dec780f680be8d99d98ee37d74c",
+      "H1.wat.dat": "940a0b317da3967ce3feebf132bb20d89a8d24bed4ce6c1315f0426fb30c4968",
+      "H1.plot.dat": "181bd07f51defe25c3d576fe7ee3af855595c90eff89ecedc317fbbce002f838",
+      "H1.ebe.dat": "f08390b06eef874b86849156c59c7816bc411794e35f8f9cef38b6b02a1f18a7",
+      "H1.loss.dat": "afa33163528d0dd275cb2bbaeecbf5838e90a7389fdc570b64f6ff6659f0fdd9",
+      "H1.pass.dat": "73f51d9090b46352a504ef01f230791c5e692120e05f4252cdeb368f3136828e"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-001",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.sol": "db8875c0e3c05abf02627db8362610092ab5715d97d33de1786956ff70f57d83",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.loss.dat": "0f2c9f814de243d16fb6e233e5ec7d880d602db2dcd7867f41d60d6017904199",
+      "H1.pass.dat": "b35dd02c11e8aaf0c1d25656f353f1c160e16308c2da7e17a893d3126b6bea63",
+      "H1.ebe.dat": "0ae4ca80a9e0a0561104edcc3768744cde4d56d656d0656b86175aa783c1a544",
+      "H1.plot.dat": "94493b18bb06e2bf8be4117edbfd98730d714de3222d1c40f4f92f9b54f22f1b",
+      "H1.element.dat": "6be543ee8f3d7562d35d24f12ed0fac50336c50623c06317841bcd10ab15f919",
+      "H1.wat.dat": "5ed8883c9ea30f47c7b2ddd812f2b2b6175def317a0923654c165d574d42d811",
+      "H1.soil.dat": "68b12c5f74768a979e414d208ba54f9304d92d503895c654bd2cdecba5606ca4"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-010",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "d2abc52d73d75642e0150a60d0d12e4570b36f6b878b4224b0a3fbd685323c70",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3"
+    },
+    "outputs": {
+      "H1.soil.dat": "6407013e50b193ca87e1d61f8bb0e3a9f8a7e3bedf46a8a9191ef7f732667f40",
+      "H1.wat.dat": "915aaf7a7af895e28ad8ea2d32dcd8106ad4526b28f002e6993dc7eabf991996",
+      "H1.element.dat": "6893bae1911c326847169bee8c9af9fda7a8132ea23762667569075962bd1707",
+      "H1.plot.dat": "fa976ebc4187da6e3494ebcea91db1d4cac1a156f56200b5bc9ad733ce59b4e6",
+      "H1.pass.dat": "562fd43895f69466dbccd37b08f4483e174f82c8b65885b55d13bf03910b1567",
+      "H1.loss.dat": "d0e01c6566a07433c49c7a9abcad1577b81e292381ac5e5b977ed99f8008fec0",
+      "H1.ebe.dat": "00dbcb31d1d2adba7b1762e3d1cf517d05ae89694bcc36fef1dfeeb0b4603cab"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-011",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.sol": "5c9c142f0b0dcd6339b2bb05e8ca144300501db9314cbd41f75b46c975e450ae",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.loss.dat": "0b11b763c70c6658d9e32730893a6ce18bcb771538468a84fa6e84a212c7f067",
+      "H1.pass.dat": "5e0f08ec5ccb5639aaeb812cf05106b07bb379ed431584912d3e49396c5e995b",
+      "H1.element.dat": "2d4bf48c1c7013c25cbeb2655928f131cd0616140857d4847048b5f448d76305",
+      "H1.plot.dat": "ebc878f1713c06a45043604e447f2ec4b679120a2c432815f15f52c4fc4ed69c",
+      "H1.wat.dat": "427179a752494fc2425018e2ee20a7c2d402c71d90399750b60bb218b0c2d6f7",
+      "H1.soil.dat": "844dbd555c046af2ba07eef23775caf71c9a5d778482677027f5a273381adf86",
+      "H1.ebe.dat": "6263b0e9914e4b10323aca2c77086dfdc1e21ace516bc47077521f3fb0e2037e"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-100",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "cb83c737ed1cf7e65ffb5245b7d0aa4ef14c0b9ca72eb36f14af2ed0770ca14d",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.element.dat": "059314abce3da1d8f911867a43435207bc0bf0cad3952948da738b0e1c42b496",
+      "H1.plot.dat": "2ccb93637f36d6f096c902d98c39d5ccaf9a3c10b0e2ed01e33ca3cc8062e405",
+      "H1.loss.dat": "a43acdd6dd35e04af19e0b698670dfaae003d205985cb2686b93b9171476fe43",
+      "H1.pass.dat": "7028b74bee49d3161caaa38509d4747fe19b2ba0fe61c6b60de5b571f07b78ae",
+      "H1.wat.dat": "4d550fccb8de0d390a92cde732ca9fc760bd7636ba7099fb417bf731fe48f75a",
+      "H1.soil.dat": "a140918e99348e9554dd4e17c67215d38e783518e1e4c50ec959248015bbbd41",
+      "H1.ebe.dat": "1ab83b1111ad2b6c083a11901def2479754a7b01ec420075ccda6bc3b831447c"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-101",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.sol": "71bdf22831dcb032d3a70baf9598000fdd39a9c8bbd46b89a50028581574de0c",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+    },
+    "outputs": {
+      "H1.loss.dat": "c4399ed5e082f251cce167f4a778cf38e674bd4bbaf3723bc7ae354420ab34ea",
+      "H1.ebe.dat": "29b738a094fe293c6e24b0f5f35ce9c0b06005888ac4b38d5c57cc0fa9818c9a",
+      "H1.pass.dat": "bc7403b6fb64cc8c3997a0943ce8763d12523913ff396e8bed156495e7bcf1e0",
+      "H1.plot.dat": "2dc76c7da966c961b422279deeeed0b4efcd32773554446a710fe45c459c0c38",
+      "H1.wat.dat": "5392556b084d0c71fea8dd7fbac817aee714e13aa9819b367c1d249f4b9c6bb2",
+      "H1.soil.dat": "9ff1b82bb06135efc072ac849568fff60bd8eeb7d9e5406148bd2efcb9cee57b",
+      "H1.element.dat": "70582a7c32196d429bff5e97d040d61553734553ed501bd5b83f7c672cae91a5"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-110",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "0ee0d20baa1772b82a20c5a32e249ad99d93f649e9f8b9c4dfc6e56b9c417113",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3"
+    },
+    "outputs": {
+      "H1.wat.dat": "2a1eda1816382f9d836b43a0c4c07ab16280c418a742b4de56e66666f10aa605",
+      "H1.soil.dat": "e106ccb27dc652c319f77d85485589478f5174d3a800dd9e20584f0e7c7704d7",
+      "H1.ebe.dat": "bbc95200b55384488526cb1d1d0fbdf40f153849ec17e148da1b18849b8f1a0d",
+      "H1.pass.dat": "901341cd5d1e4d4a6fc69601345d4b290964b2bf9f59e0d85c3656ae4241ad2a",
+      "H1.loss.dat": "53299792c324bbd68a582fe564bbcabdf0b6af0dfca490524027589f58bbe8e9",
+      "H1.plot.dat": "37d61e8f0a1ad0cbb541546b3e43ed5bc648c048c2b5859484d871f695f78192",
+      "H1.element.dat": "91e8cbb73ed629b10e444ea8f5fa1a28d5c7b05d30be3738afecff0a80b3b93e"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-111",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "9f636de2e998a8a52ff79faffa88635f5609f23fdb67190669739b3e08551f0a",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2"
+    },
+    "outputs": {
+      "H1.loss.dat": "c8e767864598d792a21d31dbf1fe8eaf6a0f8ddcb9deffedfac54cd230007ed7",
+      "H1.ebe.dat": "c3bbdb8941c3bd9e2c4e7371460ce704dfbbcd7919eda7f4f842475db8dcf358",
+      "H1.pass.dat": "a9fc22f9bc4d55bbc839f0cdfe423300211459d60214af87e2d5ec701c522ae3",
+      "H1.plot.dat": "09de9482fc8f21d09d9936cf4f3d487468da38b9f5794764c90aedc7aee5ea5b",
+      "H1.wat.dat": "19f3a5d4c55d929e10e94364b201f796bbea492af9efefae9f8ee760be7c1e44",
+      "H1.soil.dat": "6f17f93e1ee0cf34322ed17aa97bfab98bfa6053a6d10a2bdcfcf9163e27b466",
+      "H1.element.dat": "90c085013a95867f762aaab4769fbf56f10cd74c5d20cb5daf6d41adf850dc6b"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-format",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "7bfe821734ee92f0acb55d20fbf05024174d3a97aa65dd4f2cbb7c0e6584af56"
+    },
+    "outputs": {
+      "H1.element.dat": "8c82ea735793809dc200e17b4cf5b5e904191d2aacd2da2c289d1f91d31ec0b2",
+      "H1.soil.dat": "d4a7ef096dd95917f276fd0de510a04b827d2bdd47f70c5c348ed8c50e169743",
+      "H1.ebe.dat": "b122622c88d0ca551090209fe8706c94688429b367f6805e8e9a7719dacf9460",
+      "H1.plot.dat": "2cd4c22c8c787d48283aabdd608c61efc5b7a54e301df5f355ffcc6bf1477456",
+      "H1.pass.dat": "e6ee0549dcd78a9b9f354c7ab72a7a78074768acf3790209da109e2186d8d6ca",
+      "H1.wat.dat": "940a0b317da3967ce3feebf132bb20d89a8d24bed4ce6c1315f0426fb30c4968",
+      "H1.loss.dat": "70f3f76e5e2ef39785c199aa9de015f973dcf8e53a99107942a941f2f6d626a2"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-legacy-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db"
+    },
+    "outputs": {
+      "H1.soil.dat": "9dc24559f2db57e14487cf0d3c3ba724ee6e8577f8e883361cda558736ec7894",
+      "H1.ebe.dat": "f935778b4cd9516e7b69419a69055b6d6c8b62b0babc07e0a10c7a1b84498d45",
+      "H1.element.dat": "c766dac084bef9a64f120e1f1e5adc194f655cc61743a8cb2ac805ae02e05fb5",
+      "H1.plot.dat": "c2974e3c6644b5ab34dca001fbc5dfabf557bdb23823ec7ee30ed75cb1861bf0",
+      "H1.pass.dat": "ce5d76c59942eb20c37ef21b67a2477a1b49177bbc0647698dd77ba78527adc7",
+      "H1.loss.dat": "6a6695132f7bfca8b0f2c6d6ebd25accbf42aa1330a1e9bded1194db28642a56",
+      "H1.wat.dat": "fa340b7e41a7cdaa9df5dc952df845ef968d11fc8bced5c1f772bd615822b011"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outunrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.element.dat": "fc40b2a47d72648454ea07bdf8a5c0e9731390d3c85b07468910f6bff8588b64",
+      "H1.wat.dat": "f17a326255ddf4b852061073a739154c2a5097015bc4eb49a50dbd03b3bc8dcc",
+      "H1.plot.dat": "2d635fa23bf3fa83947fe68fb7d06f9d71d925234a6cc314d77f69ee30a17ec4",
+      "H1.loss.dat": "7ff3ab80f64bc846fc3b852e9cd1e0a4651f3baf923231cf95850fc6164e6b8c",
+      "H1.pass.dat": "17c1a4aa6b2b909ee8c1c962676ca2c91e6385356627f60547f90b38026bd70e",
+      "H1.soil.dat": "f33c69c1a0295dbf496d9f5d20b1f81ba6d2ae8dc74f3f0acf3097af93528836",
+      "H1.ebe.dat": "5bcf9a55998c9483e82f61917be1d80cb19908b3d52f4de358a6265f951688e9"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-000",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "a357faaad954741aa22230a876ac841b44504c40488c08804052dfd7a70a8b8d"
+    },
+    "outputs": {
+      "H1.wat.dat": "a0b12d118d9c1f812614c7285db16d28530502b300008b7a3ea9365c028a645c",
+      "H1.soil.dat": "5349a346a175aae3700b85775413a71b3f25dc75680a84d3f9082d773f7b92b9",
+      "H1.loss.dat": "4c5c5e3b32f601b7510f6c0dadb89ca698ead1d02aa8ffb900333659bdaebd24",
+      "H1.pass.dat": "11be27d8ff8cbb79b420c75cd3860d34a15bde50d72c746545c212f4faa25ba0",
+      "H1.ebe.dat": "ec65b2028cbbb02622aa795f3748feb90850c9646ec92cf9078940df9c65826c",
+      "H1.element.dat": "8d40678a86440f48a5d92cf7a8a98b874c8011bee16b1e3961d081b38fed1ba1",
+      "H1.plot.dat": "1a220357c746d3845f8ee4e08b581493fe74f7357ec00d08d1dd4b10e4f9530a"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-001",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "5a817f665133aaf9ad8cc539212aaccaf84a5d968a70e5564d04d5ae2e20a9e0",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2"
+    },
+    "outputs": {
+      "H1.loss.dat": "57085a1b75bcf243d287fc8d0d4ec7043590a3f2fa7bd57b44de4ff6e87f6c5b",
+      "H1.pass.dat": "57d249597389736d1b126d4a8beb603d167f38a69d9dc596d4e4b9d8648c1fc8",
+      "H1.wat.dat": "0be2e0d2b4f4aacb5f3c44379f5f02bf562660445dfc0d3deb92a069392337c5",
+      "H1.plot.dat": "1b0880f501dc195da3e1912ec2b87f6c2b5e35f220aa14984887211ac6629d84",
+      "H1.soil.dat": "d6c8e35e31582cb113a6c4a442169196234b946ea15237a6912a51461fb7db90",
+      "H1.ebe.dat": "2b04f1c4e09642523f7d47e3038b3c13235a6a748b3926358d19b42d1e8984af",
+      "H1.element.dat": "aa40decb0bbc7131d2e802e0fdf587d929754d93920230751e3377afcd6a7def"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-010",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "38b7963593aaa2be759725f89911a34a0a045966a6949da28807faee392de04d",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+    },
+    "outputs": {
+      "H1.ebe.dat": "7e205e6fd23a0dd8f5400823b677705034310130dc601d544cc58d35b59f9ce0",
+      "H1.soil.dat": "6908649f6075a3a53883d0608b00b730c2ac9b74b8648021a820ca5f7927dbc4",
+      "H1.element.dat": "5d5b22efcf3bd40c4fd240883563ad529ae56992fea2518c2179bb5d21ee7981",
+      "H1.plot.dat": "4017df9b61eec601d9f38c2b6d8040aa1a268b558b8dd7037bc06db64ca588bd",
+      "H1.wat.dat": "0f7cb2b8c20ac67ccb2b89406cd41c9b1f34eac0f77fd902be4d524177e7b675",
+      "H1.pass.dat": "9e2c4d0f5e525931a537be96faf544c8fc7f564661ee3239920f516897812d06",
+      "H1.loss.dat": "abab125c1b54d90b7c19dad8257ca52f4c99c773b58c265829b1b4f85e219fca"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-011",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "9c671fd76dc60680711eb38f72cc3c31166ee9f9c70ffcb0ab6dfffbf4de3d24",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+    },
+    "outputs": {
+      "H1.loss.dat": "41e96608cfb308dd8be42348e7fc410bd4218552cd03aa0c27afad7f3a244289",
+      "H1.pass.dat": "5b15a0aff0e6765b16b900632920310bd76fc833f338d99c3fec547c89640c96",
+      "H1.wat.dat": "dd308359e010450ec9fa4ed1cee49dcf7d7419c2ac8203e9109c39844ef30947",
+      "H1.plot.dat": "1dae578fd41389212b269f6bb3e8b0dff43e435a6d636253abba944a30750652",
+      "H1.element.dat": "9a61f0ae61f60d7a391378936e17282680e6d23b8e75c1626ce9aa6d6fd82a0f",
+      "H1.ebe.dat": "575b28e3cb680e571cd6b359523d0b8f9425b7f4207f26199a22f2566c536570",
+      "H1.soil.dat": "d36fffe99cd71cd5013c3bc1837f66848e969019c29e4708df933e9e0b979491"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-100",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "5647201b1ec9f987db9eebb61c818b9246af01b01fb8c11876b324290fc1f128"
+    },
+    "outputs": {
+      "H1.soil.dat": "717f1e0289dcfbbb144de968fd90e1b65556827515df1da81152705ff516dea7",
+      "H1.wat.dat": "81f97353c925bb1b8e77bc81e380eee3bc5b83fd405867210f544ceb56e70392",
+      "H1.loss.dat": "b5cd6d783a0e8ca73cf3e77dd255fa1fa827baf4385df23dc2fe398cb2d2ca81",
+      "H1.pass.dat": "15a3097bfb5fd4deb64b26d931915c16a77d7be2bacafbf32153ad0e25293bb7",
+      "H1.element.dat": "6a7eafceb5fe42ea312ffc00f77dc3166eb0ab14c3280176faf0293b9b29c027",
+      "H1.plot.dat": "77670d67e5daf35af75521ab0d22a7cd61da2edf9713e2c75be48b2df247c1ed",
+      "H1.ebe.dat": "d9e3bff5361d271d9b54f9184fe6a0d53c191138a61d8d7721031cfb92f144a2"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-101",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.sol": "16c235bd92426625582dfd1e13a4f39346f5120ca595151809fbce5a67c85c5d",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.ebe.dat": "ae626f270b3c082711b48cba3716d0d9e7506302126a1709caf78ae696d097a1",
+      "H1.element.dat": "1c28754abb53a3fed7b7fc927a2b9f1646d248bc80787d6e3931525ee682973c",
+      "H1.plot.dat": "0f0b785a72fb64e70e27e73c876ab19c98e97bd9275cee235b58d5d5aebf7307",
+      "H1.loss.dat": "76d448f52f4db853dd5ca3152ba6cbd3e51cd38a13a27d033906de7608c67292",
+      "H1.pass.dat": "108920989b8c2f5f1557701fe882319cd8319a9fe34ecd07c43df89e0ac5908f",
+      "H1.soil.dat": "6762e5e7d13986ffa1a93efd0c41e5af6bd49819bae06c1bd5a52111d05b19a9",
+      "H1.wat.dat": "6f109af9d3accea48fdc6dc2d9f7fea36e5712b4c7c4ed5ede1b5b459b4676c5"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-110",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "6b7c6a65c14b2d4f37c02fd551857ca97a6f030477be675a9af9e450d2a86d9f",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2"
+    },
+    "outputs": {
+      "H1.loss.dat": "586694a13683c202509ca109d3061c42db796c9445738ec4b3f1bd9aae99d803",
+      "H1.pass.dat": "8cf36cfd30b0083947c63a89b7a4ee9f27e3553f330cba48323bd82a381a4050",
+      "H1.plot.dat": "73f5bd78b765d9da08ddfe6a512e083d7b5803d87bbadcb548cc70b58d171aa2",
+      "H1.ebe.dat": "e350cd3e665d44aafcd0c89cce55b17d4449aa4031041abbf17f08c6a8875c58",
+      "H1.element.dat": "e7c41c3ce7851ad6efbb4c88d46474b59d81937ada8e2a38daa500653cd655d5",
+      "H1.soil.dat": "570a3531ab45738ca639da783f45492ab3d66951cdabbac832b28a5effb80a36",
+      "H1.wat.dat": "29580462578fc2867015a6fe339a547376cac0a4eb10646a8c0d0dfee86f9314"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-111",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "a840b3e0f22b8ed8c8289cb801468c95889e910f668db54752b4c984afbb6a85",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "c14e87d4e11180fd0121a8a651daa0cf9fd2f8f190e4f1e4b95e08a26af5634a",
+      "H1.soil.dat": "3839095153f2a26821c66d275b178b8f72ddacef1ffb0bfc5ff49535c1529669",
+      "H1.element.dat": "86c2529784939ec284db13ba0b6dd38e5c5c1e1bbc5c9b8d58f56e64fcdddcd0",
+      "H1.pass.dat": "9babffcfea953b518cf0a0efd702b49340f73527b4541da82077e1e027ed1df8",
+      "H1.loss.dat": "f59109c04b5db3ebc7d2033c8dacb1094c8667613f60317da8d4042660915abb",
+      "H1.plot.dat": "f2ae1901e06abf3216569476518e6245e26709b0927071d26b82d9924e4d806a",
+      "H1.ebe.dat": "274892f6ad3fea3e361c5d6a04e9635c54339d682825dcde3e9b5aaccff9bb90"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-format",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.sol": "097673a7a809990640c62db782fef601daaa5f76975310022b7b70378f318d4a",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+    },
+    "outputs": {
+      "H1.ebe.dat": "cd85c46645880904d16dabd0f0c5b37bce9b4d7f859a4251eca8b6c1f5f0fabd",
+      "H1.element.dat": "9967f425c63db28859de9dd80c170b62b5f2c131b70e56080efdff380c9ef777",
+      "H1.soil.dat": "07f5977e8a920afd29a2342ed085c498e4fc63b994c1b15cad7cb4b57d3d8c9e",
+      "H1.pass.dat": "1f694af76110ed390466cec1638818f5e0b5ec41b651b33a183d5815a5d9480e",
+      "H1.loss.dat": "b240100e44d00870a13ae3d3708208ae65197051ed595755b47ba76f089809f1",
+      "H1.wat.dat": "a0b12d118d9c1f812614c7285db16d28530502b300008b7a3ea9365c028a645c",
+      "H1.plot.dat": "d0024b7314daa1d3f7ea409cd1fcee8ad9e05183d85f2e70a4a9367db6650a6d"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-legacy-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3"
+    },
+    "outputs": {
+      "H1.ebe.dat": "f922de9ef11150c91b97dc1fc2ef0a4356b4e6cd88c91c7a13c48332317de221",
+      "H1.loss.dat": "52a1ee3c704baadcd4f6cd95e7e7b0126ecd1a7d45d20e4f32a92fbff2a1ef59",
+      "H1.pass.dat": "38e606cc8512a9858f0b4f5abd63daa681ef344035182dac282e9baa506459fe",
+      "H1.plot.dat": "76317ecfecc87aa7de411b85e074fff6b9f5a55150bccf81e1f861ae156f070b",
+      "H1.wat.dat": "2ad3dbecdc296db3437a64db27f51458ea3d73feca09c0e8c6f431230dc1345c",
+      "H1.soil.dat": "c73586b19ffd9d7969181a6d7f0b06beff9853dd45331f8c85e20bc45a2092b3",
+      "H1.element.dat": "11c6bbbb7a3d40952fc7351a104548f2cc5b7be9e761a0eba2d3c602d78e425a"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "reference.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "c9ddbc4dc1a60235d500a5979cccc8a3abf87f9915ec49ce9d008a8ad6c0732f"
+    },
+    "outputs": {
+      "H1.plot.dat": "fc621ef55ae065027c6e23931301e795b1c6a42b0f51d60c6e6a48007ecfcb91",
+      "H1.ebe.dat": "9755926d9cbe167df358534c07b6fdefb31a3590dd6fad0498c10e0a9c4062e2",
+      "H1.pass.dat": "d7eb685d6ab9f30c4051ab413dcd46b42680caa0ed21ba953dae1c48dd586515",
+      "H1.loss.dat": "e77ca1f5d56f30a29ae9cecae254745d976aaf2cb8da24f696c5e8b7c13d63d6",
+      "H1.wat.dat": "6cab0f616c981c9e937c88a99b22c0c3c89ac9c6f40ce06e7a1ddf9fff5b68cc",
+      "H1.element.dat": "244c80681095586b83f1796d1a54ad90c63348d535b709fbbf47a4c8b0c3a444",
+      "H1.soil.dat": "77a3de75fe6388ad0683f2c3fed9dc761d4e0f4255d20052e1c238c607b965fa"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-000",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "a357faaad954741aa22230a876ac841b44504c40488c08804052dfd7a70a8b8d",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28"
+    },
+    "outputs": {
+      "H1.loss.dat": "c7fcd610ad05a7597762e875e50b75d90cd7e98904eb77b40b90c8d23c4c945c",
+      "H1.ebe.dat": "51d39a002ca06ed6e1d7ace21eb61294700ba4653f6f3d87a186ccac9bbdd217",
+      "H1.pass.dat": "04bdbb5c33dfd54f165e868c97051cbe7758e9fe3b1034b9e952a9ccb672a6a4",
+      "H1.plot.dat": "3aec1dbe9b70d23cc663b75597adf4ec5166231d8af6a4d2aa6b1f5d0c613bb9",
+      "H1.wat.dat": "4ec88d69e79ebbe68f25d7046a68b084a3c7b3a14b1e314ebbf5b63702696a75",
+      "H1.element.dat": "f87ea022138704a0e604f90f9038549a65068c216ef9f1cdb748714e0cec30c1",
+      "H1.soil.dat": "c13a417d0a6dc9263518ed7b99011d2abe17b8f2524f22e9443f67a8640c6551"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-001",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "5a817f665133aaf9ad8cc539212aaccaf84a5d968a70e5564d04d5ae2e20a9e0",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.soil.dat": "8565ca4c5916a4b7c91a19b5f0a8ddb3d32a6772670b47c9740997bf030ff183",
+      "H1.element.dat": "adbbf49b697afc0a22dc3fb7ee8b2b28dec63d1eb98e183b2bb49ea67d59c6d2",
+      "H1.wat.dat": "ef40a506539cba0b7b6d4b340f366fa825809e337050fe1ee596f3dcfec5b267",
+      "H1.plot.dat": "36ad6ea78b12890b9d405a0ab01597ace5d4f981e18568e487030b35067e355b",
+      "H1.pass.dat": "f29ea6af03e2aafdd611910c2cd1c375ab92925f3d50223033079ab32119835c",
+      "H1.loss.dat": "bac3389c0b3c6ca49334b20aad21268648676ecb425568cfee5e03a3c1ed2161",
+      "H1.ebe.dat": "a5913a3e40b3c2b9febf6dcd62ceaf7afb8598385176da86808842d5d8e1ff16"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-010",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "38b7963593aaa2be759725f89911a34a0a045966a6949da28807faee392de04d",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3"
+    },
+    "outputs": {
+      "H1.soil.dat": "8c9ef96df80599d51e1ef364f643aba92c40dbb431944753449196d5a2279056",
+      "H1.wat.dat": "4f9bebb79c74ff52e3e62e8a2b9bc0fdb129105b9c0bd1d03d03b9d2c923fce5",
+      "H1.element.dat": "c36d52c837995ff2f030d11fbc8d0c96b12bc847e41eb7309e06979bca35e1dd",
+      "H1.plot.dat": "aa807e0188135421d07751d42b8432b460e67b81361cb3905f4f655764258c14",
+      "H1.ebe.dat": "03c63228bcd688ca6fa4a2a47a9d8b18a7fe4cc1752c0ae9a479194ab70ddb04",
+      "H1.pass.dat": "c153643441418c5da53b948cc7da9171a69da4316190b018ee13e01f7155c23b",
+      "H1.loss.dat": "8a58ba3556b636ffd64db64295d8c20b0b2e5ed45bfedd0a6c7810c44ac4ac5b"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-011",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "9c671fd76dc60680711eb38f72cc3c31166ee9f9c70ffcb0ab6dfffbf4de3d24",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275"
+    },
+    "outputs": {
+      "H1.soil.dat": "65f089c8ec85d45897540b85ef7fc91a953571c780b38b77da4bb81669ca16ed",
+      "H1.wat.dat": "f7598ef45c4bf404298cea97af55335fa2a1316394fe76d2b7df3dc51bc0ae71",
+      "H1.element.dat": "dcd8673cabfb9c8bb5552eb2d142e275cf4ea87f0977ef1c34123dd4de3c7e11",
+      "H1.plot.dat": "9abe11acee12e739927765d9aa0c96e1baaba2628c481c2645bf9f84fa78b882",
+      "H1.loss.dat": "3fe4c87098e1cb1110d46f2057f69c006b145921e841972c8a5c5828179a6433",
+      "H1.ebe.dat": "c0b86a00b29951afd422aebf4a9dc0d265efab0d0305edd401bb7e6b2e5ad595",
+      "H1.pass.dat": "8d62b5dff67c20f43a722428910084b0a5de7391633f5363e07407a62f213869"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-100",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.sol": "5647201b1ec9f987db9eebb61c818b9246af01b01fb8c11876b324290fc1f128",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.soil.dat": "41a47dc1368e26f17d3e819b0fba4001b4288a1a29ecea0c13dd8078aad45ab1",
+      "H1.wat.dat": "871050557d5ea81e114acb32192e394183261f95c6ddf3a279d7619b1c167e77",
+      "H1.element.dat": "a8258b74c1a658fcac9c0bd1e5e0ccae8c32325be443a40814481ddaf8dd2890",
+      "H1.plot.dat": "3659332bde7b3817297189761c480a275b7c3d3394cca1b8969539cfd07d4426",
+      "H1.loss.dat": "e39461549c0469320b1a2536d964ef96ed4a3fd4b5a18f7d2bea9070d5a4af8b",
+      "H1.ebe.dat": "afbe97a5c05a1fde81949525a5d38d88fdc183b9ee6333026bd507f36b82636a",
+      "H1.pass.dat": "057246d2dc189caf49f6e1fa2b396cdec838a7ce6ef23ccfe1590a1ddd2ee128"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-101",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.sol": "16c235bd92426625582dfd1e13a4f39346f5120ca595151809fbce5a67c85c5d",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.pass.dat": "9fba810fd3c52fdb20bf5aeae3c2ca0948d2213bb829fddc9e32ae4c7179c02b",
+      "H1.loss.dat": "c391b6120e970e02da606c32b8f39646cf61d9d7a73c466d43513aa723b01cc6",
+      "H1.plot.dat": "3d4828555a885bcba79960cb54a916a9903647122e98fee005d902d51e076361",
+      "H1.wat.dat": "f05452705b0f05e83115dcb174fc8bcf1cb17e1927960922d014dea536bd1c22",
+      "H1.element.dat": "703f3450f893ea17632aa6677ebe695db9086d61338bd5fcfb301677e3d05f01",
+      "H1.soil.dat": "dbddb6d7c0f1fdf9ad6fd2228f3dc761633e3c1e1fcd24b32f5be919509c9bf6",
+      "H1.ebe.dat": "c9ff6987b14494671fd03ff97b73275c663e1516ec1f3516c4079a846ae043e9"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-110",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "6b7c6a65c14b2d4f37c02fd551857ca97a6f030477be675a9af9e450d2a86d9f",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3"
+    },
+    "outputs": {
+      "H1.wat.dat": "c27280c87e118a6846d09c3cad3ba0a700d02eeb027accee3c9e36d79ec754d2",
+      "H1.plot.dat": "5bfe39e496bce844aa8b81a3686882085d3999d09c6b6fafb9c5b98f19affaa8",
+      "H1.element.dat": "68b6e43601ad84451d86dbfd9689cc946a80c24ef79792dfcf0386be5b4fc123",
+      "H1.pass.dat": "8c02054c2123614095c9292322d394d71b3a7e3b03ef8876acb3cd9e3d1c7900",
+      "H1.loss.dat": "6a9f0aad437f39c96e5ce81a41dd8d5ed1c476a6bc3db33e2e9a3a0a065beaf0",
+      "H1.ebe.dat": "17172a4de38fba0063135efe27e8ccbecc33966be496e664ae52287b862c20ee",
+      "H1.soil.dat": "b98036342d538fe6d92d47a63fc4f8c7cd71991e82d9450a7cd438a7a5f56374"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-111",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "a840b3e0f22b8ed8c8289cb801468c95889e910f668db54752b4c984afbb6a85",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3"
+    },
+    "outputs": {
+      "H1.wat.dat": "ff47a49fa4183d4c20b3e68a0eb270b78042d62a77fa929db01744b12ed8d66d",
+      "H1.plot.dat": "cef824678e9c451ad4d3438cf0ddf749b8f58ce41045d159f790ad53ea94d14f",
+      "H1.pass.dat": "c4fec681624ad254854c204bf5c10753145ab10506d7c6e93595468a54b4bbe8",
+      "H1.element.dat": "f9a00450e90b3678dc14fc0cde201e5fddb48b6711e0f054206f07e5b612e6df",
+      "H1.loss.dat": "89758d34d6ac14abd3fa74ffdd16abab53654e8a2f18ce0461d2d54e6e019961",
+      "H1.ebe.dat": "7e211d1de58ad1a2e9a24a8d7e33908925539dbbfe7a95811713e49391c9fad9",
+      "H1.soil.dat": "ef61c525708cb32307dba52b2bc7d3a2814be60f2f2ab30a466ddb429bedc5c9"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-format",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.sol": "097673a7a809990640c62db782fef601daaa5f76975310022b7b70378f318d4a",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28"
+    },
+    "outputs": {
+      "H1.soil.dat": "497ed59bb29f54b29182a6192c5ac624146eda50dafbc3ef72c3b0fd9c6ca65c",
+      "H1.element.dat": "ba1076106de0677b11f1d563694265d46dfdf3a623237bddd9b12e335fcd3504",
+      "H1.wat.dat": "4ec88d69e79ebbe68f25d7046a68b084a3c7b3a14b1e314ebbf5b63702696a75",
+      "H1.plot.dat": "41e0e614bf022bd4c69aa29606dc1f1106f4dba946ba8e579cf9705d484b61f6",
+      "H1.pass.dat": "60c09310a592c6385444545b5ddf9d18d72d8318dfcba22dea78eb873482a57d",
+      "H1.loss.dat": "3235a07fa71201a70c792e2a7856d9f2ff97766ca7714e415043527ca583fb33",
+      "H1.ebe.dat": "f4eac2a7a776976d24876cb002afc294a3896cdaea08dff2bdf40170ed5de5b6"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-legacy-legacy",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275"
+    },
+    "outputs": {
+      "H1.wat.dat": "0a2b17462136e153dc6c0d674ca1f3f63f53447808afb3e6cbe12ffdc0b56a7a",
+      "H1.soil.dat": "d5614d10c0cf2513f8936ac14a4294c43fd6e1a81249943a63cb34b6fcbd29b5",
+      "H1.loss.dat": "8d4092bf3c42010feac9052a18a83702e51f7b4630965d6fc3ddecce5b5d8174",
+      "H1.element.dat": "b8fcdca79c9c7f93275abf7de2305eac9f91f6c24cfcc34b79c0e522b06a990f",
+      "H1.pass.dat": "70a5c3a8a163c99ac8e8def1e1e7c484006832f70a44cb757160d8ba3513b933",
+      "H1.ebe.dat": "0e1b65bde15c05b2cd0507bc996a7061237012697a7c5b52ba9bfaad24f88268",
+      "H1.plot.dat": "27aa9b225a87d49e001784594494f7cfc1e5e0d8e52af26d55ec6f92315fb29e"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-legacy",
+    "case": {
+      "climate": "birmingham",
+      "soil": "clay",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+      "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "reference.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "normalized-3pclay2.sol": "3b76cbcc6d3e783351da3f7364b5ea4a36e6b00e01c01138e7b55930e53067a3",
+      "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+      "p1.sol": "f6de4241a7a41f959457664e86a660ddde5ae0f139c64b61d2ab18378c86ba28"
+    },
+    "outputs": {
+      "H1.wat.dat": "cac425b683b84935060651e45bdba7f3190ae0eafb1af3550ad6663bbdd3769c",
+      "H1.soil.dat": "4ce5813a2fde9d322baa449c505f79a3792a82383fa8b0e25b93b34e77725fbc",
+      "H1.ebe.dat": "26008d4eccba5d5a253c298afae555a581d4d6ea72a2504eccec0fdf6d6d2203",
+      "H1.pass.dat": "49b2a79a119a3e0e8ab2534aed12b96185b78772aba581deffaa5db869c73826",
+      "H1.loss.dat": "87be50fa3afa557613924b32c107f2a4ba6f0484df772859d53fb9711d7659df",
+      "H1.plot.dat": "a24d97b50cf1722ed000bc03689e7095eeb6b8a83b28a9782becb1285665447d",
+      "H1.element.dat": "2a32ec185597426109272c22f09748d451ec09f7338380bdfab60f8df74092af"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-000",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.sol": "8566f4604bea57301fc0cc3f480fd783323036e925aa182503c2ae02f519c1e6",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.pass.dat": "1063470eca7b89d894d8d65f2fa1fadd655bd1f3d4fc16484a5db618fdf1c6a2",
+      "H1.loss.dat": "d958399374fdca8c7dd8b04e02a757cae0b6641a23b1370e3cdba5b875694974",
+      "H1.ebe.dat": "694f25b03adad310da63e454e9dd01b0203965cf12ccd299e94f57f3d4299550",
+      "H1.plot.dat": "806c3f7ad559911fd0f92e32f4ce049951b6aac02d2d7d8d1f0f6a6416c637d4",
+      "H1.wat.dat": "b3f600c5a3278cd6b9ee2fddbfb9e8fd45029d92e617c19019a4a2f2644c776c",
+      "H1.soil.dat": "c98ea39308a2e3fe77a81250dd7f092daf2ae41c8bdfb336ae6be5bf705bb6e6",
+      "H1.element.dat": "87cff2bae4b812f4927082d648e011902ad40f30e554646fa15d961b99209854"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-001",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.sol": "db8875c0e3c05abf02627db8362610092ab5715d97d33de1786956ff70f57d83",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.plot.dat": "16993490d752915a198b31d5825e0e1a0035c789d4dbce07f40b1da8c9ef3156",
+      "H1.element.dat": "d9841e8194c0422cbd9f05333b68bef95a8b5b3a2110e900fd13968e5fb19f8e",
+      "H1.wat.dat": "78710ff29aae87cbc5aaa3337a7f2ad8be10ed3c959010c5c909c814dc902842",
+      "H1.pass.dat": "97ac82401d622b74dcd0c62bb769a860036084889615c758bd9d674cd167e72f",
+      "H1.loss.dat": "1d9270b85c98c054cadfe6204db6c64e3a0c76466eae0d427e790890acdb4c14",
+      "H1.soil.dat": "63f1c61af444aebba6a3f7046f2757f27016299723c4128471da63d73b227411",
+      "H1.ebe.dat": "60f65d89c668992298d4d33702284490a37e6df09ba77b8eb4bb6b75638c679b"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-010",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "d2abc52d73d75642e0150a60d0d12e4570b36f6b878b4224b0a3fbd685323c70",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "638ef52339a55a74baa313c092dcbc603b9020e3a6f8b891c481f74a6da4e8e8",
+      "H1.soil.dat": "c5aac3bef3cf1d0bc613e293f168f04736ff7c639bc9df01b1267f8dc9d5f30b",
+      "H1.loss.dat": "46226ec2008a79fc4ca4f30cbf33d78663561e4c96ce52c3929f0e49ace90902",
+      "H1.element.dat": "77ccd472a0befda9400569b6c3c0926ad5e5f50ea6c1613113536f7be80cb64d",
+      "H1.pass.dat": "067c613df8ef8a36e527b57d5a758c7330310b165ce1c5fa057bee212d61242a",
+      "H1.ebe.dat": "41e0770a67c6ffac28c4dd8173e56ca51f1d679cff084e253debbe72eba4f2a5",
+      "H1.plot.dat": "f55ca148604d628a49547d8a2257f5697d7df305f7bc9f53664982bd5dedce12"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-011",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "5c9c142f0b0dcd6339b2bb05e8ca144300501db9314cbd41f75b46c975e450ae",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.ebe.dat": "5942bd4506a2330cf4607f3eb72b051c6681d0d681bb29d1ea2ef63c18c2bf08",
+      "H1.element.dat": "904f0d42fb841878a42238dd1b901b8f2a839dc04b2bfb5550e991504ce22a8b",
+      "H1.soil.dat": "b4044cf8ab1e8dabe1d9349e8c2ffd83f48ba27c15085486c1e8e55edf4364aa",
+      "H1.wat.dat": "0f8d3b6930be3810cef6eb50d337c0bc1783f67c95176a25e4a9fd72f2565f48",
+      "H1.pass.dat": "ad2b76cc328aa1d5d63092fc232f96dc546c724ddcd03ccca552159de046db3f",
+      "H1.loss.dat": "dcd0e7f624921bfecc8b3515fb1dade5765265b2d89a5a6927cdee5162daaad6",
+      "H1.plot.dat": "8b02fb574fd8572a766f4d6a52af2169ab42e5d1a4a9340fe377a0bccb83015a"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-100",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "cb83c737ed1cf7e65ffb5245b7d0aa4ef14c0b9ca72eb36f14af2ed0770ca14d",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "outputs": {
+      "H1.wat.dat": "f777bf5e57d95e074e8c09a6260b189ab77245af855b48de0b4e358264fe827f",
+      "H1.soil.dat": "fe954aa00b2204b7e66050a526da45f4909db1948d5a097cd74dbd725cc9340b",
+      "H1.ebe.dat": "a9cca100cf1f28db755fe97e8316340f91c7786e2fa103f4a97c03b730e72bba",
+      "H1.plot.dat": "df549fe508eb5c3e5a31eee6379741a1d52a60f4b1953c86d09be3d86daef446",
+      "H1.element.dat": "48dc946896e81884dee252f1832e77c1af47f6f5f5ff2e5c1556646b820b1fb2",
+      "H1.pass.dat": "8e7c7953eb1a32fca65724ed9bf5373f20165342678f139963a3e7a06c250bc1",
+      "H1.loss.dat": "674b705026440d3d52234183059f83ebc3e76e2b1a7f91606368ac2c6a4e9d6c"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-101",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.sol": "71bdf22831dcb032d3a70baf9598000fdd39a9c8bbd46b89a50028581574de0c",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.element.dat": "147b5c1273c52edd9c7bbf9715cbc27968bc81f23477d93cc3bd00e8ed1b9ddc",
+      "H1.plot.dat": "d3559f669c2f945cbf49f6909b8accb700f3e18d20392ae4c1f9a661cf6e1471",
+      "H1.wat.dat": "9c70c0a77b6572176836a6e8c776ce265bd8d4d1b6e0771ebe662e8cc5da66be",
+      "H1.loss.dat": "f78b5308ce256db98e40023bd14ac1b5bad2e5b8c634e7cade13144748789fc1",
+      "H1.pass.dat": "0f50114981cf459dd01eaa5d38e877acfaef0de6e92b1250b9d7c4cf21b9c7d9",
+      "H1.soil.dat": "41d76ed9ee8f198c1dcf02546ab67e640a32fa21822c46500d3863ff7249a836",
+      "H1.ebe.dat": "62e6c48d029be929126bedf2df07a2adb6d0e11e32ec08d02245b8bdade5157b"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-110",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "0ee0d20baa1772b82a20c5a32e249ad99d93f649e9f8b9c4dfc6e56b9c417113",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2"
+    },
+    "outputs": {
+      "H1.pass.dat": "5cb7484288311f4d63bc5ac321d2f6f3483650374d331eaf5ee8942f5f75196d",
+      "H1.loss.dat": "d5ba35425f84da472e5c038d73f888dce894587dcc79754301e6515dd9eaf1f2",
+      "H1.wat.dat": "a561cacc53b7ab0776f8e12278f3ef4318a4df97dbf65bc735979bba0466bc38",
+      "H1.plot.dat": "1b27f3422ba82912e77423fd4e36ea8c0a208e245fdd916fee9e5dc0b2fc2229",
+      "H1.element.dat": "917eb8257c1f62bb7e93233a9fb4b58b8f0fe9d18bb11bca0caa97a3d016a79c",
+      "H1.ebe.dat": "312e3e4ead87a4aecde5eaeb302d3b890063c013d3f9eec99799b671a8e43f05",
+      "H1.soil.dat": "b5cd064fda7b81ee75d516689a627bc2934526abc5a12fabf47c3961bae7a999"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-111",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.sol": "9f636de2e998a8a52ff79faffa88635f5609f23fdb67190669739b3e08551f0a",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.plot.dat": "4b9acac587ec933b6c72ec568598b87d429556aeec8712efd1ba281999b3295e",
+      "H1.ebe.dat": "f0855a6d4f2fd388ebdfbdf18c7b88249e95eda392f0edebb140de82c915fbe3",
+      "H1.loss.dat": "aa707b5cdbac9da79cd6a6e16349a7da7c81c0ee586413ae1646e982e9d3fd46",
+      "H1.pass.dat": "5dba48ec4cc3c55e2d7acccfb3b417094943cec68d38ca5407c4ce6932e9b186",
+      "H1.soil.dat": "5aa64901fe9319057b660327f72874cf17ac9c21c2d9cb0154aeabc8acd48242",
+      "H1.wat.dat": "c2b8f9bbe2ed8e783e24439c1e45afddbbd0494845d7aa3b4676c28d88b1b6c4",
+      "H1.element.dat": "4e2d381854cbc6dd93e937cb3dc62b3c8fd085d4fb8199cf8a3e3f7d74f7d3e6"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-format",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "7bfe821734ee92f0acb55d20fbf05024174d3a97aa65dd4f2cbb7c0e6584af56",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.soil.dat": "1182a519418750fff928975916428a20780d2bbc9bf55a29c763aee11318b2b9",
+      "H1.ebe.dat": "b723263662a15d17e0c23bc92bfa9eec80b062e06fda8ad40df02936ce5aba81",
+      "H1.plot.dat": "2b94c8bf6930b84e8ecfe91a00795e21e6a1fd2bc10854b3800eb4a352658343",
+      "H1.element.dat": "0490abb5acc1de02a6dc2fc894706f8728c1a98a969dd974112c125a3fdf26a0",
+      "H1.pass.dat": "58b22e982ce30ca2cc04d345f036d3d58684a2f4f8ad71152305fb40e885feef",
+      "H1.wat.dat": "b3f600c5a3278cd6b9ee2fddbfb9e8fd45029d92e617c19019a4a2f2644c776c",
+      "H1.loss.dat": "ee344be0751494ff37ec4e49f35273b307f642a5679897a1bbeaf374100eee19"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-legacy-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db"
+    },
+    "outputs": {
+      "H1.loss.dat": "f4f72c89164a64e14a3db46206485dc16912dd378daaf3a02482369068654fe5",
+      "H1.element.dat": "48261070307da409dac0ba6c8839b8fc58deb6fd549190a0137282c6b767f75a",
+      "H1.pass.dat": "8c6746816b95b9e907d0c28e29f19325fd84d62799a8ef65f11c857ac077fb47",
+      "H1.wat.dat": "d0821c563b038b4013ea41b5ce8a042fe7fee88fb9fcf192b27f01b71f4e66e8",
+      "H1.plot.dat": "4cd0bd063c89c6ee0751ed0b5e7c246c207bce970922bb791f5a3a4cc3682c1a",
+      "H1.soil.dat": "129f5ff74adfec5e23751582c9dfcccc36f3d4c08492e581626546dd0e134cef",
+      "H1.ebe.dat": "c649eb86fb21b63baa093d28840df6cc29603aa6bf13a99ba48b7537a0fc11c8"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-legacy",
+    "case": {
+      "climate": "site",
+      "soil": "sand",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "outputs": {
+      "H1.wat.dat": "49e63784b13ab42b4bc447c5e9e42b2b81ad018efb32efdbe85dd85c1056f16f",
+      "H1.soil.dat": "58a017de2b9def8e6c2453a71ad18ac8060b563fb04a1c242375986eb7be0e1c",
+      "H1.plot.dat": "5505814cb6be5dfd045a812874ddb5b85d72f8e29408db75a6267dc348278419",
+      "H1.ebe.dat": "d1c987dbc57d2ba38389a4f3f1dd8e288a0e1859399590e1d5fed4e41deb2b61",
+      "H1.pass.dat": "9187d5f300ec90e03982734b8bbfdc23d4e25cd09b3b961b2f69aa85781b3bd7",
+      "H1.loss.dat": "5769e6ff7ead2a6cfcb0822f6213f3d3cd72280f27136e5dbb1b27d50b8be851",
+      "H1.element.dat": "0f2575261015fda1daf47d237cfcc00c1d92048178d36c77ba7ba8b757fb3f06"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-000",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.sol": "91d5a3505c3e85933d62a1e81fae3a5dd46a1a2a6901c9356d713bef409dc3a2",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.ebe.dat": "9d5965beaf0b2463669954e76bcbd09c2707d06c501d12d1d178404a0c8a4c1f",
+      "H1.loss.dat": "387c119f1b3d8de1c59ad0302689858fedf2b2debe1132d5b3e982246a3efb99",
+      "H1.pass.dat": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "H1.element.dat": "bb6681b7c0859ece0fa50207429ed4f93e8d955409a718d3102b94f586b94b73",
+      "H1.plot.dat": "08f4033f72d0b7a8a4a7452cc7ac921594a84eb00f493b546b6053519372f20c",
+      "H1.wat.dat": "99ec35d283957c878b3e1a762cfd5f317deba87b2a802395415f38a66f286220",
+      "H1.soil.dat": "37da6db17e85d9b592072e9ca41ef4e0827b0dfbe0254391db1f9b8457160c05"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-001",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "ef86a83ae579b4471e5bc3eae61a62af41f2f1362c4fe61dd26680a411464ecf",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.ebe.dat": "8309674acf6e245c9c23417b68958bcaf3b5584047358264e7c5a016a613cfbe",
+      "H1.soil.dat": "223ae368bc117c5badaf1d0e0f614f108ac1d4a9411e76078c2e0a29b0ad94cc",
+      "H1.pass.dat": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "H1.element.dat": "f525e04a54579a7fa1f3a696cba2f4d1c4507f5a577fd67a4c1d8b3a615697ed",
+      "H1.loss.dat": "70823073226b98cf9d357d7ec0343bb03595b6c9d5854be976209fcf40adf4af",
+      "H1.wat.dat": "99ec35d283957c878b3e1a762cfd5f317deba87b2a802395415f38a66f286220",
+      "H1.plot.dat": "5d4a5998025226f92bc0263a0589a91e79abbe9fb3dcca52e7de05f8f34320e0"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-010",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "fcda6fcc04b28411d1ae5d80a89ca39ec0b18b32829d385d1c7e3f162b6536f4",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+    },
+    "outputs": {
+      "H1.element.dat": "5b4210dc23d5f7fbc05fd36e70a89c23e16e16edb5fc8c8e5609f99a388b6b4a",
+      "H1.soil.dat": "223d74124c377dbef9bce79ef52a8714d545c69fa65f3bad0d8d5e2bfc031ca6",
+      "H1.ebe.dat": "474b1e0b8eb079d1b885dcbc3582ce03ebb8491279a5a788a684fae474d9a07a",
+      "H1.pass.dat": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "H1.loss.dat": "f2c74f776417f041467c1d561b0b383c29a707be7f419577ee8c82b03218711b",
+      "H1.plot.dat": "ea8031a62494f2033e4a32eb4628c868f5e21781b6a1647113941db118f96cf1",
+      "H1.wat.dat": "b82f128dbd8de99574cd86b3371a381a2358ac50a3c48354dedf8cd45e5448f9"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-011",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "c777f04de17c89ecc90bcb0125c4597c0bd29753f0ec82c165ba73c91589cf1b",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "outputs": {
+      "H1.loss.dat": "87da0a6219342b51cd5caf9f3321cd92d565f9a96450bfcdaa513ff60904ea49",
+      "H1.ebe.dat": "4eddf5c7c86ca87acc596c89b440b381680a92bac978352a195ecf38310a59ba",
+      "H1.pass.dat": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "H1.plot.dat": "457f04712daafb7f9f3276105d35c339aefa52d95df5f59358b8c47b59787839",
+      "H1.wat.dat": "b82f128dbd8de99574cd86b3371a381a2358ac50a3c48354dedf8cd45e5448f9",
+      "H1.soil.dat": "a3275b1822d250aa4aa91e287f1aa057102eab81e24d72bc5d7d89cdb6568b4b",
+      "H1.element.dat": "ab55d4ddb9b3018152ac3cffd97b7c1c791372aa6f68a23e9db9ceb2851e8fa4"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-100",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "4e091eed6e492117d3a680d54cca089dafd9effabea0a485d0852b5654a4b2b6",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8"
+    },
+    "outputs": {
+      "H1.wat.dat": "311c0a6e47bd7d739351fbb1e0af09d6c342d6e262cc1e9c3bf2ff040aaa8e60",
+      "H1.loss.dat": "84d656f7c9fe54e8bc883adb14b3b8fc8569fd2b9222fcf7fe4eed6afdda5170",
+      "H1.pass.dat": "7f674dbd507b6cfc85fb33df9266ccaa2ec015c12efe8149c451c27dc837d41c",
+      "H1.plot.dat": "810a8c8df7a26770a70acf4448cc73812c3e8a0d1dac4cb6fc2dee40f90d9a12",
+      "H1.ebe.dat": "9ff5f1b3eed42696095d008416cf6198d07223d359f7831668a9f6c0092a5930",
+      "H1.element.dat": "44ec266ce18b1a1565f09a6326f68656c81c38ad0e04830d8367e3423c9d4465",
+      "H1.soil.dat": "f037314584502405ac166ef2d7e3d6889fdec1340beda86ae21863e2dad6c17a"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-101",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "896a5f99fd02f2dab4bc55fae851f9ae48df053b0d16cea51c87f64f6db95891"
+    },
+    "outputs": {
+      "H1.soil.dat": "9a0963afe32fe6739557fc00b4f6b70e8db7d20a99468dfc02374fbd58e5db40",
+      "H1.ebe.dat": "2a779735d3763789cd606b27a85110e44581c79dd8aaedccda85480778c7d669",
+      "H1.plot.dat": "8fbe06af8d6f2d51f86f401eeb4c6f7edb68e2fe00bedd7e27d636bec33ed73c",
+      "H1.wat.dat": "e12573ea59a5a1e1423a0f4c3989cc237b7043a1c6c351271543b98311bd84d3",
+      "H1.element.dat": "f612920258d4bcc1dea0e78849af7b16e0344653cc1042fef2b8aa56482d404f",
+      "H1.pass.dat": "2146129c891ac316c7ee152f4afd0f216104084ca68ea9ae890085138b2b90fc",
+      "H1.loss.dat": "97286e2c7068444787973dd131f599db2a984553b483527143aa14b1f5ea28e0"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-110",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.sol": "d35a36ac89d557be8461fb7964e711a77ebfa75b6efb7abc6951ff6f6c1316f6",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.plot.dat": "8a0931b796426fffbbd40d02be9036ac898a64bb3aa388276717b93517d2783a",
+      "H1.loss.dat": "9f24052364d80a6e8c93b9a88e9dc58c359e8195dfd93e13f33d6cc7d70fcba4",
+      "H1.pass.dat": "e4c8239d18ff00a3689708e0943e08542b221b3410a82055898544bea860dbe6",
+      "H1.ebe.dat": "0d11019491d7d39d4fd1bb82bd727a3ffc39327566262586f5e7e8433f2ad2c2",
+      "H1.element.dat": "2e091ae5e0d2e634abac0cdfd5d21bcd892080a6be3e2c6f5eb92c1ae733d770",
+      "H1.soil.dat": "0f8d9580e1ff8ae0e3d54808afca0d8f6c6432a01b024d4bbd6cd3c69f8b7dfd",
+      "H1.wat.dat": "1bdee14f52e7917624a257aa1d51a80afa218d82807b94c2cbc0426e0b9cdbc4"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-111",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "73e51d1cd6eecdc0167f645105b7601c07312bca968451c0b0f7a33c15b34d9a",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.soil.dat": "ddf8b8cba0a43b8417e089ca0ff79bb13ff6704ecee903f5703c5be903d96d6b",
+      "H1.element.dat": "172461ab727827f668308213913b85add67df89e9330e44f8d73e4bc6c642308",
+      "H1.wat.dat": "df5e196728f1fc8674120b1d07dd901d028344eb3589045e2e658277e9c9381b",
+      "H1.plot.dat": "2ac81a07ec57e369bd955df8320335a58a70c57be32a4b355a206c1f1feaf849",
+      "H1.loss.dat": "8044daa4b4d9586761ce4cae6818b521d0ef8fb08a528ba7adda1ddd40b8e7e1",
+      "H1.pass.dat": "2dc45201247f1646d4a2fdac431fac309ccbdd473650feaa85cd455918ddb403",
+      "H1.ebe.dat": "1acfe5e8accaf951102f4d44ddd50afc756e17949a4a3f71d71d9a4f9a1d3509"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-format",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "540dd9274cb02410ef6dbfc812edca40da57935fd0f42e4b7c902fadcda60cec",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "outputs": {
+      "H1.element.dat": "8c5b0abc2bffefe1cc3750674dff5c95ae5fa4a7a867dbec378f6d399898f276",
+      "H1.loss.dat": "416a6f1e032c6c6fe94fe3699f65a2d1f4147dd8c58137c8094d2858047922e9",
+      "H1.pass.dat": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "H1.plot.dat": "7ff779a1faad16e0bebe0fcf6da8a1ada4b8eabf6a8d64392f8f8b7c13e2bd74",
+      "H1.wat.dat": "99ec35d283957c878b3e1a762cfd5f317deba87b2a802395415f38a66f286220",
+      "H1.soil.dat": "1dc4dfc0981de6dc4ddaa04db623843d392b1288882fb45203dfa8a9370bc4cc",
+      "H1.ebe.dat": "8e7bae69dabe0e7148bac9b99b71798033f760dd7816d0018e917e95e0dfe05e"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-legacy-legacy",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+    },
+    "outputs": {
+      "H1.pass.dat": "b93c7b84a4e0b91b1298306b6045cdc5614fb3665e098d11ed53a3c889e7f3d3",
+      "H1.loss.dat": "eda7a6430c8b77b88bad75dca621a7184ce7cf221dcc8f4dc27969a628476e9a",
+      "H1.plot.dat": "6e04df3c039ed5bb3028b4f875c77727a16f4ed4f371fd10425b63adccdc0682",
+      "H1.ebe.dat": "ed89f8e919a7743d67bda4baa0888b67f2915859bb3959c7c3564a9e1d453f38",
+      "H1.element.dat": "6f361ac4281ea69d30d629007068cd318d48ad8b81609b5c2d2b4ce505c8bde0",
+      "H1.soil.dat": "12d4bea42f9c52bd141699177a2bd7bc7869756245548fd4bef4ffe524c66c9e",
+      "H1.wat.dat": "685e73e0a3918c79d80282e9dbe4b394227fe64258c7955cca4996397a886e26"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-legacy",
+    "case": {
+      "climate": "denver",
+      "soil": "loam",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "p1.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.soil.dat": "0d3428754fc3097eb343d0b77e4b494a53a9f7da2df9a8a6f02d5939c81154cf",
+      "H1.wat.dat": "48b89d78b72417d4514c6afb55721b020b57d191eb8dde819590f10fbedb7905",
+      "H1.loss.dat": "3717ff9eebc1870ffacb14b6632735220ad36e6254be3f12f3c3f824ee438623",
+      "H1.element.dat": "a6b3a629bc8862ac3604326bcc984cca5a678dc62658e6a7b5303922bd8d48ca",
+      "H1.pass.dat": "bf3d3b2fb46c1c56dc2769d2d1f6dab871e6703862a69edb75d9eb8a2a1b4d22",
+      "H1.ebe.dat": "8f266b2746e38e9366c2f72ac2a13dc64e5f31ae66b33f4dfd4f4044e6b2a5b4",
+      "H1.plot.dat": "921cee63d5ad8e1b9f977e44436b6bc2847eda9e1913af2d392d968b2ceb9d66"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-000",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "000"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "fa5fce7487eb19a8c56253e2abc95439887132041e48a882d32da367ca6fe368",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2"
+    },
+    "outputs": {
+      "H1.ebe.dat": "6151f6da3f51c5d86f5de58c3a35071580397132d3dd8ee0a6d49537dd33d6fd",
+      "H1.soil.dat": "b3aba320f37a090dd9c214704b8d0e2745218e388503b0c43e3baf752c5fc394",
+      "H1.pass.dat": "3686459e72b089e54b3b7fcf567a2302d84b7f516ccb1620755814582d42d0f3",
+      "H1.wat.dat": "e319a07e02eaddf7565a5236402dd3ef912bed80b27b69a61ff96e2f04490ba7",
+      "H1.loss.dat": "9eaf40908a2060b86c9ded633f047f89bb8013db977bd2988d7a5d5c9c370d09",
+      "H1.plot.dat": "e9119e909d0eebd8744458bc6caed206f854f54c7a7fee861d4fb364c76f1ad1",
+      "H1.element.dat": "d3202f885da6da651478550a4bf6814b5d39eeab57747eec4202654ac6a28902"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-001",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "001"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "b3121a3fc24901322ed7e5d7d45cdbbd02351f9351695e6900fab69b7995e843",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.wat.dat": "7519eddef812829629b5096635f2e3739f1f671e100b053a9bbfb435279ddec3",
+      "H1.element.dat": "dc154c9754c25bc2fcc5a3ac4eb48e03b142b544bfc5c1539c32667f094e802d",
+      "H1.soil.dat": "3e15673eaa9e1b52fc998f05a2255666a89c0c6a781d82bc474df587cd0a5646",
+      "H1.pass.dat": "8661098eb63a97c40beef17eb284591c1c897e6cfdfab46dab4971873b1d6c59",
+      "H1.loss.dat": "c0069d2678d5ea110df7e76e221feedb40c1b8da0ee27bb77bd7c959580391ea",
+      "H1.ebe.dat": "1d0e8ab27301218b7dfa8bd4ad58ff3712441b6ab19dc9dd9c35e511896b859d",
+      "H1.plot.dat": "acdefdd7cc2c86f604fe74820899e7552dd43f4b2be9c7665c40a19cc11b7132"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-010",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "010"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "d2f403a7d03601c2262edca6f1550f6c046920173b356cba49208d6c6806851b",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    "outputs": {
+      "H1.plot.dat": "38b0462b32199b95b23c8351c19ab4f702a4cffbaa2c9c3d94cf8d93d78fbfcb",
+      "H1.loss.dat": "ce4b9d763bc7ffa6030a35998b9840e7294bd6505608ec794b932e5fc1ee39eb",
+      "H1.pass.dat": "15a18ac7c83117393b6cc7a48936add02581ed0aa50534ebce286ffa10a66f0b",
+      "H1.ebe.dat": "c1a23f20f59a77cfa46aab97069f14953f93418d63f07044c14124bb8607db48",
+      "H1.soil.dat": "887021a2b18d5cc9d36682138a9cd2c05989a098128a10a2f009d1376f18f21e",
+      "H1.element.dat": "f8070ac924d9b0ae37876a9820af66418a04b35ae53258d154f0a9abdaefea8d",
+      "H1.wat.dat": "2fc62de36a79553b6e2999f0645437366e6f288499b0e631f4e18a1ea6416dad"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-011",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "011"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "d65fac548e8b271dee85c34c8982fa97a49cba97c13bc2d94a9cb152defa54c4",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb"
+    },
+    "outputs": {
+      "H1.ebe.dat": "a2e24e75fff0891488aa34a862dab3722f228d505d3fdc5ceb12d9c64b29de81",
+      "H1.soil.dat": "7993b6490cf67e425f07bf32fa05f7dbebcf9514035f0faa03d423be7bc687d0",
+      "H1.element.dat": "028f6a3bf37c8154fffa955896449fbfc32a5276b46e4fa1e93cebeceedbcb5d",
+      "H1.wat.dat": "5381d142cbdb3a69847362e54cd25bae47cc8d0253e5c2f356809f6a46ca88d1",
+      "H1.plot.dat": "097008c5f090d95d13bcbb47aaccfc6d3d8c39aca3435693378951a1d5bcfe31",
+      "H1.pass.dat": "984debbf41251346b40f7d506a630fa4c19865165abe0120ce52fec51f4d5892",
+      "H1.loss.dat": "4de9d4c126f3daf9121eab59ab2afbbd19c1771be9a57b3efeca3b3bebb4a8e2"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-100",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "100"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.sol": "d7da2c35cdb072ff4b4d832134519fc804e91e321836383fd254131b25528828",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb"
+    },
+    "outputs": {
+      "H1.soil.dat": "ad091a3a0abcfbd240d34a2e5b83ef4c16f02b2d55f627c4f74e728aefbf9c64",
+      "H1.ebe.dat": "401529d8543dcdb66dfbb3478de5d0fbdb8dd4f34df388100f39ae94df1c7298",
+      "H1.loss.dat": "61276b97f2cc599ff6b17ff79c1a7630da323017f315c9b7930c9b67f572dc2a",
+      "H1.pass.dat": "8349af53a1898e26107c840c1f834cd13a152e0559653cfadd772d858acb3a9e",
+      "H1.wat.dat": "66dd2a6e2c702c9369fa108acf72346315d8b6cb4d368450c828d489637f86b1",
+      "H1.plot.dat": "1eb776a32f3751b843de0032202e081233e5fedf94af518d761186b2f51d955c",
+      "H1.element.dat": "4c02fb9aad8bd8c7d0c3ae7fb2b61cd0f66b1064ca4ebe03337251a35b091b40"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-101",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "101"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "ebe528a50293a954353312b9ad208c3eb69f3ecd160b708c978de1789d9b8e0b",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+    },
+    "outputs": {
+      "H1.element.dat": "c3ba0a0ba365e677863ee96f46181e9e52344be73bd910a8833961da70002e9e",
+      "H1.soil.dat": "bab08f56c7122ffd967aef87a24c684f683d04b94727eb73b10c80e142716fe6",
+      "H1.wat.dat": "30bd72672aded91a44a1b1cd5c5d86a4ea89867e9b5ec59c84549436ed597361",
+      "H1.plot.dat": "01adcd5bca3700e3d8ea1d04314a070adb03ed1df87488660b595205e6a44546",
+      "H1.pass.dat": "32a658072a8c018577dd20102ac62f54908d62a6248d37e07799b52deba952a6",
+      "H1.ebe.dat": "6b2d57812fa920a8cd7ff8517b306af46e846a7bc2e51d0ede6a74657cc717b3",
+      "H1.loss.dat": "bd32692d5c71a40dc7bff3cd6510c8d2892c5fbc4023965d24ff16afcb2e9ee3"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-110",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "110"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "8e6db30f3bf230e8db515af47e4db991de0b367f55643077fe9ea5304da91c36",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb"
+    },
+    "outputs": {
+      "H1.soil.dat": "3cf8a7835d399e0c1c939bfd74cefc06257c8acc070ffa505eac3bc56550b624",
+      "H1.wat.dat": "d1149938e5cbbd5492ae829c8d3b04568de81e8367e9902d3747d09e1766d7ca",
+      "H1.ebe.dat": "691406056c565d5d5e7d3bc8f94db50a41022153b172b7e1ecc7f7aee777851e",
+      "H1.plot.dat": "540898aa7eab2005863971a05fbe6271888bd5dc0b8d92d7d60ff5399dda6b54",
+      "H1.loss.dat": "5f1c832aafa4f9600b4643ace47aa56f1454f41092fb10729d12e9b3219e19d4",
+      "H1.element.dat": "6ebc18846c36efd477cbef007f7fd00b0a7a3168563dfbc6444536a0e8a5a172",
+      "H1.pass.dat": "87e91d9b4ebb1f21d13b6bbe0374769c1c84d72e9134b32c8289c52eb4a7b9a5"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-111",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "111"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "9f876c7e4c48e6470fb4b60a025076a31c1a1425d688f1015a998ef8a8e2f788",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.loss.dat": "044f1d83c2078f6f92491ab398725c79dc0b3de40c78ee3c6df1f585d82ed2ca",
+      "H1.pass.dat": "b5b0353bd969a08df837887b5a36079e2f4853e98abe9badb8a35e6f917b77c1",
+      "H1.element.dat": "02aca3cb340007184f24d817270bb29461c17065fc74baf51a5823e62514dbf3",
+      "H1.plot.dat": "cdd12296ca2f1389d97910a7adf3cf60802944657814bb972cd9c2baf45dc7e9",
+      "H1.wat.dat": "7a0fc08562e8654d3d5727bbdcc55f4db4fa57bb8113514779d33199ebc41d8c",
+      "H1.soil.dat": "d50d2d2402a3017714143ec155757291875ec467947bf31b13eba4cdba5a6343",
+      "H1.ebe.dat": "1eb33136177aff8916b4396fb2d2d9650ca205e756af40fa82fcf08667b6f57a"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-format",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "format"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "p1.sol": "2004f64966816be65716c2c5469918a57d732d79c2026e76481845dcd59332c2",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    "outputs": {
+      "H1.loss.dat": "f29b4a5c9886bb07cb9c4523972adff5a6cc7b56a9b25181a60dbaf69d1e31a6",
+      "H1.element.dat": "a7cbebd6224bd5c41d1f7189151cd261288ebbc5473b15ce9c6d14c638ef978a",
+      "H1.pass.dat": "778ac2580209409da8f080d03c105561f902784ce578608b66af509673e1c5b1",
+      "H1.ebe.dat": "44d2d573e094e84e4857e4fdb74e3356e82c56182c337a12375647b6c43f3487",
+      "H1.plot.dat": "36c509da117f50650debe9e2ff3ae659c2f52f7333ee33cf9425117e06495241",
+      "H1.wat.dat": "e319a07e02eaddf7565a5236402dd3ef912bed80b27b69a61ff96e2f04490ba7",
+      "H1.soil.dat": "08e7c8045abd38406f0c2bdc3844be234db74c2f4e04f0068bf91e9a735510f6"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-legacy-legacy",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "legacy",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/wc1/runs/ro/roads-soil-benchmark-20261029/reference/bin/wepp2010",
+      "sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8"
+    },
+    "inputs": {
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+    },
+    "outputs": {
+      "H1.soil.dat": "2db122b50095960d677da78dd2ce07efb2235c7c0320649ccaa6437fd58a82c1",
+      "H1.wat.dat": "5f73a2408c40656201eac7e54cfa799e34df5c90d99a485324f4b0e10c7646d6",
+      "H1.loss.dat": "ca4d481f92ac7fa3dbd15a61c7fb2361bc5206b595827abd7ab2787e25e09a56",
+      "H1.pass.dat": "58f4633a099db5521c0e5645a0bc5842d9910e7ec575e8eaa0cffc01bbbeee22",
+      "H1.element.dat": "b804ec5a48a10b8a2983ed4f86b5e798db914af33293b84afa9d8471f610bfc2",
+      "H1.plot.dat": "a5123ba89836e723d57e33d73ee01ff7d4972978ce454719793af25ea9d8b827",
+      "H1.ebe.dat": "5ca4aa28905c709d24992c496e15126435f0144cfdcf78394a45691e8f542d45"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-legacy",
+    "case": {
+      "climate": "charleston",
+      "soil": "silt",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "low",
+      "binary": "modern",
+      "variant": "legacy"
+    },
+    "binary": {
+      "path": "/workdir/wepppy/wepp_runner/bin/wepp_261026",
+      "sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48"
+    },
+    "inputs": {
+      "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+      "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+      "reference.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db",
+      "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+      "p1.sol": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    "outputs": {
+      "H1.soil.dat": "55b57b3a18fc0124500c4f3b186d64d1d851c3bdeba4ac619f52c6770cb25617",
+      "H1.ebe.dat": "98ca2de188a2964e5c0f22e5280e4db2a1a08e5f2c6d806fbf462de98fe99e5d",
+      "H1.plot.dat": "e963d3435fb5bc3608d7436f9f31107d5af22b17ab9ad9550881c0bdbac11697",
+      "H1.element.dat": "96a0e38872a91630ce3afea62b9723bb156811c72829756a32bfbd0c899ee671",
+      "H1.loss.dat": "dafad6058eebb43f798079912a0416b80736cf13673320caae2640431bb17496",
+      "H1.wat.dat": "8c15e2dc787793ecfa0ef1f6810ac176e47b788102bf1608cf4347946994c11d",
+      "H1.pass.dat": "0447ab717510f3691a3d884e6c51718fbd2e8bad0ee2869a830ecb3fca3123a7"
+    },
+    "wat_rows": 17532,
+    "status": "completed"
+  }
+]

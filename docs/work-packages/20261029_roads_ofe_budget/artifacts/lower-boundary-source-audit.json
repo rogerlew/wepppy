@@ -1,0 +1,7 @@
+{
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "path": "/wc1/runs/ro/roads-ofe-budget-20261029-v2/analysis-v3/input.for",
+  "sha256": "362a328510298eb86f682b248256ae43c8b36ca15b6cf2d6dd1887999ae275df",
+  "lines": "665\u2013675",
+  "interpretation": "9002 kslast divided by 3.6e6 converts mm/h to m/s; bedrock thickness divided by 1000 converts mm to m"
+}

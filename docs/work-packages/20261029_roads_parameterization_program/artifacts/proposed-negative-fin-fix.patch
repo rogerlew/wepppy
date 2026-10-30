@@ -1,0 +1,22 @@
+--- a/src/watbal_hourly.for
++++ b/src/watbal_hourly.for
+@@ -377,14 +377,11 @@
+ c
+ cd    Modified by S. Dun Jan 24, 2004
+ c
+-      if (fin.lt.0.0) then
+-        if ((ivers.eq.3).or.(contrs(nowcrp,iplane).ne.0)) then
+-           fin = roffon(ielmt) - runoff(iplane)
+-         else
+-           if (iplane.gt.1) fin = (runoff(iplane-1)*efflen(iplane-1)
+-     1             - runoff(iplane)*efflen(iplane))/slplen(iplane)
+-        endif
+-      endif
++c     Keep the complete signed balance computed above. A negative value
++c     requests withdrawal from existing storage; recomputing only the
++c     runoff difference here discards rain, interception, melt and
++c     irrigation inputs. The hourly allocator must retain its inventory
++c     checks rather than receive an inflated withdrawal request.
+ c       ------ Add in check if FIN is negative which will happen on a
+ c       case 3 hydrologic plane on a multiple OFE hillslope - dcf
+ cd        if (fin.lt.0.0.and.ivers.ne.3) then

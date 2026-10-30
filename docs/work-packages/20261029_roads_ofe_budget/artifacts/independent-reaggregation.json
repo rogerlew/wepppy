@@ -1,0 +1,26 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  },
+  {
+    "name": "site-sand-outrut-gravel-high-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  },
+  {
+    "name": "charleston-silt-inveg-gravel-low-modern-111",
+    "sediment_and_water_sql_reaggregation": true
+  }
+]

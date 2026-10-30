@@ -1,0 +1,41 @@
+{
+  "candidate": "erosion_road_cap",
+  "screen_cases": 96,
+  "magnitude_passes": 93,
+  "numerical_gate": true,
+  "native_failures": [
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap",
+      "runtime": "project"
+    },
+    {
+      "climate": "birmingham",
+      "soil": "sand",
+      "design": "inveg",
+      "surface": "gravel",
+      "traffic": "none",
+      "variant": "erosion_road_cap",
+      "runtime": "project"
+    }
+  ],
+  "source_explained_accounting_cases": [
+    "site-loam-inbare-gravel-high-erosion_road_cap-project",
+    "site-loam-inbare-gravel-none-erosion_road_cap-project",
+    "site-loam-inveg-gravel-high-erosion_road_cap-project",
+    "site-loam-inveg-gravel-none-erosion_road_cap-project"
+  ],
+  "negative_flux_cases": 0,
+  "physical_gate": false,
+  "accepted": false,
+  "reason": "Two native water failures remain; exact trace proves loss of net local rainfall in negative-FIN reset. Native scope decision pending.",
+  "evidence_sha256": {
+    "engineered-surface-score.json": "c670f6a8341a9a7a876e5d25cfe6bd712ba8398fddc8ca501be256c8063af065",
+    "engineered-accounting.json": "ef83a57deccb3bac84e8aabae5a37095fca238e15592a3b8daae31709cc248a3",
+    "negative-fin-proof.json": "ee4cd4f6faef96b505e2ffef9b034a4c757073f8580211612b77b151d13ad1fa"
+  }
+}

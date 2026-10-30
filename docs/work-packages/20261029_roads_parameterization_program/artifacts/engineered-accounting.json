@@ -1,0 +1,210 @@
+[
+  {
+    "name": "site-loam-inbare-gravel-high-erosion_road_cap-project",
+    "declaration": {
+      "source_case": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1/matrix-v1/site-loam-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "f7457d1cab2d09991a1b566a6e3542eb45e9c86b4f7db7472ab90b638114d4a5",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+      "source_sha256": {
+        "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+        "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+      },
+      "runtime_libraries": {
+        "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+        "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+        "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+        "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+        "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+        "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+      },
+      "script_sha256": "a3123517127eeea0bb56f61a9178110b854e368e6ec270cde399782f4a07d186",
+      "gdb_script_sha256": "efe86f1dd851c75823f5e8a6d8733d8406fd0702ca415032ca7f29f775150562",
+      "scope": "Three noncontoured OFEs, pinned binary only; observe qout export branch without changing output or precision bounds"
+    },
+    "outputs_byte_identical": {
+      "H1.soil.dat": true,
+      "H1.element.dat": true,
+      "H1.wat.dat": true,
+      "H1.plot.dat": true,
+      "H1.loss.dat": true,
+      "H1.ebe.dat": true,
+      "H1.pass.dat": true
+    },
+    "events": [
+      {
+        "qout": 0.0,
+        "ofelod_kg_m": 3.90502167,
+        "avsole_kg_m": 0.0,
+        "ofe": 3,
+        "year": 2003,
+        "julian": 5
+      }
+    ],
+    "native_audit_sha256": "14cefdcf55e6ddc23d7b2e057d68e9e6911292aaabaeb35a9ad29df5a4baba25",
+    "debugger_log_sha256": "764f036d93ebc5c983cb866f6752b8aa8ab9b943f0e6a89a015ae02a5e04e6eb",
+    "original_report_delta_kg_yr": 0.9650024999999118,
+    "explained_kg_yr": 0.966492863325,
+    "residual_kg_yr": -0.0014903633250881176,
+    "unchanged_precision_bound_kg_yr": 0.18700966152,
+    "unresolved_ebe_mismatches": [],
+    "source_explained": true,
+    "scope": "Case-specific export-gate explanation only. Original loads/flags unchanged; no parameter or field validation claim."
+  },
+  {
+    "name": "site-loam-inbare-gravel-none-erosion_road_cap-project",
+    "declaration": {
+      "source_case": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1/matrix-v1/site-loam-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "71e8711f446cf75406ca8328698285da75d3871b78e8b5abd98a6bd44839e59b",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+      "source_sha256": {
+        "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+        "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+      },
+      "runtime_libraries": {
+        "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+        "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+        "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+        "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+        "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+        "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+      },
+      "script_sha256": "a3123517127eeea0bb56f61a9178110b854e368e6ec270cde399782f4a07d186",
+      "gdb_script_sha256": "d5afcaecfd7cecec5fdc4a278c8dd256c8fc96e857203b4572e9fa695a2071d3",
+      "scope": "Three noncontoured OFEs, pinned binary only; observe qout export branch without changing output or precision bounds"
+    },
+    "outputs_byte_identical": {
+      "H1.soil.dat": true,
+      "H1.ebe.dat": true,
+      "H1.plot.dat": true,
+      "H1.element.dat": true,
+      "H1.pass.dat": true,
+      "H1.wat.dat": true,
+      "H1.loss.dat": true
+    },
+    "events": [
+      {
+        "qout": 0.0,
+        "ofelod_kg_m": 0.814176857,
+        "avsole_kg_m": 0.0,
+        "ofe": 3,
+        "year": 2003,
+        "julian": 5
+      }
+    ],
+    "native_audit_sha256": "731c15877371b350e55bbe3e3604898124b2e31a422a748f0de128a5d8658000",
+    "debugger_log_sha256": "2f51571c3f47ce40f682027a42864a523f07e154af079737615d4dd3ac529a01",
+    "original_report_delta_kg_yr": 0.1994850000000099,
+    "explained_kg_yr": 0.20150877210749998,
+    "residual_kg_yr": -0.0020237721074900794,
+    "unchanged_precision_bound_kg_yr": 0.18251843544,
+    "unresolved_ebe_mismatches": [],
+    "source_explained": true,
+    "scope": "Case-specific export-gate explanation only. Original loads/flags unchanged; no parameter or field validation claim."
+  },
+  {
+    "name": "site-loam-inveg-gravel-high-erosion_road_cap-project",
+    "declaration": {
+      "source_case": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1/matrix-v1/site-loam-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "cc3e2c15968b45c44af20cb351404329e71d4db3648cbcc5b409f3ef204025ed",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+      "source_sha256": {
+        "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+        "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+      },
+      "runtime_libraries": {
+        "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+        "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+        "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+        "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+        "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+        "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+      },
+      "script_sha256": "a3123517127eeea0bb56f61a9178110b854e368e6ec270cde399782f4a07d186",
+      "gdb_script_sha256": "9a4a858b0f3221929fa25bfeee1017da7f581167baa2882496270e1d44a37b68",
+      "scope": "Three noncontoured OFEs, pinned binary only; observe qout export branch without changing output or precision bounds"
+    },
+    "outputs_byte_identical": {
+      "H1.pass.dat": true,
+      "H1.wat.dat": true,
+      "H1.loss.dat": true,
+      "H1.plot.dat": true,
+      "H1.element.dat": true,
+      "H1.ebe.dat": true,
+      "H1.soil.dat": true
+    },
+    "events": [
+      {
+        "qout": 0.0,
+        "ofelod_kg_m": 0.982762873,
+        "avsole_kg_m": 0.0,
+        "ofe": 3,
+        "year": 2003,
+        "julian": 5
+      }
+    ],
+    "native_audit_sha256": "70f51cd04338baba8664c2df30ee2921d41896a91fdcc325488e030e8ea99488",
+    "debugger_log_sha256": "7a9fb33f7dd5d19ed527a9bf97d1971aecc773811eacee754b34539576e97be3",
+    "original_report_delta_kg_yr": 0.24255000000006532,
+    "explained_kg_yr": 0.2432338110675,
+    "residual_kg_yr": -0.0006838110674346753,
+    "unchanged_precision_bound_kg_yr": 0.18673880544000002,
+    "unresolved_ebe_mismatches": [],
+    "source_explained": true,
+    "scope": "Case-specific export-gate explanation only. Original loads/flags unchanged; no parameter or field validation claim."
+  },
+  {
+    "name": "site-loam-inveg-gravel-none-erosion_road_cap-project",
+    "declaration": {
+      "source_case": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1/matrix-v1/site-loam-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "7e224d37b9981c03b761f4d74271c2c947ce0ec2b2e7a294e25a9b8dc34072ff",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+      "source_sha256": {
+        "contin.for": "85ecb5440db506b94d8bf886ce53eef781467d42c4c75c074eeaa3ae6ff32669",
+        "sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+      },
+      "runtime_libraries": {
+        "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+        "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+        "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+        "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+        "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+        "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+      },
+      "script_sha256": "a3123517127eeea0bb56f61a9178110b854e368e6ec270cde399782f4a07d186",
+      "gdb_script_sha256": "2041928967af40117cd05197a28af2d47cbd7b33cc56ef2ccd6a9f35376ff867",
+      "scope": "Three noncontoured OFEs, pinned binary only; observe qout export branch without changing output or precision bounds"
+    },
+    "outputs_byte_identical": {
+      "H1.soil.dat": true,
+      "H1.wat.dat": true,
+      "H1.loss.dat": true,
+      "H1.pass.dat": true,
+      "H1.element.dat": true,
+      "H1.plot.dat": true,
+      "H1.ebe.dat": true
+    },
+    "events": [
+      {
+        "qout": 0.0,
+        "ofelod_kg_m": 0.814176857,
+        "avsole_kg_m": 0.0,
+        "ofe": 3,
+        "year": 2003,
+        "julian": 5
+      }
+    ],
+    "native_audit_sha256": "37a20d6e37e046c567cbc46b7d3a0cc362ae8aa3eefea776b797232e749e85c5",
+    "debugger_log_sha256": "d8ff7d4515e98df245cc7860fc7ab3434e51e795f54776fb1f4bb4d06dd432fd",
+    "original_report_delta_kg_yr": 0.20121750000002692,
+    "explained_kg_yr": 0.20150877210749998,
+    "residual_kg_yr": -0.0002912721074730673,
+    "unchanged_precision_bound_kg_yr": 0.18247639608,
+    "unresolved_ebe_mismatches": [],
+    "source_explained": true,
+    "scope": "Case-specific export-gate explanation only. Original loads/flags unchanged; no parameter or field validation claim."
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "wepppyo3": {
+    "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/__init__.py",
+    "sha256": "de19b64c347a426430b7242a85768149a306d63bf8124b3f02e05f3d1905ea1b"
+  },
+  "wepppyo3.wepp_interchange.wepp_interchange_rust": {
+    "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+    "sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad"
+  },
+  "wepppyo3.wepp_interchange": {
+    "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/__init__.py",
+    "sha256": "69289cd2af86e36e3a3881b63b993bb02eb461267380f13922bc1a73402d5958"
+  }
+}

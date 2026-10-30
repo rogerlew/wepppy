@@ -1,0 +1,2611 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261029/surface-screen-v4",
+  "declaration_sha256": "099490e55816ba059d311c0d1187b13bd4646f5e91b51246799fbe245d7ffec5",
+  "results_sha256": "ff68231f2a930a5c111b3d080aff7d3dfb1ad8f89c569e83cf1bb2351aeafd0f",
+  "variants": {
+    "roles": {
+      "overall": {
+        "cases": 96,
+        "passing": 88,
+        "fraction": 0.9166666666666666
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 32,
+            "fraction": 1.0
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 24,
+            "fraction": 0.75
+          },
+          "site": {
+            "cases": 32,
+            "passing": 32,
+            "fraction": 1.0
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 48,
+            "fraction": 1.0
+          },
+          "none": {
+            "cases": 48,
+            "passing": 40,
+            "fraction": 0.8333333333333334
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 88,
+            "fraction": 0.9166666666666666
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 32,
+                "fraction": 1.0
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 24,
+                "fraction": 0.75
+              },
+              "site": {
+                "cases": 32,
+                "passing": 32,
+                "fraction": 1.0
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 48,
+                "fraction": 1.0
+              },
+              "none": {
+                "cases": 48,
+                "passing": 40,
+                "fraction": 0.8333333333333334
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 88,
+        "fraction": 0.9166666666666666
+      },
+      "native_failures": [
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "roles",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "erosion": {
+      "overall": {
+        "cases": 96,
+        "passing": 85,
+        "fraction": 0.8854166666666666
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 23,
+            "fraction": 0.71875
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 21,
+            "fraction": 0.875
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 41,
+            "fraction": 0.8541666666666666
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 41,
+            "fraction": 0.8541666666666666
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 48,
+            "fraction": 1.0
+          },
+          "none": {
+            "cases": 48,
+            "passing": 37,
+            "fraction": 0.7708333333333334
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 85,
+            "fraction": 0.8854166666666666
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 23,
+                "fraction": 0.71875
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 21,
+                "fraction": 0.875
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 41,
+                "fraction": 0.8541666666666666
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 41,
+                "fraction": 0.8541666666666666
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 48,
+                "fraction": 1.0
+              },
+              "none": {
+                "cases": 48,
+                "passing": 37,
+                "fraction": 0.7708333333333334
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 85,
+        "fraction": 0.8854166666666666
+      },
+      "native_failures": [
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "rock": {
+      "overall": {
+        "cases": 96,
+        "passing": 89,
+        "fraction": 0.9270833333333334
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 30,
+            "fraction": 0.9375
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 28,
+            "fraction": 0.875
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 22,
+            "fraction": 0.9166666666666666
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 23,
+            "fraction": 0.9583333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "none": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 89,
+            "fraction": 0.9270833333333334
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 30,
+                "fraction": 0.9375
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 28,
+                "fraction": 0.875
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 22,
+                "fraction": 0.9166666666666666
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 23,
+                "fraction": 0.9583333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "none": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 89,
+        "fraction": 0.9270833333333334
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "rock",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "rock",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "compact1": {
+      "overall": {
+        "cases": 96,
+        "passing": 75,
+        "fraction": 0.78125
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 28,
+            "fraction": 0.875
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 16,
+            "fraction": 0.5
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 16,
+            "fraction": 0.6666666666666666
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 23,
+            "fraction": 0.9583333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 12,
+            "fraction": 0.5
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 38,
+            "fraction": 0.7916666666666666
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 37,
+            "fraction": 0.7708333333333334
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 38,
+            "fraction": 0.7916666666666666
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 37,
+            "fraction": 0.7708333333333334
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 40,
+            "fraction": 0.8333333333333334
+          },
+          "none": {
+            "cases": 48,
+            "passing": 35,
+            "fraction": 0.7291666666666666
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 75,
+            "fraction": 0.78125
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 28,
+                "fraction": 0.875
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 16,
+                "fraction": 0.5
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 16,
+                "fraction": 0.6666666666666666
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 23,
+                "fraction": 0.9583333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 12,
+                "fraction": 0.5
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 38,
+                "fraction": 0.7916666666666666
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 37,
+                "fraction": 0.7708333333333334
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 38,
+                "fraction": 0.7916666666666666
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 37,
+                "fraction": 0.7708333333333334
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 40,
+                "fraction": 0.8333333333333334
+              },
+              "none": {
+                "cases": 48,
+                "passing": 35,
+                "fraction": 0.7291666666666666
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 75,
+        "fraction": 0.78125
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact1",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "compact3": {
+      "overall": {
+        "cases": 96,
+        "passing": 78,
+        "fraction": 0.8125
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 22,
+            "fraction": 0.6875
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 28,
+            "fraction": 0.875
+          },
+          "site": {
+            "cases": 32,
+            "passing": 28,
+            "fraction": 0.875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 18,
+            "fraction": 0.75
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 16,
+            "fraction": 0.6666666666666666
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 39,
+            "fraction": 0.8125
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 39,
+            "fraction": 0.8125
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 34,
+            "fraction": 0.7083333333333334
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 38,
+            "fraction": 0.7916666666666666
+          },
+          "none": {
+            "cases": 48,
+            "passing": 40,
+            "fraction": 0.8333333333333334
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 78,
+            "fraction": 0.8125
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 22,
+                "fraction": 0.6875
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 28,
+                "fraction": 0.875
+              },
+              "site": {
+                "cases": 32,
+                "passing": 28,
+                "fraction": 0.875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 18,
+                "fraction": 0.75
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 16,
+                "fraction": 0.6666666666666666
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 39,
+                "fraction": 0.8125
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 39,
+                "fraction": 0.8125
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 34,
+                "fraction": 0.7083333333333334
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 38,
+                "fraction": 0.7916666666666666
+              },
+              "none": {
+                "cases": 48,
+                "passing": 40,
+                "fraction": 0.8333333333333334
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 78,
+        "fraction": 0.8125
+      },
+      "native_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "clay",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact3",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "compact10": {
+      "overall": {
+        "cases": 96,
+        "passing": 86,
+        "fraction": 0.8958333333333334
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 27,
+            "fraction": 0.84375
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 28,
+            "fraction": 0.875
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 21,
+            "fraction": 0.875
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 18,
+            "fraction": 0.75
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 23,
+            "fraction": 0.9583333333333334
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 41,
+            "fraction": 0.8541666666666666
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 40,
+            "fraction": 0.8333333333333334
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          },
+          "none": {
+            "cases": 48,
+            "passing": 40,
+            "fraction": 0.8333333333333334
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 86,
+            "fraction": 0.8958333333333334
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 27,
+                "fraction": 0.84375
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 28,
+                "fraction": 0.875
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 21,
+                "fraction": 0.875
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 18,
+                "fraction": 0.75
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 23,
+                "fraction": 0.9583333333333334
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 41,
+                "fraction": 0.8541666666666666
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 40,
+                "fraction": 0.8333333333333334
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              },
+              "none": {
+                "cases": 48,
+                "passing": 40,
+                "fraction": 0.8333333333333334
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 86,
+        "fraction": 0.8958333333333334
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        },
+        {
+          "climate": "flagstaff",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "compact10",
+          "runtime": "ui-only"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    }
+  }
+}

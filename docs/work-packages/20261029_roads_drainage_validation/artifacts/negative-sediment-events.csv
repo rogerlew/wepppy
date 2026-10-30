@@ -1,0 +1,13 @@
+case,year,julian,ofe,sediment_kg_m,physical_budget_valid,report_reconciled
+flagstaff-new_lithic-inbare-gravel-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-inbare-gravel-none-source,7,251,3,-8.42,False,False
+flagstaff-new_lithic-inbare-paved-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-inbare-paved-none-source,7,251,3,-8.42,False,False
+flagstaff-new_lithic-inveg-gravel-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-inveg-gravel-none-source,7,251,3,-8.42,False,False
+flagstaff-new_lithic-inveg-paved-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-inveg-paved-none-source,7,251,3,-8.42,False,False
+flagstaff-new_lithic-outrut-gravel-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-outrut-gravel-none-source,7,251,3,-8.42,False,False
+flagstaff-new_lithic-outrut-paved-none-source,7,251,2,-8.436,False,False
+flagstaff-new_lithic-outrut-paved-none-source,7,251,3,-8.42,False,False

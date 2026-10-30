@@ -1,0 +1,68 @@
+{
+  "ui-only:current": {
+    "cases": 80,
+    "positive": 71,
+    "within": 61,
+    "zeros": 9,
+    "above": 4,
+    "below": 6,
+    "report_reconciled": 77,
+    "ebe_mismatch_cases": 3,
+    "ebe_mismatch_events": 4
+  },
+  "ui-only:source": {
+    "cases": 80,
+    "positive": 71,
+    "within": 61,
+    "zeros": 9,
+    "above": 4,
+    "below": 6,
+    "report_reconciled": 79,
+    "ebe_mismatch_cases": 1,
+    "ebe_mismatch_events": 2
+  },
+  "ui-only:policy": {
+    "cases": 80,
+    "positive": 71,
+    "within": 61,
+    "zeros": 9,
+    "above": 4,
+    "below": 6,
+    "report_reconciled": 79,
+    "ebe_mismatch_cases": 1,
+    "ebe_mismatch_events": 2
+  },
+  "site-shared:current": {
+    "cases": 16,
+    "positive": 16,
+    "within": 14,
+    "zeros": 0,
+    "above": 0,
+    "below": 2,
+    "report_reconciled": 13,
+    "ebe_mismatch_cases": 3,
+    "ebe_mismatch_events": 4
+  },
+  "site-shared:source": {
+    "cases": 16,
+    "positive": 16,
+    "within": 14,
+    "zeros": 0,
+    "above": 0,
+    "below": 2,
+    "report_reconciled": 15,
+    "ebe_mismatch_cases": 1,
+    "ebe_mismatch_events": 2
+  },
+  "site-shared:policy": {
+    "cases": 16,
+    "positive": 16,
+    "within": 14,
+    "zeros": 0,
+    "above": 0,
+    "below": 2,
+    "report_reconciled": 15,
+    "ebe_mismatch_cases": 1,
+    "ebe_mismatch_events": 2
+  }
+}

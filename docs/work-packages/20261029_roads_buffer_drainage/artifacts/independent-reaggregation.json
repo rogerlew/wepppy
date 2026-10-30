@@ -1,0 +1,98 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high--current--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--current--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--current--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high--source--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--current--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "site-clay-outunrut-paved-high--source--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--current--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "birmingham-clay-outunrut-paved-low--source--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--current--plus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--minus",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--same",
+    "independent_aggregation": true
+  },
+  {
+    "name": "denver-loam-outrut-gravel-low--source--plus",
+    "independent_aggregation": true
+  }
+]

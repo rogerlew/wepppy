@@ -1,0 +1,44 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261029/hourly-water-trace-v1",
+  "source": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1/matrix-v1/birmingham-sand-inbare-gravel-none-erosion_road_cap-project",
+  "outputs_byte_identical": {
+    "H1.loss.dat": true,
+    "H1.pass.dat": true,
+    "H1.wat.dat": true,
+    "H1.plot.dat": true,
+    "H1.soil.dat": true,
+    "H1.element.dat": true,
+    "H1.ebe.dat": true
+  },
+  "state": {
+    "sdate": 9.0,
+    "iplane": 2.0,
+    "ii": 20.0,
+    "fin": -0.0611533709,
+    "xfin": -0.00246943883,
+    "hrfin": -0.00246943883,
+    "wateravail": 0.0024257467593997717,
+    "waterleft": "<optimized out>",
+    "ui_LFtstpF": 24.0,
+    "runoff(iplane)": 0.00970193464,
+    "roffon(ielmt)": 0.0,
+    "slplen(iplane)": 4.57000017,
+    "slplen(iplane-1)": 60.9599991,
+    "fwidth(iplane)": 3.96000004,
+    "fwidth(iplane-1)": 3.96000004,
+    "nsl(iplane)": 4.0
+  },
+  "unmet_mm": 0.04369207060022848,
+  "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+  "source_sha256": "c828a9b714347f0aa6f8e62509328a7c4dfe3b629d3c30029e300a7a8514bb32",
+  "runtime_libraries": {
+    "libm.so.6": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+    "ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+    "libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+    "libgfortran.so.5": "d1c716d10039872bb5481b921d2142577c7873cad4d8d9f09028231aa7e42127",
+    "libmvec.so.1": "cd2f99df70ed0fa44f79bd6322396180d19eaa1fb527b1b6e2aec9cdfc034d9d",
+    "libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+  },
+  "debugger_log_sha256": "b8e41b3e0eff3525b4cc27fef68192908e3c14059591b5d3d3250657e817afe3",
+  "interpretation": "Exact reproduction of signed hourly withdrawal exceeding available storage on first-year day9 OFE2 hour20; allocation failure identified, root cause not established. No guard relaxed."
+}

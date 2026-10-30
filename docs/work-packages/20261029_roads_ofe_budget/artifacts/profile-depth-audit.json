@@ -1,0 +1,78 @@
+[
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-111",
+    "input_bottom_mm": [
+      400.0,
+      400.0,
+      400.0
+    ],
+    "reported_depths_mm": {
+      "1": [
+        600.0
+      ],
+      "2": [
+        600.0
+      ],
+      "3": [
+        600.0
+      ]
+    }
+  },
+  {
+    "name": "site-sand-outunrut-gravel-high-modern-legacy",
+    "input_bottom_mm": [
+      200,
+      300,
+      300
+    ],
+    "reported_depths_mm": {
+      "1": [
+        400.0
+      ],
+      "2": [
+        400.0
+      ],
+      "3": [
+        400.0
+      ]
+    }
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-111",
+    "input_bottom_mm": [
+      400.0,
+      400.0,
+      400.0
+    ],
+    "reported_depths_mm": {
+      "1": [
+        600.0
+      ],
+      "2": [
+        600.0
+      ],
+      "3": [
+        600.0
+      ]
+    }
+  },
+  {
+    "name": "site-clay-outunrut-paved-high-modern-legacy",
+    "input_bottom_mm": [
+      200,
+      400,
+      400
+    ],
+    "reported_depths_mm": {
+      "1": [
+        400.0
+      ],
+      "2": [
+        600.0
+      ],
+      "3": [
+        600.0
+      ]
+    }
+  }
+]

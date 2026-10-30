@@ -1,0 +1,152 @@
+[
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "current"
+    },
+    "export_kg_yr": 51.31764,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": true
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    "export_kg_yr": 47.77344,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": null
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "source"
+    },
+    "export_kg_yr": 50.89392,
+    "negative_fluxes": [
+      {
+        "year": 7,
+        "julian": 251,
+        "ofe": 2,
+        "sediment_kg_m": -8.436
+      },
+      {
+        "year": 7,
+        "julian": 251,
+        "ofe": 3,
+        "sediment_kg_m": -8.42
+      }
+    ],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "mode_off_control_exact": true
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "inbare",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    "export_kg_yr": 48.18924,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": null
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "current"
+    },
+    "export_kg_yr": 51.31764,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": true
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "current",
+      "runtime": "ui-only"
+    },
+    "export_kg_yr": 47.77344,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": null
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "source"
+    },
+    "export_kg_yr": 50.89392,
+    "negative_fluxes": [
+      {
+        "year": 7,
+        "julian": 251,
+        "ofe": 2,
+        "sediment_kg_m": -8.436
+      },
+      {
+        "year": 7,
+        "julian": 251,
+        "ofe": 3,
+        "sediment_kg_m": -8.42
+      }
+    ],
+    "report_reconciled": false,
+    "ebe_mismatch_events": 1,
+    "mode_off_control_exact": true
+  },
+  {
+    "case": {
+      "climate": "flagstaff",
+      "soil": "new_lithic",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "none",
+      "drainage": "source",
+      "runtime": "ui-only"
+    },
+    "export_kg_yr": 48.18924,
+    "negative_fluxes": [],
+    "report_reconciled": true,
+    "ebe_mismatch_events": 0,
+    "mode_off_control_exact": null
+  }
+]

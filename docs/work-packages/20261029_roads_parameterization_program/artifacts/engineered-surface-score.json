@@ -1,0 +1,1215 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261029/engineered-surface-screen-v1",
+  "declaration_sha256": "a62683ad1a1af85b64e343e054077fa84a1019bc2416edc2ff7190f59f8371ae",
+  "results_sha256": "c5d5450ec550edfd41f39d53ed6ddf278cddc9ef99df420c4a33788480ac1bf0",
+  "variants": {
+    "erosion_road": {
+      "overall": {
+        "cases": 96,
+        "passing": 80,
+        "fraction": 0.8333333333333334
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 24,
+            "fraction": 0.75
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 25,
+            "fraction": 0.78125
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 17,
+            "fraction": 0.7083333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 19,
+            "fraction": 0.7916666666666666
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 42,
+            "fraction": 0.875
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 38,
+            "fraction": 0.7916666666666666
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 34,
+            "fraction": 0.7083333333333334
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 44,
+            "fraction": 0.9166666666666666
+          },
+          "none": {
+            "cases": 48,
+            "passing": 36,
+            "fraction": 0.75
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 80,
+            "fraction": 0.8333333333333334
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 24,
+                "fraction": 0.75
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 25,
+                "fraction": 0.78125
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 17,
+                "fraction": 0.7083333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 19,
+                "fraction": 0.7916666666666666
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 42,
+                "fraction": 0.875
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 38,
+                "fraction": 0.7916666666666666
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 34,
+                "fraction": 0.7083333333333334
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 44,
+                "fraction": 0.9166666666666666
+              },
+              "none": {
+                "cases": 48,
+                "passing": 36,
+                "fraction": 0.75
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 80,
+        "fraction": 0.8333333333333334
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road",
+          "runtime": "project"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "erosion_road_cap": {
+      "overall": {
+        "cases": 96,
+        "passing": 93,
+        "fraction": 0.96875
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 30,
+            "fraction": 0.9375
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 32,
+            "fraction": 1.0
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 23,
+            "fraction": 0.9583333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 22,
+            "fraction": 0.9166666666666666
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 47,
+            "fraction": 0.9791666666666666
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 47,
+            "fraction": 0.9791666666666666
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 48,
+            "fraction": 1.0
+          },
+          "none": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 93,
+            "fraction": 0.96875
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 30,
+                "fraction": 0.9375
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 32,
+                "fraction": 1.0
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 23,
+                "fraction": 0.9583333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 22,
+                "fraction": 0.9166666666666666
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 47,
+                "fraction": 0.9791666666666666
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 47,
+                "fraction": 0.9791666666666666
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 48,
+                "fraction": 1.0
+              },
+              "none": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 93,
+        "fraction": 0.96875
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_cap",
+          "runtime": "project"
+        }
+      ],
+      "numerical_gate": true,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "erosion_road_fill": {
+      "overall": {
+        "cases": 96,
+        "passing": 79,
+        "fraction": 0.8229166666666666
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 24,
+            "fraction": 0.75
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 24,
+            "fraction": 0.75
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 16,
+            "fraction": 0.6666666666666666
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 20,
+            "fraction": 0.8333333333333334
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 19,
+            "fraction": 0.7916666666666666
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 42,
+            "fraction": 0.875
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 37,
+            "fraction": 0.7708333333333334
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 34,
+            "fraction": 0.7083333333333334
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 43,
+            "fraction": 0.8958333333333334
+          },
+          "none": {
+            "cases": 48,
+            "passing": 36,
+            "fraction": 0.75
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 79,
+            "fraction": 0.8229166666666666
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 24,
+                "fraction": 0.75
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 24,
+                "fraction": 0.75
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 16,
+                "fraction": 0.6666666666666666
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 20,
+                "fraction": 0.8333333333333334
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 19,
+                "fraction": 0.7916666666666666
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 42,
+                "fraction": 0.875
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 37,
+                "fraction": 0.7708333333333334
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 34,
+                "fraction": 0.7083333333333334
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 43,
+                "fraction": 0.8958333333333334
+              },
+              "none": {
+                "cases": 48,
+                "passing": 36,
+                "fraction": 0.75
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 79,
+        "fraction": 0.8229166666666666
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "high",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "paved",
+          "traffic": "none",
+          "variant": "erosion_road_fill",
+          "runtime": "project"
+        }
+      ],
+      "numerical_gate": false,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    },
+    "erosion_road_fill_cap": {
+      "overall": {
+        "cases": 96,
+        "passing": 93,
+        "fraction": 0.96875
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 32,
+            "passing": 30,
+            "fraction": 0.9375
+          },
+          "flagstaff": {
+            "cases": 32,
+            "passing": 32,
+            "fraction": 1.0
+          },
+          "site": {
+            "cases": 32,
+            "passing": 31,
+            "fraction": 0.96875
+          }
+        },
+        "soil": {
+          "clay": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          },
+          "loam": {
+            "cases": 24,
+            "passing": 23,
+            "fraction": 0.9583333333333334
+          },
+          "sand": {
+            "cases": 24,
+            "passing": 22,
+            "fraction": 0.9166666666666666
+          },
+          "silt": {
+            "cases": 24,
+            "passing": 24,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 48,
+            "passing": 47,
+            "fraction": 0.9791666666666666
+          },
+          "inveg": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 48,
+            "passing": 46,
+            "fraction": 0.9583333333333334
+          },
+          "paved": {
+            "cases": 48,
+            "passing": 47,
+            "fraction": 0.9791666666666666
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 48,
+            "passing": 48,
+            "fraction": 1.0
+          },
+          "none": {
+            "cases": 48,
+            "passing": 45,
+            "fraction": 0.9375
+          }
+        }
+      },
+      "load_strata": {
+        "small": {
+          "overall": {
+            "cases": 0,
+            "passing": 0,
+            "fraction": null
+          },
+          "groups": {
+            "climate": {},
+            "soil": {},
+            "design": {},
+            "surface": {},
+            "traffic": {}
+          }
+        },
+        "meaningful": {
+          "overall": {
+            "cases": 96,
+            "passing": 93,
+            "fraction": 0.96875
+          },
+          "groups": {
+            "climate": {
+              "birmingham": {
+                "cases": 32,
+                "passing": 30,
+                "fraction": 0.9375
+              },
+              "flagstaff": {
+                "cases": 32,
+                "passing": 32,
+                "fraction": 1.0
+              },
+              "site": {
+                "cases": 32,
+                "passing": 31,
+                "fraction": 0.96875
+              }
+            },
+            "soil": {
+              "clay": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              },
+              "loam": {
+                "cases": 24,
+                "passing": 23,
+                "fraction": 0.9583333333333334
+              },
+              "sand": {
+                "cases": 24,
+                "passing": 22,
+                "fraction": 0.9166666666666666
+              },
+              "silt": {
+                "cases": 24,
+                "passing": 24,
+                "fraction": 1.0
+              }
+            },
+            "design": {
+              "inbare": {
+                "cases": 48,
+                "passing": 47,
+                "fraction": 0.9791666666666666
+              },
+              "inveg": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              }
+            },
+            "surface": {
+              "gravel": {
+                "cases": 48,
+                "passing": 46,
+                "fraction": 0.9583333333333334
+              },
+              "paved": {
+                "cases": 48,
+                "passing": 47,
+                "fraction": 0.9791666666666666
+              }
+            },
+            "traffic": {
+              "high": {
+                "cases": 48,
+                "passing": 48,
+                "fraction": 1.0
+              },
+              "none": {
+                "cases": 48,
+                "passing": 45,
+                "fraction": 0.9375
+              }
+            }
+          }
+        }
+      },
+      "small_load": {
+        "cases": 0,
+        "passing": 0,
+        "fraction": null
+      },
+      "meaningful_load": {
+        "cases": 96,
+        "passing": 93,
+        "fraction": 0.96875
+      },
+      "native_failures": [
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        }
+      ],
+      "physical_failures": [
+        {
+          "climate": "site",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "site",
+          "soil": "loam",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inbare",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        },
+        {
+          "climate": "birmingham",
+          "soil": "sand",
+          "design": "inveg",
+          "surface": "gravel",
+          "traffic": "none",
+          "variant": "erosion_road_fill_cap",
+          "runtime": "project"
+        }
+      ],
+      "numerical_gate": true,
+      "physical_gate": false,
+      "screen_gate": false,
+      "acceptance": false,
+      "limitation": "Development screen only; withheld, routing and project-runtime validation pending"
+    }
+  }
+}

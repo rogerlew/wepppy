@@ -1,0 +1,13 @@
+{
+  "hashes": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/analyze_runtime.py": "bcd29f577bd87842debf7ea1090577a5cc3eae42ab4a0d790a42b82a664a74c1",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/analyze.py": "a6e8d930114af96680392c1f667e9ce1a0ed05168f36ac368f4c0dc439390fc2",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/runtime_bridge.py": "57c54ec81bdc32a3154307f8e442f7f953cafb678beb668e463a2ec81755fc49"
+  },
+  "declaration_sha256": "c70d0e7c59685aa1a6de02752724b696b6bcc7d65e7caae4fc931d604bf45b9d",
+  "native_reader_provenance_sha256": "2a2006b8a19f9f3b08e312a03b20ccdcf929d90a1f9594909d5ee2b78984d9f3",
+  "collection_source_hashes": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/analyze_runtime.py": "f374443b4a00acfa292fd6c276de1188ab79bd04eaaab7bd3fd48ece1d4d4e70",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_drainage_validation/artifacts/analyze.py": "46527525729b9101938dfa67c3a23c34ef1c8854073f42c13856a72f9ec15f7a"
+  }
+}
