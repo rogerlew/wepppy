@@ -1,0 +1,26 @@
+{
+  "native_release_commit": "47183b0fb",
+  "model_source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "files": [
+    {
+      "name": "wepp_261029",
+      "sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+      "native_vendor_identical": true
+    },
+    {
+      "name": "wepp_261029.json",
+      "sha256": "c0d0c62da8f36bbe73b6b3c91bd2b0e84a864dbfb2a21bb3a631f414d55647c9",
+      "native_vendor_identical": true
+    },
+    {
+      "name": "wepp_261029_hill",
+      "sha256": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+      "native_vendor_identical": true
+    },
+    {
+      "name": "wepp_261029_hill.json",
+      "sha256": "636b8ff505b515d8080291552b6d6e600c60942f91c28ce00008d1242e026cd1",
+      "native_vendor_identical": true
+    }
+  ]
+}

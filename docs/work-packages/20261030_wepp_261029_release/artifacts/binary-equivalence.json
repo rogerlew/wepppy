@@ -1,0 +1,14 @@
+[
+  {
+    "role": "watershed",
+    "candidate_sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "release_sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "normalized_identical": true
+  },
+  {
+    "role": "hill",
+    "candidate_sha256": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+    "release_sha256": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+    "normalized_identical": true
+  }
+]

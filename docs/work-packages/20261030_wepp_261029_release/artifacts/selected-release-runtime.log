@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261030_wepp_261029_release/verify_selected_release.py /wc1/ablation/hourly-return-timing-20261030/release-fixture-inputs.zip /wc1/ablation/hourly-return-timing-20261030/selected-release-runtime-v3
+{
+  "release": "wepp_261029",
+  "binary_sha256": {
+    "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4"
+  },
+  "fixture_source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "fixture_sha256": "64eb68c9a408b36abd5658aea68a039014620f7340236b0aa518b9e4a72677fc",
+  "native_output_sha256": {
+    "H1.wat.dat": "380e4117745d81126d7f1f45a7fc5ecd81a497be3a484b685c36e896d21d2fdb",
+    "H1.soil.dat": "0a8af31c390d448d2abe782324a7065a0f9000965d1c2fa13e4e93809f5f5d11",
+    "H1.loss.dat": "e90aac92df40284ae81addb37e2a67727b5b4f89ed9bba3ca02cd6968237ce06",
+    "H1.element.dat": "d6fb1c037705f2ec95a5d73b4f6909b35fce8a13bd39b55c670ad18b7851882b",
+    "H1.pass.dat": "162cffe8e3f9f450ba1260c8751a984ca8c271bd51c86cdc044ea0022e893e39",
+    "H1.ebe.dat": "91a8d2f1c7e89c17913b785f05ad800ea4e199d86678b6b8eccb9134b5304c5b",
+    "H1.plot.dat": "06c723531fc9d35b37f921c5f2824b3af5e2ffeb2dfbfb89d70a26c0cc852a4c"
+  },
+  "complete_water_rows": 17532,
+  "parquet_rows": {
+    "H.element.parquet": 3237,
+    "H.wat.parquet": 17532
+  },
+  "absent_optional_water_columns": [
+    "InterceptionStorage"
+  ],
+  "runner_log_sha256": "3b6e7d257bd6e63116aef90abb57d28a363bc158024fe059cbf0ffce69290c30"
+}

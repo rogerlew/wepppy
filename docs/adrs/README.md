@@ -119,3 +119,5 @@ Each ADR should normally include:
 - [ADR-0106: Scheduled Culvert JWT renewal](ADR-0106-culvert-jwt-renewal.md) (Accepted, deployed and validated on wepp1/wepp2, 2026-10-26).
 
 - [ADR-0110: Consistent generated-soil boundary at 200 mm](ADR-0110-generated-soil-200mm-boundary.md) (Accepted and locally validated, 2026-10-29; property-preserving normalization with an uploaded-soil exception).
+
+- [ADR-0112: Native signed water balance retains local inputs](ADR-0112-native-negative-balance-local-inputs.md) (Accepted, 2026-10-30; local inputs, proportional return timing and updated-stock ET; explicit matched Linux release selection).

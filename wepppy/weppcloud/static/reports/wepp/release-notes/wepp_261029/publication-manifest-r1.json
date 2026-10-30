@@ -1,0 +1,28 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261029",
+  "document_revision": "1",
+  "document_date": "2026-10-30",
+  "publication_status": "approved",
+  "approved_on": "2026-10-30",
+  "approval_record": "Release owner read and accepted the report and authorized independent review agents; scientific, implementation and disclosure AI reviews completed with no unresolved substantive blockers",
+  "pdf_filename": "wepp_261029_release-notes-r1.pdf",
+  "pdf_sha256": "be19fc81a89c1df957e13240a62fe9e0affdaf2238c40d23061f29c761e3d42b",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r1.pdf",
+  "pages": 10,
+  "figures": 4,
+  "model_source_identity": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "source_comparison_baseline": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "binary_sha256": {
+    "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4"
+  },
+  "review_scope": "Independent AI scientific, implementation and disclosure reviews; owner acceptance; no human scientific peer-review or institutional endorsement claim",
+  "known_limitations": [
+    "Source-time partition is an approximation, not a travel-time solver",
+    "Wider signed soil/channel coupling and clipping remain open; daily negative exchange remains unallocated",
+    "Roads development magnitude screen is not field calibration or withheld-soil acceptance",
+    "Inherited portability changes affect comparisons with261026; no new Windows release"
+  ],
+  "production_deployment": false
+}

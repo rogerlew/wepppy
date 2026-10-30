@@ -20,7 +20,7 @@ def old_project(tmp_path, monkeypatch):
     from wepppy.nodb.core import Climate, Watershed, Wepp
     installed = registry_module.get_linux_wepp_bin_opts()
     with monkeypatch.context() as isolated:
-        isolated.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: [item for item in installed if item not in ('wepp_261010', 'wepp_261021', 'wepp_261026')])
+        isolated.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: [item for item in installed if item not in ('wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')])
         registry = registry_module.load_registry()
     selections = parse_builder_selections(dict(
         locale='continental-us', dem='usgs-ned13-2022', delineation_backend='wbt',
@@ -38,11 +38,11 @@ def old_project(tmp_path, monkeypatch):
     return Wepp(str(tmp_path), 'config.cfg')
 
 
-@pytest.mark.parametrize('binary', ['wepp_261010', 'wepp_261021', 'wepp_261026'])
+@pytest.mark.parametrize('binary', ['wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029'])
 def test_old_builder_project_can_persist_new_release_without_config_migration(old_project, tmp_path, binary):
     from wepppy.nodb.core import Wepp
     before = {name: (tmp_path / name).read_bytes() for name in ('config.cfg', 'config-manifest.json')}
-    assert project_wepp_binary_options(old_project) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026')
+    assert project_wepp_binary_options(old_project) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     old_project.parse_inputs({'wepp_bin': binary})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == binary
     assert all((tmp_path / name).read_bytes() == content for name, content in before.items())
@@ -96,7 +96,7 @@ class V1Config:
 
 def test_v1_choices_expand_only_binary_axis_and_preserve_geometry():
     config = V1Config()
-    assert project_wepp_binary_options(config) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026')
+    assert project_wepp_binary_options(config) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     validate_project_wepp_binary_selection(config, 'wepp_261010')
     assert project_wepp_binary_options(config, backend='topaz') == ()
     assert project_wepp_binary_options(config, multi_ofe=False) == ()
@@ -137,7 +137,7 @@ def test_explicit_v1_saved_config_persists_new_binary(old_project, tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     before = (serialized, manifest_path.read_bytes())
     reloaded = Wepp.load_detached(str(tmp_path))
-    assert project_wepp_binary_options(reloaded) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026')
+    assert project_wepp_binary_options(reloaded) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     reloaded.parse_inputs({'wepp_bin': 'wepp_261010'})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == 'wepp_261010'
     assert ((tmp_path / 'config.cfg').read_bytes(), manifest_path.read_bytes()) == before

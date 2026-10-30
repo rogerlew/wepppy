@@ -15,6 +15,16 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active: [WEPP 261029 release promotion](docs/work-packages/20261030_wepp_261029_release/package.md) — scientific review, matched binary promotion and illustrated defect/patch report; defaults and deployment unchanged.
+
+Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — autonomous outcome-driven search with frozen scientific gates, followed by a run-scoped user-facing parameterization view; CSV editing not required.
+
+Completed locally: [Roads drainage physical justification and validation](docs/work-packages/20261029_roads_drainage_validation/package.md) — 2,112 native runs; source drainage fixes 17 factor-ten failures but regresses 13. Missing UI-mode sidecar materially affects prior benchmark applicability; six negative-flux cases retained. No production candidate accepted; 12,186 tests passed / 298 skipped.
+
+Completed locally: [Roads buffer drainage and storage](docs/work-packages/20261029_roads_buffer_drainage/package.md) — 24 native runs; source-based buffer drainage brings both selected high-export cases inside factor ten. Native depth threshold and upstream coupling documented; no production candidate accepted. Repository coverage: 12,168 passed, 298 skipped.
+
+Completed locally: [Roads OFE sediment and water-budget study](docs/work-packages/20261029_roads_ofe_budget/package.md) — 66 native runs; surface hydraulic factors do not resolve two site-climate unrutted failures. Buffer drainage/storage is the next target; native accounting limits retained. Repository: 12,151 passed, 298 skipped. No production changes.
+
 Completed locally: [Generated-soil 200 mm boundary consistency](docs/work-packages/20261029_soil_200mm_boundary_consistency/package.md) — all confirmed generated-input writers share property-preserving insertion; uploaded topology remains preserved. Native normalized split/unsplit inputs and outputs agree. Repository coverage: 12,135 passed, 298 skipped. No deployment or native binary change.
 
 Completed locally: [Roads prepared-soil and hydraulic experiment](docs/work-packages/20261029_roads_prepared_soil_hydraulics/package.md) — 1,615 study runs plus two minimal replays; no parameter candidate accepted. Equivalent horizon subdivision exposes a native conductivity sensitivity. Report/reproducer retained; repository checks: 12,083 passed, 298 skipped. No production changes.

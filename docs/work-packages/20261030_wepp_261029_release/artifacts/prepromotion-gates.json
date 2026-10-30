@@ -1,0 +1,30 @@
+{
+  "log_sha256": {
+    "binary-equivalence.json": "a2931bcfa041a94bf54f3aa3ddcbbdb7d2533d0442e1f317e8aa41498274c001",
+    "release-artifact-policy.log": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352",
+    "release-container-hill.log": "9a4dab3b4971233757d5866772659e066136301e6e9a6aac713b3dcbd8f7fd51",
+    "release-container-watershed.log": "6bff18ff6d19765f83fc883c24ba807142d246fc60f22e320d3cbf4628be74f8",
+    "release-native-pytest.log": "8888a8857559eb0f75c464e97d9c4ac9db90d7ecee40fe2e4287016cffcd9a65",
+    "release-provenance.log": "c2f2f563b58168e2f5c7ae336e48ec9ef491990ea31822326fc4eacff0eb0848",
+    "release-smoke-hill.log": "8e8f60c569167f0243139a110cf6d7cfb8811c59b42a0854d7f020724e95fdd3",
+    "release-smoke-watershed.log": "e936c59efb155873a1060bde916d52655dc342bf86668ebf66b1980b8c3b0bdc",
+    "release-watchlist.log": "16cdc3a3b1306dee681d032725420c13a67a66132cfa4f25cbc6ac578a1d75d3"
+  },
+  "source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "status": "prepared; independent review and promotion pending",
+  "validation": {
+    "ablation_artifact_policy": "pass",
+    "container_smoke": "both dated release profiles passed in WEPPpy runtime using scratch paths",
+    "disturbed_matrix": "99 passed; 96 configurations",
+    "downstream_vendoring": "not performed",
+    "elf_interpreter": "/lib64/ld-linux-x86-64.so.2",
+    "hillslope_watchlist": "13 passed; zero failures",
+    "host_smoke": "both dated release profiles passed",
+    "independent_scientific_review": "pending reviewer assignment",
+    "production_deployment": "not performed",
+    "pytest": "663 passed, 2 warnings in 519.04s; PATH=/usr/bin:/bin first",
+    "release_candidate_equivalence": "both complete binary SHA256 values exactly identical; no normalization required",
+    "roads_development_panel": "96/96 frozen magnitude and physical/accounting gates passed; not field calibration or holdout acceptance",
+    "same_build_watershed_replay": "864 independently generated hillslopes and full 1980-2003 Cedar watershed; exact binary SHA256 identity transfers candidate evidence"
+  }
+}

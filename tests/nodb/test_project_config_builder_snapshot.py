@@ -116,7 +116,7 @@ def test_single_inputs_are_independent_creation_capabilities(representation, cli
     assert config["nodb"]["single_user_defined_uploads"] is True
     assert config["watershed"]["mofe_buffer"] is False
     assert manifest["selections"]["single_user_defined_uploads"] is True
-    assert config["capabilities"]["wepp_binaries"] == ["wepp_260803", "wepp_261010", "wepp_261021", "wepp_261026"]
+    assert config["capabilities"]["wepp_binaries"] == ["wepp_260803", "wepp_261010", "wepp_261021", "wepp_261026", "wepp_261029"]
     assert "observed_prism_800m" in config["capabilities"]["climate_datasets"]
     for section in ("capabilities.landuse_methods", "capabilities.soil_builders",
                     "capabilities.landuse_methods_by_representation"):
