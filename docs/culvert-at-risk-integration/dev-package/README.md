@@ -763,6 +763,7 @@ request the full (non-skeletonized) output.
 | POST | `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize` | Rebuild batch summary artifacts after retries |
 | GET | `/rq-engine/api/jobstatus/{job_id}` | Poll job status |
 | GET | `/rq-engine/api/jobinfo/{job_id}` | Get detailed job info |
+| POST | `/rq-engine/api/canceljob/{job_id}` | Cancel a job and its registered children |
 | GET | `/weppcloud/culverts/{batch_uuid}/browse/` | Browse batch artifacts |
 | GET | `/weppcloud/culverts/{batch_uuid}/download/{subpath}` | Download artifacts (authenticated) |
 
@@ -915,8 +916,57 @@ IDs, queue depth, worker capacity, or a cross-queue rank.
 | `deferred` | Job is deferred |
 | `scheduled` | Job is scheduled for later |
 | `canceled` | Job was canceled |
+| `stopped` | A running job was stopped |
 
 Note: `jobstatus` is an aggregated status view and does not currently include execution error payloads.
+
+### Canceling WEPPcloud jobs
+
+Use `POST /rq-engine/api/canceljob/{job_id}` to cancel remote WEPPcloud work. Save the
+`job_id` returned by submission and use that root job ID, **not** `culvert_batch_uuid`
+or the Culvert_web_app local RQ job ID. Canceling a local task or stopping its polling
+is not a remote cancellation request.
+
+**Authentication:** Send the service JWT as a bearer token. For Culvert batch jobs,
+`culvert:batch:submit` is sufficient when the identity has `culvert_runner` feature
+access; a separate cancellation scope is not required. The endpoint also accepts
+`rq:status`, subject to run-access and feature-access checks. Authentication is required
+even when status polling is open. Do not use the artifact `browse_token`.
+
+```bash
+# WEPPCLOUD_TOKEN must contain the current service JWT (see Authentication above).
+WEPPCLOUD_HOST='https://wepp.cloud'
+WEPPCLOUD_JOB_ID='<job_id returned by WEPPcloud submission>'
+curl --fail-with-body --silent --show-error \
+  --request POST \
+  --header "Authorization: Bearer ${WEPPCLOUD_TOKEN}" \
+  "${WEPPCLOUD_HOST}/rq-engine/api/canceljob/${WEPPCLOUD_JOB_ID}"
+```
+
+No request body is required. A successful Culvert cancellation returns HTTP 200:
+
+```json
+{"status": "ok"}
+```
+
+The handler cancels the root and recursively visits children recorded in its RQ
+`jobs:*` metadata. Queued jobs are canceled; started jobs receive an RQ stop command.
+A finished dispatch parent does not prevent cancellation of its registered children.
+Retries and finalizers return their own job IDs: retain and cancel those separately
+when they are not descendants of the original submission job.
+
+After the request, continue polling `GET /rq-engine/api/jobstatus/{job_id}` at the
+normal interval (one second). HTTP 200 acknowledges the cancellation operation;
+it does not guarantee all workers have stopped. The aggregate can remain `started`
+while a child stops, then report `stopped`, `canceled`, or `failed`. Inspect
+`GET /rq-engine/api/jobinfo/{job_id}` for child states when the outcome is unclear.
+Completed work can remain `finished`; cancellation does not delete existing run
+files or roll back outputs. Treat retained artifacts as potentially partial.
+
+HTTP 401 indicates an authentication failure; HTTP 403 indicates missing scope,
+run access, or feature access; HTTP 404 means the job is no longer found. Check the
+response body and do not mark the remote job canceled solely because the local task
+stopped or the cancellation request failed.
 
 ### Artifact Access
 
