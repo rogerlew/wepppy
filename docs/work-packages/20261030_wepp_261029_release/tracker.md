@@ -1,18 +1,23 @@
 # Tracker
 
-- Owner authorized promotion and independent review, and read/accepted notes.
-- Exact model source631aed1d1c89ed8fa76c5dc3f2e4258a8f199504; dated pair is
-  byte-identical to the complete scientific candidate. Portability retained.
-- Independent AI science, implementation and disclosure reviews pass. Wording
-  and provenance findings closed; no model edits followed the dated build.
-- Native release47183b0fb committed/pushed on canonical default branch.
-- Matched pair and reviewed10-page PDF/public manifest vendored.69 targeted
-  tests, both host/container smokes and provenance pass.
-- Actual selected runner and Rust readers pass complete16-year/3-OFE fixture:
-  17532 WAT daily and3237 ELEMENT event rows; absent optional storage stays null.
-- Actual local Caddy PDF/type/hash, manifest bytes and Usersum navigation pass.
-- ADR0112 accepted; lifecycle and user-facing model documentation updated.
-- Fresh broad WEPPpy suite running: session85125; scratch log
-  /wc1/ablation/hourly-return-timing-20261030/postvendor-full-pytest.log.
-- Remaining: broad-suite outcome, WEPPpy commit/push, final closeout.
-- No production deployment, new Windows artifact or default/parameterization switch.
+Completed and pushed, 2026-10-30 UTC.
+
+- Owner accepted notes and authorized independent review agents. Scientific,
+  implementation, disclosure and downstream integration reviews pass. No blocker.
+- Model source 631aed1d1c89ed8fa76c5dc3f2e4258a8f199504; both dated binaries
+  exactly match the scientific candidate. Native release 47183b0fb and
+  native package closeout 788e5d566 pushed. Portability retained.
+- WEPPpy promotion 7077dc7ca and prior Roads evidence d023d6380 pushed.
+- Fresh native 663 tests, 13 watchlist cases and both smokes pass.
+- Post-vendor 69 targeted tests, both host/container smokes and provenance pass.
+- Actual selected runner: 17532 complete finite/nonnegative WAT daily rows.
+  Rust imports 3237 ELEMENT events and 17532 WAT rows; optional absent
+  InterceptionStorage remains null. Independent numeric readback passes.
+- Reviewed10-page/four-figure PDF and public manifest match actual local HTTP
+  downloads; Usersum navigation preserves prior releases.
+- Fresh full WEPPpy sweep: 12,210 passed, 298 skipped, 5,830 warnings in 3490.99 s.
+  Session 85125 is complete, exit 0; final-gates.json retains the log hash.
+- ADR0112 accepted; lifecycle and user documentation updated; plan archived.
+- No production deployment, Windows release or default/parameterization switch.
+- Roads withheld-soil/geometry validation and configuration UI remain in the
+  parent program.

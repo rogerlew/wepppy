@@ -1,0 +1,22 @@
+{
+  "completed_utc": "2026-10-30T17:13:54.841005+00:00",
+  "native_release_commit": "47183b0fb",
+  "native_closeout_commit": "788e5d566",
+  "wepppy_release_commit": "7077dc7ca",
+  "roads_evidence_commit": "d023d6380",
+  "model_source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "wepppy_full_suite": "12210 passed, 298 skipped, 5830 warnings in 3490.99s (0:58:10)",
+  "wepppy_full_suite_exit_code": 0,
+  "full_suite_log_sha256": "94d7198635ad15b6243bae70330af2d9492f8f92b6669b6864f1ae4fd083c9bf",
+  "native_tests": 663,
+  "postvendor_targeted_tests": 69,
+  "independent_ai_reviews": [
+    "scientific",
+    "implementation",
+    "disclosure",
+    "downstream integration"
+  ],
+  "unresolved_release_blockers": 0,
+  "production_deployment": false,
+  "default_changes": false
+}

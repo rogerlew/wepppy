@@ -28,12 +28,12 @@ wider channel coupling/clipping limits remain open; Windows is excluded.
 | New matched pair | Correct role resolution and declared MOFE/upload support | selected-release-runtime.json; sidecars/hash checks | pass |
 | Prepared inputs | Exact committed fixture bytes consumed in runtime container | fixture manifest and SHA256 in script/receipt | pass |
 | Fresh execution |16 years,3OFEs,17532 complete finite/nonnegative WAT rows | actual run_hillslope with runner identity log | pass |
-| Consumer boundary |3237 ELEMENT event and17532 WAT daily rows; known absent optional storage stays null | actual Rust interchange/Parquet readback | pass |
+| Consumer boundary |3237 ELEMENT event and 17532 WAT daily rows; known absent optional storage stays null | actual Rust interchange/Parquet readback | pass |
 | User documentation | Download approved bytes and retain prior release navigation | report-download-check.json | pass |
 
 The direct native failure boundary is exercised by the committed fixture, signed
 allocation/guard probes and exact-binary traces. Cedar is supplementary actual
-watershed evidence:864 independently regenerated hillslopes and24 watershed years.
+watershed evidence:864 independently regenerated hillslopes and 24 watershed years.
 No mocks replace the selected-release runner or Rust reader. New project schema,
 archive format or visibility behavior is not introduced; normal run artifacts
 remain under the existing output inventory and project authorization. Runtime
@@ -45,10 +45,11 @@ No unresolved release blocker. Scientific daily-negative-FIN wording and histori
 source-label findings are closed. Verification harness findings were corrected
 against actual producer/reader contracts without modifying generated outputs:
 ELEMENT is event-only; optional absent InterceptionStorage is null. The first
-HTTP attempt missed Caddy's configured host and returned empty200; hash/size
+HTTP attempt missed Caddy's configured host and returned empty 200; hash/size
 checks rejected it before the correct host route passed.
 
 Integration gate: pass. Highest claim: implemented and locally environment-validated
 through actual selection, execution, consumer and served documentation. Full
-repository sweep and commit/push remain tracked separately. No production
+repository sweep passes 12,210 tests with 298 skips; both releases are committed
+and pushed (see final-gates.json). No production
 deployment, affected-project rerun, Windows promotion or field validation claim.

@@ -61,7 +61,7 @@ channels, downstream elements and zero crossings.
   conservation and masks insufficient water.
 - Change the shared 200 mm normalization: unrelated to this arithmetic defect.
 - Treat the initial patch as full signed-exchange repair: rejected; the later
-  failure and the pre-existing routing contract show that claim is unsupported.
+  failure and the preexisting routing contract show that claim is unsupported.
 - Revert portability changes: explicitly rejected by the operator.
 
 ## Consequences, risk and rollback

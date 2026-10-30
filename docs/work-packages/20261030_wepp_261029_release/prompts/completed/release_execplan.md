@@ -18,14 +18,15 @@ is not a global default change or production deployment. Prior releases remain.
   selected execution, readers and HTTP download.
 - [x] Update ADR, binary lifecycle and user-facing navigation.
 - [x] Commit/push native release as 47183b0fb on the canonical default branch.
-- [ ] Finish fresh full WEPPpy suite; commit/push WEPPpy and record final identities.
+- [x] Commit/push WEPPpy promotion as 7077dc7ca and prior Roads evidence as d023d6380.
+- [x] Finish fresh full WEPPpy suite and archive final handoff evidence:12,210 passed, 298 skipped; exit 0.
 
 ## Context and execution
 
 Native canonical checkout: /workdir/wepp-forest-release-20261009, default branch
 wepp_260430_negmeltfix_comparator. Do not use the dirty abandoned /workdir/wepp-forest
 checkout or switch branches. Native implementation plan remains
-docs/work-packages/20261029-negative-fin-water-accounting/prompts/active/implementation_execplan.md.
+docs/work-packages/20261029-negative-fin-water-accounting/prompts/completed/implementation_execplan.md.
 Source commit 631aed1d1c89ed8fa76c5dc3f2e4258a8f199504 contains all model edits
 and permanent fixtures. Validation-only commit 7d2be92bc repairs evidence metadata.
 
@@ -73,30 +74,35 @@ channel-coupling limitations. Source-time attribution is not a travel-time solve
 
 ## Outcomes & Retrospective
 
-Dated pair passes 663 native tests, both host smokes, 13 watchlist cases, artifact
-policy, ELF provenance and both WEPPpy runtime smokes from scratch paths. Logs
-and checksums are retained in artifacts/prepromotion-gates.json. The 10-page
-illustrated report is a review draft; no promotion or publication claimed.
-Owner authorized independent agents and accepted the report draft on 2026-10-30.
-Scientific, implementation and publication reviewers are executing independently. Subsequent vendoring, selected
-execution and HTTP publication gates must still run.
+Completed on 2026-10-30 UTC. Native source 631aed1d1c89ed8fa76c5dc3f2e4258a8f199504
+produced the matched dated pair, exactly byte-identical to the full scientific
+candidate. Native release 47183b0fb and closeout 788e5d566 are pushed. WEPPpy
+release 7077dc7ca and preceding Roads evidence d023d6380 are pushed.
 
-2026-10-30 update: record completed gates and sidecar validation without implying
-independent scientific acceptance. Model source and binary hashes are unchanged.
+Independent AI scientific, implementation and disclosure reviews accepted the
+bounded release. Owner read and accepted the report. The daily-negative-FIN
+wording correction is closed: daily negative exchange is unallocated and must
+not be independently debited by ET. No model changes followed review.
 
+Fresh native 663 tests, 13 watchlist cases, both host smokes, artifact policy and
+ELF gates pass. Post-vendor 69 targeted checks and both host/container smokes pass.
+Real selected-runner execution and Rust readback cover 17532 WAT daily and 3237
+ELEMENT event rows; independent comparison verifies all 22 numeric ELEMENT fields.
+The final full WEPPpy suite passes 12,210 tests with 298 skips and 5,830 warnings
+in 3490.99 seconds; session 85125 is terminal, exit 0. Final logs/hashes are in
+artifacts/final-gates.json and artifacts/validation.md.
 
-2026-10-30 review authorization: the owner wrote, "go for independent review
-agents. I read through the release-notes and it looks acceptable". Assign
-/root/scientific_review, /root/implementation_review and /root/publication_review;
-retain written findings and closure. This is independent AI review, not an
-institutional or human peer-review claim.
+The 10-page/four-figure report and public manifest are frozen and independently
+inspected. Actual Caddy HTTP 200/type/hash and existing Usersum navigation checks
+pass. Initial harness assumptions about event rows and optional nulls were
+corrected against producer/reader contracts; no model outputs or acceptance
+thresholds changed. Caddy's configured host must be supplied to local probes;
+empty 200 responses are not download success.
 
+The release is implemented and locally environment-validated, committed and
+pushed. Existing defaults, historical binaries and deployment remain unchanged.
+Roads development success is not withheld-soil/geometry acceptance or completion
+of its configuration UI. Those remain in the active parent program.
 
-2026-10-30 UTC integration update: scientific, implementation and publication
-reviews pass; owner acceptance recorded. Dated pair and public PDF/manifest
-installed.69 targeted checks, both host/container smokes and actual runner/Rust
-readback pass. PDF HTTP200/type/hash and existing navigation verified. Native
-release47183b0fb is pushed. Full WEPPpy suite is live in session85125, log
-/wc1/ablation/hourly-return-timing-20261030/postvendor-full-pytest.log. Poll this
-process rather than starting a replacement. Initial script/HTTP verification
-failures and corrections are recorded in artifacts/validation.md.
+Final revision: record completed broad gate and archived release handoff; model
+source, binary and approved PDF identities remain unchanged.

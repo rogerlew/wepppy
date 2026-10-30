@@ -93,7 +93,7 @@ The operator decision and the eventual suite outcome are both outstanding.
 implement the accounting fix, release wepp_261029, run the Disturbed matrix and
 Cedar Creek semantic analysis, and author illustrated release notes. The native-pin
 blocker is resolved. Active native plan:
-`/workdir/wepp-forest-release-20261009/docs/work-packages/20261029-negative-fin-water-accounting/prompts/active/implementation_execplan.md`.
+`/workdir/wepp-forest-release-20261009/docs/work-packages/20261029-negative-fin-water-accounting/prompts/completed/implementation_execplan.md`.
 261026 remains the historical control; acceptance thresholds and withheld sampling
 are unchanged. The new binary may support Roads acceptance only after validation.
 
@@ -129,3 +129,8 @@ This does not accept Roads defaults or the user-facing editor: withheld-soil and
 broader-geometry validation, parameterization contract and UI work remain in
 this program. Release work and final repository gates are tracked in
 ../20261030_wepp_261029_release/package.md.
+
+Release promotion complete: native47183b0fb, WEPPpy7077dc7ca pushed; full
+WEPPpy sweep12,210 passed/298 skipped. Independent AI reviews accepted the
+bounded engine repair. Continue this program with withheld-soil/geometry gates
+and the user-facing parameterization view; no Roads default is accepted yet.
