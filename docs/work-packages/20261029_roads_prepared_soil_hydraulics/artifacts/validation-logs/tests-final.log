@@ -1,0 +1,13 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/tools/test_roads_prepared_soil_hydraulics.py tests/tools/test_roads_soil_benchmark.py -q
+...........                                                              [100%]
+=============================== warnings summary ===============================
+tests/tools/test_roads_prepared_soil_hydraulics.py::test_layer_split_preserves_deeper_material_and_other_ofes
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/tools/test_roads_prepared_soil_hydraulics.py::test_layer_split_preserves_deeper_material_and_other_ofes
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+11 passed, 2 warnings in 10.85s

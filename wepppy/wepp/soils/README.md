@@ -3,7 +3,7 @@
 
 > **See also:** [AGENTS.md](../../../AGENTS.md) for coding conventions and [wepppy.soils](../../soils/README.md) for SSURGO data acquisition.
 >
-> **User documentation:** [Soil Input File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) (line-by-line file format reference) and [Soil File Parameters](../../../weppcloud/routes/usersum/db/soil_file.parameters.md) (parameter dictionary with extended descriptions).
+> **User documentation:** [Soil Input File Specification](../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) (line-by-line file format reference) and [Soil File Parameters](../../weppcloud/routes/usersum/db/soil_file.parameters.md) (parameter dictionary with extended descriptions).
 
 ## Overview
 
@@ -39,6 +39,17 @@ wepppy/wepp/soils/
     ├── multi_ofe.py         # Multi-OFE composition
     └── utils.py             # Helper functions
 ```
+
+Generated input soils now include a property-preserving horizon break at 200 mm.
+This applies to ordinary hillslopes as well as Roads and Disturbed inputs. Writers
+copy the crossing material into two pieces without changing total depth or its
+properties. Files already split at 200 mm are unchanged by normalization.
+
+The explicit uploaded-soil preservation path retains supplied topology. Generated
+profiles exceeding WEPP's ten-layer capacity fail before publication. Existing
+runs are not rewritten; reruns may change runoff and sediment because the native
+reader responds differently to split and unsplit horizons. See the
+[boundary contract](../../../docs/schemas/soil-horizon-boundary-contract.md).
 
 ## Quick Start
 

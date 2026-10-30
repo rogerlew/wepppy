@@ -1,0 +1,13 @@
+{
+  "collection_node_count": 11568,
+  "successful_prefix_node_count": 5367,
+  "prefix_passed": 5314,
+  "prefix_runtime_skipped": 53,
+  "prefix_collection_skipped": 1,
+  "continuation_node_count": 6201,
+  "first_continuation_node": "tests/nodb/test_project_developer_mode.py::test_project_policy_drives_saved_and_prepared_anisotropy",
+  "files": {
+    "/wc1/runs/so/soil-boundary-consistency-20261029-v4/all-nodeids.txt": "bfcdef65c7f96f6882bca4c8363897b2806f3d380eeb50bfaceca7f6fb7fc570",
+    "/wc1/runs/so/soil-boundary-consistency-20261029-v4/remaining-nodeids.txt": "72e93c929bd21d7016290c38749b236ab776bb3e538871f6fde35b18ed7dd114"
+  }
+}

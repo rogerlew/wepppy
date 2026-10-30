@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-29",
+  "passed": 12083,
+  "skipped": 298,
+  "failed": 0,
+  "coverage": "Fresh disjoint repository groups; focused run not counted twice",
+  "native_study_runs": 1615,
+  "minimal_replays": 2,
+  "native_failures": 0,
+  "logs": [
+    {
+      "file": "9002-mofe-mulch.log",
+      "sha256": "021d3b488a169bf84e74eb5ccd18954a04901c574d2c36773462064839b1dd9a",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and mofe and (not thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 199.21s (0:03:19)"
+    },
+    {
+      "file": "9002-mofe-thinning.log",
+      "sha256": "67f6540af75743567d144a05bfe4d0623946406d1ff5a99b097845af2e2b2823",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and mofe and (thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 241.89s (0:04:01)"
+    },
+    {
+      "file": "9002-single-mulch.log",
+      "sha256": "2e2a35154a1b260affe4821c47da557eea3b3e117a228ee28f921f65853cbc8f",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and single and (not thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 102.39s (0:01:42)"
+    },
+    {
+      "file": "9002-single-thinning.log",
+      "sha256": "c6bc00761f8d9d59c5c171981a60ebc909a4dc60e7df8194e59ac17c4ff92f44",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and single and (thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 119.25s (0:01:59)"
+    },
+    {
+      "file": "9005-mofe-mulch.log",
+      "sha256": "4a2254c9cf1900e867d7df20e5f2d5586c8b1ef58ad7f726425dacdfccb0bb2a",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and mofe and (not thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 202.90s (0:03:22)"
+    },
+    {
+      "file": "9005-mofe-thinning.log",
+      "sha256": "04e5d6b857ce59503c5ff7927b61bbc100de5f71720330ccc845f2f0d97143e3",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and mofe and (thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 245.74s (0:04:05)"
+    },
+    {
+      "file": "9005-single-mulch.log",
+      "sha256": "ca6fa035c27f850975847fd8759e4268a98893551770acf3bb10bfd4dbacf2fa",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and single and (not thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 107.80s (0:01:47)"
+    },
+    {
+      "file": "9005-single-thinning.log",
+      "sha256": "5c9f4b2a613b6b26b1b3c134b63c3e99b7d43312cdd0d86b55faccbbd45afd42",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and single and (thinning)' --maxfail=1",
+      "pytest_summary": "27 passed, 203 deselected, 2 warnings in 116.00s (0:01:55)"
+    },
+    {
+      "file": "analyzer-check.log",
+      "sha256": "ddd2583a0e5ad9dc9d6af3734b067895ad47ec4d7e1cacfdbba16c8b2089398f",
+      "command": "INFO:wctl2:docker compose exec weppcloud python -",
+      "pytest_summary": null
+    },
+    {
+      "file": "confirmation-analysis-v2.log",
+      "sha256": "cf9bd52a58da8595c08afcaa45e80df3d9c7b6f63d04738b4e4136bd59b10b33",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py --batch confirmation-v1 --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-analysis-v2 --workers 8",
+      "pytest_summary": null
+    },
+    {
+      "file": "confirmation-analysis.log",
+      "sha256": "830f08b6959e06497af0d1663f265a2fe01e4f1b0cfbd8c67856cf150dd18091",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py --batch confirmation-v1 --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-analysis-v1 --workers 8",
+      "pytest_summary": null
+    },
+    {
+      "file": "confirmation.log",
+      "sha256": "d4d1eda4916a60338b071bd78d39239d38f4d0e18c36bf6bd72e75994792746a",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py validation --batch confirmation-v1 --variants roles raw --workers 16",
+      "pytest_summary": null
+    },
+    {
+      "file": "diagnostic.log",
+      "sha256": "5a29497c763d6079abafe12155144d8040877cd987927be070a6a87afa5aaad1",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py diagnostic --batch diagnostic-v1 --workers 12",
+      "pytest_summary": null
+    },
+    {
+      "file": "disturbed.log",
+      "sha256": "8dcdece5ebdcbb7979781426e7b6c8d73587cc0de851164f4a224cc121ff90eb",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/disturbed/test_disturbed_matrix.py -q",
+      "pytest_summary": "99 passed, 2 warnings in 434.11s (0:07:14)"
+    },
+    {
+      "file": "exceptions.log",
+      "sha256": "8c23d90b3de6aea94908dab2d6e1898e57ee1c0ea72629df51e17c2c6950a88c",
+      "command": "Broad exception handler changed-file enforcement",
+      "pytest_summary": null
+    },
+    {
+      "file": "minimal-replay.log",
+      "sha256": "6635fe552d33ac7a977e0a41b5eaed2a7908b20f701c01e58132350f4b64e1e2",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/reproducer/reproduce.py --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/minimal-replay",
+      "pytest_summary": null
+    },
+    {
+      "file": "repository-remainder.log",
+      "sha256": "9eee8fec403a5d64261061465bd349c719435c42f21ce09f3b5d9fe599ad3ef8",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py --ignore=tests/disturbed/test_disturbed_matrix.py --ignore=tests/roads --maxfail=1",
+      "pytest_summary": "======== 11224 passed, 293 skipped, 5830 warnings in 1662.08s (0:27:42) ========"
+    },
+    {
+      "file": "roads.log",
+      "sha256": "62e55c1a8870536463f7db144c8532a877883628599b701f54baf69caab27683",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/roads --maxfail=1",
+      "pytest_summary": "============ 530 passed, 5 skipped, 2 warnings in 393.04s (0:06:33) ============"
+    },
+    {
+      "file": "soil-other.log",
+      "sha256": "35c57e9ff8e34a882737ee0d6267677a97904b322c1222e6d2cba280379bdb78",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k 'not 9002 and not 9005' --maxfail=1",
+      "pytest_summary": "14 passed, 216 deselected, 2 warnings in 93.06s (0:01:33)"
+    },
+    {
+      "file": "subdivision.log",
+      "sha256": "555416de68f7d325e71d9812344f2ab515687c2d05f9cce1af0a6b8e247b8147",
+      "command": "INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py diagnostic --batch subdivision-v1 --variants split_all split_road split_fill split_buffer format_unsplit --workers 8",
+      "pytest_summary": null
+    },
+    {
+      "file": "tests-final.log",
+      "sha256": "daaa900c6fbc3307f2c542bda47af5ceed0aabe85e0b738083fba29bd1845b67",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/tools/test_roads_prepared_soil_hydraulics.py tests/tools/test_roads_soil_benchmark.py -q",
+      "pytest_summary": "11 passed, 2 warnings in 10.85s"
+    }
+  ]
+}

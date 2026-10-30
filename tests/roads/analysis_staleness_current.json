@@ -10,10 +10,18 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978"
+      "current": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b"
+    },
+    "tests/roads/roads_analysis.py": {
+      "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
+      "current": "e096957eb27244d3ac0a341dffad3f5acb3201bacdbe24dd9aa2d63c2eea1a23"
+    },
+    "wepppy/wepp/soils/horizon_boundary.py": {
+      "recorded": null,
+      "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
     }
   },
-  "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale.",
+  "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale. The generated-soil boundary change adds the shared normalizer to execution-source hashing; historical reports remain unchanged and explicitly stale.",
   "subsequent_source_reviews": [
     {
       "commit": "2fff37a75f445fc09521782c771748a525c9f9b6",
@@ -22,6 +30,14 @@
       "current_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
       "scope": "Add query_inputs only; saved input-form presentation, no model-result changes.",
       "evidence": "docs/dev-notes/roads-project-render-contention.md"
+    },
+    {
+      "date": "2026-10-29",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978",
+      "current_sha256": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b",
+      "scope": "Apply shared generated-soil 200 mm normalization to four soil assembly paths. Legacy matrix templates already terminate at 200 mm, so insertion is a no-op; historical routing evidence remains stale.",
+      "evidence": "docs/work-packages/20261029_soil_200mm_boundary_consistency/package.md"
     }
   ]
 }

@@ -15,6 +15,7 @@ SUITE = REPO / "tests/roads"
 def source_hashes():
     paths = list(SUITE.glob("*.py")) + [SUITE / "analysis_context.md"] + list((SUITE / "data").rglob("*"))
     paths += list((REPO / "wepppy/nodb/mods/roads").glob("*.py"))
+    paths += [REPO / "wepppy/wepp/soils/horizon_boundary.py"]
     paths += list((REPO / "wepppy/nodb/mods/roads/legacy_templates").rglob("*"))
     paths += list((REPO / "wepp_runner").glob("*.py"))
     paths += list((REPO / "wepp_runner/templates").rglob("*"))

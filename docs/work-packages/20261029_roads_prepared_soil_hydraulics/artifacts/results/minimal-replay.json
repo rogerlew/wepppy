@@ -1,0 +1,176 @@
+[
+  {
+    "case": "unsplit",
+    "metrics": {
+      "years": 16,
+      "sediment_export_kg_yr": 109.09933556364493,
+      "spatial_net_loss_kg_yr": 109.29675751421051,
+      "runoff_mm_yr": 682.5999999999999,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 1745.9342108533679
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.04310522938113193,
+      "annual_mean_export_delta_kg": 0.021552614690563132
+    },
+    "wat_rows": 17532,
+    "outputs": {
+      "H1.plot.dat": "4f37fa8b57c1fb45db1e61fede321f66bb25cf2382f944dc810a9ef19311ac5f",
+      "H1.element.dat": "c18fdd36c8b82a3775f7d8d12e3eb67d654e4e08829aac598bc60deb0f1661ba",
+      "H1.wat.dat": "249b9c28b7c648c48c365e7ff85a8b8c29a0a368f9fe1f51e032e60e14acbafb",
+      "H1.pass.dat": "d045d3c91c1709371f432b4312e1768a20e779564fa37aa7395612b1c87101ab",
+      "H1.loss.dat": "854a7fa5103885c6ecd99bae930a465cb596d1b7eddc6777cb29d84bf93b3a05",
+      "H1.soil.dat": "39014faf1e7fc6c3f18cea8a21129584a2ee02cc32d0d2f19f2175e02c4768d8",
+      "H1.ebe.dat": "0bc0e60b52c2e483b422140a55673f494c18eba81698dea651c7eb6182377414"
+    }
+  },
+  {
+    "case": "split",
+    "metrics": {
+      "years": 16,
+      "sediment_export_kg_yr": 4473.288284256348,
+      "spatial_net_loss_kg_yr": 4525.834420976535,
+      "runoff_mm_yr": 1001.54,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 1146.3404701618226
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 1455.5773857420631
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 1832.6619323682053
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 3026.849207143084
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 3731.4041813776857
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 4958.480746170369
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 9346.334465793312
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 2348.84705420726
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 2570.7958802907087
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 4192.931872361466
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 3966.844944257429
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 5510.831155460193
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 9872.778632225076
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 1421.0932022371578
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 5855.974727114917
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 10334.996006878955
+        }
+      ],
+      "export_resolution_kg": 0.04310522938113193,
+      "annual_mean_export_delta_kg": 0.008082230508989596
+    },
+    "wat_rows": 17532,
+    "outputs": {
+      "H1.wat.dat": "940a0b317da3967ce3feebf132bb20d89a8d24bed4ce6c1315f0426fb30c4968",
+      "H1.soil.dat": "d4a7ef096dd95917f276fd0de510a04b827d2bdd47f70c5c348ed8c50e169743",
+      "H1.element.dat": "8c82ea735793809dc200e17b4cf5b5e904191d2aacd2da2c289d1f91d31ec0b2",
+      "H1.loss.dat": "70f3f76e5e2ef39785c199aa9de015f973dcf8e53a99107942a941f2f6d626a2",
+      "H1.pass.dat": "e6ee0549dcd78a9b9f354c7ab72a7a78074768acf3790209da109e2186d8d6ca",
+      "H1.ebe.dat": "b122622c88d0ca551090209fe8706c94688429b367f6805e8e9a7719dacf9460",
+      "H1.plot.dat": "2cd4c22c8c787d48283aabdd608c61efc5b7a54e301df5f355ffcc6bf1477456"
+    }
+  }
+]

@@ -21,6 +21,9 @@ Canonical behavioral contract:
   hydration. Archive/fork replacement uses incoming mode, with no sticky state.
 * Uploaded soil preparation follows `docs/schemas/single-user-defined-inputs-contract.md`;
   preserve admitted versions and explicit hydraulic values through single/MOFE preparation.
+* Generated hillslope, MOFE and channel soil inputs follow
+  `docs/schemas/soil-horizon-boundary-contract.md`; preserve the explicit upload
+  exception and validate emitted 200 mm boundaries before publication.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
   omitted kslast preserves saved state; explicit clearing remains supported.
 * Treatment soil class selection follows `docs/schemas/disturbed-treatment-soil-lookup-contract.md`:

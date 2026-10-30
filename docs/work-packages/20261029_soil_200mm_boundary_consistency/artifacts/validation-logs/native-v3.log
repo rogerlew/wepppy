@@ -1,0 +1,78 @@
+INFO:wctl2:docker compose exec weppcloud /opt/venv/bin/python /workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py
+{
+  "root": "/wc1/runs/so/soil-boundary-consistency-20261029-v3",
+  "metrics": {
+    "years": 16,
+    "sediment_export_kg_yr": 4473.288284256344,
+    "spatial_net_loss_kg_yr": 4525.834420976531,
+    "runoff_mm_yr": 1001.54,
+    "annual_export": [
+      {
+        "year": 1,
+        "sediment_export_kg": 1146.3404701618217
+      },
+      {
+        "year": 2,
+        "sediment_export_kg": 1455.577385742062
+      },
+      {
+        "year": 3,
+        "sediment_export_kg": 1832.6619323682037
+      },
+      {
+        "year": 4,
+        "sediment_export_kg": 3026.849207143082
+      },
+      {
+        "year": 5,
+        "sediment_export_kg": 3731.4041813776826
+      },
+      {
+        "year": 6,
+        "sediment_export_kg": 4958.480746170364
+      },
+      {
+        "year": 7,
+        "sediment_export_kg": 9346.334465793305
+      },
+      {
+        "year": 8,
+        "sediment_export_kg": 2348.847054207258
+      },
+      {
+        "year": 9,
+        "sediment_export_kg": 2570.7958802907065
+      },
+      {
+        "year": 10,
+        "sediment_export_kg": 4192.931872361462
+      },
+      {
+        "year": 11,
+        "sediment_export_kg": 3966.844944257425
+      },
+      {
+        "year": 12,
+        "sediment_export_kg": 5510.831155460189
+      },
+      {
+        "year": 13,
+        "sediment_export_kg": 9872.778632225069
+      },
+      {
+        "year": 14,
+        "sediment_export_kg": 1421.0932022371567
+      },
+      {
+        "year": 15,
+        "sediment_export_kg": 5855.974727114913
+      },
+      {
+        "year": 16,
+        "sediment_export_kg": 10334.996006878946
+      }
+    ],
+    "export_resolution_kg": 0.0431052293811319,
+    "annual_mean_export_delta_kg": 0.008082230508989596
+  }
+}

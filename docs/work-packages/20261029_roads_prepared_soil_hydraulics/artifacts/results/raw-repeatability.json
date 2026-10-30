@@ -1,0 +1,2407 @@
+{
+  "cases": 480,
+  "all_shared_metrics_identical": true,
+  "schema_note": "New parser additionally records annual_mean_export_delta_kg, absent from original execution records; all original metrics including annual series compare exactly. Initial full-dictionary comparison correctly identified this additive field, not a changed modeled result.",
+  "records": [
+    {
+      "name": "birmingham-clay-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-clay-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-clay-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-loam-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-loam-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-sand-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-sand-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "birmingham-silt-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/birmingham-silt-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-clay-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-clay-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-loam-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-loam-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-sand-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-sand-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "charleston-silt-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/charleston-silt-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-clay-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-clay-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-loam-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-loam-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-sand-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-sand-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "denver-silt-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/denver-silt-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-clay-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-clay-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-loam-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-loam-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-sand-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-sand-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "flagstaff-silt-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/flagstaff-silt-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-clay-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-clay-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-loam-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-loam-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-sand-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-sand-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inbare-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inbare-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-inveg-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-inveg-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-gravel-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-gravel-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-gravel-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-gravel-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-gravel-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-gravel-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-paved-high-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-paved-high-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-paved-low-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-paved-low-modern-generated/record.json",
+      "shared_metrics_equal": true
+    },
+    {
+      "name": "site-silt-outunrut-paved-none-modern-raw",
+      "prior": "/wc1/runs/ro/roads-soil-benchmark-20261029/validation-v4/site-silt-outunrut-paved-none-modern-generated/record.json",
+      "shared_metrics_equal": true
+    }
+  ]
+}

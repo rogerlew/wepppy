@@ -1,0 +1,12 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py --batch confirmation-v1 --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-analysis-v1 --workers 8
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py", line 96, in <module>
+    args=parser.parse_args();main(args.root,args.batch,args.destination,args.workers)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py", line 48, in main
+    references[refname]=records.get(refname) or verify(e.OLD/'validation-v4'/refname)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py", line 19, in verify
+    if fresh!=r['metrics']:raise ValueError('Parsed loss differs from record')
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Parsed loss differs from record

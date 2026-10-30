@@ -73,3 +73,39 @@ def test_ssurgo_sol_generation_quotes_muname_apostrophes_for_roundtrip(
 
     parsed = WeppSoilUtil(str(sol_path))
     assert parsed.obj["ofes"][0]["slid"] == muname
+
+
+@pytest.mark.parametrize('legacy', [False, True])
+def test_ssurgo_generated_crossing_horizon_preserves_material(tmp_path, legacy):
+    soil = _fake_wepp_soil('Example soil')
+    soil.horizons[0].hzdepb_r = 35.0
+    text = (soil.build_file_contents_v2006_2() if legacy
+            else soil.build_file_contents())
+    path = tmp_path / 'generated.sol'
+    path.write_text(text)
+    parsed = WeppSoilUtil(str(path)).obj['ofes'][0]
+    assert parsed['nsl'] == 2
+    assert [h['solthk'] for h in parsed['horizons']] == [200, 350 if legacy else 400]
+    assert {k: v for k, v in parsed['horizons'][0].items() if k != 'solthk'} == {
+        k: v for k, v in parsed['horizons'][1].items() if k != 'solthk'}
+    assert soil.num_layers == 1
+
+
+@pytest.mark.parametrize('method,expected_depths', [
+    ('_build_urban', [200, 210]),
+    ('_build_water', [200, 210]),
+    ('_build_urban_v2006_2', [200, 210]),
+    ('_build_water_v2006_2', []),
+])
+def test_canned_ssurgo_profiles_keep_their_material_and_total_depth(method, expected_depths):
+    import shlex
+    from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
+    text = getattr(_fake_wepp_soil('Canned soil'), method)()
+    records = [line for line in text.splitlines() if line.strip() and not line.startswith('#')]
+    count = int(shlex.split(records[3])[2])
+    horizons = [line.split() for line in records[4:4 + count]]
+    assert [float(row[0]) for row in horizons] == expected_depths
+    assert len(records) == 5 + count
+    if horizons:
+        assert horizons[0][1:] == horizons[1][1:]
+    assert ensure_200mm_boundary(text) == text

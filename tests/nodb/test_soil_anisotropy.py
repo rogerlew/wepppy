@@ -129,6 +129,9 @@ def test_preparation_one_source_read_one_destination_write(tmp_path, monkeypatch
         expected = expected.to7778()
     expected.modify_initial_sat(.4)
     expected.modify_kslast(.02)
+    expected_path = tmp_path / 'expected.sol'
+    expected.write(str(expected_path))
+    expected = WeppSoilUtil(str(expected_path), preserve_input_format=uploaded)
     counts = {'read': 0, 'write': 0}
     real_open = builtins.open
     destination = tmp_path / 'wepp/runs/p1.sol'
@@ -172,7 +175,7 @@ def test_native_values_reach_all_prepared_ofes(tmp_path, version):
 def test_crossing_horizon_receives_lower_value_without_splitting(tmp_path, uploaded):
     from wepppy.wepp.soils.utils import WeppSoilUtil
     source = _soil_source(tmp_path)
-    soil = WeppSoilUtil(str(source))
+    soil = WeppSoilUtil(str(source), preserve_input_format=True)
     for ofe in soil.obj['ofes']:
         ofe['horizons'][1]['solthk'] = 600
     soil.write(str(source))
@@ -180,8 +183,8 @@ def test_crossing_horizon_receives_lower_value_without_splitting(tmp_path, uploa
     _mofe_files(tmp_path)
     dst = _prepare(tmp_path, source, options=(25, 3), uploaded=uploaded)
     for ofe in WeppSoilUtil(str(dst)).obj['ofes']:
-        assert [h['solthk'] for h in ofe['horizons']] == [100, 600, 800]
-        assert [h['anisotropy'] for h in ofe['horizons']] == [25, 3, 3]
+        assert [h['solthk'] for h in ofe['horizons']] == ([100, 600, 800] if uploaded else [100, 200, 600, 800])
+        assert [h['anisotropy'] for h in ofe['horizons']] == ([25, 3, 3] if uploaded else [25, 3, 3, 3])
     assert source.read_bytes() == original
 
 
@@ -191,10 +194,10 @@ def test_clipping_precedes_classification_and_blank_retains_zero(tmp_path, uploa
     source = _soil_source(tmp_path)
     _mofe_files(tmp_path)
     dst = _prepare(tmp_path, source, options=(None, 3), uploaded=uploaded)
-    assert [h['anisotropy'] for h in WeppSoilUtil(str(dst)).obj['ofes'][0]['horizons']] == [0, 2, 3]
+    assert [h['anisotropy'] for h in WeppSoilUtil(str(dst)).obj['ofes'][0]['horizons']] == ([0, 2, 3] if uploaded else [0, 2, 2, 3])
     dst = _prepare(tmp_path, source, options=(25, 3), uploaded=uploaded, clip=True)
     horizons = WeppSoilUtil(str(dst)).obj['ofes'][0]['horizons']
-    assert [h['solthk'] for h in horizons] == ([100, 500] if uploaded else [100, 500, 500])
+    assert [h['solthk'] for h in horizons] == ([100, 500] if uploaded else [100, 200, 500, 500])
     assert all(h['anisotropy'] == 25 for h in horizons)
 
 
@@ -243,4 +246,6 @@ def test_facade_prep_passes_effective_options_to_real_worker(tmp_path, saved, ho
             clip_soils_minimum=False, clip_soils_minimum_depth=1000, initial_sat=.4))
     Wepp._prep_multi_ofe(context, SimpleNamespace(wepp=lambda **kwargs: 1), max_workers=1, wepp_ui=hourly)
     soil = WeppSoilUtil(str(runs/'p1.sol'))
+    # Final serialization copies the already-assigned second horizon at 200 mm.
+    expected = [expected[0], expected[1], expected[1], expected[2]]
     assert all([h['anisotropy'] for h in ofe['horizons']] == expected for ofe in soil.obj['ofes'])

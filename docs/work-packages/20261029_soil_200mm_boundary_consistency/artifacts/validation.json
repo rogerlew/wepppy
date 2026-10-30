@@ -1,0 +1,42 @@
+{
+  "status": "complete",
+  "passed": 12135,
+  "skipped": 298,
+  "unresolved_failures": 0,
+  "groups": [
+    {
+      "group": "successful broad prefix",
+      "passed": 5314,
+      "skipped": 54,
+      "log": "validation-logs/full.log",
+      "note": "Initial failing developer-mode assertion was corrected and revalidated in continuation."
+    },
+    {
+      "group": "exact broad continuation",
+      "passed": 5962,
+      "skipped": 239,
+      "log": "validation-logs/remainder.log"
+    },
+    {
+      "group": "Roads",
+      "passed": 530,
+      "skipped": 5,
+      "log": "validation-logs/roads-final.log"
+    },
+    {
+      "group": "Disturbed matrix",
+      "passed": 99,
+      "skipped": 0,
+      "log": "validation-logs/disturbed.log"
+    },
+    {
+      "group": "treatment-soil artifacts",
+      "passed": 230,
+      "skipped": 0,
+      "log": "validation-logs/treatment.log"
+    }
+  ],
+  "coverage_proof": "coverage-continuation.json",
+  "log_identities": "validation-log-hashes.json",
+  "native_evidence": "native-evidence.json"
+}

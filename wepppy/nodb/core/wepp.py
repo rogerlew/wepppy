@@ -161,6 +161,7 @@ from wepppy.all_your_base import (
 from wepppy.all_your_base import try_parse_float, isint
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator, RDIOutOfBoundsException
 
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.wepp.soils.utils import WeppSoilUtil
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 
@@ -2607,17 +2608,19 @@ class Wepp(NoDbBase):
         assert isfloat(critical_shear)
 
         # iterate over soils and append them together
-        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-        fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
+        lines = []
+        lines.append('7778.0\ncomments: soil file\n{chn_n} 1\n'
                  .format(chn_n=chn_n))
 
         for i in range(chn_n):
-            fp.write('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}\n'
+            lines.append('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}\n'
                      .format(erodibility=erodibility, critical_shear=critical_shear))
-            fp.write('    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20\n')
-            fp.write('1 10000 0.0001\n')
+            lines.append('    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20\n')
+            lines.append('1 10000 0.0001\n')
 
-        fp.close()
+        soil_text = ensure_200mm_boundary(''.join(lines))
+        with open(_join(runs_dir, 'pw0.sol'), 'w') as fp:
+            fp.write(soil_text)
 
     def _prep_2006_channel_soils(self, translator, erodibility, critical_shear, avke):
         if erodibility is not None or critical_shear is not None:
@@ -2653,8 +2656,8 @@ class Wepp(NoDbBase):
         assert isfloat(critical_shear)
 
         # iterate over soils and append them together
-        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-        fp.write('2006.2\ncomments: soil file\n{chn_n} 1\n'
+        lines = []
+        lines.append('2006.2\ncomments: soil file\n{chn_n} 1\n'
                  .format(chn_n=chn_n))
 
         for chn_enum, soil in soil_c:
@@ -2662,12 +2665,14 @@ class Wepp(NoDbBase):
             if _avke is None:
                 _avke = avke
 
-            fp.write('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear} {avke}\n'
+            lines.append('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear} {avke}\n'
                      .format(erodibility=erodibility, critical_shear=critical_shear, avke=_avke))
-            fp.write('    400	66.8	7	3	11.3	20\n')
-            fp.write('1 25 0.0001\n')
+            lines.append('    400	66.8	7	3	11.3	20\n')
+            lines.append('1 25 0.0001\n')
 
-        fp.close()
+        soil_text = ensure_200mm_boundary(''.join(lines))
+        with open(_join(runs_dir, 'pw0.sol'), 'w') as fp:
+            fp.write(soil_text)
 
     def _prep_watershed_managements(self, translator):
         landuse = self.landuse_instance

@@ -116,7 +116,7 @@
 - Work package process: `docs/work-packages/README.md`; mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - Incident and artifact validation: `docs/standards/hardening-lifecycle-standard.md`; `docs/standards/generated-artifact-validation-standard.md`
-- Parameterization ADR requirement: `docs/standards/parameterization-adr-standard.md`
+- Parameterization: [ADR standard](docs/standards/parameterization-adr-standard.md); generated soils: [200 mm boundary contract](docs/schemas/soil-horizon-boundary-contract.md) and [ADR-0110](docs/adrs/ADR-0110-generated-soil-200mm-boundary.md).
 - RQ scoped NoDb mutation cache-guard standard: `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`

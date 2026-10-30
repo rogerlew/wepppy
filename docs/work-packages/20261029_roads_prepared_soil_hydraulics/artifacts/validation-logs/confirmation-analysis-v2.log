@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/analyze.py --batch confirmation-v1 --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/confirmation-analysis-v2 --workers 8
+legacy {'positive_reference': 114, 'within': 113, 'zero_to_positive': 0, 'both_zero': 6, 'max_absolute_difference': 404.37144}
+raw {'positive_reference': 563, 'within': 361, 'zero_to_positive': 6, 'both_zero': 31, 'max_absolute_difference': 4019.7960000000003}
+roles {'positive_reference': 563, 'within': 503, 'zero_to_positive': 13, 'both_zero': 24, 'max_absolute_difference': 1415.6188381057536}
+Verified 1440 native cases and 600 references

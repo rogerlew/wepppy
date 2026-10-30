@@ -101,5 +101,6 @@ def test_project_policy_drives_saved_and_prepared_anisotropy(tmp_path, monkeypat
     prep_multi_ofe_hillslope(('101', 1, str(tmp_path), str(runs), 1, .02, .4,
         False, 300, False, 500, False, 1000, None, False, False, (101, 11), True))
     prepared = WeppSoilUtil(str(runs / 'p1.sol'))
-    assert [[h['anisotropy'] for h in ofe['horizons']] for ofe in prepared.obj['ofes']] == [[101, 101, 11]] * 2
+    assert [[h['solthk'] for h in ofe['horizons']] for ofe in prepared.obj['ofes']] == [[100, 200, 500, 800]] * 2
+    assert [[h['anisotropy'] for h in ofe['horizons']] for ofe in prepared.obj['ofes']] == [[101, 101, 101, 11]] * 2
     assert source.read_bytes() == source_bytes

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
+
 import hashlib
 import json
 import os
@@ -2854,7 +2856,7 @@ class Roads(NoDbBase):
             out.append(header_line)
             out.append(horizon_line)
 
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
 
     
     
@@ -2973,7 +2975,7 @@ class Roads(NoDbBase):
         out.append(road_horizon_line)
         out.append(buffer_header)
         out.append(buffer_horizon_line)
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
 
     def _build_routed_three_ofe_soil_file(
         self,
@@ -3079,7 +3081,7 @@ class Roads(NoDbBase):
         out.append(fill_horizon_line)
         out.append(buffer_header)
         out.append(buffer_horizon_line)
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
 
     @staticmethod
     def _strip_management_scenario_block(
@@ -3433,7 +3435,7 @@ class Roads(NoDbBase):
             horizon_tokens[-1] = f"{float(rfg_pct):.6g}"
         out.append(" ".join(horizon_tokens))
 
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
 
     def _materialize_single_ofe_management_template(self, *, traffic: str) -> Path:
         source_path = self._resolve_legacy_management_template_path(traffic=traffic)

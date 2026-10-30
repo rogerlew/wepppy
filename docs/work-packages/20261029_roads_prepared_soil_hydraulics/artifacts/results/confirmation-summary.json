@@ -1,0 +1,1160 @@
+{
+  "legacy": {
+    "all": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 404.37144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 120,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 288.97319879999964
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 114,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 404.37144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 120,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 288.97319879999964
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 114,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "climate:birmingham": {
+      "cases": 24,
+      "sediment_export_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 144.8488799999999
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 288.97319879999964
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 8.850000000000001
+      }
+    },
+    "climate:denver": {
+      "cases": 24,
+      "sediment_export_kg_yr": {
+        "positive_reference": 18,
+        "within": 18,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 20.984040000000007
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 69.84220319999997
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 18,
+        "within": 18,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 1.1799999999999997
+      }
+    },
+    "climate:flagstaff": {
+      "cases": 24,
+      "sediment_export_kg_yr": {
+        "positive_reference": 24,
+        "within": 23,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 25.023239999999994
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 51.535044
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1.4399999999999995
+      }
+    },
+    "climate:charleston": {
+      "cases": 24,
+      "sediment_export_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 27.735840000000024
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 176.9575895999999
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 5.960000000000001
+      }
+    },
+    "climate:site": {
+      "cases": 24,
+      "sediment_export_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 404.37144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 264.4520075999998
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "soil:sand": {
+      "cases": 0,
+      "sediment_export_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "soil:loam": {
+      "cases": 0,
+      "sediment_export_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "soil:silt": {
+      "cases": 0,
+      "sediment_export_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "soil:clay": {
+      "cases": 0,
+      "sediment_export_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 0,
+        "within": 0,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "soil:holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 404.37144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 120,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 288.97319879999964
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 114,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "design:inbare": {
+      "cases": 30,
+      "sediment_export_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 404.37144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 288.97319879999964
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "design:inveg": {
+      "cases": 30,
+      "sediment_export_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 239.33843999999993
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 221.9048171999998
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "design:outrut": {
+      "cases": 30,
+      "sediment_export_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 343.16568
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 251.06938560000003
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 212.67999999999995
+      }
+    },
+    "design:outunrut": {
+      "cases": 30,
+      "sediment_export_kg_yr": {
+        "positive_reference": 24,
+        "within": 23,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 66.42515847632431
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 30,
+        "within": 30,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 208.22325894390815
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 24,
+        "within": 24,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 142.94
+      }
+    }
+  },
+  "raw": {
+    "all": {
+      "cases": 600,
+      "sediment_export_kg_yr": {
+        "positive_reference": 563,
+        "within": 361,
+        "zero_to_positive": 6,
+        "both_zero": 31,
+        "max_absolute_difference": 4019.7960000000003
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 600,
+        "within": 469,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3975.0446339999994
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 568,
+        "within": 342,
+        "zero_to_positive": 6,
+        "both_zero": 26,
+        "max_absolute_difference": 1221.47
+      }
+    },
+    "holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 84,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 1602.33084
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 2083.5703152
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 48,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 656.75
+      }
+    },
+    "climate:birmingham": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 110,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3297.2483110509247
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 116,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 2886.599877567164
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 117,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 192.26
+      }
+    },
+    "climate:denver": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 90,
+        "within": 17,
+        "zero_to_positive": 6,
+        "both_zero": 24,
+        "max_absolute_difference": 176.8176509214032
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 44,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 302.80623120000007
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 90,
+        "within": 18,
+        "zero_to_positive": 6,
+        "both_zero": 24,
+        "max_absolute_difference": 5.54
+      }
+    },
+    "climate:flagstaff": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 48,
+        "zero_to_positive": 0,
+        "both_zero": 7,
+        "max_absolute_difference": 153.17676
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 102,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 242.865216
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 118,
+        "within": 51,
+        "zero_to_positive": 0,
+        "both_zero": 2,
+        "max_absolute_difference": 19.01
+      }
+    },
+    "climate:charleston": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 79,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 808.31916
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 102,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 985.4809668
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 51,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 117.11
+      }
+    },
+    "climate:site": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 107,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 4019.7960000000003
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 105,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3975.0446339999994
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 105,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1221.47
+      }
+    },
+    "soil:sand": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 71,
+        "zero_to_positive": 0,
+        "both_zero": 7,
+        "max_absolute_difference": 927.6537599999999
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 109,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3618.1189836000012
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 78,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 1023.06
+      }
+    },
+    "soil:loam": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 84,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 1602.33084
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 2083.5703152
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 48,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 656.75
+      }
+    },
+    "soil:silt": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 108,
+        "within": 65,
+        "zero_to_positive": 0,
+        "both_zero": 12,
+        "max_absolute_difference": 591.4972799999998
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 88,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1091.773386
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 112,
+        "within": 63,
+        "zero_to_positive": 0,
+        "both_zero": 8,
+        "max_absolute_difference": 731.92
+      }
+    },
+    "soil:clay": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 57,
+        "zero_to_positive": 6,
+        "both_zero": 0,
+        "max_absolute_difference": 4019.7960000000003
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 86,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3975.0446339999994
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 105,
+        "zero_to_positive": 6,
+        "both_zero": 0,
+        "max_absolute_difference": 1221.47
+      }
+    },
+    "soil:holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 84,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 1602.33084
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 2083.5703152
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 48,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 656.75
+      }
+    },
+    "design:inbare": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 108,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3973.9788
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 127,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3913.3522295999996
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1221.47
+      }
+    },
+    "design:inveg": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 104,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 4019.7960000000003
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 118,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3975.0446339999994
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1221.47
+      }
+    },
+    "design:outrut": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 100,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3543.89112
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 121,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3491.0897076
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 93,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1221.46
+      }
+    },
+    "design:outunrut": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 49,
+        "zero_to_positive": 6,
+        "both_zero": 31,
+        "max_absolute_difference": 3297.2483110509247
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 103,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 3061.5502099517767
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 118,
+        "within": 63,
+        "zero_to_positive": 6,
+        "both_zero": 26,
+        "max_absolute_difference": 1153.5900000000001
+      }
+    }
+  },
+  "roles": {
+    "all": {
+      "cases": 600,
+      "sediment_export_kg_yr": {
+        "positive_reference": 563,
+        "within": 503,
+        "zero_to_positive": 13,
+        "both_zero": 24,
+        "max_absolute_difference": 1415.6188381057536
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 600,
+        "within": 570,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1816.9324668000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 568,
+        "within": 405,
+        "zero_to_positive": 12,
+        "both_zero": 20,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 98,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 941.1494400000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 117,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1631.6212968000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 72,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 653.4499999999999
+      }
+    },
+    "climate:birmingham": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 117,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 878.16564
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 120,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1816.9324668000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 111,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 202.12
+      }
+    },
+    "climate:denver": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 90,
+        "within": 88,
+        "zero_to_positive": 12,
+        "both_zero": 18,
+        "max_absolute_difference": 45.144
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 115,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 285.03093959999995
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 90,
+        "within": 63,
+        "zero_to_positive": 12,
+        "both_zero": 18,
+        "max_absolute_difference": 4.14
+      }
+    },
+    "climate:flagstaff": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 91,
+        "zero_to_positive": 1,
+        "both_zero": 6,
+        "max_absolute_difference": 36.3924
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 109,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 260.05917959999994
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 118,
+        "within": 66,
+        "zero_to_positive": 0,
+        "both_zero": 2,
+        "max_absolute_difference": 18.71
+      }
+    },
+    "climate:charleston": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 99,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 195.89328
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 853.0775351999998
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 63,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 104.47
+      }
+    },
+    "climate:site": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 120,
+        "within": 108,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1415.6188381057536
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1383.7382104554688
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 120,
+        "within": 102,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "soil:sand": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 99,
+        "zero_to_positive": 7,
+        "both_zero": 0,
+        "max_absolute_difference": 941.1164730782536
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 113,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1816.9324668000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 78,
+        "zero_to_positive": 6,
+        "both_zero": 0,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "soil:loam": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 98,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 941.1494400000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 117,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1631.6212968000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 72,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 653.4499999999999
+      }
+    },
+    "soil:silt": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 108,
+        "within": 101,
+        "zero_to_positive": 0,
+        "both_zero": 12,
+        "max_absolute_difference": 758.93004
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 115,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1288.0592603999999
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 112,
+        "within": 78,
+        "zero_to_positive": 0,
+        "both_zero": 8,
+        "max_absolute_difference": 730.49
+      }
+    },
+    "soil:clay": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 107,
+        "zero_to_positive": 6,
+        "both_zero": 0,
+        "max_absolute_difference": 1415.6188381057536
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 108,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1383.7382104554688
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 105,
+        "zero_to_positive": 6,
+        "both_zero": 0,
+        "max_absolute_difference": 1183.92
+      }
+    },
+    "soil:holdout": {
+      "cases": 120,
+      "sediment_export_kg_yr": {
+        "positive_reference": 114,
+        "within": 98,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 941.1494400000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 120,
+        "within": 117,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1631.6212968000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 114,
+        "within": 72,
+        "zero_to_positive": 0,
+        "both_zero": 6,
+        "max_absolute_difference": 653.4499999999999
+      }
+    },
+    "design:inbare": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 146,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 941.1494400000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 150,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1816.9324668000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 119,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "design:inveg": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 149,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 937.1973599999999
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 147,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 948.5329392000002
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 119,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "design:outrut": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 150,
+        "within": 150,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 874.9461600000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 147,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 942.8196887999999
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 150,
+        "within": 119,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1312.55
+      }
+    },
+    "design:outunrut": {
+      "cases": 150,
+      "sediment_export_kg_yr": {
+        "positive_reference": 113,
+        "within": 58,
+        "zero_to_positive": 13,
+        "both_zero": 24,
+        "max_absolute_difference": 1415.6188381057536
+      },
+      "spatial_net_loss_kg_yr": {
+        "positive_reference": 150,
+        "within": 126,
+        "zero_to_positive": 0,
+        "both_zero": 0,
+        "max_absolute_difference": 1383.7382104554688
+      },
+      "runoff_mm_yr": {
+        "positive_reference": 118,
+        "within": 48,
+        "zero_to_positive": 12,
+        "both_zero": 20,
+        "max_absolute_difference": 1089.21
+      }
+    }
+  }
+}

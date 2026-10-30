@@ -16,6 +16,16 @@ Use cumulative horizon bottom depth in millimeters: <=500 is upper, >500 is lowe
 
 Support per-horizon anisotropy formats 7778 and 9001/9002/9003/9005. A requested active override on a format without per-horizon anisotropy fails explicitly before writing that prepared soil; never migrate uploaded 7777/2006 inputs or reinterpret profile anisotropy. Unset overrides preserve their existing preparation. Revalidate stored active override values and effective hourly enablement at preparation, including explicit preparation-time routine overrides; inactive settings never leak into a non-hourly or non-MOFE preparation.
 
+Generated final serialization also follows the
+[200 mm boundary contract](soil-horizon-boundary-contract.md). If it inserts a
+boundary after anisotropy assignment, both pieces retain that assigned ratio;
+serialization does not run the 500 mm classifier again. Thus an unsplit source
+horizon spanning 200 and 500 mm first receives the lower override and its inserted
+upper piece retains it. Sources already split at 200 mm are classified using
+their supplied boundaries. The prohibition above concerns adding a 500 mm split
+for anisotropy; generated 200 mm insertion is a separate serialization rule.
+Uploaded-soil preservation continues to retain supplied topology.
+
 ## Native and persistence boundaries
 
 WEPPpy owns requests, current eligibility, NoDb locking and file orchestration. A narrow Rust function in wepppyo3 owns finite range checks, depth validation and horizon value selection. Pass parsed depths and optional original ratios in memory, validate the whole request before returning values, then update the existing parsed soil object. No Python numerical fallback if the required native function is unavailable. Do not create a second soil-file transformation pass.

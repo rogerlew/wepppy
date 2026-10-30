@@ -1,0 +1,39 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/roads/test_roads_publication.py tests/soils/test_ssurgo_serialization.py -q --maxfail=1
+......F
+=================================== FAILURES ===================================
+_______ test_ssurgo_generated_crossing_horizon_preserves_material[True] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-43/test_ssurgo_generated_crossing1')
+legacy = True
+
+    @pytest.mark.parametrize('legacy', [False, True])
+    def test_ssurgo_generated_crossing_horizon_preserves_material(tmp_path, legacy):
+        soil = _fake_wepp_soil('Example soil')
+        soil.horizons[0].hzdepb_r = 35.0
+        text = (soil.build_file_contents_v2006_2() if legacy
+                else soil.build_file_contents())
+        path = tmp_path / 'generated.sol'
+        path.write_text(text)
+        parsed = WeppSoilUtil(str(path)).obj['ofes'][0]
+        assert parsed['nsl'] == 2
+>       assert [h['solthk'] for h in parsed['horizons']] == [200, 400]
+E       assert [200.0, 350.0] == [200, 400]
+E         
+E         At index 1 diff: 350.0 != 400
+E         Use -v to get more diff
+
+tests/soils/test_ssurgo_serialization.py:88: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/soils/test_ssurgo_serialization.py::test_ssurgo_generated_crossing_horizon_preserves_material[True]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed, 2 warnings in 10.18s

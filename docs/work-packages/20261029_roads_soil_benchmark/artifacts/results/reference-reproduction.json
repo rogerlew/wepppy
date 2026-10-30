@@ -1,0 +1,2292 @@
+[
+  {
+    "case": "default",
+    "binary": "legacy",
+    "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+    "inputs": {
+      "p.cli": "f2555622d7cc736f778783a6129ae45088f4a5d0a5071ac45558cb474dc57358",
+      "p.in": "0702017e1f512e7203267cb9ed8dea32c0ee8fa27c403469fe729323a7aaa024",
+      "p.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p.sol": "cc986b2ca730b37f4729bba2409ce5b49ebfd539498591e4c9e95af80f06a74c",
+      "p.slp": "1161bf070974480411e478fdf59036dc31e8b8b6749f7ba3e6a48a8b60d4f83c"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1093.in": "25ce852add69c20f3e3295a72b251e07bb342f96dfe38fcf2d5faa509c05649c",
+      "wepp-1093.cli": "f2555622d7cc736f778783a6129ae45088f4a5d0a5071ac45558cb474dc57358",
+      "wepp-1093.par": "a6cf98286bed7d9bbd1d7e78747a21007761acbdecb03b6eaecb711965db5932",
+      "wepp-1093.sol": "6e87bbda14418a1e65363c72eff7747c88227c23f9b68875a3574deb582ccf13",
+      "wepp-1093.slp": "1161bf070974480411e478fdf59036dc31e8b8b6749f7ba3e6a48a8b60d4f83c",
+      "wepp-1093.out": "dd42f920b440746fcfffba1a9c1fd828856532ee88dfdf0943f92b1651ba0da8"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 30,
+      "sediment_export_kg_yr": 706.40064,
+      "spatial_net_loss_kg_yr": 1176.3619560000002,
+      "runoff_mm_yr": 166.83,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 561.43296
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 423.12996
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 889.2021599999999
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 674.5266
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 912.2572799999999
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 689.34492
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 461.25287999999995
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 333.26964000000004
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 752.6772
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 431.75484
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 674.13852
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 1003.83228
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 992.05524
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 873.00972
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 901.6722
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 319.36607999999995
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 797.76972
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 509.28372
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 622.00116
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 1272.60144
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 484.18128
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 1334.4606
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 920.4267600000001
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 641.5556399999999
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 946.52316
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 600.56172
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 545.3316
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 458.57592
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 690.8457599999999
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 474.94656000000003
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 30,
+      "sediment_export_kg_yr": 707.14512,
+      "spatial_net_loss_kg_yr": 1177.9454807999996,
+      "runoff_mm_yr": 163.15,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "2f3b866a3a283ef9ecace3239d062913513f9385ad9a1f06d95e74ada5e5c84b",
+    "archive_deltas": {
+      "sediment_export_kg_yr": -0.7444800000000669,
+      "spatial_net_loss_kg_yr": -1.5835247999993953,
+      "runoff_mm_yr": 3.680000000000007
+    }
+  },
+  {
+    "case": "default",
+    "binary": "modern",
+    "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "inputs": {
+      "p.slp": "1161bf070974480411e478fdf59036dc31e8b8b6749f7ba3e6a48a8b60d4f83c",
+      "p.sol": "cc986b2ca730b37f4729bba2409ce5b49ebfd539498591e4c9e95af80f06a74c",
+      "p.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p.in": "0702017e1f512e7203267cb9ed8dea32c0ee8fa27c403469fe729323a7aaa024",
+      "p.cli": "f2555622d7cc736f778783a6129ae45088f4a5d0a5071ac45558cb474dc57358"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1093.in": "25ce852add69c20f3e3295a72b251e07bb342f96dfe38fcf2d5faa509c05649c",
+      "wepp-1093.cli": "f2555622d7cc736f778783a6129ae45088f4a5d0a5071ac45558cb474dc57358",
+      "wepp-1093.par": "a6cf98286bed7d9bbd1d7e78747a21007761acbdecb03b6eaecb711965db5932",
+      "wepp-1093.sol": "6e87bbda14418a1e65363c72eff7747c88227c23f9b68875a3574deb582ccf13",
+      "wepp-1093.slp": "1161bf070974480411e478fdf59036dc31e8b8b6749f7ba3e6a48a8b60d4f83c",
+      "wepp-1093.out": "dd42f920b440746fcfffba1a9c1fd828856532ee88dfdf0943f92b1651ba0da8"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 30,
+      "sediment_export_kg_yr": 784.4957999999999,
+      "spatial_net_loss_kg_yr": 1243.0160424000003,
+      "runoff_mm_yr": 214.64,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 636.33636
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 492.20028
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 1058.8247999999999
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 761.13576
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 978.4922399999999
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 771.4674
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 511.19244
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 437.1642
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 868.53888
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 493.23780000000005
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 727.2104400000001
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 1071.1404
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 1106.79228
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 939.85848
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 996.12612
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 403.47648000000004
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 869.8338
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 562.1814
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 735.81948
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 1428.5304
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 526.5493200000001
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 1459.4263199999998
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 1051.46712
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 689.89536
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 1008.1962
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 646.29972
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 581.15772
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 473.7744
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 723.21084
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 525.30588
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 30,
+      "sediment_export_kg_yr": 707.14512,
+      "spatial_net_loss_kg_yr": 1177.9454807999996,
+      "runoff_mm_yr": 163.15,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "57169b19131f2e10eaef577f280240778cd0609795d329b92994454dac0b1668",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 77.3506799999999,
+      "spatial_net_loss_kg_yr": 65.0705616000007,
+      "runoff_mm_yr": 51.48999999999998
+    }
+  },
+  {
+    "case": "run_2",
+    "binary": "legacy",
+    "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+    "inputs": {
+      "p.sol": "7b141a0575eb307ba04711dbf3f0cfd1be4854dea96bb30d90fc6f16bd6916f1",
+      "p.slp": "c6fe68861e63dbea2ecef48c44b8fd1c0615fea1ef8d1e9c2477fd47223931d4",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "p.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1098.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "wepp-1098.in": "c6a40d6afcf1517c1268e868f14ef5b4d7570fc6a529040e4219cd377843d467",
+      "wepp-1098.out": "042e61d97773713bfbca8506e27482167dc90d19042c0d0a768214d4dc97a007",
+      "wepp-1098.par": "18d92ab9d106f7f2f80ff8c19a14e86dd462940ca4c4ec3824301d5bd9414463",
+      "wepp-1098.slp": "c6fe68861e63dbea2ecef48c44b8fd1c0615fea1ef8d1e9c2477fd47223931d4",
+      "wepp-1098.sol": "c341795f1eb0ed6128a0538c808a3c541daa1c1e2c9d56ff539e5c3a46ea2fa6"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 18.26352,
+      "spatial_net_loss_kg_yr": 47.70216,
+      "runoff_mm_yr": 3.4,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 48.73968
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 91.93932
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 136.7388
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 29.898
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 52.40664
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 108.6822
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 225.4626
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 85.70628
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 75.82212
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 0.40787999999999996
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 57.27744
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 17.80812,
+      "spatial_net_loss_kg_yr": 47.72592,
+      "runoff_mm_yr": 3.32,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "00015898047777fbd8a65abff1468c298ab74a516ff9638f63b318a4e348a3e1",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 0.4554000000000009,
+      "spatial_net_loss_kg_yr": -0.02376000000000289,
+      "runoff_mm_yr": 0.08000000000000007
+    }
+  },
+  {
+    "case": "run_2",
+    "binary": "modern",
+    "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "inputs": {
+      "p.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "p.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.sol": "7b141a0575eb307ba04711dbf3f0cfd1be4854dea96bb30d90fc6f16bd6916f1",
+      "p.slp": "c6fe68861e63dbea2ecef48c44b8fd1c0615fea1ef8d1e9c2477fd47223931d4"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1098.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "wepp-1098.in": "c6a40d6afcf1517c1268e868f14ef5b4d7570fc6a529040e4219cd377843d467",
+      "wepp-1098.out": "042e61d97773713bfbca8506e27482167dc90d19042c0d0a768214d4dc97a007",
+      "wepp-1098.par": "18d92ab9d106f7f2f80ff8c19a14e86dd462940ca4c4ec3824301d5bd9414463",
+      "wepp-1098.slp": "c6fe68861e63dbea2ecef48c44b8fd1c0615fea1ef8d1e9c2477fd47223931d4",
+      "wepp-1098.sol": "c341795f1eb0ed6128a0538c808a3c541daa1c1e2c9d56ff539e5c3a46ea2fa6"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 21.38796,
+      "spatial_net_loss_kg_yr": 75.57513479999999,
+      "runoff_mm_yr": 4.41,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 50.19696
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 137.34864
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 182.50055999999998
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 23.158079999999998
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 59.70492
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 123.36192
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 227.87028
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 105.7716
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 9.8604
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 65.83104
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 14.743079999999999
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 68.99904
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 17.80812,
+      "spatial_net_loss_kg_yr": 47.72592,
+      "runoff_mm_yr": 3.32,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "935096c043c4ce69a8d6611b4959f4c8be0f0b2054b5bd8f2c3e758bf5160b4c",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 3.579840000000001,
+      "spatial_net_loss_kg_yr": 27.849214799999984,
+      "runoff_mm_yr": 1.0900000000000003
+    }
+  },
+  {
+    "case": "run_3",
+    "binary": "legacy",
+    "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+    "inputs": {
+      "p.sol": "d8fabe546d0beaa8271a87298ab3109883061db5dc6a626b060954396ce6dddd",
+      "p.slp": "59bde2cbb9cfe229e460682c4c3315d88f19d6c7e2ee0180802ef852e931687d",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p.cli": "0d74afcdf53b0848353de08d8409b4aa8b3342f61e98a313457994552aaf1ef8"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1103.out": "fd6f16f2ec05a7351d496acd192f46ac3f775856bea4e7b70c8a28a8e7bdef57",
+      "wepp-1103.sol": "06d564a851860a32d74848860552e3dcbec6b33fdbf3655ce7e61233d60344a5",
+      "wepp-1103.in": "f22d64d0054c9906099345cdc1291d04c517108fc51a79f452e834fa5aae152d",
+      "wepp-1103.slp": "59bde2cbb9cfe229e460682c4c3315d88f19d6c7e2ee0180802ef852e931687d",
+      "wepp-1103.par": "08d0584cce681a1bcd9fdfa309c7f71fc1773294c64f950bae0b37057fbe148f",
+      "wepp-1103.cli": "0d74afcdf53b0848353de08d8409b4aa8b3342f61e98a313457994552aaf1ef8"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 28.22688,
+      "spatial_net_loss_kg_yr": 78.76004400000001,
+      "runoff_mm_yr": 24.380000000000003,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 33.08976
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 22.30668
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 19.602
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 83.05704
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 31.125600000000002
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 32.67792
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 16.90524
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 19.07136
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.87516
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 2.66112
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 26.65872
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 0.43163999999999997
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 87.50412
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 30.11976
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 64.85292
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 71.56512
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 15.17076
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 23.12244
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 5.8449599999999995
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 40.39596
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 107.05463999999999
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 32.36904
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 259.77996
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 21.17016
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 40.8474
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 15.20244
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 61.44336
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 46.26468
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 40.720679999999994
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 14.56092
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 7.5834
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 34.00848
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 1.7424
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 92.35116000000001
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 9.115920000000001
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 28.87236,
+      "spatial_net_loss_kg_yr": 81.5335884,
+      "runoff_mm_yr": 23.59,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "82f8a0bb7e78721d6d50ef5e1e23e63af1a4643da79f5bca72c7f31a23eab8ba",
+    "archive_deltas": {
+      "sediment_export_kg_yr": -0.6454799999999992,
+      "spatial_net_loss_kg_yr": -2.7735443999999916,
+      "runoff_mm_yr": 0.7900000000000027
+    }
+  },
+  {
+    "case": "run_3",
+    "binary": "modern",
+    "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "inputs": {
+      "p.slp": "59bde2cbb9cfe229e460682c4c3315d88f19d6c7e2ee0180802ef852e931687d",
+      "p.sol": "d8fabe546d0beaa8271a87298ab3109883061db5dc6a626b060954396ce6dddd",
+      "p.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+      "p.cli": "0d74afcdf53b0848353de08d8409b4aa8b3342f61e98a313457994552aaf1ef8",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1103.out": "fd6f16f2ec05a7351d496acd192f46ac3f775856bea4e7b70c8a28a8e7bdef57",
+      "wepp-1103.sol": "06d564a851860a32d74848860552e3dcbec6b33fdbf3655ce7e61233d60344a5",
+      "wepp-1103.in": "f22d64d0054c9906099345cdc1291d04c517108fc51a79f452e834fa5aae152d",
+      "wepp-1103.slp": "59bde2cbb9cfe229e460682c4c3315d88f19d6c7e2ee0180802ef852e931687d",
+      "wepp-1103.par": "08d0584cce681a1bcd9fdfa309c7f71fc1773294c64f950bae0b37057fbe148f",
+      "wepp-1103.cli": "0d74afcdf53b0848353de08d8409b4aa8b3342f61e98a313457994552aaf1ef8"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 34.071839999999995,
+      "spatial_net_loss_kg_yr": 96.03910800000001,
+      "runoff_mm_yr": 22.66,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 35.03016
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 25.945919999999997
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 21.2652
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 96.81012
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 41.354279999999996
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 38.32488
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 36.9666
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 48.10608
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 14.751
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 8.06256
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 40.53852
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 25.59348
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 94.64796
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 32.42844
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 58.54464
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 81.1602
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 19.1664
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 26.433
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 3.42144
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 42.878879999999995
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 111.09779999999999
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 34.7688
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 263.16576000000003
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 23.11848
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 34.9668
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 64.7064
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 62.59968
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 48.25656
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 55.04004
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 10.90188
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 6.86664
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 37.65168
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 30.590999999999998
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 1.3464
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 103.09464
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 23.89464
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 28.87236,
+      "spatial_net_loss_kg_yr": 81.5335884,
+      "runoff_mm_yr": 23.59,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "f8165ef5e24ec39bd8dd14aa95b33a6d6f1c8f0cfc8d0ce4f56515bcff94389d",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 5.199479999999994,
+      "spatial_net_loss_kg_yr": 14.505519600000014,
+      "runoff_mm_yr": -0.9299999999999997
+    }
+  },
+  {
+    "case": "run_4",
+    "binary": "legacy",
+    "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+    "inputs": {
+      "p.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.cli": "a0d48adf5645010ac7c5e18e43eab1a248f5a5f0c81a2b85f90387b18445c111",
+      "p.sol": "9e04f89f3713e35aa3fe3059fd710b56560ecd1a4ff4a26a6cb4c7f25841bbe0",
+      "p.slp": "cfdd43922074e2133dd701033aa95750f5632cdff46f666512ca38c9046b059c"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1108.cli": "a0d48adf5645010ac7c5e18e43eab1a248f5a5f0c81a2b85f90387b18445c111",
+      "wepp-1108.in": "4ccf799fbc4bb5c72dc1979c368b5e8d948f9d26151f3ac5014afbec3f46ebd3",
+      "wepp-1108.out": "9396f2b850643c676288f85b0d384bb4af9602ebe09e4e5912491197620f7ddd",
+      "wepp-1108.par": "d1dab17e220acd6b339ee2e1632fa1c11cd400320ee09420f8c176414a937c2e",
+      "wepp-1108.slp": "cfdd43922074e2133dd701033aa95750f5632cdff46f666512ca38c9046b059c",
+      "wepp-1108.sol": "66bb0e11754a40074e56f95e87a3b62fc3da9cee7533e6cdae39839595c247dd"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 19.440458450890485,
+      "spatial_net_loss_kg_yr": 108.17645260259478,
+      "runoff_mm_yr": 6.22,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 21.12156239675463
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 1.336262110815089
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 14.871304136490505
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 50.60553929344885
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 395.4904795718852
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 104.1853394141958
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 45.993279749667735
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 49.48480332953942
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 69.18389315671669
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 7.327888994792423
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 52.157327551169594
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 63.96816040159974
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 96.081556290543
+        }
+      ],
+      "export_resolution_kg": 0.0431052293811319
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 19.440458450890485,
+      "spatial_net_loss_kg_yr": 108.46008501192262,
+      "runoff_mm_yr": 5.79,
+      "annual_export": [],
+      "export_resolution_kg": 0.0431052293811319
+    },
+    "output_sha256": "c87b327f39c15319b93742efd951235ce62a13a74c4220b8487fc1f47cd625ba",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 0.0,
+      "spatial_net_loss_kg_yr": -0.2836324093278364,
+      "runoff_mm_yr": 0.4299999999999997
+    }
+  },
+  {
+    "case": "run_4",
+    "binary": "modern",
+    "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "inputs": {
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.sol": "9e04f89f3713e35aa3fe3059fd710b56560ecd1a4ff4a26a6cb4c7f25841bbe0",
+      "p.slp": "cfdd43922074e2133dd701033aa95750f5632cdff46f666512ca38c9046b059c",
+      "p.cli": "a0d48adf5645010ac7c5e18e43eab1a248f5a5f0c81a2b85f90387b18445c111",
+      "p.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1108.cli": "a0d48adf5645010ac7c5e18e43eab1a248f5a5f0c81a2b85f90387b18445c111",
+      "wepp-1108.in": "4ccf799fbc4bb5c72dc1979c368b5e8d948f9d26151f3ac5014afbec3f46ebd3",
+      "wepp-1108.out": "9396f2b850643c676288f85b0d384bb4af9602ebe09e4e5912491197620f7ddd",
+      "wepp-1108.par": "d1dab17e220acd6b339ee2e1632fa1c11cd400320ee09420f8c176414a937c2e",
+      "wepp-1108.slp": "cfdd43922074e2133dd701033aa95750f5632cdff46f666512ca38c9046b059c",
+      "wepp-1108.sol": "66bb0e11754a40074e56f95e87a3b62fc3da9cee7533e6cdae39839595c247dd"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 24.095823224052733,
+      "spatial_net_loss_kg_yr": 109.67737668964581,
+      "runoff_mm_yr": 7.5,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 21.854351296233872
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 2.241471927818859
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 10.474570739615052
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 13.707462943199944
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 31.294396530701757
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 502.30523797833
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 125.82416456352402
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 58.01963874700354
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 64.09747608974314
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 100.30586876989393
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 8.189993582415061
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 64.3130022366488
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 74.35652068245253
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 128.71221493205985
+        }
+      ],
+      "export_resolution_kg": 0.0431052293811319
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 19.440458450890485,
+      "spatial_net_loss_kg_yr": 108.46008501192262,
+      "runoff_mm_yr": 5.79,
+      "annual_export": [],
+      "export_resolution_kg": 0.0431052293811319
+    },
+    "output_sha256": "24cc06cdccd5046671b3d28b6a80db5bcf8dee57b3f2abc7f91ea4818a74f9e2",
+    "archive_deltas": {
+      "sediment_export_kg_yr": 4.655364773162248,
+      "spatial_net_loss_kg_yr": 1.2172916777231961,
+      "runoff_mm_yr": 1.71
+    }
+  },
+  {
+    "case": "run_5",
+    "binary": "legacy",
+    "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+    "inputs": {
+      "p.sol": "54cf890a19b4508cb81e031171a652e855965980369ee5bb3f45745f734427ca",
+      "p.slp": "7ed2adc55c8a9588172a4adfb5d547eae9ad6cfeab83d652bcde48ceb088b42f",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "p.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1113.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "wepp-1113.in": "220762b4f409f7e480f4fe35af45e0153284bf6b78056cda1f17828e342a532d",
+      "wepp-1113.out": "2e2cd662b28e808363cb4db5a82aca6e547bbb85e3ad06601fc0237927cf8d71",
+      "wepp-1113.par": "18d92ab9d106f7f2f80ff8c19a14e86dd462940ca4c4ec3824301d5bd9414463",
+      "wepp-1113.slp": "7ed2adc55c8a9588172a4adfb5d547eae9ad6cfeab83d652bcde48ceb088b42f",
+      "wepp-1113.sol": "39d260d51cc1c1d8a2c2c4fbb556f34a68e9e4697074b5f028436c33f7337e55"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 73.98468,
+      "spatial_net_loss_kg_yr": 132.8814432,
+      "runoff_mm_yr": 9.790000000000001,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 73.0026
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 59.2614
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 6.01128
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 175.74876
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 12.279959999999999
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 60.95628
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 36.28548
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 254.87748
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 40.13064
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 7.57944
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 67.98528
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 11.41668
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 261.05508000000003
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 93.12732
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 234.22608000000002
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 190.24632
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 42.779880000000006
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 26.57952
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 275.21999999999997
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 90.84635999999999
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 527.9194799999999
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 5.4291599999999995
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 313.69536
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 66.73392
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 63.90648000000001
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 15.752880000000001
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 88.8228
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 17.42004
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.20592
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 28.36548
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 161.75016
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 117.14076
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 121.35816
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 143.57376
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 7.642799999999999
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 74.4084,
+      "spatial_net_loss_kg_yr": 134.4374856,
+      "runoff_mm_yr": 9.75,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "03869009533739477079bfe86fbb3b3a65c6469b8a7cc9cc28fe6a0b9ea3bc26",
+    "archive_deltas": {
+      "sediment_export_kg_yr": -0.423720000000003,
+      "spatial_net_loss_kg_yr": -1.5560423999999955,
+      "runoff_mm_yr": 0.040000000000000924
+    }
+  },
+  {
+    "case": "run_5",
+    "binary": "modern",
+    "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+    "inputs": {
+      "p.sol": "54cf890a19b4508cb81e031171a652e855965980369ee5bb3f45745f734427ca",
+      "p.slp": "7ed2adc55c8a9588172a4adfb5d547eae9ad6cfeab83d652bcde48ceb088b42f",
+      "p.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "p.in": "b57cafc3253b1f8993fdf87dd598f22851e0db43fa50557226e9f93f046ea381",
+      "p.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384"
+    },
+    "removed_capture_filename_line": true,
+    "source_sha256": {
+      "wepp-1113.cli": "b5b504a6cf6a3483e3e9aaf62684c41f526ebf355c7988a40a8d7a66b56ef384",
+      "wepp-1113.in": "220762b4f409f7e480f4fe35af45e0153284bf6b78056cda1f17828e342a532d",
+      "wepp-1113.out": "2e2cd662b28e808363cb4db5a82aca6e547bbb85e3ad06601fc0237927cf8d71",
+      "wepp-1113.par": "18d92ab9d106f7f2f80ff8c19a14e86dd462940ca4c4ec3824301d5bd9414463",
+      "wepp-1113.slp": "7ed2adc55c8a9588172a4adfb5d547eae9ad6cfeab83d652bcde48ceb088b42f",
+      "wepp-1113.sol": "39d260d51cc1c1d8a2c2c4fbb556f34a68e9e4697074b5f028436c33f7337e55"
+    },
+    "status": "completed",
+    "metrics": {
+      "years": 50,
+      "sediment_export_kg_yr": 72.57492,
+      "spatial_net_loss_kg_yr": 129.5193636,
+      "runoff_mm_yr": 9.84,
+      "annual_export": [
+        {
+          "year": 1,
+          "sediment_export_kg": 73.953
+        },
+        {
+          "year": 2,
+          "sediment_export_kg": 58.0734
+        },
+        {
+          "year": 3,
+          "sediment_export_kg": 4.47084
+        },
+        {
+          "year": 4,
+          "sediment_export_kg": 180.41760000000002
+        },
+        {
+          "year": 5,
+          "sediment_export_kg": 12.72744
+        },
+        {
+          "year": 6,
+          "sediment_export_kg": 61.64136
+        },
+        {
+          "year": 7,
+          "sediment_export_kg": 21.39984
+        },
+        {
+          "year": 8,
+          "sediment_export_kg": 254.22012
+        },
+        {
+          "year": 9,
+          "sediment_export_kg": 41.203799999999994
+        },
+        {
+          "year": 10,
+          "sediment_export_kg": 7.37748
+        },
+        {
+          "year": 11,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 12,
+          "sediment_export_kg": 68.62679999999999
+        },
+        {
+          "year": 13,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 14,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 15,
+          "sediment_export_kg": 14.75892
+        },
+        {
+          "year": 16,
+          "sediment_export_kg": 253.37664
+        },
+        {
+          "year": 17,
+          "sediment_export_kg": 92.6046
+        },
+        {
+          "year": 18,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 19,
+          "sediment_export_kg": 232.78859999999997
+        },
+        {
+          "year": 20,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 21,
+          "sediment_export_kg": 188.52372
+        },
+        {
+          "year": 22,
+          "sediment_export_kg": 43.21548
+        },
+        {
+          "year": 23,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 24,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 25,
+          "sediment_export_kg": 27.72396
+        },
+        {
+          "year": 26,
+          "sediment_export_kg": 279.48888
+        },
+        {
+          "year": 27,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 28,
+          "sediment_export_kg": 92.93724
+        },
+        {
+          "year": 29,
+          "sediment_export_kg": 495.15444
+        },
+        {
+          "year": 30,
+          "sediment_export_kg": 2.32056
+        },
+        {
+          "year": 31,
+          "sediment_export_kg": 308.23055999999997
+        },
+        {
+          "year": 32,
+          "sediment_export_kg": 63.961920000000006
+        },
+        {
+          "year": 33,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 34,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 35,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 36,
+          "sediment_export_kg": 63.30852
+        },
+        {
+          "year": 37,
+          "sediment_export_kg": 16.6518
+        },
+        {
+          "year": 38,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 39,
+          "sediment_export_kg": 87.89616000000001
+        },
+        {
+          "year": 40,
+          "sediment_export_kg": 16.616159999999997
+        },
+        {
+          "year": 41,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 42,
+          "sediment_export_kg": 0.198
+        },
+        {
+          "year": 43,
+          "sediment_export_kg": 32.12748
+        },
+        {
+          "year": 44,
+          "sediment_export_kg": 0.0
+        },
+        {
+          "year": 45,
+          "sediment_export_kg": 158.68115999999998
+        },
+        {
+          "year": 46,
+          "sediment_export_kg": 107.71992
+        },
+        {
+          "year": 47,
+          "sediment_export_kg": 116.24184
+        },
+        {
+          "year": 48,
+          "sediment_export_kg": 142.38972
+        },
+        {
+          "year": 49,
+          "sediment_export_kg": 7.7022
+        },
+        {
+          "year": 50,
+          "sediment_export_kg": 0.0
+        }
+      ],
+      "export_resolution_kg": 0.00396
+    },
+    "archived": {
+      "years": 50,
+      "sediment_export_kg_yr": 74.4084,
+      "spatial_net_loss_kg_yr": 134.4374856,
+      "runoff_mm_yr": 9.75,
+      "annual_export": [],
+      "export_resolution_kg": 0.00396
+    },
+    "output_sha256": "a105b4fa15303b3756b41c22ed6952addb59d69418c79d29aba1ee9cd6e8d96e",
+    "archive_deltas": {
+      "sediment_export_kg_yr": -1.8334799999999944,
+      "spatial_net_loss_kg_yr": -4.918122000000011,
+      "runoff_mm_yr": 0.08999999999999986
+    }
+  }
+]

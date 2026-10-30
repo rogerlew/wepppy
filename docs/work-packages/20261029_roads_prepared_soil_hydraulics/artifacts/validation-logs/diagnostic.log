@@ -1,0 +1,16 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py diagnostic --batch diagnostic-v1 --workers 12
+10/140 completed records
+20/140 completed records
+30/140 completed records
+40/140 completed records
+50/140 completed records
+60/140 completed records
+70/140 completed records
+80/140 completed records
+90/140 completed records
+100/140 completed records
+110/140 completed records
+120/140 completed records
+130/140 completed records
+140/140 completed records
+Finished 140 cases; failures=0

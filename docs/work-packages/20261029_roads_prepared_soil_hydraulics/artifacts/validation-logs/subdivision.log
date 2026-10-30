@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/experiment.py diagnostic --batch subdivision-v1 --variants split_all split_road split_fill split_buffer format_unsplit --workers 8
+10/35 completed records
+20/35 completed records
+30/35 completed records
+Finished 35 cases; failures=0

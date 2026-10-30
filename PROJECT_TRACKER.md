@@ -15,6 +15,12 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Completed locally: [Generated-soil 200 mm boundary consistency](docs/work-packages/20261029_soil_200mm_boundary_consistency/package.md) — all confirmed generated-input writers share property-preserving insertion; uploaded topology remains preserved. Native normalized split/unsplit inputs and outputs agree. Repository coverage: 12,135 passed, 298 skipped. No deployment or native binary change.
+
+Completed locally: [Roads prepared-soil and hydraulic experiment](docs/work-packages/20261029_roads_prepared_soil_hydraulics/package.md) — 1,615 study runs plus two minimal replays; no parameter candidate accepted. Equivalent horizon subdivision exposes a native conductivity sensitivity. Report/reproducer retained; repository checks: 12,083 passed, 298 skipped. No production changes.
+
+Completed locally: [Roads soil and binary benchmark](docs/work-packages/20261029_roads_soil_benchmark/package.md) — 2,880 paired matrix cases plus screening/reference/stress controls; generated-soil candidates retain material failures, so no production parameter change. Report and reproducible evidence retained. Repository checks: 12,076 passed, 298 skipped.
+
 Completed locally: [Project developer mode](docs/work-packages/20261028_project_developer_mode/package.md) — Ron-owned enable-only mode, Dev-only PowerUser activation and project-controlled anisotropy maxima; clone inheritance and incoming recovery state preserved. Real native/worker/browser artifacts and independent reviews pass. Segmented Python: 12,047 passed / 298 skipped; existing Roads provenance failure retained. Native published; no production deployment.
 
 Active: [Download error observability](docs/work-packages/20261027_download_error_observability/package.md) — safe correlated server failures, bootstrap terminal reporting and failure exit propagation; implementation and cross-platform validation complete; broad assessment retains one unrelated Roads provenance blocker. Deployment held.

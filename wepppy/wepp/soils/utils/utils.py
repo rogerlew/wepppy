@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import csv
-import shutil
 from dataclasses import dataclass
 from typing import Dict, List, MutableMapping, Optional, Tuple
 
 from deprecated import deprecated
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 
 __all__ = [
     "SoilReplacements",
@@ -235,7 +235,10 @@ def soil_specialization(src: str, dst: str, replacements: SoilReplacements, call
     line5[2] = _replace_parameter(line5[2], replacements.effHC)
 
     if len(line5) < 5:
-        shutil.copyfile(src, dst)
+        with open(src) as source:
+            text = ensure_200mm_boundary(source.read())
+        with open(dst, "w") as target:
+            target.write(text)
         return
 
     if "rock" not in lines[3].lower() and "water" not in lines[3].lower():
@@ -250,13 +253,9 @@ def soil_specialization(src: str, dst: str, replacements: SoilReplacements, call
         lastline[-1] = f"{replacements.kslast}"
         lines[-1] = " ".join(lastline)
 
+    text = ensure_200mm_boundary("".join(header + lines[:3] + [line4, line5] + lines[5:]))
     with open(dst, "w") as f:
-        f.writelines(header)
-        f.writelines(lines[:3])
-        f.writelines(line4)
-        f.writelines(line5)
-        if len(lines) > 5:
-            f.writelines(lines[5:])
+        f.write(text)
 
 
 def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
@@ -283,9 +282,9 @@ def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
     lastline[-1] = f"{kslast}"
     lines[-1] = " ".join(lastline)
 
+    text = ensure_200mm_boundary("".join(header + lines))
     with open(dst, "w") as fp:
-        fp.writelines(header)
-        fp.writelines(lines)
+        fp.write(text)
 
 
 def soil_is_water(soil_fn: str) -> bool:

@@ -1,0 +1,10 @@
+{
+  "source_commit": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "binding": "wepp_runner/bin/wepp_261026.json source_commit",
+  "files": {
+    "input.for": "362a328510298eb86f682b248256ae43c8b36ca15b6cf2d6dd1887999ae275df",
+    "winter.for": "6dca46e762611ddd93e030d7fcc619af92922d614a4ddc1c44576b90ee9d86ff",
+    "cvgpar.inc": "2662c147b8347e0a1071f03cd5f595e545540e7f5cefde061dd6f10b7870af11",
+    "infpar.for": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352"
+  }
+}

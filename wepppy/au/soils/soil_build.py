@@ -12,6 +12,7 @@ from os.path import exists as _exists
 from typing import Dict, Sequence, Tuple
 
 from wepppy.all_your_base import isfloat
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
@@ -202,7 +203,7 @@ def build_asris_soils(
         ofe_indx = len(s)
         s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit}".format(
             slid=soil_type, texid=tex_top,
-            nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=shcrit))
+            nsl=2, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=shcrit))
 
         s.append('    {solthk} \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(
             solthk=thickness_top, sand=sand_top, clay=clay_top, orgmat= om_top, cec=cec_top, rfg=rfg_top
@@ -221,8 +222,9 @@ def build_asris_soils(
         if key not in soils:
             fname = key + ".sol"
             fn = _join(soil_dir, fname)
+            soil_text = ensure_200mm_boundary('\n'.join(s))
             with open(fn, 'w') as fp:
-                fp.write('\n'.join(s))
+                fp.write(soil_text)
 
             soils[key] = SoilSummary(
                 mukey=key,
@@ -235,13 +237,14 @@ def build_asris_soils(
             lowmod_key = '{}_lowmod_sev'.format(key)
             soil_pars = read_disturbed_wepp_soil_fire_pars(tex_top, 'low')
             s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
-                slid=soil_type, texid=tex_top, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                slid=soil_type, texid=tex_top, nsl=2, salb=soil_pars['salb'], sat=soil_pars['sat'],
                 ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
 
             fname = lowmod_key + '.sol'
             fn = _join(soil_dir, fname)
+            soil_text = ensure_200mm_boundary('\n'.join(s))
             with open(fn, 'w') as fp:
-                fp.write('\n'.join(s))
+                fp.write(soil_text)
 
             soils[lowmod_key] = SoilSummary(
                 mukey=lowmod_key,
@@ -254,13 +257,14 @@ def build_asris_soils(
             high_key = '{}_high_sev'.format(key)
             soil_pars = read_disturbed_wepp_soil_fire_pars(tex_top, 'high')
             s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
-                slid=soil_type, texid=tex_top, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                slid=soil_type, texid=tex_top, nsl=2, salb=soil_pars['salb'], sat=soil_pars['sat'],
                 ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
 
             fname = high_key + '.sol'
             fn = _join(soil_dir, fname)
+            soil_text = ensure_200mm_boundary('\n'.join(s))
             with open(fn, 'w') as fp:
-                fp.write('\n'.join(s))
+                fp.write(soil_text)
 
             soils[high_key] = SoilSummary(
                 mukey=high_key,

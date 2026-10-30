@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20261029_roads_prepared_soil_hydraulics/artifacts/reproducer/reproduce.py --destination /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/minimal-replay
+unsplit /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/minimal-replay/unsplit/output/H1.loss.dat
+split /wc1/runs/ro/roads-prepared-soil-hydraulics-20261029/minimal-replay/split/output/H1.loss.dat

@@ -1,0 +1,89 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/soils tests/eu/soils tests/nodb/test_soil_anisotropy.py --maxfail=1 -q
+...........................sssss........................................ [ 45%]
+........................F
+=================================== FAILURES ===================================
+_________________ test_phase1_fixture_replays_builder_cases[0] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8cb98ff0b0>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-33/test_phase1_fixture_replays_bu0')
+case_index = 0
+
+    @pytest.mark.parametrize("case_index", range(7))
+    def test_phase1_fixture_replays_builder_cases(
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        case_index: int,
+    ) -> None:
+        case = _load_fixture()["cases"][case_index]
+        expected = case["expected_output"]
+    
+        if case["expected_quality"] == "rejected":
+            if expected.get("error_type"):
+                error_type = expected["error_type"]
+    
+                def failing_query(_self, _lng, _lat, _attrs):
+                    if error_type == "RDIOutOfBoundsException":
+                        raise RDIOutOfBoundsException
+                    if error_type == "TypeError":
+                        raise TypeError("int() argument must be a string, a bytes-like object or None")
+                    raise KeyError("")
+    
+                monkeypatch.setattr(ESDAC, "query", failing_query)
+            else:
+                _patch_source_provider(monkeypatch, case)
+    
+            with pytest.raises(ESDACSoilBuildError) as error:
+                ESDAC().build_wepp_soil(
+                    case["provenance"]["lng"],
+                    case["provenance"]["lat"],
+                    str(tmp_path),
+                )
+            result = error.value.result
+            assert result.outcome == "rejected"
+            assert result.context.longitude == case["provenance"]["lng"]
+            assert result.context.latitude == case["provenance"]["lat"]
+            if expected.get("error_type"):
+                assert result.diagnostics[0].exception_type == expected["error_type"]
+            assert not list(tmp_path.glob("*.sol"))
+            return
+    
+        _patch_source_provider(monkeypatch, case)
+        key, horizon, _description = ESDAC().build_wepp_soil(
+            case["provenance"]["lng"],
+            case["provenance"]["lat"],
+            str(tmp_path),
+        )
+    
+        sol_path = tmp_path / f"{key}.sol"
+        assert sol_path.exists()
+        assert key == expected["key"]
+        assert horizon.quality_result.outcome == case["expected_quality"]
+        if case["expected_quality"] == "degraded":
+            assert "source.usedom.no_information" in horizon.quality_result.reason_codes
+>       assert _horizon_depths(sol_path) == expected["horizon_depths"]
+E       assert [200.0, 1200.0, 1500.0] == [1200.0, 1500.0]
+E         
+E         At index 0 diff: 200.0 != 1200.0
+E         Left contains one more item: 1500.0
+E         Use -v to get more diff
+
+tests/eu/soils/test_esdac_quality_fixture.py:146: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/soils/test_ssurgo_reclaimed_fairpoint.py: 3 warnings
+tests/eu/soils/test_esdac_build.py: 32 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1415888) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/eu/soils/test_esdac_quality_fixture.py::test_phase1_fixture_replays_builder_cases[0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 91 passed, 5 skipped, 37 warnings in 33.36s

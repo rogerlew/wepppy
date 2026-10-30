@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE, STDOUT
 from datetime import datetime
 
 from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo import GeoTransformer
 import json
@@ -188,8 +189,9 @@ class SIFT(object):
                     if soil.valid or soil.is_water:
                         valid_cnt += 1
                         covered_area += area
+                        soil_text = str(soil)
                         with open(_join(outdir, f'{mukey}.sol'), 'w') as fp:
-                            fp.write(str(soil))
+                            fp.write(soil_text)
                         break
 
         stats = dict(mukey_cnt=mukey_cnt, valid_cnt=valid_cnt, 
@@ -344,7 +346,7 @@ class SiftSoil(list):
               "'water_7778_2'      'Water' 1   0.1600  0.7500  1.0000  0.0100  999.0000    0.1000",
               '210.000000  0.800000    100.000000  10.000000   0.242   0.115   66.800  7.000   3.000   11.300  0.00000',
               '1 10000 100']
-        return '\n'.join(s)
+        return ensure_200mm_boundary('\n'.join(s))
 
     def __str__(self):
         """Return WEPP ``.sol`` contents for the soil (or water fallback)."""
@@ -393,7 +395,7 @@ class SiftSoil(list):
         else:
             s.append('1 10000.0 %0.5f' % (res_lyr_ksat * 3.6))
 
-        return '\n'.join(s)
+        return ensure_200mm_boundary('\n'.join(s))
 
 
 class SiftHorizon(HorizonMixin):

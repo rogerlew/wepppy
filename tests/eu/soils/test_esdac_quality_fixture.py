@@ -143,7 +143,8 @@ def test_phase1_fixture_replays_builder_cases(
     assert horizon.quality_result.outcome == case["expected_quality"]
     if case["expected_quality"] == "degraded":
         assert "source.usedom.no_information" in horizon.quality_result.reason_codes
-    assert _horizon_depths(sol_path) == expected["horizon_depths"]
+    # Keep the historical source fixture intact; generated output now splits at 200 mm.
+    assert _horizon_depths(sol_path) == sorted(set([200.0] + expected["horizon_depths"]))
     assert expected["horizon_depths"][1] > expected["horizon_depths"][0]
     numeric_rows: list[list[float]] = []
     for line in sol_path.read_text(encoding="utf-8").splitlines():
@@ -155,6 +156,7 @@ def test_phase1_fixture_replays_builder_cases(
         except ValueError:
             continue
     assert numeric_rows
+    assert numeric_rows[0][1:] == numeric_rows[1][1:]
     assert all(math.isfinite(value) for row in numeric_rows for value in row)
 
 

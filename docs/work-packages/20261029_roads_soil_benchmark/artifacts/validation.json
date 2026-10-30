@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-29",
+  "passed": 12076,
+  "skipped": 298,
+  "failed": 0,
+  "coverage": "Disjoint repository groups; focused run not counted twice",
+  "logs": [
+    {
+      "log": "benchmark-tests.log",
+      "sha256": "970e99dbabc9b774c42f240486ece1f685ef059c0207d45a005f11d939aca235",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/tools/test_roads_soil_benchmark.py -q",
+      "result": "4 passed, 2 warnings in 9.30s"
+    },
+    {
+      "log": "broad-exceptions.log",
+      "sha256": "8c23d90b3de6aea94908dab2d6e1898e57ee1c0ea72629df51e17c2c6950a88c",
+      "command": "Broad exception handler changed-file enforcement",
+      "result": "See log"
+    },
+    {
+      "log": "disturbed-suite.log",
+      "sha256": "010feb6c68b49e396a2ca475709abd2e9bede3aea7e815bce0b08df66d11ff67",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/disturbed/test_disturbed_matrix.py -q",
+      "result": "99 passed, 2 warnings in 387.15s (0:06:27)"
+    },
+    {
+      "log": "full-remainder.log",
+      "sha256": "aebddfbae9a33d37e7a685aaaa3da3192f1581c1c11d4e2a84dd91e7e446be5c",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py --ignore=tests/disturbed/test_disturbed_matrix.py --ignore=tests/roads --maxfail=1",
+      "result": "======== 11217 passed, 293 skipped, 5830 warnings in 1523.22s (0:25:23) ========"
+    },
+    {
+      "log": "roads-suite.log",
+      "sha256": "f2c6eba622e7c89d2f2819663b3fe449c5729394e1b1b7e1f4868bb016997005",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/roads --maxfail=1",
+      "result": "============ 530 passed, 5 skipped, 2 warnings in 376.91s (0:06:16) ============"
+    },
+    {
+      "log": "shard-9002-mofe-mulch.log",
+      "sha256": "c8e19b06d4753f167cb3fbfc64333a94db55ac26238dafb3b4f8cc706c8955a0",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and mofe and (not thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 173.44s (0:02:53)"
+    },
+    {
+      "log": "shard-9002-mofe-thinning.log",
+      "sha256": "e07cc10ef3e1de783c169cd5ecf5e4dc8a3a38e09a72285e40d3aab1fedaa02f",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and mofe and (thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 217.26s (0:03:37)"
+    },
+    {
+      "log": "shard-9002-single-mulch.log",
+      "sha256": "cd96b331c7c0f07fba72d2a6c112ddfd35eaba57c561a5bc3d58a5c8001eb804",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and single and (not thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 82.92s (0:01:22)"
+    },
+    {
+      "log": "shard-9002-single-thinning.log",
+      "sha256": "5d4f19936d8ac5fb22b3bfce9e916f50ccb06f892965126a0c94748fd47d4a52",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9002 and single and (thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 98.88s (0:01:38)"
+    },
+    {
+      "log": "shard-9005-mofe-mulch.log",
+      "sha256": "40614703f80cc0e02bc91c43f931a149546a4c1cae6c16f01d4218e664cb72f7",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and mofe and (not thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 177.99s (0:02:57)"
+    },
+    {
+      "log": "shard-9005-mofe-thinning.log",
+      "sha256": "29c17f8868bf6080b16a3645d0a35c89ed41ce841ff9a6f15cab4ea70d701302",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and mofe and (thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 216.66s (0:03:36)"
+    },
+    {
+      "log": "shard-9005-single-mulch.log",
+      "sha256": "7e4e4abaea31843ab7765e35866e6514b39f7a4af5e25bc887bac8aef25ed9ae",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and single and (not thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 82.99s (0:01:22)"
+    },
+    {
+      "log": "shard-9005-single-thinning.log",
+      "sha256": "22bd7e3d88c37f0b1f6fc75daf479a2735c21366697b1f071372b97018ac571b",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k '9005 and single and (thinning)' --maxfail=1",
+      "result": "27 passed, 203 deselected, 2 warnings in 98.42s (0:01:38)"
+    },
+    {
+      "log": "shard-other.log",
+      "sha256": "9015997bb4e1b6cee15beebd82ae1a72eb07db4c5ba025f8b2a75481233875a3",
+      "command": "INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py -q -k 'not 9002 and not 9005' --maxfail=1",
+      "result": "14 passed, 216 deselected, 2 warnings in 69.85s (0:01:09)"
+    }
+  ]
+}

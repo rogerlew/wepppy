@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python -
+PASS: additive diagnostic accepted; changed recorded export rejected

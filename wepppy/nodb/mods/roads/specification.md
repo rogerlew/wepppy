@@ -478,6 +478,13 @@ Apply legacy WEPP:Road adjustments to selected template:
 - traffic effect on detachability/interrill:
   - for `traffic != high` (`low` or `none`), divide first-layer `Ki` and `Kr` by `4`.
 
+All generated soil assembly paths apply the shared
+[200 mm boundary contract](../../../../docs/schemas/soil-horizon-boundary-contract.md)
+before publication. Existing legacy templates already end at 200 mm, so this
+operation is a no-op for those templates. Generated modern soils retain their
+deeper material properties when a crossing horizon is subdivided. This changes
+input consistency, not the Roads erosion calibration or selected WEPP binary.
+
 ## Management File Selection
 
 Use legacy management files:

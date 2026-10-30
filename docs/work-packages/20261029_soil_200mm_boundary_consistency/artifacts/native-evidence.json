@@ -1,0 +1,214 @@
+{
+  "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+  "cases": [
+    {
+      "name": "unsplit",
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 4473.288284256344,
+        "spatial_net_loss_kg_yr": 4525.834420976531,
+        "runoff_mm_yr": 1001.54,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 1146.3404701618217
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 1455.577385742062
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1832.6619323682037
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 3026.849207143082
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 3731.4041813776826
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 4958.480746170364
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 9346.334465793305
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 2348.847054207258
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 2570.7958802907065
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 4192.931872361462
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 3966.844944257425
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 5510.831155460189
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 9872.778632225069
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 1421.0932022371567
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 5855.974727114913
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 10334.996006878946
+          }
+        ],
+        "export_resolution_kg": 0.0431052293811319,
+        "annual_mean_export_delta_kg": 0.008082230508989596
+      },
+      "validated_wat_rows": 17532,
+      "source_sha256": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.sol": "4b3aa9373d43998718ebbdf5f0a4e73f0ca5c41ca170d50b3a4d7511a05c3088",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+      },
+      "input_sha256": {
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.sol": "25a75ce87f2ead996a5a3a7d0c40073d6570b65f671018d02f86ddc827e299c9",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+      },
+      "output_sha256": {
+        "H1.element.dat": "8c82ea735793809dc200e17b4cf5b5e904191d2aacd2da2c289d1f91d31ec0b2",
+        "H1.soil.dat": "d4a7ef096dd95917f276fd0de510a04b827d2bdd47f70c5c348ed8c50e169743",
+        "H1.wat.dat": "940a0b317da3967ce3feebf132bb20d89a8d24bed4ce6c1315f0426fb30c4968",
+        "H1.plot.dat": "2cd4c22c8c787d48283aabdd608c61efc5b7a54e301df5f355ffcc6bf1477456",
+        "H1.loss.dat": "70f3f76e5e2ef39785c199aa9de015f973dcf8e53a99107942a941f2f6d626a2",
+        "H1.ebe.dat": "b122622c88d0ca551090209fe8706c94688429b367f6805e8e9a7719dacf9460",
+        "H1.pass.dat": "e6ee0549dcd78a9b9f354c7ab72a7a78074768acf3790209da109e2186d8d6ca"
+      }
+    },
+    {
+      "name": "split",
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 4473.288284256344,
+        "spatial_net_loss_kg_yr": 4525.834420976531,
+        "runoff_mm_yr": 1001.54,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 1146.3404701618217
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 1455.577385742062
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1832.6619323682037
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 3026.849207143082
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 3731.4041813776826
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 4958.480746170364
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 9346.334465793305
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 2348.847054207258
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 2570.7958802907065
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 4192.931872361462
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 3966.844944257425
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 5510.831155460189
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 9872.778632225069
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 1421.0932022371567
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 5855.974727114913
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 10334.996006878946
+          }
+        ],
+        "export_resolution_kg": 0.0431052293811319,
+        "annual_mean_export_delta_kg": 0.008082230508989596
+      },
+      "validated_wat_rows": 17532,
+      "source_sha256": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.sol": "e3d595ff024fe67d16db3fa3206c13857da837db8036bd7864c9c663c2502878",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+      },
+      "input_sha256": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.sol": "06794dc154b9528192e8a12beeb6e1767bfc692e0922c6750d584706953e81b7",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2"
+      },
+      "output_sha256": {
+        "H1.plot.dat": "2cd4c22c8c787d48283aabdd608c61efc5b7a54e301df5f355ffcc6bf1477456",
+        "H1.ebe.dat": "b122622c88d0ca551090209fe8706c94688429b367f6805e8e9a7719dacf9460",
+        "H1.loss.dat": "70f3f76e5e2ef39785c199aa9de015f973dcf8e53a99107942a941f2f6d626a2",
+        "H1.pass.dat": "e6ee0549dcd78a9b9f354c7ab72a7a78074768acf3790209da109e2186d8d6ca",
+        "H1.soil.dat": "d4a7ef096dd95917f276fd0de510a04b827d2bdd47f70c5c348ed8c50e169743",
+        "H1.wat.dat": "940a0b317da3967ce3feebf132bb20d89a8d24bed4ce6c1315f0426fb30c4968",
+        "H1.element.dat": "8c82ea735793809dc200e17b4cf5b5e904191d2aacd2da2c289d1f91d31ec0b2"
+      }
+    }
+  ],
+  "source_sha256": {
+    "docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py": "01160803438b22e6578848ea2edef891bce154ac26245370a517fc5026564ac0",
+    "docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "wepppy/wepp/soils/horizon_boundary.py": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "9d6babff56f8d6e9e87c4a6abc3b48b9e9e55f98f91c532e0018bf73e1667d17",
+    "wepppy/nodb/core/wepp.py": "2df813f1ec6f3edca6820e7c395e079f9c8a8f1668915a0abe4bf4e4d1778904"
+  }
+}

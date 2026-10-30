@@ -1,0 +1,12 @@
+{
+  "legacy-detailed.txt": {
+    "source": "/wc1/runs/ro/roads-soil-benchmark-20261029/pilot-detailed/p.out",
+    "sha256": "c45570f2338a705e74234deab26a96dfe57ae62988d8a05e939d64d9fe614b83",
+    "purpose": "Native loss parser regression fixture, scientific output only"
+  },
+  "modern-zero.txt": {
+    "source": "/wc1/runs/ro/roads-soil-benchmark-20261029/screen-v2/denver-silt-outrut-gravel-low-modern-road_erosion/output/H1.loss.dat",
+    "sha256": "eee17f11bb6e0fa7fc47b702911a56f99fbbf9d4a2c7b20ad4c3bffda4bd19ef",
+    "purpose": "Native loss parser regression fixture, scientific output only"
+  }
+}

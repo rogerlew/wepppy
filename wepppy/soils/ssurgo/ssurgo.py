@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import csv
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
+
 import os
 import requests
 import math
@@ -1321,7 +1323,7 @@ POSSIBILITY OF SUCH DAMAGE."""
         return True
 
     def _build_urban(self):
-        return (
+        return ensure_200mm_boundary(
             """7778\n"""
             + self.description
             + """        
@@ -1333,7 +1335,7 @@ Any comments:
         )
 
     def _build_urban_v2006_2(self):
-        return (
+        return ensure_200mm_boundary(
             """2006.2\n"""
             + self.description
             + """        
@@ -1346,7 +1348,7 @@ Any comments:
 
     def _build_water(self):
         # Updated 8/27/2020 values from Mariana
-        return (
+        return ensure_200mm_boundary(
             """7778\n"""
             + self.description
             + """
@@ -1358,7 +1360,7 @@ Any comments:
         )
 
     def _build_water_v2006_2(self):
-        return (
+        return ensure_200mm_boundary(
             """2006.2\n"""
             + self.description
             + """
@@ -1596,7 +1598,7 @@ Any comments:
             # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
             s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
-        return "\n".join(s)
+        return ensure_200mm_boundary("\n".join(s))
 
     def build_file_contents_v2006_2(self, ag=False):
         assert self.valid()
@@ -1699,7 +1701,7 @@ Any comments:
             # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
             s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
-        return "\n".join(s)
+        return ensure_200mm_boundary("\n".join(s))
 
 
 def _fetch_components(mukeys):

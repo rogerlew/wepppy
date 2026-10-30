@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose exec weppcloud /opt/venv/bin/python /workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py", line 72, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py", line 66, in main
+    assert (ROOT / 'unsplit/wepp/runs/p1.sol').read_bytes() == (ROOT / 'split/wepp/runs/p1.sol').read_bytes()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

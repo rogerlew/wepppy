@@ -1,0 +1,37 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 77e1db5d9184c934e663142cdcfbad98df8e0026
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 11
+
+Files:
+  M wepppy/au/soils/soil_build.py
+  M wepppy/eu/soils/esdac/esdac.py
+  M wepppy/locales/canada/bc/soils/sift/sift.py
+  M wepppy/locales/earth/soils/isric/__init__.py
+  M wepppy/nodb/core/soils.py
+  M wepppy/nodb/core/wepp.py
+  M wepppy/nodb/mods/roads/roads.py
+  M wepppy/soils/ssurgo/ssurgo.py
+  M wepppy/wepp/soils/utils/multi_ofe.py
+  M wepppy/wepp/soils/utils/utils.py
+  M wepppy/wepp/soils/utils/wepp_soil_util.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/au/soils/soil_build.py (base=0 current=0 delta=+0)
+  M wepppy/eu/soils/esdac/esdac.py (base=0 current=0 delta=+0)
+  M wepppy/locales/canada/bc/soils/sift/sift.py (base=4 current=0 delta=-4)
+  M wepppy/locales/earth/soils/isric/__init__.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/core/soils.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/core/wepp.py (base=2 current=2 delta=+0)
+  M wepppy/nodb/mods/roads/roads.py (base=18 current=18 delta=+0)
+  M wepppy/soils/ssurgo/ssurgo.py (base=3 current=3 delta=+0)
+  M wepppy/wepp/soils/utils/multi_ofe.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/soils/utils/utils.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/soils/utils/wepp_soil_util.py (base=1 current=1 delta=+0)
+
+Net delta (all changed files): -4
+Result: PASS

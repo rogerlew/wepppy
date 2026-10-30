@@ -19,6 +19,7 @@ from wepppy.all_your_base.geo import GeoTransformer, RasterDatasetInterpolator
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.wepp.soils.utils import simple_texture
 
 BBox = Tuple[float, float, float, float]
@@ -533,8 +534,9 @@ class ISRICSoilData:
         if soil_fn is None:
             soil_fn = f'{mukey}.sol'
 
+        soil_text = ensure_200mm_boundary('\n'.join(s))
         with open(_join(self.soils_dir, soil_fn), 'w') as fp:
-            fp.write('\n'.join(s))
+            fp.write(soil_text)
 
         with open(_join(self.soils_dir, soil_fn + '.log'), 'w') as fp:
             fp.write('\n'.join(_log))

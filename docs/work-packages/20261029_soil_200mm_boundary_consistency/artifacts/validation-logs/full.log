@@ -1,0 +1,277 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests --ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py --ignore=tests/disturbed/test_disturbed_matrix.py --ignore=tests/roads --maxfail=1 -q
+.....................................................................sss [  0%]
+sssss................................................................... [  1%]
+...........................ssssssssssssss.............................ss [  1%]
+ss...................................................................... [  2%]
+........................................................................ [  3%]
+...........................................................s............ [  3%]
+........................................................................ [  4%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  6%]
+........................................................................ [  6%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 11%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+........................................................................ [ 16%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+...................................s.ss................................. [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 19%]
+............................................s........................ [ 20%]
+.....................................................................sss [ 21%]
+ssssssssssssssss........................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+........................................................................ [ 23%]
+........................................................................ [ 24%]
+........................................................................ [ 24%]
+........................................................................ [ 25%]
+..................................................................sss... [ 26%]
+........................................................................ [ 26%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 31%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 34%]
+........................................................................ [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+........................................................................ [ 36%]
+........................................................................ [ 37%]
+........................................................................ [ 37%]
+........................................................................ [ 38%]
+........................................................................ [ 39%]
+........................................................................ [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 41%]
+........................................................................ [ 41%]
+........................................................................ [ 42%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 44%]
+........................................................................ [ 45%]
+........................................................................ [ 46%]
+..........................................F
+=================================== FAILURES ===================================
+___________ test_project_policy_drives_saved_and_prepared_anisotropy ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-39/test_project_policy_drives_sav0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x740a28721100>
+
+    def test_project_policy_drives_saved_and_prepared_anisotropy(tmp_path, monkeypatch):
+        from tests.nodb.test_soil_anisotropy import _soil_source, _mofe_files
+        from wepppy.nodb.core.wepp import prep_multi_ofe_hillslope
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+        ron = make_ron(tmp_path)
+        monkeypatch.setattr(Wepp, 'clean', lambda self: None)
+        wepp = Wepp(str(tmp_path), 'canada-wbt-mofe.cfg')
+        with wepp.locked():
+            wepp._multi_ofe = True
+            wepp._run_wepp_ui = True
+        with pytest.raises(ValueError):
+            wepp.parse_inputs({'soil_anisotropy_upper': 101, 'soil_anisotropy_lower': 11, 'developer_mode': True})
+        assert ron.developer_mode is False
+        ron.enable_developer_mode()
+        wepp.parse_inputs({'soil_anisotropy_upper': 101, 'soil_anisotropy_lower': 11})
+        loaded = Wepp.load_detached(str(tmp_path))
+        assert (loaded.soil_anisotropy_upper, loaded.soil_anisotropy_lower) == (101, 11)
+        before = (tmp_path / 'wepp.nodb').read_bytes()
+        for invalid in [True, False, float('inf'), float('nan'), 0, -1]:
+            with pytest.raises(ValueError):
+                wepp.parse_inputs({'soil_anisotropy_upper': invalid})
+            assert (tmp_path / 'wepp.nodb').read_bytes() == before
+        source = _soil_source(tmp_path)
+        _mofe_files(tmp_path)
+        source_bytes = source.read_bytes()
+        runs = tmp_path / 'wepp/runs'
+        runs.mkdir(parents=True, exist_ok=True)
+        prep_multi_ofe_hillslope(('101', 1, str(tmp_path), str(runs), 1, .02, .4,
+            False, 300, False, 500, False, 1000, None, False, False, (101, 11), True))
+        prepared = WeppSoilUtil(str(runs / 'p1.sol'))
+>       assert [[h['anisotropy'] for h in ofe['horizons']] for ofe in prepared.obj['ofes']] == [[101, 101, 11]] * 2
+E       assert [[101.0, 101.... 101.0, 11.0]] == [[101, 101, 1...101, 101, 11]]
+E         
+E         At index 0 diff: [101.0, 101.0, 101.0, 11.0] != [101, 101, 11]
+E         Use -v to get more diff
+
+tests/nodb/test_project_developer_mode.py:104: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/climates/gridmet/test_download_clients.py::test_grid_content_decoding_failure_retries_and_closes_responses
+  /usr/local/lib/python3.12/contextlib.py:775: RuntimeWarning: Cannot close a netcdf_file opened with mmap=True, when netcdf_variables or arrays referring to its data still exist. All data arrays obtained from such files refer directly to data on disk, and must be copied before the file can be cleanly closed. (See netcdf_file docstring for more information on mmap.)
+    def __enter__(self):
+
+tests/climates/test_gridmet_propagation.py::test_daymet_download_pool_receives_pickle_safe_config
+  /workdir/wepppy/wepppy/climates/daymet/daymet_singlelocation_client.py:296: FutureWarning: This function is deprecated. See: https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
+    hill_easting, hill_northing = pyproj.transform(wgs84_proj, raster_proj, loc['longitude'], loc['latitude'])
+
+tests/climates/test_gridmet_propagation.py::test_daymet_download_pool_receives_pickle_safe_config
+  /workdir/wepppy/wepppy/climates/daymet/daymet_singlelocation_client.py:345: FutureWarning: This function is deprecated. See: https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
+    lng, lat = pyproj.transform(raster_proj, wgs84_proj, eastings[i], northings[j])
+
+tests/climates/test_maca_artifacts.py: 2 warnings
+tests/nodb/mods/geneva/test_geneva_cache_freshness.py: 1 warning
+tests/nodb/test_batch_daymet_multiple_contention.py: 5 warnings
+tests/nodb/test_cli_parquet_lineage.py: 1 warning
+tests/nodb/test_prism_temperature_artifact_retention.py: 2 warnings
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/climates/test_maca_artifacts.py::test_replay_validation_failure_retains_working_input_and_real_exception_log
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_m3_task_retains_failure_and_preserves_previous_result
+tests/nodb/test_mofe_scenario_artifacts.py::test_global_mapping_writes_files_before_completion[True]
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/climates/test_prism_temperature_ordering.py: 4 warnings
+tests/nodb/test_batch_daymet_multiple_contention.py: 365 warnings
+tests/nodb/test_climate_edde_build.py: 3294 warnings
+tests/nodb/test_climate_prism_build.py: 1464 warnings
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/eu/soils/test_esdac_build.py: 32 warnings
+tests/nodb/mods/test_postfire_debris_flow_kf.py: 2 warnings
+tests/nodb/mods/test_postfire_debris_flow_production.py: 9 warnings
+tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py: 11 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1434682) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/microservices/test_files_routes.py::test_files_pattern_literal_underscore_percent
+tests/microservices/test_files_routes.py::test_files_sort_stability_matches_manifest
+tests/microservices/test_files_routes.py::test_files_manifest_cached_flag
+tests/microservices/test_files_routes.py::test_files_meta_skips_cached_flag
+tests/microservices/test_files_routes.py::test_files_manifest_pattern_filtering
+tests/microservices/test_files_routes.py::test_files_manifest_stale_cache_is_ignored
+tests/microservices/test_files_routes.py::test_files_dotfiles_hidden_by_default
+  /workdir/wepppy/wepppy/microservices/browse/listing.py:252: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    generated_at = datetime.utcnow().isoformat()
+
+tests/microservices/test_rq_engine_bootstrap_routes.py::test_bootstrap_checkout_invalid_json_payload_falls_back_to_missing_sha
+tests/microservices/test_rq_engine_features_export_routes.py::test_features_export_submit_non_json_returns_415
+tests/microservices/test_rq_engine_jobinfo.py::test_jobinfo_batch_uses_query_args_when_payload_invalid
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_dry_run_invalid_json_returns_400
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_issues_with_cookie
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_allows_admin_non_owner_without_cached_session_roles
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_private_run_requires_authenticated_cookie_session
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_stale_remember_cookie_avoids_destructive_recovery_guidance
+  /opt/venv/lib/python3.12/site-packages/httpx/_client.py:822: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    warnings.warn(message, DeprecationWarning)
+
+tests/nodb/mods/baer/test_baer_prep_timestamps.py::test_modify_burn_class_updates_landuse_and_sbs_timestamps
+  /workdir/wepppy/tests/nodb/mods/baer/test_baer_prep_timestamps.py:32: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+tests/nodb/mods/baer/test_landuse_remap_locking.py::test_remap_landuse_rebuilds_managements_after_unlock
+  /workdir/wepppy/tests/nodb/mods/baer/test_landuse_remap_locking.py:64: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+tests/nodb/mods/test_features_export_water_weighting.py::test_et_only_selection_rejects_hidden_infinite_components
+  /opt/venv/lib/python3.12/site-packages/numpy/core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+    return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_dnbr
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_rejects_mutation_and_preserves_accepted[dem_mask_after_auto]
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:304: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = DatasetReader(path, driver=driver, sharing=sharing, **kwargs)
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = writer(
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:585: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:592: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_run_at = datetime.utcnow().isoformat()
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_status_partial_from_skipped
+tests/nodb/mods/test_swat_interchange.py::test_interchange_error_clears_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_failed_status_from_version_manifest
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback_skips_historical_run
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:748: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_swat_interchange_at = datetime.utcnow().isoformat()
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+tests/nodb/test_mofe_scenario_artifacts.py::test_real_sbs_classification_reaches_management_files
+  /workdir/wepppy/tests/nodb/test_mofe_scenario_artifacts.py:302: DeprecationWarning: Call to deprecated method build_lcgrid. (Use wepppyo3 instead)
+    assert sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)['101'] == {
+
+tests/nodb/test_mofe_scenario_artifacts.py::test_real_sbs_classification_reaches_management_files
+  /workdir/wepppy/wepppy/nodb/core/landuse.py:1524: DeprecationWarning: Call to deprecated method build_lcgrid. (Use wepppyo3 instead)
+    sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_project_developer_mode.py::test_project_policy_drives_saved_and_prepared_anisotropy
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 5314 passed, 54 skipped, 5244 warnings, 3 subtests passed in 989.65s (0:16:29)

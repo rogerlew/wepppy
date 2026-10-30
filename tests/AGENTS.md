@@ -17,6 +17,8 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Disturbed matrix | `tests/disturbed/` | 96 canonical hourly hillslope cases including young forest; committed finite climate; legacy/v3 PASS and event-accounting contracts |
 | Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; separate opt-in full-project checks; reviewed Usersum report |
+| Roads generated-soil benchmark | `tests/tools/test_roads_soil_benchmark.py` | Common native report and calendar validation; opt-in cross-binary study under `docs/work-packages/20261029_roads_soil_benchmark/` |
+| Roads prepared-soil hydraulics | `tests/tools/test_roads_prepared_soil_hydraulics.py` | Layer-depth and deeper-material preservation; isolated follow-up experiment under `docs/work-packages/20261029_roads_prepared_soil_hydraulics/` |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
 | Go microservices | `services/status2/internal/**/_test.go` (Go) | Go-based WebSocket and checklist services (`status2`, `preflight2`) |

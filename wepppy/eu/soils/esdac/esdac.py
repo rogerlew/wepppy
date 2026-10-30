@@ -16,6 +16,7 @@ from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.locationinfo import RDIOutOfBoundsException
 
 from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 from .quality import (
     ESDACSoilBuildError,
@@ -731,8 +732,9 @@ class ESDAC:
               f"{d_esdb['dgh'][1]}_{d_esdb['dimp'][1]}_{d_esdb['dr'][1]}_{round(h0.clay)},{round(h0.vfs)},{round(h0.sand)},{round(h0.bd)}"
         fn = f"{key}.sol"
 
+        soil_text = ensure_200mm_boundary('\n'.join(s))
         with open(_join(soils_dir, fn), 'w') as fp:
-            fp.write('\n'.join(s))
+            fp.write(soil_text)
 
         desc = f"{d_esdb['fao90lev1'][2]} {d_esdb['usedom'][2]} {h0.simple_texture}"
 

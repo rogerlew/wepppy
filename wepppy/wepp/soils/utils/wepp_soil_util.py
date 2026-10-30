@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from wepppy.all_your_base import isfloat, try_parse, try_parse_float
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.wepp.soils.utils.utils import _quote_wepp_text
 
 DISTURBED_BD_MIN_G_CM3 = 0.6
@@ -785,7 +786,7 @@ class WeppSoilUtil(object):
             else:
                 s.append('0 0.0 0.0')
 
-        return '\n'.join(s) + '\n'
+        return ensure_200mm_boundary('\n'.join(s) + '\n')
         
 
     def __repr__(self) -> str:

@@ -1,0 +1,1638 @@
+{
+  "script_sha256": "1ea544765da1c45be130ea6c690d784fa095f54ae61db6ea73785c46db634647",
+  "rows": [
+    {
+      "arrangement": "bare_direct",
+      "binary": "legacy",
+      "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "bare_direct",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-bare_direct-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-bare_direct-core",
+        "status": "prepared",
+        "design": "inslope_bd",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662"
+          ]
+        },
+        "ofe_order": [
+          1
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1
+          ],
+          "yearly_plant_indices": [
+            1
+          ],
+          "ofe_initial_indices": [
+            1
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "36df4597b03fb95f666f114f552fed956c56a532e1c123953225b816080bda32"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.sol": "332106a06054c423e7faa5364eccc9776ab732ebc7ff158058c34e1995da9e06",
+          "wepp/roads/runs/p1.slp": "b847df9497b57846e4f39f743f14bc645291027a482acc53160f479d4153a2b5",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.man": "3c3791f687ee47ba73d70cb5efa03e6f7a1c627df59cb84db0098eacaf42ad92"
+        }
+      },
+      "inputs": {
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.sol": "332106a06054c423e7faa5364eccc9776ab732ebc7ff158058c34e1995da9e06",
+        "p1.slp": "b847df9497b57846e4f39f743f14bc645291027a482acc53160f479d4153a2b5",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "p1.man": "3c3791f687ee47ba73d70cb5efa03e6f7a1c627df59cb84db0098eacaf42ad92"
+      },
+      "outputs": {
+        "H1.ebe.dat": "e8a27ba1eb0c57b16efecc46932a6e149b6201147404d1f56ee62ba09d9faa56",
+        "H1.plot.dat": "c6cbaaf9a5bdb980e021752ef8b6b3ad759710f4f13eac057588b651e58fd044",
+        "H1.loss.dat": "a22e3ff32faaf95bb24becbfa98bbfecdb7f5953436178dea0f12fe838c58df8",
+        "H1.pass.dat": "4dc23e77830fd9cb6a52bea682b401ba3aadc65e4939944ef656699ecb231c0c",
+        "H1.soil.dat": "f3fdb5a6bc8da9829e061e2e6817af78d8a4487b2eacf980c353e53eac7ba631",
+        "H1.element.dat": "8a08c07288fb7d2e382e6ee4b132e11fd85f4ca1aae35a6cd842e49a8a7bdf79",
+        "H1.wat.dat": "ffacb0ff19477cf671d51535f4c4e9d534db082012dc2dbc7eda1af1287bccf1"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 196435.704,
+        "spatial_net_loss_kg_yr": 196434.72132,
+        "runoff_mm_yr": 1587.5800000000002,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 117126.632
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 159547.736
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 214143.236
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 203631.716
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 184775.316
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 182196.16
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 273260.572
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 171154.256
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 157596.208
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 159105.628
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 234767.604
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 197799.216
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 282788.54
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 127826.208
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 248434.068
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 228818.18
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": 0.000750000006519258
+      },
+      "wat_rows": 5844,
+      "area_m2": 2332.76,
+      "net_loss_t_ha_yr": 842.0699999999999,
+      "export_t_ha_yr": 842.0742125207908
+    },
+    {
+      "arrangement": "bare_direct",
+      "binary": "modern",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "bare_direct",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-bare_direct-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-bare_direct-core",
+        "status": "prepared",
+        "design": "inslope_bd",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662"
+          ]
+        },
+        "ofe_order": [
+          1
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1
+          ],
+          "yearly_plant_indices": [
+            1
+          ],
+          "ofe_initial_indices": [
+            1
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "36df4597b03fb95f666f114f552fed956c56a532e1c123953225b816080bda32"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.slp": "b847df9497b57846e4f39f743f14bc645291027a482acc53160f479d4153a2b5",
+          "wepp/roads/runs/p1.sol": "332106a06054c423e7faa5364eccc9776ab732ebc7ff158058c34e1995da9e06",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.man": "3c3791f687ee47ba73d70cb5efa03e6f7a1c627df59cb84db0098eacaf42ad92",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8"
+        }
+      },
+      "inputs": {
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.slp": "b847df9497b57846e4f39f743f14bc645291027a482acc53160f479d4153a2b5",
+        "p1.sol": "332106a06054c423e7faa5364eccc9776ab732ebc7ff158058c34e1995da9e06",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "p1.man": "3c3791f687ee47ba73d70cb5efa03e6f7a1c627df59cb84db0098eacaf42ad92",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5"
+      },
+      "outputs": {
+        "H1.soil.dat": "bdd7ea1000c1a1d120f1c3dc726297ffa548621e334d87ac6ea9832e4e608e40",
+        "H1.ebe.dat": "f0e01cbc0a1b594d3452480b9324df000d4078589c2a053695b2081dcce101dd",
+        "H1.element.dat": "bd1fb21a87c165c2ea02ac019ae03a53e729085a297b630153e7c71dacae47d7",
+        "H1.loss.dat": "0cf5022d5f8577acbf38bfc025cf98c6778be66af68f6e372a8efa0a423ad3e7",
+        "H1.pass.dat": "3c7e48fb0f7568f1a6b77955544c47fee5eddd18097d071b68584d7f95bf8086",
+        "H1.wat.dat": "7b18a01629d0671dfc72baff6045848bf68e9efe9e71a48a74d5839af4bc6e52",
+        "H1.plot.dat": "87695798749a2c3fdb21ef6dcfb7f0aae586f1bc1726f7a6ed08c2a4104454d0"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 215914.436,
+        "spatial_net_loss_kg_yr": 215915.60008000003,
+        "runoff_mm_yr": 1777.09,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 129320.796
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 181377.08
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 206686.984
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 225210.532
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 200706.392
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 212283.608
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 296805.936
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 192085.468
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 181773.752
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 174101.548
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 257280.36
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 217593.188
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 312104.408
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 144905.592
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 271593.624
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 250803.796
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": 0.1304999999993015
+      },
+      "wat_rows": 5844,
+      "area_m2": 2332.76,
+      "net_loss_t_ha_yr": 925.58,
+      "export_t_ha_yr": 925.5750098595654
+    },
+    {
+      "arrangement": "bare_buffer",
+      "binary": "legacy",
+      "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "bare_buffer",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-bare_buffer-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-bare_buffer-core",
+        "status": "prepared",
+        "design": "inslope_bd",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662",
+            "0.00, 0.049662 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "ofe_order": [
+          1,
+          3
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1,
+            1
+          ],
+          "yearly_plant_indices": [
+            1,
+            3
+          ],
+          "ofe_initial_indices": [
+            1,
+            2
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "421cd0720c0fc7e0cc092b661c5f6d72a7be83a30c5f90d32df92e3eb0f36576"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Forest",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.05,
+            "sat": 0.4,
+            "ki": 120000.0,
+            "kr": 0.0002,
+            "shcrit": 2.0,
+            "avke": 25,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 6,
+                "cec": 14,
+                "rfg": 15
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.man": "fc4e954a9b9f48a505b515f0fc3935e896568b29809da7afe88a56ec29fa7c8e",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.sol": "e074c7c8e54a2fe0af2e45f8d11f7286fce18e6772f0db82ce130e0fb236e6b2",
+          "wepp/roads/runs/p1.slp": "bf3f949bf702ccf9f01ad6a5a90dc82c220d08741c11f0c75fc138293a251662",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504"
+        }
+      },
+      "inputs": {
+        "p1.man": "fc4e954a9b9f48a505b515f0fc3935e896568b29809da7afe88a56ec29fa7c8e",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p1.sol": "e074c7c8e54a2fe0af2e45f8d11f7286fce18e6772f0db82ce130e0fb236e6b2",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "p1.slp": "bf3f949bf702ccf9f01ad6a5a90dc82c220d08741c11f0c75fc138293a251662",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+      },
+      "outputs": {
+        "H1.loss.dat": "701478e00b015a6685adae906e25ffc8990aa9b1f2c3dc60fc1c33876e7b0587",
+        "H1.pass.dat": "7aeb2565bd33af0dc14d991bbb9622d28f91aaae7e8855a0c9c3805ca86f69e4",
+        "H1.ebe.dat": "8420767e1d365930b82764db99534cd5fce8acdfe374d07838304edbbc68ae9e",
+        "H1.plot.dat": "016cbf73ab22a89994cb11b1aa4fb60bd45f0e41190686a4e5502e70b99b23fb",
+        "H1.element.dat": "49f16b67adebe709e2cd027d619e2faf6ad437825ff99d824d25084b0f35d1ac",
+        "H1.soil.dat": "4c02c46a370fe13b3985d8e5a1103f15d76c17f56af848ef62b07db232938175",
+        "H1.wat.dat": "8b4475b9f90bdf8666cea0602dafd1e60a16fec34debf8d6ad8851832fe519e5"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 168505.556,
+        "spatial_net_loss_kg_yr": 192629.98976,
+        "runoff_mm_yr": 1412.77,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 86688.228
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 100705.86
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 140310.284
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 155851.596
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 149371.948
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 163012.62
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 248232.516
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 150979.904
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 141016.86
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 146781.54
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 212290.148
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 177623.836
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 255688.672
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 116077.7
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 231763.5
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 219693.7
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": 0.0009999999892897904
+      },
+      "wat_rows": 11688,
+      "area_m2": 2452.76,
+      "net_loss_t_ha_yr": 785.3601239420082,
+      "export_t_ha_yr": 687.0038487255174
+    },
+    {
+      "arrangement": "bare_buffer",
+      "binary": "modern",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "bare_buffer",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-bare_buffer-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-bare_buffer-core",
+        "status": "prepared",
+        "design": "inslope_bd",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662",
+            "0.00, 0.049662 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "ofe_order": [
+          1,
+          3
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1,
+            1
+          ],
+          "yearly_plant_indices": [
+            1,
+            3
+          ],
+          "ofe_initial_indices": [
+            1,
+            2
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "421cd0720c0fc7e0cc092b661c5f6d72a7be83a30c5f90d32df92e3eb0f36576"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Forest",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.05,
+            "sat": 0.4,
+            "ki": 120000.0,
+            "kr": 0.0002,
+            "shcrit": 2.0,
+            "avke": 25,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 6,
+                "cec": 14,
+                "rfg": 15
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.sol": "e074c7c8e54a2fe0af2e45f8d11f7286fce18e6772f0db82ce130e0fb236e6b2",
+          "wepp/roads/runs/p1.slp": "bf3f949bf702ccf9f01ad6a5a90dc82c220d08741c11f0c75fc138293a251662",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.man": "fc4e954a9b9f48a505b515f0fc3935e896568b29809da7afe88a56ec29fa7c8e",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8"
+        }
+      },
+      "inputs": {
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.sol": "e074c7c8e54a2fe0af2e45f8d11f7286fce18e6772f0db82ce130e0fb236e6b2",
+        "p1.slp": "bf3f949bf702ccf9f01ad6a5a90dc82c220d08741c11f0c75fc138293a251662",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "p1.man": "fc4e954a9b9f48a505b515f0fc3935e896568b29809da7afe88a56ec29fa7c8e",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8"
+      },
+      "outputs": {
+        "H1.soil.dat": "92eac22c7e47fa05a4a771619ffa401a2a2adb4acaf5da01d30e0b4c35d1d68f",
+        "H1.wat.dat": "5f72cace5ab023cd19113fa88884f955524cd8c16d0951f74dc82efdcd99f7da",
+        "H1.element.dat": "4b6cd5400a1a54ec5c7e84337516325f286a2bb1b7c965341d661dceb0e7eed9",
+        "H1.plot.dat": "c002a1beefcbb05d5681391c41312dbc703b708810b75d16e152cd9d1e55642c",
+        "H1.loss.dat": "bc91583f4f7396383a9e4b099fa47c15f5e7ab687cc2fd1e92b3e0c4155ea2a3",
+        "H1.ebe.dat": "1404f560befcf9bf5375ab11444fe43fc22f7dfc998f2c14c84ae95ad8a89ac7",
+        "H1.pass.dat": "5e586ff5bac97e5e406fac019d374f5215a401bb738b37ba14d331acddf69951"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 182041.908,
+        "spatial_net_loss_kg_yr": 209451.52212000004,
+        "runoff_mm_yr": 1621.8300000000002,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 83121.78
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 108313.416
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 140858.376
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 171525.22
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 160075.548
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 180781.532
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 266730.5
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 166761.452
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 160022.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 157665.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 234757.296
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 192026.452
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 278868.876
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 125327.5
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 252309.14
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 233525.236
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": -0.07524999999441206
+      },
+      "wat_rows": 11688,
+      "area_m2": 2452.76,
+      "net_loss_t_ha_yr": 853.9421799116099,
+      "export_t_ha_yr": 742.1920938045304
+    },
+    {
+      "arrangement": "rutted",
+      "binary": "legacy",
+      "binary_sha256": "a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "rutted",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-rutted-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-rutted-core",
+        "status": "prepared",
+        "design": "outslope_rutted",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19,
+            30.0,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662",
+            "0.00, 0.049662 0.05, 0.100000 1.00, 0.100000",
+            "0.00, 0.100000 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "ofe_order": [
+          1,
+          2,
+          3
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1,
+            2,
+            1
+          ],
+          "yearly_plant_indices": [
+            1,
+            2,
+            3
+          ],
+          "ofe_initial_indices": [
+            1,
+            2,
+            3
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "51743aeddbb4f99eaaaf9440c208d67099139907bd123e32f39598d87b35fadd"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Fill",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.18,
+            "sat": 0.45,
+            "ki": 2300000.0,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 21,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 3,
+                "cec": 13,
+                "rfg": 40
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Forest",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.05,
+            "sat": 0.4,
+            "ki": 120000.0,
+            "kr": 0.0002,
+            "shcrit": 2.0,
+            "avke": 25,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 6,
+                "cec": 14,
+                "rfg": 15
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.slp": "86753b4c6778a0a8ffc4743dac98a86d0b5a3cf13fc71a8a41d3ecb6b4454a8d",
+          "wepp/roads/runs/p1.sol": "66c25136f42a1cdea5657c7b04d54e8ffa9156728989fee779e7d7bde072f704",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        }
+      },
+      "inputs": {
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.slp": "86753b4c6778a0a8ffc4743dac98a86d0b5a3cf13fc71a8a41d3ecb6b4454a8d",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.sol": "66c25136f42a1cdea5657c7b04d54e8ffa9156728989fee779e7d7bde072f704",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+      },
+      "outputs": {
+        "H1.plot.dat": "6055466c94ad06e8d6bd863bd8eb4922aa5ce15537ad91052a3134327e5586d8",
+        "H1.loss.dat": "d3bbee3324cd154e0e9f2ea97b4a9a15213e7fb215f0b05bcdd3b1f854ca5417",
+        "H1.wat.dat": "668ce48a767640b66407153a17fc5e22c9cf433180c98e81b4aad445936beb27",
+        "H1.pass.dat": "ff20a35bf55e8bcaf5eb0dbb7ff86f1b2bb0838477c46b52d587bcb5fbb098e8",
+        "H1.soil.dat": "e6b886902102fff0e77d02d54337f833d1b5b8a97335be15648a1f3de87d6207",
+        "H1.element.dat": "7d53cbca93d0e5240c44cbb24f8cedf7d45ae477a6e03e9e959acbc15d3ea81e",
+        "H1.ebe.dat": "37b5a8e5992951b09678bd4cbdac6df05b2f5a8e5a737b694b733b3735ce11c0"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 166298.984,
+        "spatial_net_loss_kg_yr": 188653.41272,
+        "runoff_mm_yr": 1314.97,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 84374.792
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 98290.792
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 138807.82
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 155425.804
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 149325.54
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 161354.668
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 251086.656
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 145603.232
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 138532.416
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 146423.848
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 209320.444
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 173288.596
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 252015.912
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 111958.652
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 226153.444
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 218821.104
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": -0.001500000013038516
+      },
+      "wat_rows": 17532,
+      "area_m2": 2572.76,
+      "net_loss_t_ha_yr": 733.2724883782396,
+      "export_t_ha_yr": 646.3835880532968
+    },
+    {
+      "arrangement": "rutted",
+      "binary": "modern",
+      "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+      "prepared": {
+        "case": {
+          "geometry": "long",
+          "texture": "silt",
+          "surface": "paved",
+          "traffic": "high",
+          "arrangement": "rutted",
+          "control": "core"
+        },
+        "name": "long-silt-paved-high-rutted-core",
+        "segment_run_id": 1,
+        "segment_id": "long-silt-paved-high-rutted-core",
+        "status": "prepared",
+        "design": "outslope_rutted",
+        "surface": "paved",
+        "traffic": "high",
+        "soil_texture": "silt",
+        "rfg_pct": 15.0,
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null,
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            583.19,
+            30.0,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.049662 1.00, 0.049662",
+            "0.00, 0.049662 0.05, 0.100000 1.00, 0.100000",
+            "0.00, 0.100000 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "ofe_order": [
+          1,
+          2,
+          3
+        ],
+        "effective_geometry": {
+          "width_m": 4.0,
+          "road_length_m": 583.1901103762971,
+          "road_slope_pct": 4.966171188944492,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0
+        },
+        "clipping": {
+          "road_grade": false,
+          "unrutted_length": false,
+          "unrutted_width": false
+        },
+        "management_readback": {
+          "plant_names": [
+            "ROAD",
+            "FILL",
+            "FOREST"
+          ],
+          "initial_residue_indices": [
+            1,
+            2,
+            1
+          ],
+          "yearly_plant_indices": [
+            1,
+            2,
+            3
+          ],
+          "ofe_initial_indices": [
+            1,
+            2,
+            3
+          ],
+          "schedule_years": 200,
+          "schedule_sha256": "51743aeddbb4f99eaaaf9440c208d67099139907bd123e32f39598d87b35fadd"
+        },
+        "road_width_m": 4.0,
+        "segment_length_m": 583.1901103762971,
+        "slope_pct_clamped": 4.966171188944492,
+        "soil_readback": [
+          {
+            "slid": "Road",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.6,
+            "sat": 0.5,
+            "ki": 5,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 0.08,
+            "horizons": [
+              {
+                "solthk": 200,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 35,
+                "clay": 15,
+                "orgmat": 0.01,
+                "cec": 12,
+                "rfg": 95
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Fill",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.18,
+            "sat": 0.45,
+            "ki": 2300000.0,
+            "kr": 0.0003,
+            "shcrit": 2.0,
+            "avke": 21,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 3,
+                "cec": 13,
+                "rfg": 40
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          },
+          {
+            "slid": "Forest",
+            "texid": "silt loam",
+            "nsl": 1,
+            "salb": 0.05,
+            "sat": 0.4,
+            "ki": 120000.0,
+            "kr": 0.0002,
+            "shcrit": 2.0,
+            "avke": 25,
+            "horizons": [
+              {
+                "solthk": 400,
+                "bd": null,
+                "ksat": null,
+                "anisotropy": null,
+                "fc": null,
+                "wp": null,
+                "sand": 30,
+                "clay": 15,
+                "orgmat": 6,
+                "cec": 14,
+                "rfg": 15
+              }
+            ],
+            "ksatadj": 0,
+            "luse": null,
+            "stext": null,
+            "uksat": null,
+            "texid_enum": null,
+            "lkeff": null,
+            "ksatfac": null,
+            "ksatrec": null,
+            "res_lyr": null
+          }
+        ],
+        "template_sha256": {
+          "wepppy/nodb/mods/roads/legacy_templates/soils/3psilt1.sol": "9e4df782723de0f07384c7c592794d42ebf448b141281ea7619387854372bc86",
+          "wepppy/nodb/mods/roads/legacy_templates/managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "input_sha256": {
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.slp": "86753b4c6778a0a8ffc4743dac98a86d0b5a3cf13fc71a8a41d3ecb6b4454a8d",
+          "wepp/roads/runs/p1.sol": "66c25136f42a1cdea5657c7b04d54e8ffa9156728989fee779e7d7bde072f704"
+        }
+      },
+      "inputs": {
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.slp": "86753b4c6778a0a8ffc4743dac98a86d0b5a3cf13fc71a8a41d3ecb6b4454a8d",
+        "p1.sol": "66c25136f42a1cdea5657c7b04d54e8ffa9156728989fee779e7d7bde072f704",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5"
+      },
+      "outputs": {
+        "H1.soil.dat": "3858dd4c5079bc404b5195fc1971f74cb7a2ad6fe1aa3a30861bc921e2c7a10a",
+        "H1.element.dat": "41d076aa6867b5acd153d879e4b4ba3cd853a92e56238f9e61083815dc38e7ca",
+        "H1.ebe.dat": "bdd6ee4cd7d8dc9e20c70b83dffaed4575fa397253ebd7703d58303f8141cf89",
+        "H1.plot.dat": "ff989afaf7e0a7d0029bd5bbda4baa063eb8079962efec06a7e4890d28840b01",
+        "H1.loss.dat": "113cbd230b361a9df139fb78214f8e01b2dacec64f6b3f50c78801e352080cab",
+        "H1.wat.dat": "148e5f43aaa90f5871d4fc22eac6a745062dbefd89c90d164425a2ba846f414c",
+        "H1.pass.dat": "9431de76994081977aac1a852620123595d04b1d05cf01dc5be6f4e1f7395daa"
+      },
+      "metrics": {
+        "years": 16,
+        "sediment_export_kg_yr": 162655.14,
+        "spatial_net_loss_kg_yr": 202779.63004000002,
+        "runoff_mm_yr": 1529.49,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 80865.288
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 102322.936
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 137471.564
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 162365.204
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 146214.968
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 162205.048
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 235454.736
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 137179.28
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 128555.024
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 141744.42
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 205755.28
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 165149.72
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 244853.08
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 115282.14
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 224821.376
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 212243.048
+          }
+        ],
+        "export_resolution_kg": 0.004,
+        "annual_mean_export_delta_kg": 0.054499999998370185
+      },
+      "wat_rows": 17532,
+      "area_m2": 2572.76,
+      "net_loss_t_ha_yr": 788.1793484040486,
+      "export_t_ha_yr": 632.2204169840949
+    }
+  ],
+  "qualification": "Native stress controls exceed fswepp2 300 m API limit; not admitted fswepp2 validation cases"
+}

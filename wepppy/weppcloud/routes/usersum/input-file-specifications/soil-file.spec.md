@@ -1,10 +1,72 @@
 # Soil Input File
 
-Information on soil properties to a maximum depth of 1.8 meters are input to the WEPP model through the soil input file. The user may input information on up to 8 different soil layers. WEPP internally creates a new set of soil layers based on the original set parameter values. If the entire 1.8 meters is parameterized, the new soil layers represent depths of 0-100 mm, 100-200 mm, 200-400 mm, 400-600 mm, 600-800 mm, 800-1000 mm, 1000-1200 mm, 1200-1400 mm, 1400-1600 mm, 1600-1800 mm.
+The soil input file supplies soil properties by horizon. Layer depths (`solthk`) are cumulative depths from the soil surface to the bottom of each horizon, in millimeters. WEPP converts these input horizons into its internal calculation layers.
+
+The original WEPP format description used up to eight input layers over 1.8 meters, with internal layers at 0–100, 100–200, and successive 200 mm intervals down to 1800 mm. Those are legacy limits, not a universal limit for every version described below. The generated-soil writer targeting `wepp_261026` enforces a ten-input-layer limit, including any inserted 200 mm boundary.
 
 As with the slope file, soil parameters must be input for each and every Overland Flow Element (OFE) on the hillslope profile and for each channel in a watershed, even if the soil on all OFEs is the same.
 
 Accurate estimation of soil physical and hydrological parameters is essential when operating the WEPP erosion prediction model. Table 3 lists the input parameters in the soil input file, and the discussion following the table is meant to assist the users in determining input parameter values. There are several versions of the soil file that can be used as input for WEPP. The differences in format are specified by the version number in line 1 which indicates how the remainder of the file is interpreted by WEPP.
+
+## WEPPcloud normalization at 200 mm
+
+WEPPcloud normalizes generated soil files so that each profile extending below
+200 mm has an explicit horizon bottom at **200 mm (20 cm)**. This applies to
+generated hillslope soils, every overland flow element in multi-OFE profiles,
+Roads soils, and watershed channel soils.
+
+When a horizon crosses 200 mm, the writer splits it into two pieces with
+identical material properties. For example:
+
+| Supplied horizon | Written horizon | Saturated conductivity |
+| --- | --- | ---: |
+| 0–150 mm | 0–150 mm | 100.8 mm/h |
+| 150–400 mm | 150–200 mm | 9.72 mm/h |
+| — | 200–400 mm | 9.72 mm/h |
+
+In this example, the horizon-bottom entries change from `150, 400` to
+`150, 200, 400`, and `nsl` changes from two to three. All material properties of
+the crossing horizon are copied, including conductivity, texture, bulk density,
+water-retention parameters, and anisotropy. Total soil depth and restrictive-layer
+settings remain unchanged. Normalization does not estimate new properties or
+average adjacent horizons. Existing landuse adjustments remain separate.
+
+### Why the boundary is necessary
+
+The verified `wepp_261026` soil reader applies a surface conductivity adjustment
+while building its top 200 mm calculation layer. If an input horizon crosses
+200 mm, the adjusted conductivity can persist into the deeper portion of that
+same input horizon. Giving the deeper piece its own input row prevents that
+carryover and retains its supplied conductivity below 200 mm.
+
+Disturbed-soil preparation already inserted this boundary, but other writers
+previously did not do so consistently. Applying the same rule to generated files
+removes that difference between preparation paths. The soil-file format alone
+(for example, 7778 versus 9002) does not guarantee the boundary is present.
+
+### What to expect in your files and results
+
+- A profile already containing a 200 mm boundary, or ending at or above 200 mm,
+  receives no additional horizon. Repeating normalization does not add duplicates.
+- The emitted horizon count includes the inserted piece. If the generated output
+  would exceed ten layers, preparation fails before replacing the destination
+  file. The writer does not merge layers or discard deeper material to make room.
+- The explicit user-uploaded soil preservation path retains the supplied horizon
+  structure; this automatic insertion is not applied to those uploads. Source
+  catalogs and existing run artifacts are not rewritten.
+- Newly generated or prepared files can produce different runoff and sediment
+  from older unsplit inputs, despite identical supplied material properties.
+  Sediment can increase. This normalization is not a sediment-reduction setting
+  or evidence of improved field calibration.
+
+To check a generated profile, inspect the horizon-bottom entries in its `.sol`
+file and its declared `nsl`. Compare the prepared `wepp/runs/p*.sol` files when
+comparing runs; source soil files alone do not establish what the model consumed.
+The normalization changes input preparation; it does not change the WEPP binary.
+
+The [decision and rationale (ADR-0110)](../../../../../docs/adrs/ADR-0110-generated-soil-200mm-boundary.md)
+and [generated-soil contract](../../../../../docs/schemas/soil-horizon-boundary-contract.md)
+provide implementation ownership, scope, and the supporting validation evidence.
 
 ## Soil input file description
 
@@ -41,7 +103,7 @@ Accurate estimation of soil physical and hydrological parameters is essential wh
 
   b) soil texture for current OFE or channel - character (`texid`)
 
-  c) number of soil layers for current OFE or channel - integer (`nsl`)
+  c) number of soil layers for current OFE or channel - integer (`nsl`). For generated soils, this includes any layer added by [200 mm normalization](#weppcloud-normalization-at-200-mm).
 
   d) albedo of the bare dry surface soil on the current OFE or channel - real (`salb`)
 

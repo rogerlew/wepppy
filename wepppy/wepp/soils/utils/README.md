@@ -469,7 +469,7 @@ SoilMultipleOfeSynth(stack: Optional[Iterable[str]] = None)
 - `stack_of_fns` - Boolean indicating if all files exist
 
 **Methods:**
-- `write(dst_fn: str, ksflag: int = 0)` - Write multi-OFE file
+- `write(dst_fn: str, ksflag: int = 0, *, preserve_input_format: bool = False)` - Write a normalized generated multi-OFE file; the explicit preservation option retains uploaded topology.
 
 ### Example - Variable Soil Hillslope
 
@@ -717,6 +717,19 @@ with ProcessPoolExecutor(max_workers=8) as executor:
 for result in results:
     print(f"Migrated {result}")
 ```
+
+Generated serialization uses
+`wepppy.wepp.soils.horizon_boundary.ensure_200mm_boundary(text)` before opening the
+destination. The helper inserts a copied material row ending at 200 mm in each OFE,
+updates its layer count, preserves other tokens, and is idempotent. More than ten
+emitted layers fail explicitly. Disturbed conductivity overrides remain a separate
+operation; the normalizer does not estimate or replace physical properties.
+
+`SoilMultipleOfeSynth.write(..., preserve_input_format=True)` is reserved for the
+existing uploaded-soil preservation path. The default normalizes generated output.
+See the [boundary contract](../../../../docs/schemas/soil-horizon-boundary-contract.md)
+for ownership, source preservation and scientific compatibility.
+
 ## Known Limitations
 
 ### Version Mixing

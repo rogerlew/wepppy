@@ -115,3 +115,5 @@ Each ADR should normally include:
 - [ADR-0105: Roads dashboard detachment aggregation and display](ADR-0105-roads-dashboard-detachment-display.md) (Accepted and independently reviewed; implementation pending).
 
 - [ADR-0106: Scheduled Culvert JWT renewal](ADR-0106-culvert-jwt-renewal.md) (Accepted, deployed and validated on wepp1/wepp2, 2026-10-26).
+
+- [ADR-0110: Consistent generated-soil boundary at 200 mm](ADR-0110-generated-soil-200mm-boundary.md) (Accepted and locally validated, 2026-10-29; property-preserving normalization with an uploaded-soil exception).

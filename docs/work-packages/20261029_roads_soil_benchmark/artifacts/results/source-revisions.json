@@ -1,0 +1,17 @@
+{
+  "/workdir/wepppy": {
+    "commit": "77e1db5d9184c934e663142cdcfbad98df8e0026",
+    "files": {
+      "wepppy/nodb/core/soils.py": "c8c93c20cb40e0ed0fb7edbde61a0126f21028adfcb10ea6d118d0036aad1b98",
+      "wepppy/nodb/mods/roads/roads.py": "bc58f90258044a34bf4614887276735f98256a8cfc5d7d868b68523d01d16978"
+    }
+  },
+  "/workdir/fswepp2": {
+    "commit": "c0fe47499406955afc547827cdae8d02ccada432",
+    "files": {
+      "api/wepproad.py": "c848b2178311591079a2fccdee30d818b14e753c12b4f4ab6f0d28e4e7ee9382",
+      "api/wepp.py": "ebb38b9563261b5a95d0e041d69028de0607b02501fd225c3bcb41bf2075aba5",
+      "parity-runs/wepproad/cases.yaml": "a40c6b0af169d4959de2cc31976faa1a21aa2bfa183baa2132106c2f78760226"
+    }
+  }
+}

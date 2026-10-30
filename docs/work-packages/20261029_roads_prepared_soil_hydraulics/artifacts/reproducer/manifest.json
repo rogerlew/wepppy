@@ -1,0 +1,21 @@
+{
+  "binary": "wepp_261026",
+  "binary_sha256": "a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48",
+  "width_m": 43.105229381131934,
+  "expected_export_kg_yr": {
+    "unsplit": 109.09933556364493,
+    "split": 4473.288284256348
+  },
+  "inputs": {
+    "unsplit/runs/p1.sol": "4b3aa9373d43998718ebbdf5f0a4e73f0ca5c41ca170d50b3a4d7511a05c3088",
+    "unsplit/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "unsplit/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "unsplit/runs/p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+    "unsplit/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "split/runs/p1.sol": "e3d595ff024fe67d16db3fa3206c13857da837db8036bd7864c9c663c2502878",
+    "split/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "split/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "split/runs/p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+    "split/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac"
+  }
+}

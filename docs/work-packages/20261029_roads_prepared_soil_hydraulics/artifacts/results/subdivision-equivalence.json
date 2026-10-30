@@ -1,0 +1,1264 @@
+[
+  {
+    "case": "site-sand-outunrut-gravel-high-modern-",
+    "original_soil_sha256": "4b3aa9373d43998718ebbdf5f0a4e73f0ca5c41ca170d50b3a4d7511a05c3088",
+    "split_soil_sha256": "e3d595ff024fe67d16db3fa3206c13857da837db8036bd7864c9c663c2502878",
+    "equivalence": [
+      {
+        "ofe": 1,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 150.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 100.8,
+              "anisotropy": 10.0,
+              "fc": 0.2615,
+              "wp": 0.1385,
+              "sand": 67.9,
+              "clay": 12.5,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 48.0
+            }
+          },
+          {
+            "top_mm": 150.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 150.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 100.8,
+              "anisotropy": 10.0,
+              "fc": 0.2615,
+              "wp": 0.1385,
+              "sand": 67.9,
+              "clay": 12.5,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 48.0
+            }
+          },
+          {
+            "top_mm": 150.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 150.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 100.8,
+              "anisotropy": 10.0,
+              "fc": 0.2615,
+              "wp": 0.1385,
+              "sand": 67.9,
+              "clay": 12.5,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 48.0
+            }
+          },
+          {
+            "top_mm": 150.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.4,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.314,
+              "wp": 0.198,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 15.0,
+              "rfg": 68.5
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "case": "birmingham-clay-outunrut-paved-low-modern-",
+    "original_soil_sha256": "70e3eded9747960b535bcc0c5ab1d2e01f924738910f0fa0fd7c5f2311a42c9f",
+    "split_soil_sha256": "10554ca83f4d6b382502e347a3b57b1fa97bbeaf3f327af9e6564bcbb04213a2",
+    "equivalence": [
+      {
+        "ofe": 1,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 400.0,
+            "properties": {
+              "bd": 1.25,
+              "ksat": 9.72,
+              "anisotropy": 10.0,
+              "fc": 0.3411,
+              "wp": 0.2,
+              "sand": 35.4,
+              "clay": 31.0,
+              "orgmat": 2.5,
+              "cec": 20.0,
+              "rfg": 10.0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "case": "denver-loam-outrut-gravel-low-modern-",
+    "original_soil_sha256": "e8f2e1b678914d2ad19f8da91074a4d49069252398867fa51c36470612942eea",
+    "split_soil_sha256": "79c2a28c299a028fa9b2fd2e72dfb0c3b2818a758acc075f7af1015792bac034",
+    "equivalence": [
+      {
+        "ofe": 1,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "case": "birmingham-loam-outrut-gravel-low-modern-",
+    "original_soil_sha256": "e8f2e1b678914d2ad19f8da91074a4d49069252398867fa51c36470612942eea",
+    "split_soil_sha256": "79c2a28c299a028fa9b2fd2e72dfb0c3b2818a758acc075f7af1015792bac034",
+    "equivalence": [
+      {
+        "ofe": 1,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 180.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.3141,
+              "wp": 0.1424,
+              "sand": 42.2,
+              "clay": 15.0,
+              "orgmat": 11.0,
+              "cec": 50.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 180.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 360.0,
+            "properties": {
+              "bd": 0.78,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2863,
+              "wp": 0.1253,
+              "sand": 38.2,
+              "clay": 18.0,
+              "orgmat": 9.0,
+              "cec": 50.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 360.0,
+            "bottom_mm": 610.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2863,
+              "wp": 0.1263,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 7.0,
+              "cec": 40.0,
+              "rfg": 5.0
+            }
+          },
+          {
+            "top_mm": 610.0,
+            "bottom_mm": 1090.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2788,
+              "wp": 0.1024,
+              "sand": 32.6,
+              "clay": 24.0,
+              "orgmat": 2.0,
+              "cec": 40.0,
+              "rfg": 15.0
+            }
+          },
+          {
+            "top_mm": 1090.0,
+            "bottom_mm": 1270.0,
+            "properties": {
+              "bd": 0.8,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.2929,
+              "wp": 0.0943,
+              "sand": 36.5,
+              "clay": 22.0,
+              "orgmat": 0.5,
+              "cec": 25.0,
+              "rfg": 30.0
+            }
+          },
+          {
+            "top_mm": 1270.0,
+            "bottom_mm": 1600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "case": "charleston-silt-inveg-gravel-low-modern-",
+    "original_soil_sha256": "4d8368330dbdb99a28fa6c8a46fb94813a20453f9bd6b5453b52b038aad1f01a",
+    "split_soil_sha256": "fcd9f1a6b1c938bea2d563717a0409989628e1b5c893fd8559800c47bfbb2ece",
+    "equivalence": [
+      {
+        "ofe": 1,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 170.0,
+            "properties": {
+              "bd": 0.9,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2995,
+              "wp": 0.1477,
+              "sand": 24.5,
+              "clay": 23.5,
+              "orgmat": 7.5,
+              "cec": 57.5,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 170.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 600.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 600.0,
+            "bottom_mm": 2360.0,
+            "properties": {
+              "bd": 1.05,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3169,
+              "wp": 0.2328,
+              "sand": 5.5,
+              "clay": 47.5,
+              "orgmat": 3.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 2360.0,
+            "bottom_mm": 2600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 170.0,
+            "properties": {
+              "bd": 0.9,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2995,
+              "wp": 0.1477,
+              "sand": 24.5,
+              "clay": 23.5,
+              "orgmat": 7.5,
+              "cec": 57.5,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 170.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 600.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 600.0,
+            "bottom_mm": 2360.0,
+            "properties": {
+              "bd": 1.05,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3169,
+              "wp": 0.2328,
+              "sand": 5.5,
+              "clay": 47.5,
+              "orgmat": 3.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 2360.0,
+            "bottom_mm": 2600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "equivalent_intervals": [
+          {
+            "top_mm": 0.0,
+            "bottom_mm": 170.0,
+            "properties": {
+              "bd": 0.9,
+              "ksat": 32.4,
+              "anisotropy": 10.0,
+              "fc": 0.2995,
+              "wp": 0.1477,
+              "sand": 24.5,
+              "clay": 23.5,
+              "orgmat": 7.5,
+              "cec": 57.5,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 170.0,
+            "bottom_mm": 200.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 200.0,
+            "bottom_mm": 600.0,
+            "properties": {
+              "bd": 0.85,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3087,
+              "wp": 0.161,
+              "sand": 17.8,
+              "clay": 30.0,
+              "orgmat": 7.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 600.0,
+            "bottom_mm": 2360.0,
+            "properties": {
+              "bd": 1.05,
+              "ksat": 32.4,
+              "anisotropy": 1.0,
+              "fc": 0.3169,
+              "wp": 0.2328,
+              "sand": 5.5,
+              "clay": 47.5,
+              "orgmat": 3.5,
+              "cec": 40.0,
+              "rfg": 2.5
+            }
+          },
+          {
+            "top_mm": 2360.0,
+            "bottom_mm": 2600.0,
+            "properties": {
+              "bd": 1.52,
+              "ksat": 59.8734,
+              "anisotropy": 1.0,
+              "fc": 0.188,
+              "wp": 0.09,
+              "sand": 66.8,
+              "clay": 7.0,
+              "orgmat": 7.0,
+              "cec": 11.3,
+              "rfg": 55.5
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

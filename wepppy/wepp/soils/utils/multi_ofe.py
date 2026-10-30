@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+
+from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from typing import Iterable, List, Optional
 
 from os.path import exists as exists
@@ -50,7 +52,7 @@ class SoilMultipleOfeSynth(object):
         """Return True if every file referenced in ``stack`` exists."""
         return all(exists(fn) for fn in self.stack)
 
-    def write(self, dst_fn: str, ksflag: int = 0) -> None:
+    def write(self, dst_fn: str, ksflag: int = 0, *, preserve_input_format: bool = False) -> None:
         """Write the merged soil definition to ``dst_fn``."""
         assert len(self.stack) > 0
 
@@ -77,5 +79,8 @@ class SoilMultipleOfeSynth(object):
                     i += 1
         s.append('\n\n')
 
+        text = ''.join(s)
+        if not preserve_input_format:
+            text = ensure_200mm_boundary(text)
         with open(dst_fn, 'w') as pf:
-            pf.write(''.join(s))
+            pf.write(text)

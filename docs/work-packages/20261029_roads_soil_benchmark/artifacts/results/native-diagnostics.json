@@ -1,0 +1,1283 @@
+{
+  "script_sha256": "90ebf2f8f5521112d7b2613ed8451c7826edf04f0e5c62df83693938cb838c0f",
+  "native_sha256": {
+    "wepp_interchange_rust.so": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad"
+  },
+  "records": [
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-legacy",
+      "source_sha256": "823cc46c246875f612bd276756f46c4d54e27bb1b8cc84b7dcb1549d967408a9",
+      "parquet_sha256": "f8719745e298b431d56a5b8a7dd6cd732c7825419be59935d96c3cbd983f9d0a",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 544.76784375,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 544.7675983141249,
+      "surface_volume_m3_yr": 38.141127499999996,
+      "lateral_volume_m3_yr": 0.28980239375,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 568.7154,
+        "spatial_net_loss_kg_yr": 895.4321111999999,
+        "runoff_mm_yr": 92.27,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 524.47032
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 302.39748
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 789.87744
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 650.71116
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 821.03472
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 482.99724
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 446.87016
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 214.19244
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 673.94052
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 359.0136
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 544.0168799999999
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 694.3028400000001
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 909.5209199999999
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 642.015
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 747.11736
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 296.96832
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-generated",
+      "source_sha256": "6e3b8c96fefdaff946f10d4a4c1e597d618144264ad363eda5f4881b34c7ae4a",
+      "parquet_sha256": "5dd97ed7687bdf559e0f6768eaaf08473853d665afcd7f408401eb9f2af20e66",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 1215.8729475,
+      "signed_deposition_kg_yr": -305.5554280625,
+      "pass_export_kg_yr": 989.0263790003833,
+      "surface_volume_m3_yr": 21.7930085,
+      "lateral_volume_m3_yr": 17.5768896875,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 994.6728,
+        "spatial_net_loss_kg_yr": 1826.5115879999996,
+        "runoff_mm_yr": 51.370000000000005,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 733.28112
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 425.77524
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1886.4410400000002
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 2118.2436
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 1076.6764799999999
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 666.4878
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 86.30424000000001
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 34.661880000000004
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 843.88392
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 730.02204
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 336.88908
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 1478.5768799999998
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 1980.32076
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 1001.57508
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 2078.39016
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 437.27112
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-road_combined",
+      "source_sha256": "351fea80cb402f6ba3aa1c17014275f6e7adc4ce7dbb732b9510b5b243787e70",
+      "parquet_sha256": "7182a87c15055c3c8b43c069e56916d4a684cefe783b70139150a862c2680c21",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 948.96576875,
+      "signed_deposition_kg_yr": -27.0149625,
+      "pass_export_kg_yr": 929.823323419085,
+      "surface_volume_m3_yr": 33.11968625,
+      "lateral_volume_m3_yr": 16.64003525,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 960.5178,
+        "spatial_net_loss_kg_yr": 1552.1838948,
+        "runoff_mm_yr": 79.96000000000001,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 804.15324
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 372.933
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1521.65376
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 1296.9989999999998
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 1488.13236
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 730.4932799999999
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 925.44408
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 424.809
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 891.76824
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 599.3103600000001
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 708.74892
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 1388.0988
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 1393.18344
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 941.13756
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 1334.82096
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 546.61464
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-all_combined",
+      "source_sha256": "01f600debdb80d605a19700c4048a075e8712369a78fd1e273282d290239483a",
+      "parquet_sha256": "c1f081961b134172752ca517bc1cb2355054f062cf7839c0756db8df249af45c",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 451.677551875,
+      "signed_deposition_kg_yr": -1.4608618750000002,
+      "pass_export_kg_yr": 451.3227495672625,
+      "surface_volume_m3_yr": 37.515226375,
+      "lateral_volume_m3_yr": 14.3154285,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 478.03535999999997,
+        "spatial_net_loss_kg_yr": 651.8029716,
+        "runoff_mm_yr": 90.65,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 342.98352
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 228.67812
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 754.24536
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 629.86968
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 754.41168
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 363.93192
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 357.39
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 192.0006
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 534.1208399999999
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 284.28444
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 406.73952
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 592.64568
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 763.6107599999999
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 556.54632
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 647.51148
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 239.6196
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-gravel-low-modern-cloud_legacy",
+      "source_sha256": "b0815a810c9aaf0e8b57ae46d57da720a77333073c6769b5199799f758d0d2af",
+      "parquet_sha256": "fff875db0390d6dfe7c5dadb5f377d07e579e4caab15decc930dff2e4a1477dd",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 550.87310625,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 550.8758382708126,
+      "surface_volume_m3_yr": 38.141128125,
+      "lateral_volume_m3_yr": 0.28980109375,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 575.2612799999999,
+        "spatial_net_loss_kg_yr": 914.1871068,
+        "runoff_mm_yr": 92.27,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 532.2794399999999
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 303.31224
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 797.41332
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 655.63344
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 832.7246399999999
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 491.75280000000004
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 454.90103999999997
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 215.70912
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 680.8546799999999
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 364.46256
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 547.56108
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 695.9502
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 923.0364
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 649.62216
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 758.5657199999999
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 300.39768000000004
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-legacy",
+      "source_sha256": "6e8142714cb2ad28ace06498f45a188e9b1f6bcfa2f69b5a38b76580458990e1",
+      "parquet_sha256": "2fc8b95d42f7f5a3f6f311621d5260eae52498e3c4ec8dae3b49d194b95f6d0a",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 576.7805915,
+      "signed_deposition_kg_yr": -4.0041075,
+      "pass_export_kg_yr": 572.7771320488205,
+      "surface_volume_m3_yr": 68.823886375,
+      "lateral_volume_m3_yr": 1.2349302625,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 607.20264,
+        "spatial_net_loss_kg_yr": 1151.6352803999998,
+        "runoff_mm_yr": 166.2,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 527.87592
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 364.61304
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 904.3847999999999
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 772.0693200000001
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 772.101
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 632.6931599999999
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 404.22096
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 325.86444
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 782.17128
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 416.63952
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 505.27223999999995
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 821.96136
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 691.7407199999999
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 746.46792
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 712.35252
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 334.77840000000003
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-generated",
+      "source_sha256": "6e3b8c96fefdaff946f10d4a4c1e597d618144264ad363eda5f4881b34c7ae4a",
+      "parquet_sha256": "468dd673d59ab4a5db7220de0e8d5434c5c216c04e86e122ee16bfda8580e9b4",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 1215.8729475,
+      "signed_deposition_kg_yr": -305.5554280625,
+      "pass_export_kg_yr": 989.0263790003833,
+      "surface_volume_m3_yr": 21.7930085,
+      "lateral_volume_m3_yr": 17.5768896875,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 994.6728,
+        "spatial_net_loss_kg_yr": 1826.5115879999996,
+        "runoff_mm_yr": 51.370000000000005,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 733.28112
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 425.77524
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1886.4410400000002
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 2118.2436
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 1076.6764799999999
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 666.4878
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 86.30424000000001
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 34.661880000000004
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 843.88392
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 730.02204
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 336.88908
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 1478.5768799999998
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 1980.32076
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 1001.57508
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 2078.39016
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 437.27112
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-road_combined",
+      "source_sha256": "9acceba0716ecf8ba04b48f4e7d87c49c1947b65880aceea7f8b3577b942b04f",
+      "parquet_sha256": "02a60bb14c17f8d35b79ab6fa4e7e2ac829954e58521bc7c2ef3f98172fc9d72",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 1696.613646629645,
+      "signed_deposition_kg_yr": -148.27261922970564,
+      "pass_export_kg_yr": 1631.8904401452023,
+      "surface_volume_m3_yr": 83.4421325,
+      "lateral_volume_m3_yr": 88.679471875,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 1658.30544,
+        "spatial_net_loss_kg_yr": 2806.6383972000003,
+        "runoff_mm_yr": 199.57,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 1389.56004
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 886.53312
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 2246.38128
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 1845.30456
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 2429.68968
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 1324.3626
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 1456.65036
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 698.9796
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 2072.85408
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 963.3056399999999
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 1305.99612
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 2503.38528
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 2335.0932
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 2073.56292
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 2350.0224000000003
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 651.1784399999999
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-all_combined",
+      "source_sha256": "22690e4eff24824611f4270d5a918c48141fcd6aa4266dbc993becc4d4e19fc0",
+      "parquet_sha256": "3f5c80164e01c4ee63081279f3073289f1cf272d68e053d1832396f2a111e82a",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 542.3712493742687,
+      "signed_deposition_kg_yr": -12.870358624806249,
+      "pass_export_kg_yr": 537.6694789372343,
+      "surface_volume_m3_yr": 88.9453636875,
+      "lateral_volume_m3_yr": 82.81904875000001,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 569.2658399999999,
+        "spatial_net_loss_kg_yr": 942.277644,
+        "runoff_mm_yr": 213.62,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 493.14671999999996
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 336.47724
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 781.75548
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 686.8818
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 705.92544
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 546.74136
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 428.92343999999997
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 233.27568
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 662.20704
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 377.60976
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 486.35531999999995
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 848.73888
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 689.9112
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 697.3480800000001
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 826.51932
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 306.44460000000004
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "birmingham-loam-outrut-paved-high-modern-cloud_legacy",
+      "source_sha256": "5a993b01e3bb18654482b4f3bf7feb9ea2d96c8203924dacc6f01fd800f962cc",
+      "parquet_sha256": "4871579be9e1fbe67f8f19c37270300c5c69ba6c68243daf66a02b6981352389",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 1134.45675,
+      "signed_deposition_kg_yr": -14.444055625,
+      "pass_export_kg_yr": 1120.0128367174,
+      "surface_volume_m3_yr": 68.8239551875,
+      "lateral_volume_m3_yr": 1.23492933125,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 1168.2594,
+        "spatial_net_loss_kg_yr": 2310.1554564,
+        "runoff_mm_yr": 166.2,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 1048.20804
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 814.77
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 1665.17208
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 1312.85484
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 1487.55024
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 1222.9509600000001
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 890.39808
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 614.4731999999999
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 1357.5038399999999
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 892.5840000000001
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 1062.59076
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 1450.2708
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 1455.7989599999999
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 1463.96052
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 1305.40212
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 647.658
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-legacy",
+      "source_sha256": "bf3d3b2fb46c1c56dc2769d2d1f6dab871e6703862a69edb75d9eb8a2a1b4d22",
+      "parquet_sha256": "4464e23757588e4f3addf3b05cca1fc263afb052808a10989411e53419c7b031",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 25.8680625,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 25.86816199675,
+      "surface_volume_m3_yr": 0.9901875,
+      "lateral_volume_m3_yr": 0.001122875,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 28.03284,
+        "spatial_net_loss_kg_yr": 101.37374279999999,
+        "runoff_mm_yr": 2.45,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 0.5464800000000001
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 1.05336
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 61.174080000000004
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 143.98955999999998
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 25.300440000000002
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 216.46944
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-generated",
+      "source_sha256": "b37a1e225e6b695bce024f8c39233f3e741e9b38e4932ed6da958697aef4a8d0",
+      "parquet_sha256": "fa1795863f3a8de443a88813e679119bea1981caaa8c3446e38c84738646702b",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 0.0,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 0.0,
+      "surface_volume_m3_yr": 0.0,
+      "lateral_volume_m3_yr": 0.0,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 0.0,
+        "spatial_net_loss_kg_yr": 0.015206400000000014,
+        "runoff_mm_yr": 0.0,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 0.0
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-road_combined",
+      "source_sha256": "4ea5af4c89e92aaf1394b7e3f5e5fd0606897f78598573ed15c248f940499a4a",
+      "parquet_sha256": "527bf4f074b9b79868c57a03c6196225c23a13db3ea01f688b7fe178e6198fcc",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 21.411875,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 21.411629423750004,
+      "surface_volume_m3_yr": 0.1735375,
+      "lateral_volume_m3_yr": 0.0,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 25.93008,
+        "spatial_net_loss_kg_yr": 65.8209024,
+        "runoff_mm_yr": 0.51,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 33.32736
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 38.97828
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 342.59148
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-all_combined",
+      "source_sha256": "913decc5b37ee069b9fa7cccc53bb9157e560d52a17a58b24ba1608bd7177dc5",
+      "parquet_sha256": "bba6a76a0b40c0db7adade49a497d3a44795d8881dcc98418dbb7fca280521c9",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 17.3149375,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 17.314487555875,
+      "surface_volume_m3_yr": 0.559289375,
+      "lateral_volume_m3_yr": 0.0,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 17.313119999999998,
+        "spatial_net_loss_kg_yr": 29.475547199999998,
+        "runoff_mm_yr": 1.34,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 43.639199999999995
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 81.56808
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 151.8264
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    },
+    {
+      "name": "denver-loam-outrut-gravel-low-modern-cloud_legacy",
+      "source_sha256": "35d27ec5928d3159fefdbaa6e3eea4d5a2036d959d7bfa4f62d970992e38d844",
+      "parquet_sha256": "15db7d541b559bf08a6fac855887489079d6a64ca029d1b4d8e25e3aeeff6ddc",
+      "rows": 5844,
+      "pass_detachment_kg_yr": 25.724875,
+      "signed_deposition_kg_yr": 0.0,
+      "pass_export_kg_yr": 25.724697517,
+      "surface_volume_m3_yr": 0.99000625,
+      "lateral_volume_m3_yr": 0.001122,
+      "baseflow_volume_m3_yr": 0.0,
+      "common_report": {
+        "years": 16,
+        "sediment_export_kg_yr": 27.89028,
+        "spatial_net_loss_kg_yr": 102.9682764,
+        "runoff_mm_yr": 2.44,
+        "annual_export": [
+          {
+            "year": 1,
+            "sediment_export_kg": 0.5464800000000001
+          },
+          {
+            "year": 2,
+            "sediment_export_kg": 1.05732
+          },
+          {
+            "year": 3,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 4,
+            "sediment_export_kg": 59.1822
+          },
+          {
+            "year": 5,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 6,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 7,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 8,
+            "sediment_export_kg": 143.847
+          },
+          {
+            "year": 9,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 10,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 11,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 12,
+            "sediment_export_kg": 25.300440000000002
+          },
+          {
+            "year": 13,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 14,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 15,
+            "sediment_export_kg": 0.0
+          },
+          {
+            "year": 16,
+            "sediment_export_kg": 216.30707999999998
+          }
+        ],
+        "export_resolution_kg": 0.00396
+      }
+    }
+  ]
+}

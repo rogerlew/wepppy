@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose exec weppcloud /opt/venv/bin/python /workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py", line 72, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20261029_soil_200mm_boundary_consistency/artifacts/replay.py", line 55, in main
+    subprocess.run([str(BINARY)], cwd=runs, stdin=stdin, stdout=stdout,
+  File "/usr/local/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/workdir/wepppy/wepp_runner/bin/wepp_261026']' returned non-zero exit status 2.

@@ -1,0 +1,39 @@
+{
+  "screen": {
+    "reason": "Abbreviated reports failed required annual-detail checks; original source and outputs retained.",
+    "record_count": 96,
+    "completed_records": 0,
+    "execution_sha256": "486f8386bb41fa76657d21d14c00e0e777afe4f73e5b5668ed4d8f783d5f6aa3"
+  },
+  "screen-v2": {
+    "reason": "All 96 native outputs revalidated; two original parser failures retained separately.",
+    "record_count": 96,
+    "completed_records": 94,
+    "execution_sha256": "2bf62efccad6dc481f376f21b2218b61b30dcb7a66309b70f93a4e3a75659975"
+  },
+  "validation": {
+    "reason": "Stopped on exact malformed sand template.",
+    "record_count": 76,
+    "completed_records": 76,
+    "execution_sha256": "ff0fe4ea6980fcd82e1de420ece4904386f93c10f1cf947dca66536ea2180955"
+  },
+  "validation-v2": {
+    "reason": "Superseded to move Python readback validation from threads to processes.",
+    "record_count": 304,
+    "completed_records": 288,
+    "execution_sha256": "c40a4d396c6e869508b58c95efe1984748fdfdfd2f3d3ea33c9a8d25a2dc1725"
+  },
+  "validation-v3": {
+    "reason": "Superseded to use bounded available parallel capacity after measuring memory usage.",
+    "record_count": 246,
+    "completed_records": 238,
+    "execution_sha256": "59c44082b5f674e011c627357697e2f7e6a4ee93c7f34a0f6483e3cec58c00f1"
+  },
+  "validation-v4": {
+    "reason": "Final 2880 cases; resumed once for exact malformed clay template repair; completed records immutable.",
+    "record_count": 2880,
+    "completed_records": 2880,
+    "execution_sha256": "59c44082b5f674e011c627357697e2f7e6a4ee93c7f34a0f6483e3cec58c00f1",
+    "resume_sha256": "3789fb1d14ce2d12cc6a01a67ce583dcd91f254386168f80bef73532d762f727"
+  }
+}

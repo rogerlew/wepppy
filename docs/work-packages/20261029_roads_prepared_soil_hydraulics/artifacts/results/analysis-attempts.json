@@ -1,0 +1,10 @@
+{
+  "confirmation-analysis-v1": {
+    "status": "failed",
+    "reason": "Old execution records lack additive annual_mean_export_delta_kg; strict dictionary equality rejected equivalent metrics after all 1440 new cases were verified. Native runs unaffected."
+  },
+  "confirmation-analysis-v2": {
+    "status": "completed",
+    "change": "Require every original recorded metric key/value to match fresh strict parsing; retain fresh additional diagnostic field."
+  }
+}

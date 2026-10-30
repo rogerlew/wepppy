@@ -1,0 +1,2685 @@
+{
+  "all_combined": {
+    "all": {
+      "count": 480,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 420,
+        "above": 28,
+        "reference_zero": 15,
+        "both_zero": 16,
+        "below": 1,
+        "ratio_min": 0.0,
+        "ratio_median": 1.697685219134218,
+        "ratio_max": 590.0
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 469,
+        "above": 11,
+        "ratio_min": 0.19079102034660647,
+        "ratio_median": 1.2418479013057262,
+        "ratio_max": 92.24806201550389
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 390,
+        "reference_zero": 12,
+        "both_zero": 14,
+        "above": 57,
+        "below": 7,
+        "ratio_min": 0.0,
+        "ratio_median": 2.1809954751131224,
+        "ratio_max": 160.4678624813154
+      }
+    },
+    "holdout": {
+      "count": 192,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 176,
+        "reference_zero": 6,
+        "above": 9,
+        "below": 1,
+        "ratio_min": 0.0,
+        "ratio_median": 2.15847085440511,
+        "ratio_max": 590.0
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 189,
+        "above": 3,
+        "ratio_min": 0.240927796483352,
+        "ratio_median": 1.3320423521263534,
+        "ratio_max": 44.78860569715143
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 150,
+        "reference_zero": 6,
+        "above": 33,
+        "below": 3,
+        "ratio_min": 0.04659498207885305,
+        "ratio_median": 2.7826308807021127,
+        "ratio_max": 130.3
+      }
+    },
+    "climate": {
+      "birmingham": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 95,
+          "above": 1,
+          "ratio_min": 0.19372990353697747,
+          "ratio_median": 1.4390953039062273,
+          "ratio_max": 10.34875954198473
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.2403770517347872,
+          "ratio_median": 1.2053813985828041,
+          "ratio_max": 9.470757875913817
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.38346297896859693,
+          "ratio_median": 1.5742474698579274,
+          "ratio_max": 6.045128637705608
+        }
+      },
+      "charleston": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 89,
+          "above": 6,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 1.9916302765647744,
+          "ratio_max": 590.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 95,
+          "above": 1,
+          "ratio_min": 0.240927796483352,
+          "ratio_median": 1.1581843136803596,
+          "ratio_max": 44.78860569715143
+        },
+        "runoff_mm_yr": {
+          "above": 27,
+          "within_factor_10": 66,
+          "below": 3,
+          "ratio_min": 0.04659498207885305,
+          "ratio_median": 3.024411159387148,
+          "ratio_max": 130.3
+        }
+      },
+      "denver": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 72,
+          "reference_zero": 12,
+          "both_zero": 12,
+          "ratio_min": 0.3744906997342781,
+          "ratio_median": 1.2989064416145812,
+          "ratio_max": 5.904892546867855
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 95,
+          "above": 1,
+          "ratio_min": 0.29592736643775097,
+          "ratio_median": 1.1009674697733156,
+          "ratio_max": 92.24806201550389
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 72,
+          "reference_zero": 12,
+          "both_zero": 12,
+          "ratio_min": 0.3137254901960784,
+          "ratio_median": 1.4858824515102007,
+          "ratio_max": 6.190140845070422
+        }
+      },
+      "flagstaff": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 84,
+          "above": 5,
+          "reference_zero": 3,
+          "both_zero": 4,
+          "ratio_min": 0.4166666666666667,
+          "ratio_median": 1.8527944111776449,
+          "ratio_max": 439.00000000000006
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 95,
+          "above": 1,
+          "ratio_min": 0.33352142194994155,
+          "ratio_median": 1.264760651104882,
+          "ratio_max": 82.22485207100594
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 78,
+          "above": 12,
+          "both_zero": 2,
+          "below": 4,
+          "ratio_min": 0.0,
+          "ratio_median": 2.348095083034842,
+          "ratio_max": 151.0
+        }
+      },
+      "site": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 80,
+          "above": 16,
+          "ratio_min": 0.18483624943921037,
+          "ratio_median": 2.192607838667292,
+          "ratio_max": 110.84615384615383
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 88,
+          "above": 8,
+          "ratio_min": 0.19079102034660647,
+          "ratio_median": 1.9060557879355966,
+          "ratio_max": 34.64742135825487
+        },
+        "runoff_mm_yr": {
+          "above": 18,
+          "within_factor_10": 78,
+          "ratio_min": 1.2799076804718554,
+          "ratio_median": 6.649763877061238,
+          "ratio_max": 160.4678624813154
+        }
+      }
+    },
+    "soil": {
+      "clay": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 111,
+          "reference_zero": 6,
+          "above": 3,
+          "ratio_min": 1.339894552872616,
+          "ratio_median": 2.235016684860126,
+          "ratio_max": 13.037499999999998
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 118,
+          "above": 2,
+          "ratio_min": 0.9805144992126911,
+          "ratio_median": 1.4044284615896172,
+          "ratio_max": 10.576615306035583
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 105,
+          "reference_zero": 6,
+          "above": 9,
+          "ratio_min": 1.666403264612917,
+          "ratio_median": 2.942622950819672,
+          "ratio_max": 21.612745098039216
+        }
+      },
+      "loam": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.2608695652173913,
+          "ratio_median": 0.9276452274780418,
+          "ratio_max": 8.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.240927796483352,
+          "ratio_median": 0.8047192794763668,
+          "ratio_max": 1.6559766763848398
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "both_zero": 6,
+          "above": 3,
+          "ratio_min": 0.35692495424039045,
+          "ratio_median": 1.0100273473108476,
+          "ratio_max": 21.0
+        }
+      },
+      "sand": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 88,
+          "above": 25,
+          "reference_zero": 7,
+          "ratio_min": 2.4646034535867654,
+          "ratio_median": 4.774436090225564,
+          "ratio_max": 590.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 111,
+          "above": 9,
+          "ratio_min": 1.1170303039911982,
+          "ratio_median": 1.9803273283340397,
+          "ratio_max": 92.24806201550389
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 69,
+          "reference_zero": 6,
+          "above": 45,
+          "ratio_min": 3.770541874607979,
+          "ratio_median": 6.395705521472394,
+          "ratio_max": 160.4678624813154
+        }
+      },
+      "silt": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 107,
+          "both_zero": 10,
+          "reference_zero": 2,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 0.8981655414917824,
+          "ratio_max": 3.441860465116279
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.19079102034660647,
+          "ratio_median": 0.910124933717503,
+          "ratio_max": 2.7413692098744176
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 105,
+          "both_zero": 8,
+          "below": 7,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9795918367346939,
+          "ratio_max": 6.9227089251009115
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 118,
+          "above": 2,
+          "ratio_min": 0.3881963074009784,
+          "ratio_median": 1.476825574470753,
+          "ratio_max": 13.607016005262004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.3013726832752869,
+          "ratio_median": 1.2071108089887574,
+          "ratio_max": 8.216342463348557
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "above": 9,
+          "ratio_min": 0.2514167954662545,
+          "ratio_median": 2.0026291678285464,
+          "ratio_max": 38.63609898107715
+        }
+      },
+      "inveg": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 117,
+          "above": 3,
+          "ratio_min": 0.3744906997342781,
+          "ratio_median": 1.6702404546254996,
+          "ratio_max": 16.34585793522992
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.3091558602241399,
+          "ratio_median": 1.2779873112404982,
+          "ratio_max": 9.614697575912595
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "above": 9,
+          "ratio_min": 0.2514167954662545,
+          "ratio_median": 2.0026291678285464,
+          "ratio_max": 38.63609898107715
+        }
+      },
+      "outrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 118,
+          "above": 2,
+          "ratio_min": 0.38874881815316736,
+          "ratio_median": 1.6979772973022482,
+          "ratio_max": 13.607016005262004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.29592736643775097,
+          "ratio_median": 1.331873041541657,
+          "ratio_max": 8.216342463348557
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "above": 9,
+          "ratio_min": 0.2514167954662545,
+          "ratio_median": 2.0026291678285464,
+          "ratio_max": 38.63609898107715
+        }
+      },
+      "outunrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 67,
+          "above": 21,
+          "reference_zero": 15,
+          "both_zero": 16,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 3.047389712964747,
+          "ratio_max": 590.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 109,
+          "above": 11,
+          "ratio_min": 0.19079102034660647,
+          "ratio_median": 1.191585790902141,
+          "ratio_max": 92.24806201550389
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 57,
+          "reference_zero": 12,
+          "both_zero": 14,
+          "above": 30,
+          "below": 7,
+          "ratio_min": 0.0,
+          "ratio_median": 3.5420666867232056,
+          "ratio_max": 160.4678624813154
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 208,
+          "reference_zero": 7,
+          "both_zero": 8,
+          "above": 17,
+          "ratio_min": 0.3744906997342781,
+          "ratio_median": 2.127827672361402,
+          "ratio_max": 110.84615384615383
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 237,
+          "above": 3,
+          "ratio_min": 0.27989328256658114,
+          "ratio_median": 1.269222397560617,
+          "ratio_max": 17.391496592071988
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 186,
+          "reference_zero": 6,
+          "both_zero": 8,
+          "above": 39,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 3.9648061589221877,
+          "ratio_max": 160.4678624813154
+        }
+      },
+      "paved": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 212,
+          "above": 11,
+          "reference_zero": 8,
+          "both_zero": 8,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 1.373668604130629,
+          "ratio_max": 590.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 232,
+          "above": 8,
+          "ratio_min": 0.19079102034660647,
+          "ratio_median": 1.2210526494510763,
+          "ratio_max": 92.24806201550389
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 204,
+          "reference_zero": 6,
+          "both_zero": 6,
+          "above": 18,
+          "below": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 1.528568956069671,
+          "ratio_max": 81.85714285714286
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 142,
+          "reference_zero": 4,
+          "both_zero": 6,
+          "above": 8,
+          "ratio_min": 0.3155680224403928,
+          "ratio_median": 1.593780724995896,
+          "ratio_max": 439.00000000000006
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 157,
+          "above": 3,
+          "ratio_min": 0.27989328256658114,
+          "ratio_median": 1.1680064658661067,
+          "ratio_max": 19.359097949241978
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 130,
+          "reference_zero": 4,
+          "both_zero": 5,
+          "above": 19,
+          "below": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 2.348095083034842,
+          "ratio_max": 160.4678624813154
+        }
+      },
+      "low": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 139,
+          "reference_zero": 4,
+          "both_zero": 6,
+          "above": 11,
+          "ratio_min": 0.3155680224403928,
+          "ratio_median": 1.7692290588755308,
+          "ratio_max": 439.00000000000006
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 157,
+          "above": 3,
+          "ratio_min": 0.3302291944815309,
+          "ratio_median": 1.2759062860205996,
+          "ratio_max": 19.359097949241978
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 130,
+          "reference_zero": 4,
+          "both_zero": 5,
+          "above": 19,
+          "below": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 2.348095083034842,
+          "ratio_max": 160.4678624813154
+        }
+      },
+      "none": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 139,
+          "above": 9,
+          "reference_zero": 7,
+          "both_zero": 4,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6877873443116276,
+          "ratio_max": 590.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 155,
+          "above": 5,
+          "ratio_min": 0.19079102034660647,
+          "ratio_median": 1.552318788055782,
+          "ratio_max": 92.24806201550389
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 130,
+          "reference_zero": 4,
+          "both_zero": 4,
+          "above": 19,
+          "below": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 2.0577534056614333,
+          "ratio_max": 158.75186846038864
+        }
+      }
+    }
+  },
+  "cloud_legacy": {
+    "all": {
+      "count": 480,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 446,
+        "both_zero": 30,
+        "above": 3,
+        "reference_zero": 1,
+        "ratio_min": 0.5713324360699865,
+        "ratio_median": 1.2404015498414935,
+        "ratio_max": 57.00000000000001
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 473,
+        "above": 7,
+        "ratio_min": 0.6505391606747605,
+        "ratio_median": 1.3312276987637293,
+        "ratio_max": 24.618343195266274
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 453,
+        "both_zero": 24,
+        "reference_zero": 2,
+        "above": 1,
+        "ratio_min": 0.2269503546099291,
+        "ratio_median": 1.153252480705623,
+        "ratio_max": 48.0
+      }
+    },
+    "holdout": {
+      "count": 192,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 186,
+        "both_zero": 6,
+        "ratio_min": 0.7454545454545455,
+        "ratio_median": 1.2405533968625937,
+        "ratio_max": 8.0
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 191,
+        "above": 1,
+        "ratio_min": 0.8325073162220162,
+        "ratio_median": 1.3132861719072544,
+        "ratio_max": 10.321487444968207
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 186,
+        "both_zero": 6,
+        "ratio_min": 0.2269503546099291,
+        "ratio_median": 1.153252480705623,
+        "ratio_max": 3.777777777777778
+      }
+    },
+    "climate": {
+      "birmingham": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.8874598070739551,
+          "ratio_median": 1.155884962887102,
+          "ratio_max": 2.220328140287499
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.9342891540609822,
+          "ratio_median": 1.1967337552547819,
+          "ratio_max": 2.4318035308426276
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.675885911840968,
+          "ratio_median": 0.9894985794054116,
+          "ratio_max": 1.191670149045828
+        }
+      },
+      "charleston": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.7454545454545455,
+          "ratio_median": 1.2346682425804385,
+          "ratio_max": 8.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 1.0534493892267118,
+          "ratio_median": 1.3122609535420913,
+          "ratio_max": 7.453148425787107
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1783520533520533,
+          "ratio_max": 1.620689655172414
+        }
+      },
+      "denver": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 72,
+          "both_zero": 24,
+          "ratio_min": 0.753978606835377,
+          "ratio_median": 1.2760334188525677,
+          "ratio_max": 2.5850802370970074
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 95,
+          "above": 1,
+          "ratio_min": 0.8433830456579525,
+          "ratio_median": 1.4051438043851783,
+          "ratio_max": 10.233665559246953
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 72,
+          "both_zero": 24,
+          "ratio_min": 1.0515759312320916,
+          "ratio_median": 1.257570806100218,
+          "ratio_max": 2.0135135135135136
+        }
+      },
+      "flagstaff": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 86,
+          "above": 3,
+          "reference_zero": 1,
+          "both_zero": 6,
+          "ratio_min": 1.0229616656937148,
+          "ratio_median": 1.303757828810021,
+          "ratio_max": 57.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 90,
+          "above": 6,
+          "ratio_min": 0.9612624595628684,
+          "ratio_median": 1.3810359329576594,
+          "ratio_max": 24.618343195266274
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.1995043370508054,
+          "ratio_max": 48.0
+        }
+      },
+      "site": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.5713324360699865,
+          "ratio_median": 1.6157222959718995,
+          "ratio_max": 2.9211101766190075
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.6505391606747605,
+          "ratio_median": 1.392789365564181,
+          "ratio_max": 3.517880279138793
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.4346941543469416,
+          "ratio_median": 1.6012587240172709,
+          "ratio_max": 3.5710014947683106
+        }
+      }
+    },
+    "soil": {
+      "clay": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.753978606835377,
+          "ratio_median": 1.2496034839259837,
+          "ratio_max": 5.557082452431289
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 119,
+          "above": 1,
+          "ratio_min": 0.8325073162220162,
+          "ratio_median": 1.3066115043629662,
+          "ratio_max": 10.321487444968207
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.30682881197380735,
+          "ratio_median": 1.0515759312320916,
+          "ratio_max": 3.777777777777778
+        }
+      },
+      "loam": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 113,
+          "both_zero": 6,
+          "above": 1,
+          "ratio_min": 0.6325811001410437,
+          "ratio_median": 1.2437700584445839,
+          "ratio_max": 14.23076923076923
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 119,
+          "above": 1,
+          "ratio_min": 0.7470679485059518,
+          "ratio_median": 1.3154634868121933,
+          "ratio_max": 12.312583121240559
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.091177861873226,
+          "ratio_max": 3.1007506914263137
+        }
+      },
+      "sand": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 111,
+          "both_zero": 6,
+          "above": 2,
+          "reference_zero": 1,
+          "ratio_min": 0.6148741721854304,
+          "ratio_median": 1.234671796104833,
+          "ratio_max": 57.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 117,
+          "above": 3,
+          "ratio_min": 0.6983319286766559,
+          "ratio_median": 1.31432819102759,
+          "ratio_max": 24.618343195266274
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.4346941543469416,
+          "ratio_median": 1.1995043370508054,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "silt": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 108,
+          "both_zero": 12,
+          "ratio_min": 0.5713324360699865,
+          "ratio_median": 1.2386196755180816,
+          "ratio_max": 6.409620253164556
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 118,
+          "above": 2,
+          "ratio_min": 0.6505391606747605,
+          "ratio_median": 1.4388211104104887,
+          "ratio_max": 14.01328273244782
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "both_zero": 6,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1847977684797766,
+          "ratio_max": 48.0
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6940920211832475,
+          "ratio_median": 1.2088296672900085,
+          "ratio_max": 2.0835679294216742
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.817834718549778,
+          "ratio_median": 1.2647909882360735,
+          "ratio_max": 1.8358079116841066
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.1748228945198642,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "inveg": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6148741721854304,
+          "ratio_median": 1.2090329017386652,
+          "ratio_max": 2.2757535109091407
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6983319286766559,
+          "ratio_median": 1.2646538531653215,
+          "ratio_max": 1.7859922073082135
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.1748228945198642,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "outrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.8955247735748536,
+          "ratio_median": 1.4992241205154497,
+          "ratio_max": 7.7980085348506405
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 116,
+          "above": 4,
+          "ratio_min": 0.985002814697147,
+          "ratio_median": 1.6175768873487715,
+          "ratio_max": 12.312583121240559
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.174942448873462,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "outunrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 86,
+          "both_zero": 30,
+          "above": 3,
+          "reference_zero": 1,
+          "ratio_min": 0.5713324360699865,
+          "ratio_median": 1.225705329153605,
+          "ratio_max": 57.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 117,
+          "above": 3,
+          "ratio_min": 0.6505391606747605,
+          "ratio_median": 1.3419529196645625,
+          "ratio_max": 24.618343195266274
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "both_zero": 24,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 0.9271366905043712,
+          "ratio_max": 48.0
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 224,
+          "both_zero": 15,
+          "above": 1,
+          "ratio_min": 0.7454545454545455,
+          "ratio_median": 1.2468280397074631,
+          "ratio_max": 14.23076923076923
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 240,
+          "ratio_min": 1.0914554169123059,
+          "ratio_median": 1.3420272724687534,
+          "ratio_max": 1.8694982320088787
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 225,
+          "both_zero": 12,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.8970588235294118,
+          "ratio_median": 1.288056206088993,
+          "ratio_max": 48.0
+        }
+      },
+      "paved": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 222,
+          "both_zero": 15,
+          "above": 2,
+          "reference_zero": 1,
+          "ratio_min": 0.5713324360699865,
+          "ratio_median": 1.2218091323395799,
+          "ratio_max": 57.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 233,
+          "above": 7,
+          "ratio_min": 0.6505391606747605,
+          "ratio_median": 1.30423669916776,
+          "ratio_max": 24.618343195266274
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 228,
+          "both_zero": 12,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 0.9243880003057181,
+          "ratio_max": 3.375
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 148,
+          "both_zero": 10,
+          "above": 2,
+          "ratio_min": 0.7243395780150231,
+          "ratio_median": 1.2200079488201638,
+          "ratio_max": 57.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 156,
+          "above": 4,
+          "ratio_min": 0.8565949310668263,
+          "ratio_median": 1.3633327869935812,
+          "ratio_max": 12.312583121240559
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "reference_zero": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.153252480705623,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "low": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 149,
+          "both_zero": 10,
+          "above": 1,
+          "ratio_min": 0.6306685366993923,
+          "ratio_median": 1.2238114524816028,
+          "ratio_max": 33.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 160,
+          "ratio_min": 0.812986759639262,
+          "ratio_median": 1.319756184833514,
+          "ratio_max": 5.500772797527048
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "reference_zero": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.153252480705623,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "none": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 149,
+          "both_zero": 10,
+          "reference_zero": 1,
+          "ratio_min": 0.5713324360699865,
+          "ratio_median": 1.2595182595182597,
+          "ratio_max": 8.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 157,
+          "above": 3,
+          "ratio_min": 0.6505391606747605,
+          "ratio_median": 1.3074863640911079,
+          "ratio_max": 24.618343195266274
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1515817861879016,
+          "ratio_max": 48.0
+        }
+      }
+    }
+  },
+  "generated": {
+    "all": {
+      "count": 480,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 277,
+        "above": 57,
+        "below": 115,
+        "both_zero": 25,
+        "reference_zero": 6,
+        "ratio_min": 0.0,
+        "ratio_median": 1.2391101793617516,
+        "ratio_max": 223.6428571428571
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 376,
+        "above": 44,
+        "below": 60,
+        "ratio_min": 0.0,
+        "ratio_median": 1.7515281478813842,
+        "ratio_max": 157.24444444444444
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 294,
+        "below": 133,
+        "both_zero": 20,
+        "reference_zero": 6,
+        "above": 27,
+        "ratio_min": 0.0,
+        "ratio_median": 1.1562363064175596,
+        "ratio_max": 102.03288490284004
+      }
+    },
+    "holdout": {
+      "count": 192,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 111,
+        "above": 57,
+        "reference_zero": 6,
+        "below": 18,
+        "ratio_min": 0.0,
+        "ratio_median": 4.866008937362901,
+        "ratio_max": 223.6428571428571
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 149,
+        "above": 38,
+        "below": 5,
+        "ratio_min": 0.04669002094470967,
+        "ratio_median": 3.7115428158997776,
+        "ratio_max": 157.24444444444444
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 135,
+        "reference_zero": 6,
+        "above": 12,
+        "below": 39,
+        "ratio_min": 0.0,
+        "ratio_median": 1.9186822388321203,
+        "ratio_max": 33.06989247311828
+      }
+    },
+    "climate": {
+      "birmingham": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 86,
+          "above": 10,
+          "ratio_min": 0.15353405936365577,
+          "ratio_median": 2.4797985992392055,
+          "ratio_max": 15.73569639761125
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 92,
+          "above": 4,
+          "ratio_min": 0.13519108175279684,
+          "ratio_median": 2.365550944949205,
+          "ratio_max": 11.870429110747198
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "below": 3,
+          "ratio_min": 0.08066839527513685,
+          "ratio_median": 1.0074295313080834,
+          "ratio_max": 5.115646258503401
+        }
+      },
+      "charleston": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 61,
+          "below": 18,
+          "above": 17,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9777242338452262,
+          "ratio_max": 80.99242424242425
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 81,
+          "below": 5,
+          "above": 10,
+          "ratio_min": 0.04669002094470967,
+          "ratio_median": 1.7408325595097351,
+          "ratio_max": 62.091247974068075
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 51,
+          "above": 6,
+          "below": 39,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9389756494906203,
+          "ratio_max": 33.06989247311828
+        }
+      },
+      "denver": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "below": 54,
+          "both_zero": 18,
+          "within_factor_10": 17,
+          "above": 1,
+          "reference_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.0,
+          "ratio_max": 10.635955831608005
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 43,
+          "below": 52,
+          "above": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 0.020155310255766352,
+          "ratio_max": 87.24897119341561
+        },
+        "runoff_mm_yr": {
+          "below": 54,
+          "both_zero": 18,
+          "within_factor_10": 18,
+          "reference_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.0,
+          "ratio_max": 2.8875
+        }
+      },
+      "flagstaff": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "below": 42,
+          "within_factor_10": 30,
+          "both_zero": 7,
+          "above": 17,
+          "ratio_min": 0.0,
+          "ratio_median": 0.14811889009578352,
+          "ratio_max": 223.6428571428571
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 79,
+          "above": 15,
+          "below": 2,
+          "ratio_min": 0.023028091187128938,
+          "ratio_median": 1.9888680099699894,
+          "ratio_max": 157.24444444444444
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 51,
+          "above": 6,
+          "below": 37,
+          "both_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 0.5791457286432162,
+          "ratio_max": 31.914285714285715
+        }
+      },
+      "site": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 83,
+          "below": 1,
+          "above": 12,
+          "ratio_min": 0.08696604600219059,
+          "ratio_median": 2.998773833647703,
+          "ratio_max": 48.17434210526314
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 81,
+          "above": 14,
+          "below": 1,
+          "ratio_min": 0.09515573299789438,
+          "ratio_median": 2.3044640960957197,
+          "ratio_max": 38.788919511364604
+        },
+        "runoff_mm_yr": {
+          "above": 15,
+          "within_factor_10": 81,
+          "ratio_min": 1.1903546372553742,
+          "ratio_median": 6.558798482619804,
+          "ratio_max": 102.03288490284004
+        }
+      }
+    },
+    "soil": {
+      "clay": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 57,
+          "above": 57,
+          "reference_zero": 6,
+          "ratio_min": 2.4993837971070896,
+          "ratio_median": 10.164695781909352,
+          "ratio_max": 223.6428571428571
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 86,
+          "above": 34,
+          "ratio_min": 0.7371901053392766,
+          "ratio_median": 5.977579940326616,
+          "ratio_max": 157.24444444444444
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 105,
+          "reference_zero": 6,
+          "above": 9,
+          "ratio_min": 0.7171945701357465,
+          "ratio_median": 2.8591247577272267,
+          "ratio_max": 33.06989247311828
+        }
+      },
+      "loam": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 84,
+          "below": 30,
+          "both_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.5448084423028718,
+          "ratio_max": 9.54296512118909
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 93,
+          "below": 23,
+          "above": 4,
+          "ratio_min": 0.0,
+          "ratio_median": 1.324498388661957,
+          "ratio_max": 21.3719806763285
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 48,
+          "below": 66,
+          "both_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.06055771940001657,
+          "ratio_max": 9.380860452289022
+        }
+      },
+      "sand": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 71,
+          "below": 42,
+          "both_zero": 7,
+          "ratio_min": 0.0,
+          "ratio_median": 1.0173223631915265,
+          "ratio_max": 7.252307692307692
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 109,
+          "below": 6,
+          "above": 5,
+          "ratio_min": 0.0024378776533686246,
+          "ratio_median": 1.771781771740411,
+          "ratio_max": 72.89940828402369
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 78,
+          "below": 18,
+          "both_zero": 6,
+          "above": 18,
+          "ratio_min": 0.0,
+          "ratio_median": 2.068050591146549,
+          "ratio_max": 102.03288490284004
+        }
+      },
+      "silt": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 65,
+          "below": 43,
+          "both_zero": 12,
+          "ratio_min": 0.0,
+          "ratio_median": 0.31484463682693176,
+          "ratio_max": 3.6615999489785067
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 88,
+          "below": 31,
+          "above": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 0.7924519021686158,
+          "ratio_max": 23.278937381404173
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 63,
+          "below": 49,
+          "both_zero": 8,
+          "ratio_min": 0.0,
+          "ratio_median": 0.1427917791779178,
+          "ratio_max": 6.767379279413963
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 84,
+          "above": 8,
+          "below": 28,
+          "ratio_min": 0.0,
+          "ratio_median": 1.0578483821989442,
+          "ratio_max": 19.329589998940566
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 103,
+          "below": 12,
+          "above": 5,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6736325646476167,
+          "ratio_max": 14.518438952089438
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 81,
+          "below": 36,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9363095418828715,
+          "ratio_max": 30.689082969432317
+        }
+      },
+      "inveg": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 80,
+          "above": 13,
+          "below": 27,
+          "ratio_min": 0.0,
+          "ratio_median": 1.4891324440703175,
+          "ratio_max": 26.476853867363225
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 95,
+          "above": 13,
+          "below": 12,
+          "ratio_min": 0.0,
+          "ratio_median": 2.827207218080793,
+          "ratio_max": 25.655207975249226
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 81,
+          "below": 36,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9363095418828715,
+          "ratio_max": 30.689082969432317
+        }
+      },
+      "outrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 76,
+          "above": 14,
+          "below": 30,
+          "ratio_min": 0.0,
+          "ratio_median": 1.2545607287449392,
+          "ratio_max": 27.231641791044776
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 98,
+          "above": 10,
+          "below": 12,
+          "ratio_min": 0.0,
+          "ratio_median": 1.8872671488432493,
+          "ratio_max": 26.494735626014638
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 81,
+          "below": 36,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 0.936433843657711,
+          "ratio_max": 30.689082969432317
+        }
+      },
+      "outunrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 37,
+          "above": 22,
+          "both_zero": 25,
+          "reference_zero": 6,
+          "below": 30,
+          "ratio_min": 0.0,
+          "ratio_median": 0.31213872832369943,
+          "ratio_max": 223.6428571428571
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 80,
+          "above": 16,
+          "below": 24,
+          "ratio_min": 0.0,
+          "ratio_median": 0.5804207000047532,
+          "ratio_max": 157.24444444444444
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 51,
+          "below": 25,
+          "both_zero": 20,
+          "reference_zero": 6,
+          "above": 18,
+          "ratio_min": 0.0,
+          "ratio_median": 2.5479760339783097,
+          "ratio_max": 102.03288490284004
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 135,
+          "above": 32,
+          "below": 58,
+          "both_zero": 12,
+          "reference_zero": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.3802424830261881,
+          "ratio_max": 36.72266800401203
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 188,
+          "above": 19,
+          "below": 33,
+          "ratio_min": 0.0,
+          "ratio_median": 1.8361244203864593,
+          "ratio_max": 22.337116210096724
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 144,
+          "below": 55,
+          "both_zero": 11,
+          "reference_zero": 3,
+          "above": 27,
+          "ratio_min": 0.0,
+          "ratio_median": 2.068050591146549,
+          "ratio_max": 102.03288490284004
+        }
+      },
+      "paved": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 142,
+          "above": 25,
+          "below": 57,
+          "both_zero": 13,
+          "reference_zero": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.075646494282103,
+          "ratio_max": 223.6428571428571
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 188,
+          "above": 25,
+          "below": 27,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6595409827480343,
+          "ratio_max": 157.24444444444444
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 150,
+          "below": 78,
+          "both_zero": 9,
+          "reference_zero": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 0.7531748616085965,
+          "ratio_max": 9.258103892581039
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 102,
+          "above": 8,
+          "below": 40,
+          "both_zero": 8,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 0.8673787773925152,
+          "ratio_max": 125.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 133,
+          "below": 23,
+          "above": 4,
+          "ratio_min": 0.0,
+          "ratio_median": 1.103925153784499,
+          "ratio_max": 38.788919511364604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 98,
+          "below": 44,
+          "both_zero": 7,
+          "reference_zero": 2,
+          "above": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 1.1562363064175596,
+          "ratio_max": 102.03288490284004
+        }
+      },
+      "low": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 93,
+          "above": 21,
+          "below": 36,
+          "both_zero": 8,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 1.189355479675355,
+          "ratio_max": 125.00000000000001
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 128,
+          "below": 21,
+          "above": 11,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6599600173837687,
+          "ratio_max": 38.788919511364604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 98,
+          "below": 44,
+          "both_zero": 7,
+          "reference_zero": 2,
+          "above": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 1.1562363064175596,
+          "ratio_max": 102.03288490284004
+        }
+      },
+      "none": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 82,
+          "above": 28,
+          "below": 39,
+          "both_zero": 9,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6531244243875485,
+          "ratio_max": 223.6428571428571
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 115,
+          "above": 29,
+          "below": 16,
+          "ratio_min": 0.0,
+          "ratio_median": 3.7143035599030596,
+          "ratio_max": 157.24444444444444
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 98,
+          "below": 45,
+          "both_zero": 6,
+          "reference_zero": 2,
+          "above": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 1.123366733466934,
+          "ratio_max": 101.15545590433483
+        }
+      }
+    }
+  },
+  "legacy": {
+    "all": {
+      "count": 480,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 446,
+        "both_zero": 30,
+        "above": 3,
+        "reference_zero": 1,
+        "ratio_min": 0.4302631578947368,
+        "ratio_median": 1.1967607440667094,
+        "ratio_max": 25.000000000000004
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 480,
+        "ratio_min": 0.6423996309488431,
+        "ratio_median": 1.2597395180311044,
+        "ratio_max": 6.239089184060722
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 453,
+        "both_zero": 24,
+        "reference_zero": 2,
+        "above": 1,
+        "ratio_min": 0.2269503546099291,
+        "ratio_median": 1.153252480705623,
+        "ratio_max": 48.0
+      }
+    },
+    "holdout": {
+      "count": 192,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 186,
+        "both_zero": 6,
+        "ratio_min": 0.4302631578947368,
+        "ratio_median": 1.1698413965314756,
+        "ratio_max": 4.0
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 192,
+        "ratio_min": 0.6677609176811102,
+        "ratio_median": 1.2510690816763907,
+        "ratio_max": 2.0110399646721127
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 186,
+        "both_zero": 6,
+        "ratio_min": 0.2269503546099291,
+        "ratio_median": 1.153252480705623,
+        "ratio_max": 3.777777777777778
+      }
+    },
+    "climate": {
+      "birmingham": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.8709807073954983,
+          "ratio_median": 1.132585962526844,
+          "ratio_max": 1.288762278978389
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.9261996029730233,
+          "ratio_median": 1.1739614419929996,
+          "ratio_max": 1.2803936686192414
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.675885911840968,
+          "ratio_median": 0.9894985794054116,
+          "ratio_max": 1.191670149045828
+        }
+      },
+      "charleston": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.712121212121212,
+          "ratio_median": 1.2092203053041743,
+          "ratio_max": 4.0
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.8252296056185845,
+          "ratio_median": 1.2678936295889085,
+          "ratio_max": 1.9400299850074965
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1783520533520533,
+          "ratio_max": 1.620689655172414
+        }
+      },
+      "denver": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 72,
+          "both_zero": 24,
+          "ratio_min": 0.7442657527023464,
+          "ratio_median": 1.2525725856280006,
+          "ratio_max": 1.6488874861922045
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.8268812499468996,
+          "ratio_median": 1.3221204738657129,
+          "ratio_max": 1.8358079116841066
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 72,
+          "both_zero": 24,
+          "ratio_min": 1.0515759312320916,
+          "ratio_median": 1.257570806100218,
+          "ratio_max": 2.0135135135135136
+        }
+      },
+      "flagstaff": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 86,
+          "above": 3,
+          "reference_zero": 1,
+          "both_zero": 6,
+          "ratio_min": 0.888888888888889,
+          "ratio_median": 1.2254066615027113,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.8992197659297788,
+          "ratio_median": 1.337934182519725,
+          "ratio_max": 6.239089184060722
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.1995043370508054,
+          "ratio_max": 48.0
+        }
+      },
+      "site": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.1361461277406626,
+          "ratio_max": 2.2757535109091407
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.6423996309488431,
+          "ratio_median": 1.149353755254945,
+          "ratio_max": 1.7859922073082135
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.4346941543469416,
+          "ratio_median": 1.6012587240172709,
+          "ratio_max": 3.5710014947683106
+        }
+      }
+    },
+    "soil": {
+      "clay": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.125672938734673,
+          "ratio_max": 1.8505341220093579
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6677609176811102,
+          "ratio_median": 1.2326665825571368,
+          "ratio_max": 2.0110399646721127
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.30682881197380735,
+          "ratio_median": 1.0515759312320916,
+          "ratio_max": 3.777777777777778
+        }
+      },
+      "loam": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 113,
+          "both_zero": 6,
+          "above": 1,
+          "ratio_min": 0.5664739884393064,
+          "ratio_median": 1.1992208723465398,
+          "ratio_max": 14.076923076923077
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7408811326542144,
+          "ratio_median": 1.2548432007946182,
+          "ratio_max": 2.4251207729468596
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.091177861873226,
+          "ratio_max": 3.1007506914263137
+        }
+      },
+      "sand": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 111,
+          "both_zero": 6,
+          "above": 2,
+          "reference_zero": 1,
+          "ratio_min": 0.6148741721854304,
+          "ratio_median": 1.214619397282121,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6983319286766559,
+          "ratio_median": 1.2561686122952151,
+          "ratio_max": 3.5562130177514804
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "both_zero": 6,
+          "ratio_min": 0.4346941543469416,
+          "ratio_median": 1.1995043370508054,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "silt": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 108,
+          "both_zero": 12,
+          "ratio_min": 0.5699865410497981,
+          "ratio_median": 1.2047472140671505,
+          "ratio_max": 1.9431438127090301
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6423996309488431,
+          "ratio_median": 1.3187061566690972,
+          "ratio_max": 6.239089184060722
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 111,
+          "both_zero": 6,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1852161785216178,
+          "ratio_max": 48.0
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6940920211832475,
+          "ratio_median": 1.2088296672900085,
+          "ratio_max": 2.0835679294216742
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.817834718549778,
+          "ratio_median": 1.2647909882360735,
+          "ratio_max": 1.8358079116841066
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.1748228945198642,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "inveg": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6148741721854304,
+          "ratio_median": 1.2090329017386652,
+          "ratio_max": 2.2757535109091407
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6983319286766559,
+          "ratio_median": 1.2646538531653215,
+          "ratio_max": 1.7859922073082135
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.1748228945198642,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "outrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6167954182205647,
+          "ratio_median": 1.200515166116501,
+          "ratio_max": 2.0835679294216742
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.699209057623731,
+          "ratio_median": 1.2769197971618684,
+          "ratio_max": 1.7962297415615895
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.7430074696036203,
+          "ratio_median": 1.1749934744883208,
+          "ratio_max": 3.401164483260553
+        }
+      },
+      "outunrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 86,
+          "both_zero": 30,
+          "above": 3,
+          "reference_zero": 1,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.1000499001996007,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.6423996309488431,
+          "ratio_median": 1.2383722558230916,
+          "ratio_max": 6.239089184060722
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "both_zero": 24,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 0.9271366905043712,
+          "ratio_max": 48.0
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 224,
+          "both_zero": 15,
+          "above": 1,
+          "ratio_min": 0.7454545454545455,
+          "ratio_median": 1.2454157536616306,
+          "ratio_max": 14.076923076923077
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 240,
+          "ratio_min": 1.0914554169123059,
+          "ratio_median": 1.3233316099812185,
+          "ratio_max": 1.8358079116841066
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 225,
+          "both_zero": 12,
+          "reference_zero": 2,
+          "above": 1,
+          "ratio_min": 0.8970588235294118,
+          "ratio_median": 1.288056206088993,
+          "ratio_max": 48.0
+        }
+      },
+      "paved": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 222,
+          "both_zero": 15,
+          "above": 2,
+          "reference_zero": 1,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.0967248346581677,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 240,
+          "ratio_min": 0.6423996309488431,
+          "ratio_median": 1.1855203619909502,
+          "ratio_max": 6.239089184060722
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 228,
+          "both_zero": 12,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 0.9243880003057181,
+          "ratio_max": 3.375
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 148,
+          "both_zero": 10,
+          "above": 2,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.1682993888267728,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 160,
+          "ratio_min": 0.6677609176811102,
+          "ratio_median": 1.2765858095244988,
+          "ratio_max": 2.6292759159576318
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "reference_zero": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.153252480705623,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "low": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 149,
+          "both_zero": 10,
+          "above": 1,
+          "ratio_min": 0.4302631578947368,
+          "ratio_median": 1.165610891389942,
+          "ratio_max": 25.000000000000004
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 160,
+          "ratio_min": 0.6677609176811102,
+          "ratio_median": 1.2667201128422256,
+          "ratio_max": 2.6292759159576318
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "reference_zero": 1,
+          "ratio_min": 0.2588235294117647,
+          "ratio_median": 1.153252480705623,
+          "ratio_max": 3.5710014947683106
+        }
+      },
+      "none": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 149,
+          "both_zero": 10,
+          "reference_zero": 1,
+          "ratio_min": 0.5699865410497981,
+          "ratio_median": 1.2378257914618536,
+          "ratio_max": 7.166666666666665
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 160,
+          "ratio_min": 0.6423996309488431,
+          "ratio_median": 1.243081044275933,
+          "ratio_max": 6.239089184060722
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 151,
+          "both_zero": 8,
+          "above": 1,
+          "ratio_min": 0.2269503546099291,
+          "ratio_median": 1.1515817861879016,
+          "ratio_max": 48.0
+        }
+      }
+    }
+  },
+  "road_combined": {
+    "all": {
+      "count": 480,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 394,
+        "below": 34,
+        "above": 21,
+        "both_zero": 25,
+        "reference_zero": 6,
+        "ratio_min": 0.0,
+        "ratio_median": 2.347210730729172,
+        "ratio_max": 84.28571428571428
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 459,
+        "below": 7,
+        "above": 14,
+        "ratio_min": 0.0,
+        "ratio_median": 2.1444832288538502,
+        "ratio_max": 67.61604938271604
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 394,
+        "both_zero": 20,
+        "below": 28,
+        "reference_zero": 6,
+        "above": 32,
+        "ratio_min": 0.0,
+        "ratio_median": 1.7461428101500442,
+        "ratio_max": 103.1285500747384
+      }
+    },
+    "holdout": {
+      "count": 192,
+      "sediment_export_kg_yr": {
+        "within_factor_10": 151,
+        "above": 21,
+        "reference_zero": 6,
+        "below": 14,
+        "ratio_min": 0.0,
+        "ratio_median": 4.032395744914735,
+        "ratio_max": 84.28571428571428
+      },
+      "spatial_net_loss_kg_yr": {
+        "within_factor_10": 179,
+        "above": 12,
+        "below": 1,
+        "ratio_min": 0.0,
+        "ratio_median": 2.611987817327819,
+        "ratio_max": 67.61604938271604
+      },
+      "runoff_mm_yr": {
+        "within_factor_10": 162,
+        "reference_zero": 6,
+        "above": 15,
+        "below": 9,
+        "ratio_min": 0.0,
+        "ratio_median": 3.619490418806196,
+        "ratio_max": 33.377450980392155
+      }
+    },
+    "climate": {
+      "birmingham": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 91,
+          "below": 1,
+          "above": 4,
+          "ratio_min": 0.034967845659163985,
+          "ratio_median": 3.1522602122930166,
+          "ratio_max": 16.51261799267964
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 94,
+          "below": 1,
+          "above": 1,
+          "ratio_min": 0.04335419095518897,
+          "ratio_median": 2.6723995752064003,
+          "ratio_max": 10.210545728153908
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 96,
+          "ratio_min": 0.14577931431864014,
+          "ratio_median": 1.3252019173170615,
+          "ratio_max": 5.212363206152026
+        }
+      },
+      "charleston": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 76,
+          "above": 6,
+          "below": 14,
+          "ratio_min": 0.0,
+          "ratio_median": 1.9825784641939541,
+          "ratio_max": 36.03787878787879
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 93,
+          "above": 2,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 2.058003069583048,
+          "ratio_max": 25.55402485143166
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 78,
+          "above": 9,
+          "below": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 2.3959146134725984,
+          "ratio_max": 33.377450980392155
+        }
+      },
+      "denver": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 63,
+          "both_zero": 18,
+          "below": 9,
+          "reference_zero": 6,
+          "ratio_min": 0.0007878978884336591,
+          "ratio_median": 1.577842645048482,
+          "ratio_max": 6.523500191058464
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 93,
+          "above": 2,
+          "below": 1,
+          "ratio_min": 0.08890290037831024,
+          "ratio_median": 2.3516894857292865,
+          "ratio_max": 67.61604938271604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 63,
+          "both_zero": 18,
+          "below": 9,
+          "reference_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.49720056697377746,
+          "ratio_max": 4.434426229508197
+        }
+      },
+      "flagstaff": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 77,
+          "below": 7,
+          "both_zero": 7,
+          "above": 5,
+          "ratio_min": 0.0,
+          "ratio_median": 1.78392705682782,
+          "ratio_max": 84.28571428571428
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 91,
+          "above": 4,
+          "below": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 1.7157366051149037,
+          "ratio_max": 49.175308641975306
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 76,
+          "above": 8,
+          "below": 10,
+          "both_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 2.006211180124224,
+          "ratio_max": 32.28571428571429
+        }
+      },
+      "site": {
+        "count": 96,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 87,
+          "below": 3,
+          "above": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 2.591412526300007,
+          "ratio_max": 43.4282894736842
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 88,
+          "below": 3,
+          "above": 5,
+          "ratio_min": 0.0007274566076569244,
+          "ratio_median": 2.1728643219513772,
+          "ratio_max": 35.126808972503625
+        },
+        "runoff_mm_yr": {
+          "above": 15,
+          "within_factor_10": 81,
+          "ratio_min": 1.2581527546266613,
+          "ratio_median": 6.562669350468376,
+          "ratio_max": 103.1285500747384
+        }
+      }
+    },
+    "soil": {
+      "clay": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 94,
+          "above": 20,
+          "reference_zero": 6,
+          "ratio_min": 1.5716064320409633,
+          "ratio_median": 4.9012450473784765,
+          "ratio_max": 84.28571428571428
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 109,
+          "above": 11,
+          "ratio_min": 1.1298129134114627,
+          "ratio_median": 2.9624496163165337,
+          "ratio_max": 67.61604938271604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 105,
+          "reference_zero": 6,
+          "above": 9,
+          "ratio_min": 1.7369674954002925,
+          "ratio_median": 3.7017822875318735,
+          "ratio_max": 33.377450980392155
+        }
+      },
+      "loam": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 109,
+          "both_zero": 6,
+          "below": 5,
+          "ratio_min": 0.0,
+          "ratio_median": 1.633026560763533,
+          "ratio_max": 4.583673245914205
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.16609308280656127,
+          "ratio_median": 1.7295361581341218,
+          "ratio_max": 5.788837984173262
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 105,
+          "both_zero": 6,
+          "below": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 0.7596827094474152,
+          "ratio_max": 9.509100937672365
+        }
+      },
+      "sand": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 102,
+          "both_zero": 7,
+          "below": 10,
+          "above": 1,
+          "ratio_min": 0.0,
+          "ratio_median": 3.4195011337868486,
+          "ratio_max": 10.590450450450453
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 117,
+          "above": 3,
+          "ratio_min": 0.8034291448910411,
+          "ratio_median": 3.9006981859749654,
+          "ratio_max": 42.61351052048727
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 91,
+          "both_zero": 6,
+          "above": 23,
+          "ratio_min": 0.20422535211267606,
+          "ratio_median": 3.003189575268524,
+          "ratio_max": 103.1285500747384
+        }
+      },
+      "silt": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 89,
+          "below": 19,
+          "both_zero": 12,
+          "ratio_min": 0.0,
+          "ratio_median": 0.6218527148523014,
+          "ratio_max": 2.6049745844994003
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 113,
+          "below": 7,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9045866293259511,
+          "ratio_max": 2.249740801316079
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 93,
+          "below": 19,
+          "both_zero": 8,
+          "ratio_min": 0.0,
+          "ratio_median": 0.6463700234192038,
+          "ratio_max": 6.7811332037673795
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 117,
+          "below": 3,
+          "ratio_min": 0.0007890168849613383,
+          "ratio_median": 1.9790772675556134,
+          "ratio_max": 7.169298828360912
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.2904536826623287,
+          "ratio_median": 1.7209758335892387,
+          "ratio_max": 7.123953530036927
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "below": 3,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.5264911170866209,
+          "ratio_max": 31.136535662299853
+        }
+      },
+      "inveg": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 117,
+          "below": 3,
+          "ratio_min": 0.0008857395925597876,
+          "ratio_median": 2.5913153322150526,
+          "ratio_max": 9.69464520367937
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.28720726506524275,
+          "ratio_median": 2.540967553183779,
+          "ratio_max": 8.877881059322984
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "below": 3,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.5264911170866209,
+          "ratio_max": 31.136535662299853
+        }
+      },
+      "outrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 116,
+          "below": 3,
+          "above": 1,
+          "ratio_min": 0.0007878978884336591,
+          "ratio_median": 2.6225175269665852,
+          "ratio_max": 10.590450450450453
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 120,
+          "ratio_min": 0.2858899759258311,
+          "ratio_median": 2.5828197403314737,
+          "ratio_max": 9.221916510025816
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 114,
+          "below": 3,
+          "above": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.5262658519978825,
+          "ratio_max": 31.136535662299853
+        }
+      },
+      "outunrut": {
+        "count": 120,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 44,
+          "below": 25,
+          "above": 20,
+          "both_zero": 25,
+          "reference_zero": 6,
+          "ratio_min": 0.0,
+          "ratio_median": 0.9884393063583815,
+          "ratio_max": 84.28571428571428
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 99,
+          "below": 7,
+          "above": 14,
+          "ratio_min": 0.0,
+          "ratio_median": 1.893028312782391,
+          "ratio_max": 67.61604938271604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 52,
+          "both_zero": 20,
+          "reference_zero": 6,
+          "above": 23,
+          "below": 19,
+          "ratio_min": 0.0,
+          "ratio_median": 2.5763225047784744,
+          "ratio_max": 103.1285500747384
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 198,
+          "above": 8,
+          "both_zero": 12,
+          "below": 19,
+          "reference_zero": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 1.7673495538574528,
+          "ratio_max": 32.29488465396189
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 238,
+          "above": 2,
+          "ratio_min": 0.16609308280656127,
+          "ratio_median": 1.7353314674320526,
+          "ratio_max": 19.677575118802142
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 180,
+          "both_zero": 11,
+          "below": 19,
+          "reference_zero": 3,
+          "above": 27,
+          "ratio_min": 0.0,
+          "ratio_median": 2.4307121253780584,
+          "ratio_max": 103.1285500747384
+        }
+      },
+      "paved": {
+        "count": 240,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 196,
+          "below": 15,
+          "above": 13,
+          "both_zero": 13,
+          "reference_zero": 3,
+          "ratio_min": 0.0,
+          "ratio_median": 2.5871891598460452,
+          "ratio_max": 84.28571428571428
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 221,
+          "below": 7,
+          "above": 12,
+          "ratio_min": 0.0,
+          "ratio_median": 2.5846517849275363,
+          "ratio_max": 67.61604938271604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 214,
+          "both_zero": 9,
+          "reference_zero": 3,
+          "above": 5,
+          "below": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 1.3155642085954722,
+          "ratio_max": 16.25
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 133,
+          "above": 5,
+          "both_zero": 8,
+          "below": 12,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 1.9457088715701354,
+          "ratio_max": 71.72222222222223
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 157,
+          "above": 2,
+          "below": 1,
+          "ratio_min": 0.049948078920041536,
+          "ratio_median": 1.7040443278270452,
+          "ratio_max": 35.126808972503625
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 131,
+          "both_zero": 7,
+          "below": 9,
+          "reference_zero": 2,
+          "above": 11,
+          "ratio_min": 0.0,
+          "ratio_median": 1.7487431848757344,
+          "ratio_max": 103.1285500747384
+        }
+      },
+      "low": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 130,
+          "above": 8,
+          "both_zero": 8,
+          "below": 12,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 2.474418595415482,
+          "ratio_max": 71.72222222222223
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 156,
+          "above": 3,
+          "below": 1,
+          "ratio_min": 0.049948078920041536,
+          "ratio_median": 2.3702710999422854,
+          "ratio_max": 35.126808972503625
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 131,
+          "both_zero": 7,
+          "below": 9,
+          "reference_zero": 2,
+          "above": 11,
+          "ratio_min": 0.0,
+          "ratio_median": 1.7487431848757344,
+          "ratio_max": 103.1285500747384
+        }
+      },
+      "none": {
+        "count": 160,
+        "sediment_export_kg_yr": {
+          "within_factor_10": 131,
+          "below": 10,
+          "above": 8,
+          "both_zero": 9,
+          "reference_zero": 2,
+          "ratio_min": 0.0,
+          "ratio_median": 2.5482654600301657,
+          "ratio_max": 84.28571428571428
+        },
+        "spatial_net_loss_kg_yr": {
+          "within_factor_10": 146,
+          "below": 5,
+          "above": 9,
+          "ratio_min": 0.0,
+          "ratio_median": 2.3935590768042925,
+          "ratio_max": 67.61604938271604
+        },
+        "runoff_mm_yr": {
+          "within_factor_10": 132,
+          "both_zero": 6,
+          "below": 10,
+          "reference_zero": 2,
+          "above": 10,
+          "ratio_min": 0.0,
+          "ratio_median": 1.6734254913723037,
+          "ratio_max": 102.37817638266068
+        }
+      }
+    }
+  }
+}

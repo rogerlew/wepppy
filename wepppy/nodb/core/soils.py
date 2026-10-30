@@ -1512,7 +1512,9 @@ class Soils(NoDbBase):
             soil = WeppSoilUtil(source, compute_erodibilities=False, compute_conductivity=False)
             destination = os.path.join(self.soils_dir, f"hill_{topaz_id}.mofe.sol")
             if self.mode == SoilsMode.SingleUserDefined:
-                SoilMultipleOfeSynth([source] * count).write(destination, ksflag=int(soil.obj["ksflag"]))
+                SoilMultipleOfeSynth([source] * count).write(
+                    destination, ksflag=int(soil.obj["ksflag"]), preserve_input_format=True
+                )
             else:
                 # Catalog templates can contain symbolic parameters and trailing
                 # display colors. Normalize through the existing soil consumer.

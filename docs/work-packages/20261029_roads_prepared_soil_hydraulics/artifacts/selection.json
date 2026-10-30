@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-29",
+  "diagnostic_batch": "diagnostic-v1",
+  "diagnostic_cases": 140,
+  "accepted_candidate": null,
+  "confirmation_variants": ["roles", "raw"],
+  "rationale": "No new adjustment passes all five diagnostic cases. Roles (bare road, bare fill, forest buffer) passes four and preserves distinct landuse treatment; confirm its limitations across the matrix against the raw generated baseline, without promoting or fitting it. Hydraulic sweep does not resolve the sandy-loam failure. New loam specimen outputs have not been inspected or used for selection.",
+  "additional_diagnostic": "Isolate the 200 mm horizon split from format metadata: split road/fill/buffer separately in 7778, plus unsplit 9002. This is a source-supported investigation, not candidate fitting."
+}
