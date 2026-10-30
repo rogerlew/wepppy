@@ -460,7 +460,8 @@ extends the WEPP single-flight rule to proposed input persistence, completion
 timestamps and replacement receipts/hints for the five named execution endpoints.
 Configuration-only saves and permitted prior-work reconciliation retain their
 specified exceptions. Existing 409 envelopes and middleware `job_active` errors
-remain unchanged. Checkpoint ratification and implementation conformance pending.
+remain unchanged. Ratified in checkpoint `525e78c9f`; focused local conformance
+validated, deployment separate.
 
 ## Error responses
 - Use status-code-first semantics:

@@ -105,6 +105,33 @@ def _watershed_abstraction_state_response(wd: str, *, route_label: str) -> JSONR
     )
 
 
+def _apply_run_payload(wd: str, payload: dict, *, job_key: str) -> Wepp | JSONResponse:
+    """Keep payload error translation identical for saves and admitted execution."""
+    try:
+        return apply_wepp_run_payload(
+            wd,
+            payload,
+            wepp_cls=Wepp,
+            soils_cls=Soils,
+            watershed_cls=Watershed,
+            ron_cls=Ron,
+        )
+    except WeppRunPayloadValidationError as exc:
+        return error_response(
+            str(exc),
+            status_code=409 if exc.code == "capability_authority_invalid" else 400,
+            code=exc.code,
+            details=exc.details,
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except NoDbAlreadyLockedError:
+        return _nodb_lock_conflict_response(route_label=job_key)
+    except RuntimeError:
+        logger.exception("rq-engine run-wepp parse failed")
+        return error_response_with_traceback("Error preparing WEPP run request")
+
+
 async def _handle_run_wepp_request(
     runid: str,
     config: str,
@@ -154,21 +181,7 @@ async def _handle_run_wepp_request(
     except redis.RedisError:
         return webhooks.response_error(webhooks.AdmissionError('webhook_unavailable', 503))
     try:
-        wepp = apply_wepp_run_payload(
-            wd,
-            payload,
-            wepp_cls=Wepp,
-            soils_cls=Soils,
-            watershed_cls=Watershed,
-            ron_cls=Ron,
-        )
-    except WeppRunPayloadValidationError as exc:
-        return error_response(
-            str(exc),
-            status_code=409 if exc.code == "capability_authority_invalid" else 400,
-            code=exc.code,
-            details=exc.details,
-        )
+        wepp = Wepp.getInstance(wd)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except NoDbAlreadyLockedError:
@@ -178,6 +191,9 @@ async def _handle_run_wepp_request(
         return error_response_with_traceback("Error preparing WEPP run request")
 
     if getattr(wepp, "run_group", "") == "batch" or _is_base_project_context(runid, config):
+        result = _apply_run_payload(wd, payload, job_key=job_key)
+        if isinstance(result, JSONResponse):
+            return result
         return JSONResponse({"message": "Set wepp inputs for batch processing"})
 
     try:
@@ -196,6 +212,11 @@ async def _handle_run_wepp_request(
                 )
                 lease.checkpoint()
                 ensure_no_active_wepp_job(runid, prep, redis_conn)
+                lease.checkpoint()
+                wepp = _apply_run_payload(wd, payload, job_key=job_key)
+                if isinstance(wepp, JSONResponse):
+                    return wepp
+                lease.checkpoint()
                 prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
                 prep.remove_timestamp(TaskEnum.run_wepp_watershed)
                 prep.remove_timestamp(TaskEnum.run_omni_scenarios)

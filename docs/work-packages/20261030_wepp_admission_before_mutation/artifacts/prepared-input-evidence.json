@@ -1,0 +1,19 @@
+{
+  "fixture_path": "/tmp/pytest-of-unknown/pytest-117/test_competing_requests_and_ac0/wam-3654cf601777462a9b06d9ababc9e2b5/wepp/runs/p1.sol",
+  "artifact": "wepp/runs/p1.sol",
+  "sha256": "75431adbedee9bb4bfa611f684e3080959fb2144586b18511047b1535643f7a4",
+  "accepted_kslast": 0.03,
+  "rejected_kslast": 0.9,
+  "parsed_kslast": 0.03,
+  "boundary": "real normal single-OFE prep_soil writer using reloaded accepted NoDb fields; no full worker or model run",
+  "retained_copy": "accepted-after-rejection.p1.sol",
+  "checkpoint_revision": "525e78c9fac901925e497a903cf20bbd2543c3ad",
+  "environment": "wctl development weppcloud container; Python 3.12.16; pytest 9.0.3; disposable Redis 7.0.15 Unix socket",
+  "source_fixture": "tests/omni/fixtures/honeyed_marathoner_sediment_inversion/run_root/wepp/runs/p118.sol",
+  "source_sha256": "73861fa1a3fd82da29eab4bf8f3e94800d8c7805212f68e64dc7adf1af0f27d9",
+  "candidate_sha256": {
+    "wepppy/microservices/rq_engine/wepp_routes.py": "fe2e5bd5cac9af2f3f720b7108518389c130517892e4c0821e413898f14088c8",
+    "wepppy/microservices/rq_engine/bootstrap_routes.py": "beb53dcd2aa29fd4f0296f254a6f874110376c95faef80c28198244c04d69483",
+    "tests/microservices/test_wepp_admission_persistence.py": "a7b68a1afcce38afb3bc40b2d6e79b740dffd089974d8b00ddc0161bea29f156"
+  }
+}

@@ -169,10 +169,11 @@ def _enqueue_no_prep_job(
     enforce_wepp_singleflight: bool = False,
     wd: str | None = None,
     wepp: Wepp | None = None,
+    payload: dict[str, Any] | None = None,
 ) -> JSONResponse:
     # Bootstrap no-prep contract: enqueue execution against the currently
     # checked-out tracked inputs exactly as they exist on disk. This helper is
-    # intentionally queue-only; it must never run any prep/regeneration path
+    # allowed to save admitted controller metadata, but never run a prep/regeneration path
     # that would rewrite `wepp/runs/` or `swat/TxtInOut/`.
     resolved_wd = wd if wd is not None else get_wd(runid, prefer_active=False)
     resolved_wepp = wepp if wepp is not None else Wepp.getInstance(resolved_wd)
@@ -194,6 +195,20 @@ def _enqueue_no_prep_job(
                 )
                 ensure_no_active_wepp_job(runid, prep, redis_conn)
             lease.checkpoint()
+            if payload:
+                # Only controller metadata changes; checked-out prepared inputs stay intact.
+                try:
+                    apply_wepp_run_payload(resolved_wd, payload)
+                except WeppRunPayloadValidationError as exc:
+                    return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
+                except ValueError as exc:
+                    return error_response(str(exc), status_code=400)
+                except NoDbAlreadyLockedError:
+                    return _nodb_lock_conflict_response(route_label=job_key)
+                except RuntimeError:
+                    logger.exception("rq-engine %s payload apply failed", job_key)
+                    return error_response("Error preparing WEPP no-prep request", status_code=500)
+                lease.checkpoint()
             for task in reset_tasks:
                 prep.remove_timestamp(task)
             q = Queue(connection=redis_conn)
@@ -460,11 +475,6 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
 
     try:
         payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
-        if payload:
-            # Do not regenerate tracked WEPP inputs in bootstrap no-prep mode.
-            # This updates controller metadata only; execution still uses the
-            # currently checked-out `wepp/runs/` files as-is.
-            apply_wepp_run_payload(wd, payload)
     except WeppRunPayloadValidationError as exc:
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
@@ -489,6 +499,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
             enforce_wepp_singleflight=True,
             wd=wd,
             wepp=wepp,
+            payload=payload,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
@@ -549,11 +560,6 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
 
     try:
         payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
-        if payload:
-            # Do not regenerate tracked WEPP inputs in bootstrap no-prep mode.
-            # This updates controller metadata only; execution still uses the
-            # currently checked-out `wepp/runs/` files as-is.
-            apply_wepp_run_payload(wd, payload)
     except WeppRunPayloadValidationError as exc:
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
@@ -573,6 +579,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
             enforce_wepp_singleflight=True,
             wd=wd,
             wepp=wepp,
+            payload=payload,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)

@@ -89,3 +89,23 @@ Existing real-facade fixture precedent is
 `tests/nodb/test_wepp_input_parser.py::test_kslast_omission_survives_real_facade_persistence`.
 Real coordination/recovery suites include `tests/rq/test_submission_recovery.py`
 and `tests/rq/test_wepp_singleflight_tracking.py`.
+
+## Executed coverage update
+
+The five confirmed static defects are implemented and directly tested in
+`tests/microservices/test_wepp_admission_persistence.py`. Each has accepted-state
+reload, active-rejection file-byte/receipt/timestamp preservation and actual
+busy-lease coverage. One controlled competing pair and finished-root/active-child
+case exercises the shared preparation handler and the real soil writer. No-prep
+files are preserved on acceptance/rejection. Three callback routes each cover
+real reservation/publication/replay and conflict. All three shared routes cover
+persisted batch membership and both normalized base variants. Shared and bootstrap
+handlers cover admitted validation/persistence/enqueue failure and successor-token
+lease loss. Deferred, mismatched, terminal and missing prior-job states and local
+file lifecycle exclusion pass. Existing recovery/ownership suites supplement this
+bounded matrix; it is not a full Cartesian or repository-wide concurrent-edit proof.
+
+Unresolved/excluded: full worker-dispatch/model/report propagation, live production
+browser and deployment/affected-run repair were not executed. The accepted local
+claim ends at actual prepared-soil writer readback. Prior-state reconciliation
+may change Redis state; no all-bytes-unchanged Redis assertion is made.

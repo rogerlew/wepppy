@@ -1408,7 +1408,8 @@ def test_wepp_endpoints_return_409_when_singleflight_conflict(
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch)
     _stub_prep(monkeypatch)
-    _stub_wepp_stack(monkeypatch)
+    capture = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         wepp_routes,
@@ -1419,11 +1420,14 @@ def test_wepp_endpoints_return_409_when_singleflight_conflict(
     )
 
     with TestClient(rq_engine.app) as client:
-        response = client.post(endpoint, json={})
+        response = client.post(endpoint, json={"kslast": 0.25, "initial_sat": 0.8})
 
     assert response.status_code == 409
     payload = response.json()
     assert "already active" in payload["error"]["message"]
+
+    assert "parse_payload" not in capture
+    assert capture["wepp"].persist_job_hint_calls == []
 
 
 @pytest.mark.parametrize(
@@ -1441,7 +1445,8 @@ def test_wepp_endpoints_return_409_when_submit_lock_is_busy(
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch)
     _stub_prep(monkeypatch)
-    _stub_wepp_stack(monkeypatch)
+    capture = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         wepp_routes,
@@ -1452,11 +1457,14 @@ def test_wepp_endpoints_return_409_when_submit_lock_is_busy(
     )
 
     with TestClient(rq_engine.app) as client:
-        response = client.post(endpoint, json={})
+        response = client.post(endpoint, json={"kslast": 0.25, "initial_sat": 0.8})
 
     assert response.status_code == 409
     payload = response.json()
     assert "already in progress" in payload["error"]["message"]
+
+    assert "parse_payload" not in capture
+    assert capture["wepp"].persist_job_hint_calls == []
 
 
 @pytest.mark.parametrize(

@@ -2,8 +2,9 @@
 
 ## Admission before proposed input mutation (WAM-01)
 
-Operator requested 2026-10-30. Contract checkpoint ratification and implementation
-conformance are pending; this is not a deployment claim.
+Operator requested 2026-10-30; ratified in checkpoint `525e78c9f`.
+Implementation and focused local conformance validated; no deployment.
+Evidence: [WAM-01 validation](../work-packages/20261030_wepp_admission_before_mutation/artifacts/validation.md).
 
 Execution submissions through `run-wepp`, `run-wepp-watershed`,
 `prep-wepp-watershed`, `run-wepp-npprep`, and `run-wepp-watershed-no-prep`
@@ -59,6 +60,19 @@ introduced. Full model execution is unnecessary when exact prepared-input
 readback establishes this boundary; it cannot support claims about scientific
 outputs or repaired production runs.
 
+For users and API operators: an active-work or busy-admission 409 leaves the
+submitted changes unapplied. Wait for active work to finish (or use the existing
+authorized cancellation workflow), then resubmit the intended values. Batch/base
+configuration-only saves keep the existing input-update message. A webhook retry
+with the same key replays its receipt; use the callback contract's instructions
+for uncertain publication rather than assuming a 5xx means no work was accepted.
+
+For maintainers: keep payload error translation at the application boundary and
+apply payloads only after reconciliation and active-work admission within the same
+lease. Keep a checkpoint after application before clearing timestamps or replacing
+receipts. Preserve bootstrap's 400 payload-validation mapping versus the shared
+handler's capability-authority 409. Test active descendants and lease contention
+using changed values and real persisted-state readback, not source-order checks.
 ## Executable selection (CBEXEC-01)
 
 [WEPP executable selection](wepp-executable-selection-contract.md) governs

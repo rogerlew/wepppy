@@ -1,6 +1,7 @@
 # WEPP admission before mutation
 
-Status: active; pre-implementation checkpoint preparation, 2026-10-30 UTC.
+Status: implemented and locally validated; review-ready, 2026-10-30 UTC.
+Full gate: 12,210 passed, 334 skipped. No deployment.
 Remediation ID: WAM-01. Owner: operator / Codex.
 
 ## Outcome and scope
@@ -29,9 +30,9 @@ forbid pre-admission input persistence. WAM-01 adds normative intent, so the
 [contract-first checkpoint](../../standards/contract-first-change-standard.md#required-pre-implementation-checkpoint)
 applies. The [operator prompt](artifacts/operator-prompt.md) approves the bounded
 outcome and confirmed-consumer assessment, but explicitly does not grant commit
-authority. Prepare contract amendments, two independent read-only reviews and
-findings disposition before requesting authority for a standalone checkpoint
-commit. Implementation must follow that ancestor, not precede it.
+authority initially. The operator subsequently granted that authority; two
+independent reviews and disposition preceded checkpoint `525e78c9f`, and all
+implementation/test edits followed it.
 
 Security impact: low. Existing auth/access, callback destination policy,
 ownership and isolation remain unchanged; the patch reduces mutation by rejected

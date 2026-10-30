@@ -95,7 +95,8 @@ New WEPP callback submissions follow
 WEPP admission precedes proposed input persistence. Existing replay, reservation,
 prepublication cleanup and publication-uncertainty rules above remain unchanged;
 callback metadata is distinct from proposed model inputs and active-job hints.
-Checkpoint ratification and implementation conformance pending.
+Ratified in checkpoint `525e78c9f`; focused local conformance validated,
+deployment separate.
 
 ## Event envelope
 

@@ -19,9 +19,9 @@ accepted request's value.
 - [x] (2026-10-30 22:00 UTC) Record master/revision and unrelated dirty work; inspect handler, payload, leases, replay and worker reloads.
 - [x] (2026-10-30 22:00 UTC) Identify five confirmed static consumers and prepare canonical amendment and state matrix.
 - [x] (2026-10-30 22:04 UTC) Two independent checkpoint reviews pass; low error-mapping wording finding corrected and dispositioned.
-- [ ] Obtain commit authority and create standalone checkpoint ancestor; record SHA in tracker.
-- [ ] Write failing regression, implement bounded ordering correction, then prove accepted/rejected persistence and prepared-input behavior.
-- [ ] Run focused/full gates and independent correctness/QA reviews; update affected docs and final evidence.
+- [x] (2026-10-30 UTC) Operator granted commit authority; standalone ancestor `525e78c9f` created before tests/code edits.
+- [x] (2026-10-30 UTC) Failing regression, five-endpoint correction and real persistence/lease/soil-writer evidence complete; 237 focused tests passed.
+- [x] (2026-10-30 UTC) Full gate: 12,210 passed, 334 skipped. Focused 237, final refined boundary 38 and archive/browse 72 passed; independent correctness/QA approved; docs/evidence updated.
 
 ## Surprises & Discoveries
 
@@ -36,17 +36,19 @@ active-work admission, so it does not close the persisted-input defect.
 
 2026-10-30 UTC, Codex: classify WAM-01 as a normative amendment. Current response
 contract promises no duplicate enqueue, not nonmutation on execution rejection.
-The operator explicitly approves the correction but withholds commit authority;
-implementation must wait for the reviewed checkpoint ancestor. Preserve existing
+The operator approved the correction and subsequently granted checkpoint commit authority;
+ancestor `525e78c9f` precedes all implementation edits. Preserve existing
 no-prep metadata saves after admission and prepared-file immutability.
 
 ## Outcomes & Retrospective
 
 
-Diagnosis and proposed contract only. No implementation, runtime reproduction of
-mixed results, prepared-artifact validation, deployment or production repair yet.
-The missing commit authority is a real sequencing gate, not a request to approve
-the already-authorized correction again.
+Bounded correction implemented. Prepatch regression failed on observed parser mutation
+before 409. Direct tests pass for real NoDb rejection and real soil-writer
+readback: 237 focused plus 72 archive/browse checks, with all 38 final boundary
+cases rerun after fixture refinement. Full repository validation passed: 12,210
+passed, 334 skipped.
+No deployment or production repair.
 
 ## Context and Orientation
 
@@ -171,4 +173,8 @@ Submission and existing response helpers. No dependency or payload schema change
 NoDb durable controller semantics remain authoritative for readback.
 
 Revision note (2026-10-30 UTC): created after tracing shared and bootstrap peers;
-implementation awaits the required reviewed ancestor commit.
+checkpoint committed after operator approval; implementation and local validation complete.
+
+Final revision note (2026-10-30 UTC): completed local delivery and all required
+gates; final artifact uses normal single-OFE forest-soil preparation. Implementation
+remains review-ready in the working tree; no production deployment/recovery claim.
