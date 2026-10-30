@@ -1,0 +1,10 @@
+{"body": "{", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "[]", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "null", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "   ", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "{}", "media": "application/json", "rq_status": 200, "rq_payload": {}, "flask_status": 200, "flask_payload": {}}
+{"body": "{\"clean\":\"not-a-boolean\"}", "media": "application/json", "rq_status": 200, "rq_payload": {"clean": "not-a-boolean"}, "flask_status": 200, "flask_payload": {"clean": "not-a-boolean"}}
+{"body": "{\"clean\":2}", "media": "application/json", "rq_status": 200, "rq_payload": {"clean": true}, "flask_status": 200, "flask_payload": {"clean": true}}
+{"body": "{\"clean\":false}", "media": "application/json", "rq_status": 200, "rq_payload": {"clean": false}, "flask_status": 200, "flask_payload": {"clean": false}}
+{"body": "clean=off", "media": "application/x-www-form-urlencoded", "rq_status": 200, "rq_payload": {"clean": false}, "flask_status": 200, "flask_payload": {"clean": false}}

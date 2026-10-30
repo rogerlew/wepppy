@@ -15,6 +15,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — MRS-01 checkpoint independently approved; both framework fallbacks reproduced safely and consumer/state matrix retained. Implementation awaits checkpoint commit authority.
+
 Completed locally: [WEPP admission before mutation](docs/work-packages/20261030_wepp_admission_before_mutation/package.md) — five endpoints corrected after checkpoint `525e78c9f`; 237 focused, 38 final boundary and 72 archive/browse checks pass; full suite 12,210 passed / 334 skipped. Independent reviews approve; no deployment.
 
 Completed: [WEPP 261029 release promotion](docs/work-packages/20261030_wepp_261029_release/package.md) — independent AI reviews accepted; matched Linux pair and illustrated defect/patch report pushed. Native 663 tests and WEPPpy 12,210 tests pass (298 skipped). Defaults and deployment unchanged.

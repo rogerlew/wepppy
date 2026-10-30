@@ -185,6 +185,12 @@ Metadata `version` records the actual admitted version as a canonical string;
 existing 7778 metadata remains valid. Format bounds are admission/resource limits,
 not scientific defaults.
 
+MRS-01 proposed checkpoint (implementation pending): apply the shared
+[request payload contract](request-payload-contract.md) inside the bounded adapter.
+Validate all supplied mode, scalar flag and applicable numeric/mapping fields
+before accepting/promoting a new source or persisting settings; a later field
+error must not leave a replaced source. Keep the existing byte/file limits and
+close temporary resources on parser failure, disconnect and cancellation.
 ## Source state, publication and recovery
 
 Optional controller `_single_user_defined_source` metadata contains `filename`,

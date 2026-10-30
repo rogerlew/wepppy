@@ -73,6 +73,14 @@ lease. Keep a checkpoint after application before clearing timestamps or replaci
 receipts. Preserve bootstrap's 400 payload-validation mapping versus the shared
 handler's capability-authority 409. Test active descendants and lease contention
 using changed values and real persisted-state readback, not source-order checks.
+
+MRS-01 proposed checkpoint (implementation pending): [request validation](request-payload-contract.md)
+rejects malformed transport and invalid supplied scalar flags/numbers before
+proposed input application. This includes `delete_after_interchange` as a scalar
+flag (null/blank retain no override). Preserve the admission leases and domain-error
+precedence above, six routine checkbox no-override sentinels, batch/base saves,
+callback replay and checked-out no-prep files. The `kslast` contract below remains
+unchanged. This adds validation before writes, not rollback of later failures.
 ## Executable selection (CBEXEC-01)
 
 [WEPP executable selection](wepp-executable-selection-contract.md) governs

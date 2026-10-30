@@ -632,6 +632,9 @@ only; Builder, fork, upload, and batch endpoints retain their own contracts.
 Rationale: observability must cover every exit from the create link, including
 unexpected failures, without weakening authorization or exposing internal data.
 
+MRS-01 proposed checkpoint (implementation pending): malformed mutation/submission
+payloads follow the [request payload contract](request-payload-contract.md), including
+HTTP 400 `invalid_request`, bounded diagnostics and rejection before side effects.
 ## Non-JSON responses
 - File downloads may return non-JSON payloads on success; errors must still conform to the error schema.
 

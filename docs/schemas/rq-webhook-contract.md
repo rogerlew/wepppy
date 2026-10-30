@@ -98,6 +98,12 @@ callback metadata is distinct from proposed model inputs and active-job hints.
 Ratified in checkpoint `525e78c9f`; focused local conformance validated,
 deployment separate.
 
+MRS-01 proposed checkpoint (implementation pending): [request validation](request-payload-contract.md)
+of transport and state-independent supplied fields precedes new callback
+reservation. State-dependent admission follows existing reserve/replay semantics,
+with prepublication cleanup on new-request rejection. Share body reuse and
+retain bounded multipart ownership. Valid replay identity, digest, prepublication
+cleanup and uncertain-publication behavior above remain unchanged.
 ## Event envelope
 
 Send an unsigned HTTPS POST with `Content-Type: application/json`,

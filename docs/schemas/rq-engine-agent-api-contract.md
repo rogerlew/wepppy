@@ -27,6 +27,11 @@ Route ownership and freeze artifacts:
   - `tools/check_endpoint_inventory.py`
   - `tools/check_route_contract_checklist.py`
 
+MRS-01 proposed checkpoint (implementation pending): mutation/submission clients
+follow the [request payload contract](request-payload-contract.md). Use explicit
+false for disabled flags and `{}` or no body only for intentional default operations;
+malformed input returns canonical HTTP 400 before business side effects. Existing
+JSON/form clients and domain-specific body shapes remain supported.
 ## Auth Model
 
 FA-01 amendment prepared 2026-10-01, implementation/checkpoint pending:

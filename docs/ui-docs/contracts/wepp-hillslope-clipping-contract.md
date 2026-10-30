@@ -24,17 +24,19 @@ set the same persisted `Watershed.clip_hillslope_length` value. When both are
 present, `hillslope_clip_length` remains authoritative unless its extracted
 value is `None` (including JSON null or an all-empty collection), in which case
 the compatibility alias is used. A scalar empty string does not trigger alias
-fallback and produces no update. Request parsing remains
-backward compatible: values are parsed with Python integer conversion; absent,
-empty, boolean, and non-numeric values do not update the persisted length.
-Finite fractional numeric values retain the established integer-conversion
-behavior. Numeric NaN and strings `"nan"`, `"inf"`, and `"-inf"` produce no
-length update. Numeric positive or negative infinity retains the pre-existing
-exceptional synchronous `OverflowError` behavior and does not enqueue;
-repairing that broader parser defect is outside this package. A parsed zero or
-negative value may be persisted by compatibility paths, but is invalid runtime
-state when clipping is enabled.
+fallback and produces no update. Absent/null/empty selected values retain no-update
+behavior. Finite fractional numeric values retain Python integer conversion.
+A parsed zero or negative value may still be persisted by compatibility paths,
+but is invalid runtime state when clipping is enabled.
 
+MRS-01 proposed checkpoint (implementation pending) replaces silent malformed-value
+omission and synchronous infinity `OverflowError` with the bounded HTTP 400 policy
+in [request payload validation](../../schemas/request-payload-contract.md#bounded-numeric-validation).
+A selected boolean, nonnumeric nonblank value or non-finite value is invalid supplied
+input and must fail before proposed changes or enqueue. JSON non-finite values
+also fail shared transport/structural validation. This changes malformed-input
+handling only; numeric alias precedence, blank/null sentinels, finite conversion,
+zero/negative runtime policy and slope parameterization remain unchanged.
 ## Generated Slope-File Behavior
 
 When `clip_hillslopes` is false, preparation copies each source slope geometry
@@ -63,11 +65,15 @@ limit.
 
 Preparation requires a finite, positive effective clip length when clipping is
 enabled. A persisted zero, negative, NaN, or infinity is invalid runtime state.
-The existing `run-wepp` request remains accepted and enqueued for request
-compatibility, but asynchronous preparation fails with `ValueError`; polling
+A request that omits a replacement length retains the existing accepted/enqueued
+behavior for such persisted invalid state; asynchronous preparation fails with
+`ValueError`. Newly supplied malformed/non-finite values instead receive the
+MRS-01 HTTP 400 before mutation/enqueue specified above. Finite zero/negative
+request values retain their existing persistence and asynchronous failure policy;
+this repair adds no new scientific range. Polling for the asynchronous failures
 reports terminal `failed` status and `jobinfo` supplies `exc_info` according to
-`docs/schemas/rq-response-contract.md`. This is an expected user-reachable
-failure with recovery guidance to resubmit using a finite positive length.
+`docs/schemas/rq-response-contract.md`. Recovery is to resubmit a finite positive
+length. Existing persisted invalid state is distinct from a malformed new request.
 
 A malformed slope file is exceptional generated/source-state corruption.
 Preparation fails the asynchronous job with its parsing exception, exposed by

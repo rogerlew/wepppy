@@ -1,0 +1,5387 @@
+[
+  {
+    "source": "wepppy/microservices/rq_engine/upload_climate_routes.py",
+    "function": "upload_cli",
+    "line": 101,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 150,
+        "call": "reject_unsupported_payload(form)"
+      },
+      {
+        "line": 149,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/run_sync_routes.py",
+    "function": "run_sync",
+    "line": 183,
+    "routes": [
+      "router.post(\"/run-sync\")"
+    ],
+    "parsing": [
+      {
+        "line": 193,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 198,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields={\"run_migrations\", \"archive_before\"},\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/session_routes.py",
+    "function": "_parse_optional_json_payload",
+    "line": 747,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 760,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/session_routes.py",
+    "function": "issue_session_token",
+    "line": 1009,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/rhem_routes.py",
+    "function": "run_rhem",
+    "line": 45,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 55,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 61,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\n                \"clean\",\n                \"clean_hillslopes\",\n                \"prep\",\n                \"prep_hillslopes\",\n                \"run\",\n                \"run_hillslopes\",\n            ),\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/climate_routes.py",
+    "function": "build_climate",
+    "line": 658,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 668,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 703,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/swat_routes.py",
+    "function": "run_swat",
+    "line": 72,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 82,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 88,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/swat_routes.py",
+    "function": "update_swat_print_prt",
+    "line": 139,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 151,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\"daily\", \"monthly\", \"yearly\", \"avann\"),\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/swat_routes.py",
+    "function": "update_swat_print_prt_meta",
+    "line": 207,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 219,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "_safe_json",
+    "line": 153,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 155,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "bootstrap_enable",
+    "line": 255,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "bootstrap_mint_token",
+    "line": 294,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "bootstrap_checkout",
+    "line": 407,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "run_wepp_npprep",
+    "line": 452,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 462,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 477,
+        "call": "parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "run_wepp_watershed_noprep",
+    "line": 537,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 547,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 562,
+        "call": "parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/bootstrap_routes.py",
+    "function": "run_swat_noprep",
+    "line": 613,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 623,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/upload_huc_fire_routes.py",
+    "function": "upload_huc_fire_sbs",
+    "line": 69,
+    "routes": [
+      "router.post(\"/huc-fire/tasks/upload-sbs/\")"
+    ],
+    "parsing": [
+      {
+        "line": 86,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_soils_routes.py",
+    "function": "_safe_json",
+    "line": 30,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 32,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_soils_routes.py",
+    "function": "build_landuse_and_soils",
+    "line": 48,
+    "routes": [
+      "router.post(\"/landuse-and-soils\")"
+    ],
+    "parsing": [
+      {
+        "line": 49,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/job_routes.py",
+    "function": "_safe_json",
+    "line": 203,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 205,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/job_routes.py",
+    "function": "jobinfo_batch",
+    "line": 415,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/job_routes.py",
+    "function": "canceljob",
+    "line": 486,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/single_input_uploads.py",
+    "function": "input_payload",
+    "line": 85,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 87,
+        "call": "parse_request_payload(request, boolean_fields=boolean_fields)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/wepp_routes.py",
+    "function": "_handle_run_wepp_request",
+    "line": 135,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 164,
+        "call": "webhooks.request_options(request, operation=operation)"
+      },
+      {
+        "line": 168,
+        "call": "parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/wepp_routes.py",
+    "function": "run_wepp",
+    "line": 278,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/wepp_routes.py",
+    "function": "run_wepp_watershed",
+    "line": 321,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/wepp_routes.py",
+    "function": "prep_wepp_watershed",
+    "line": 367,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/openet_ts_routes.py",
+    "function": "acquire_openet_ts",
+    "line": 48,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 59,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 64,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\"force_refresh\",),\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "upload_boundaries",
+    "line": 601,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 611,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "confirm_schema",
+    "line": 682,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 691,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "build_subfields",
+    "line": 734,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 739,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 749,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "upload_plant_database",
+    "line": 786,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 791,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 797,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "delete_plant_file",
+    "line": 892,
+    "routes": [
+      "router.delete("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "save_rotation_mapping",
+    "line": 980,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 989,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "run_wepp",
+    "line": 1064,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1069,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 1082,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "run_watershed",
+    "line": 1125,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1130,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 1151,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "clear_watershed",
+    "line": 1194,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1203,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ag_fields_routes.py",
+    "function": "clear_wepp",
+    "line": 1257,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/watershed_routes.py",
+    "function": "upload_dem",
+    "line": 613,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 627,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/watershed_routes.py",
+    "function": "fetch_dem_and_build_channels",
+    "line": 684,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 696,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 701,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/watershed_routes.py",
+    "function": "set_outlet",
+    "line": 829,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 839,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 843,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/watershed_routes.py",
+    "function": "build_subcatchments_and_abstract_watershed",
+    "line": 929,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 942,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 946,
+        "call": "parse_request_payload(\n        request,\n        boolean_fields=(\n            \"clip_hillslopes\",\n            \"walk_flowpaths\",\n            \"mofe_buffer\",\n            \"bieger2015_widths\",\n        ),\n    )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/treatments_routes.py",
+    "function": "build_treatments",
+    "line": 99,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 109,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 120,
+        "call": "parse_request_payload(request)"
+      },
+      {
+        "line": 147,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/rusle_routes.py",
+    "function": "build_rusle",
+    "line": 48,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 58,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 66,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\"force_polaris_refresh\",),\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/dss_export_routes.py",
+    "function": "post_dss_export",
+    "line": 72,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 82,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 91,
+        "call": "parse_request_payload(request, boolean_fields=boolean_fields)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/migration_routes.py",
+    "function": "_safe_json",
+    "line": 94,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 96,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/migration_routes.py",
+    "function": "migrate_run",
+    "line": 199,
+    "routes": [
+      "router.post(\"/runs/{runid}/{config}/migrate-run\")"
+    ],
+    "parsing": [
+      {
+        "line": 209,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/upload_disturbed_routes.py",
+    "function": "upload_sbs",
+    "line": 72,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 94,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/upload_disturbed_routes.py",
+    "function": "upload_cover_transform",
+    "line": 153,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 169,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/debug_routes.py",
+    "function": "hello_world",
+    "line": 44,
+    "routes": [
+      "router.post(\"/runs/{runid}/{config}/hello-world\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/project_routes.py",
+    "function": "create",
+    "line": 357,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/project_routes.py",
+    "function": "_create",
+    "line": 382,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 394,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/webhooks.py",
+    "function": "request_options",
+    "line": 47,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 54,
+        "call": "request.form()"
+      },
+      {
+        "line": 50,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/webhooks.py",
+    "function": "reject_unsupported",
+    "line": 58,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 73,
+        "call": "reject_unsupported_payload(payload)"
+      },
+      {
+        "line": 66,
+        "call": "request.json()"
+      },
+      {
+        "line": 68,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "_run_omni",
+    "line": 561,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 573,
+        "call": "reject_unsupported_payload(payload)"
+      },
+      {
+        "line": 572,
+        "call": "parse_request_payload(request)"
+      },
+      {
+        "line": 580,
+        "call": "request.form()"
+      },
+      {
+        "line": 577,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "_run_omni_contrasts",
+    "line": 651,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 663,
+        "call": "reject_unsupported_payload(payload)"
+      },
+      {
+        "line": 662,
+        "call": "parse_request_payload(request)"
+      },
+      {
+        "line": 670,
+        "call": "request.form()"
+      },
+      {
+        "line": 667,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "_dry_run_omni_contrasts",
+    "line": 796,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 807,
+        "call": "parse_request_payload(request)"
+      },
+      {
+        "line": 812,
+        "call": "request.form()"
+      },
+      {
+        "line": 809,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "run_omni",
+    "line": 979,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "run_omni_contrasts",
+    "line": 1021,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "run_omni_contrasts_dry_run",
+    "line": 1060,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/omni_routes.py",
+    "function": "delete_omni_contrasts",
+    "line": 1096,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1107,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/polaris_routes.py",
+    "function": "acquire_polaris",
+    "line": 47,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 54,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 59,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\"force_refresh\", \"keep_source_intermediates\"),\n        )"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+    "function": "_strict_request_boolean",
+    "line": 498,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 509,
+        "call": "request.form()"
+      },
+      {
+        "line": 501,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+    "function": "fork_project",
+    "line": 771,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 823,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields={\"undisturbify\", \"skip_wepp_runs_output\"},\n        )"
+      },
+      {
+        "line": 873,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+    "function": "archive_run",
+    "line": 1429,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1439,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 1444,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+    "function": "restore_archive",
+    "line": 1531,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1541,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 1546,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+    "function": "delete_archive",
+    "line": 1642,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1653,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/payloads.py",
+    "function": "parse_request_payload",
+    "line": 80,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 90,
+        "call": "request.json()"
+      },
+      {
+        "line": 99,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/upload_batch_runner_routes.py",
+    "function": "upload_geojson",
+    "line": 138,
+    "routes": [
+      "router.post(\"/batch/_/{batch_name}/upload-geojson\")"
+    ],
+    "parsing": [
+      {
+        "line": 159,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/upload_batch_runner_routes.py",
+    "function": "upload_sbs_map",
+    "line": 274,
+    "routes": [
+      "router.post(\"/batch/_/{batch_name}/upload-sbs-map\")"
+    ],
+    "parsing": [
+      {
+        "line": 295,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/rap_ts_routes.py",
+    "function": "acquire_rap_ts",
+    "line": 95,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 105,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 116,
+        "call": "parse_request_payload(\n            request,\n            boolean_fields=(\"force_refresh\",),\n        )"
+      },
+      {
+        "line": 112,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "build_landuse",
+    "line": 547,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 566,
+        "call": "input_payload(\n            request, \"landuse\",\n            boolean_fields=(\n                \"checkbox_burn_shrubs\",\n                \"checkbox_burn_grass\",\n                \"burn_shrubs\",\n                \"burn_grass\",\n            ),\n        )"
+      },
+      {
+        "line": 575,
+        "call": "reject_unsupported_payload(payload)"
+      },
+      {
+        "line": 688,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "set_landuse_mode",
+    "line": 832,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 845,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "set_landuse_db",
+    "line": 909,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 922,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "modify_landuse_coverage",
+    "line": 963,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 976,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "modify_landuse_mapping",
+    "line": 1055,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1067,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 1072,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "upload_landuse_user_defined_managements",
+    "line": 1178,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1199,
+        "call": "parse_request_payload(request, boolean_fields={\"replace\"})"
+      },
+      {
+        "line": 1202,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "delete_landuse_user_defined_management",
+    "line": 1335,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1350,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "update_landuse_user_defined_management_description",
+    "line": 1414,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1433,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "save_landuse_map",
+    "line": 1559,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1575,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "clear_landuse_map_override",
+    "line": 1767,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/landuse_routes.py",
+    "function": "modify_landuse",
+    "line": 1822,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 1837,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/culvert_routes.py",
+    "function": "culverts_wepp_batch",
+    "line": 281,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 294,
+        "call": "request.form()"
+      },
+      {
+        "line": 336,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/culvert_routes.py",
+    "function": "culverts_retry_run",
+    "line": 482,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 495,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/culvert_routes.py",
+    "function": "culverts_finalize_batch",
+    "line": 598,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 609,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/builder_routes.py",
+    "function": "validate_builder",
+    "line": 148,
+    "routes": [
+      "router.post(\"/project-config/builder/validate\", summary=\"Validate project config proposal\", description=\"Requires JWT `rq:enqueue`; synchronously resolves a complete proposal with no queue or writes.\", tags=[\"rq-engine\", \"project\"], operation_id=rq_operation_id(\"validate_project_config_builder\"), responses=agent_route_responses(success_code=200, success_description=\"Valid resolved proposal.\", extra={400: \"Validation failed. Returns the canonical error payload.\", 409: \"Stale schema. Returns the canonical error payload.\"}))"
+    ],
+    "parsing": [
+      {
+        "line": 153,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/builder_routes.py",
+    "function": "create_builder_project",
+    "line": 190,
+    "routes": [
+      "router.post(\"/project-config/builder/create\", summary=\"Create project from builder\", description=\"Requires JWT `rq:enqueue`; synchronously creates one fixed-token project with no queue.\", tags=[\"rq-engine\", \"project\"], operation_id=rq_operation_id(\"create_project_config_builder\"), responses=agent_route_responses(success_code=201, success_description=\"Builder project created.\", extra={400: \"Validation failed. Returns the canonical error payload.\", 409: \"Stale or duplicate request. Returns the canonical error payload.\", 503: \"Creation unavailable. Returns the canonical error payload.\"}))"
+    ],
+    "parsing": [
+      {
+        "line": 195,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/ash_routes.py",
+    "function": "run_ash",
+    "line": 181,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 191,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 198,
+        "call": "parse_request_payload(request)"
+      },
+      {
+        "line": 280,
+        "call": "request.form()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/geneva_routes.py",
+    "function": "prepare_hrus",
+    "line": 498,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 513,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 518,
+        "call": "parse_request_payload(request, boolean_fields=(\"force_rebuild\",))"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/geneva_routes.py",
+    "function": "build_frequency_panel",
+    "line": 568,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 583,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 588,
+        "call": "parse_request_payload(request, boolean_fields=(\"rebuild\",))"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/geneva_routes.py",
+    "function": "run_batch",
+    "line": 637,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 652,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 657,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/geneva_routes.py",
+    "function": "run_workflow",
+    "line": 702,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 717,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 722,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+    "function": "upload",
+    "line": 196,
+    "routes": [
+      "router.post(PREFIX+'/upload-dnbr', summary='Upload a dNBR raster',"
+    ],
+    "parsing": [
+      {
+        "line": 212,
+        "call": "reject_unsupported_payload(data)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+    "function": "retry",
+    "line": 271,
+    "routes": [
+      "router.post(PREFIX+'/retry-dnbr', summary='Correct a retained dNBR scale',"
+    ],
+    "parsing": [
+      {
+        "line": 275,
+        "call": "reject_unsupported_payload(data)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+    "function": "run",
+    "line": 304,
+    "routes": [
+      "router.post(PREFIX+'/run', summary='Run the selected Staley model', operation_id=rq_operation_id('postfire_run'),",
+      "router.post(PREFIX+'/run-m1', summary='Run watershed M1 likelihood calculations',"
+    ],
+    "parsing": [
+      {
+        "line": 308,
+        "call": "reject_unsupported_payload(data)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+    "function": "selection",
+    "line": 391,
+    "routes": [
+      "router.post(PREFIX+'/selection', summary='Save Staley model and rainfall selection',"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/soils_routes.py",
+    "function": "build_soils",
+    "line": 153,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 171,
+        "call": "input_payload(\n            request, \"soils\",\n            boolean_fields={\"clear_ssurgo_cache_on_rebuild\"},\n        )"
+      },
+      {
+        "line": 175,
+        "call": "reject_unsupported_payload(payload)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/export_routes.py",
+    "function": "_parse_features_export_submit_payload",
+    "line": 165,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 174,
+        "call": "request.body()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/export_routes.py",
+    "function": "export_ermit_submit",
+    "line": 451,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 461,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/export_routes.py",
+    "function": "export_features_submit",
+    "line": 788,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 798,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/export_routes.py",
+    "function": "export_features_profile_resolve",
+    "line": 868,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/batch_routes.py",
+    "function": "run_batch",
+    "line": 58,
+    "routes": [
+      "router.post(\"/batch/_/{batch_name}/run-batch\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/batch_routes.py",
+    "function": "delete_batch",
+    "line": 135,
+    "routes": [
+      "router.post(\"/batch/_/{batch_name}/delete-batch\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/project_config_update_routes.py",
+    "function": "update_apply",
+    "line": 625,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 634,
+        "call": "reject_unsupported_payload(payload)"
+      },
+      {
+        "line": 633,
+        "call": "request.json()"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/debris_flow_routes.py",
+    "function": "run_debris_flow",
+    "line": 87,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 97,
+        "call": "reject_unsupported_webhook(request)"
+      },
+      {
+        "line": 107,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/roads_routes.py",
+    "function": "prepare_roads",
+    "line": 86,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 96,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/microservices/rq_engine/roads_routes.py",
+    "function": "run_roads",
+    "line": 127,
+    "routes": [
+      "router.post("
+    ],
+    "parsing": [
+      {
+        "line": 137,
+        "call": "reject_unsupported_webhook(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/jsoncrack.py",
+    "function": "wp_jsoncrack_tree",
+    "line": 88,
+    "routes": [
+      "jsoncrack_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/jsoncrack/<path:subpath>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/jsoncrack.py",
+    "function": "jsoncrack_tree",
+    "line": 94,
+    "routes": [
+      "jsoncrack_bp.route('/runs/<string:runid>/<config>/jsoncrack/<path:subpath>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/recorder_bp.py",
+    "function": "recorder_events",
+    "line": 33,
+    "routes": [
+      "recorder_bp.route(\"/runs/<runid>/<config>/recorder/events\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 34,
+        "call": "request.get_json(silent=True)"
+      },
+      {
+        "line": 38,
+        "call": "parse_request_payload(request, trim_strings=False)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/recorder_bp.py",
+    "function": "recorder_promote",
+    "line": 75,
+    "routes": [
+      "recorder_bp.route(\"/runs/<runid>/<config>/recorder/promote\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 79,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "issue_rq_engine_token",
+    "line": 412,
+    "routes": [
+      "weppcloud_site_bp.route('/api/auth/rq-engine-token', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "issue_rq_engine_operator_token",
+    "line": 435,
+    "routes": [
+      "weppcloud_site_bp.route('/api/auth/rq-engine-operator-token', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 599,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "session_heartbeat",
+    "line": 750,
+    "routes": [
+      "weppcloud_site_bp.route('/api/auth/session-heartbeat', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "reset_browser_state",
+    "line": 834,
+    "routes": [
+      "weppcloud_site_bp.route('/api/auth/reset-browser-state', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "index",
+    "line": 977,
+    "routes": [
+      "weppcloud_site_bp.route('/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "interfaces",
+    "line": 982,
+    "routes": [
+      "weppcloud_site_bp.route('/interfaces/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "config_builder",
+    "line": 1025,
+    "routes": [
+      "weppcloud_site_bp.route('/config-builder/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "diagnostics",
+    "line": 1031,
+    "routes": [
+      "weppcloud_site_bp.route('/diagnostics/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "cap_verify",
+    "line": 1039,
+    "routes": [
+      "weppcloud_site_bp.route('/cap/verify', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 1044,
+        "call": "(request.form.get('cap_token') or payload.get('cap_token') or '').strip()"
+      },
+      {
+        "line": 1043,
+        "call": "request.get_json(silent=True)"
+      },
+      {
+        "line": 1044,
+        "call": "request.form.get('cap_token')"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing",
+    "line": 1079,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_light",
+    "line": 1085,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/light/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_dark",
+    "line": 1092,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/dark/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_run_locations",
+    "line": 1099,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/run-locations.json', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_variant_run_locations",
+    "line": 1106,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/light/run-locations.json', strict_slashes=False)",
+      "weppcloud_site_bp.route('/landing/dark/run-locations.json', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_run_locations_root",
+    "line": 1112,
+    "routes": [
+      "weppcloud_site_bp.route('/run-locations.json', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_static_assets",
+    "line": 1131,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/assets/<path:asset_path>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_variant_static_assets",
+    "line": 1144,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/light/assets/<path:asset_path>', strict_slashes=False)",
+      "weppcloud_site_bp.route('/landing/dark/assets/<path:asset_path>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_static_assets_root",
+    "line": 1150,
+    "routes": [
+      "weppcloud_site_bp.route('/assets/<path:asset_path>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_static_vite_icon",
+    "line": 1156,
+    "routes": [
+      "weppcloud_site_bp.route('/landing/vite.svg', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloud_site.py",
+    "function": "landing_static_vite_icon_root",
+    "line": 1165,
+    "routes": [
+      "weppcloud_site_bp.route('/vite.svg', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/gl_dashboard.py",
+    "function": "gl_dashboard",
+    "line": 123,
+    "routes": [
+      "gl_dashboard_bp.route("
+    ],
+    "parsing": [
+      {
+        "line": 128,
+        "call": "response.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/huc_fire.py",
+    "function": "huc_fire",
+    "line": 55,
+    "routes": [
+      "huc_fire_bp.route('/huc-fire')",
+      "huc_fire_bp.route('/huc-fire/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/huc_fire.py",
+    "function": "huc",
+    "line": 75,
+    "routes": [
+      "huc_fire_bp.route('/runs/<string:runid>/<config>/resources/huc.json')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/combined_watershed_viewer.py",
+    "function": "combined_ws_viewer",
+    "line": 145,
+    "routes": [
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer')",
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/combined_watershed_viewer.py",
+    "function": "combined_ws_viewer2",
+    "line": 151,
+    "routes": [
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer2')",
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer2/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/combined_watershed_viewer.py",
+    "function": "bounds_ws_viewer",
+    "line": 157,
+    "routes": [
+      "combined_watershed_viewer_bp.route('/bounds_ws_viewer')",
+      "combined_watershed_viewer_bp.route('/bounds_ws_viewer/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/combined_watershed_viewer.py",
+    "function": "combined_ws_viewer_url_gen",
+    "line": 163,
+    "routes": [
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer/url_generator', methods=['GET', 'POST'])",
+      "combined_watershed_viewer_bp.route('/combined_ws_viewer/url_generator/', methods=['GET', 'POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/stats.py",
+    "function": "getloadavg",
+    "line": 14,
+    "routes": [
+      "stats_bp.route('/getloadavg')",
+      "stats_bp.route('/getloadavg/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/stats.py",
+    "function": "access_by_year",
+    "line": 20,
+    "routes": [
+      "stats_bp.route('/access-by-year')",
+      "stats_bp.route('/access-by-year/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/stats.py",
+    "function": "access_by_month",
+    "line": 47,
+    "routes": [
+      "stats_bp.route('/access-by-month')",
+      "stats_bp.route('/access-by-month/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/stats.py",
+    "function": "stats",
+    "line": 76,
+    "routes": [
+      "stats_bp.route('/stats')",
+      "stats_bp.route('/stats/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/stats.py",
+    "function": "stats_key",
+    "line": 100,
+    "routes": [
+      "stats_bp.route('/stats/<key>')",
+      "stats_bp.route('/stats/<key>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "view_access_log",
+    "line": 27,
+    "routes": [
+      "admin_bp.route('/runs/<string:runid>/<config>/access-log')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "runid_query",
+    "line": 43,
+    "routes": [
+      "admin_bp.route('/dev/runid_query')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "usermod",
+    "line": 60,
+    "routes": [
+      "admin_bp.route('/usermod', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "task_usermod",
+    "line": 67,
+    "routes": [
+      "admin_bp.route('/tasks/usermod/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 70,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "feature_access",
+    "line": 128,
+    "routes": [
+      "admin_bp.route('/admin/feature-access', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/admin.py",
+    "function": "feature_access_memberships",
+    "line": 147,
+    "routes": [
+      "admin_bp.route('/admin/feature-access/memberships', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/test_bp.py",
+    "function": "create_run_endpoint",
+    "line": 106,
+    "routes": [
+      "test_bp.post(\"/create-run\")"
+    ],
+    "parsing": [
+      {
+        "line": 109,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/test_bp.py",
+    "function": "delete_run_endpoint",
+    "line": 118,
+    "routes": [
+      "test_bp.delete(\"/run/<runid>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/pivottable.py",
+    "function": "wp_pivottable_tree",
+    "line": 488,
+    "routes": [
+      "pivottable_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/pivottable/<path:subpath>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/pivottable.py",
+    "function": "pivottable_tree",
+    "line": 494,
+    "routes": [
+      "pivottable_bp.route('/runs/<string:runid>/<config>/pivottable/<path:subpath>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/geodata.py",
+    "function": "resources_usgs_gage_locations",
+    "line": 48,
+    "routes": [
+      "geodata_bp.route('/resources/usgs/gage_locations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/geodata.py",
+    "function": "resources_snotel_locations",
+    "line": 54,
+    "routes": [
+      "geodata_bp.route('/resources/snotel/snotel_locations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "joh_index",
+    "line": 49,
+    "routes": [
+      "locations_bp.route('/joh')",
+      "locations_bp.route('/joh/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "joh_map",
+    "line": 54,
+    "routes": [
+      "locations_bp.route('/joh/joh-map.htm')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "portland_index",
+    "line": 63,
+    "routes": [
+      "locations_bp.route('/portland-municipal')",
+      "locations_bp.route('/portland-municipal/')",
+      "locations_bp.route('/locations/portland-municipal')",
+      "locations_bp.route('/locations/portland-municipal/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "portland_results_index",
+    "line": 95,
+    "routes": [
+      "locations_bp.route('/portland-municipal/results')",
+      "locations_bp.route('/portland-municipal/results/')",
+      "locations_bp.route('/locations/portland-municipal/results')",
+      "locations_bp.route('/locations/portland-municipal/results/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "portland_results",
+    "line": 110,
+    "routes": [
+      "locations_bp.route('/portland-municipal/results/<file>')",
+      "locations_bp.route('/portland-municipal/results/<file>/')",
+      "locations_bp.route('/locations/portland-municipal/results/<file>')",
+      "locations_bp.route('/locations/portland-municipal/results/<file>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "lt_index",
+    "line": 127,
+    "routes": [
+      "locations_bp.route('/lt')",
+      "locations_bp.route('/lt/')",
+      "locations_bp.route('/locations/lt')",
+      "locations_bp.route('/locations/lt/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "lt_steep_slope_index",
+    "line": 135,
+    "routes": [
+      "locations_bp.route('/lt/SteepSlopes')",
+      "locations_bp.route('/lt/SteepSlopes/')",
+      "locations_bp.route('/locations/lt/SteepSlopes')",
+      "locations_bp.route('/locations/lt/SteepSlopes/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "caldor_index",
+    "line": 141,
+    "routes": [
+      "locations_bp.route('/locations/caldor')",
+      "locations_bp.route('/locations/caldor/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "caldor_results",
+    "line": 147,
+    "routes": [
+      "locations_bp.route('/locations/caldor/results/<file>')",
+      "locations_bp.route('/locations//results/<file>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "seattle_index",
+    "line": 158,
+    "routes": [
+      "locations_bp.route('/seattle-municipal')",
+      "locations_bp.route('/seattle-municipal/')",
+      "locations_bp.route('/locations/seattle-municipal')",
+      "locations_bp.route('/locations/seattle-municipal/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "seattle_results_index",
+    "line": 166,
+    "routes": [
+      "locations_bp.route('/seattle-municipal/results')",
+      "locations_bp.route('/seattle-municipal/results/')",
+      "locations_bp.route('/locations/seattle-municipal/results')",
+      "locations_bp.route('/locations/seattle-municipal/results/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/locations.py",
+    "function": "seattle_results",
+    "line": 175,
+    "routes": [
+      "locations_bp.route('/seattle-municipal/results/<path:subpath>')",
+      "locations_bp.route('/seattle-municipal/results/<path:subpath>/')",
+      "locations_bp.route('/locations/seattle-municipal/results/<path:subpath>')",
+      "locations_bp.route('/locations/seattle-municipal/results/<path:subpath>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloudr.py",
+    "function": "viz_r",
+    "line": 155,
+    "routes": [
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>')",
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloudr.py",
+    "function": "weppcloudr",
+    "line": 280,
+    "routes": [
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>')",
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloudr.py",
+    "function": "deval_details",
+    "line": 755,
+    "routes": [
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details')",
+      "weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/weppcloudr.py",
+    "function": "weppcloudr_proxy",
+    "line": 826,
+    "routes": [
+      "weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])",
+      "weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>/', methods=['GET', 'POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_common.py",
+    "function": "parse_request_payload",
+    "line": 197,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 215,
+        "call": "req.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "profile",
+    "line": 488,
+    "routes": [
+      "user_bp.route('/profile', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "preferences",
+    "line": 534,
+    "routes": [
+      "user_bp.route('/preferences', methods=['GET', 'POST'], strict_slashes=False)"
+    ],
+    "parsing": [
+      {
+        "line": 544,
+        "call": "request.form.get('unit_system')"
+      },
+      {
+        "line": 546,
+        "call": "request.form.get('wbt_boundary_touch_behavior')"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "mint_profile_token",
+    "line": 593,
+    "routes": [
+      "user_bp.route('/profile/mint-token', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "mint_run_token",
+    "line": 651,
+    "routes": [
+      "user_bp.route('/runs/<string:runid>/<config>/mint-run-token', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "runs_users",
+    "line": 713,
+    "routes": [
+      "user_bp.route(\"/runs/users\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "runs",
+    "line": 861,
+    "routes": [
+      "user_bp.route(\"/runs\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "runs_catalog",
+    "line": 955,
+    "routes": [
+      "user_bp.route(\"/runs/catalog\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "runs_map_data",
+    "line": 995,
+    "routes": [
+      "user_bp.route(\"/runs/map-data\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "internal_access_acknowledge",
+    "line": 1020,
+    "routes": [
+      "user_bp.route('/profile/internal-access/acknowledge', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/user.py",
+    "function": "poweruser_onboarding",
+    "line": 1026,
+    "routes": [
+      "user_bp.route('/profile/poweruser', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "verify_token",
+    "line": 48,
+    "routes": [
+      "bootstrap_bp.route(\"/api/bootstrap/verify-token\", methods=[\"GET\", \"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "enable_bootstrap",
+    "line": 82,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/enable\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "mint_bootstrap_token",
+    "line": 103,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/mint-token\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "bootstrap_commits",
+    "line": 122,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/commits\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "bootstrap_checkout",
+    "line": 137,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/checkout\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "bootstrap_current_ref",
+    "line": 157,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/current-ref\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/bootstrap.py",
+    "function": "bootstrap_disable",
+    "line": 171,
+    "routes": [
+      "bootstrap_bp.route(\"/runs/<string:runid>/<config>/bootstrap/disable\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/agent.py",
+    "function": "initialize_agent_chat",
+    "line": 66,
+    "routes": [
+      "agent_bp.route(\"/runs/<runid>/<config>/agent/chat\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 71,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/agent.py",
+    "function": "send_agent_message",
+    "line": 112,
+    "routes": [
+      "agent_bp.route(\"/runs/<runid>/<config>/agent/chat/<session_id>\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 117,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/agent.py",
+    "function": "terminate_agent_session",
+    "line": 142,
+    "routes": [
+      "agent_bp.route(\"/runs/<runid>/<config>/agent/chat/<session_id>\", methods=[\"DELETE\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/storm_event_analyzer.py",
+    "function": "storm_event_analyzer",
+    "line": 48,
+    "routes": [
+      "storm_event_analyzer_bp.route("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/diff/diff.py",
+    "function": "diff_comparer",
+    "line": 66,
+    "routes": [
+      "diff_bp.route('/runs/<string:runid>/<config>/diff/<path:subpath>', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "create_batch_project",
+    "line": 213,
+    "routes": [
+      "batch_runner_bp.route(\"/batch/create/\", methods=[\"GET\", \"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 228,
+        "call": "request.form.get(\"batch_name\", \"\")"
+      },
+      {
+        "line": 229,
+        "call": "request.form.get(\"base_config\", \"\")"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "view_batch",
+    "line": 258,
+    "routes": [
+      "batch_runner_bp.route(\"/batch/_/<string:batch_name>/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "gl_dashboard_batch",
+    "line": 316,
+    "routes": [
+      "batch_runner_bp.route(\"/batch/_/<string:batch_name>/gl-dashboard\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "update_run_directives",
+    "line": 395,
+    "routes": [
+      "batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 401,
+        "call": "parse_request_payload(request, trim_strings=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "validate_template",
+    "line": 429,
+    "routes": [
+      "batch_runner_bp.route(\"/batch/_/<string:batch_name>/validate-template\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 437,
+        "call": "parse_request_payload(request, trim_strings=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py",
+    "function": "runstate",
+    "line": 478,
+    "routes": [
+      "batch_runner_bp.route(\"/batch/_/<string:batch_name>/runstate\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "service_worker",
+    "line": 1380,
+    "routes": [
+      "run_0_bp.route('/sw.js')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "runs0_nocfg",
+    "line": 1390,
+    "routes": [
+      "run_0_bp.route('/runs/<string:runid>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "runs0",
+    "line": 2448,
+    "routes": [
+      "run_0_bp.route('/runs/<string:runid>/<config>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "migration_page",
+    "line": 2521,
+    "routes": [
+      "run_0_bp.route('/runs/<string:runid>/<config>/migrate')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "view_mod_section",
+    "line": 2567,
+    "routes": [
+      "run_0_bp.route('/runs/<string:runid>/<config>/view/mod/<string:mod_name>')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+    "function": "create_index",
+    "line": 2597,
+    "routes": [
+      "run_0_bp.route('/create', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/run_sync_dashboard/run_sync_dashboard.py",
+    "function": "run_sync_dashboard",
+    "line": 52,
+    "routes": [
+      "run_sync_dashboard_bp.route('/rq/run-sync', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "set_soil_mode",
+    "line": 43,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soil_mode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 45,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "query_soils",
+    "line": 133,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils')",
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "query_soils_subcatchments",
+    "line": 141,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils/subcatchments')",
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "query_soils_channels",
+    "line": 149,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils/channels')",
+      "soils_bp.route('/runs/<string:runid>/<config>/query/soils/channels/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "report_soils",
+    "line": 158,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/report/soils')",
+      "soils_bp.route('/runs/<string:runid>/<config>/report/soils/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "task_set_soils_ksflag",
+    "line": 177,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag', methods=['POST'])",
+      "soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 178,
+        "call": "parse_request_payload(request, boolean_fields={'ksflag'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+    "function": "task_set_disturbed_sol_ver",
+    "line": 200,
+    "routes": [
+      "soils_bp.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver', methods=['POST'])",
+      "soils_bp.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 201,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "get_scenarios",
+    "line": 139,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/api/omni/get_scenarios')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "get_scenario_run_state",
+    "line": 153,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/api/omni/get_scenario_run_state')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "delete_scenarios",
+    "line": 173,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/api/omni/delete_scenarios', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 179,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "omni_migration",
+    "line": 198,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/tasks/omni_migration')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "query_omni_scenarios_report",
+    "line": 214,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/report/omni_scenarios')",
+      "omni_bp.route('/runs/<string:runid>/<config>/report/omni_scenarios/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "function": "query_omni_contrasts_report",
+    "line": 241,
+    "routes": [
+      "omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts')",
+      "omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_bp.py",
+    "function": "task_modify_rangeland_cover",
+    "line": 167,
+    "routes": [
+      "rangeland_bp.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 171,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_bp.py",
+    "function": "query_rangeland_cover_subcatchments",
+    "line": 207,
+    "routes": [
+      "rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')",
+      "rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_bp.py",
+    "function": "report_rangeland_cover",
+    "line": 217,
+    "routes": [
+      "rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover')",
+      "rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_bp.py",
+    "function": "task_build_rangeland_cover",
+    "line": 229,
+    "routes": [
+      "rangeland_bp.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 233,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "set_climatestation_mode",
+    "line": 442,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 452,
+        "call": "parse_request_payload(request, boolean_fields={\"state\"})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "set_climatestation",
+    "line": 496,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 506,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "query_climatestation",
+    "line": 526,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climatestation')",
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climatestation/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "query_climate_has_observed",
+    "line": 542,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climate_has_observed')",
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climate_has_observed/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "query_climate_catalog",
+    "line": 559,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog')",
+      "climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "report_climate",
+    "line": 583,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/report/climate/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "set_climate_mode",
+    "line": 607,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 617,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "set_climate_spatialmode",
+    "line": 685,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_spatialmode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 695,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_closest_stations",
+    "line": 737,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/closest_stations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_heuristic_stations",
+    "line": 774,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/heuristic_stations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_station_par",
+    "line": 818,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/par/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_eu_heuristic_stations",
+    "line": 835,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/eu_heuristic_stations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_au_heuristic_stations",
+    "line": 869,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/au_heuristic_stations/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "view_climate_monthlies",
+    "line": 904,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/view/climate_monthlies')",
+      "climate_bp.route('/runs/<string:runid>/<config>/view/climate_monthlies/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "task_set_use_gridmet_wind_when_applicable",
+    "line": 939,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])",
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 951,
+        "call": "request.json.get('state', None)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "task_set_adjust_mx_pt5",
+    "line": 976,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5', methods=['POST'])",
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 986,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+    "function": "task_set_silent_pass_observed_quality_guard",
+    "line": 1006,
+    "routes": [
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_silent_pass_observed_quality_guard', methods=['POST'])",
+      "climate_bp.route('/runs/<string:runid>/<config>/tasks/set_silent_pass_observed_quality_guard/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 1016,
+        "call": "parse_request_payload(request, boolean_fields={\"state\"})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "enable_developer_mode",
+    "line": 291,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/enable_developer_mode', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 295,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "clear_locks",
+    "line": 310,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "clear_nodb_cache",
+    "line": 323,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/clear_nodb_cache', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "delete_run",
+    "line": 340,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])",
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "meta_subcatchmets_wgs",
+    "line": 392,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')",
+      "project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_adduser",
+    "line": 409,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 416,
+        "call": "parse_request_payload(request, trim_strings=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_removeuser",
+    "line": 484,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/removeuser/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 491,
+        "call": "parse_request_payload(request, trim_strings=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "report_users",
+    "line": 546,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/report/users/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "resources_netful_geojson",
+    "line": 556,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/resources/netful.json')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "resources_subcatchments_geojson",
+    "line": 567,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/resources/subcatchments.json')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "resources_bounds_geojson",
+    "line": 587,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/resources/bound.json')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_setname",
+    "line": 627,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 630,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_setscenario",
+    "line": 641,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 644,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_set_public",
+    "line": 653,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 657,
+        "call": "parse_request_payload(request, boolean_fields={'public'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_set_ttl_disabled",
+    "line": 679,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/set_ttl_disabled', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 680,
+        "call": "parse_request_payload(request, boolean_fields={'ttl_disabled'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_set_readonly",
+    "line": 713,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 722,
+        "call": "parse_request_payload(request, boolean_fields={'readonly'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
+    "function": "task_set_mod",
+    "line": 759,
+    "routes": [
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/set_mod', methods=['POST'])",
+      "project_bp.route('/runs/<string:runid>/<config>/tasks/set_mod/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 760,
+        "call": "parse_request_payload(request, trim_strings=True, boolean_fields={'enabled'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "report_rhem_results",
+    "line": 30,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/results')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/results/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "report_rhem_run_summary",
+    "line": 46,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/run_summary')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/run_summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "report_rhem_avg_annuals",
+    "line": 72,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/summary')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "report_rhem_return_periods",
+    "line": 101,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/return_periods')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "query_rhem_sub_runoff",
+    "line": 131,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "query_rhem_sub_sed_yield",
+    "line": 145,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rhem_bp.py",
+    "function": "query_rhem_sub_soil_loss",
+    "line": 153,
+    "routes": [
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments')",
+      "rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "enable_path_cost_effective",
+    "line": 85,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "get_path_cost_effective_config",
+    "line": 132,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "update_path_cost_effective_config",
+    "line": 144,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [
+      {
+        "line": 151,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "get_path_cost_effective_status",
+    "line": 165,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "get_path_cost_effective_results",
+    "line": 193,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py",
+    "function": "run_path_cost_effective",
+    "line": 207,
+    "routes": [
+      "path_ce_bp.route("
+    ],
+    "parsing": [
+      {
+        "line": 218,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/interchange_bp.py",
+    "function": "migrate_default_interchange",
+    "line": 69,
+    "routes": [
+      "interchange_bp.route('/runs/<string:runid>/<config>/tasks/interchange/migrate', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 76,
+        "call": "request.get_json(silent=True)"
+      },
+      {
+        "line": 79,
+        "call": "request.form.get('wepp_output_subpath')"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_set_lookup_variant",
+    "line": 234,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_lookup_variant', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 243,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "modify_disturbed",
+    "line": 268,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/modify_disturbed')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "reset_disturbed",
+    "line": 317,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "load_extended_land_soil_lookup",
+    "line": 329,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "delete_extended_land_soil_lookup",
+    "line": 343,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/delete_extended_land_soil_lookup', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "sync_base_to_extended_land_soil_lookup",
+    "line": 374,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/sync_base_to_extended_land_soil_lookup', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "has_sbs",
+    "line": 389,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs')",
+      "disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "lookup_disturbed_lookup_meta",
+    "line": 401,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/lookup_meta')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "lookup_disturbed_lookup_snapshot",
+    "line": 432,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/lookup_snapshot')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_modify_disturbed",
+    "line": 455,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 465,
+        "call": "request.get_json(silent=True, force=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "query_baer_wgs_bounds",
+    "line": 589,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/query/baer_wgs_map')",
+      "disturbed_bp.route('/runs/<string:runid>/<config>/query/baer_wgs_map/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "query_baer_class_map",
+    "line": 609,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/view/modify_burn_class')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_baer_class_map",
+    "line": 630,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_burn_class', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 646,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_baer_modify_color_map",
+    "line": 671,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_color_map', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 686,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "resources_baer_sbs",
+    "line": 706,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/resources/baer.png')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "set_firedate",
+    "line": 731,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 739,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_remove_sbs",
+    "line": 751,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/remove_sbs', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/disturbed_bp.py",
+    "function": "task_build_uniform_sbs",
+    "line": 773,
+    "routes": [
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs', methods=['POST'])",
+      "disturbed_bp.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 781,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_topaz_pass",
+    "line": 212,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "resources_channels_geojson",
+    "line": 233,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/resources/channels.json')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_extent",
+    "line": 253,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/extent')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/extent/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "report_channel",
+    "line": 262,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/report/channel')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_outlet",
+    "line": 280,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/outlet')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/outlet/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "report_outlet",
+    "line": 292,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/report/outlet')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/report/outlet/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_has_dem",
+    "line": 303,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_watershed_summary_subcatchments",
+    "line": 312,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_watershed_summary_channels",
+    "line": 321,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_watershed_summary",
+    "line": 331,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "task_abstract_watershed",
+    "line": 341,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "sub_intersection",
+    "line": 351,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 354,
+        "call": "request.json.get('extent', None)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_terrain_processor_config",
+    "line": 652,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/config')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/config/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "set_terrain_processor_config",
+    "line": 661,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/tasks/set_terrain_processor_config/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 664,
+        "call": "request.get_json(silent=True)"
+      },
+      {
+        "line": 666,
+        "call": "parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "run_terrain_processor",
+    "line": 688,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/tasks/run_terrain_processor/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 692,
+        "call": "request.get_json(silent=True)"
+      },
+      {
+        "line": 694,
+        "call": "parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_terrain_processor_last_result",
+    "line": 739,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/last_result')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/last_result/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "query_terrain_processor_manifest",
+    "line": 749,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/manifest')",
+      "watershed_bp.route('/runs/<string:runid>/<config>/query/terrain_processor/manifest/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watershed_bp.py",
+    "function": "resources_terrain_processor_artifact",
+    "line": 763,
+    "routes": [
+      "watershed_bp.route('/runs/<string:runid>/<config>/resources/terrain_processor/<path:artifact_relpath>')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "view_channel_def",
+    "line": 623,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "view_management",
+    "line": 638,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/management/<key>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/management/<key>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "view_management_effective",
+    "line": 654,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/management_effective/<key>/<texture>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/view/management_effective/<key>/<texture>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "task_set_hourly_seepage",
+    "line": 719,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])",
+      "wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 720,
+        "call": "parse_request_payload(request, boolean_fields={'state'})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_results",
+    "line": 764,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "download_ermit_export",
+    "line": 859,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/download/ermit')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/download/ermit/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "download_features_export_published",
+    "line": 885,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_rusle_results",
+    "line": 912,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/rusle/results')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/rusle/results/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_subcatchments_summary",
+    "line": 953,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/subcatchments_summary')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/subcatchments_summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_channels_summary",
+    "line": 971,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/channels_summary')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/channels_summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "get_wepp_prep_details",
+    "line": 989,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_wepp_phos_opts",
+    "line": 1012,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_run_summary",
+    "line": 1021,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_loss",
+    "line": 1050,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_yearly_watbal",
+    "line": 1142,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_avg_annual_by_landuse",
+    "line": 1189,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_avg_annual_watbal",
+    "line": 1219,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "plot_wepp_streamflow",
+    "line": 1267,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_return_periods",
+    "line": 1391,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_frq_flood",
+    "line": 1555,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_wepp_sediment_delivery",
+    "line": 1576,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_wepp_sub_phosphorus",
+    "line": 1617,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_ron_chn_summary",
+    "line": 1626,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_ron_sub_summary",
+    "line": 1635,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_ron_chn_summary",
+    "line": 1650,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_topaz_wepp_map",
+    "line": 1668,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/topaz_wepp_map')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/topaz_wepp_map/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "report_ron_sub_summary",
+    "line": 1683,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "resources_wepp_loss",
+    "line": 1695,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp_loss.tif')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/wepp_bp.py",
+    "function": "query_bound_coords",
+    "line": 1714,
+    "routes": [
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords')",
+      "wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "query_landuse",
+    "line": 613,
+    "routes": [
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse')",
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "query_landuse_subcatchments",
+    "line": 622,
+    "routes": [
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')",
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "query_landuse_channels",
+    "line": 631,
+    "routes": [
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/channels')",
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/channels/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "report_landuse",
+    "line": 641,
+    "routes": [
+      "landuse_bp.route('/runs/<string:runid>/<config>/report/landuse')",
+      "landuse_bp.route('/runs/<string:runid>/<config>/report/landuse/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "view_landuse_user_defined",
+    "line": 683,
+    "routes": [
+      "landuse_bp.route(\"/runs/<string:runid>/<config>/landuse-user-defined\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "view_landuse_map",
+    "line": 716,
+    "routes": [
+      "landuse_bp.route(\"/runs/<string:runid>/<config>/landuse-map\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/landuse_bp.py",
+    "function": "query_landuse_cover_subcatchments",
+    "line": 751,
+    "routes": [
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments')",
+      "landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/treatments_bp.py",
+    "function": "set_treatments_mode",
+    "line": 14,
+    "routes": [
+      "treatments_bp.route('/runs/<string:runid>/<config>/tasks/set_treatments_mode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 15,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "hillslope0_ash",
+    "line": 44,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')",
+      "watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "task_set_ash_wind_transport",
+    "line": 172,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport', methods=['POST'])",
+      "watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 175,
+        "call": "request.json.get('run_wind_transport', None)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "report_run_ash",
+    "line": 199,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/report/run_ash')",
+      "watar_bp.route('/runs/<string:runid>/<config>/report/run_ash/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "report_ash",
+    "line": 217,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/report/ash')",
+      "watar_bp.route('/runs/<string:runid>/<config>/report/ash/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "query_ash_out",
+    "line": 276,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/query/ash_out')",
+      "watar_bp.route('/runs/<string:runid>/<config>/query/ash_out/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "function": "report_contaminant",
+    "line": 294,
+    "routes": [
+      "watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])",
+      "watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/debris_flow_bp.py",
+    "function": "report_debris_flow",
+    "line": 26,
+    "routes": [
+      "debris_flow_bp.route('/runs/<string:runid>/<config>/report/debris_flow')",
+      "debris_flow_bp.route('/runs/<string:runid>/<config>/report/debris_flow/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/observed_bp.py",
+    "function": "submit_task_run_model_fit",
+    "line": 21,
+    "routes": [
+      "observed_bp.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])",
+      "observed_bp.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 25,
+        "call": "parse_request_payload(request, trim_strings=False)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/observed_bp.py",
+    "function": "report_observed",
+    "line": 66,
+    "routes": [
+      "observed_bp.route('/runs/<string:runid>/<config>/report/observed')",
+      "observed_bp.route('/runs/<string:runid>/<config>/report/observed/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/observed_bp.py",
+    "function": "resources_observed_data",
+    "line": 140,
+    "routes": [
+      "observed_bp.route('/runs/<string:runid>/<config>/resources/observed/<file>')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_upload_geojson",
+    "line": 294,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/upload_geojson\", methods=[\"POST\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/upload_geojson/\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_set_params",
+    "line": 369,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/set_params\", methods=[\"POST\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/set_params/\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 377,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_prepare_segments",
+    "line": 427,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/prepare_segments\", methods=[\"POST\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/prepare_segments/\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_run",
+    "line": 446,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/run\", methods=[\"POST\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/tasks/roads/run/\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_get_config",
+    "line": 464,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/api/roads/config\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_set_config",
+    "line": 483,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/api/roads/config\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 487,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_status",
+    "line": 505,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/api/roads/status\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "roads_results",
+    "line": 514,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/api/roads/results\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "query_roads",
+    "line": 532,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads\", methods=[\"GET\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "query_roads_summary",
+    "line": 542,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads/summary\", methods=[\"GET\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads/summary/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "resources_roads_geojson",
+    "line": 552,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/resources/roads.json\", methods=[\"GET\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/resources/roads.json/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "query_roads_segment_detail",
+    "line": 588,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads/segment/<segment_id>\", methods=[\"GET\"])",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/query/roads/segment/<segment_id>/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "report_roads_summary",
+    "line": 613,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/summary\")",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/summary/\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "report_roads_results",
+    "line": 630,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/results\")",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/results/\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/roads_bp.py",
+    "function": "report_roads_segment_summary",
+    "line": 649,
+    "routes": [
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/segment_summary/<segment_id>\")",
+      "roads_bp.route(\"/runs/<string:runid>/<config>/report/roads/segment_summary/<segment_id>/\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/unitizer_bp.py",
+    "function": "task_set_unit_preferences",
+    "line": 20,
+    "routes": [
+      "unitizer_bp.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])",
+      "unitizer_bp.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 25,
+        "call": "parse_request_payload(request, trim_strings=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/unitizer_bp.py",
+    "function": "unitizer_route",
+    "line": 42,
+    "routes": [
+      "unitizer_bp.route('/runs/<string:runid>/<config>/unitizer')",
+      "unitizer_bp.route('/runs/<string:runid>/<config>/unitizer/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/unitizer_bp.py",
+    "function": "unitizer_units_route",
+    "line": 67,
+    "routes": [
+      "unitizer_bp.route('/runs/<string:runid>/<config>/unitizer_units')",
+      "unitizer_bp.route('/runs/<string:runid>/<config>/unitizer_units/')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py",
+    "function": "query_rangeland_cover_current",
+    "line": 58,
+    "routes": [
+      "rangeland_cover_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 62,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py",
+    "function": "set_rangeland_cover_mode",
+    "line": 70,
+    "routes": [
+      "rangeland_cover_bp.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 71,
+        "call": "parse_request_payload(request)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "_json_object_payload",
+    "line": 113,
+    "routes": [],
+    "parsing": [
+      {
+        "line": 114,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "geneva_get_config",
+    "line": 317,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/config\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "geneva_set_config",
+    "line": 327,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/config\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "task_geneva_prepare_hrus",
+    "line": 363,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/tasks/geneva/prepare_hrus\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "task_geneva_build_frequency_panel",
+    "line": 422,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/tasks/geneva/build_frequency_panel\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "task_geneva_run_batch",
+    "line": 451,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/tasks/geneva/run_batch\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "geneva_status",
+    "line": 479,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/status\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "geneva_results",
+    "line": 489,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/results\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "geneva_frequency_panel",
+    "line": 499,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/frequency_panel\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "query_geneva_summary",
+    "line": 513,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/query/geneva/summary\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "query_geneva_hru_map_rows",
+    "line": 540,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/query/geneva/hru_map_rows\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "query_geneva_hru_map_features",
+    "line": 570,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/query/geneva/hru_map_features\", methods=[\"POST\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "report_geneva_summary",
+    "line": 588,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/report/geneva/summary\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "modify_geneva_cn_table",
+    "line": 633,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/modify_geneva_cn_table\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "lookup_geneva_cn_table_meta",
+    "line": 683,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/cn_table_meta\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "lookup_geneva_cn_table_snapshot",
+    "line": 700,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/api/geneva/cn_table_snapshot\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "task_modify_geneva_cn_table",
+    "line": 717,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/tasks/modify_geneva_cn_table\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 723,
+        "call": "request.get_json(silent=True, force=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py",
+    "function": "task_reset_geneva_cn_table",
+    "line": 793,
+    "routes": [
+      "geneva_bp.route(\"/runs/<string:runid>/<config>/tasks/reset_geneva_cn_table\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 799,
+        "call": "parse_request_payload(request, boolean_fields={\"confirm\"})"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "usersum_index",
+    "line": 595,
+    "routes": [
+      "usersum_bp.route(\"/usersum/\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "feature_catalog",
+    "line": 605,
+    "routes": [
+      "usersum_bp.route(\"/usersum/features/\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "view_doc",
+    "line": 621,
+    "routes": [
+      "usersum_bp.route(\"/usersum/doc/<doc_id>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "view_markdown",
+    "line": 636,
+    "routes": [
+      "usersum_bp.route(\"/usersum/view/<category>/<path:filename>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "view_vendor_markdown",
+    "line": 658,
+    "routes": [
+      "usersum_bp.route(\"/usersum/vendor/<vendor_id>/<path:filename>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "view_src_markdown",
+    "line": 679,
+    "routes": [
+      "usersum_bp.route(\"/usersum/src/<path:rel_path>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "view_src_markdown_legacy",
+    "line": 712,
+    "routes": [
+      "usersum_bp.route(\"/usersum/src//<path:rel_path>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "raw_markdown",
+    "line": 717,
+    "routes": [
+      "usersum_bp.route(\"/usersum/raw/<path:rel_path>\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "usersum_api_parameter",
+    "line": 1001,
+    "routes": [
+      "usersum_bp.route(\"/usersum/api/parameter\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "usersum_api_keyword",
+    "line": 1020,
+    "routes": [
+      "usersum_bp.route(\"/usersum/api/keyword\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "usersum_api_search",
+    "line": 1057,
+    "routes": [
+      "usersum_bp.route(\"/usersum/api/search\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/usersum/usersum.py",
+    "function": "usersum_search",
+    "line": 1109,
+    "routes": [
+      "usersum_bp.route(\"/usersum/search\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py",
+    "function": "rq_archive_dashboard",
+    "line": 62,
+    "routes": [
+      "archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py",
+    "function": "rq_archive_list",
+    "line": 77,
+    "routes": [
+      "archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard/archives', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/fork_console/fork_console.py",
+    "function": "rq_fork_console",
+    "line": 145,
+    "routes": [
+      "fork_bp.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)",
+      "fork_bp.route('/runs/<string:runid>/<config>/rq-fork-console/', strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/command_bar/command_bar.py",
+    "function": "set_log_level",
+    "line": 71,
+    "routes": [
+      "command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/loglevel', methods=['POST'])"
+    ],
+    "parsing": [
+      {
+        "line": 78,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/command_bar/command_bar.py",
+    "function": "get_lock_statuses",
+    "line": 110,
+    "routes": [
+      "command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/locks', methods=['GET'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/command_bar/command_bar.py",
+    "function": "get_directory_lock_statuses",
+    "line": 152,
+    "routes": [
+      "command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/directory_locks', methods=['GET'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/command_bar/command_bar.py",
+    "function": "clear_directory_lock_statuses",
+    "line": 170,
+    "routes": [
+      "command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/clear_directory_locks', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/command_bar/command_bar.py",
+    "function": "issue_query_engine_mcp_token",
+    "line": 251,
+    "routes": [
+      "command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_mcp_token', methods=['POST'])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py",
+    "function": "component_gallery",
+    "line": 66,
+    "routes": [
+      "ui_showcase_bp.route(\"/\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py",
+    "function": "report_accessibility_probe",
+    "line": 710,
+    "routes": [
+      "ui_showcase_bp.route(\"/report-a11y\", methods=[\"GET\"])"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/readme_md/readme_md.py",
+    "function": "readme_editor",
+    "line": 458,
+    "routes": [
+      "readme_bp.route(\"/runs/<string:runid>/<config>/readme-editor\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/readme_md/readme_md.py",
+    "function": "readme_raw",
+    "line": 490,
+    "routes": [
+      "readme_bp.route(\"/runs/<string:runid>/<config>/readme/raw\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/readme_md/readme_md.py",
+    "function": "readme_save",
+    "line": 514,
+    "routes": [
+      "readme_bp.route(\"/runs/<string:runid>/<config>/readme/save\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 520,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/readme_md/readme_md.py",
+    "function": "readme_preview",
+    "line": 592,
+    "routes": [
+      "readme_bp.route(\"/runs/<string:runid>/<config>/readme/preview\", methods=[\"POST\"])"
+    ],
+    "parsing": [
+      {
+        "line": 598,
+        "call": "request.get_json(silent=True)"
+      }
+    ],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/readme_md/readme_md.py",
+    "function": "readme_render",
+    "line": 616,
+    "routes": [
+      "readme_bp.route(\"/runs/<string:runid>/<config>/README\")"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/ui.py",
+    "function": "login",
+    "line": 73,
+    "routes": [
+      "security_bp.route(\"/login\", methods=[\"GET\", \"POST\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/ui.py",
+    "function": "welcome",
+    "line": 82,
+    "routes": [
+      "security_bp.route(\"/welcome\", methods=[\"GET\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/ui.py",
+    "function": "goodbye",
+    "line": 87,
+    "routes": [
+      "security_bp.route(\"/goodbye\", methods=[\"GET\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/oauth.py",
+    "function": "oauth_login",
+    "line": 405,
+    "routes": [
+      "security_oauth_bp.route(\"/oauth/<provider>/login\", methods=[\"GET\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/oauth.py",
+    "function": "callback",
+    "line": 440,
+    "routes": [
+      "security_oauth_bp.route(\"/oauth/<provider>/callback\", methods=[\"GET\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/oauth.py",
+    "function": "callback_alias",
+    "line": 559,
+    "routes": [
+      "security_oauth_bp.route(\"/<provider>-auth-callback\", methods=[\"GET\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/_security/oauth.py",
+    "function": "disconnect",
+    "line": 565,
+    "routes": [
+      "security_oauth_bp.route(\"/oauth/<provider>/disconnect\", methods=[\"POST\"], strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/rq/info_details/routes.py",
+    "function": "rq_info_details",
+    "line": 171,
+    "routes": [
+      "rq_info_details_bp.route(\"/rq/info-details\", strict_slashes=False)"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  },
+  {
+    "source": "wepppy/weppcloud/routes/rq/job_dashboard/routes.py",
+    "function": "job_dashboard_route",
+    "line": 16,
+    "routes": [
+      "rq_job_dashboard_bp.route('/rq/job-dashboard/<string:job_id>')"
+    ],
+    "parsing": [],
+    "disposition": "unresolved; source inventory, not runtime conformance"
+  }
+]

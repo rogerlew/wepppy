@@ -162,6 +162,9 @@ variants. A late response MUST NOT recreate a fenced SID.
 - Raw `fetch(...)` mutation calls MUST attach `X-CSRFToken` when they target CSRF-protected Flask routes.
 - Templates that rely on JS mutations SHOULD expose a discoverable token source (for example, `<meta name="csrf-token" ...>` or hidden form field).
 
+MRS-01 proposed checkpoint (implementation pending): [payload validation](request-payload-contract.md)
+runs within existing auth/CSRF/request-lock boundaries before business mutation.
+This amendment changes no CSRF exemptions, token requirements or auth precedence.
 ## rq-engine and 3rd-Party API Requirements
 - 3rd-party and agent clients MUST use bearer-token auth for rq-engine API routes.
 - Bearer-token routes MUST remain CSRF-agnostic so non-browser clients are not coupled to CSRF tokens.
