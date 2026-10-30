@@ -1,5 +1,64 @@
 # WEPP run input contract
 
+## Admission before proposed input mutation (WAM-01)
+
+Operator requested 2026-10-30. Contract checkpoint ratification and implementation
+conformance are pending; this is not a deployment claim.
+
+Execution submissions through `run-wepp`, `run-wepp-watershed`,
+`prep-wepp-watershed`, `run-wepp-npprep`, and `run-wepp-watershed-no-prep`
+MUST establish WEPP admission before applying proposed input changes. Hold the
+existing run lifecycle and WEPP submission leases continuously across deferred
+reconciliation, active-work admission, payload application, completion timestamp
+reset, replacement receipt/hint publication, and enqueue. Preserve renewal,
+ownership checkpoints and ownership-safe release. Never hold these leases across
+model execution. A separate precheck followed by release and later mutation is
+insufficient.
+
+Busy-lease, active-root/descendant, and ambiguous-association rejection MUST NOT
+apply proposed inputs, clear completion timestamps, replace active-job receipts
+or hints, or enqueue replacement work. Reconciliation may update safely associated
+prior orchestration state under the existing
+[RQ response contract](rq-response-contract.md#error-responses); rejection does
+not imply byte-identical Redis state. An active descendant remains a conflict
+after its dispatcher finishes. Missing/terminal legacy hints remain retryable.
+
+The shared preparation handler's batch membership (`run_group == "batch"`) and
+base detection (case-insensitive, trimmed final `;;` runid component or config
+of `_base`) retain synchronous configuration-only saves and their existing
+message, without an execution active-job gate or enqueue. This exception does
+not broaden bootstrap no-prep eligibility or add a configuration-only mode there.
+No-prep submissions still use checked-out prepared files without regeneration;
+the ordering rule also protects their proposed controller metadata changes.
+
+Preserve auth, prerequisites, capability validation, payload semantics, sparse
+fields, false/zero values, errors and successful job identity. Admission conflicts
+may precede payload validation when both apply; admitted payload validation retains
+its existing error contract. Webhook replay returns its existing identity without
+reapplying inputs or duplicating enqueue. New webhook submissions follow this
+admission rule; callback reservation/recovery metadata remains governed by the
+[webhook contract](rq-webhook-contract.md#admission-and-recovery-matrix).
+
+This rule governs rejection before payload application. It adds no cross-controller
+transaction or rollback guarantee for payload, lease, storage or enqueue failure
+after admission/application begins. Preserve existing explicit failure and cleanup
+contracts. It does not freeze inputs against unrelated editing endpoints or
+nonparticipating writers.
+
+Rationale: workers reload saved controller state during preparation, so a rejected
+submission must not publish parameters that admitted work can consume. Extending
+the existing critical section closes this ordering gap without new infrastructure,
+immutable snapshots or changes to valid configuration-only saves.
+
+Evidence must include real NoDb persistence/reload, actual lease contention and
+controlled competing submissions, and parsed prepared input under `wepp/runs/`
+after accepting A and rejecting changed B. Retain existing visible controller,
+intermediate, prepared-input, log and output paths and normal browse/download and
+archive/restore behavior. No new artifact format, hidden path or exclusion is
+introduced. Full model execution is unnecessary when exact prepared-input
+readback establishes this boundary; it cannot support claims about scientific
+outputs or repaired production runs.
+
 ## Executable selection (CBEXEC-01)
 
 [WEPP executable selection](wepp-executable-selection-contract.md) governs

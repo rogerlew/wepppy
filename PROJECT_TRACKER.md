@@ -15,6 +15,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active: [WEPP admission before mutation](docs/work-packages/20261030_wepp_admission_before_mutation/package.md) — five static consumers confirmed; checkpoint independently reviewed, 135 baseline tests pass; implementation awaits checkpoint commit authority.
+
 Completed: [WEPP 261029 release promotion](docs/work-packages/20261030_wepp_261029_release/package.md) — independent AI reviews accepted; matched Linux pair and illustrated defect/patch report pushed. Native 663 tests and WEPPpy 12,210 tests pass (298 skipped). Defaults and deployment unchanged.
 
 Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — autonomous outcome-driven search with frozen scientific gates, followed by a run-scoped user-facing parameterization view; CSV editing not required.

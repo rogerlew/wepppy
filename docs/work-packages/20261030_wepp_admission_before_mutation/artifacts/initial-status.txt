@@ -1,0 +1,47 @@
+ M PROJECT_TRACKER.md
+ M docs/adrs/README.md
+ M docs/work-packages/20261029_roads_parameterization_program/acceptance.md
+ M docs/work-packages/20261029_roads_parameterization_program/autonomy.md
+ M docs/work-packages/20261029_roads_parameterization_program/package.md
+ M docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md
+ M docs/work-packages/20261029_roads_parameterization_program/tracker.md
+ M wepppy/nodb/mods/roads/specification.md
+ M wepppy/weppcloud/routes/usersum/generated/docs_index.json
+?? docs/adrs/ADR-0113-native-roads-boundary-accounting-ablation.md
+?? docs/adrs/ADR-0114-native-equivalent-melt-support-and-storage.md
+?? docs/adrs/ADR-0115-native-boundary-anchored-deposition.md
+?? docs/adrs/ADR-0116-native-channel-sediment-source-accounting.md
+?? docs/adrs/ADR-0117-native-constant-discharge-channel-support.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/archive-receipt-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/broad-failure-fixture/
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/builder-bridge-v2-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/builder_bridge.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v2.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/cap-only-v1-stratified.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/cap-only-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/cap_only.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/charleston-cap-budget-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/continuation-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/continuation-reviews.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/continuation.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/continuation_report.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/daily-coupling-fixture/
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/design-v2.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development-matrix-v1-stratified.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development-matrix-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development-pilot-v1-stratified.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development-pilot-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development_matrix.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/development_pilot.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/exact-legacy-v1-stratified.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/exact-legacy-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/exact_legacy_control.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/fixture-instructions.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-normalization-comparison.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-accounting-archive-receipts.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/paired-daily-coupling-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/rebaseline-v1-stratified.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/rebaseline-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_daily_coupling.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/unmet-budget-v1.json
+?? docs/work-packages/20261030_wepp_admission_before_mutation/

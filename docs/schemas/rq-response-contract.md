@@ -453,6 +453,15 @@ existing sanitized generic `auth_actor` for worker propagation and protected
 operator diagnostics, but open polling must apply the `auth_actor=null`
 projection above.
 
+## WEPP proposed-input admission ordering
+
+[WAM-01](wepp-run-input-contract.md#admission-before-proposed-input-mutation-wam-01)
+extends the WEPP single-flight rule to proposed input persistence, completion
+timestamps and replacement receipts/hints for the five named execution endpoints.
+Configuration-only saves and permitted prior-work reconciliation retain their
+specified exceptions. Existing 409 envelopes and middleware `job_active` errors
+remain unchanged. Checkpoint ratification and implementation conformance pending.
+
 ## Error responses
 - Use status-code-first semantics:
   - 4xx for validation/input errors.

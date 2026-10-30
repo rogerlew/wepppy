@@ -88,6 +88,15 @@ Omit browse credential fields on that response. Do not remove staged inputs, rep
 computation failure, or enqueue again. Same-key retry reattempts issuance only after
 authorization; no new token-renewal API is introduced.
 
+## WEPP input ordering
+
+New WEPP callback submissions follow
+[WAM-01](wepp-run-input-contract.md#admission-before-proposed-input-mutation-wam-01):
+WEPP admission precedes proposed input persistence. Existing replay, reservation,
+prepublication cleanup and publication-uncertainty rules above remain unchanged;
+callback metadata is distinct from proposed model inputs and active-job hints.
+Checkpoint ratification and implementation conformance pending.
+
 ## Event envelope
 
 Send an unsigned HTTPS POST with `Content-Type: application/json`,
