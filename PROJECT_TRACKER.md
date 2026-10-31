@@ -15,6 +15,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Active checkpoint: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — contamination reproduced; contract and consumer audit prepared; implementation awaits reviewed standalone checkpoint commit authority.
+
 Completed locally: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — both frameworks and confirmed consumers repaired; independent correctness/security/QA approved. 4,017 route tests and 71 real persistence tests pass. Split broad coverage: 12,451 passed / 368 executed skips plus one collection skip; plain full command hit an unrelated active test lock. Docs checkpoints and implementation committed; no deployment.
 
 Completed locally: [WEPP admission before mutation](docs/work-packages/20261030_wepp_admission_before_mutation/package.md) — five endpoints corrected after checkpoint `525e78c9f`; 237 focused, 38 final boundary and 72 archive/browse checks pass; full suite 12,210 passed / 334 skipped. Independent reviews approve; no deployment.
@@ -23,7 +25,7 @@ Completed: [WEPP 261029 release promotion](docs/work-packages/20261030_wepp_2610
 
 Completed: [WEPP 261029 artifact revision 2](docs/work-packages/20261030_wepp_261029_rerelease/package.md) — accepted matched pair and illustrated report reissued; 1,059 native tests, 840 Roads physical cases, 99 Disturbed tests and fresh Cedar audits pass. Isolated WEPPpy coverage: 12,213 passed / 332 skipped; initial failures retained, all 14 archives verified. No deployment/default change.
 
-Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — final native accounting repairs accepted; 840/840 physical cases pass. Magnitude remains unmet: 719/766 meaningful-reference and 30/74 small-reference cases. Withheld panel untouched; human specification/layout approval required before UI implementation.
+Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — final native accounting repairs accepted; 840/840 physical cases pass. Magnitude remains unmet: 719/766 meaningful-reference and 30/74 small-reference cases. Resumed role attribution: 840 paired readbacks and 111 physical controls; downstream soil/runtime work remains. Withheld panel untouched; human specification/layout approval required before UI implementation.
 
 Completed locally: [Roads drainage physical justification and validation](docs/work-packages/20261029_roads_drainage_validation/package.md) — 2,112 native runs; source drainage fixes 17 factor-ten failures but regresses 13. Missing UI-mode sidecar materially affects prior benchmark applicability; six negative-flux cases retained. No production candidate accepted; 12,186 tests passed / 298 skipped.
 

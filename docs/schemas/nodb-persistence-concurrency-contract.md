@@ -294,6 +294,130 @@ over scientific project files.
 - `wepppy/nodb/AGENTS.md`
 - `tests/nodb/test_base_boundary_characterization.py`
 
+## Failed high-level mutation state (NFMS-01; specified, implementation pending)
+
+A failed high-level mutation MUST NOT leave rejected or uncommitted state
+available through the affected controller to later reads, unrelated successful
+mutations, or generated-input preparation. Lock release and unchanged disk
+signatures do not prove clean memory. This extends the previous lock/disk
+contract to reuse of already-returned controller references.
+
+### Ownership and recovery state machine
+
+Before acquisition, failed acquisition MUST leave the legitimate owner's memory,
+signatures and lock token untouched. Producers MUST stage proposed mutable
+values outside the live controller or begin an owned mutation before changing
+live fields; late lock acquisition does not protect earlier mutations.
+
+After acquisition, an escaping operation or persistence exception MUST discard
+uncommitted controller state. Before reuse, restore the same controller identity
+in place from a coherent authoritative disk generation under appropriate writer
+coordination, or make the affected instance explicitly unusable until that
+recovery succeeds. Merely evicting a singleton or invalidating its signature is
+insufficient for held references. Recovery MUST replace persisted state,
+including nested values and newly added/deleted attributes. Shared failed-state
+recovery MUST NOT merge rejected changes with durable data or write old entry
+snapshots back to disk; separately authorized domain compensation is governed
+by the composite-operation rule below.
+
+Recovery MUST preserve owner-token fencing and MUST NOT overwrite another
+same-process owner's active state. If ownership has been lost, do not release
+the replacement owner's lock. Obtain safe coordination before restoration or
+quarantine the failed instance without changing the replacement owner's object.
+Concurrent singleton readers MUST NOT advertise dirty failed state as current.
+Stale-write rejection remains an explicit conflict: recover the latest durable
+generation and reapply an intended operation from that generation, never redump
+the rejected stale object. Recovery may observe a newer committed generation;
+it must associate decoded bytes with their own descriptor signature.
+
+Atomic replacement is the commit boundary. An exception after replacement,
+an explicit intermediate dump, or an earlier component commit MUST NOT cause
+shared failed-state recovery to restore pre-commit memory or old disk bytes.
+Separately authorized domain compensation remains subject to the composite rule. Recover the currently
+authoritative generation if committed state cannot be trusted in memory.
+Existing directory-fsync warnings and best-effort mirror classifications remain
+unchanged. Validation, metadata, notification, unlock and post-dump-hook errors
+must preserve this distinction. A returned exception is not proof of no commit.
+
+When recovery fails (including missing, malformed or unreadable durable data,
+Redis outage or lost ownership), the original operation failure MUST remain
+diagnosable with observable recovery/cleanup context. The failed instance MUST
+reject ordinary state reads, new mutations and persistence until safe recovery;
+unchanged signatures or unavailable Redis cannot authorize dirty reuse. Allow
+bounded explicit recovery after the fault clears. Do not introduce retry loops,
+global cache clearing, force unlocks, or silently substitute partial records.
+Cancellation and other escaping BaseException subclasses require the same
+minimal cleanup boundary and MUST propagate; process death is outside in-memory
+recovery guarantees.
+
+### Reference, lifecycle and compatibility limits
+
+Controller identity is preserved when recovery succeeds. References to nested
+mutable values obtained before failure are invalid after recovery; arbitrary
+external Python aliases cannot be transparently repaired. Audited consumers
+MUST reacquire nested values from the recovered controller and MUST NOT reattach
+or persist a rejected alias. Producers that mutate options before acquiring a
+lock require local staging or a correctly placed owned mutation boundary.
+
+Logging resources and declared transient fields are not persisted snapshots.
+Recovery MUST preserve or deliberately rebuild their lifecycle without duplicate
+listeners, leaked handlers, copied locks/clients or stale derived caches.
+Runtime-only recovery metadata MUST NOT enter jsonpickle payloads. Successful
+setters SHOULD NOT serialize/copy/reload state solely for rollback; any added
+healthy-path cost requires representative controller measurements.
+
+If first initialization fails before a durable file exists, preserve the
+initialization error and make that failed object unusable; retry initialization
+with a fresh object. Do not fabricate an authoritative empty record. Independent
+optional reads still return absence as contracted. Fresh initialization,
+present-empty, populated, supported legacy, detached and readonly/ignore-lock
+reads retain their existing behavior. Detached writable objects have the same
+failed high-level mutation guarantee; readonly objects still reject writes.
+Existing coherent hydration and legacy decode hooks remain authoritative.
+
+Low-level direct `dump()` retains explicit retry semantics for pre-commit I/O
+failure: the caller may retry its intentionally retained payload while still
+owning the lock and satisfying stale-write checks. This is not an aborted
+high-level mutation. Manual high-level lock/mutate/dump/unlock producers MUST
+establish an abort boundary for both body and persistence failures; unlocking
+alone is insufficient. `dump_and_unlock()` is a high-level completion boundary.
+
+Composite operations MUST classify each file's actual commit outcome. This
+contract grants no new distributed rollback or reversal of published artifacts
+or external actions. Existing explicitly bounded grouped compensation may remain
+only while ownership and generation checks authorize it; it MUST NOT redump stale
+entry snapshots over another writer's generation. After compensation succeeds or
+fails, live state MUST match actual durable bytes or be unusable. Shared recovery
+MUST NOT itself initiate compensation or double-apply controller-local rollback.
+
+### Consumer and acceptance obligations
+
+Apply this guarantee to `locked`, `nodb_setter`, high-level completion and
+confirmed manual producers, including fresh-hydration helpers and BatchRunner
+receipts. The Batch receipt next-read signature invalidation remains useful but
+MUST also satisfy immediate held-reference safety. RQ scoped cache guards keep
+their existing placement; they do not repair failed live mutations.
+
+Regression evidence MUST use real serialized files, held singleton references,
+scalar/nested/list/option mutations, unrelated follow-up saves, at least two real
+controllers, and a manual producer. Exercise acquisition rejection, domain and
+serialization errors, temp-write/fsync/replace failures, stale writes, ownership
+loss, post-commit errors, intermediate commits and failed recovery followed by
+safe recovery. Preserve direct-dump retry, legacy and optional-state tests.
+Validate a reachable failure followed by accepted edits and actual preparation;
+parse the exact executable input under `wepp/runs/` for accepted values.
+Measure successful-path cost and repeated-failure resource lifecycle. Independent
+correctness, security and QA review must distinguish tested coverage from
+unresolved consumers and must not infer class-wide closure from base tests.
+
+Rationale: eager authoritative recovery can repair held controller references
+without healthy-path deep copies; explicit unusability is required when disk or
+ownership prevents safe restoration. Cache eviction alone and shallow snapshots
+cannot meet the outcome. Local staging is appropriate for consumers mutating
+aliased options before acquisition. These mechanisms are bounded to failed
+state reuse and do not change scientific values, on-disk schemas, lock TTL,
+authentication, permissions or queue topology.
+
 ## Bounded Initial Preparation Reads (FORK-READ-01)
 
 Implemented locally (2026-09-07 UTC); production rollout validation pending. Initial WEPP preparation
@@ -326,8 +450,10 @@ retry or merge of independently mutated objects.
 
 Retain external lock-token ownership while refreshing attributes. Failed
 acquisition must not modify an existing owner's mutation signature. After an
-acquired transaction fails, invalidate only that instance's signature so its
-next singleton read reloads durable state. Never clear global caches.
+acquired transaction fails, the NFMS-01 failed high-level mutation state section
+requires immediate held-reference safety as well as safe next-read hydration.
+Signature-only invalidation is insufficient. Never clear global caches. This
+extension is specified; implementation conformance is pending.
 
 Save root finalizer linkage and release a ready deferred finalizer before the
 compatibility receipt, so a receipt failure cannot skip RQ bookkeeping.

@@ -225,8 +225,13 @@ publication; remove an unreferenced candidate on failure. After successful
 acceptance retain current and immediately previous accepted generation, prune only
 unreferenced older generations when no build can consume them. Do not retain
 rejected hostile bytes. Temporary files are cleaned on expected failure; interrupted
-staging is identifiable for normal bounded cleanup. Disk failure preserves the
-previous active source. Enqueue failure after acceptance leaves the accepted source
+staging is identifiable for normal bounded cleanup. A precommit metadata disk
+failure preserves the previous active source. Once metadata atomic replacement
+commits, a later exception does not undo acceptance: retain the source referenced
+by authoritative metadata and recover held controller state under
+[the NFMS-01 failed mutation contract](nodb-persistence-concurrency-contract.md#failed-high-level-mutation-state-nfms-01-specified-implementation-pending).
+Do not delete a candidate referenced by committed metadata. This commit-aware
+clarification is specified; implementation conformance is pending. Enqueue failure after acceptance leaves the accepted source
 visible/reusable and returns an explicit submission error; retry does not require
 re-upload. Build failure retains source and normal job diagnostics, and cannot
 claim completed outputs. No queue topology changes are introduced.
