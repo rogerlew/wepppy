@@ -1,0 +1,1407 @@
+{
+  "remaining_small_cases": 42,
+  "positive_net_buffer": 0,
+  "positive_net_fill": 42,
+  "zero_road_boundary": 15,
+  "coupled_gains_over_conductivity": [
+    [
+      "site",
+      "2711184",
+      "outunrut",
+      "gravel",
+      "none"
+    ]
+  ],
+  "coupled_losses_to_conductivity": [],
+  "rows": [
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.08621045876226387,
+      "export_kg_yr": 4.569154314399985,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 5.6387028184193255,
+          "net_kg_yr": 5.6387028184193255,
+          "positive_daily_net_kg_yr": 5.6387028184193255,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 4.577236544908947,
+          "net_kg_yr": -1.0614662735103737,
+          "positive_daily_net_kg_yr": 2.3276823865811247,
+          "negative_daily_net_kg_yr": -3.3891486600914997
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 6.8537314715999775,
+      "ofes": [
+        {
+          "boundary_kg_yr": 42.4290160952154,
+          "net_kg_yr": 42.4290160952154,
+          "positive_daily_net_kg_yr": 42.4290160952154,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 63.79843356091156,
+          "net_kg_yr": 21.369417465696152,
+          "positive_daily_net_kg_yr": 21.385581926714078,
+          "negative_daily_net_kg_yr": -0.016164461017924476
+        },
+        {
+          "boundary_kg_yr": 6.8698959326179025,
+          "net_kg_yr": -56.92853762829366,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -56.92853762829366
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 6.638205324694318,
+      "ofes": [
+        {
+          "boundary_kg_yr": 23.950343074891414,
+          "net_kg_yr": 23.950343074891414,
+          "positive_daily_net_kg_yr": 23.950343074891414,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.387112461495576,
+          "net_kg_yr": 21.436769386604176,
+          "positive_daily_net_kg_yr": 21.450239770785778,
+          "negative_daily_net_kg_yr": -0.01347038418160373
+        },
+        {
+          "boundary_kg_yr": 6.619346786840074,
+          "net_kg_yr": -38.76776567465552,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -38.76776567465552
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 5.819205966452811,
+      "ofes": [
+        {
+          "boundary_kg_yr": 40.459645927864926,
+          "net_kg_yr": 40.459645927864926,
+          "positive_daily_net_kg_yr": 40.459645927864926,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 44.436103338274336,
+          "net_kg_yr": 3.976457410409423,
+          "positive_daily_net_kg_yr": 4.162348712115553,
+          "negative_daily_net_kg_yr": -0.18589130170613144
+        },
+        {
+          "boundary_kg_yr": 5.821900043289133,
+          "net_kg_yr": -38.614203294985224,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -38.614203294985224
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.3278889947924295,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 49.08607995776398,
+          "net_kg_yr": 49.08607995776398,
+          "positive_daily_net_kg_yr": 49.08607995776398,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.317112687447146,
+          "net_kg_yr": -41.76896727031683,
+          "positive_daily_net_kg_yr": 0.03771707570849059,
+          "negative_daily_net_kg_yr": -41.806684346025314
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.3278889947924295,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 49.08607995776398,
+          "net_kg_yr": 49.08607995776398,
+          "positive_daily_net_kg_yr": 49.08607995776398,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.317112687447146,
+          "net_kg_yr": -41.76896727031683,
+          "positive_daily_net_kg_yr": 0.03771707570849059,
+          "negative_daily_net_kg_yr": -41.806684346025314
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 16.29377670606787,
+      "ofes": [
+        {
+          "boundary_kg_yr": 41.760885039807874,
+          "net_kg_yr": 41.760885039807874,
+          "positive_daily_net_kg_yr": 41.760885039807874,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 109.32024986422314,
+          "net_kg_yr": 67.55936482441533,
+          "positive_daily_net_kg_yr": 67.56205890125165,
+          "negative_daily_net_kg_yr": -0.002694076836320746
+        },
+        {
+          "boundary_kg_yr": 16.296470782904194,
+          "net_kg_yr": -93.02377908131895,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -93.02377908131895
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 15.560987806588628,
+      "ofes": [
+        {
+          "boundary_kg_yr": 17.595015818010786,
+          "net_kg_yr": 17.595015818010786,
+          "positive_daily_net_kg_yr": 17.595015818010786,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 85.1867095644619,
+          "net_kg_yr": 67.59169374645117,
+          "positive_daily_net_kg_yr": 67.59169374645117,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 15.563681883424948,
+          "net_kg_yr": -69.623027681037,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -69.623027681037
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 3.750154956158478,
+      "ofes": [
+        {
+          "boundary_kg_yr": 29.556716971274902,
+          "net_kg_yr": 29.556716971274902,
+          "positive_daily_net_kg_yr": 29.556716971274902,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 40.58357346233571,
+          "net_kg_yr": 11.026856491060814,
+          "positive_daily_net_kg_yr": 11.067267643605625,
+          "negative_daily_net_kg_yr": -0.04041115254481119
+        },
+        {
+          "boundary_kg_yr": 3.7528490329947988,
+          "net_kg_yr": -36.8307244293409,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -36.8307244293409
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 18.92319569831692,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 85.78210054528878,
+          "net_kg_yr": 85.78210054528878,
+          "positive_daily_net_kg_yr": 85.78210054528878,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.917807544644276,
+          "net_kg_yr": -66.86429300064455,
+          "positive_daily_net_kg_yr": 0.021552614690565797,
+          "negative_daily_net_kg_yr": -66.88584561533511
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 18.92319569831692,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 85.78210054528878,
+          "net_kg_yr": 85.78210054528878,
+          "positive_daily_net_kg_yr": 85.78210054528878,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.917807544644276,
+          "net_kg_yr": -66.86429300064455,
+          "positive_daily_net_kg_yr": 0.021552614690565797,
+          "negative_daily_net_kg_yr": -66.88584561533511
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 2.069051010294333,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 8.637210337244309,
+          "net_kg_yr": 8.637210337244309,
+          "positive_daily_net_kg_yr": 8.637210337244309,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.05827470294905,
+          "net_kg_yr": -6.578935634295262,
+          "positive_daily_net_kg_yr": 0.005388153672641491,
+          "negative_daily_net_kg_yr": -6.584323787967905
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 9.13830862879997,
+      "ofes": [
+        {
+          "boundary_kg_yr": 43.32883775854653,
+          "net_kg_yr": 43.32883775854653,
+          "positive_daily_net_kg_yr": 43.32883775854653,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 68.06854534647992,
+          "net_kg_yr": 24.739707587933395,
+          "positive_daily_net_kg_yr": 24.739707587933395,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 9.154473089817895,
+          "net_kg_yr": -58.91407225666205,
+          "positive_daily_net_kg_yr": 0.013470384181602846,
+          "negative_daily_net_kg_yr": -58.927542640843654
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.758941288603748,
+      "ofes": [
+        {
+          "boundary_kg_yr": 15.032948746669767,
+          "net_kg_yr": 15.032948746669767,
+          "positive_daily_net_kg_yr": 15.032948746669767,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 39.84000825551118,
+          "net_kg_yr": 24.807059508841412,
+          "positive_daily_net_kg_yr": 24.807059508841412,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.76432944227639,
+          "net_kg_yr": -32.075678813234795,
+          "positive_daily_net_kg_yr": 0.06735192090801956,
+          "negative_daily_net_kg_yr": -32.14303073414282
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 5.172627525735832,
+      "ofes": [
+        {
+          "boundary_kg_yr": 26.2079794637282,
+          "net_kg_yr": 26.2079794637282,
+          "positive_daily_net_kg_yr": 26.2079794637282,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 40.35457693124844,
+          "net_kg_yr": 14.146597467520236,
+          "positive_daily_net_kg_yr": 14.265136848318347,
+          "negative_daily_net_kg_yr": -0.11853938079811284
+        },
+        {
+          "boundary_kg_yr": 5.161851218390549,
+          "net_kg_yr": -35.19272571285787,
+          "positive_daily_net_kg_yr": 0.03502299887216909,
+          "negative_daily_net_kg_yr": -35.227748711730044
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.80204651798488,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.80970736198184,
+          "net_kg_yr": 62.80970736198184,
+          "positive_daily_net_kg_yr": 62.80970736198184,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.807434671657521,
+          "net_kg_yr": -55.00227269032432,
+          "positive_daily_net_kg_yr": 0.10776307345282943,
+          "negative_daily_net_kg_yr": -55.110035763777155
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.80204651798488,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.80970736198184,
+          "net_kg_yr": 62.80970736198184,
+          "positive_daily_net_kg_yr": 62.80970736198184,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.807434671657521,
+          "net_kg_yr": -55.00227269032432,
+          "positive_daily_net_kg_yr": 0.10776307345282943,
+          "negative_daily_net_kg_yr": -55.110035763777155
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 1.1638411932905621,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 14.407922920643351,
+          "net_kg_yr": 14.407922920643351,
+          "positive_daily_net_kg_yr": 14.407922920643351,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.1584530396179207,
+          "net_kg_yr": -13.249469881025432,
+          "positive_daily_net_kg_yr": 0.061963767235377165,
+          "negative_daily_net_kg_yr": -13.31143364826081
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 9.310729546324497,
+      "ofes": [
+        {
+          "boundary_kg_yr": 50.49508214315973,
+          "net_kg_yr": 50.49508214315973,
+          "positive_daily_net_kg_yr": 50.49508214315973,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 72.1123546777974,
+          "net_kg_yr": 21.61727253463766,
+          "positive_daily_net_kg_yr": 21.62804884198294,
+          "negative_daily_net_kg_yr": -0.010776307345282982
+        },
+        {
+          "boundary_kg_yr": 9.329588084178742,
+          "net_kg_yr": -62.78276659361866,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -62.78276659361866
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 8.189993582415068,
+      "ofes": [
+        {
+          "boundary_kg_yr": 21.514897614857468,
+          "net_kg_yr": 21.514897614857468,
+          "positive_daily_net_kg_yr": 21.514897614857468,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 43.196827993566814,
+          "net_kg_yr": 21.681930378709364,
+          "positive_daily_net_kg_yr": 21.681930378709364,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 8.179217275069785,
+          "net_kg_yr": -35.01761071849704,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -35.01761071849704
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 5.9916268839773394,
+      "ofes": [
+        {
+          "boundary_kg_yr": 37.30757602936968,
+          "net_kg_yr": 37.30757602936968,
+          "positive_daily_net_kg_yr": 37.30757602936968,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 47.5450680073885,
+          "net_kg_yr": 10.237491978018838,
+          "positive_daily_net_kg_yr": 10.819412574664117,
+          "negative_daily_net_kg_yr": -0.581920596645281
+        },
+        {
+          "boundary_kg_yr": 5.972768346123093,
+          "net_kg_yr": -41.572299661265426,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -41.572299661265426
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.370994224173561,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 44.21518903769606,
+          "net_kg_yr": 44.21518903769606,
+          "positive_daily_net_kg_yr": 44.21518903769606,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.349441609482994,
+          "net_kg_yr": -36.865747428213076,
+          "positive_daily_net_kg_yr": 0.08621045876226385,
+          "negative_daily_net_kg_yr": -36.951957886975336
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 7.370994224173561,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 44.21518903769606,
+          "net_kg_yr": 44.21518903769606,
+          "positive_daily_net_kg_yr": 44.21518903769606,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 7.349441609482994,
+          "net_kg_yr": -36.865747428213076,
+          "positive_daily_net_kg_yr": 0.08621045876226385,
+          "negative_daily_net_kg_yr": -36.951957886975336
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 6.46578440716979,
+      "ofes": [
+        {
+          "boundary_kg_yr": 61.505774173202646,
+          "net_kg_yr": 61.505774173202646,
+          "positive_daily_net_kg_yr": 61.505774173202646,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 81.40153160943133,
+          "net_kg_yr": 19.89575743622871,
+          "positive_daily_net_kg_yr": 19.89575743622871,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 6.468478484006111,
+          "net_kg_yr": -74.93305312542522,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -74.93305312542522
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 4.913996149449041,
+      "ofes": [
+        {
+          "boundary_kg_yr": 21.377499696205106,
+          "net_kg_yr": 21.377499696205106,
+          "positive_daily_net_kg_yr": 21.377499696205106,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 41.348691283850805,
+          "net_kg_yr": 19.97119158764569,
+          "positive_daily_net_kg_yr": 19.97119158764569,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 4.922078379958003,
+          "net_kg_yr": -36.4266129038928,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -36.4266129038928
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 2.7587346803924437,
+      "ofes": [
+        {
+          "boundary_kg_yr": 35.992866533245156,
+          "net_kg_yr": 35.992866533245156,
+          "positive_daily_net_kg_yr": 35.992866533245156,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.78852991010736,
+          "net_kg_yr": 9.795663376862235,
+          "positive_daily_net_kg_yr": 10.054294753149025,
+          "negative_daily_net_kg_yr": -0.25863137628679167
+        },
+        {
+          "boundary_kg_yr": 2.7641228340650854,
+          "net_kg_yr": -43.024407076042266,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -43.024407076042266
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 5.56057459016602,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.327842771096506,
+          "net_kg_yr": 45.327842771096506,
+          "positive_daily_net_kg_yr": 45.327842771096506,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 5.541716052311774,
+          "net_kg_yr": -39.78612671878472,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -39.78612671878472
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.0,
+      "export_kg_yr": 5.56057459016602,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.327842771096506,
+          "net_kg_yr": 45.327842771096506,
+          "positive_daily_net_kg_yr": 45.327842771096506,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 5.541716052311774,
+          "net_kg_yr": -39.78612671878472,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -39.78612671878472
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.4310522938113194,
+      "export_kg_yr": 15.474777347826365,
+      "ofes": [
+        {
+          "boundary_kg_yr": 48.10274191250692,
+          "net_kg_yr": 48.10274191250692,
+          "positive_daily_net_kg_yr": 48.10274191250692,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 49.239642337434276,
+          "net_kg_yr": 1.136900424927354,
+          "positive_daily_net_kg_yr": 1.2931568814339578,
+          "negative_daily_net_kg_yr": -0.15625645650660341
+        },
+        {
+          "boundary_kg_yr": 15.482859578335326,
+          "net_kg_yr": -33.756782759098954,
+          "positive_daily_net_kg_yr": 0.11853938079811277,
+          "negative_daily_net_kg_yr": -33.875322139897065
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.4310522938113194,
+      "export_kg_yr": 10.215939363328268,
+      "ofes": [
+        {
+          "boundary_kg_yr": 24.402947983393315,
+          "net_kg_yr": 24.402947983393315,
+          "positive_daily_net_kg_yr": 24.402947983393315,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 25.652999635446136,
+          "net_kg_yr": 1.2500516520528258,
+          "positive_daily_net_kg_yr": 1.3120154192882032,
+          "negative_daily_net_kg_yr": -0.061963767235377165
+        },
+        {
+          "boundary_kg_yr": 10.232103824346193,
+          "net_kg_yr": -15.420895811099951,
+          "positive_daily_net_kg_yr": 0.12123345763443316,
+          "negative_daily_net_kg_yr": -15.542129268734385
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.3879470644301874,
+      "export_kg_yr": 14.612672760203727,
+      "ofes": [
+        {
+          "boundary_kg_yr": 40.960744219420604,
+          "net_kg_yr": 40.960744219420604,
+          "positive_daily_net_kg_yr": 40.960744219420604,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 42.202713640964475,
+          "net_kg_yr": 1.2419694215438644,
+          "positive_daily_net_kg_yr": 1.7269032520816001,
+          "negative_daily_net_kg_yr": -0.48493383053773415
+        },
+        {
+          "boundary_kg_yr": 14.620754990712689,
+          "net_kg_yr": -27.581958650251792,
+          "positive_daily_net_kg_yr": 0.09429268927122547,
+          "negative_daily_net_kg_yr": -27.676251339523017
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.04310522938113193,
+      "export_kg_yr": 1.3793673401962219,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 3.0928002080962163,
+          "net_kg_yr": 3.0928002080962163,
+          "positive_daily_net_kg_yr": 3.0928002080962163,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.3632028791782973,
+          "net_kg_yr": -1.7295973289179187,
+          "positive_daily_net_kg_yr": 0.3852529875938667,
+          "negative_daily_net_kg_yr": -2.114850316511786
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.04310522938113193,
+      "export_kg_yr": 1.3793673401962219,
+      "ofes": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 3.0928002080962163,
+          "net_kg_yr": 3.0928002080962163,
+          "positive_daily_net_kg_yr": 3.0928002080962163,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.3632028791782973,
+          "net_kg_yr": -1.7295973289179187,
+          "positive_daily_net_kg_yr": 0.3852529875938667,
+          "negative_daily_net_kg_yr": -2.114850316511786
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 24.35445460033954,
+      "ofes": [
+        {
+          "boundary_kg_yr": 51.49458464943473,
+          "net_kg_yr": 51.49458464943473,
+          "positive_daily_net_kg_yr": 51.49458464943473,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 53.240346439370555,
+          "net_kg_yr": 1.7457617899358442,
+          "positive_daily_net_kg_yr": 4.294358477095269,
+          "negative_daily_net_kg_yr": -2.5485966871594252
+        },
+        {
+          "boundary_kg_yr": 24.340984216157942,
+          "net_kg_yr": -28.899362223212627,
+          "positive_daily_net_kg_yr": 2.6455834532669704,
+          "negative_daily_net_kg_yr": -31.544945676479607
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 13.750568172581087,
+      "ofes": [
+        {
+          "boundary_kg_yr": 21.329006313151336,
+          "net_kg_yr": 21.329006313151336,
+          "positive_daily_net_kg_yr": 21.329006313151336,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 25.3377926455966,
+          "net_kg_yr": 4.008786332445272,
+          "positive_daily_net_kg_yr": 4.337463706476403,
+          "negative_daily_net_kg_yr": -0.32867737403113095
+        },
+        {
+          "boundary_kg_yr": 13.75595632625373,
+          "net_kg_yr": -11.581836319342884,
+          "positive_daily_net_kg_yr": 2.6644419911212176,
+          "negative_daily_net_kg_yr": -14.246278310464096
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5172627525735832,
+      "export_kg_yr": 17.974880651932015,
+      "ofes": [
+        {
+          "boundary_kg_yr": 35.058021871041845,
+          "net_kg_yr": 35.058021871041845,
+          "positive_daily_net_kg_yr": 35.058021871041845,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 37.64702971074608,
+          "net_kg_yr": 2.5890078397042355,
+          "positive_daily_net_kg_yr": 3.1709284363495183,
+          "negative_daily_net_kg_yr": -0.5819205966452812
+        },
+        {
+          "boundary_kg_yr": 17.96679842142305,
+          "net_kg_yr": -19.68023128932304,
+          "positive_daily_net_kg_yr": 2.780287295083008,
+          "negative_daily_net_kg_yr": -22.460518584406046
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 22.975087260143322,
+      "ofes": [
+        {
+          "boundary_kg_yr": 58.50457257754131,
+          "net_kg_yr": 58.50457257754131,
+          "positive_daily_net_kg_yr": 58.50457257754131,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 61.715912166435636,
+          "net_kg_yr": 3.2113395888943295,
+          "positive_daily_net_kg_yr": 3.456500580999516,
+          "negative_daily_net_kg_yr": -0.24516099210518816
+        },
+        {
+          "boundary_kg_yr": 22.977781336979643,
+          "net_kg_yr": -38.738130829456004,
+          "positive_daily_net_kg_yr": 1.856218940224994,
+          "negative_daily_net_kg_yr": -40.594349769680996
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 12.457411291147128,
+      "ofes": [
+        {
+          "boundary_kg_yr": 23.877603000310753,
+          "net_kg_yr": 23.877603000310753,
+          "positive_daily_net_kg_yr": 23.877603000310753,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.312550966619717,
+          "net_kg_yr": 3.434947966308952,
+          "positive_daily_net_kg_yr": 3.50229988721697,
+          "negative_daily_net_kg_yr": -0.06735192090801866
+        },
+        {
+          "boundary_kg_yr": 12.465493521656091,
+          "net_kg_yr": -14.847057444963637,
+          "positive_daily_net_kg_yr": 1.9074064001150879,
+          "negative_daily_net_kg_yr": -16.754463845078718
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5172627525735832,
+      "export_kg_yr": 18.578353863267864,
+      "ofes": [
+        {
+          "boundary_kg_yr": 41.4914773561758,
+          "net_kg_yr": 41.4914773561758,
+          "positive_daily_net_kg_yr": 41.4914773561758,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 44.03737996649891,
+          "net_kg_yr": 2.545902610323104,
+          "positive_daily_net_kg_yr": 3.39453681376414,
+          "negative_daily_net_kg_yr": -0.848634203441035
+        },
+        {
+          "boundary_kg_yr": 18.597212401122107,
+          "net_kg_yr": -25.440167565376804,
+          "positive_daily_net_kg_yr": 1.7619262509537679,
+          "negative_daily_net_kg_yr": -27.20209381633057
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 20.5180891854188,
+      "ofes": [
+        {
+          "boundary_kg_yr": 72.56765366313556,
+          "net_kg_yr": 72.56765366313556,
+          "positive_daily_net_kg_yr": 72.56765366313556,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 73.82848162253369,
+          "net_kg_yr": 1.2608279593981084,
+          "positive_daily_net_kg_yr": 1.5571764113933906,
+          "negative_daily_net_kg_yr": -0.2963484519952821
+        },
+        {
+          "boundary_kg_yr": 20.518089185418802,
+          "net_kg_yr": -53.3103924371149,
+          "positive_daily_net_kg_yr": 0.36639444973962254,
+          "negative_daily_net_kg_yr": -53.676786886854515
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5603679819547152,
+      "export_kg_yr": 8.621045876226388,
+      "ofes": [
+        {
+          "boundary_kg_yr": 24.688520128043304,
+          "net_kg_yr": 24.688520128043304,
+          "positive_daily_net_kg_yr": 24.688520128043304,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 26.22144984790981,
+          "net_kg_yr": 1.5329297198665035,
+          "positive_daily_net_kg_yr": 1.616446101792447,
+          "negative_daily_net_kg_yr": -0.08351638192594313
+        },
+        {
+          "boundary_kg_yr": 8.63451626040799,
+          "net_kg_yr": -17.586933587501825,
+          "positive_daily_net_kg_yr": 0.45260490850188595,
+          "negative_daily_net_kg_yr": -18.039538496003708
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "pore_coupled",
+        "runtime": "project"
+      },
+      "reference_kg_yr": 0.5172627525735832,
+      "export_kg_yr": 13.276410649388636,
+      "ofes": [
+        {
+          "boundary_kg_yr": 41.32444459232391,
+          "net_kg_yr": 41.32444459232391,
+          "positive_daily_net_kg_yr": 41.32444459232391,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 44.83213263321352,
+          "net_kg_yr": 3.5076880408896103,
+          "positive_daily_net_kg_yr": 3.8336713380844207,
+          "negative_daily_net_kg_yr": -0.3259832971948103
+        },
+        {
+          "boundary_kg_yr": 13.273716572552315,
+          "net_kg_yr": -31.558416060661212,
+          "positive_daily_net_kg_yr": 0.422970063302357,
+          "negative_daily_net_kg_yr": -31.98138612396357
+        }
+      ]
+    }
+  ],
+  "limitation": "Annual net exchange is not tagged particle origin or a causal attribution; negative annual buffer exchange can include individual source events.",
+  "source_results_sha256": "275711f6c27d396b280f8879a0e9ce6602b3a1667d3ce8d25a8a40a454146804",
+  "script_sha256": "fb216a4153730d83462a41e8e85217e761f999a35056f22e5fc00df2c30d5a09"
+}

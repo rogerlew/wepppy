@@ -22,7 +22,9 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Execute the 16-input runtime bridge: 112 new runs, 107 physical passes and five explicit native guard failures.
 - [x] Complete the generated/legacy by hourly/daily comparison: 196 new runs, all 464 labeled cells physically verified; reject global hourly-off (26/96 recovered, two control regressions).
 - [x] Read back seven generated role profiles and first-day native states; retain source density/retention coupling as a hypothesis.
-- [ ] Execute the source-supported generated role hydraulic audit before declaring new parameter values.
+- [x] Complete seven-material/21-role/96-horizon source audit and 14 exact-parity initialization observations.
+- [x] Execute 348 predeclared incremental road-pore/conductivity runs; fresh physical audits all pass, 24/25 misses recovered and all 20 controls retained. Seven coupled observation replays have exact output parity.
+- [ ] Establish initialization/output-equivalent legacy format bridge before downstream role isolation.
 
 - [x] D2 geometry/recession repair accepted and delivered as revision 3;
   permanent regression coverage and accepted ADR-0119 retained.
@@ -746,3 +748,70 @@ See the [soil/runtime findings](../../artifacts/soil-hourly-r3-findings.md).
 Archive retention is complete: every member was rehashed against its manifest;
 see [retention receipt](../../artifacts/runtime-soil-r3-v1-retention.json).
 Documentation lint: 31 files, zero errors or warnings.
+
+## Generated-role hydraulic audit execution — 2026-10-31
+
+Execute `hydraulic_init_probe_r3.py` build/declare/run: isolated archive of compiled
+source 6112b68bc, observation-only stdout at SCON completion and WATBAL initialization.
+Fourteen full-period replays (first retained legacy-panel case per development
+material, generated and legacy) must exactly match all released raw outputs.
+No native checkout or released binary changes. Inventory all emitted horizons and
+source dependencies; distinguish native inferred legacy values from supplied modern
+values. Physical literature must justify the next bounded contrast independently
+of its sediment response. Withheld/UI/default gates remain unchanged.
+
+### Declared conditional road-pore sensitivity
+
+Initialization observation passes 14/14 exact raw-output comparisons. Execute
+`road_pore_screen_r3.py declare/run`: three incremental road-only lanes on the
+frozen 96 misses plus 20 passing controls (348 new runs). Pore lane reduces raw
+porosity by 0.02 through density and scales FC/WP at fixed normalized retention
+shape; conductivity lane divides existing capped K by 2.4; coupled lane combines
+them. Appended VG scale values follow the same factors, though this native
+revision reads but does not consume those arrays downstream. Preserve every
+non-target line and all non-soil input bytes. The native density clamp is applied
+before computing the perturbation. The source is Martin et al. 2024,
+https://doi.org/10.1186/s13595-024-01265-4. This is a bounded sensitivity, with
+explicit model gaps: skid-trail to constructed-road transfer, uniform 0–200 mm
+instead of measured depth bands, and fixed-shape retention translation. It is
+not a calibrated road rule. Do not tune its constants after seeing sediment.
+Require all physical checks and report control regressions; no default promotion.
+
+## Hydraulic audit and sensitivity outcome — 2026-10-31
+
+### Surprises & Discoveries
+
+Generated role density/retention preservation is confirmed, with all 200 mm
+breaks present. Initialization—not day-one weather output—shows the substantial
+legacy/generated state difference. Nevertheless, a modest pore/retention treatment
+recovers only one miss. Conductivity-only recovers 24/96 and coupled recovers
+25/96; all 20 passing controls remain. All 348 treatment runs pass recomputed
+physical audits. The 14 baseline and seven coupled observation replays have
+exact full-period raw-output parity. Native corrected porosity falls by about
+0.019, rather than the raw input target 0.02, because entrapped-air corrections
+and initialization/tillage apply; observation preserves this distinction.
+
+### Decision Log
+
+No standalone parameterization accepted. Forty-two small-load misses remain,
+already preventing the full small-reference gate; do not spend a new 840-case
+sweep on these standalone treatments. Retain conductivity as a component
+hypothesis, without tuning the frozen 2.4 divisor or adding unsupported fill
+compaction. Establish exact same-format legacy equivalence before isolating
+whole fill/buffer role contributions. The research coefficient rationale and
+non-production scope are durable in ADR-0120. The next normative scope is
+[role-isolation-r3-plan.md](../../artifacts/role-isolation-r3-plan.md).
+
+### Outcomes & Retrospective
+
+369 native executions: 348 treatment runs and 21 observation replays. No binary,
+shared soil writer, default, withheld or UI changes. Ledger v14 supersedes v13.
+The source audit did not establish a production defect. Research-only field
+transfer assumptions remain explicit; numerical improvement does not validate
+constructed-road compaction or the fixed normalized-retention translation.
+See [results](../../artifacts/road-pore-screen-r3-findings.md) and
+[archive receipt](../../artifacts/hydraulic-role-r3-v1-retention.json).
+
+Retention complete: 10,323 archived files individually verified (3,170,098,899
+uncompressed bytes). Documentation lint passed for all 34 package Markdown files,
+ADR-0120 and the ADR index; spelling preview and whitespace checks are clean.

@@ -1,0 +1,3434 @@
+{
+  "cases": 348,
+  "physical_pass": 348,
+  "all_input_output_hashes_verified": true,
+  "all_native_audits_recomputed": true,
+  "checks": [
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "4966109cb6082836e8e81f20f5b0f1cb11f9a843f445d2dca251c0406c6e5595",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "78b81b56a2ae9c1a1799489f7cd7ff2261c0c80f9b20c73e17b20bc9b0990bfb",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "2a543864ba8d60162b803f50836ad7020890fbf0a52adc7a3af38fb4c873c97b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "39c24265ba8042694065695e75458345c7638138d9cd5e317eb30bbc3ec84519",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "7132659b0e4a9faba11f9976bf7c3f5a5fa5fa87e8297b290fabb112d7391af5",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "495629d6fa2cbf1e6be78eb7a82a8e7bced4bbedfd3c25c6839f6ea83217a62e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "0f9b9ef4f586b67465c0be22cd98a1a3b570ef541c7a7c3758edf8547d564071",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "a01b7e71a96e3200476e302f9349265421a1b2ccf4424a2e3da9eaf43069bcf2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "87dfcde9a95ad4bcc6c099c99cb706238754b53e6f0f26e46d9645ce242b197a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "94c45b82f3bf7ba3b12b1e3f064a2bd8b65a996d474dbfe2d3aacb7f772d6b96",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "5e1ca6c25fb02eaca3e9b9622f587a465db96c87ef4e8871fbe4cfdbc84b82bd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "e0fcc6a68fa868b0fda783d6269c34d6242695a3d8ca7e78b5bfd918dabee574",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "84f417069b6a3a29f19dcc2e35de32c153a2841760c255c4b059295971c3cf5e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "400a0928fa9027f32746eaf47ffb731a47955385e0e39e22c2628b33a44730dd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "f20ccf96ff842e2f7cccf7855789c9618b18d1d7a1fe33da8479861765d0659a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "3440acecd56d0028face80478e2906e2b576c474b6a3a143c7ec2fbb18642347",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "ff7df3707d975a4fcf9c0c11e9e27983cfc856308fe00988a83e8e7dc095d18d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "fb3715c37501534e49a2e0a6e84b80cae49ed285fe4271f31598bf511c51ae36",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "81b5f60569ef7f12e605c4a4b974b122cf102850201a29f9ab8ebee8c9b6aade",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "da3296b1e9846a92433ed0c75902b6794dea54c659a437c06af5870b5d1d67b4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "033b145bf3b4e3f94cb5145aea220fb36c60e0d7ec1328213393a776cf4d1c62",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "9048919bf57d966d2064c8b38b9d16e1ced1c24906afe380e722bf9b37089148",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "a369bd7fd5f004101f01c42df39053924886982879dd767cfe1b11a70a21453a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "538365d2dd63d03dacf6ad59d4d375cc3e135b14c9990c0ac26884ec48e4766f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "d3773903388bb001acc9710a0c1cb8096731138f323be57b42b2452f0c0141f8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "4e1c76d81e55b590838b90a7ddef7d16d0094f2004cb4469b11d7002098fc34b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "38e344c43920c8c25b30b33e4f4a4dbd09d887495b7db5810ca7b69b4fdbf134",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "0da300671dd318f62c4ae60764fa090b96878103eddf3a52c294d9270764d91b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "f2544317b104d90012ad55fe6fe848a685bd8c167997f3fe3a3c034ecebbeaac",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "b499bf4ff8b58b570d4790838954235b1106e24c3326477060c830657c67f350",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "3e9466fbcbb31b417f2b2ec0e0ee2fac769bf4a764d360c51412330c514ae679",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "3ecb27083fe71a6dca139b7efd2488732a563d5c469538b45fc9feda499ef244",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "9e9d81e5c822d0b9abe9e4c2ae601ce9b013a58a84e79af3175e70864d4e065f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "9b8fc3af3654e1bebe5bb99898479fb21da550ffd24404a65ad48b66ed0691ff",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "6af788f082a53ffcbbfe8dcf49a2704055dcbc861a40a244b367d37abee953e9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "c5e879ad65314f03e02c2edd07f63dc4455d64e9500b59e69bec3c5a571496b2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "7648ad676f2e83bca4459afdb34f675ca92d9f936bfbf2685ce6f79d3092b080",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "a7377fdae05ef41ed26526521ec6c1f941a57291ede6190327d28e9467c39881",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b522d1d854389c66a6802fd1b3949417a0f8ebf367d82a57bbe43a1f0faea697",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "186919ba41c23554d27c71a2e6d2eeacb860eaaede9959fbc5b01f148cc8b11a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "d7374f12426fa5f27f0b1b9bd89737a4be2660b0fe9b2acfbb5fd287815be833",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "73d2eb36a95eb427d9541a95b567ba0da666d89ddbbd4dc40c744f59d2f33c52",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "977f93c86cab7bc84edeacb89e77e503b32c9de19be5c85eabce23cd62104773",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "9ddd7f3212c85abacd4b830a64d1d9b69eecf8d5c95ec8e50e11016135b3c7ce",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "9d081007eae75af8dd1dbe88b9240637bcd35f0416fd187349d6a2ad4948ef37",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "84706335ca0703d211c735ebc83a939751ff5774af355f7422c52a7780e2fca6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "914eba7293da6328af29210e20afa7b7ef36eb67c7775fe7710cb6b50a8664a5",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "789e00d03a39f48437f800cac7f7eeb13a42cc8ebe1fddd3cff0354749547b5a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "6113592aa211dd3ff321f335a5fd0ec7a3eb468a4d59194c6fe7b7f8d383fb5c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "d28e1d10e554fdb5bf0d51c01bebbf68a01eb04f25771543eb11534e80a9109e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "9b2f392f2c1be69fe1a17e47e246c6a4055fc81702947da63cdd0fb854c3da6d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "4e8286548625e92e1c667580d6ee3e5c6176f113914bbd58129ba115524a0855",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "3a118e48ecd2e6e6867c2b79fc6a94440c3d35fbdffe3db1d43fc44ff5cb8676",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "2116316952de748ef1e157da354cfece9eb6eb8f104b3162765cbae01a9d9fcc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "dc2afc55154e1fd5ed2f2879b1819ac48936839f5d6d5dee5f065cc960da95a6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "4d9dddb70e61d4ec721e389da452586554049067305f678adf36c99768aaf07a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "d326afcb8a211e9b1c0c3d1ce71f9a3f6e4b050f80f66db7dc0191edbaa5d11e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "28411e64f55352b8a5bb6b9ab2455c6e51cefc32c745ed43c037ad9c2834485b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "23ca73c64aef145d03c4cb5b29de4a3dfa4d9ffb95aa00f8ee0154bf6d9edd8a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "549049509ad92b02cae9eb30775f8b4570b1f2c057e106a86b7907f2da51c494",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "241bb9d1e39bce2f991ca95aa375327bf056d8b21f6532f96bb3f20ecec0506c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "fd87639bfbd6664cc447d6f87d64e8d906d7ea4bd4ce79a3f6ba33fff2656f29",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "c8c7f04908e66be3a730bb6460a3a36aef744c5f61a538be6b8e343c394011bf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "744423a3bee0783005fd4d18cca98d67627e14492ed1298239ac582aaf2f7d2b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "638a722eeae4268e8e3aa77e15254bcdd9cf8c51aed0f63131d99c99df9f5c76",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "d0d1fa9c28dc66c35096a5efe6801e4aac8a3426a99730903234838d420b4385",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "4aea52c84a5b8a7ac85a49295900bd27bb1e5d883e463bab89ae70cbef75410d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "91fac3f5fb38b11fa64dffc5d244dab9e4535730123f73a10cdb0f46f0d5e30c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "48bd10eaf8b8c5dc1efdf75509672ee3b056b8ea47b49de12b561593e6ae7716",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "775d7f488e1a87e9034d843a7f498d2723d42496656a9db38e4ede5976b07d01",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "1b1c9635b6b147067866fe4f403e77bbc816852153757fbd1d4a9fc611d843fc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "665b85830a5428b511454076d91c74c7af72b789f6e802c142a9d551e36b189a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "e74a9b6f49cd19214664d8febfd026eecaedfb6e00f87b5c8c5f926298dc40a8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "d8588d7b630c157f648f5b4f51e177349fe1ae7d1f466bf8d40b2f020008f867",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "8525949e7914ce4a97f4a67f087cf72e0bf0b8e1495a2d9e8e0e190de04eb3bf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "710f27687a2c7c3d2a2be6d830e786ea6e952d79e697895bc0fccf69318ca300",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "084209d163950c00d3294a83269550eb10513b3c91bf5e3b5ab5da405d33c016",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "5f1964b1a07d25502760b9513d9f40a4b14b038fa66b8de44c2d222416c2cd5f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b6d69fddc202a57e8d536656e25ee05426804b6da1da8e6e898a0a1d58e1a40c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b43d1edbc14265a4fec4a99fd2b58362fcf466a56a9cc973a160dcd69db0cddf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "05900d4250e03b5e7b915f21d227706021f9069fa43e13f21911f8e74e836d68",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "df2bd2191ae4a2d67147e729d6cc82b7e52948d51fdafb8f2c6170682040545a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "b662e40ab336ff9d4e073dca784dace5e63d6e2ee42d977e0213216df68c65b9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "f635b7f72f37f07643cb688ece24924c819f2ceaff78c9eeae6025d988a80e4f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "4dc5d7eeb0f4cd8c39f770197bb1e28f46058ca1ba058c2f9659feb6068e4501",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "ca4f2925ee2938e4365c28299d8d9e246877115998c4a14208de8482ae3bfe19",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "c2b396e316da8ae2722e6475ca8ed0b68b310257e34c4cabd496ce164c3c85d0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "172eea6d4f8008faa81548cdc03978a47c3e7f1937e1517c5cae56f17aad3040",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "513edd3a36a17383b7fa2cf472e1e5f752f054009a04577e8e62d0c57bcdc8fa",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "2a4e715c2d84ee5e427253d5d7eb8c46ff744e91ea755109efa92c4bfc06f315",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "84d6d836739a7f069f6ffd81b0f93764644c7a9ec01892486f01915c801991c4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "ecfc686182c77e8d712af086a2f54328612eb3e4599425d784095bef954bb01f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "4e596017946c0269293705c69a7ffcd609c1a28cf93d6b2af42c8a479ceb0e70",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "b853bb0afde245b7a4e6ce0ca153aaeffc83bdb1ac43fbe819b76b17db1e3615",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "b5c8c97754fe14493ed31980301fe1bd723a975eb4528a7a5436fda3108b23bb",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "0d924b8c49456959d23e0df8b0e28584fb277af7381549b84e448919e289cd6d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "f4d3d030ca9facc3ac49a609d9c0ede0889f66481dae31f09045288acd515135",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "19b4cf89abe2c27e71da9ec13cfe4cc59f4d434d690dc2ca862d8b1b1c7daff2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "3ec8c7b38a3f5f12f6298df868faffcd65dad8ab5545df181be44f063f95884a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "48b67f78ba6180052e68e14ffb942a82cd268dfe5340446b0097560b48be5ac5",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "a23b8e73a5cef4e29ba1257b2daa29b3ac9dd4add3e122f8b1097d090401ba2b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "4406b93b4906b831ea97b43bd95b00c2fe6d4d74cc0b5ff8081f180f36c15f32",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "b46a804b1af8186d37828dbbc0948b31711176158104d5ed79a95b568506c158",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "2995781b3dd1ff452ff9489c85d11f78372c7d891083b2ed225c8a02c7d458bb",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "489a9068c46256d839fbcc8ffe901766c486a7a924e27241e08112d785caa539",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718510-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "17ec0c81a7336a21c71e6a51954ceb1eaa00c412680ba85d7f3823060546686e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718510-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "17301201fd0c2451f8dd27732a512caf7cc4a10a3e86a2eb71008ecf30c3c1cf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718510-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "48bbdfdd8fa723e9aa9be1292ead9d980368d46d515ec5d4015e5b7f23cf56ba",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "0594db87524a45df6ff171e84be1767c9094a13be860fa94b2a525da1127cafe",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "b4276be4936605b0ebd507308b77e0afc4c1c75bc0ca33f51cadd43a06a905a7",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "0525e2a879f7fc7b1ccb6f86f128146d8872465a509f0be7e823231e3c22e464",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "06a2fbaf5cb5aa65b091083c94acd4cfd2d32e483b81876cd7d40ba77952cf34",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "4b7635a39a8eff9dc12e7f0d35c05a2c494facf60b01fe6c577b8267da1d0dc0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "92f93270e3c234c666bb5f0d0cc00af945c622e50c856cf3f12b6a37d3303194",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "52be57bba05346a0d91ec6a7555f9d6b69cdbd6b85b102b2feef3dd7ec0c619d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "0119c0505bd8744d46980b11730fb9b65a78246dc60728407eb05dad677f5eba",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "36bd5cf11a767624a11bbfc71721aabfb999637d19f4181fb3b3ab14f56dc31a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "739bfcfa7b70d20a7f79505ad800493f3ac4bbd6057f67895a8b1720e9b7e66e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "7f57a1d6a8a1806bc0a9a66f8d2a395683d913c284b3cfec07430842ba7b11e5",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "1d30d02443afdb91d03c043821570e99dcd33e8a0ffa8b4a892a38da95684553",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "2881c2ab9db7e08b8a3eb5b28f1f377292cb11f54d2965f0e09ce04a4037d1ba",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "9a7ebd78decbba164f822b35a94c1c4947d2958bc1f845d2bbdc99c78118a6ef",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "ffcfae52e89c96d4901314732520eff64e6a75d29d95a2fc6a760bba08f52174",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1856573-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "c538970c3807bedd492a4b602bdc294c239171d16abe29d0c1451012d5abe15c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1856573-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "e12063340b896defe525634a009b255f2626e133bd92ce190f28c8b3bea31378",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1856573-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "a9289d5611586899323ea4c2a9a09aaa33d29b312226a50cf935cf4fd9cdd817",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "36224c0b865d3b448f14e46d75af5f26581ec44c22969ae6082684d268d99567",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "c32b73315074408cca51dd53beed9c186c018a028b77a2b23f3b013651b2b338",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "72462f594667168bf50ff679343d3946befe7647869d536cc4470cd9b088e392",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "3779e8e31f131c6287bea2d8dde0e589b8c0ba4bc28ab90010ca62b04b61745f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "59c23246a283528cf6fc2bf4ab666aea4ef905fdecfb8573d912e8e6ecf927db",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "25cebbf2593262a2169b2caaadb09a2df9ed5e3f731c1c9bf42a0c4f5ec1d45c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b484beca4fc80ce6a3832970a3adb4ea6b61f587ea300c6dac6ad160025eb205",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "e863e04672b6774d35c07b742c0830718dd078fd3200017827e6ed3a1ac138cd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "0a68d8d973a3d67d0ba5c5eb06ed3c60a4b6dd5da9ffb4af89dd1ab08e1e3420",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "ff6fe50b42fbc2f427300d60c0367868a504e0aa95d13f456d5b7555b47e612d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "4dfac59fff2b3d1342d167de013abf487c3a8786f2779ddb40f3107d11f48864",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "b54e5530c6bf76c6faa3efda026e23e5af49b46846a32a4ab5a147bd95473438",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "71d0b078c2014196f75c6965e884f7f4f726f27dc49d976ca0ae80cf28562246",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "455897ee7436df9a3e1f09dd2a60a3fdf31c2f40a2957186bf0cf5ceec25c17e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "01886216b044ba4853fdcd24ebc62918deaba216e23a7a717d3f328f9f54bb15",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "a990fa1133f8990d7e5ae403da5325939ba08ee84f8cffeebbc2b1aeea059d69",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "453dedaca7c42e12cc6017f329623ece8049d72b3475c6a517d58ad63b4473f5",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "5c81d397f414e1624dc8295d9312887d15ce54449fb7a4e9d4301ae2b7e97b58",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "d0112a077ada00df89ab778dcf67ff21ddf7556fa52b2045e781b24673815bca",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "266b1910aee975a54ad1442d5253705472f63beeba8c0d4b4d1f9f20e007549a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "2596844a806b149d2ba234a652647fbd3af808e7eb1ef9979b6e59fec1cd2c1e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "d5da4a62838137cbd56cc559e06a92a6ee8eb7396130ef52af01149320e60f77",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "0a189138e1f879c145c99d50cffba21afb236bd7a1db59032849b0986619e051",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "0236a57194ca38fff64d608cc0e2d42cc707fef96e2434f9e41f60d566d54ad9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "da9fd5dd5dbb7045398a8af106993a54ed20b939a2773436d9ebf26a0df85e3e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "eda8c09a61abb81394e59ab0d94349acb1f87671b00208383bd904859d613131",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "f2bb7afa76d47b289e259d1a661d003c667a8b8dd29972c47c094b3b69daedf7",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711184-outrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "d22dfdf79db37060473478c48d26586c11e92e21e4efea694b96ae95923c753e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711184-outrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "447f30bc504ef6b56438576a841234de723d844f25f016c400483e4e3046e1fe",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711184-outrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "0294daf7f72ce0c40c4f89df41ec413c5412330f15aabba454847b3e5e3fbf05",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "8c0330a433038ba468079c52bb45228ab812690312348a07af2a29d779403a17",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "76c57f44d857761dd927590af90891a16e944c9b135eb296d6c1a39e5b5e3978",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "64894f7379ee4ffaffb5e24f43727ebad0ed7ccc5fc78e9058426e53fd36e8c8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "03162e9f5d841cba8ae0889c1e3beb886e4e78f492322dfb239511572bed4236",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "4dc8224ceb183fbc76ea0ef9dedb04ec235a44694003271f490944e4becb9c43",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inbare-gravel-low-erosion_road_cap-project",
+      "record_sha256": "d1e7a44b8d430318fccefa13d42debf048fdc07ae5b68c0cff10c74427c3afd1",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "da561ad6d3354bf649ce6f13cd3bbab057a8d98d82e7b1ad848aa61d05f4afc1",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "8d3cdea922987c818985c5837c1f92a54ce0021d685551d25c81191714af3e84",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inbare-gravel-none-erosion_road_cap-project",
+      "record_sha256": "3b1034cae9d863941d92a9ae270394dc947f56ea097e6fda2d4ad58e05d03b9c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "9ada11feebb8171c258c1d8797d9dd6cf51157b4857178a6e1b8d578ab160d02",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "171f66a9ec05c8fe181459a9fd84783801503b176566137632cd4be869f0e5c0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "5d7c5c385dbaf2d3d43de5602202aad5d6e779d5a5ddf8e5bb31831fed606810",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "9a86e8cc7ce8aae0c6eb4ccd1cf7bd4d2814a161e7dfba14ca5c6c742b178e4e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "36b80d39beb812fb1feccfa87131a4406bd983e27c3d73a2e4456d71b966aba9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "70f374823621254ba6b5fd93323fa8a4a0e41af1dc9ecef4250e91c477b98270",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "ee39cbefd37b4c2fb5b789e2d759dd85350dcb370063b8aa5e5c95a12992c767",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "5e92444851f13af20b697b940fcd4c4127055b836c52ee1f82e986ddbe1ea478",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-inveg-gravel-none-erosion_road_cap-project",
+      "record_sha256": "753a2e48ca8d510e136312f14bab78ac76ed34c8f5c6f3b91bdec581279c5c0a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "84da25b22b2c5f1a683f15b65d25ddc5b6405666932647ab9fddc4bd42f15d3c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "87e8b5600d4c7b9128bd0c7cc8e59c4497795719414fa974f1cc9ba7deb581d0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "4529286cbce7421613fe8d9bdf11598bd69de93bd2188acbddec12295f9665e8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "f0a48ad2de90a649d975c858a0543bb75542595ac37aee25ff6f6be163418915",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "1cbcc668b2c16beebff424df97a819edd7885775e311f110ca3bf1557cd8b4e4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-outrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "740e20f030ed22b986abdd1241f97bea34418a6bacd7a75c44a8d18e1c9abf0a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-2711250-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "e9d930d8d229660cad3de1bc28022d662f564ec7ae8b6481f6923671c120b019",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-2711250-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "0a48c88e1a19f53203977f17241d81627316ba0208dbf9c45648e41a45dccb0c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-2711250-outrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "78f216a6464b1536a035ee8590a13dee38c869ca0d7584351fab3d90db30a3bb",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "a2475146878322c9156cdf04547b9ee0e9bcb5a2068f4ac716b14fcd0774d0f8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "e1fb2b7ef64111621e3d62852427f8aa7100774bfa90ce593a731840ca39f410",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "7b865aa5c6c956dbdaf4cb775502d4df573eda28e73c826b9c5c8d603221f34e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "895654c419862851f6bf50e75129e61b7bb58640829a0741032c77e2159325b0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "769f16d13962675c460f36523ce8e13e543379380a0756e04cd718040b0ea914",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "fc70c5e11dbe06f44edf4a8abbc543f377688a2c57ad17894e6395d5bfdd551f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "f4cdda61bfef0baaa1bc7e9546ede99cd50aa6a061977098eebfe705d320261a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "45579bf645508901ff2ab8638d6ef9ff20c5b246b33502e3bbc426d7740410ae",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "8dfb91965f824d04b7ef5384258f8f5f06c9903ff4ac54b394a446ed1c3c53d4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-53949-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "2dbe58d62196b776734bbbd19802ec306c39f3c12ac82ad3e9733ac60e0e3733",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-53949-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "f14f26d706b93fdb940594a27d787020c3ac49a8b8038d5917e631595280acfc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-53949-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "b8eb52085c54f9130ae1b11f35dec8aedec76a9840e7c5f07a33f55a89d607c7",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-53949-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "f0b7c22c5bdd26f7b9fc6928cb37e4a21ab4ea48f7bf0f123b8fc034cb89ed07",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-53949-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "c355bc3c1bd981221c3a691c56b6b0071d15243e98373ab2a2246f5e9e3090f2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-53949-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "4ea198fd1da4a1e948814a81c7ba3f0fea58e98a244d99e694583fd0d5368b34",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "a35ea7ee5db7c3a6cd6b1b996827c162a87bfd47600c21d31cc411b110483c1c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "a0d0ee592c840aebe6d9a5f060efbfdae9ad0dee7549e9f49f319ab48abec84e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "9de4f7d3436565d454b0c3dba91303fd6092a4d7d679817e20b9aa4bfad7d210",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "1d9eec806e68035e4f5d42a9f163e40188b5c35352c42c6ba1752fa6d08a93d8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "fd80e51536ab6e2d0b7f8b5c67048e4e32c723076adb00b3c3bf90af4a804f46",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "7991597d562acaafe580e8a85c75712c4c67e7c4270e26cc63dce04ffbde1b51",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "429623389e689be3d1f5633fc80508f28a08a76b893a04aef2100de82777ca4b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "97351ae9ba44b591375e2c7123cf46688cf23111de7347f0c5acd3c377e3ac60",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "ad848612a44ec5a427c7b9886e8254dc49171ce3e879ae218f6f2312c31bf358",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "cd5c150eace6d11537c7c05345b04138098a05fdad3f2020de2fc34d37e9b947",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "0c8da5346e69a1e00aa062b3a2cdda9ba3876a0de8cf164de298f104e12a4ea0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "6efe90f842349191c0b27fb4639400a5fb2b538ae6a6372e0371a789ca5e920b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "47e7fc2a69ce62cb7661d66b08a9c40757a39d239fc3dcfeb9ceaade2d2d0bcf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "1a4f1600922f6d5a22aa97b65583808ec1bb92012b35ded1302c3053622f71cc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "1b095923a986735e078d67bf2f4722080e5701e0af69d02cb8816c4dbd2e3d01",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "1c37e162e66d24845b47ec6f65a32554804e7af1c5b7265aba1e1d0fe774015a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "61367bb1b910f5a43082fe91c363cc31b2a5e187c87dc4312da092da3a9d0ea4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "760005b3917d526478359c0d798078d481ba708b4d327a32c170b5b8ecacf723",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "64321bd88cc083f023caad3ab9c6ba2aa48309086efabfe75739a61ba92fc841",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "67c5b995506702c724947c0134c2cda6faed969b511e895ce674fe1a1b95887b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "27dc0ba85eedc9d37584266742177f1c667b3d0dd56017127e0b92ce36ce7a2f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b07f21f6f601388cd179670d0b6eeb852bd8a99399f065237fb0383c0a06e7f8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "aef79802db91d6d20ec683344a0c0e5837cc16c3b57d24911eb12b82324fb3ff",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "cb0cda4141ce28429d7b0707023e28b06ff9d0a2865e3f42178bdc3ecb4735f1",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "6fa71ada73267eb41a6c10c37022ce00f946da66d8150df290a8f3346fa84c3c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "4b428a483079ce06bebab5e3161ad40c8ba0cb6f8ee4012e0f5e10bca2c45c64",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "63d2c1876385a307ac5c2a99d7a60d9f876b580cb8b5b6a236f43ef0bad43879",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "6922104bea715dff29e3035c893d39589208913d04cdf17b9105d35f522312c0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "5ec52b7b90c5675e3ee091eabb4f04dec53f32c959fa7cb98dd27f0e3ad8d10f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1856573-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "68a5dfe9160b7272f1adcb721a5595e59cdc514ee142f895177779e36e2c11bf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "999e6eaa956399f4e0f9158a357aecf4ee9e2ae87ec5bc5cdafaa71b4dc00893",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "faff788bc460cbc6ef240f98dc60c92f1809433ffc7bdfaa775b3f4b739d3b1e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1856573-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "0c8239112a5f23528b3af3ad5cdac01bdae0912e95e6fa053552aab648a1440c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "3fc5edfcbc42ccb3a6a01c0d218926a47bd03cb35dfb03a037b35945991f222f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "e858ea6191cc46fd6d77cc253235a3988bbccb28766af6c7032c2f416762b3b7",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "record_sha256": "c5933bac7dc50f9950815bcc9616d7724323925faf3887b8034c8e41547719ad",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "c3ad357499780c35a007c89de460d376fe84c77ebab71cb7af98c3d505142739",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "17e92a019aef24dfd4e8fc3006a0685be18977ec6629da720ec88b3d1d0c503c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "45f96de5d9e10309e51699e43757e63257de057ba98251c7bf59168741ad7e5c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "ee525303808bff0706b5f07401ee38e545597d5b455cf2f4d03b2e563c28e008",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "14e4d46084e4980cb631d9996152a0f7af0288cc0d7c49499c6ad1949ed5eff2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "7e01a48d79137be5f794c9d2f8468e022b2e9abfa5f2450687cb81c38a03735f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "496d07f16159c6b23d42aa1cbb9e91d471eeaa41a376bf1cb34148b403eddd3b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "17a4aab4f170bad987041f08e999f9fe69faedce45a697ebb45be329b7405100",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "95d274fb05660ded323766d10c42ce3a959c794f2ea5a848651f6e9fbb6ee8df",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "2ce711afe7d44cf33c5964de55a557bf08216408caf8c74f826c71d4a0fc04b6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "99a6223c5601edd46a32bdd35eb7cb293d31659ea91419c0259b532fa2d344d4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-53949-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "047963e1eefb63c9c3ae4f36aa525b6f035d7b2d50956cf91330c0288bc469bb",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "b412d6a418cb438171602f38457d9105747101ffb2abc04000ff51a16f21fbc4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "935ac7dc3b07d271a77a1de4b527e561a13d27fee29d8eef8be21013c2a1c33c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-53949-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "67c63e1e3abffbe6cd71855f3baf28ef4e49e7073dc33e5458e0089f67001e68",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "462bf3fa2d4337d040464c0871ed4ecb3032df0b01beb59891230294cbe1ded9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "a33855d6310b90ca7554afe6622821361e552672001c94cbaabfa725ff9edff2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "aaa533efa352634b9b97da919996f169b828b262520102679abb661c71124a43",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "a5288bb138031046af996eefc07f60572274986cc608310ecfd739e37edad500",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "2a88aaf18fe66ff6247289df6baeaa8d8aaa99d8e0055a66357de6763f835f6e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "1cab41a894c845a0e5e861fb9b66fdacbed8d4e0f618804bb81f1823e0306999",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "6b485aec849caef1f9f388245fae81fb16760e72e606ce1b1aab00180a8585cc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "3227e21578481e69387c11bc908e33186adcad97e73191c9ef8cc55a490aeeda",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1856573-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "bae07c220e0c3e24bd9a5d40f03d32b08dc4e4889471ad413bd73fb8dfa28e95",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "e0bfb13ead6bec02dccd7f4e3c8b176fd7e8da0c66135081e3931b9be29e7cec",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "fcb69595c069676f78a6eec39ce67b16b49961b8a85f24f7ab5f6619ccc06616",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1856573-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "a56ef9eca4c5198a7baa7886edb1cc37d2010ca963a7c0d2d665ed9f2b781cd3",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "25187c05f53c9aa07d74de9f936e5ee15b99e79a7147c9cc494fdb49c4bdc855",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "5b5cadef8c6deb2525a9ea7bdd7c002fc85927a960060e99f7853c050063f0d8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "62ec737a01ffaaddffdb2881ed32dfe2588fce2cb79f2b4ae8256b2866d69445",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "eca6f18a35a8212ab1f24df4db526060fdcf8dd5f9d5d93be7e8ac8b3f6d232f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "42b520efe3fbcd561bc921fc51da0ab8dcd91652670569f2d206367c0569bdaa",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "87879e56eb3bc8a6b97ec8a82f4f62328560e02e2413eb24fc4e6b8d8e265995",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "f144ee0b26348ce8612213c310706389cf77ceb3873eaf031f01e8b1d7cb68dd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "aecd7e7ac3711c20c3051e6cdd23c67907a7cd5156c805f4dc28214d881725d6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "record_sha256": "10dc654bb907e7d045013f40b66cff6c8676464395757fd086209d14b3464c0b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "447314098df6f25ce0eea6f3735c3b950d91461f25b82784605b56724284a52f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "0259a933205f0b52688b2c52b9496400cce86ab94d15275327e6e997c4e98b0e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "2957b3d2244ab41358a8c8abc09972113d2d838e8e8792b8a18d4bfb48fdf503",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "919d489712c27967608e51a88c796c3d32f4af8520f2eae6eeb1e71674555d35",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "f21b41f4dc6ba89ed6fe4cf82a0c94df939cff3e69fa1dc3a13bc9899401802b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "a58d1f47506c43b9145f2da2a94faa81bc28096cc3bf9fac7a8f8e02d64f0477",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "caaa5d609cb3a8edc1f0b4fbb19b3dd7ab89eb440af2bfe2d0bd2a0f44fd1d39",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "c7a0805d1c9998e8783f90683faa487d978ed17cd1c91bd664fe03ce27359cf0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "b1255d46ed2cdc6d5bd6ab243ffdd6efc006ee7b497270b1b746a5a802e1844e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "3cc66c254c3178afd6e2c96763a94bb29d1b6a6f474f05519648dd17e6a7f123",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "955ec252a9678a60f863e28b36a9a6429f6516e2f3664e6b3efb4282d6d11958",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "record_sha256": "3c9c87e87369c53ac7d0312b347ca01fac9951a966e6aa95016045e72ab24ca6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "8a8cffc13cc2e7b671547f67142f0194b5cfa9845707b7ad9e9d1fed32e7d243",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "75bd2d0ab55c8444f8546d1c4c5e95c227cafaa7664afc238f6fb28409f91786",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "record_sha256": "6cbf5a32e2d9eb1d0cdf58481a1987bbbb04ff45d64a2fa4d67ca8f612181549",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "365d188abe1fa5bd5407938d6eb54dd073351db3eb8121811da5218339c30dd6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "bb4c5962055224a7c76783b0b2291c84ae845d34138f0291f9373faddfe93220",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "0e1e7d09ec892e6befb779e80448112d8e6e14a192571f1d8569942defba018c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "b5506f806f0427cdea70db2668ca94356798d3655aa3cff9eb3720e2c823d62a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "6dfbf8df6faadfbfa119bf1d63f148d7483396d3ef2680a66b92ec914d51ac35",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "efcb581c28b4f9bd119c400edef0feb057adc1f215a234367e8a091d44a7c41a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "c6cd2ba1faec9fd426ae87f99f8cd73623f7ed41a20cb757e02b26beb25e4a24",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "6c6cd4f2e0b726bdddfe79b03de25a650b15bd4d329a525c365b689ed56db210",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "354c8c4b1389d6b439bd60e52379cdeacdbf0fd3a4a0a678da5a2f9ae82dd037",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "7e72209886a46b6d3c2da4d780107be6a8ca43eedb59b8a796219cc88d29dc7c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "2dfed4a7f8f11af7d171da88d872ae65793b3d6fd4470b9baad1d1c858304764",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "978eba44e295d851e22ae84735efac81373e151d790d041c8174a14b50c61737",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "d4ff74d41d154328c31649441f66566e4925136fef9b0341f0e74cfa2a5a8cfd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "460153e40b0f660cab113688530e2bcf3a597da527485ab17e1789e39fc19452",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "11b08ca0f853a42038a00441d87bc2f9ece697bad27e0d0260cf81f22eb8faba",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "de549e27bfd7e0a8429c5808b250ff9708afb7d9290b2579bcaf754d7ca555cf",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "86e0183fb3a776750e2fed2f0fb7195fadebed66679aba3e9884e60d4bc65f78",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "aded48e07c5d16444c2b30b5afa8cff45044856222f54c907043f1e460ff944b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "ec15cfb0165cb79f2e66aef961cbf149dc28a55ecb7578f70821570787f5b761",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "42eede5ffb968aa221f8780fc7f1a13528ca8533d1c8b9a02765e8ef5a29f1b8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "d568a88df9e27cd580aac2b3aef31bc06ce9fc82bdd7485343952b09d94858d1",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "4ccd8ecd0745b61c4bbbd5293ff7555672f66da4d73c332a70f6116279d443bd",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "c10a6dfeb2b888209befb51e296a3b8402336389d8f0a462ea999840a2df50b6",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "3c6afc750982b22a405b953c2078db3dbcf5a4dceddd21fbfe197881772dcaf8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "f0a2a5e6686d75b460da97765e2280fd2769bb366fe2a4870f353da7ee9e071e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "950d130bb28aaf72553d195ab1ef9691fc1a74e31635660803fd5fe6fa5bb4a4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "c10022caf2741ec2241c943d4dafa7e96a7ef5a3b7faf32bfe608e526ed9c426",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "67040592321dd45174ad7e4a9b5311a355593ce195e8afa51da7064563952e9e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "a741a8cc73e20da646175ffe030b3dd5edbce146bb5f50c44448be81aba596ae",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "3f57c923bb29f8726f3f81943c57ae90ed1369901fed288b606b8c343d7ba357",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "becc0d36362d9e210350ee3639ce697030e43be5a7d72decc47118b86bce7bbe",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "1879dcec10f7e52bb8db84f9626fe1768bca18e6713223a0e4f43b280780387a",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "900581454571bcbe2a27cf11a14ad935f7b8656ca3245d5e7e654a90d975ded2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "2af4bd84e84b47561ac682e67d556280df1029436a35b78cfe910c29e85d5274",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "062af2b332a0c9307dca346e93f1fbc05c2184f0340b56bf03661ba7bac1c00b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "50f916b246ddc9f0273847ac67edfbc8fd2652102bd22ada2e5c472c514af9c2",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/denver-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "a1b38df37a6cc5d96fd827218d0ce07cdd9f8abf379f1a26ebd0e5c0613dd4e4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/denver-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "fcbf03f5a8a91f63c59c22859f8e610aa594424a92742e894992bb8b2195ea37",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/denver-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "2b9a4d5fa9727f19aaf40691fc9bf75e85cd0e409d98b9da613028cd070f6a81",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "b6d8dea928095b2d5d42787f9ca7f60d49e92bd2cdae19bbe837d825c7d025da",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "68d4f40c364c4886d5dccf6fafaba829848a794cc98430a0d1671aaa9a2426a4",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "1977c5b9dfbc12edca5e496f2aff2dc9a4adad57341ea64ea8ed5bdb42606fb3",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "9d1467fd321b94cd87930e8eaf9c96691ac39cc663bec32daf174139459d392e",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "acc3f2ac6204db1a4bc19e5bf6525d8211b7ce7b5ff61b1130643e4629c2127c",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "30a6fde0fe313cbf0f91dfeee93c6e92a875bd49c510c6c58160ca8a2a8a86d8",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "5b715b18d8b7235be2adc140520a3ec06e79578137c2e65eada103b7289f4c8f",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "d07c155b7150bcd94177235de91e95995c304ab3fe2c658697aebbdef2e407e0",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "1b120ed9b3dfe467d7803c907e83af7eb9baf492c58468cb254aaa096e06c823",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "f7fe1ac84305d79fc7ac6a7e4d5d52788f36afe38ae45317653962116958649d",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "cf24df9bcd8f9cafd188465322a04674fbe39a489e39a16e6ae8738944ca650b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "record_sha256": "1b7eb2eb0d1c33bfc264ea805c2fe9bb75112ee9ca763d1e6d63841574700fa9",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "ed421999c2e6452cf9c8603430a2256e2bdc721a45ef4fe0eed3a3c499959ee1",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "b1f8d17b0c02c05b03ca895c4bd29a67dac56852102733f87aa72bb355604cec",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "record_sha256": "965722fcc8e89cb2e20feff2aee9401368f3aa0735d4ae2c76ada03b10cb8e4b",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "cc8a74f6e18965b238cab09ceaa8c5d7a3ddf3e5e287a438b252c0125e53bc69",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "f90a1187283dfa08751c398af1cbc4577a18dad9bf55cfdb5c6a77c88dc23074",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-inveg-gravel-high-erosion_road_cap-project",
+      "record_sha256": "fc62192c9268f2081c02e03c3bf4eee9f1ef9982db11861cdb41abf2664f7a53",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "69c3cbd6099ed338dbeac91a5d4e20db0cf9ac0ec84cb99a0e0eb1a29823fb51",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "7127b253e1db384474f53a596b7b1cf50bc0afdfacb4acdf5d16885319344e37",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-outrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "da247c01308296f45ff513570c4cc3658325bdbafc4755326a43929abe27efbc",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/pore/site-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "09cefe2e5edaefdbf2307eb3d7c2855ea04f98f6ea97e096f94ade153a4d32b7",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/conductivity/site-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "ac9a83c697cd177835f0779b74283df782265a48d4f480a253b824d9430a3385",
+      "physical_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/road-pore-screen-r3/cases/coupled/site-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "record_sha256": "30eccac6ad80bbe60a618d3fd4ab309762e47baa741c75d76f8262daed0785f1",
+      "physical_pass": true
+    }
+  ],
+  "initialization_observations": [
+    {
+      "material": "1718465",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4553926289082,
+            "rock_correction": 0.6254917383194,
+            "fc": 0.1717756688595,
+            "wp": 0.09593479335308,
+            "conductivity_m_s": 2.22222240609e-08,
+            "available_water_m": 0.01176984608173,
+            "upper_storage_m": 0.03594578430057,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1448.649536133,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4360840022564,
+            "rock_correction": 0.6167476177216,
+            "fc": 0.1621928364038,
+            "wp": 0.0905828922987,
+            "conductivity_m_s": 9.259260913552e-09,
+            "available_water_m": 0.01111324317753,
+            "upper_storage_m": 0.03455011174083,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4553926289082,
+            "rock_correction": 0.6254917383194,
+            "fc": 0.1717756688595,
+            "wp": 0.09593479335308,
+            "conductivity_m_s": 2.22222240609e-08,
+            "available_water_m": 0.01176984608173,
+            "upper_storage_m": 0.03594578430057,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1448.649536133,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4360840022564,
+            "rock_correction": 0.6167476177216,
+            "fc": 0.1621928364038,
+            "wp": 0.0905828922987,
+            "conductivity_m_s": 9.259260913552e-09,
+            "available_water_m": 0.01111324317753,
+            "upper_storage_m": 0.03455011174083,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.451861768961,
+            "rock_correction": 0.4653658270836,
+            "fc": 0.146124869585,
+            "wp": 0.09214243292809,
+            "conductivity_m_s": 2.700000322875e-06,
+            "available_water_m": 0.01311366911978,
+            "upper_storage_m": 0.07194387167692,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.451861768961,
+            "rock_correction": 0.4653658270836,
+            "fc": 0.146124869585,
+            "wp": 0.09214243292809,
+            "conductivity_m_s": 2.700000322875e-06,
+            "available_water_m": 0.01311366911978,
+            "upper_storage_m": 0.07194387167692,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.451861768961,
+            "rock_correction": 0.4653658270836,
+            "fc": 0.146124869585,
+            "wp": 0.09214243292809,
+            "conductivity_m_s": 2.700000095501e-06,
+            "available_water_m": 0.0131136700511,
+            "upper_storage_m": 0.07194387167692,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1400.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.451861768961,
+            "rock_correction": 0.4653658270836,
+            "fc": 0.146124869585,
+            "wp": 0.09214243292809,
+            "conductivity_m_s": 2.700000095501e-06,
+            "available_water_m": 0.0131136700511,
+            "upper_storage_m": 0.07194387167692,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        }
+      ]
+    },
+    {
+      "material": "2711184",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.09899999946356,
+            "porosity": 0.6693270802498,
+            "rock_correction": 0.9531576633453,
+            "fc": 0.2967370450497,
+            "wp": 0.1340997517109,
+            "conductivity_m_s": 2.250000534332e-06,
+            "available_water_m": 0.03443809598684,
+            "upper_storage_m": 0.05352273210883,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 853.0,
+            "om_fraction": 0.09899999946356,
+            "porosity": 0.6501517891884,
+            "rock_correction": 0.950208902359,
+            "fc": 0.2873442471027,
+            "wp": 0.1298549920321,
+            "conductivity_m_s": 9.375002036904e-07,
+            "available_water_m": 0.033348005265,
+            "upper_storage_m": 0.05202968046069,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.09899999946356,
+            "porosity": 0.6693270802498,
+            "rock_correction": 0.9531576633453,
+            "fc": 0.2967370450497,
+            "wp": 0.1340997517109,
+            "conductivity_m_s": 2.250000534332e-06,
+            "available_water_m": 0.03443809598684,
+            "upper_storage_m": 0.05352273210883,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 853.0,
+            "om_fraction": 0.09899999946356,
+            "porosity": 0.6501517891884,
+            "rock_correction": 0.950208902359,
+            "fc": 0.2873442471027,
+            "wp": 0.1298549920321,
+            "conductivity_m_s": 9.375002036904e-07,
+            "available_water_m": 0.033348005265,
+            "upper_storage_m": 0.05202968046069,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.08600001037121,
+            "porosity": 0.6671096086502,
+            "rock_correction": 0.9843597412109,
+            "fc": 0.2818222045898,
+            "wp": 0.1235371530056,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07379395514727,
+            "upper_storage_m": 0.1087144836783,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.08600001037121,
+            "porosity": 0.6671096086502,
+            "rock_correction": 0.9843597412109,
+            "fc": 0.2818222045898,
+            "wp": 0.1235371530056,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07379395514727,
+            "upper_storage_m": 0.1087144836783,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.07000000029802,
+            "porosity": 0.6653110980988,
+            "rock_correction": 0.9843597412109,
+            "fc": 0.2818222045898,
+            "wp": 0.1243246421218,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07337089627981,
+            "upper_storage_m": 0.1081973016262,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.07000000029802,
+            "porosity": 0.6653110980988,
+            "rock_correction": 0.9843597412109,
+            "fc": 0.2818222045898,
+            "wp": 0.1243246421218,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07337089627981,
+            "upper_storage_m": 0.1081973016262,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.02250000089407,
+            "porosity": 0.6644439697266,
+            "rock_correction": 0.9512963294983,
+            "fc": 0.2655781507492,
+            "wp": 0.09854953736067,
+            "conductivity_m_s": 9.000003046822e-06,
+            "available_water_m": 0.07510255277157,
+            "upper_storage_m": 0.1131788790226,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.02250000089407,
+            "porosity": 0.6644439697266,
+            "rock_correction": 0.9512963294983,
+            "fc": 0.2655781507492,
+            "wp": 0.09854953736067,
+            "conductivity_m_s": 9.000003046822e-06,
+            "available_water_m": 0.07510255277157,
+            "upper_storage_m": 0.1131788790226,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.01999999955297,
+            "porosity": 0.6643860340118,
+            "rock_correction": 0.9494204521179,
+            "fc": 0.264698445797,
+            "wp": 0.0972206518054,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0751731172204,
+            "upper_storage_m": 0.1134330704808,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.01999999955297,
+            "porosity": 0.6643860340118,
+            "rock_correction": 0.9494204521179,
+            "fc": 0.264698445797,
+            "wp": 0.0972206518054,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0751731172204,
+            "upper_storage_m": 0.1134330704808,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.01175000052899,
+            "porosity": 0.6657106876373,
+            "rock_correction": 0.9162114858627,
+            "fc": 0.2625449895859,
+            "wp": 0.08973833173513,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07354211807251,
+            "upper_storage_m": 0.1151944994926,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 800.0,
+            "om_fraction": 0.01175000052899,
+            "porosity": 0.6657106876373,
+            "rock_correction": 0.9162114858627,
+            "fc": 0.2625449895859,
+            "wp": 0.08973833173513,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.07354211807251,
+            "upper_storage_m": 0.1151944994926,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1267.999755859,
+            "om_fraction": 0.04724997654557,
+            "porosity": 0.5043480396271,
+            "rock_correction": 0.7056467533112,
+            "fc": 0.1585694402456,
+            "wp": 0.06457021087408,
+            "conductivity_m_s": 1.282522316615e-05,
+            "available_water_m": 0.04046969860792,
+            "upper_storage_m": 0.08795558661222,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1267.999755859,
+            "om_fraction": 0.04724997654557,
+            "porosity": 0.5043480396271,
+            "rock_correction": 0.7056467533112,
+            "fc": 0.1585694402456,
+            "wp": 0.06457021087408,
+            "conductivity_m_s": 1.282522316615e-05,
+            "available_water_m": 0.04046969860792,
+            "upper_storage_m": 0.08795558661222,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1520.0,
+            "om_fraction": 0.07000000029802,
+            "porosity": 0.4158626496792,
+            "rock_correction": 0.5829646587372,
+            "fc": 0.1095973551273,
+            "wp": 0.05246682092547,
+            "conductivity_m_s": 1.66315039678e-05,
+            "available_water_m": 0.02587162517011,
+            "upper_storage_m": 0.07267918437719,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1520.0,
+            "om_fraction": 0.07000000029802,
+            "porosity": 0.4158626496792,
+            "rock_correction": 0.5829646587372,
+            "fc": 0.1095973551273,
+            "wp": 0.05246682092547,
+            "conductivity_m_s": 1.66315039678e-05,
+            "available_water_m": 0.02587162517011,
+            "upper_storage_m": 0.07267918437719,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1519.99987793,
+            "om_fraction": 0.06999999284744,
+            "porosity": 0.4158627092838,
+            "rock_correction": 0.5829646587372,
+            "fc": 0.1095973402262,
+            "wp": 0.05246681720018,
+            "conductivity_m_s": 1.663150214881e-05,
+            "available_water_m": 0.02587163448334,
+            "upper_storage_m": 0.07267919927835,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1519.99987793,
+            "om_fraction": 0.06999999284744,
+            "porosity": 0.4158627092838,
+            "rock_correction": 0.5829646587372,
+            "fc": 0.1095973402262,
+            "wp": 0.05246681720018,
+            "conductivity_m_s": 1.663150214881e-05,
+            "available_water_m": 0.02587163448334,
+            "upper_storage_m": 0.07267919927835,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          }
+        }
+      ]
+    },
+    {
+      "material": "2711250",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 892.5,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6285137534142,
+            "rock_correction": 0.9914382100105,
+            "fc": 0.2983039021492,
+            "wp": 0.1484133303165,
+            "conductivity_m_s": 2.222222761361e-08,
+            "available_water_m": 0.03189360722899,
+            "upper_storage_m": 0.04801004379988,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 945.5000610352,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6095600128174,
+            "rock_correction": 0.9909344315529,
+            "fc": 0.2891612052917,
+            "wp": 0.1438655406237,
+            "conductivity_m_s": 9.259262689909e-09,
+            "available_water_m": 0.03091599419713,
+            "upper_storage_m": 0.04656944796443,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 892.5,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6285137534142,
+            "rock_correction": 0.9914382100105,
+            "fc": 0.2983039021492,
+            "wp": 0.1484133303165,
+            "conductivity_m_s": 2.222222761361e-08,
+            "available_water_m": 0.03189360722899,
+            "upper_storage_m": 0.04801004379988,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 945.5000610352,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6095600128174,
+            "rock_correction": 0.9909344315529,
+            "fc": 0.2891612052917,
+            "wp": 0.1438655406237,
+            "conductivity_m_s": 9.259262689909e-09,
+            "available_water_m": 0.03091599419713,
+            "upper_storage_m": 0.04656944796443,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 850.0,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6392483711243,
+            "rock_correction": 0.9918426275253,
+            "fc": 0.3061818182468,
+            "wp": 0.1596866548061,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.06316774338484,
+            "upper_storage_m": 0.09591234475374,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 850.0,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6392483711243,
+            "rock_correction": 0.9918426275253,
+            "fc": 0.3061818182468,
+            "wp": 0.1596866548061,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.06316774338484,
+            "upper_storage_m": 0.09591234475374,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 850.0,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6392483711243,
+            "rock_correction": 0.9918426275253,
+            "fc": 0.3061818182468,
+            "wp": 0.1596866548061,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.06316774338484,
+            "upper_storage_m": 0.09591235220432,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 850.0,
+            "om_fraction": 0.07500000298023,
+            "porosity": 0.6392483711243,
+            "rock_correction": 0.9918426275253,
+            "fc": 0.3061818182468,
+            "wp": 0.1596866548061,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.06316774338484,
+            "upper_storage_m": 0.09591235220432,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0364479534328,
+            "upper_storage_m": 0.06507927924395,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0364479534328,
+            "upper_storage_m": 0.06507927924395,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0364479534328,
+            "upper_storage_m": 0.06507927924395,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.0364479534328,
+            "upper_storage_m": 0.06507927924395,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1050.0,
+            "om_fraction": 0.03500000014901,
+            "porosity": 0.5558550357819,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137128055096,
+            "wp": 0.2304586321115,
+            "conductivity_m_s": 9.000002137327e-06,
+            "available_water_m": 0.03644796460867,
+            "upper_storage_m": 0.06507930159569,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1049.99987793,
+            "om_fraction": 0.03499999642372,
+            "porosity": 0.5558550953865,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137127757072,
+            "wp": 0.2304586172104,
+            "conductivity_m_s": 9.000001227832e-06,
+            "available_water_m": 0.03644797950983,
+            "upper_storage_m": 0.06507930904627,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1049.99987793,
+            "om_fraction": 0.03499999642372,
+            "porosity": 0.5558550953865,
+            "rock_correction": 0.9899425506592,
+            "fc": 0.3137127757072,
+            "wp": 0.2304586172104,
+            "conductivity_m_s": 9.000001227832e-06,
+            "available_water_m": 0.03644797950983,
+            "upper_storage_m": 0.06507930904627,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          }
+        }
+      ]
+    },
+    {
+      "material": "1718510",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5024740099907,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 1.666666776146e-06,
+            "available_water_m": 0.01680479384959,
+            "upper_storage_m": 0.03124341741204,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1303.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4834517836571,
+            "rock_correction": 0.9481970071793,
+            "fc": 0.3111858665943,
+            "wp": 0.1824602037668,
+            "conductivity_m_s": 6.944445090085e-07,
+            "available_water_m": 0.01613454334438,
+            "upper_storage_m": 0.03009915910661,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5024740099907,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 1.666666776146e-06,
+            "available_water_m": 0.01680479384959,
+            "upper_storage_m": 0.03124341741204,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1303.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.4834517836571,
+            "rock_correction": 0.9481970071793,
+            "fc": 0.3111858665943,
+            "wp": 0.1824602037668,
+            "conductivity_m_s": 6.944445090085e-07,
+            "available_water_m": 0.01613454334438,
+            "upper_storage_m": 0.03009915910661,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5027568936348,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 2.700000322875e-06,
+            "available_water_m": 0.03364991769195,
+            "upper_storage_m": 0.06254341453314,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5027568936348,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 2.700000322875e-06,
+            "available_water_m": 0.03364991769195,
+            "upper_storage_m": 0.06254341453314,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5027568936348,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 2.700000095501e-06,
+            "available_water_m": 0.03364991769195,
+            "upper_storage_m": 0.06254341453314,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1250.0,
+            "om_fraction": 0.02500000037253,
+            "porosity": 0.5027568936348,
+            "rock_correction": 0.9501991868019,
+            "fc": 0.3241129517555,
+            "wp": 0.1900398433208,
+            "conductivity_m_s": 2.700000095501e-06,
+            "available_water_m": 0.03364991769195,
+            "upper_storage_m": 0.06254341453314,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        }
+      ]
+    },
+    {
+      "material": "1856573",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.02824999950826,
+            "porosity": 0.4738383591175,
+            "rock_correction": 0.7576321363449,
+            "fc": 0.2970107197762,
+            "wp": 0.1683610230684,
+            "conductivity_m_s": 2.249999852211e-06,
+            "available_water_m": 0.01008853502572,
+            "upper_storage_m": 0.03054773248732,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1383.0,
+            "om_fraction": 0.02824999950826,
+            "porosity": 0.4548130333424,
+            "rock_correction": 0.750384747982,
+            "fc": 0.2823582291603,
+            "wp": 0.1600552052259,
+            "conductivity_m_s": 9.374999194733e-07,
+            "available_water_m": 0.009590836241841,
+            "upper_storage_m": 0.02947578392923,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.02824999950826,
+            "porosity": 0.4738383591175,
+            "rock_correction": 0.7576321363449,
+            "fc": 0.2970107197762,
+            "wp": 0.1683610230684,
+            "conductivity_m_s": 2.249999852211e-06,
+            "available_water_m": 0.01008853502572,
+            "upper_storage_m": 0.03054773248732,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1383.0,
+            "om_fraction": 0.02824999950826,
+            "porosity": 0.4548130333424,
+            "rock_correction": 0.750384747982,
+            "fc": 0.2823582291603,
+            "wp": 0.1600552052259,
+            "conductivity_m_s": 9.374999194733e-07,
+            "available_water_m": 0.009590836241841,
+            "upper_storage_m": 0.02947578392923,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01850000023842,
+            "porosity": 0.4713263511658,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3066678643227,
+            "wp": 0.1876716017723,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01420559920371,
+            "upper_storage_m": 0.05673095211387,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01850000023842,
+            "porosity": 0.4713263511658,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3066678643227,
+            "wp": 0.1876716017723,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01420559920371,
+            "upper_storage_m": 0.05673095211387,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016839236,
+            "upper_storage_m": 0.05637454241514,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016839236,
+            "upper_storage_m": 0.05637454241514,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016652972,
+            "upper_storage_m": 0.05637453496456,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016652972,
+            "upper_storage_m": 0.05637453496456,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016652972,
+            "upper_storage_m": 0.05637453496456,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1330.0,
+            "om_fraction": 0.01250000018626,
+            "porosity": 0.4705395698547,
+            "rock_correction": 0.7318342924118,
+            "fc": 0.3076631426811,
+            "wp": 0.1886668950319,
+            "conductivity_m_s": 2.699999868128e-06,
+            "available_water_m": 0.01392016652972,
+            "upper_storage_m": 0.05637453496456,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "material": "53949",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1300.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.48699888587,
+            "rock_correction": 0.6813981533051,
+            "fc": 0.2499368488789,
+            "wp": 0.1101820915937,
+            "conductivity_m_s": 2.250000079584e-06,
+            "available_water_m": 0.0138698015362,
+            "upper_storage_m": 0.03768168017268,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1353.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4678796827793,
+            "rock_correction": 0.6726608276367,
+            "fc": 0.2370063066483,
+            "wp": 0.104470975697,
+            "conductivity_m_s": 9.375000331602e-07,
+            "available_water_m": 0.01315722800791,
+            "upper_storage_m": 0.03634087368846,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1300.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.48699888587,
+            "rock_correction": 0.6813981533051,
+            "fc": 0.2499368488789,
+            "wp": 0.1101820915937,
+            "conductivity_m_s": 2.250000079584e-06,
+            "available_water_m": 0.0138698015362,
+            "upper_storage_m": 0.03768168017268,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1353.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4678796827793,
+            "rock_correction": 0.6726608276367,
+            "fc": 0.2370063066483,
+            "wp": 0.104470975697,
+            "conductivity_m_s": 9.375000331602e-07,
+            "available_water_m": 0.01315722800791,
+            "upper_storage_m": 0.03634087368846,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1220.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.5145377516747,
+            "rock_correction": 0.7084413766861,
+            "fc": 0.2575892806053,
+            "wp": 0.1086749136448,
+            "conductivity_m_s": 9.000000318338e-06,
+            "available_water_m": 0.03294299170375,
+            "upper_storage_m": 0.0811725705862,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1220.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.5145377516747,
+            "rock_correction": 0.7084413766861,
+            "fc": 0.2575892806053,
+            "wp": 0.1086749136448,
+            "conductivity_m_s": 9.000000318338e-06,
+            "available_water_m": 0.03294299170375,
+            "upper_storage_m": 0.0811725705862,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1220.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.5145377516747,
+            "rock_correction": 0.7084413766861,
+            "fc": 0.2575892806053,
+            "wp": 0.1086749136448,
+            "conductivity_m_s": 9.000000318338e-06,
+            "available_water_m": 0.03294299542904,
+            "upper_storage_m": 0.08117257803679,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1220.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.5145377516747,
+            "rock_correction": 0.7084413766861,
+            "fc": 0.2575892806053,
+            "wp": 0.1086749136448,
+            "conductivity_m_s": 9.000000318338e-06,
+            "available_water_m": 0.03294299542904,
+            "upper_storage_m": 0.08117257803679,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        }
+      ]
+    },
+    {
+      "material": "1718494",
+      "status": "observed",
+      "exact_raw_output_parity": true,
+      "road_initialization": [
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1491.791503906,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4169777333736,
+            "rock_correction": 1.0,
+            "fc": 0.2800000011921,
+            "wp": 0.1260000020266,
+            "conductivity_m_s": 2.222222761361e-08,
+            "available_water_m": 0.01867332868278,
+            "upper_storage_m": 0.02909777127206,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 1,
+            "bd_kg_m3": 1540.441040039,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.3977605104446,
+            "rock_correction": 1.0,
+            "fc": 0.2670956552029,
+            "wp": 0.1201930418611,
+            "conductivity_m_s": 9.259262689909e-09,
+            "available_water_m": 0.01781273446977,
+            "upper_storage_m": 0.027756748721,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.1000000014901
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1491.791503906,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4169777333736,
+            "rock_correction": 1.0,
+            "fc": 0.2800000011921,
+            "wp": 0.1260000020266,
+            "conductivity_m_s": 2.222222761361e-08,
+            "available_water_m": 0.01867332868278,
+            "upper_storage_m": 0.02909777127206,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 2,
+            "bd_kg_m3": 1540.441040039,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.3977605104446,
+            "rock_correction": 1.0,
+            "fc": 0.2670956552029,
+            "wp": 0.1201930418611,
+            "conductivity_m_s": 9.259262689909e-09,
+            "available_water_m": 0.01781273446977,
+            "upper_storage_m": 0.027756748721,
+            "layer_thickness_m": 0.1000000014901,
+            "layer_bottom_m": 0.2000000029802
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4230238497257,
+            "rock_correction": 1.0,
+            "fc": 0.200100004673,
+            "wp": 0.09455000609159,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04454357549548,
+            "upper_storage_m": 0.06569477170706,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 3,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4230238497257,
+            "rock_correction": 1.0,
+            "fc": 0.200100004673,
+            "wp": 0.09455000609159,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04454357549548,
+            "upper_storage_m": 0.06569477170706,
+            "layer_thickness_m": 0.2000000029802,
+            "layer_bottom_m": 0.4000000059605
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4241686165333,
+            "rock_correction": 1.0,
+            "fc": 0.1860000044107,
+            "wp": 0.08900000154972,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.04582529887557,
+            "upper_storage_m": 0.06703372299671,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 4,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.01499999966472,
+            "porosity": 0.4241686165333,
+            "rock_correction": 1.0,
+            "fc": 0.1860000044107,
+            "wp": 0.08900000154972,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.04582529887557,
+            "upper_storage_m": 0.06703372299671,
+            "layer_thickness_m": 0.2000000178814,
+            "layer_bottom_m": 0.6000000238419
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007874999195337,
+            "porosity": 0.4215772151947,
+            "rock_correction": 1.0,
+            "fc": 0.2477500289679,
+            "wp": 0.1063000038266,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04197658225894,
+            "upper_storage_m": 0.0630554407835,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 5,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007874999195337,
+            "porosity": 0.4215772151947,
+            "rock_correction": 1.0,
+            "fc": 0.2477500289679,
+            "wp": 0.1063000038266,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04197658225894,
+            "upper_storage_m": 0.0630554407835,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 0.8000000119209
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4240480363369,
+            "rock_correction": 0.9964526295662,
+            "fc": 0.1725905686617,
+            "wp": 0.07534676790237,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04831220954657,
+            "upper_storage_m": 0.06974025070667,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 6,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4240480363369,
+            "rock_correction": 0.9964526295662,
+            "fc": 0.1725905686617,
+            "wp": 0.07534676790237,
+            "conductivity_m_s": 2.800000584102e-05,
+            "available_water_m": 0.04831220954657,
+            "upper_storage_m": 0.06974025070667,
+            "layer_thickness_m": 0.1999999880791,
+            "layer_bottom_m": 1.0
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 7,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.200000047684
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 8,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.400000095367
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 9,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000766001e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.600000143051
+          }
+        },
+        {
+          "before": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000038405e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          },
+          "after": {
+            "stage": "ROAD_INIT_WATBAL_INIT",
+            "ofe": 1,
+            "layer": 10,
+            "bd_kg_m3": 1500.0,
+            "om_fraction": 0.007499999832362,
+            "porosity": 0.4237749576569,
+            "rock_correction": 0.9251870512962,
+            "fc": 0.1712521314621,
+            "wp": 0.07614289224148,
+            "conductivity_m_s": 2.800000038405e-05,
+            "available_water_m": 0.0435820966959,
+            "upper_storage_m": 0.06952642649412,
+            "layer_thickness_m": 0.2000000476837,
+            "layer_bottom_m": 1.800000190735
+          }
+        }
+      ]
+    }
+  ],
+  "script_sha256": "c25a435c5a8271be5dacf50b624d008e39e073db898367b426ff26c4d7100ca8",
+  "declaration_sha256": "5ac7ab2c8a1bedc4fa4088681e73506c5df29b672eee176db0ddda160505d78a",
+  "results_sha256": "275711f6c27d396b280f8879a0e9ce6602b3a1667d3ce8d25a8a40a454146804"
+}

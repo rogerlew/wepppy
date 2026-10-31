@@ -1,0 +1,84 @@
+{
+  "summary": {
+    "pore": {
+      "cases": 116,
+      "physical_pass": 116,
+      "groups": {
+        "meaningful_high": {
+          "cases": 5,
+          "within": 0
+        },
+        "meaningful_low": {
+          "cases": 48,
+          "within": 1
+        },
+        "meaningful_pass": {
+          "cases": 18,
+          "within": 18
+        },
+        "small_exceedance": {
+          "cases": 43,
+          "within": 0
+        },
+        "small_pass": {
+          "cases": 2,
+          "within": 2
+        }
+      }
+    },
+    "conductivity": {
+      "cases": 116,
+      "physical_pass": 116,
+      "groups": {
+        "meaningful_high": {
+          "cases": 5,
+          "within": 2
+        },
+        "meaningful_low": {
+          "cases": 48,
+          "within": 21
+        },
+        "meaningful_pass": {
+          "cases": 18,
+          "within": 18
+        },
+        "small_exceedance": {
+          "cases": 43,
+          "within": 1
+        },
+        "small_pass": {
+          "cases": 2,
+          "within": 2
+        }
+      }
+    },
+    "coupled": {
+      "cases": 116,
+      "physical_pass": 116,
+      "groups": {
+        "meaningful_high": {
+          "cases": 5,
+          "within": 2
+        },
+        "meaningful_low": {
+          "cases": 48,
+          "within": 22
+        },
+        "meaningful_pass": {
+          "cases": 18,
+          "within": 18
+        },
+        "small_exceedance": {
+          "cases": 43,
+          "within": 1
+        },
+        "small_pass": {
+          "cases": 2,
+          "within": 2
+        }
+      }
+    }
+  },
+  "declaration_sha256": "5ac7ab2c8a1bedc4fa4088681e73506c5df29b672eee176db0ddda160505d78a",
+  "results_sha256": "275711f6c27d396b280f8879a0e9ce6602b3a1667d3ce8d25a8a40a454146804"
+}

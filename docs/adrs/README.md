@@ -48,6 +48,8 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0120`: [Bounded generated-road hydraulic sensitivity](ADR-0120-roads-generated-hydraulic-sensitivity.md) (Research execution only, 2026-10-31; no production rule).
+
 - `ADR-0111`: [RAP Production Data Correction Awareness](ADR-0111-rap-production-data-correction-awareness.md) (Accepted reference record, 2026-10-29; no runtime change).
 
 - `ADR-0080`: [Feature Access Governance Amendment](ADR-0080-feature-access-governance-amendment.md) (Operator-directed amendment prepared; technical checkpoint pending, 2026-10-01)

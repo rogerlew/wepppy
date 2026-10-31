@@ -1,22 +1,25 @@
 # Roads parameterization and configuration view
 
-Revision-3 runtime studies are complete; [ledger v13](artifacts/candidate-ledger-v13.json)
-is current. The 112-run runtime bridge shows a strong daily-mode effect on legacy
-soils, but the 196-new-run soil/runtime completion rejects global hourly-off:
-only 26/96 generated-soil misses recover and two of 20 passing controls regress.
-All 464 PMET-retained comparison cells pass physical checks. Five native guard
-stops in the separate hourly/original-Penman bridge remain explicit failures.
-See [runtime findings](artifacts/runtime-bridge-r3-findings.md) and
-[generated-soil findings](artifacts/soil-hourly-r3-findings.md).
+The generated-role hydraulic audit and bounded road-only sensitivity are complete;
+[ledger v14](artifacts/candidate-ledger-v14.json) is current. All 348 treatment runs
+pass fresh physical audits. Conductivity-only recovers 24/96 misses and coupled
+pore/conductivity recovers 25/96; each retains all 20 passing controls. All 21
+initialization observation replays match released-binary raw outputs exactly.
+Seven raw sources, 21 role profiles and 96 horizons retain their 200 mm boundaries.
+
+No standalone treatment meets acceptance: 42 small-reference excesses remain.
+All have net fill addition and net buffer deposition; these are boundary budgets,
+not tagged particle origins. Next is an
+[initialization-verified legacy format bridge and downstream role isolation](artifacts/role-isolation-r3-plan.md).
+See [hydraulic audit](artifacts/generated-role-hydraulic-audit-r3-findings.md),
+[screen results](artifacts/road-pore-screen-r3-findings.md) and
+[research-only ADR-0120](../../adrs/ADR-0120-roads-generated-hydraulic-sensitivity.md).
 
 The full development baseline remains 840/840 physical, 713/766 meaningful and
-31/74 small magnitude passes; no parameterization is accepted. Next is the
-[source-supported role hydraulic audit](artifacts/generated-role-hydraulic-audit-r3-plan.md),
-with the current runtime fixed. Withheld materials, production defaults and the
-human UI specification/layout gate remain untouched.
-
-Raw decks, outputs and verification evidence are retained in the
-[verified runtime/soil archive](artifacts/runtime-soil-r3-v1-retention.json).
+31/74 small magnitude passes. No generated parameterization is accepted.
+Withheld materials, production defaults and the human UI specification/layout
+gate remain untouched. Evidence is in the
+[verified hydraulic study archive](artifacts/hydraulic-role-r3-v1-retention.json).
 
 Status: active. One outcome-driven program, authorized by the operator on
 2026-10-29 Pacific (2026-10-30 UTC). This supersedes the sequence of individually
