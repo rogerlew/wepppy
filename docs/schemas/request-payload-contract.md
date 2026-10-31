@@ -85,6 +85,7 @@ them to a universal boolean/default:
 | Polaris flags | Null uses stored/default state; blank rejected; legacy `y/n` additionally accepted here only |
 | RUSLE `force_polaris_refresh` | Null defaults false; blank rejected |
 | Geneva `force_rebuild` / `rebuild` | Supplied null/blank rejected |
+| Batch run_directives keys present in the existing batch directive mapping | Omission preserves existing directive; supplied null/blank rejected; unknown keys and known TaskEnum members absent from that mapping retain ignore behavior |
 | Soil cache-clear, OpenET refresh, SWAT print, fork undisturbify/skip-output, landuse replace, migration create_archive, run-sync flags | Null/blank false; omission retains existing default (including run-sync migrations enabled) |
 
 These explicit blank/null exceptions preserve legacy setter outcomes without
@@ -127,6 +128,9 @@ silently ignoring it. Existing domain validators remain additive.
 | DSS export mode | No mode override | Existing conversion; result must be existing mode 1 or 2 |
 | DSS excluded orders/channel ID lists | Preserve empty list, omitted/null behavior and skipping null/blank entries | Preserve comma/list syntax and deduplication; malformed nonblank entries reject; existing excluded-order domain is 1–5 |
 | Soil build initial_sat/sol_ver | Preserve existing required/default/clearing policy; no new required field | Existing validation must finish before source promotion |
+| Ash mode 1 ini_black_depth/ini_white_depth; mode 0 ini_black_load/ini_white_load/field_black_bulkdensity/field_white_bulkdensity; fire_date | Preserve mode-specific required fields and null/omitted date behavior | Numeric inputs must be finite; supplied date must pass existing YearlessDate parsing before settings or uploads |
+| WATAR low_/mod_/high_ fields for configured contaminant keys, plus reservoir_capacity/reservoir_storage | Omission preserves stored values; explicit nonnumeric/null/blank values reject | Existing float conversion, including zero; finite supplied values only, with no new scientific ranges; unrelated form keys remain ignored |
+| Agent chat ttl_seconds | Omission/null/exact empty string/native numeric zero/false retain the existing 1800-second default; true retains 1 second | Scalar finite integer conversion retained; containers and whitespace-only text reject; selected nonpositive values reject before spawn/publish because Redis cannot accept that TTL |
 
 For WEPP clipping length, preserve
 [the exact numeric alias precedence](../ui-docs/contracts/wepp-hillslope-clipping-contract.md#user-controls):
