@@ -1,0 +1,229 @@
+{
+  "scope": "Fresh canonical SOIL conversion of 18 frozen seed lanes; observational context only, no native runs or seed changes",
+  "pairs": 9,
+  "lanes": 18,
+  "rows": 315576,
+  "all_source_record_and_soil_hashes_verified_before_and_after": true,
+  "reader_bound_before_and_after": true,
+  "first_attempt_limitation": "v1 and v2 bound Python facades rather than the actual Rust library; exact executed sources and summaries retained. v3 additionally binds the callable native module before and after conversion.",
+  "all18_v1_v2_logical_tables_equal": true,
+  "parquet_byte_hashes_differ": true,
+  "results_sha256": "adeb2e75565cb98a4f4b7adcf4525b0ffa68f80f385968bb366b05672b7e1724",
+  "strata": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 19.47,
+          "minimum": 6.0,
+          "maximum": 19.47,
+          "missing": 0,
+          "first_changed": {
+            "year": 1,
+            "julian": 5,
+            "Rough": 19.46
+          }
+        }
+      }
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 17.34,
+          "minimum": 6.0,
+          "maximum": 17.34,
+          "missing": 0,
+          "first_changed": {
+            "year": 1,
+            "julian": 5,
+            "Rough": 17.33
+          }
+        }
+      }
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 17.34,
+          "minimum": 6.0,
+          "maximum": 17.34,
+          "missing": 0,
+          "first_changed": {
+            "year": 1,
+            "julian": 4,
+            "Rough": 17.33
+          }
+        }
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 19.47,
+          "minimum": 6.0,
+          "maximum": 19.47,
+          "missing": 0,
+          "first_changed": {
+            "year": 2000,
+            "julian": 2,
+            "Rough": 19.08
+          }
+        }
+      }
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        }
+      }
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        }
+      }
+    },
+    {
+      "stratum": "small_passing_control",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 19.47,
+          "minimum": 6.0,
+          "maximum": 19.47,
+          "missing": 0,
+          "first_changed": {
+            "year": 1,
+            "julian": 5,
+            "Rough": 19.46
+          }
+        }
+      }
+    },
+    {
+      "stratum": "meaningful_high",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 22.95,
+          "minimum": 6.0,
+          "maximum": 22.95,
+          "missing": 0,
+          "first_changed": {
+            "year": 2000,
+            "julian": 2,
+            "Rough": 22.53
+          }
+        }
+      }
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "buffer_roughness_mm": {
+        "legacy": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        },
+        "modern": {
+          "first": 100.0,
+          "minimum": 100.0,
+          "maximum": 100.0,
+          "missing": 0,
+          "first_changed": null
+        }
+      }
+    }
+  ],
+  "v3_declaration": {
+    "scope": "Read published SOIL histories for frozen observer seeds; no native runs.\n\nPost hoc descriptive context, not a causal test or seed-selection amendment.\nWrites only a new output root and preserves every source artifact.\n",
+    "seeds_sha256": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "script_sha256": "816ed60012cb004b7e719c35229e96696c2e69a453ff713c5ace4f9c997292f7",
+    "reader": "/home/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/__init__.py",
+    "reader_sha256": "69289cd2af86e36e3a3881b63b993bb02eb461267380f13922bc1a73402d5958",
+    "native_reader": "/home/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+    "native_reader_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+    "wrapper": "/home/workdir/wepppy/wepppy/wepp/interchange/_rust_interchange.py",
+    "wrapper_sha256": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+    "interchange_version": [
+      1,
+      2
+    ],
+    "native_runs": 0,
+    "pairs": 9
+  },
+  "all18_v2_v3_logical_tables_equal": true,
+  "results_path": "out/roads-parameterization-program-20261031/buffer-published-soil-context-r4-v3/results.json",
+  "interpretation": "Descriptive association in nine preselected pairs; neither proof of causality nor a parameter recommendation."
+}

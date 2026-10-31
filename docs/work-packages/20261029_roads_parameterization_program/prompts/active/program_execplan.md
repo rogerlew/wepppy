@@ -88,6 +88,7 @@ This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
+- [x] Read and independently verify all 315,576 published SOIL rows for the nine frozen pairs; fresh v3 conversion binds the actual Rust library and preserves source artifacts. Archive all three attempts with all 65 members verified.
 - [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
 - [x] Complete independent revision-4 PDF/manifest approval, exact-byte delivery, host/container smokes and actual selected hill/PASS/watershed/reader checks.
@@ -162,16 +163,15 @@ This execution stops at the explicit human specification/layout gate.
 ## Context and Orientation
 
 Work in /workdir/wepppy on the existing master branch. Large native artifacts
-belong under /wc1/runs/ro/roads-parameterization-program-20261030; new batch roots
+belong under /wc1/runs/ro/roads-parameterization-program-20261031; new batch roots
 must not overwrite earlier studies. Canonical native checkout is
-/workdir/wepp-forest-release-20261009. Current compiled source is
-`6112b68bce0e21a77f510bde5c24af067a47a647`; native delivery `eb601ce8d`, WEPPpy
-release delivery `d783e742e`. The accepted undeployed artifact revision is 3.
-Installed watershed SHA256 is `1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531`;
-hill SHA256 is `568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d`.
-The revision-3 release package records completed independent scientific/runtime
-reviews, 1,095 native tests and complete application coverage. Prior revisions
-remain historical controls; never mix their PASS/output artifacts.
+/workdir/wepp-forest-release-20261009. Current compiled inputs match source
+`b01a739957bef5aacf35b4a89bc13eddc9d94804`; native delivery is `1959d8f61`,
+WEPPpy release delivery `a5c40031a`. The accepted undeployed artifact revision is 4.
+Installed watershed SHA256 is `2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`;
+hill SHA256 is `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.
+The current acceptance and application-coverage limitations are recorded above.
+Prior revisions remain historical controls; never mix their PASS/output artifacts.
 Legacy 2010 SHA256 is a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8.
 Keep historical 261026 results as controls; do not relabel them as current.
 
@@ -265,6 +265,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The nine fixed observer pairs have legacy buffer roughness of 100 mm throughout. Six conditioned generated profiles decline to 6 mm; the three selected underprediction profiles retain 100 mm. This is post hoc descriptive context, not causal evidence. The SOIL consolidation branch and IRS depression-storage operands require native observation. See artifacts/buffer-published-soil-context-r4.json.
+
 - Exact-R4 paired outputs shift the next question toward buffer runoff support: all 115 printing-separated lower-incoming-sediment/higher-export case-days have higher generated surface outflow, including 101 with zero legacy outflow. Higher printed Keff does not isolate layerwise infiltration or storage; whole profiles differ. The modern lane is the conditioned U12 erosion_road_cap candidate, not raw SSURGO output.
 
 - The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
@@ -354,6 +356,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-10-31: add published SOIL history as supplemental context without changing frozen seeds or execution design. Preserve v1/v2 provenance attempts and use a fresh v3 conversion binding the actual native callable module; facade identity alone does not identify the Rust reader.
+
 - Accept the 116-case ledger for observational accounting only. Before further tuning, observe actual storm-time buffer hydrology and sediment processes in paired profiles, with passing controls and both discrepancy directions. The pattern also occurs in passing controls and meaningful underpredictions move oppositely, so a blanket buffer correction is unsupported. Preserve the original FSWEPP2/WEPP2010 criteria; same-engine legacy controls are diagnostic anchors, not replacement targets.
 
 - Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
@@ -439,6 +443,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+- Buffer observation preparation remains active. Published SOIL context narrows the roughness hypothesis but does not accept a parameter change. Actual prebuild scientific/implementation review and ordinary-output parity remain required before interpreting native traces.
 
 - WEPPpy revision-4 delivery is pushed as a5c40031a. The 116-case ledger has independent scientific and implementation acceptance, complete raw retention and a source-free reproduction packet. No model/parameter change follows from this observational result; the next bounded source study is predeclared separately.
 

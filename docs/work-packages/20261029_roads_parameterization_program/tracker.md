@@ -40,6 +40,16 @@ The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
 
+Supplemental published SOIL readback covers all 315,576 rows from the nine frozen
+pairs. Legacy buffer roughness stays at 100 mm; six conditioned generated profiles
+decline to 6 mm, while all three selected underprediction profiles retain 100 mm.
+This is descriptive context, not a causal result or parameter recommendation.
+Native observation will check consolidation-branch activation and depression-storage
+operands. The fresh v3 readback binds the actual Rust library; v1/v2 provenance
+attempts are retained. [Independent readback](artifacts/buffer-published-soil-context-r4-independent-review.md)
+passes, and all 65 raw archive members are verified. See
+[findings and reproduction](artifacts/buffer-published-soil-context-r4.md).
+
 The 928-cell factorial is complete; no parameter candidate is accepted. All
 116 exact-revision-4 legacy-soil anchors also completed. Their 91 apparent
 particle/bulk mismatches were a research-audit fixed-width parsing defect:

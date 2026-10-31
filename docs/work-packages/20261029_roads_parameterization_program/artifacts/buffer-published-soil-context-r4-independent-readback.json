@@ -1,0 +1,277 @@
+{
+  "passed": true,
+  "scope": "Independent descriptive SOIL-context readback only; no causal test or native runs.",
+  "rows": 315576,
+  "logical_table_pairs_equal": 18,
+  "actual_callable_module": "wepppyo3.wepp_interchange.wepp_interchange_rust",
+  "native_reader_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+  "checks": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "cdf509f69ea6d3a72108b3f506acd192f11804a129adee372944a3a93da386dd"
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 19.47,
+        "minimum": 6.0,
+        "maximum": 19.47,
+        "missing": 0,
+        "first_changed": {
+          "year": 1,
+          "julian": 5,
+          "Rough": 19.46
+        }
+      },
+      "parquet_sha256": "df8d040bf6be8a37977283d5ee068280e0a56245c51dd6238de2ca34ed99eab4"
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "e2399386e9056d2a7e70840413fc448a969ed11753c4ef6cd5e1b0fcf2a50934"
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 17.34,
+        "minimum": 6.0,
+        "maximum": 17.34,
+        "missing": 0,
+        "first_changed": {
+          "year": 1,
+          "julian": 5,
+          "Rough": 17.33
+        }
+      },
+      "parquet_sha256": "d099b1a1b83ff60d9fecacde7c26297cb34c669488f30dd33f31eceaa32890e3"
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "94a24de097338df9d464dd0e64365dfe03db2971d9b5f019cb314a5e1bcaebe8"
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 17.34,
+        "minimum": 6.0,
+        "maximum": 17.34,
+        "missing": 0,
+        "first_changed": {
+          "year": 1,
+          "julian": 4,
+          "Rough": 17.33
+        }
+      },
+      "parquet_sha256": "acc2023507a962b0f3aa8a542d447aa3f2d8ceebf713a4001af87c82e10fe4f2"
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "0ed05b9a288dfbbb5bdb8cca8ac26c5f0ed621ffd7741d642203997708ba0a68"
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 19.47,
+        "minimum": 6.0,
+        "maximum": 19.47,
+        "missing": 0,
+        "first_changed": {
+          "year": 2000,
+          "julian": 2,
+          "Rough": 19.08
+        }
+      },
+      "parquet_sha256": "dd55738c68282ac648d561e86655f1e775b37ba96bbbff23e1fbe71608368de0"
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "745ef88f6185db5978a96a6d5297ca9505e025f0100618e7df25a698ef272a52"
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "7fb4ba3f3cf05fa03ba920d41a03717791cb5223b16bb615ab9629e152f259af"
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "734baf8e2c9eeb8e75ef175dccce5905ad7275ec90ea4db6e5d4449f4926adc3"
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "7776d5a41043bd405003abbf1e3d9fc3d0dfa6b992d46eac82b0289ae79be78c"
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "925819d2fe30b18b0331cfe75b14c764576572bf24eb05926c104e063854ef3a"
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 19.47,
+        "minimum": 6.0,
+        "maximum": 19.47,
+        "missing": 0,
+        "first_changed": {
+          "year": 1,
+          "julian": 5,
+          "Rough": 19.46
+        }
+      },
+      "parquet_sha256": "7fdd6ca083ae8e5698961fd4f568863759771ebcd05cc02176daf90d2d90c5f1"
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "a5766704feb688be1f6141d32ff8c5ac98b3f117b2af9e83f15f702da76a31bb"
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 22.95,
+        "minimum": 6.0,
+        "maximum": 22.95,
+        "missing": 0,
+        "first_changed": {
+          "year": 2000,
+          "julian": 2,
+          "Rough": 22.53
+        }
+      },
+      "parquet_sha256": "43f1974ecd7efbd0a2c081a739d66fc6ccae14c4239d8d7f1506beae33ee1e34"
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "f1490ca49b8b2d2597ed001732fb015be5251d4e329de345b31e0554224ae2d6"
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "rows": 17532,
+      "buffer_roughness_mm": {
+        "first": 100.0,
+        "minimum": 100.0,
+        "maximum": 100.0,
+        "missing": 0,
+        "first_changed": null
+      },
+      "parquet_sha256": "10c55f0885e3a01b53b3da124099da0f1148e4d013953badf1fe3ccdc06158f2"
+    }
+  ],
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-published-soil-context-r4-v3/declaration.json": "35a89d482eb6e8fd91e7519f8c5b18349f43a031a5039c61708d8c20d0059b13",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-published-soil-context-r4-v3/results.json": "adeb2e75565cb98a4f4b7adcf4525b0ffa68f80f385968bb366b05672b7e1724",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-published-soil-context-r4-v3/logical-replay-verification.json": "d2b0a622305a56b3dcb908d0ac0b85b167256fcc20fb1ae76253efb651e66f41",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-published-soil-context-r4-v2/results.json": "358b49dfa10c6455a381ff8054f79f0988eaacfbfc42efabcb16ffa9f07ddd2a",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/read_buffer_soil_context_r4.py": "816ed60012cb004b7e719c35229e96696c2e69a453ff713c5ace4f9c997292f7",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_soil_context_r4.py": "6d39e520f6a4de3685a4d72c4689d846737052ce3c71826bb1430e48e157d551"
+  }
+}
