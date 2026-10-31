@@ -1,0 +1,267 @@
+{
+  "status": "designed_not_executed",
+  "engine_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+  "source_results_sha256": "85e8598de8f261c83181fcb260e6f540c0440ad8a84dbd36ce1a8f078018cbfa",
+  "selection": "One per exact consumed-input identity among17remaining failures; first retained passing control perclimate.",
+  "unique_residuals": 11,
+  "passing_controls": 5,
+  "factors": [
+    "wepp_ui.txt",
+    "pmetpara.txt",
+    "snow.txt"
+  ],
+  "baseline": "All three sidecars present, exact116control outputs retained.",
+  "new_runs": 112,
+  "total_cells": 128,
+  "changed_inputs": "Only declared presence/absence of the three runtime sidecars; retain exact98.4soil deck, climate, management, geometry and native binary.",
+  "hypothesis": "Residual whole-legacy-soil differences arise from modern runtime choices and/or engine behavior; separate these before fitting generated hydraulic parameters.",
+  "limitations": [
+    "PMET absence selects original Penman; it is not a calibrated regional PMET alternative.",
+    "Snow absence changes the default threshold; not a regional snow calibration.",
+    "Diagnostic only; all failures remain in denominators, no clipping/threshold/default changes.",
+    "Retained fixed-site runtime bundle across climates remains a study limitation.",
+    "No withheld materials or UI implementation."
+  ],
+  "cases": [
+    {
+      "group": "residual",
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "6ac835be43c848b7c77a8fde5480f7423780afa7f1a5199c94155c4937f69f28",
+      "reference_kg_yr": 1.1638411932905621
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "da5d7b6068fe43c61ba14bfb3dc66d6cbd9f0a5195ec8dac680aafcfcbe67fbf",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "39dc5b98c472908b690d2cde7fc38066f24d662e72226c71e0d2d49762c252cf",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "759f32bd6606c3e7e9135aa7af6208a9666d7c5be5bb08bd4293c5daaa300012",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "47d48bcbe092199d4e6f8c7a86e78227dee2fc6103fb23e898b400d5c605260d",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "e7514726c1ca2c9644480d1d67e10823c1da0d119700b42d220e518351d9a7e7",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "0ac6fc9d180c94a95f7ffc25788e133025fbcd88f3dd88eb2755a912cf411dff",
+      "reference_kg_yr": 0.0
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "7bd4aab49e5389f847b2bc2a71bf2313e28773672645a150270e6386658ccba2",
+      "reference_kg_yr": 0.04310522938113193
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "67a9262fec579177f588acdfa93395621c781a702ef286ce128580980807a684",
+      "reference_kg_yr": 0.04310522938113193
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "b7291799eb9cc4db83ea5c93d096e3aad387ee17f504f826588f9b744598206c",
+      "reference_kg_yr": 0.5603679819547152
+    },
+    {
+      "group": "residual",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "f25b1bd681f4bdd4c2fc70d518960a8b71ad1148f7a4b367eebc5d7ae36188e8",
+      "reference_kg_yr": 14.00919954886788
+    },
+    {
+      "group": "passing_control",
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "169085adf4c87dfe4ba958d57b7807fb53332f55dbcab86969539e88c96f35ec",
+      "reference_kg_yr": 635.88888
+    },
+    {
+      "group": "passing_control",
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "9324f1c04c58b6420f488bf704b06dd738c95eea49bc1a1d08411087e7c041f4",
+      "reference_kg_yr": 84.81924000000001
+    },
+    {
+      "group": "passing_control",
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "6c1e03e9053c0ae8ce1b58c34d9c3cd96d9635deeb8ae58f9cdeef24c0f4495b",
+      "reference_kg_yr": 22.837320000000002
+    },
+    {
+      "group": "passing_control",
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "141cf3d5f47f9ea2a3c1f55ffe3ab0b2ed26d2fa518a8b6fa988679495b9221d",
+      "reference_kg_yr": 24.453
+    },
+    {
+      "group": "passing_control",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "1ec7e7a81033beae0a0d22de1a1d314784137c276eeb0f725b5a24c6f0fe6046",
+      "reference_kg_yr": 204.11028
+    }
+  ]
+}

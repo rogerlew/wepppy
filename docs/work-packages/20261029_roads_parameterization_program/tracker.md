@@ -1,5 +1,15 @@
 # Roads parameterization program tracker
 
+## Current: parameterization resumption on revision 3
+
+Native release delivery and all reviews are complete (`d783e742e` WEPPpy,
+`eb601ce8d` native delivery; compiled source `6112b68bc`). Scientific baseline:
+840/840 physical, 713/766 meaningful and 31/74 small magnitude passes. There are
+96 misses: 48 meaningful low, five meaningful high, 43 small excess; 71 outunrut.
+Execute `artifacts/role_boundary_assessment_r3.py` against retained final outputs
+before declaring the next role-specific contrast. Historical checkpoints below
+are retained; they are not current release blockers. No withheld/UI/default changes.
+
 Active: [ExecPlan](prompts/active/program_execplan.md).
 
 ## Current checkpoint
@@ -516,3 +526,22 @@ Withheld materials remain untouched and UI specification/layout remains human-ga
 
 Current engine ledger: [v11](artifacts/candidate-ledger-v11.json), revision 3
 vendored with final scientific acceptance; release integration tracked separately.
+
+## Completed revision-3 resumption studies
+
+[Findings](artifacts/revision3-resumption-findings.md): all 840 role-boundary
+comparisons rehashed/read through Rust; 116 whole-soil controls complete and pass
+physical checks. Recover79/96 misses; retain 20/20 passing controls. Remaining 17
+failures represent11 distinct inputs, all outunrut. Next:
+[runtime bridge design](artifacts/runtime-bridge-r3-design.json), 112 new runs plus
+16 retained controls, before generated-soil hydraulic parameter selection.
+
+Fresh verification rehashed all recorded inputs/outputs and recomputed all 116
+completed native audits: 116/116 pass, 96 distinct consumed input sets. No omitted
+failures or changed thresholds. Current [ledger v12](artifacts/candidate-ledger-v12.json).
+Execution: `wctl exec -T weppcloud env PYTHONPATH=/workdir/wepppy python .../legacy_soil_control_r3.py --declare`,
+then the same command without `--declare`; `verify_legacy_soil_r3.py` verifies outputs.
+Readback adapter schema failure is retained and corrected without model/output changes.
+
+Retention: [revision-3 resumption archive](artifacts/revision3-resumption-v1-retention.json)
+contains 3,037 files; every archived member was rehashed.

@@ -1,5 +1,12 @@
 # Roads parameterization and configuration view
 
+Current resumption (2026-10-31): revision-3 native release and scientific/application
+review are complete. Use [ledger v12](artifacts/candidate-ledger-v12.json), not
+historical release prerequisites below. All 840 cases pass physical checks;
+713/766 meaningful and 31/74 small comparisons meet magnitude criteria. Refresh
+road/fill/buffer attribution on the final pair before the next parameter contrast.
+Withheld materials and the human UI specification/layout gate remain untouched.
+
 Status: active. One outcome-driven program, authorized by the operator on
 2026-10-29 Pacific (2026-10-30 UTC). This supersedes the sequence of individually
 approved experiments; closed studies remain historical evidence.
@@ -134,7 +141,7 @@ view or its production persistence/application wiring. Scientific experiments,
 disposable builder/full-project validation and reviewable design documents remain
 authorized. Do not treat silence, scientific acceptance or AI review as UI approval.
 
-## Latest scientific checkpoint
+## Historical revision-2 scientific checkpoint
 
 Completed 333 erosion-anchor and 98 runtime-factor runs; see
 [findings](artifacts/role-runtime-ablation-findings.md). Erosion-only substitution
@@ -167,7 +174,7 @@ paired files and completed native audits verified. Reject promotion; investigate
 before more tuning. [Ledger v4](artifacts/candidate-ledger-v4.json) is current.
 No parameter/binary changes, withheld outcomes or UI implementation.
 
-## D2 equivalent-plane correction — 2026-10-31
+## Historical D2 candidate checkpoint — 2026-10-31
 
 [Findings](artifacts/native-D2-geometry-findings.md) and [ledger v10](artifacts/candidate-ledger-v10.json)
 are current. Confirmed native array-origin defect; origin-only and combined
@@ -186,7 +193,7 @@ Native gates: 1073 tests and 18 watchlist cases pass; Disturbed 99 pass. Roads p
 
 The user authorized re-releasing the undeployed `wepp_261029` under its existing
 name. The matched final pair is vendored; source and scientific gates passed.
-[Ledger v11](artifacts/candidate-ledger-v11.json) is current. The
+[Ledger v12](artifacts/candidate-ledger-v12.json) is current. The
 [release package](../20261031_wepp_261029_rerelease_r3/package.md) records
 application and publication delivery. This fixes native geometry/recession defects;
 Roads parameterization acceptance remains unmet at 713/766 meaningful and 31/74

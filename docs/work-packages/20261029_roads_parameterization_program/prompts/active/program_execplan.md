@@ -15,10 +15,17 @@ This execution stops at the explicit human specification/layout gate.
 ## Progress
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
-- [ ] Complete Cedar watershed semantic/particle/source review and candidate disposition.
+- [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.
+- [x] Recompute final revision-3 road/fill/buffer attribution for all 840 cases.
+- [x] Execute 116 same-engine whole-legacy-soil controls:79/96 misses recovered;
+  all 20 passing controls retained. All 116 native audits recomputed; 3,037 retained files rehashed.
+- [ ] Execute the declared 16-input runtime bridge (112 new runs) before choosing
+  generated-soil hydraulic contrasts.
 
-- [x] D2 confirms EPLANE array-origin defect; U2/U3 physical panels and clean-output parity pass. Native candidate implemented with 13 permanent tests and proposed ADR-0119.
-- [x] Complete native, Disturbed and Roads development gates; Cedar review remains separately tracked. No released binary or parameter adoption.
+- [x] D2 geometry/recession repair accepted and delivered as revision 3;
+  permanent regression coverage and accepted ADR-0119 retained.
+- [x] Complete native, Disturbed, Roads and Cedar gates; exact revision-3 pair
+  released. No Roads parameter defaults adopted.
 
 - [x] Reconcile native release: source 631aed1d1, matched 261029 pair reviewed and pushed.
 - [x] Existing road-cap candidate passes 96/96 development cases with physical audits.
@@ -54,13 +61,14 @@ This execution stops at the explicit human specification/layout gate.
 Work in /workdir/wepppy on the existing master branch. Large native artifacts
 belong under /wc1/runs/ro/roads-parameterization-program-20261030; new batch roots
 must not overwrite earlier studies. Canonical native checkout is
-/workdir/wepp-forest-release-20261009. Final native repair source is `ba9f2ad91b5165d5cd2954bd64b5df608798541e`;
-independent acceptance is retained in the native accounting package. The owner
-explicitly authorized replacing undeployed 261029 with artifact revision 2.
-Installed watershed SHA256 is `819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715`;
-hill SHA256 is `21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed`.
-Original identities remain in the reissue package. Regenerate matched outputs;
-the shared release filename is not evidence of byte compatibility.
+/workdir/wepp-forest-release-20261009. Current compiled source is
+`6112b68bce0e21a77f510bde5c24af067a47a647`; native delivery `eb601ce8d`, WEPPpy
+release delivery `d783e742e`. The accepted undeployed artifact revision is 3.
+Installed watershed SHA256 is `1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531`;
+hill SHA256 is `568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d`.
+The revision-3 release package records completed independent scientific/runtime
+reviews, 1,095 native tests and complete application coverage. Prior revisions
+remain historical controls; never mix their PASS/output artifacts.
 Legacy 2010 SHA256 is a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8.
 Keep historical 261026 results as controls; do not relabel them as current.
 
@@ -285,9 +293,12 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-Native gates: 1073 tests and 18 watchlist cases pass; Disturbed 99 pass. Roads physical gate 840/840; magnitude 713/766 meaningful and 31/74 small, two recoveries and seven regressions. All 864 Cedar hillslopes complete; watershed and semantic/particle audit pending. No release or parameter adoption.
-
-Current: ledger v10 and `artifacts/native-D2-geometry-findings.md`. Both twelve-case lanes complete with zero negative linked FIN and unfunded requests; clean candidate exactly matches all U3 outputs. Native full gates running; Disturbed/Cedar/Roads magnitude rebaselining remains. Earlier D1/U1 rejection remains historical evidence.
+Current: artifact revision 3 delivery is complete; ledger v12 records the current baseline and completed resumption studies.
+All 840 physical cases pass; 713/766 meaningful and 31/74 small references pass
+magnitude criteria. There are 48 meaningful underpredictions, five meaningful
+overpredictions and 43 small-load exceedances. Of 96 misses, 71 are outunrut.
+No parameterization is accepted. Cedar scientific review is complete; no native
+release prerequisite remains open. Earlier entries below are historical checkpoints.
 
 Previous D1 checkpoint: ledger v9 and `artifacts/native-domain-review-findings.md`. D1 completes
 63 reference solves, 42 scalar calls, zero new full WEPP runs. No adoption.
@@ -632,3 +643,45 @@ acceptance binds the final dated pair: 1,095 native tests, 28 watchlist cases,
 Magnitude remains 744/840, so this acceptance does not promote a parameterization.
 Resume exploration only after release delivery; preserve the existing success
 criteria, withheld-material boundary and human UI specification/layout gate.
+
+## Revision-3 parameterization resumption — 2026-10-31
+
+Execute `artifacts/role_boundary_assessment_r3.py` against the retained final dated
+840-case matrix, checking binary identity, native output hashes and matched
+climate/management/slope inputs. Read boundaries through the canonical Rust reader;
+compare signed road/fill/buffer net exchanges with frozen FSWEPP2/WEPP2010 outputs.
+This readback performs no new model runs and does not establish particle provenance
+or parameter causality. Preserve old studies rather than treating revision-2
+control results as revision-3 evidence. Use the new attribution to declare a
+bounded role-specific hydraulic/transport contrast with passing controls before
+any parameter search. No global erosion reduction, withheld-material access or UI
+implementation is authorized by the readback. Existing scientific thresholds stand.
+
+Decision: close completed native-release prerequisites and refresh role attribution
+on the exact accepted pair before choosing the next experiment. This avoids tuning
+against superseded engine behavior and keeps opposing magnitude errors visible.
+
+### Declared immediate control: whole legacy soil on revision 3
+
+The completed final-pair role readback places the largest net-exchange difference
+at the buffer for all five meaningful high cases and downstream for 42/43 small
+exceedances. Low misses span all three roles. Legacy templates use format 98.4,
+whereas generated decks use 9002: do not splice role blocks or assume a conversion
+is semantically neutral. First execute `artifacts/legacy_soil_control_r3.py` on
+all 96 current misses plus the first passing case per climate/design (20 controls):
+116 runs, changing only the entire `p1.sol` to its hash-verified legacy reference.
+Freeze the declaration before execution. All climate, geometry, management, runtime
+sidecars and final binary bytes remain exact. Retain every failure and native
+physical audit. This refreshes the prior whole-soil diagnostic on the repaired
+engine; legacy substitution is not a generated-soil candidate. Subsequent role
+contrasts require a source-supported, representation-preserving intervention.
+
+### Resumption decision and outcome
+
+See `artifacts/revision3-resumption-findings.md`. The refreshed whole-soil control
+recovers79/96 misses, but 17 residuals (11 distinct inputs) remain, all outunrut. Execute
+`artifacts/runtime-bridge-r3-design.json` next, retaining five passing controls.
+Reason: a soil-only explanation is incomplete, and prior runtime findings precede
+the shared recession correction. Do not tune generated hydraulic parameters to
+compensate for unseparated engine/runtime effects. No change to acceptance,
+withheld material, regional-runtime validation or the human UI gate.

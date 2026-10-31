@@ -1,0 +1,38 @@
+{
+  "cases": 116,
+  "unique_consumed_input_sets": 96,
+  "physical_pass": 116,
+  "groups": {
+    "meaningful_low": {
+      "cases": 48,
+      "within": 47,
+      "physical": 48
+    },
+    "small_exceedance": {
+      "cases": 43,
+      "within": 28,
+      "physical": 43
+    },
+    "meaningful_high": {
+      "cases": 5,
+      "within": 4,
+      "physical": 5
+    },
+    "meaningful_pass": {
+      "cases": 18,
+      "within": 18,
+      "physical": 18
+    },
+    "small_pass": {
+      "cases": 2,
+      "within": 2,
+      "physical": 2
+    }
+  },
+  "all_recorded_bytes_verified": true,
+  "sole_input_change": "p1.sol exact legacy reference",
+  "completed_native_audits_recomputed": true,
+  "results_sha256": "85e8598de8f261c83181fcb260e6f540c0440ad8a84dbd36ce1a8f078018cbfa",
+  "declaration_sha256": "91ae6b22992f84912cfb5eb25ffe948a196b3b9dac085e4da5cf05dcb73ac015",
+  "verifier_sha256": "cd1418b5c4518cb6995e2214496d7624a5099a23b83914c1881f4636f6f344e5"
+}
