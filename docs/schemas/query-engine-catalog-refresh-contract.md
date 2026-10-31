@@ -338,3 +338,21 @@ The October 27 batch pilot is historical evidence, not default-queue acceptance.
 Validate real default-worker inventory/refresh artifacts, batch-backlog isolation,
 default ordinary-backlog deferral, mixed-version rejection and retained-accounting
 behavior. No other catalog subsystem or scientific-job routing changes.
+
+## RedisPrep initial-identity provenance (RPS-01A)
+
+Specified; implementation conformance pending. The existing incarnation JSON
+records `initialization_only: true` when `resolve_scope(create=True)` creates
+the first identity without replacing project state. Destructive incarnation
+invalidation omits this bit (false); missing legacy values are also false.
+The [RedisPrep snapshot contract](redisprep-snapshot-contract.md#initial-catalog-identity-distinction-rps-01a)
+uses that distinction solely to permit binding a previously markerless wrapper
+to initial catalog creation without confusing it with in-place restoration.
+Catalog publication, revision, admission, readonly and lifecycle ordering remain
+unchanged. Healthy RedisPrep reads do not create incarnation metadata.
+
+In-place restore rotates and durably retains the replacement incarnation before
+any destructive edits, preserving the incarnation and held standalone publication
+lock through cleanup/extraction. Incoming archive coordination markers cannot
+overwrite them. Fencing failure blocks destruction; interruption must not erase
+replacement provenance and later masquerade as initial identity creation.

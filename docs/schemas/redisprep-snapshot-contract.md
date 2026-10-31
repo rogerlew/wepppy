@@ -174,3 +174,33 @@ race that atomic rename alone leaves open. Atomic conditional Redis recovery
 closes partial visibility and delayed-loader overwrites. Explicit cross-store
 limits preserve honest failure/retry behavior without a distributed transaction
 framework or guessed legacy repair.
+
+## Initial catalog identity distinction (RPS-01A)
+
+Implementation conformance pending. Normal first catalog initialization is not
+project replacement and MUST NOT reject a previously bound RedisPrep wrapper.
+Healthy loaded reads MUST NOT require new write access to the run directory or
+coordination storage. The existing catalog incarnation marker may add
+`initialization_only: true` only when creating the first identity without
+replacement; destructive invalidation omits this field (equivalent to false).
+Absent/false remains conservative replacement, including historical markers.
+A wrapper bound before the first marker may adopt that first explicitly initial
+incarnation while holding the guard, with unchanged directory identity. Once
+bound to a nonempty incarnation, every incarnation change remains a conflict.
+This does not add Redis fields or alter `redisprep.dump`'s flat schema.
+
+Rationale: review reproduced normal catalog creation rejecting healthy completion
+setters and a loaded reader in a mode-0555 directory failing at mkdir. Directory
+identity alone cannot distinguish in-place restore, and the old marker's absence
+cannot distinguish ordinary initialization from replacement. The one additive
+provenance bit avoids forcing write access onto healthy readers. Missing historic
+provenance is never guessed from file timestamps or status metadata.
+
+Destructive in-place replacement MUST durably rotate the existing incarnation
+with initial provenance absent/false before removing any project contents.
+Restoration MUST preserve that fence and its held coordination inode through
+cleanup, archive extraction, failure and process death; copied archive markers
+cannot replace it. If pre-replacement fencing fails, do not start destruction.
+An absent marker after interrupted replacement is not evidence of initialization.
+Test kill/failure after destructive work begins followed by normal catalog
+initialization and an old markerless wrapper's attempted mutation.
