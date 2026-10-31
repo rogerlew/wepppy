@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
@@ -24,7 +26,7 @@ from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 ADMIN_SCOPE = "rq:status"
 

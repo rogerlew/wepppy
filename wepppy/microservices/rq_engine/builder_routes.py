@@ -8,6 +8,8 @@ import os
 from typing import Any, Mapping
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
@@ -34,7 +36,7 @@ from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, validation_error_response
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 _SCOPES = ["rq:enqueue"]
 _OVERRIDE_ROLES = frozenset({"poweruser", "admin", "root"})
 _BUILDER_DESCRIPTION_SCHEMA_VERSION = 2

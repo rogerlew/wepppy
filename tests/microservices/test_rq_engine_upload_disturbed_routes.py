@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from tests.factories.raster import sbs_raster_bytes
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -58,7 +59,7 @@ def test_upload_sbs_returns_disturbed_fn(monkeypatch: pytest.MonkeyPatch, tmp_pa
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/tasks/upload-sbs/",
-            files={"input_upload_sbs": ("sbs.tif", b"data")},
+            files={"input_upload_sbs": ("sbs.tif", sbs_raster_bytes(tmp_path / "source.tif"))},
             headers={"Authorization": "Bearer token"},
         )
 
@@ -288,7 +289,7 @@ def test_upload_sbs_validation_failure_returns_specific_reason(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/tasks/upload-sbs/",
-            files={"input_upload_sbs": ("sbs.tif", b"abcdef")},
+            files={"input_upload_sbs": ("sbs.tif", sbs_raster_bytes(tmp_path / "source.tif"))},
             headers={"Authorization": "Bearer token"},
         )
 
@@ -330,3 +331,24 @@ def test_upload_cover_transform_validation_failure_returns_specific_reason(
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "Cover transform validation failed: missing required columns: old,new"
+
+
+@pytest.mark.parametrize('baer_mode', [False, True])
+def test_all_nodata_replacement_preserves_source(monkeypatch, tmp_path, baer_mode):
+    from types import SimpleNamespace
+    destination = tmp_path / 'source.tif'
+    destination.write_bytes(b'accepted-source')
+    raw = sbs_raster_bytes(tmp_path / 'invalid.tif', nodata_only=True)
+    effects = []
+    controller = SimpleNamespace(baer_dir=str(tmp_path), validate=lambda *a, **k: effects.append('apply'))
+    monkeypatch.setattr(upload_disturbed_routes, 'require_jwt', lambda *a, **k: {})
+    monkeypatch.setattr(upload_disturbed_routes, 'authorize_run_access', lambda *a: None)
+    monkeypatch.setattr(upload_disturbed_routes, 'get_wd', lambda *a: str(tmp_path))
+    monkeypatch.setattr(upload_disturbed_routes.Ron, 'getInstance', lambda *a: SimpleNamespace(mods=['baer'] if baer_mode else []))
+    monkeypatch.setattr(upload_disturbed_routes.Baer, 'getInstance', lambda *a: controller)
+    monkeypatch.setattr(upload_disturbed_routes.Disturbed, 'getInstance', lambda *a: controller)
+    with TestClient(rq_engine.app) as client:
+        response = client.post('/api/runs/test/cfg/tasks/upload-sbs/', files={'input_upload_sbs':('source.tif', raw)})
+    assert response.status_code == 400, response.text
+    assert destination.read_bytes() == b'accepted-source'
+    assert effects == []

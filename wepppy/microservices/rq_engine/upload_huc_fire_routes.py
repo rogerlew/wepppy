@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import logging
 import os
+import tempfile
 from pathlib import Path
 import uuid
+
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -24,11 +28,11 @@ from wepppy.weppcloud.user_preferences import (
 
 from .auth import AuthError, require_jwt
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file, upload_failure
+from .upload_helpers import UploadError, save_upload_file, validate_upload_file, upload_failure
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
@@ -36,6 +40,8 @@ UPLOAD_HUC_FIRE_SBS_MAX_BYTES = 100 * 1024 * 1024
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -83,7 +89,7 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
     try:
         from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
 
-        form = await request.form()
+        form = await request_form(request)
         upload = _extract_upload(form, "input_upload_sbs")
         if upload is None:
             return upload_failure("input_upload_sbs must be provided")
@@ -111,6 +117,26 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
                 error_id=error_id,
                 log_exception=False,
             )
+
+        try:
+            validate_upload_file(upload, allowed_extensions=UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS,
+                                 max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES)
+        except UploadError as exc:
+            return upload_failure(str(exc), status=exc.status_code)
+
+        from wepppy.all_your_base.geo import validate_srs
+        from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
+        try:
+            with tempfile.TemporaryDirectory(prefix="huc-fire-upload-") as staging:
+                staged = save_upload_file(upload,
+                    allowed_extensions=UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS,
+                    dest_dir=Path(staging), max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES)
+                if not validate_srs(str(staged)):
+                    return upload_failure("Map contains an invalid projection. Try reprojecting to UTM.")
+                SoilBurnSeverityMap(str(staged), breaks=None, nodata_vals=None, color_map=None)
+        except (ValueError, RuntimeError) as exc:
+            logger.info("HUC fire source rejected before project creation", exc_info=True)
+            return upload_failure("Invalid SBS map.")
 
         runid, wd = create_run_dir(actor)
 
@@ -199,6 +225,8 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
             )
 
         return JSONResponse({"runid": runid})
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         error_id = uuid.uuid4().hex
         logger.exception(

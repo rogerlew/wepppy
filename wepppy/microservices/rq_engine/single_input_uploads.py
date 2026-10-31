@@ -7,7 +7,9 @@ from starlette.formparsers import MultiPartException, MultiPartParser
 from python_multipart.multipart import parse_options_header
 
 from wepppy.wepp.single_input import MAX_SOURCE_BYTES, SingleInputError
-from .payloads import _form_to_dict, _normalize_payload_value, parse_request_payload
+from .payloads import _form_to_dict, parse_request_payload
+from wepppy.request_payload import normalize_payload, media_type
+from python_multipart.exceptions import MultipartParseError
 
 __all__ = ["input_payload"]
 
@@ -82,9 +84,9 @@ class _InputParser(MultiPartParser):
 
 
 @asynccontextmanager
-async def input_payload(request, kind, *, boolean_fields=()):
-    if "multipart/form-data" not in request.headers.get("content-type", "").lower():
-        payload = await parse_request_payload(request, boolean_fields=boolean_fields)
+async def input_payload(request, kind, *, boolean_fields=(), blank_false_fields=()):
+    if media_type(request.headers.get("content-type", "")) != "multipart/form-data":
+        payload = await parse_request_payload(request, boolean_fields=boolean_fields, blank_false_fields=blank_false_fields)
         if any(key.startswith("input_upload_single_") for key in payload):
             raise SingleInputError("Single-input file fields require multipart/form-data.")
         yield payload, None
@@ -95,14 +97,13 @@ async def input_payload(request, kind, *, boolean_fields=()):
             form = await parser.parse()
             if not parser.finished:
                 raise MultiPartException("Incomplete multipart body.")
-        except (MultiPartException, UnicodeDecodeError) as exc:
+        except (MultiPartException, MultipartParseError, UnicodeDecodeError) as exc:
             raise SingleInputError("Invalid multipart upload request.") from exc
         # Existing raster handling calls request.form(); reuse the bounded parse.
         request._form = form
-        payload = {
-            key: _normalize_payload_value(value, coerce_boolean=key in boolean_fields, trim_strings=True)
-            for key, value in _form_to_dict(form).items()
-        }
+        request.state.payload_form_complete = True
+        payload = normalize_payload(_form_to_dict(form), boolean_fields=boolean_fields,
+                                    trim_strings=True, form=True, blank_false_fields=blank_false_fields)
         yield payload, form
     finally:
         # Starlette only guarantees this cleanup for MultiPartException; own the

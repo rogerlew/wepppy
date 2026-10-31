@@ -193,9 +193,9 @@ def test_update_config_rejects_invalid_treatments(path_ce_client):
         json={"treatments": [{"label": "", "scenario": "mulch_60_sbs_map"}]},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
-    assert "label" in payload["error"]["message"]
+    assert payload["error"]["code"] == "invalid_request"
 
 
 def test_status_endpoint_handles_missing_instance(path_ce_client):
@@ -291,7 +291,7 @@ def test_update_config_rejects_nonnumeric_threshold(path_ce_client):
         json={"sddc_threshold": "abc"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
     assert "error" in payload
     assert PathCEStub.getInstance(run_dir).config["sddc_threshold"] == 0.0  # unchanged default
@@ -319,7 +319,8 @@ def test_update_config_rejects_empty_treatment_list(path_ce_client):
         json={"treatments": []},
     )
     payload = response.get_json()
-    assert "at least one treatment" in payload["error"]["message"]
+    assert response.status_code == 400
+    assert payload["error"]["code"] == "invalid_request"
 
 
 def test_run_rejected_while_job_active(path_ce_client, monkeypatch):
@@ -357,3 +358,15 @@ def test_run_requires_sbs_map(path_ce_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert "SBS map" in payload["error"]["message"]
+
+
+@pytest.mark.parametrize('body', [b'{', b'null', b'{"sddc_threshold":"invalid"}'])
+def test_invalid_config_does_not_initialize_optional_controller(path_ce_client, body):
+    client, controller_type, *_unused, run_dir = path_ce_client
+    controller_type.reset_instances()
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/api/path_ce/config', data=body, content_type='application/json')
+    assert response.status_code == 400
+    assert controller_type.tryGetInstance(run_dir) is None
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/api/path_ce/config', json={'sddc_threshold':12})
+    assert response.status_code == 200
+    assert controller_type.getInstance(run_dir).config['sddc_threshold'] == 12

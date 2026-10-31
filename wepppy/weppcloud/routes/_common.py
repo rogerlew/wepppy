@@ -92,8 +92,10 @@ __all__.extend([
     'register_run_context_preprocessor',
 ])
 
-_TRUE_TOKENS: Set[str] = {'1', 'true', 'yes', 'on'}
-_FALSE_TOKENS: Set[str] = {'0', 'false', 'no', 'off'}
+from wepppy.request_payload import (
+    RequestPayloadError, decode_json, is_json_media, media_type, normalize_payload,
+    normalize_value,
+)
 
 
 def _maybe_log_exception(exc: Exception) -> None:
@@ -126,6 +128,7 @@ class LoggedBlueprint(_FlaskBlueprint):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.register_error_handler(Exception, self._log_and_propagate)
+        self.register_error_handler(RequestPayloadError, lambda exc: (jsonify(exc.envelope()), 400))
 
     @staticmethod
     def _log_and_propagate(exc: Exception):
@@ -139,103 +142,50 @@ class LoggedBlueprint(_FlaskBlueprint):
 Blueprint = LoggedBlueprint
 
 
-def _normalise_scalar(
-    value: Any,
-    *,
-    coerce_boolean: bool,
-    trim_strings: bool,
-) -> Any:
-    if isinstance(value, str):
-        token = value.strip() if trim_strings else value
-        if coerce_boolean:
-            lowered = token.lower()
-            if lowered in _TRUE_TOKENS:
-                return True
-            if lowered in _FALSE_TOKENS:
-                return False
-        return token
-    if coerce_boolean and isinstance(value, (int, float)):
-        # Match HTML checkbox semantics: any non-zero value is True
-        return bool(value)
-    return value
+def parse_json_payload(req, *, allow_list=False, boolean_fields=()):
+    if getattr(req, "payload_error", None) is not None:
+        raise req.payload_error
+    content_type = media_type(req.content_type or "")
+    if content_type in {"multipart/form-data", "application/x-www-form-urlencoded"}:
+        raise RequestPayloadError()
+    body = req.get_data(cache=True)
+    if body and content_type and not is_json_media(content_type):
+        raise RequestPayloadError()
+    data = decode_json(body, allow_list=allow_list)
+    if boolean_fields and isinstance(data, dict):
+        flags = normalize_payload({key: data[key] for key in boolean_fields if key in data},
+                                  boolean_fields=boolean_fields)
+        data = {**data, **flags}
+    return data
 
 
-def _normalise_payload_value(
-    value: Any,
-    *,
-    coerce_boolean: bool,
-    trim_strings: bool,
-) -> Any:
-    if isinstance(value, dict):
-        return {
-            key: _normalise_payload_value(
-                inner,
-                coerce_boolean=coerce_boolean,
-                trim_strings=trim_strings,
-            )
-            for key, inner in value.items()
-        }
-    if isinstance(value, (list, tuple, set)):
-        normalised = [
-            _normalise_payload_value(
-                item,
-                coerce_boolean=coerce_boolean,
-                trim_strings=trim_strings,
-            )
-            for item in value
-        ]
-        if len(normalised) == 1:
-            return normalised[0]
-        return normalised
-    return _normalise_scalar(
-        value,
-        coerce_boolean=coerce_boolean,
-        trim_strings=trim_strings,
-    )
+def parse_request_payload(req: 'flask.Request', *, boolean_fields=None, trim_strings=True,
+                          allow_list=False, preserve_structure=False):
+    content_type = media_type(req.content_type or "")
+    if content_type in {"application/x-www-form-urlencoded", "multipart/form-data"}:
+        if content_type == "multipart/form-data":
+            # Werkzeug's silent multipart mode would otherwise accept a truncated body.
+            req.form_data_parser_class = StrictFormDataParser
+        raw = req.form
+        if getattr(req, "payload_error", None) is not None:
+            raise req.payload_error
+        data = raw.to_dict(flat=False)
+        return normalize_payload(data, boolean_fields=boolean_fields or (),
+                                 trim_strings=trim_strings, form=True)
+    body = req.get_data(cache=True)
+    if body and content_type and not is_json_media(content_type):
+        raise RequestPayloadError()
+    data = decode_json(body, allow_list=allow_list)
+    if isinstance(data, list):
+        return data
+    if preserve_structure:
+        flags = normalize_payload({key: data[key] for key in boolean_fields or () if key in data},
+                                  boolean_fields=boolean_fields or (), trim_strings=trim_strings)
+        return {**data, **flags}
+    return normalize_payload(data, boolean_fields=boolean_fields or (), trim_strings=trim_strings)
 
 
-def parse_request_payload(
-    req: 'flask.Request',
-    *,
-    boolean_fields: Optional[Iterable[str]] = None,
-    trim_strings: bool = True,
-) -> Dict[str, Any]:
-    """
-    Normalise incoming payloads for controllers that now post JSON bodies.
-
-    - Attempts JSON deserialisation first via ``request.get_json(silent=True)``.
-    - Falls back to ``request.form`` preserving multi-value entries.
-    - Trims string values (unless ``trim_strings`` is False).
-    - Normalises checkbox-style inputs to booleans when the key is included in
-      ``boolean_fields``.
-    """
-    boolean_field_set: Set[str] = set(boolean_fields or [])
-
-    data: Dict[str, Any] = {}
-    raw_json = req.get_json(silent=True)
-    if isinstance(raw_json, dict):
-        data.update(raw_json)
-    elif raw_json is None:
-        # No JSON body supplied; fall back to form data below.
-        pass
-    else:
-        # JSON body was provided but not a dict (array / scalar). Ignore it and
-        # rely on form data so callers receive a predictable structure.
-        pass
-
-    if not data and req.form:
-        form_dict: Dict[str, Union[str, Iterable[str]]] = req.form.to_dict(flat=False)  # type: ignore[attr-defined]
-        data.update(form_dict)
-
-    normalised: Dict[str, Any] = {}
-    for key, value in data.items():
-        coerce_boolean = key in boolean_field_set
-        normalised[key] = _normalise_payload_value(
-            value,
-            coerce_boolean=coerce_boolean,
-            trim_strings=trim_strings,
-        )
-    return normalised
+from wepppy.weppcloud.request import StrictFormDataParser
 
 
-__all__.append('parse_request_payload')
+__all__.extend(['parse_request_payload', 'parse_json_payload', 'RequestPayloadError'])

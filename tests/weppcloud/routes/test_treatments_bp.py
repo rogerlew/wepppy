@@ -130,3 +130,8 @@ def test_single_input_project_rejects_excluded_mutation_before_hydration(treatme
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/set_treatments_mode/", json={'mode': 1})
     assert response.status_code == 400
     assert response.get_json()["error"]["code"] == "unsupported_capability"
+
+
+def test_malformed_payload_route_matrix(treatments_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(treatments_client[0], RUN_ID, CONFIG, tmp_path)

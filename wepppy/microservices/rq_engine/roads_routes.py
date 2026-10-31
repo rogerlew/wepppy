@@ -4,6 +4,8 @@ import logging
 import os
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -28,7 +30,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]

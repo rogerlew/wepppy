@@ -10,6 +10,9 @@ import uuid
 
 import redis
 from redis.exceptions import RedisError
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.exceptions import HTTPException
@@ -33,7 +36,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .responses import error_response
 from .openapi import agent_route_responses, rq_operation_id
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 logger = logging.getLogger(__name__)
 PREFIX = '/runs/{runid}/{config}/postfire-debris-flow'
 LIMIT = 100*1024*1024

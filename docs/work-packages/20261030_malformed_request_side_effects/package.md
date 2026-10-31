@@ -1,6 +1,6 @@
 # Malformed request side-effect repair (MRS-01)
 
-Status: accepted contract checkpoint awaiting commit authority; implementation not started.
+Status: Closed 2026-10-30 (local repair; qualified split-run validation).
 Started: 2026-10-30. Owner: operator; implementer: Codex.
 
 ## Objective and scope
@@ -16,11 +16,11 @@ checkpoint is committed as an ancestor.
 
 ## Execution and evidence
 
-Execute [the active ExecPlan](prompts/active/repair_execplan.md).
+Completed [ExecPlan](prompts/completed/repair_execplan.md).
 [Tracker](tracker.md), [consumer matrix](artifacts/consumer-matrix.md),
 [decision](artifacts/20261030_contract_decision.md), and
 [canonical contract](../../schemas/request-payload-contract.md) define the work.
-The copied [operator prompt](prompts/active/repair_request.md) preserves scope.
+The copied [operator prompt](prompts/completed/repair_request.md) preserves scope.
 `artifacts/initial-status.txt` records unrelated Roads/research changes; preserve
 those, including preexisting PROJECT_TRACKER changes. Ignore generated usersum
 index changes. No branch changes, dependency installation, deployment or production
@@ -33,8 +33,8 @@ upload parsers. No new services, dependencies, queues, privileges or artifact/da
 schemas. No scientific default/formula changes; parameterization ADR not required
 for this scope. Escalations require evidence and separate authority.
 Security impact: **high**, because public mutation routes and uploads can change
-or delete state on invalid input. Dedicated [security review](artifacts/20261030_security_review.md)
-and independent correctness/QA review are required. Preserve auth/CSRF and valid
+or delete state on invalid input. Dedicated [final security review](artifacts/security-final-review.md)
+and independent correctness/QA reviews are retained. Preserve auth/CSRF and valid
 absent/empty/populated/legacy/busy/replay states; do not turn optional absence into
 an error or change access policy.
 
@@ -70,3 +70,22 @@ is [WEPP input](../../schemas/wepp-run-input-contract.md),
 [RQ response](../../schemas/rq-response-contract.md),
 [webhooks](../../schemas/rq-webhook-contract.md),
 [CSRF](../../schemas/weppcloud-csrf-contract.md), and the shared MRS-01 amendment.
+
+## Local outcome and remaining limits
+
+Implemented shared strict transport/flag validation, framework error propagation,
+confirmed early-write repairs and validated upload promotion. Independent
+correctness, security and QA reviews have no open medium/high findings. Both
+operator-authorized documentation checkpoints are committed (`3ab204e9c`,
+`ca28085ac`); implementation remains uncommitted. No deployment occurred.
+
+Route regressions: 4,017 passed / 74 skipped. Dedicated real WAM/input persistence:
+71 passed without skips. Split broad validation accounts for 12,451 passes and
+368 executed skips out of 12,819 collected tests, plus one collection skip.
+The plain full command failed on a lock held by an unrelated active test worker;
+unique temporary run names permitted continuation. Two obsolete test-double
+interfaces found during broad validation were corrected and reviewed. This is
+not a claim of one uninterrupted full-suite pass. [Validation](artifacts/validation.md)
+retains every gate disposition and exact continuation method. Production parity
+and rollout observation remain separate; general scientific validation is outside
+this failure-class repair. No temporary runtime mitigation needs retirement.

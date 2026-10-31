@@ -10,6 +10,8 @@ from uuid import uuid4
 
 import anyio
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
 from rq import Queue
@@ -55,7 +57,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 EXPORT_SCOPES = ["rq:export"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
@@ -795,14 +797,14 @@ async def export_features_submit(runid: str, config: str, request: Request):
         logger.exception("rq-engine export_features_submit auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    webhook_error = await reject_unsupported_webhook(request)
-    if webhook_error is not None:
-        return webhook_error
-
     payload, payload_error = await _parse_features_export_submit_payload(request)
     if payload_error is not None:
         return payload_error
     assert payload is not None
+
+    webhook_error = await reject_unsupported_webhook(request)
+    if webhook_error is not None:
+        return webhook_error
 
     try:
         wd = get_wd(runid)

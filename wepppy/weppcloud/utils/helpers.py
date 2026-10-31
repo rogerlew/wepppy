@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.request_payload import RequestPayloadError
+
 from datetime import datetime
 from functools import wraps
 import inspect
@@ -935,6 +937,8 @@ def authorize_and_handle_with_exception_factory(
         except HTTPException:
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
+        except RequestPayloadError as exc:
+            return jsonify(exc.envelope()), 400
         except Exception as exc:  # broad-except: boundary contract
             from wepppy.wepp.interchange._roads_lifecycle import RoadsOperationBusy, RoadsResultsUnavailable
             if isinstance(exc, (RoadsOperationBusy, RoadsResultsUnavailable)):
@@ -995,6 +999,8 @@ def handle_with_exception_factory(
         except HTTPException:
             # Preserve deliberate HTTP errors such as abort(404) / abort(403).
             raise
+        except RequestPayloadError as exc:
+            return jsonify(exc.envelope()), 400
         except Exception as exc:  # broad-except: boundary contract
             from wepppy.wepp.interchange._roads_lifecycle import RoadsOperationBusy, RoadsResultsUnavailable
             if isinstance(exc, (RoadsOperationBusy, RoadsResultsUnavailable)):

@@ -302,6 +302,14 @@ def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
     subwta_path.write_text("placeholder", encoding="ascii")
 
     class _DummyDs:
+        def GetRasterBand(self, index):
+            assert index == 1
+            return self
+
+        @staticmethod
+        def Checksum():
+            return 0
+
         @staticmethod
         def GetProjection() -> str:
             return "EPSG:32611"
@@ -379,6 +387,14 @@ def test_validate_map_tie_break_prefers_larger_value_after_local_and_global_ties
     subwta_path.write_text("placeholder", encoding="ascii")
 
     class _DummyDs:
+        def GetRasterBand(self, index):
+            assert index == 1
+            return self
+
+        @staticmethod
+        def Checksum():
+            return 0
+
         @staticmethod
         def GetProjection() -> str:
             return "EPSG:32611"

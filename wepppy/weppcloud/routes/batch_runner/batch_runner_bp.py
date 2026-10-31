@@ -12,10 +12,12 @@ from flask_security import current_user
 import functools
 
 from .._common import Blueprint, roles_required, parse_request_payload
+from wepppy.request_payload import RequestPayloadError, scalar_boolean
 from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.nodb.redis_prep import TaskEnum
 from wepppy.wepp.reports.output_scope import scoped_dataset_path
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, handle_with_exception_factory
@@ -398,7 +400,7 @@ def update_run_directives(batch_name: str):
     
     batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
 
-    payload = parse_request_payload(request, trim_strings=True)
+    payload = parse_request_payload(request, trim_strings=True, preserve_structure=True)
     raw_directives = payload.get('run_directives')
     if raw_directives is None:
         return jsonify({'error': {'message': 'run_directives payload is required.'}}), 400
@@ -406,7 +408,18 @@ def update_run_directives(batch_name: str):
     if not isinstance(raw_directives, dict):
         return jsonify({'error': {'message': 'run_directives must be an object mapping task names to booleans.'}}), 400
 
-    directives_payload = {str(key): value for key, value in raw_directives.items()}
+    directives_payload = {}
+    for key, value in raw_directives.items():
+        try:
+            task = TaskEnum(key)
+        except ValueError:
+            continue  # Existing unknown-directive ignore policy.
+        if task not in batch_runner.run_directives:
+            continue
+        normalized = scalar_boolean(value)
+        if not isinstance(normalized, bool):
+            raise RequestPayloadError()
+        directives_payload[str(key)] = normalized
 
     batch_runner.update_run_directives(directives_payload)
 

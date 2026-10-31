@@ -13,6 +13,8 @@ from urllib.parse import urlparse
 
 import redis
 from flask import current_app, has_app_context
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, Signer
@@ -39,7 +41,7 @@ from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 SESSION_TOKEN_TTL_SECONDS = 4 * 24 * 60 * 60
 SESSION_TOKEN_SCOPES = ["rq:read", "rq:status", "rq:enqueue", "rq:export"]
@@ -729,23 +731,12 @@ def _extract_expected_run_state_revision(request: Request, payload: Mapping[str,
     return value or None
 
 
-def _request_has_body(request: Request) -> bool:
-    content_length = str(request.headers.get("Content-Length") or "").strip()
-    if content_length:
-        try:
-            return int(content_length) > 0
-        except (TypeError, ValueError):
-            return True
-    transfer_encoding = str(request.headers.get("Transfer-Encoding") or "").strip()
-    return bool(transfer_encoding)
-
-
 def _content_type_token(request: Request) -> str:
     return str(request.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
 
 
 async def _parse_optional_json_payload(request: Request) -> dict[str, Any]:
-    if not _request_has_body(request):
+    if not await request.body():
         return {}
 
     content_type = _content_type_token(request)

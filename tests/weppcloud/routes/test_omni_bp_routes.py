@@ -265,3 +265,11 @@ def test_contrast_report_without_optional_state_is_unavailable(omni_bp_client, m
     response = omni_bp_client.get(f"/runs/{RUN_ID}/{CFG}/report/omni_contrasts")
     assert response.status_code == 404
     assert response.json["error"]["code"] == "results_unavailable"
+
+
+def test_malformed_payload_route_matrix(omni_bp_client, tmp_path, monkeypatch):
+    from tests.factories.request_payload import assert_malformed_routes
+    def unexpected(*args, **kwargs):
+        pytest.fail('malformed request reached Omni controller')
+    monkeypatch.setattr(omni_bp_module.Omni, 'getInstance', unexpected)
+    assert_malformed_routes(omni_bp_client, RUN_ID, CFG, tmp_path)

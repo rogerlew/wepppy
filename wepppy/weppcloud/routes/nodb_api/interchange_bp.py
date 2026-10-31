@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.weppcloud.routes._common import parse_request_payload, RequestPayloadError
+
 from typing import Any, MutableMapping, Optional
 
 import redis
@@ -18,6 +20,8 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 interchange_bp = Blueprint('interchange', __name__)
 
+
+interchange_bp.register_error_handler(RequestPayloadError, lambda exc: (jsonify(exc.envelope()), 400))
 
 def _sanitize_subpath(value: Optional[str]) -> Optional[str]:
     """Normalize and validate an optional WEPP output subpath.
@@ -73,7 +77,7 @@ def migrate_default_interchange(runid: str, config: str) -> Response | tuple[Res
         A JSON success payload when the job is enqueued, or a tuple containing
         an error response and HTTP status when validation fails.
     """
-    payload: MutableMapping[str, Any] = request.get_json(silent=True) or {}
+    payload: MutableMapping[str, Any] = parse_request_payload(request)
     subpath = payload.get('wepp_output_subpath')
     if subpath is None:
         subpath = request.form.get('wepp_output_subpath')

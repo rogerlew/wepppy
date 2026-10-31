@@ -63,7 +63,10 @@ from wepppy.weppcloud.session_migration import MigratingRedisSessionInterface
 config_logging(logging.INFO)
 logger = logging.getLogger(__name__)
 
+from wepppy.weppcloud.request import PayloadRequest
+
 app = Flask(__name__)
+app.request_class = PayloadRequest
 config_app(app)
 csrf = CSRFProtect(app)
 init_agent_jwt(app)

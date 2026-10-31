@@ -356,3 +356,24 @@ def test_lost_lease_never_releases_successor_or_publishes_receipt(admission, mon
         assert Wepp.load_detached(str(a.wd)).kslast == 0.9  # No late rollback promise.
     finally:
         a.connection.delete(key)  # Test-created successor, not another process's lease.
+
+
+@pytest.mark.parametrize('endpoint', ENDPOINTS)
+@pytest.mark.parametrize('body', ['{', 'null', '{"kslast":0.9,"clip_soils":"bad"}', '{"kslast":0.9,"clip_soils_minimum_depth":"bad"}', '{"delete_after_interchange":[false]}'])
+def test_malformed_rejection_preserves_real_inputs_and_valid_followup(admission, endpoint, body):
+    state = admission
+    before = _snapshot(state)
+    with TestClient(state.app) as client:
+        response = client.post(f'/api/runs/{state.runid}/cfg/{endpoint}', content=body,
+                               headers={'Content-Type':'application/json'})
+        assert response.status_code == 400, response.text
+        assert response.json()['error']['code'] == 'invalid_request'
+        assert _snapshot(state) == before
+        assert state.timestamps == {'completed': 'prior'}
+        assert state.receipts == {}
+        assert state.jobs == []
+        assert Wepp.load_detached(str(state.wd)).kslast == 0.02
+        valid = client.post(f'/api/runs/{state.runid}/cfg/{endpoint}', json={'kslast':0.03})
+        assert valid.status_code == 200, valid.text
+        assert Wepp.load_detached(str(state.wd)).kslast == 0.03
+        assert len(state.jobs) == 1

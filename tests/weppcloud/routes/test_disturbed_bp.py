@@ -1184,3 +1184,8 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     assert baer_controller.uniform_severity == 9
     prep = disturbed_module.RedisPrep.getInstance(run_dir)
     assert prep.removed[-2:] == [TaskEnum.build_rusle, TaskEnum.run_geneva]
+
+
+def test_malformed_payload_route_matrix(disturbed_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(disturbed_client[0], RUN_ID, CONFIG, tmp_path)

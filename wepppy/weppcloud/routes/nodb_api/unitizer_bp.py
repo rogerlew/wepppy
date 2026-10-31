@@ -1,5 +1,7 @@
 """Routes for unitizer blueprint extracted from app.py."""
 
+from wepppy.request_payload import RequestPayloadError
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.unitizer import Unitizer
@@ -30,6 +32,8 @@ def task_set_unit_preferences(runid, config):
         }
         res = unitizer.set_preferences(preferences, strict=False)
         return success_factory({'preferences': res})
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:28", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

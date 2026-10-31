@@ -5,6 +5,9 @@ import os
 from pathlib import Path
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -33,7 +36,7 @@ from .webhooks import reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
@@ -48,6 +51,8 @@ def _maybe_nodir_error_response(exc: Exception):
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -109,6 +114,7 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
+        form = await request_form(request)
         wd = get_wd(runid)
         _require_directory_root(wd, "climate")
         Ron.getInstance(wd)
@@ -146,7 +152,6 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
                 details="capabilities.climate_datasets does not allow user_defined_cli",
             )
 
-        form = await request.form()
         webhook_error = reject_unsupported_payload(form)
         if webhook_error is not None:
             return webhook_error
@@ -169,6 +174,8 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         )
     except UploadError as exc:
         return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

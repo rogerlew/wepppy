@@ -368,3 +368,8 @@ def test_current_cover_summary_normalizes_topaz_ids(rangeland_client):
     assert response.status_code == 200
     instance = RangelandStub.getInstance(run_dir)
     assert instance.current_summary_calls[-1] == ["101", "202"]
+
+
+def test_malformed_payload_route_matrix(rangeland_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(rangeland_client[0], RUN_ID, CONFIG, tmp_path)

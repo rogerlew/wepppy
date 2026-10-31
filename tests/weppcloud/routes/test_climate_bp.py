@@ -1022,3 +1022,8 @@ def test_task_set_silent_pass_observed_quality_guard_updates_flag(climate_client
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.silent_pass_observed_quality_guard is True
+
+
+def test_malformed_payload_route_matrix(climate_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(climate_client[0], RUN_ID, CONFIG, tmp_path)

@@ -8,6 +8,9 @@ from typing import Any
 
 import numpy as np
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -63,7 +66,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT = int(os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT", "600"))
@@ -165,7 +168,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
         for part in parts:
             try:
                 result.append(float(part))
-            except (TypeError, ValueError) as exc:
+            except (TypeError, ValueError, OverflowError) as exc:
                 raise ValueError(f"Could not parse {label}.") from exc
         return result
 
@@ -174,7 +177,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             if isinstance(value, bool):
                 return float(int(value))
             return float(value)
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"Could not parse {label}.") from exc
 
     def _as_int(value: Any, label: str) -> int:
@@ -184,7 +187,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             if value is None or value == "":
                 raise ValueError(f"Missing {label}.")
             return int(float(value))
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"Could not parse {label}.") from exc
 
     try:
@@ -319,6 +322,8 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -624,7 +629,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         wd = get_wd(runid)
         _preflight_watershed_mutation_root(wd)
 
-        form = await request.form()
+        form = await request_form(request)
         upload = _extract_upload(form, "input_upload_dem")
         if upload is None or not upload.filename:
             return upload_failure("input_upload_dem must be provided")
@@ -658,6 +663,8 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         return upload_success(result=result)
     except UploadError as exc:
         return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-dem failed")
         return error_response_with_traceback("Failed validating DEM", status_code=500)
@@ -801,6 +808,8 @@ async def fetch_dem_and_build_channels(
         )
     except UploadError as exc:
         return error_response(str(exc), status_code=400)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -954,29 +963,29 @@ async def build_subcatchments_and_abstract_watershed(
     )
 
     def _to_float(value: Any) -> float | None:
-        if value is None:
-            return None
         if isinstance(value, (list, tuple)):
             return _to_float(value[0] if value else None)
-        try:
-            return float(value)
-        except (TypeError, ValueError):
+        if value in (None, ""):
             return None
+        try:
+            result = float(value)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise RequestPayloadError() from exc
+        if not math.isfinite(result):
+            raise RequestPayloadError()
+        return result
 
     def _to_int(value: Any) -> int | None:
-        if value is None:
-            return None
         if isinstance(value, (list, tuple)):
             return _to_int(value[0] if value else None)
+        if value in (None, ""):
+            return None
         if isinstance(value, bool):
-            return None
-        if isinstance(value, float) and not math.isfinite(value):
-            return None
+            raise RequestPayloadError()
         try:
-            parsed = int(value)
-        except (TypeError, ValueError, OverflowError):
-            return None
-        return parsed
+            return int(value)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise RequestPayloadError() from exc
 
     def _to_bool(value: Any, default: bool | None = None) -> bool | None:
         if value is None:
@@ -992,6 +1001,10 @@ async def build_subcatchments_and_abstract_watershed(
         if isinstance(value, (int, float)):
             return bool(value)
         return default
+
+    for field in ("clip_hillslope_length", "mofe_target_length", "mofe_buffer_length"):
+        _to_float(payload.get(field))
+    _to_int(payload.get("mofe_max_ofes"))
 
     try:
         wd = get_wd(runid)
@@ -1145,6 +1158,8 @@ async def build_subcatchments_and_abstract_watershed(
             status_code=400,
             details=exc.__doc__,
         )
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

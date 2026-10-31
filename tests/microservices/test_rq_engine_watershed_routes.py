@@ -1473,7 +1473,7 @@ def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.M
     assert captured[0]["args"][1]["mofe_max_ofes"] == 0
 
 
-def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_subcatchments_rejects_non_finite_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="job-79")
     _stub_prep(monkeypatch)
@@ -1506,10 +1506,10 @@ def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytes
             headers={"content-type": "application/json"},
         )
 
-    assert response.status_code == 200
-    assert response.json()["job_id"] == "job-79"
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_request"
     assert dummy_watershed.grouped_update_calls == []
-    assert "mofe_max_ofes" not in captured[0]["args"][1]
+    assert captured == []
     assert dummy_watershed.mofe_max_ofes == 7
 
 

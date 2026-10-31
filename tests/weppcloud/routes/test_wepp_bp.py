@@ -116,9 +116,9 @@ def test_set_run_wepp_routine_rejects_non_boolean_state(wepp_client):
         json={"routine": "pmet", "state": "maybe"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["error"]["message"] == "state must be boolean"
+    assert payload["error"]["code"] == "invalid_request"
 
 
 def test_set_run_wepp_routine_requires_known_routine(wepp_client):
@@ -1794,3 +1794,8 @@ def test_return_period_baseline_map_labels(monkeypatch, mods, has_map, single_in
     assert wepp_module._return_period_baseline_label('/project', ron) == expected
     assert calls == ([] if single_input else [
         ('baer' if 'baer' in mods else 'disturbed', '/project', {'allow_nonexistent': False})])
+
+
+def test_malformed_payload_route_matrix(wepp_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(wepp_client[0], RUN_ID, CONFIG, tmp_path)

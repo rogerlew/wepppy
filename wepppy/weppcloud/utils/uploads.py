@@ -119,7 +119,6 @@ def save_run_file(
     if destination.exists():
         if not overwrite:
             raise UploadError("File already exists")
-        destination.unlink()
 
     if max_bytes is not None:
         storage.stream.seek(0, 2)

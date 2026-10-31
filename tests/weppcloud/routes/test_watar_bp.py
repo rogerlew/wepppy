@@ -198,3 +198,8 @@ def test_set_ash_wind_transport_persists_boolean_state(watar_client, state: bool
     assert response.status_code == 200
     ash = watar_module.Ash.getInstance(str(run_dir))
     assert ash.run_wind_transport is state
+
+
+def test_malformed_payload_route_matrix(watar_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(watar_client[0], RUN_ID, CONFIG, tmp_path)

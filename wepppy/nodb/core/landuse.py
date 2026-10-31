@@ -948,9 +948,14 @@ class Landuse(NoDbBase):
             except (TypeError, ValueError) as exc:
                 raise ValueError('mofe_buffer_selection must be an integer') from exc
 
+        summary = self.validate_mofe_buffer_selection(parsed)
         self._mofe_buffer_selection = parsed
+        self._buffer_man = summary
+
+    def validate_mofe_buffer_selection(self, value):
+        """Resolve a supplied selection before any input/source mutation."""
         mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
-        self._buffer_man = get_management_summary(parsed, mapping_reference)
+        return get_management_summary(int(value), mapping_reference)
 
     def parse_inputs(self, payload: Mapping[str, Any]) -> None:
         """

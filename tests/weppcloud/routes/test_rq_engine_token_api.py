@@ -1185,3 +1185,19 @@ def test_reset_cookie_targets_keep_same_name_with_distinct_owned_tuples() -> Non
         ("shared_name", "/session/", ".example.com"),
         ("shared_name", "/remember/", None),
     ]
+
+
+def test_operator_token_stream_without_length_rejects_malformed(monkeypatch):
+    import io
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(weppcloud_site_module.auth_tokens, 'decode_token', lambda *a, **k: {
+        'sub':'42', 'token_class':'user', 'jti':'test-stream', 'scope':'rq:read'})
+    def forbidden(*args, **kwargs):
+        pytest.fail('malformed request issued a token')
+    monkeypatch.setattr(weppcloud_site_module.auth_tokens, 'issue_token', forbidden)
+    with app.test_client() as client:
+        response = client.open('/weppcloud/api/auth/rq-engine-operator-token', method='POST',
+            headers={'Authorization':'Bearer test', 'Content-Type':'application/json'},
+            environ_overrides={'wsgi.input':io.BytesIO(b'{'), 'wsgi.input_terminated':True, 'CONTENT_LENGTH':''})
+    assert response.status_code == 400

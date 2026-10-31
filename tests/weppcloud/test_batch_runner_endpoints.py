@@ -242,3 +242,30 @@ def test_runstate_reports_empty_state(client):
     payload = response.get_json()
     assert payload["status"] == "empty"
     assert "report" in payload
+
+
+@pytest.mark.parametrize('invalid', ['invalid', 2, [False], None])
+def test_directives_validate_all_fields_before_real_persistence(app, monkeypatch, invalid):
+    from wepppy.weppcloud.utils import feature_access_flask
+    monkeypatch.setattr(feature_access_flask, 'require_feature', lambda *a, **k: None)
+    # Exercise the actual auth/exception wrappers, unlike the older isolated tests.
+    app.view_functions['batch_runner.update_run_directives'] = bp_module.update_run_directives
+    with app.app_context():
+        wd = Path(app.config['BATCH_RUNNER_ROOT']) / 'demo'
+        runner = BatchRunner.getInstance(str(wd))
+        keys = list(runner.run_directives)
+        first, second = [key.value for key in keys[:2]]
+        source = wd / BatchRunner.filename
+        before = source.read_bytes()
+        state = dict(runner.run_directives)
+    with app.test_client() as client:
+        response = client.post('/batch/_/demo/run-directives', json={'run_directives':{first:False, second:invalid}})
+        assert response.status_code == 400
+        assert response.json['error']['code'] == 'invalid_request'
+        assert source.read_bytes() == before
+        assert BatchRunner.load_detached(str(wd)).run_directives == state
+        assert BatchRunner.getInstance(str(wd)).run_directives == state
+        response = client.post('/batch/_/demo/run-directives', json={'run_directives':{first:'off', second:'on'}})
+        assert response.status_code == 200
+        saved = BatchRunner.load_detached(str(wd)).run_directives
+        assert saved[keys[0]] is False and saved[keys[1]] is True

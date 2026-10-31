@@ -8,6 +8,9 @@ from typing import Any, Mapping
 from uuid import uuid4
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -45,7 +48,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_u
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -165,6 +168,8 @@ def _coerce_contrast_pairs(payload: dict[str, Any], raw_json: Any) -> list[dict[
 
 
 def _extract_upload(form: FormData, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -563,21 +568,18 @@ async def _run_omni(
     config: str,
     request: Request,
 ) -> JSONResponse:
+    payload = await parse_request_payload(request, allow_list=True)
     wd = get_wd(runid)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
-    payload = await parse_request_payload(request)
     webhook_error = reject_unsupported_payload(payload)
     if webhook_error is not None:
         return webhook_error
-    try:
-        raw_json = await request.json()
-    except (ValueError, UnicodeDecodeError):
-        raw_json = None
-    form = await request.form()
+    raw_json = getattr(request, "_json", None)
+    form = await request_form(request)
 
     is_batch_run = getattr(omni, "run_group", "") == "batch" or _is_base_project_context(
         runid,
@@ -653,21 +655,18 @@ async def _run_omni_contrasts(
     config: str,
     request: Request,
 ) -> JSONResponse:
+    payload = await parse_request_payload(request, boolean_fields={"omni_contrast_output_" + suffix for suffix in ("chan_out", "tcr_out", "chnwb", "soil_pw0", "plot_pw0", "ebe_pw0")})
     wd = get_wd(runid)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
-    payload = await parse_request_payload(request)
     webhook_error = reject_unsupported_payload(payload)
     if webhook_error is not None:
         return webhook_error
-    try:
-        raw_json = await request.json()
-    except (ValueError, UnicodeDecodeError):
-        raw_json = None
-    form = await request.form()
+    raw_json = getattr(request, "_json", None)
+    form = await request_form(request)
 
     try:
         parsed_inputs = _prepare_omni_contrasts(
@@ -798,18 +797,15 @@ async def _dry_run_omni_contrasts(
     config: str,
     request: Request,
 ) -> JSONResponse:
+    payload = await parse_request_payload(request, boolean_fields={"omni_contrast_output_" + suffix for suffix in ("chan_out", "tcr_out", "chnwb", "soil_pw0", "plot_pw0", "ebe_pw0")})
     wd = get_wd(runid)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return error_response("omni is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
     _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
-    payload = await parse_request_payload(request)
-    try:
-        raw_json = await request.json()
-    except (ValueError, UnicodeDecodeError):
-        raw_json = None
-    form = await request.form()
+    raw_json = getattr(request, "_json", None)
+    form = await request_form(request)
 
     try:
         parsed_inputs = _prepare_omni_contrasts(
@@ -988,6 +984,8 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
 
     try:
         return await _run_omni(runid, config, request)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1031,6 +1029,8 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
 
     try:
         return await _run_omni_contrasts(runid, config, request)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1070,6 +1070,8 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
 
     try:
         return await _dry_run_omni_contrasts(runid, config, request)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

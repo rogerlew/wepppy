@@ -7,6 +7,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from wepppy.request_payload import RequestPayloadError
+from .payloads import request_form, PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from starlette.datastructures import UploadFile
@@ -24,7 +27,7 @@ from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 GEOJSON_MAX_BYTES = 30 * 1024 * 1024
@@ -115,6 +118,8 @@ def _resolve_uploader(claims: dict[str, Any]) -> Optional[str]:
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -148,6 +153,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     if not _batch_runner_feature_enabled():
         return error_response("Batch Runner is currently disabled.", status_code=403)
 
+    form = await request_form(request)
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
@@ -156,7 +162,6 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine upload-geojson failed to load batch runner")
         return error_response("Failed to load batch runner", status_code=500)
 
-    form = await request.form()
     upload = _extract_upload(form, "geojson_file") or _extract_upload(form, "file")
     if upload is None:
         return error_response("No file part named 'geojson_file'.", status_code=400)
@@ -174,57 +179,30 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
         return error_response("Only .geojson or .json files are supported.", status_code=400)
 
     resources_dir = batch_runner.resources_dir
-    os.makedirs(resources_dir, exist_ok=True)
     dest_path = os.path.join(resources_dir, safe_name)
     replaced = os.path.exists(dest_path)
+    analysis_results = {}
+    def validate_geojson(path):
+        nonlocal analysis_results
+        if not path.stat().st_size:
+            raise UploadError("GeoJSON file is empty.")
+        try:
+            analysis_results = WatershedCollection(str(path)).analysis_results
+        except ValueError as exc:
+            raise UploadError(f"GeoJSON must be a FeatureCollection: {exc}") from exc
+        if analysis_results.get("feature_count", 0) == 0:
+            raise UploadError("GeoJSON contains no features.")
     try:
-        save_upload_file(
-            upload,
-            allowed_extensions=("geojson", "json"),
-            dest_dir=Path(resources_dir),
-            filename_transform=lambda _value: safe_name,
-            overwrite=True,
-            max_bytes=_geojson_max_bytes(),
-        )
+        save_upload_file(upload, allowed_extensions=("geojson", "json"),
+            dest_dir=Path(resources_dir), filename_transform=lambda _value: safe_name,
+            overwrite=True, max_bytes=_geojson_max_bytes(), post_save=validate_geojson)
+        size_bytes = os.path.getsize(dest_path)
+        watershed_collection = WatershedCollection(dest_path)
     except UploadError as exc:
         return error_response(str(exc), status_code=_upload_error_status(exc))
-    except OSError:
-        _safe_unlink(dest_path)
-        logger.exception("Failed to save GeoJSON upload")
-        return error_response("Failed to save GeoJSON upload.", status_code=500)
-
-    try:
-        size_bytes = os.path.getsize(dest_path)
-    except OSError:
-        size_bytes = None
-
-    if not size_bytes:
-        _safe_unlink(dest_path)
-        return error_response("GeoJSON file is empty.", status_code=400)
-
-    max_bytes = _geojson_max_bytes()
-    if size_bytes and size_bytes > max_bytes:
-        _safe_unlink(dest_path)
-        limit_mb = max(1, int(max_bytes // (1024 * 1024)))
-        return error_response(
-            f"GeoJSON file exceeds maximum size of {limit_mb} MB.",
-            status_code=413,
-        )
-
-    try:
-        watershed_collection = WatershedCollection(dest_path)
-        analysis_results = watershed_collection.analysis_results
-    except ValueError as exc:
-        _safe_unlink(dest_path)
-        return error_response(f"GeoJSON must be a FeatureCollection: {exc}", status_code=400)
-    except Exception:
-        _safe_unlink(dest_path)
+    except Exception:  # Upload/native boundary; accepted source is not yet replaced on validation failure.
         logger.exception("Failed to ingest GeoJSON upload")
         return error_response("Failed to process GeoJSON upload.", status_code=500)
-
-    if analysis_results.get("feature_count", 0) == 0:
-        _safe_unlink(dest_path)
-        return error_response("GeoJSON contains no features.", status_code=400)
 
     try:
         relative_path = os.path.relpath(dest_path, batch_runner.wd)
@@ -284,6 +262,7 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     if not _batch_runner_feature_enabled():
         return error_response("Batch Runner is currently disabled.", status_code=403)
 
+    form = await request_form(request)
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
@@ -292,7 +271,6 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine upload-sbs-map failed to load batch runner")
         return error_response("Failed to load batch runner", status_code=500)
 
-    form = await request.form()
     upload = _extract_upload(form, "sbs_map") or _extract_upload(form, "file")
     if upload is None:
         return error_response("No file part named 'sbs_map'.", status_code=400)
@@ -310,38 +288,23 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         return error_response("Only GeoTIFF/IMG/VRT rasters are supported.", status_code=400)
 
     resources_dir = batch_runner.resources_dir
-    os.makedirs(resources_dir, exist_ok=True)
     dest_path = os.path.join(resources_dir, safe_name)
     replaced = os.path.exists(dest_path)
+    sanity_status, sanity_message, burn_class_counts = 0, "", {}
+    def validate_sbs(path):
+        nonlocal sanity_status, sanity_message, burn_class_counts
+        sanity_status, sanity_message = sbs_map_sanity_check(str(path))
+        if sanity_status != 0:
+            raise UploadError(sanity_message or "Invalid SBS map.")
+        burn_class_counts = SoilBurnSeverityMap(str(path)).burn_class_counts
     try:
-        save_upload_file(
-            upload,
-            allowed_extensions=SBS_MAP_ALLOWED_EXTENSIONS,
-            dest_dir=Path(resources_dir),
-            filename_transform=lambda _value: safe_name,
-            overwrite=True,
-            max_bytes=SBS_MAP_MAX_BYTES,
-        )
+        save_upload_file(upload, allowed_extensions=SBS_MAP_ALLOWED_EXTENSIONS,
+            dest_dir=Path(resources_dir), filename_transform=lambda _value: safe_name,
+            overwrite=True, max_bytes=SBS_MAP_MAX_BYTES, post_save=validate_sbs)
+        size_bytes = os.path.getsize(dest_path)
     except UploadError as exc:
         return error_response(str(exc), status_code=_upload_error_status(exc))
-    except OSError:
-        _safe_unlink(dest_path)
-        logger.exception("Failed to save SBS map upload")
-        return error_response("Failed to save SBS map upload.", status_code=500)
-
-    try:
-        size_bytes = os.path.getsize(dest_path)
-    except OSError:
-        size_bytes = None
-
-    try:
-        sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
-        if sanity_status != 0:
-            _safe_unlink(dest_path)
-            return error_response(sanity_message or "Invalid SBS map.", status_code=400)
-        burn_class_counts = SoilBurnSeverityMap(dest_path).burn_class_counts
-    except Exception:  # Native/GDAL boundary: never publish a failed SBS computation.
-        _safe_unlink(dest_path)
+    except Exception:  # Native/GDAL boundary; never publish a failed SBS computation.
         logger.exception("rq-engine upload-sbs-map native validation failed")
         return error_response("SBS raster processing failed.", status_code=500)
 

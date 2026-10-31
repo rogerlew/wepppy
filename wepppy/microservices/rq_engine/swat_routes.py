@@ -4,6 +4,9 @@ import logging
 import os
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -31,7 +34,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -114,6 +117,8 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
         return JSONResponse({"job_id": job.id})
     except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
         return error_response(str(exc), status_code=409, code="job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-swat enqueue failed")
         return error_response_with_traceback("Error Handling Request")
@@ -151,6 +156,7 @@ async def update_swat_print_prt(runid: str, config: str, request: Request) -> JS
         payload = await parse_request_payload(
             request,
             boolean_fields=("daily", "monthly", "yearly", "avann"),
+            blank_false_fields=("daily", "monthly", "yearly", "avann"),
         )
         object_name = payload.get("object") or payload.get("object_name")
         if not object_name:
@@ -182,6 +188,8 @@ async def update_swat_print_prt(runid: str, config: str, request: Request) -> JS
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt update failed")
         return error_response_with_traceback("Error Handling Request")
@@ -240,6 +248,8 @@ async def update_swat_print_prt_meta(runid: str, config: str, request: Request) 
                 setattr(swat.print_prt, key, int(value))
 
         return JSONResponse(updates)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt meta update failed")
         return error_response_with_traceback("Error Handling Request")

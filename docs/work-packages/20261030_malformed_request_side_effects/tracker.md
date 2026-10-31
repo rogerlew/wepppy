@@ -1,65 +1,51 @@
 # MRS-01 tracker
 
-Timezone: UTC. Started: 2026-10-30. Last updated: 2026-10-30 23:38 UTC.
-Phase: checkpoint accepted; awaiting commit authority. Security impact: high.
-Active plan: [repair_execplan.md](prompts/active/repair_execplan.md).
-Starting revision: `e35d7a3e69497ddfd9709736af50107f56963584`.
-Checkpoint ancestor: **none; commit authority not yet granted**.
+Status: Closed locally 2026-10-30; split-run validation limitation retained.
 
-## Task board
+## Authority and scope
 
-- [x] Record initial status; preserve unrelated Roads/research changes.
-- [x] Reproduce shared parser fallback through real HTTP safely.
-- [x] Independent source audits and consumer/state matrix.
-- [x] Draft canonical amendments, checkpoint and execution plan.
-- [x] Two independent exact-draft contract reviews; all medium/high findings closed.
-- [x] Lint changed docs and prepare precise commit allowlist.
-- [ ] Obtain authority and commit accepted checkpoint as ancestor.
-- [ ] Repair all confirmed consumers and complete traced runtime coverage.
-- [ ] Focused/broad/static gates and final correctness/QA/security reviews.
+Operator-authorized documentation checkpoints: `3ab204e9c` (initial contract) and
+`ca28085ac` (four bounded follow-on field groups). Both are ancestors of the working
+implementation. Implementation is uncommitted; no deployment, production jobs,
+branch changes or dependency installation. Unrelated Roads and release work remains
+outside this package. Historical WAM-01 records remain unchanged.
 
-## Decisions and progress
+## Progress
 
-2026-10-30: retained source baseline, executed read-only HTTP parser probe in the
-running development weppcloud container via wctl. Both frameworks silently accept
-malformed JSON as defaults and arbitrary numeric clean flags as true. No real
-business route/project/queue was invoked by the probe.
+- Discovery and baseline actual-HTTP reproduction complete; 429 source records are a discovery index, not 429 confirmed defects.
+- Shared strict JSON/form/boolean validation and typed framework error translation implemented.
+- Confirmed direct parsers, early controller writes/recovery, upload promotion, bounded numeric failures and enclosing catches repaired.
+- Real WAM-01, input uploads, optional controllers, Flask Ron/Ash, batch directives and treatment raster persistence evidence passes focused tests.
+- Independent correctness and QA reviews report no open reviewed-scope findings; security review also passes, including final session-token actual-body inspection.
+- Complete microservices/Flask regression: 4,017 passed, 74 skipped.
+- Full canonical suite reached 4,117 passes / 125 skips, then collided with an unrelated active pytest NoDb lock. Both failing parameter cases pass with unique temporary run names; remaining collection completed with that isolation. Exact evidence and limitations: [validation](artifacts/validation.md).
 
-2026-10-30: independent reviewers identified additional direct parsers, webhook-only
-body guards, early state/source mutations and null/list compatibility exceptions.
-[Consumer matrix](artifacts/consumer-matrix.md) distinguishes confirmed defects
-from unresolved candidates; no static candidate is labeled verified unaffected.
+## Decisions and discoveries
 
-2026-10-30: chose bounded shared validation plus adapters and explicit error
-translation, preserving default/form/list/null behavior. Exact rationale lives in
-[canonical contract](../../schemas/request-payload-contract.md) and
-[decision](artifacts/20261030_contract_decision.md). No production edits before the
-contract-first ancestor exists. No new infrastructure or parameterization.
+The [canonical contract](../../schemas/request-payload-contract.md) preserves empty
+requests, forms, native/legacy flags and domain-specific null/blank/list semantics.
+Malformed syntax cannot become defaults; supplied bounded fields validate before
+business mutation. [Follow-on decision](artifacts/followup-contract-decision.md)
+records why four additional domain groups needed a second ancestor checkpoint.
 
-## Blockers and risks
+Transport buffering is temporary and cleaned; source promotion follows validation.
+Sibling staging preserves relative VRT references. Form parser errors survive CSRF
+pre-reading, while size limits still reject before buffering oversize input.
 
-Implementation is blocked by the required reviewed ancestor checkpoint and absent
-commit authority. The operator prompt expressly does not grant it. Prepare the
-accepted checkpoint first, then request authority for that exact standalone commit.
-Do not stage unrelated edits in PROJECT_TRACKER or other files.
+## Verification and remaining limits
 
-Runtime coverage remains pending across direct/indirect consumers. New validation
-must not be swallowed by local catches, reject legitimate lists/null clears, alter
-callback digests, or consume bounded upload streams twice. Final review must verify
-checkpoint ancestry and valid-state noninterference, not only error containment.
+See [consumer matrix](artifacts/consumer-matrix.md), [validation](artifacts/validation.md),
+[correctness review](artifacts/correctness-final-review.md) and
+[QA review](artifacts/qa-final-review.md). The default broad-exception gate passes after reviewed exact allowlist location
+maintenance and explicit cleanup-boundary entries.
+No production observation is claimed. No temporary mitigation requires retirement.
 
-## Verification and signal log
+## Closeout
 
-Baseline command: `wctl exec weppcloud python /workdir/wepppy/docs/work-packages/20261030_malformed_request_side_effects/artifacts/reproduce_parsers.py` — passed as diagnostic;
-10 cases × 2 actual framework HTTP paths, retained in `parser-baseline.jsonl`.
-Observed defect, not repair evidence. Source index: 429 function records.
-Implementation tests/full suite: not run; implementation has not started.
-No deployment, production jobs or destructive reproduction. No temporary calluses.
-Post-change signal snapshot and production observation remain pending separately.
-
-2026-10-30 23:38 UTC: both independent reviewers approved checkpoint after clipping
-contract reconciliation. All eight canonical documents, package docs and root
-tracker lint pass with zero warnings/errors; git diff --check passes. Spelling
-preview retains only unrelated preexisting CSRF wording. Commit file scope is
-[checkpoint manifest](artifacts/checkpoint-manifest.md). No implementation/test
-suite has run; the production defect remains unfixed pending commit authority.
+Final isolated suffix: 7,832 passed / 245 skipped / 4,743 deselected. Independent QA
+verified distinct-node accounting: 12,451 passes + 368 executed skips = 12,819
+collected tests, plus one collection skip. The plain full command remains a failed
+invocation; split runs cannot prove uninterrupted same-process suite behavior.
+All confirmed MRS-01 findings are closed. Canonical contract, consumer dispositions,
+review artifacts and logs are retained; implementation is uncommitted, not deployed.
+Follow-up test ergonomics: use unique NoDb run names for real-Redis fixtures.

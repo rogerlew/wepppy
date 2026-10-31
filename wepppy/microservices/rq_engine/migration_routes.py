@@ -5,6 +5,9 @@ import os
 from typing import Any, Mapping
 
 import redis
+from .payloads import PayloadRoute, parse_request_payload
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -33,7 +36,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 MIGRATION_JOB_KEY = "migrations"
@@ -92,13 +95,7 @@ def _ensure_run_access(claims: Mapping[str, Any], runid: str) -> None:
 
 
 async def _safe_json(request: Request) -> dict[str, Any]:
-    try:
-        payload = await request.json()
-    except (UnicodeDecodeError, ValueError, RuntimeError):
-        return {}
-    if isinstance(payload, dict):
-        return payload
-    return {}
+    return await parse_request_payload(request, boolean_fields={"create_archive"}, blank_false_fields={"create_archive"})
 
 
 def _enqueue_migration_job(
@@ -268,6 +265,8 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
                 f"Failed to enqueue migration job: {exc}",
                 status_code=500,
             )
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine migrate-run failed")
         return error_response_with_traceback("Failed to enqueue migration job")

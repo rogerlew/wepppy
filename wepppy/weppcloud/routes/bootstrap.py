@@ -1,6 +1,8 @@
 """Bootstrap routes for git-backed input workflows."""
 
 from __future__ import annotations
+from wepppy.weppcloud.routes._common import parse_request_payload
+
 
 from ._common import *  # noqa: F401,F403
 
@@ -136,7 +138,7 @@ def bootstrap_commits(runid: str, config: str):
 @authorize_and_handle_with_exception_factory
 def bootstrap_checkout(runid: str, config: str):
     authorize(runid, config)
-    payload = request.json or {}
+    payload = parse_json_payload(request)
     try:
         checkpoint_run_lifecycle(runid)
         result = bootstrap_checkout_operation(
@@ -170,7 +172,7 @@ def bootstrap_current_ref(runid: str, config: str):
 @roles_accepted("Admin", "Root")
 def bootstrap_disable(runid: str, config: str):
     authorize(runid, config)
-    payload = request.json or {}
+    payload = parse_json_payload(request, boolean_fields={"disabled"})
     disabled = payload.get("disabled", True)
     try:
         from wepppy.weppcloud.app import Run, db

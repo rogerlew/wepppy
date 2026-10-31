@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import math
+from wepppy.request_payload import RequestPayloadError
 from typing import Any
 
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
@@ -38,6 +40,7 @@ _ROUTINE_CHECKBOX_ATTRS: dict[str, str] = {
 WEPP_DSS_EXCLUDE_ORDER_FIELDS: set[str] = {f"dss_export_exclude_order_{i}" for i in range(1, 6)}
 
 WEPP_BOOLEAN_FIELDS: set[str] = {
+    "delete_after_interchange",
     "clip_soils",
     "clip_soils_minimum",
     "rosetta_wc_fc_from_disturbed_bd_override",
@@ -133,21 +136,39 @@ def _pop_scalar(mapping: dict[str, Any], key: str, default: Any = None) -> Any:
 
 
 def _parse_int(value: Any) -> int | None:
-    if isinstance(value, bool) or value in (None, ""):
+    if value in (None, ""):
         return None
+    if isinstance(value, bool):
+        raise RequestPayloadError()
     try:
         return int(value)
-    except (TypeError, ValueError):
-        return None
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise RequestPayloadError() from exc
 
 
 def _parse_float(value: Any) -> float | None:
-    if isinstance(value, bool) or value in (None, ""):
+    if value in (None, ""):
         return None
+    if isinstance(value, bool):
+        raise RequestPayloadError()
     try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
+        result = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise RequestPayloadError() from exc
+    if not math.isfinite(result):
+        raise RequestPayloadError()
+    return result
+
+
+def validate_wepp_payload(payload: dict[str, Any]) -> None:
+    proposed = dict(payload)
+    _parse_int(_pop_scalar(proposed, "clip_soils_depth", None))
+    _parse_float(_pop_scalar(proposed, "clip_soils_minimum_depth", None))
+    _parse_float(_pop_scalar(proposed, "initial_sat", None))
+    length = _pop_scalar(proposed, "hillslope_clip_length", None)
+    if length is None:
+        length = _pop_scalar(proposed, "clip_hillslope_length", None)
+    _parse_int(length)
 
 
 def _apply_swat_channel_params(

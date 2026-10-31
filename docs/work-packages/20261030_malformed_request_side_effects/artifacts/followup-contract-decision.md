@@ -27,3 +27,8 @@ authority; contract-first governance requires an accepted ancestor commit before
 implementation. The earlier approval covered checkpoint `3ab204e9c`. This exact
 follow-on checkpoint needs explicit commit authority, without authorizing an
 implementation commit or deployment.
+
+Execution outcome: the operator explicitly approved this documentation-only commit;
+`ca28085ac` is the accepted ancestor. The bounded source changes were restored
+and subsequently tested. The authority request above is retained as checkpoint history,
+not an outstanding approval requirement.

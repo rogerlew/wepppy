@@ -1,5 +1,7 @@
 """Routes for project blueprint extracted from app.py."""
 
+from wepppy.request_payload import RequestPayloadError
+
 from datetime import datetime
 from subprocess import PIPE, Popen
 from contextlib import nullcontext
@@ -472,6 +474,8 @@ def task_adduser(runid, config):
             'user_id': getattr(user, 'id', None),
             'email': getattr(user, 'email', email)
         })
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:318", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -535,6 +539,8 @@ def task_removeuser(runid, config):
         user_datastore.remove_run_to_user(user, run)
 
         return success_factory({'user_id': user_id})
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:374", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -626,8 +632,8 @@ def resources_bounds_geojson(runid, config, simplify=False):
 @authorize_and_handle_with_exception_factory
 def task_setname(runid, config):
     ctx = load_run_context(runid, config)
-    ron = Ron.getInstance(str(ctx.active_root))
     payload = parse_request_payload(request)
+    ron = Ron.getInstance(str(ctx.active_root))
     raw_name = payload.get('name', '')
     name = str(raw_name).strip() if raw_name is not None else ''
     if not name:
@@ -640,8 +646,8 @@ def task_setname(runid, config):
 @authorize_and_handle_with_exception_factory
 def task_setscenario(runid, config):
     ctx = load_run_context(runid, config)
-    ron = Ron.getInstance(str(ctx.active_root))
     payload = parse_request_payload(request)
+    ron = Ron.getInstance(str(ctx.active_root))
     raw_scenario = payload.get('scenario', '')
     scenario = str(raw_scenario).strip() if raw_scenario is not None else ''
     ron.scenario = scenario

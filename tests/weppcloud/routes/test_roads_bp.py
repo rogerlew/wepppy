@@ -864,3 +864,8 @@ def test_detachment_authorization_precedes_view_and_artifact_access(roads_client
         response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json?view={view}")
         assert response.status_code == 403
         assert response.headers['Cache-Control'] == 'no-store'
+
+
+def test_malformed_payload_route_matrix(roads_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(roads_client[0], RUN_ID, CONFIG, tmp_path)

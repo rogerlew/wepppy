@@ -1,5 +1,6 @@
 """Routes for observed blueprint extracted from app.py."""
 
+
 import traceback
 
 from .._common import *  # noqa: F401,F403

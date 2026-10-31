@@ -26,77 +26,40 @@ def legacy_project_policy(monkeypatch):
 
 
 
+def _http_request(body, media):
+    from starlette.requests import Request
+    async def receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+    return Request({"type": "http", "method": "POST", "path": "/fork",
+                    "headers": [(b"content-type", media.encode())]}, receive)
+
+
 @pytest.mark.parametrize("value", [True, False])
-def test_strict_fork_omni_boolean_accepts_json_booleans(value: bool) -> None:
-    class Request:
-        headers = {"content-type": "application/json"}
-
-        async def json(self):
-            return {"skip_omni_scenarios_contrasts": value}
-
-    assert asyncio.run(
-        fork_archive_routes._strict_request_boolean(
-            Request(),
-            "skip_omni_scenarios_contrasts",
-        )
-    ) is value
+def test_strict_fork_omni_boolean_accepts_json_booleans(value):
+    import json
+    request = _http_request(json.dumps({"skip_omni_scenarios_contrasts": value}).encode(), "application/json")
+    assert asyncio.run(fork_archive_routes._strict_request_boolean(request, "skip_omni_scenarios_contrasts")) is value
 
 
 @pytest.mark.parametrize("value", [1, 0, [True], ["true"], {"value": True}, "garbage"])
-def test_strict_fork_omni_boolean_rejects_non_scalar_json(value: object) -> None:
-    class Request:
-        headers = {"content-type": "application/json"}
-
-        async def json(self):
-            return {"skip_omni_scenarios_contrasts": value}
-
+def test_strict_fork_omni_boolean_rejects_non_scalar_json(value):
+    import json
+    request = _http_request(json.dumps({"skip_omni_scenarios_contrasts": value}).encode(), "application/json")
     with pytest.raises(ValueError):
-        asyncio.run(
-            fork_archive_routes._strict_request_boolean(
-                Request(),
-                "skip_omni_scenarios_contrasts",
-            )
-        )
+        asyncio.run(fork_archive_routes._strict_request_boolean(request, "skip_omni_scenarios_contrasts"))
 
 
-@pytest.mark.parametrize(
-    ("token", "expected"),
-    [(token, expected) for expected, tokens in ((True, ("1", "true", "YES", "on")), (False, ("0", "false", "NO", "off"))) for token in tokens],
-)
-def test_strict_fork_omni_boolean_accepts_form_tokens(token: str, expected: bool) -> None:
-    class Request:
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-
-        async def form(self):
-            return FormData([("skip_omni_scenarios_contrasts", token)])
-
-    assert asyncio.run(
-        fork_archive_routes._strict_request_boolean(
-            Request(),
-            "skip_omni_scenarios_contrasts",
-        )
-    ) is expected
+@pytest.mark.parametrize(("token", "expected"),
+    [(token, expected) for expected, tokens in ((True, ("1", "true", "YES", "on")), (False, ("0", "false", "NO", "off"))) for token in tokens])
+def test_strict_fork_omni_boolean_accepts_form_tokens(token, expected):
+    request = _http_request(("skip_omni_scenarios_contrasts=" + token).encode(), "application/x-www-form-urlencoded")
+    assert asyncio.run(fork_archive_routes._strict_request_boolean(request, "skip_omni_scenarios_contrasts")) is expected
 
 
-def test_strict_fork_omni_boolean_rejects_repeated_form_values() -> None:
-    class Request:
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-
-        async def form(self):
-            return FormData(
-                [
-                    ("skip_omni_scenarios_contrasts", "false"),
-                    ("skip_omni_scenarios_contrasts", "true"),
-                ]
-            )
-
+def test_strict_fork_omni_boolean_rejects_repeated_form_values():
+    request = _http_request(b"skip_omni_scenarios_contrasts=false&skip_omni_scenarios_contrasts=true", "application/x-www-form-urlencoded")
     with pytest.raises(ValueError):
-        asyncio.run(
-            fork_archive_routes._strict_request_boolean(
-                Request(),
-                "skip_omni_scenarios_contrasts",
-            )
-        )
+        asyncio.run(fork_archive_routes._strict_request_boolean(request, "skip_omni_scenarios_contrasts"))
 
 
 def _stub_queue(

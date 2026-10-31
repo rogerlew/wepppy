@@ -661,9 +661,7 @@ def query_terrain_processor_config(runid: str, config: str) -> Response:
 def set_terrain_processor_config(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    payload = request.get_json(silent=True)
-    if payload is None:
-        payload = parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS)
+    payload = parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS, preserve_structure=True)
     if not isinstance(payload, dict):
         return error_factory(
             "TerrainProcessor config payload must be a JSON object",
@@ -671,7 +669,8 @@ def set_terrain_processor_config(runid: str, config: str) -> Response:
             status_code=400,
         )
     current_payload = _load_terrain_config_payload(wd)
-    current_payload.update(payload)
+    current_payload.update({key: value for key, value in payload.items()
+                            if key not in _TERRAIN_BOOLEAN_FIELDS or value not in (None, "")})
 
     try:
         terrain_config = _build_terrain_config(current_payload)
@@ -689,9 +688,7 @@ def run_terrain_processor(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
 
-    payload = request.get_json(silent=True)
-    if payload is None:
-        payload = parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS)
+    payload = parse_request_payload(request, boolean_fields=_TERRAIN_BOOLEAN_FIELDS, preserve_structure=True)
     if not isinstance(payload, dict):
         return error_factory(
             "TerrainProcessor run payload must be a JSON object",
@@ -700,14 +697,18 @@ def run_terrain_processor(runid: str, config: str) -> Response:
         )
     config_override = payload.get("config")
     if isinstance(config_override, Mapping):
-        update_payload = dict(config_override)
+        from wepppy.request_payload import normalize_payload
+        flags = normalize_payload({key: config_override[key] for key in _TERRAIN_BOOLEAN_FIELDS if key in config_override},
+                                  boolean_fields=_TERRAIN_BOOLEAN_FIELDS)
+        update_payload = {**config_override, **flags}
     elif payload:
         update_payload = dict(payload)
     else:
         update_payload = {}
 
     current_payload = _load_terrain_config_payload(wd)
-    current_payload.update(update_payload)
+    current_payload.update({key: value for key, value in update_payload.items()
+                            if key not in _TERRAIN_BOOLEAN_FIELDS or value not in (None, "")})
 
     try:
         terrain_config = _build_terrain_config(current_payload)

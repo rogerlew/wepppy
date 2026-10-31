@@ -1,0 +1,666 @@
+[
+  {
+    "framework": "rq-engine",
+    "module": "rhem",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-rhem",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "wepp",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-wepp",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "wepp",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-wepp-watershed",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "wepp",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/prep-wepp-watershed",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/bootstrap/enable",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/bootstrap/mint-token",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/bootstrap/checkout",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-wepp-npprep",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-wepp-watershed-no-prep",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "bootstrap",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-swat-noprep",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "climate",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-climate",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-landuse",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/set-landuse-mode",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/set-landuse-db",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/modify-landuse-coverage",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/modify-landuse-mapping",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/landuse-user-defined/upload",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/landuse-user-defined/delete",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/landuse-user-defined/update-description",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/landuse-map/save",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/landuse-map/clear-override",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/modify-landuse",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "soils",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-soils",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "treatments",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-treatments",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ash",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-ash",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "watershed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/tasks/upload-dem/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "watershed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/fetch-dem-and-build-channels",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "watershed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/set-outlet",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "watershed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "dss_export",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/post-dss-export-rq",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "swat",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-swat",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "swat",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/swat/print-prt",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "swat",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/swat/print-prt/meta",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "openet_ts",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/acquire-openet-ts",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "rap_ts",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/acquire-rap-ts",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "polaris",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/acquire-polaris",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "rusle",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/build-rusle",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "debris_flow",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-debris-flow",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "geneva",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/geneva/prepare-hrus",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "geneva",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/geneva/build-frequency-panel",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "geneva",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/geneva/run-batch",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "geneva",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/geneva/run-workflow",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "omni",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-omni",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "omni",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-omni-contrasts",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "omni",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-omni-contrasts-dry-run",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "omni",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/delete-omni-contrasts",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "run_sync",
+    "method": "POST",
+    "path": "/run-sync",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "migration",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/migrate-run",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "roads",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/prepare-roads",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "roads",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/run-roads",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "debug",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/hello-world",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "fork_archive",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/fork",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "fork_archive",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/archive",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "fork_archive",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/restore-archive",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "fork_archive",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/delete-archive",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/boundaries",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/schema",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/build-subfields",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/plant-database",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/rotation-mapping",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/run-wepp",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/run-watershed",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/clear-watershed",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "ag_fields",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/agfields/clear",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "export",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/export/ermit",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "export",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/export/features",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "export",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/export/features/profile/resolve",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "batch",
+    "method": "POST",
+    "path": "/batch/_/{batch_name}/run-batch",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "batch",
+    "method": "POST",
+    "path": "/batch/_/{batch_name}/delete-batch",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "culvert",
+    "method": "POST",
+    "path": "/culverts-wepp-batch/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "culvert",
+    "method": "POST",
+    "path": "/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "culvert",
+    "method": "POST",
+    "path": "/culverts-wepp-batch/{batch_uuid}/finalize",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_climate",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/tasks/upload-cli/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_disturbed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/tasks/upload-sbs/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_disturbed",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/tasks/upload-cover-transform",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_huc_fire",
+    "method": "POST",
+    "path": "/huc-fire/tasks/upload-sbs/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_batch_runner",
+    "method": "POST",
+    "path": "/batch/_/{batch_name}/upload-geojson",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "upload_batch_runner",
+    "method": "POST",
+    "path": "/batch/_/{batch_name}/upload-sbs-map",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "landuse_soils",
+    "method": "POST",
+    "path": "/landuse-and-soils",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "project",
+    "method": "POST",
+    "path": "/create/",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "builder",
+    "method": "POST",
+    "path": "/project-config/builder/validate",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "builder",
+    "method": "POST",
+    "path": "/project-config/builder/create",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  },
+  {
+    "framework": "rq-engine",
+    "module": "project_config_update",
+    "method": "POST",
+    "path": "/runs/{runid}/{config}/project-config/update-apply",
+    "evidence": "tests/microservices/test_malformed_route_matrix.py",
+    "disposition": "malformed JSON rejected through real route before controller/queue sentinel"
+  }
+]

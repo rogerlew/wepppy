@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 from pathlib import Path
 from typing import Any
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -25,12 +29,13 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
+from .upload_helpers import validate_upload_file
 from .upload_helpers import UploadError, save_upload_file
 from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -65,7 +70,11 @@ def _is_base_project_context(runid: str, config: str) -> bool:
 
 
 def _extract_upload(form: FormData, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
+    if key in form and not isinstance(upload, UploadFile):
+        raise RequestPayloadError()
     if isinstance(upload, UploadFile):
         return upload
     return None
@@ -209,7 +218,7 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
             )
         try:
             ash_depth_mode = int(mode_raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return error_response(
                 "ash_depth_mode must be an integer (0, 1, or 2)",
                 status_code=400,
@@ -219,6 +228,11 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         payload["ash_depth_mode"] = ash_depth_mode
 
         fire_date = _first_value(payload.get("fire_date"))
+        if fire_date is not None:
+            try:
+                YearlessDate.from_string(str(fire_date))
+            except (ValueError, TypeError, AssertionError) as exc:
+                raise RequestPayloadError("fire_date") from exc
 
         def _require_float(name: str) -> float:
             value = _first_value(payload.get(name))
@@ -226,8 +240,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                 raise KeyError(name)
             try:
                 numeric = float(value)
-            except (TypeError, ValueError) as exc:
+            except (TypeError, ValueError, OverflowError) as exc:
                 raise ValueError(name) from exc
+            if not math.isfinite(numeric):
+                raise ValueError(name)
             payload[name] = numeric
             return numeric
 
@@ -274,10 +290,25 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
             ini_white_ash_depth_mm = 3.0
 
         ash = Ash.getInstance(wd)
+        if ash_depth_mode == 2:
+            form = await request_form(request)
+            required_upload = form.get("input_upload_ash_load")
+            if required_upload is None or not getattr(required_upload, "filename", None):
+                return error_response("input_upload_ash_load must be provided", status_code=400)
+            try:
+                for field in ("input_upload_ash_load", "input_upload_ash_type_map"):
+                    if len(form.getlist(field)) > 1:
+                        raise RequestPayloadError()
+                    upload = _extract_upload(form, field)
+                    if upload is not None and upload.filename:
+                        validate_upload_file(upload, allowed_extensions=ASH_ALLOWED_EXTENSIONS, max_bytes=ASH_MAX_BYTES)
+            except UploadError as exc:
+                return error_response(str(exc), status_code=_upload_status(exc))
+
         ash.parse_inputs(payload)
 
         if ash_depth_mode == 2:
-            form = await request.form()
+            form = await request_form(request)
             with ash.locked():
                 ash._spatial_mode = AshSpatialMode.Gridded
                 try:
@@ -348,6 +379,8 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         return JSONResponse({"job_id": job.id})
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -55,7 +58,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
@@ -291,7 +294,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
     callback = None
     callback_archive = None
     try:
-        form = await request.form()
+        form = await request_form(request)
         options = webhooks.validate_option(form, request.headers, operation='culverts-wepp-batch')
         if options:
             webhooks.environment()
@@ -333,7 +336,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
     payload_zip_path = batch_root / "payload.zip"
 
     try:
-        form = await request.form()
+        form = await request_form(request)
         upload = _extract_upload(form)
         if upload is None:
             shutil.rmtree(batch_root, ignore_errors=True)
@@ -454,6 +457,8 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
             exc_info=True,
         )
         return error_response(str(exc), status_code=503, code="enqueue_unverified")
+    except RequestPayloadError:
+        raise
     except Exception:
         if not callback or not callback.publication_attempted:
             shutil.rmtree(batch_root, ignore_errors=True)

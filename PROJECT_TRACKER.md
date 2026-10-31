@@ -15,7 +15,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-Active: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — MRS-01 checkpoint independently approved; both framework fallbacks reproduced safely and consumer/state matrix retained. Implementation awaits checkpoint commit authority.
+Completed locally: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — both frameworks and confirmed consumers repaired; independent correctness/security/QA approved. 4,017 route tests and 71 real persistence tests pass. Split broad coverage: 12,451 passed / 368 executed skips plus one collection skip; plain full command hit an unrelated active test lock. Docs checkpoints and implementation committed; no deployment.
 
 Completed locally: [WEPP admission before mutation](docs/work-packages/20261030_wepp_admission_before_mutation/package.md) — five endpoints corrected after checkpoint `525e78c9f`; 237 focused, 38 final boundary and 72 archive/browse checks pass; full suite 12,210 passed / 334 skipped. Independent reviews approve; no deployment.
 

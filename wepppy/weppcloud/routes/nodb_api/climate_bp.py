@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.request_payload import RequestPayloadError
+
 from pathlib import Path
 from typing import Any, List, MutableMapping, Sequence
 import uuid
@@ -948,7 +950,9 @@ def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Respon
     """
 
     try:
-        state = request.json.get('state', None)
+        state = parse_json_payload(request, boolean_fields={'state'}).get('state')
+    except RequestPayloadError:
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:567", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -983,7 +987,7 @@ def task_set_adjust_mx_pt5(runid: str, config: str) -> Response:
     Returns:
         Response: JSON success payload or error description.
     """
-    payload = parse_request_payload(request)
+    payload = parse_request_payload(request, boolean_fields={"state"})
     state = payload.get('state', None)
     if state is None:
         return error_factory('state is None')

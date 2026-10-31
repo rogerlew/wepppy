@@ -1,5 +1,6 @@
 """Routes for rangeland_cover blueprint extracted from app.py."""
 
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.mods.rangeland_cover import RangelandCover, RangelandCoverMode

@@ -6,6 +6,8 @@ from collections.abc import Sequence
 from typing import Any, Mapping
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -41,6 +43,7 @@ from .payloads import parse_request_payload
 from .responses import error_response
 from .wepp_run_payload import (
     WEPP_BOOLEAN_FIELDS,
+    validate_wepp_payload,
     WeppRunPayloadValidationError,
     apply_wepp_run_payload,
 )
@@ -48,7 +51,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -151,13 +154,7 @@ def _nodb_lock_conflict_response(*, route_label: str) -> JSONResponse:
 
 
 async def _safe_json(request: Request) -> dict[str, Any]:
-    try:
-        payload = await request.json()
-    except (ValueError, UnicodeDecodeError):
-        return {}
-    if isinstance(payload, dict):
-        return payload
-    return {}
+    return await parse_request_payload(request)
 
 
 def _enqueue_no_prep_job(
@@ -258,6 +255,8 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
 
+    await parse_request_payload(request)
+
     try:
         result = enable_bootstrap_operation(
             runid,
@@ -296,6 +295,8 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_TOKEN_MINT_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+
+    await parse_request_payload(request)
 
     try:
         result = mint_bootstrap_token_operation(
@@ -474,7 +475,9 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
     try:
-        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS,
+                                              blank_false_fields={field for field in WEPP_BOOLEAN_FIELDS if not field.startswith("checkbox_") and field != "delete_after_interchange"})
+        validate_wepp_payload(payload)
     except WeppRunPayloadValidationError as exc:
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
@@ -559,7 +562,9 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
     try:
-        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS,
+                                              blank_false_fields={field for field in WEPP_BOOLEAN_FIELDS if not field.startswith("checkbox_") and field != "delete_after_interchange"})
+        validate_wepp_payload(payload)
     except WeppRunPayloadValidationError as exc:
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:

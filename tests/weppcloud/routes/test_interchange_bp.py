@@ -96,3 +96,8 @@ def test_migrate_default_interchange_rejects_bad_path(interchange_client):
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["error"]["message"] == "Invalid subpath"
+
+
+def test_malformed_payload_route_matrix(interchange_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(interchange_client[0], RUN_ID, CONFIG, tmp_path)

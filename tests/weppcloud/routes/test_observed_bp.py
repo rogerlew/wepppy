@@ -180,3 +180,8 @@ def test_submit_run_model_fit_with_archive_form_allowlisted_roots(observed_app):
     instance = observed_cls.getInstance(run_dir)
     assert instance.parse_calls == [payload]
     assert instance.calc_calls == 1
+
+
+def test_malformed_payload_route_matrix(observed_app, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(observed_app[0].test_client(), RUN_ID, CONFIG, tmp_path)

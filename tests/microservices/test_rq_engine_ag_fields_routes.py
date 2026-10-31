@@ -51,7 +51,10 @@ class DummyAgFields:
         self.saved_rows = None
 
     def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
-        assert path.name == "field-boundaries-upload.geojson"
+        # Validation sees a sibling staging file before accepted-source promotion.
+        assert path.name.endswith(".field-boundaries-upload.geojson")
+        assert path.parent == Path(self.ag_fields_dir)
+        assert path.read_bytes() == b"{}"
         assert source_filename == "fields.geojson"
         self.field_boundaries_source_filename = source_filename
         return {"field_id_duplicates": [7]}

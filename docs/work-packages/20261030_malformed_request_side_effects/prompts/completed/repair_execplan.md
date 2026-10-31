@@ -1,6 +1,6 @@
 # Reject malformed requests before side effects
 
-This is the active MRS-01 ExecPlan. Maintain it according to
+This is the completed MRS-01 ExecPlan (local closeout 2026-10-30). Maintain it according to
 `docs/prompt_templates/codex_exec_plans.md`, including every living section below.
 
 ## Purpose / Big Picture
@@ -21,10 +21,11 @@ consumers of invalid-to-default parsing, not just RHEM or shared helper function
 - [x] (2026-10-30) Independent read-only Flask and RQ source audits identified direct/indirect consumers and compatibility exceptions.
 - [x] (2026-10-30) Prepared canonical contract, source inventory, consumer/state matrix and checkpoint decision.
 - [x] (2026-10-30 23:37 UTC) Both independent contract reviewers approved after all medium/high findings closed.
-- [ ] Obtain explicit checkpoint commit authority; commit only the accepted checkpoint and record ancestor revision.
-- [ ] Implement shared classification/validation, adapters, enclosing catches and all confirmed early-write fixes.
-- [ ] Run actual route/persistence/multipart/WAM-01 regressions and required broad/static/doc gates.
-- [ ] Complete independent correctness, QA and security review; update all evidence and handoff.
+- [x] Operator authorized standalone contract checkpoints `3ab204e9c` and `ca28085ac`; both are ancestors of the working implementation.
+- [x] Implement shared classification/validation, framework adapters, typed error propagation and confirmed early-write fixes.
+- [x] Run actual route/persistence/multipart/WAM-01 regressions and required broad/static/doc gates; retain environmental full-command failure and independently reviewed split-run coverage.
+- [x] Complete independent correctness, QA and security reviews; no open medium/high findings, including session-body and exception-inventory addenda.
+- [x] Record final broad-suite outcome and complete local handoff; no implementation commit or deployment.
 
 ## Surprises & Discoveries
 
@@ -42,6 +43,12 @@ validation, and invalid numeric values silently omitted. Strict shared parsing
 alone cannot close the task. Legitimate Omni arrays, field-null clearing and
 route-specific null/blank boolean semantics require explicit preservation.
 
+Further review found that CSRF can consume a malformed form before the route,
+Flask URL forms must check the memory limit before reading, and upload staging in
+system `/tmp` breaks valid relative VRT references. Deferred typed form errors,
+bounded reads and sibling staging preserve these working boundaries. Real GDAL
+and NoDb tests cover source bytes and metadata, not only mocked success.
+
 ## Decision Log
 
 
@@ -58,14 +65,36 @@ strict native-boolean exceptions. Keep existing decoder duplicate-key behavior
 rather than adding a custom parser. Resolve distinct alias/form conflicts explicitly.
 Rationale and precise matrix live in `docs/schemas/request-payload-contract.md`.
 
+Follow-on decision: Ash active-mode fields, WATAR configured concentrations and
+reservoir values, agent TTL and existing batch directives needed explicit bounded
+contract rows. Independent reviewers approved them; operator authorized docs-only
+checkpoint `ca28085ac` before the associated implementation was restored. Exact
+rationale is in `artifacts/followup-contract-decision.md`. No new numeric ranges,
+scientific defaults or unknown-field policy were introduced.
+
 ## Outcomes & Retrospective
 
+The confirmed invalid-to-default class is repaired in both frameworks, including
+validation ordering, source promotion and typed errors through route wrappers.
+Valid defaults/forms/false/aliases/list/null exceptions and WAM-01 behavior remain
+covered. Independent correctness/security/QA reviews have no open medium/high
+findings. Documentation checkpoints `3ab204e9c` and `ca28085ac` were explicitly
+authorized; implementation is uncommitted and no deployment occurred.
 
-The reviewed checkpoint is ready; implementation awaits explicit checkpoint commit
-authority and its ancestor commit. Documentation lint passes. No production code is
-changed, no repair is claimed, and no deployment or production jobs were run.
-A major risk is breadth hidden behind webhook/decorator/direct-parser helpers;
-retain per-consumer evidence rather than relying on a parser-only green suite.
+Validation: 4,017 route tests pass; 71 real WAM/input persistence tests pass without
+skips. Split broad runs account for 12,451 passes and 368 executed skips from
+12,819 collected tests, plus one collection skip. The plain full command failed on
+a live unrelated test worker's NoDb lock. Unique temporary run names resolved the
+collision; passing prefixes and isolated suffixes are retained separately. This
+is not an uninterrupted full-suite pass or production-observation claim.
+
+Two obsolete upload/raster test doubles were corrected to match staged paths and
+GDAL band checks, without weakening mapping/content assertions. The canonical
+broad-exception gate passes after reviewed exact location maintenance and two
+explicit cleanup-boundary entries. Durable integration instructions live in
+`docs/schemas/request-payload-contract.md#developer-integration`. The smallest
+follow-up from observed test friction is unique run names in real-Redis fixtures.
+Detailed evidence and residual limits live in `artifacts/validation.md`.
 
 ## Context and Orientation
 
@@ -73,7 +102,7 @@ retain per-consumer evidence rather than relying on a parser-only green suite.
 Work in `/home/workdir/wepppy`, baseline
 `e35d7a3e69497ddfd9709736af50107f56963584`. `payloads.py` under
 `wepppy/microservices/rq_engine/` handles async JSON/form input; Flask uses
-`wepppy/weppcloud/routes/_common.py`. Both currently mask invalid JSON into an
+`wepppy/weppcloud/routes/_common.py`. At baseline both masked invalid JSON into an
 empty dictionary and recursively coerce boolean values. Empty dictionaries trigger
 legitimate default execution at several consumers. `webhooks.py` reads bodies
 separately, and `single_input_uploads.py` owns bounded upload streams and cleanup.
@@ -136,7 +165,7 @@ From the repository root, the baseline probe command is:
 
     wctl exec weppcloud python /workdir/wepppy/docs/work-packages/20261030_malformed_request_side_effects/artifacts/reproduce_parsers.py
 
-It currently prints both framework statuses 200 and empty payloads for malformed
+At baseline it printed both framework statuses 200 and empty payloads for malformed
 JSON. This is baseline evidence, not a success expectation after repair. The dev
 container is already running; do not start containers or install dependencies.
 Use the docs-maintainer skill's `wctl doc-lint --path <file>` and spelling preview.
@@ -190,7 +219,7 @@ commit authority prevents implementation; uncommitted documentation is insuffici
 ## Artifacts and Notes
 
 
-The operator prompt is retained as `prompts/active/repair_request.md`. Baseline
+The operator prompt is retained as `prompts/completed/repair_request.md`. Baseline
 status, HTTP probe, source inventory, consumer/state matrix, contract decisions,
 reviews and validation logs are under this package's `artifacts/`. Paths resolve
 relative to `docs/work-packages/20261030_malformed_request_side_effects/`.
@@ -213,3 +242,18 @@ audits; checkpoint review and authority precede implementation.
 Revision note, 2026-10-30 23:38 UTC: both independent reviews approved; reconciled
 clipping contract authority and completed doc gates. Only checkpoint commit
 authority now blocks source implementation.
+
+Implementation progress: operator authorized checkpoint commit `3ab204e9c`; shared
+strict transport/boolean adapters and typed framework errors are implemented.
+Focused regression run passed 264 tests; expanded microservice/Flask run passed
+3,853 with eight actionable failures (valid panel singleton handling, missing
+exception import, and obsolete rejection assertions). Fixes are under retest.
+Real WAM persistence suite: 63 passed using a disposable Redis Unix socket;
+real Flask Ron rejection/reload/valid-follow-up: three passed. RHEM worker-boundary
+sentinels and default/false behavior passed. Source replacement sentinel tests
+cover invalid size/extension/content. Independent interim reviews found late
+validation and upload cleanup issues; these remain under repair and review.
+No completion or production-observation claim is made.
+
+Final evidence reconciliation: see `artifacts/validation.md` and the consumer matrix
+for current results; earlier revision notes above are historical checkpoints.

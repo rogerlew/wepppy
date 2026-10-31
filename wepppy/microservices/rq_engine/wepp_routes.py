@@ -4,6 +4,8 @@ import logging
 import os
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -31,13 +33,14 @@ from .responses import error_response, error_response_with_traceback
 from . import webhooks
 from .wepp_run_payload import (
     WEPP_BOOLEAN_FIELDS,
+    validate_wepp_payload,
     WeppRunPayloadValidationError,
     apply_wepp_run_payload,
 )
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -165,7 +168,9 @@ async def _handle_run_wepp_request(
         if options and (_is_base_project_context(runid, config)
                         or getattr(Wepp.getInstance(wd), 'run_group', '') == 'batch'):
             raise webhooks.AdmissionError('webhook_not_supported', 400)
-        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS,
+                                              blank_false_fields={field for field in WEPP_BOOLEAN_FIELDS if not field.startswith("checkbox_") and field != "delete_after_interchange"})
+        validate_wepp_payload(payload)
         if options:
             with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
                 callback = webhooks.Submission(connection, options=options, claims=claims or {},

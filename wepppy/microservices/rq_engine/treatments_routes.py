@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Any
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -33,7 +36,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -62,6 +65,8 @@ def _require_directory_root(wd: str, root: str) -> None:
 
 
 def _extract_upload(form: Any, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -118,16 +123,17 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
         treatments = Treatments.getInstance(wd)
         landuse = Landuse.getInstance(wd)
         payload = await parse_request_payload(request)
+        requested_mode = treatments.mode
         mode_value = payload.get("mode")
         if mode_value is None:
             mode_value = payload.get("treatments_mode")
         if mode_value is not None:
             try:
-                treatments.mode = int(mode_value)
+                requested_mode = TreatmentsMode(int(mode_value))
             except (TypeError, ValueError):
                 return error_response("treatments_mode must be an integer", status_code=400)
 
-        if treatments.mode == TreatmentsMode.UserDefinedMap:
+        if requested_mode == TreatmentsMode.UserDefinedMap:
 
             def _first(value: Any) -> Any:
                 if isinstance(value, (list, tuple)):
@@ -142,9 +148,16 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
                     "landuse_management_mapping_selection must be provided",
                     status_code=400,
                 )
-            landuse.mapping = mapping
 
-            form = await request.form()
+            if not isinstance(mapping, str):
+                raise RequestPayloadError("landuse_management_mapping_selection")
+            from wepppy.wepp.management import load_map
+            try:
+                load_map(mapping)
+            except (ValueError, TypeError, FileNotFoundError) as exc:
+                raise RequestPayloadError("landuse_management_mapping_selection") from exc
+
+            form = await request_form(request)
             upload = _extract_upload(form, "input_upload_landuse")
             if upload is None:
                 return error_response(
@@ -162,29 +175,29 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             if not filename:
                 return error_response("Could not obtain filename", status_code=400)
 
+            if len(form.getlist("input_upload_landuse")) != 1:
+                raise RequestPayloadError()
             try:
-                saved_path = save_upload_file(
+                save_upload_file(
                     upload,
                     allowed_extensions=TREATMENTS_USER_DEFINED_ALLOWED_EXTENSIONS,
                     dest_dir=Path(treatments.treatments_dir),
                     filename_transform=lambda _value: filename,
                     overwrite=True,
                     max_bytes=TREATMENTS_USER_DEFINED_MAX_BYTES,
+                    post_save=Treatments.validate_upload_raster,
                 )
             except UploadError as exc:
-                return error_response(
-                    str(exc),
-                    status_code=_upload_status_from_message(str(exc)),
-                )
+                return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))
+            except ValueError as exc:
+                return error_response(str(exc), status_code=400)
             except OSError:
                 logger.exception("rq-engine build-treatments failed to save file", extra={"runid": runid, "config": config})
                 return error_response("Could not save file", status_code=500)
+            landuse.mapping = mapping
+            treatments.validate(filename)
 
-            try:
-                treatments.validate(str(saved_path))
-            except ValueError as exc:
-                return error_response(str(exc), status_code=400)
-
+        treatments.mode = requested_mode
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_treatments)
 
@@ -208,6 +221,8 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             exc.__name__ or "Watershed Not Abstracted Error",
             status_code=400,
         )
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, Literal, Mapping
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
@@ -46,7 +48,7 @@ from .webhooks import reject_unsupported_payload
 __all__ = ["router"]
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 _SCOPES = ["rq:enqueue"]
 _TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 _ACTIVE_TTL = max(_TIMEOUT, 600)

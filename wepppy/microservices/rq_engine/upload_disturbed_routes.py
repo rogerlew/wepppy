@@ -3,6 +3,9 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from starlette.datastructures import UploadFile
@@ -23,7 +26,7 @@ from .upload_helpers import UploadError, save_upload_file, upload_failure, uploa
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 UPLOAD_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
@@ -33,6 +36,8 @@ UPLOAD_COVER_TRANSFORM_MAX_BYTES = 10 * 1024 * 1024
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -82,6 +87,7 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
 
+        form = await request_form(request)
         wd = get_wd(runid)
         if single_input_uploads_enabled(Ron.getInstance(wd)):
             return error_response("disturbed is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
@@ -91,7 +97,6 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         else:
             baer = Disturbed.getInstance(wd)
 
-        form = await request.form()
         upload = _extract_upload(form, "input_upload_sbs")
         if upload is None or not upload.filename:
             return upload_failure("input_upload_sbs must be provided")
@@ -102,6 +107,32 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         if filename.lower() == "baer.cropped.tif":
             filename = "_baer.cropped.tif"
 
+        def validate_sbs(path):
+            status, description = sbs_map_sanity_check(str(path))
+            if status != 0:
+                raise UploadError(description)
+            if "baer" in ron.mods:
+                import numpy as np
+                from osgeo import gdal
+                dataset = gdal.Open(str(path))
+                band = dataset.GetRasterBand(1)
+                values = np.unique(np.array(band.ReadAsArray(), dtype=np.int64))
+                nodata = band.GetNoDataValue()
+                if nodata is not None:
+                    values = values[values != np.int64(nodata)]
+                band = dataset = None
+                if values.size == 0:
+                    raise UploadError("SBS map contains no valid cells.")
+            else:
+                from wepppy.all_your_base.geo import validate_srs
+                from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
+                if not validate_srs(str(path)):
+                    raise UploadError("Map contains an invalid projection. Try reprojecting to UTM.")
+                try:
+                    SoilBurnSeverityMap(str(path), breaks=None, nodata_vals=None, color_map=None)
+                except (ValueError, RuntimeError) as exc:
+                    raise UploadError("Invalid SBS map.") from exc
+
         dest_dir = Path(baer.baer_dir)
         saved_path = save_upload_file(
             upload,
@@ -110,11 +141,9 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
             filename_transform=lambda value: filename,
             overwrite=True,
             max_bytes=UPLOAD_SBS_MAX_BYTES,
+            post_save=validate_sbs,
         )
 
-        ret, description = sbs_map_sanity_check(str(saved_path))
-        if ret != 0:
-            return error_response(description, status_code=400)
         try:
             baer.validate(filename, mode=0)
         except Exception as exc:  # broad-except: validation boundary
@@ -127,6 +156,8 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         return upload_success(result={"disturbed_fn": baer.disturbed_fn})
     except UploadError as exc:
         return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs failed")
         reason = _validation_reason(exc)
@@ -163,10 +194,10 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
     try:
         from wepppy.nodb.mods.revegetation import Revegetation
 
+        form = await request_form(request)
         wd = get_wd(runid)
         if single_input_uploads_enabled(Ron.getInstance(wd)):
             return error_response("disturbed is unavailable for single-input upload projects.", status_code=400, code="unsupported_capability")
-        form = await request.form()
         upload = _extract_upload(form, "input_upload_cover_transform")
         if upload is None:
             return upload_failure("input_upload_cover_transform must be provided")
@@ -191,6 +222,8 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         return upload_success(result=res)
     except UploadError as exc:
         return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform failed")
         reason = _validation_reason(exc)

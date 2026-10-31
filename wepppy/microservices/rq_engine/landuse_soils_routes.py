@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Any
 
 import redis
+from .payloads import PayloadRoute, parse_request_payload
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
 from rq import Queue
@@ -18,7 +21,7 @@ from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 LANDUSE_ARCHIVE_ROOTS = (
@@ -28,11 +31,7 @@ LANDUSE_ARCHIVE_ROOTS = (
 
 
 async def _safe_json(request: Request) -> dict[str, Any]:
-    try:
-        payload = await request.json()
-    except (UnicodeDecodeError, ValueError, RuntimeError):
-        return {}
-    return payload if isinstance(payload, dict) else {}
+    return await parse_request_payload(request)
 
 
 def _resolve_archive_path(job_id: str) -> Path | None:
@@ -67,6 +66,8 @@ async def build_landuse_and_soils(request: Request) -> JSONResponse:
                 (None, extent, cfg, nlcd_db, ssurgo_db),
                 timeout=RQ_TIMEOUT,
             )
+    except RequestPayloadError:
+        raise
     except Exception:
         logger.exception("rq-engine landuse/soils enqueue failed")
         return error_response_with_traceback("land_and_soil_rq Failed")

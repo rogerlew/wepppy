@@ -322,8 +322,7 @@ def test_config_route_rejects_non_boolean_enabled(geneva_wp08_client: Any) -> No
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["error"]["code"] == "invalid_input"
-    assert payload["error"]["details"] == "enabled must be boolean"
+    assert payload["error"]["code"] == "invalid_request"
 
 
 def test_task_routes_return_canonical_rq_submission_envelope(geneva_wp08_client: Any) -> None:
@@ -495,3 +494,15 @@ def test_task_route_propagates_unsupported_domain_guard(geneva_wp08_client: Any)
     payload = response.get_json()
     assert payload["error"]["code"] == "unsupported_domain"
     assert payload["error"]["details"] == {"outside_us": True}
+
+
+@pytest.mark.parametrize('path', ['api/geneva/config', 'tasks/geneva/prepare_hrus',
+                                 'tasks/geneva/build_frequency_panel', 'tasks/geneva/run_batch'])
+def test_malformed_geneva_never_initializes_controller(geneva_wp08_client, monkeypatch, path):
+    client, *_ = geneva_wp08_client
+    def forbidden(*args, **kwargs):
+        pytest.fail('malformed payload reached optional controller initialization')
+    monkeypatch.setattr(geneva_module, '_ensure_geneva_controller', forbidden)
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/{path}', data='{', content_type='application/json')
+    assert response.status_code == 400
+    assert response.json['error']['code'] == 'invalid_request'

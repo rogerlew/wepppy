@@ -26,7 +26,7 @@ def _post_upload_sbs(
     apply_nodir: bool,
     global_nodir_default: str | None = None,
     upload_filename: str = "sbs.tif",
-    upload_bytes: bytes = b"data",
+    upload_bytes: bytes | None = None,
     validate_error: Exception | None = None,
     include_upload: bool = True,
     expected_cfg_parts: tuple[str, ...] = (),
@@ -37,6 +37,9 @@ def _post_upload_sbs(
     delete_error: Exception | None = None,
     cleanup_error: Exception | None = None,
 ) -> tuple[Any, Path]:
+    if upload_bytes is None:
+        from tests.factories.raster import sbs_raster_bytes
+        upload_bytes = sbs_raster_bytes(tmp_path / "source.tif")
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
     disturbed_dir.mkdir(parents=True)
@@ -352,7 +355,6 @@ def test_huc_fire_upload_sbs_validation_errors_are_sanitized(
         tmp_path,
         apply_nodir=False,
         upload_filename="sbs.tif",
-        upload_bytes=b"data",
         validate_error=RuntimeError("boom"),
     )
 
@@ -436,3 +438,9 @@ def test_huc_fire_upload_sbs_requires_file_field(
     assert payload["error"]["details"] == "input_upload_sbs must be provided"
     assert payload["error"]["code"] == "validation_error"
     assert payload["error_id"]
+
+
+def test_huc_invalid_source_rejected_before_project_creation(monkeypatch, tmp_path):
+    response, _ = _post_upload_sbs(monkeypatch, tmp_path, apply_nodir=False,
+        upload_bytes=b'not a raster', create_run_error=AssertionError('creation reached'))
+    assert response.status_code == 400

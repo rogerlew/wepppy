@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.request_payload import RequestPayloadError
+
 from contextlib import contextmanager, nullcontext
 import logging
 import os
@@ -238,9 +240,9 @@ def task_set_lookup_variant(runid: str, config: str) -> Response:
     wd = str(ctx.active_root)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
+    payload = parse_request_payload(request)
     disturbed = Disturbed.getInstance(wd)
 
-    payload = parse_request_payload(request)
     requested_variant = payload.get('lookup_variant')
     if requested_variant is None:
         requested_variant = payload.get('lookup')
@@ -740,6 +742,8 @@ def set_firedate(runid: str, config: str) -> Response:
         fire_date = payload.get('fire_date')
         disturbed.fire_date = fire_date
         return success_factory()
+    except RequestPayloadError:
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:240", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -777,8 +781,8 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return jsonify({"error": {"message": "disturbed is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
     ron = Ron.getInstance(wd)
-    disturbed = Disturbed.getInstance(wd)
     payload = parse_request_payload(request)
+    disturbed = Disturbed.getInstance(wd)
 
     raw_value: Union[str, int, None]
     if 'value' in payload:

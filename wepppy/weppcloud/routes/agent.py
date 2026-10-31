@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from wepppy.weppcloud.routes._common import parse_json_payload, RequestPayloadError
+
+
 import json
 import time
 import uuid
@@ -21,6 +24,8 @@ from wepppy.rq.agent_rq import spawn_wojak_session
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 agent_bp = Blueprint("agent", __name__)
+
+agent_bp.register_error_handler(RequestPayloadError, lambda exc: (jsonify(exc.envelope()), 400))
 
 _redis_client: Optional[redis.StrictRedis] = None
 
@@ -48,6 +53,19 @@ def _publish(channel: str, payload: Dict[str, Any]) -> None:
     _redis().publish(channel, serialized)
 
 
+
+def _request_ttl(payload):
+    if isinstance(payload.get("ttl_seconds"), (dict, list)):
+        raise RequestPayloadError("ttl_seconds")
+    try:
+        ttl = int(payload.get("ttl_seconds") or 1800)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise RequestPayloadError("ttl_seconds") from exc
+    if ttl <= 0:
+        raise RequestPayloadError("ttl_seconds")
+    return ttl
+
+
 def _update_last_activity(session_id: str, ttl_seconds: int) -> None:
     timestamp = int(time.time())
     _redis().setex(_session_activity_key(session_id), ttl_seconds, timestamp)
@@ -68,8 +86,8 @@ def initialize_agent_chat(runid: str, config: str) -> Response:
     Initialize a Wojak agent session for the authenticated user.
     """
 
-    payload = request.get_json(silent=True) or {}
-    ttl_seconds = int(payload.get("ttl_seconds") or 1800)  # 30 minutes inactivity TTL
+    payload = parse_json_payload(request)
+    ttl_seconds = _request_ttl(payload)  # 30 minutes inactivity TTL
     session_id = str(uuid.uuid4())
 
     token = generate_agent_token(
@@ -114,12 +132,12 @@ def send_agent_message(runid: str, config: str, session_id: str) -> Response:
     Publish a user message to the Wojak agent channel.
     """
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_json_payload(request)
     message = (payload.get("message") or "").strip()
     if not message:
         return jsonify({"error": "message is required"}), 400
 
-    ttl_seconds = int(payload.get("ttl_seconds") or 1800)
+    ttl_seconds = _request_ttl(payload)
 
     chat_channel = f"agent_chat-{session_id}"
     _publish(

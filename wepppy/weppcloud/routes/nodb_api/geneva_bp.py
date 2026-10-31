@@ -35,11 +35,13 @@ from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_f
 
 from .._common import (
     Blueprint,
+    RequestPayloadError,
     authorize,
     current_user,
     error_factory,
     load_run_context,
     parse_request_payload,
+    parse_json_payload,
     render_template,
     request,
     success_factory,
@@ -111,17 +113,7 @@ def _resolve_report_unitizer_context(wd: str) -> Any:
 
 
 def _json_object_payload() -> dict[str, Any]:
-    raw_json = request.get_json(silent=True)
-    if raw_json is None:
-        return {}
-    if not isinstance(raw_json, dict):
-        raise GenevaValidationError(
-            "request payload must be a JSON object",
-            code="invalid_input",
-            details="request payload must be a JSON object",
-            status_code=400,
-        )
-    return dict(raw_json)
+    return parse_json_payload(request)
 
 
 def _require_schema_version(payload: Mapping[str, Any], *, expected: int = 1) -> None:
@@ -130,19 +122,9 @@ def _require_schema_version(payload: Mapping[str, Any], *, expected: int = 1) ->
     try:
         schema_version = int(payload.get("schema_version", expected))
     except (TypeError, ValueError) as exc:
-        raise GenevaValidationError(
-            f"schema_version must equal {expected}",
-            code="invalid_input",
-            details=f"schema_version must equal {expected}",
-            status_code=400,
-        ) from exc
+        raise RequestPayloadError("schema_version") from exc
     if schema_version != expected:
-        raise GenevaValidationError(
-            f"schema_version must equal {expected}",
-            code="invalid_input",
-            details=f"schema_version must equal {expected}",
-            status_code=400,
-        )
+        raise RequestPayloadError("schema_version")
 
 
 def _parse_optional_ari_years_filter() -> list[int] | None:
@@ -332,6 +314,14 @@ def geneva_set_config(runid: str, config: str) -> Response:
     payload = _json_object_payload()
     _require_schema_version(payload)
 
+    from wepppy.nodb.mods.geneva.schemas.config_schema import config_from_mapping, merge_config
+    try:
+        supplied = dict(payload)
+        if supplied.get("enabled") is None:
+            supplied.pop("enabled", None)
+        config_from_mapping(supplied)
+    except (ValueError, TypeError) as exc:
+        raise RequestPayloadError() from exc
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
 
     try:
@@ -345,8 +335,13 @@ def geneva_set_config(runid: str, config: str) -> Response:
                     details="enabled must be boolean",
                     status_code=400,
                 )
-            geneva.set_enabled(enabled)
 
+        try:
+            merge_config(config_before, payload)
+        except (ValueError, TypeError) as exc:
+            raise RequestPayloadError() from exc
+        if enabled is not None:
+            geneva.set_enabled(enabled)
         if payload:
             geneva.update_config(payload)
 

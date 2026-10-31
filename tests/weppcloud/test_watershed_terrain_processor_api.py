@@ -173,3 +173,23 @@ def test_run_terrain_processor_exposes_manifest_and_artifact_urls(terrain_client
     manifest_payload = manifest_query.get_json()
     assert manifest_payload["manifest"]["entries"]
     assert manifest_payload["ui_payload"]["layers"]
+
+
+@pytest.mark.parametrize('endpoint,payload', [
+    ('set_terrain_processor_config', {'smooth':'invalid'}),
+    ('run_terrain_processor', {'config':{'smooth':[False]}}),
+])
+def test_terrain_rejection_preserves_files_and_valid_followup(terrain_client, tmp_path, endpoint, payload):
+    client = terrain_client
+    prefix = f'/runs/{RUN_ID}/{CONFIG}/tasks/'
+    assert client.post(prefix+'set_terrain_processor_config/', json={'smooth':True}).status_code == 200
+    root = tmp_path / 'runs' / RUN_ID
+    before = {p.relative_to(root):p.read_bytes() for p in root.rglob('*') if p.is_file()}
+    response = client.post(prefix+endpoint+'/', json=payload)
+    assert response.status_code == 400
+    assert {p.relative_to(root):p.read_bytes() for p in root.rglob('*') if p.is_file()} == before
+    assert client.post(prefix+'set_terrain_processor_config/', json={'smooth':None}).status_code == 200
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/query/terrain_processor/config')
+    assert response.json['config']['smooth'] is True
+    assert client.post(prefix+'set_terrain_processor_config/', json={'smooth':False}).status_code == 200
+    assert client.get(f'/runs/{RUN_ID}/{CONFIG}/query/terrain_processor/config').json['config']['smooth'] is False

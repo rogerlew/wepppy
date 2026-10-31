@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.weppcloud.routes._common import parse_json_payload, RequestPayloadError
+
 import os
 import shutil
 from pathlib import Path
@@ -96,6 +98,8 @@ def _create_run_dir_override(run_root: str) -> Tuple[str, str]:
 test_bp = Blueprint("test_bp", __name__, url_prefix="/tests/api")
 
 
+test_bp.register_error_handler(RequestPayloadError, lambda exc: (jsonify(exc.envelope()), 400))
+
 @test_bp.get("/ping")
 def ping():
     _require_enabled()
@@ -106,7 +110,7 @@ def ping():
 def create_run_endpoint():
     _require_enabled()
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_json_payload(request)
     config = payload.get("config", "dev_unit_1")
     overrides = payload.get("overrides", {}) or {}
 

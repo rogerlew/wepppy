@@ -1,5 +1,7 @@
 """Routes for omni blueprint extracted from app.py."""
 
+from wepppy.request_payload import RequestPayloadError
+
 import traceback
 
 from .._common import *  # noqa: F401,F403
@@ -186,6 +188,8 @@ def delete_scenarios(runid, config):
         omni = Omni.getInstance(wd)
         result = omni.delete_scenarios(scenario_names)
         return success_factory(result)
+    except RequestPayloadError:
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/omni_bp.py:176", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

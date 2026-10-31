@@ -6,6 +6,9 @@ import os
 from typing import Any
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -24,7 +27,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -116,6 +119,7 @@ async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONRespo
         payload = await parse_request_payload(
             request,
             boolean_fields=("force_refresh",),
+            blank_false_fields=("force_refresh",),
         )
 
         raw_datasets = payload.get("datasets")
@@ -165,6 +169,8 @@ async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONRespo
             )
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine acquire-rap-ts enqueue failed")
         return error_response_with_traceback("Error Running RAP_TS")

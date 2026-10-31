@@ -7,6 +7,9 @@ import os
 from typing import Any, Callable, Mapping
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -41,7 +44,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 CONTRACT_VERSION = "1.0.0-draft"
 DEFAULT_DEPLOYMENT_REVISION = "dev"
@@ -540,6 +543,8 @@ async def prepare_hrus(runid: str, config: str, request: Request) -> JSONRespons
             status_code=503,
             code="service_unavailable",
         )
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva prepare enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(
@@ -585,9 +590,12 @@ async def build_frequency_panel(runid: str, config: str, request: Request) -> JS
         return webhook_error
 
     try:
-        payload = await parse_request_payload(request, boolean_fields=("rebuild",))
+        payload = await parse_request_payload(request, boolean_fields=("rebuild",), preserve_structure=True)
+        if "rebuild" in payload and not isinstance(payload["rebuild"], bool):
+            raise RequestPayloadError("rebuild")
+        from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import GenevaFrequencyPanelService
+        normalized_payload = GenevaFrequencyPanelService().normalize_request(payload)
         geneva = _ensure_geneva_controller(runid, config)
-        normalized_payload = geneva.frequency_panel_service.normalize_request(payload)
         geneva.assert_task_guardrails()
         _invalidate_geneva_preflight_timestamp(runid)
         submission = _run_admission(lambda: _enqueue_geneva_job(
@@ -606,6 +614,8 @@ async def build_frequency_panel(runid: str, config: str, request: Request) -> JS
     except GenevaAdmissionUnavailable:
         logger.exception("rq-engine Geneva frequency-panel admission unavailable")
         return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception(
             "rq-engine Geneva frequency-panel enqueue failed",
@@ -674,6 +684,8 @@ async def run_batch(runid: str, config: str, request: Request) -> JSONResponse:
     except GenevaAdmissionUnavailable:
         logger.exception("rq-engine Geneva run-batch admission unavailable")
         return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva run-batch enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(
@@ -738,6 +750,8 @@ async def run_workflow(runid: str, config: str, request: Request) -> JSONRespons
     except GenevaAdmissionUnavailable:
         logger.exception("rq-engine Geneva workflow admission unavailable")
         return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva run-workflow enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(

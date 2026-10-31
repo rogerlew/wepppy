@@ -139,3 +139,16 @@ def test_create_run_endpoint_opt_in_respects_global_nodir_env_gate(
 
     marker_path = run_dir / ".nodir" / "default_archive_roots.json"
     assert not marker_path.exists()
+
+
+def test_malformed_body_before_project_creation(monkeypatch, tmp_path):
+    run_dir = tmp_path / 'absent'
+    app = _configure_create_run_test_app(monkeypatch, run_dir)
+    def unexpected(*args, **kwargs):
+        pytest.fail('malformed request reached project creation')
+    monkeypatch.setattr(test_bp_module, 'create_run_dir', unexpected)
+    response = app.test_client().post('/tests/api/create-run', data='{',
+                                      content_type='application/json')
+    assert response.status_code == 400
+    assert response.json['error']['code'] == 'invalid_request'
+    assert not run_dir.exists()

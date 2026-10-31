@@ -131,6 +131,25 @@ class Treatments(NoDbBase):
 
         self._treatments_domlc_d = _domlc_d
 
+    @staticmethod
+    def validate_upload_raster(path):
+        """Check supplied raster content without publishing files or controller state."""
+        try:
+            dataset = gdal.Open(str(path))
+        except RuntimeError as exc:
+            raise ValueError("Invalid treatments raster") from exc
+        if dataset is None:
+            raise ValueError("Invalid treatments raster")
+        try:
+            try:
+                dataset.GetRasterBand(1).Checksum()
+            except RuntimeError as exc:
+                raise ValueError("Invalid treatments raster data") from exc
+            if not validate_srs(dataset.GetProjection()):
+                raise ValueError("Treatments raster requires a valid spatial reference")
+        finally:
+            dataset = None
+
     def validate(self, fn):
         """
         Validate the treatments map.
@@ -152,18 +171,7 @@ class Treatments(NoDbBase):
         if os.path.abspath(os.path.dirname(treatment_path)) != os.path.abspath(self.treatments_dir):
             raise FileNotFoundError(f"'{fn}' not found in '{self.treatments_dir}'!")
 
-        # check it is a gdal friendly raster
-        try:
-            ds = gdal.Open(treatment_path)
-            if ds is None:
-                raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
-
-            # validate it has an srs
-            srs = ds.GetProjection()
-            if not validate_srs(srs):
-                raise ValueError(f"'{treatment_path}' does not have a valid srs!")
-        except Exception:
-            raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
+        self.validate_upload_raster(treatment_path)
 
         # reproject to align with the subwta
         if not _exists(subwta_fn):

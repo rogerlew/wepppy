@@ -378,3 +378,28 @@ def test_upload_sbs_native_failure_is_not_published(monkeypatch, tmp_path, opera
     assert response.json()["error"]["message"] == "SBS raster processing failed."
     assert runner.sbs_grouped_update_calls == []
     assert not (tmp_path / "resources" / "map.tif").exists()
+
+
+def test_invalid_geojson_replacement_preserves_existing_source(monkeypatch, tmp_path):
+    import json
+    batch = DummyBatchRunner(tmp_path)
+    resources = Path(batch.resources_dir); resources.mkdir()
+    source = resources / 'source.geojson'
+    source.write_bytes(b'accepted-source-sentinel')
+    monkeypatch.setattr(upload_batch_runner_routes, 'require_jwt', lambda *a, **k: {'sub':'2'})
+    monkeypatch.setattr(upload_batch_runner_routes, 'require_feature_access', lambda *a: None)
+    monkeypatch.setattr(upload_batch_runner_routes, '_batch_runner_feature_enabled', lambda: True)
+    monkeypatch.setattr(upload_batch_runner_routes.BatchRunner, 'getInstanceFromBatchName', lambda name: batch)
+    with TestClient(rq_engine.app) as client:
+        url = '/api/batch/_/demo/upload-geojson'
+        response = client.post(url, files={'geojson_file':('source.geojson', b'{}')})
+        assert response.status_code == 400
+        assert source.read_bytes() == b'accepted-source-sentinel'
+        assert batch.geojson_state is None
+        valid = {'type':'FeatureCollection', 'features':[{'type':'Feature','properties':{},
+            'geometry':{'type':'Polygon','coordinates':[[[-116,45],[-115,45],[-115,46],[-116,45]]]}}]}
+        raw = json.dumps(valid).encode()
+        response = client.post(url, files={'geojson_file':('source.geojson', raw)})
+        assert response.status_code == 200, response.text
+        assert source.read_bytes() == raw
+        assert batch.geojson_state['_geojson_filepath'] == str(source)

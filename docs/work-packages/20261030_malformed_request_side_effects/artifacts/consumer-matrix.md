@@ -1,7 +1,7 @@
 # MRS-01 consumer and state coverage matrix
 
-Baseline: `e35d7a3e69497ddfd9709736af50107f56963584`. All runtime repair
-coverage remains pending. **Confirmed defect** below means source tracing plus
+Baseline: `e35d7a3e69497ddfd9709736af50107f56963584`. The discovery tables below
+retain baseline classifications; final dispositions follow at the end. **Confirmed defect** below means source tracing plus
 the reproduced shared fallback, not a claim that each route was executed.
 No consumer is marked verified unaffected merely from static inspection.
 
@@ -87,7 +87,7 @@ shapes. The canonical scalar table records null/blank exceptions and aliases.
 | Multipart failure/disconnect/cancel | Temporary resources closed; no promotion | Actual bounded parser and controlled stream faults |
 | Later valid computation/storage failure | Existing explicit failure/diagnostic behavior; no invented transaction | Existing domain regression suites |
 
-## Current evidence and limits
+## Baseline evidence (historical)
 
 `reproduce_parsers.py` ran through `wctl exec weppcloud python ...` on 2026-10-30.
 `parser-baseline.jsonl` retains ten actual HTTP cases in both frameworks. It uses
@@ -96,3 +96,41 @@ performs no destructive/project/queue operations. Independent source reviews
 identified the first-effect paths above. Route integration, persistence, upload,
 worker and full-suite evidence remains **pending implementation**. No repair,
 deployment or production behavior is claimed.
+
+## Final implementation and evidence dispositions
+
+The tables above describe pre-repair findings, not outstanding implementation
+work. Exact route paths for the RQ matrix are in [rq-route-coverage.json](rq-route-coverage.json);
+Flask paths are retained in `validation/flask-matrix.log`. Tests exercise registered
+framework routes and exception wrappers, with controlled auth/read-only and queue
+boundaries. These matrix tests prove transport rejection; representative companion
+tests prove actual persistence/filesystem noninterference and valid follow-up.
+
+| Discovery group | Final disposition / executable evidence |
+| --- | --- |
+| RQ shared/default consumers, including RHEM, WEPP, bootstrap, climate, models, watershed, Omni, Geneva, required-field mutations, batch, culvert, Roads and uploads | Repaired; `test_malformed_route_matrix.py` enumerates registered POST routes. Required fields and native strict-schema error codes remain distinct. |
+| WAM-01 five admission paths | Preserved; `test_wepp_admission_persistence.py`: 63 pass with disposable Redis, real reload/prepared-input/replay/busy/no-prep assertions. |
+| RHEM clean/default execution | Repaired; `test_rq_engine_rhem_routes.py` invalid clean tests use real clean/output sentinels and controlled worker enqueue; valid omitted/null/default/false behavior retained. |
+| Landuse/soil input promotion | Repaired; `test_malformed_input_persistence.py`: eight actual multipart/real-controller rejection and valid-follow-up cases; mapping/numeric validation precedes promotion. |
+| Treatments/Ash/uploads | Repaired; route tests plus `test_treatments_upload_persistence.py`, upload helpers and disturbed/HUC/batch suites. Real raster/VRT/GeoJSON tests protect old source bytes, relative dependencies, and final metadata paths. |
+| Flask project/default/flags, Roads, climate, soils, WEPP, WATAR, unitizer, observed, rangeland, treatments, interchange, Omni | Repaired; registered-route matrix across corresponding blueprint suites; real Ron reload/cache follow-up in `test_project_bp.py`. |
+| Optional PATH/Geneva and WATAR numeric fields | Repaired; `test_optional_payload_persistence.py` real absent/populated NoDb tests, byte/reload assertions and valid follow-up; domain suites preserve panel lists and enabled ordering. |
+| Flask terrain | Repaired; `test_watershed_terrain_processor_api.py` nested/flat forms, flags and singleton arrays. |
+| Agent TTL and batch task directives | Repaired; `test_agent_payload_routes.py` controls token/spawn/publish boundaries; `test_batch_runner_endpoints.py` real BatchRunner persistence/cache rejection and valid follow-up. |
+| Recorder, bootstrap, enabled test creation | Repaired; actual registered-route malformed tests in their blueprint suites; recorder form/event and CSRF compatibility tests retained. |
+| Postfire specialized API | Verified unaffected for the exercised malformed/schema class: `test_rq_engine_postfire_debris_flow.py::test_invalid_payloads_before_mutation` and `test_model_payload_rejected_before_mutation` cover arrays, duplicates, non-finite values, limits and invalid model selections with absent file/NoDb assertions; included in the passing 4,017-test route run. |
+| CSV row editors and strict domain schemas | Preserve explicit list/native schema adapters; domain tests cover rejection before writers. No universal object restriction imposed on legitimate rows/scenario arrays. |
+| Cover-transform content | Existing route does not parse CSV content; no confirmed late content-rejection failure. Extension/size/transport boundaries retained; no new CSV rules introduced. |
+| Session token and operator token | Repaired actual-body detection without Content-Length; session suite 59 passes and operator-token suite covers stream without length. Specialized token schemas/auth remain unchanged. |
+| RQ jobinfo batch | Read-only polling fallback; no mutation/default execution. Excluded after tracing `_safe_json` to `jobinfo_batch`. |
+| README, admin role edits, CAPTCHA and command-bar loglevel | Source inspection finds explicit object/required-token/required-level guards before writes. Not classified as confirmed invalid-to-default defects; no blanket “runtime unaffected” claim. |
+| User preferences and batch creation forms | Source-guarded required fields: preference choices must belong to both existing enums; batch name/config validate before `_create_batch_project`. Empty parse results do not reach saves/creation. No confirmed default-execution defect; no claim of complete transport conformance for these specialized forms. |
+| GL dashboard response JSON | Parses an internal response, not a mutation request; excluded from this request-parser failure class. |
+| Read-only views, GETs, path/query-only commands, third-party and scientific validators | Outside this malformed-body-to-business-effect class. Router-class edits on read-only RQ modules only install common typed error translation. |
+
+The source index includes helpers/read-only routes and is deliberately broader than
+the confirmed repair set. This is not certification of every numeric/scientific
+constraint or arbitrary later computation failure. Unexercised direct APIs remain
+unresolved candidates, not verified-unaffected claims; their presence in the index
+alone is not evidence of a default-execution defect. Production rollout/observation
+is outside this local execution. See [validation](validation.md) for exact gates.

@@ -489,3 +489,17 @@ def test_parity_checkout_wrapper_matches_rq_engine(bootstrap_context, monkeypatc
 
     assert flask_response.status_code == rq_response.status_code == 200
     assert flask_response.get_json()["Content"] == rq_response.json()
+
+
+@pytest.mark.parametrize('operation', ['checkout', 'disable'])
+def test_malformed_body_before_bootstrap_mutation(bootstrap_context, monkeypatch, operation):
+    app, module, set_user = bootstrap_context
+    set_user(DummyUser(7, 'user@example.com', {'Root'}))
+    def unexpected(*args, **kwargs):
+        pytest.fail('malformed request reached bootstrap operation')
+    monkeypatch.setattr(module, 'bootstrap_checkout_operation', unexpected)
+    with app.test_client() as client:
+        response = client.post(f'/runs/{RUN_ID}/{CONFIG}/bootstrap/{operation}',
+                               data='{', content_type='application/json')
+    assert response.status_code == 400
+    assert response.json['error']['code'] == 'invalid_request'

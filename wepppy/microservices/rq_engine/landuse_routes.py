@@ -13,6 +13,9 @@ from pathlib import Path
 from typing import Any, Mapping
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -66,12 +69,13 @@ from wepppy.wepp.single_input import SingleInputError
 from wepppy.nodb.single_input_policy import SingleInputPolicyError, require_single_input_policy, single_input_uploads_enabled
 from .payloads import parse_request_payload
 from .responses import error_response, validation_error_response
-from .upload_helpers import UploadError, save_upload_file
+from wepppy.wepp.management.managements import InvalidManagementKey
+from .upload_helpers import UploadError, save_upload_file, validate_upload_file
 from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -254,6 +258,8 @@ def _require_directory_root(wd: str, root: str) -> None:
 
 
 def _extract_upload(form: Any, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
@@ -558,13 +564,9 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
     try:
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
-        landuse = Landuse.getInstance(wd)
-        authority, authority_error = _run_authority(landuse)
-        if authority_error is not None:
-            return authority_error
-
         async with input_payload(
             request, "landuse",
+            blank_false_fields=("checkbox_burn_shrubs", "checkbox_burn_grass", "burn_shrubs", "burn_grass"),
             boolean_fields=(
                 "checkbox_burn_shrubs",
                 "checkbox_burn_grass",
@@ -575,6 +577,11 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             webhook_error = reject_unsupported_payload(payload)
             if webhook_error is not None:
                 return webhook_error
+
+            landuse = Landuse.getInstance(wd)
+            authority, authority_error = _run_authority(landuse)
+            if authority_error is not None:
+                return authority_error
 
             def _first(value: Any) -> Any:
                 if isinstance(value, (list, tuple)):
@@ -653,6 +660,33 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             mapping_error = _validate_effective_mapping(landuse)
             if mapping_error is not None:
                 return mapping_error
+            if requested_mode == LanduseMode.UserDefined and mapping is None:
+                return error_response("landuse_management_mapping_selection must be provided", status_code=400)
+            raw_buffer = payload.get("mofe_buffer_selection")
+            if isinstance(raw_buffer, (list, tuple, set)):
+                raw_buffer = next((item for item in raw_buffer if item not in (None, "")), None)
+            if raw_buffer not in (None, ""):
+                try:
+                    buffer_code = int(raw_buffer)
+                    landuse.validate_mofe_buffer_selection(buffer_code)
+                except (ValueError, TypeError, OverflowError, KeyError, InvalidManagementKey) as exc:
+                    raise RequestPayloadError("mofe_buffer_selection") from exc
+
+            if requested_mode == LanduseMode.UserDefined:
+                form = await request_form(request)
+                upload = _extract_upload(form, "input_upload_landuse")
+                if upload is None:
+                    existing = landuse.user_defined_landcover_fn
+                    if not existing or not _exists(_join(landuse.lc_dir, f"_{existing}")):
+                        return error_response("input_upload_landuse is required when no existing user-defined landuse file is available.", status_code=400)
+                else:
+                    try:
+                        validate_upload_file(upload,
+                            allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
+                            max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES)
+                    except UploadError as exc:
+                        return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))
+
             with input_submission(landuse, "landuse", runid):
                 await accept_input(landuse, "landuse", upload_form, requested_mode)
                 try:
@@ -685,7 +719,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         )
                     landuse.mapping = mapping
 
-                    form = await request.form()
+                    form = await request_form(request)
                     upload = _extract_upload(form, "input_upload_landuse")
                     filename: str | None = None
                     user_defined_fn: str | None = None
@@ -802,6 +836,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         )
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -879,6 +915,8 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         return error_response(str(exc), status_code=400, code="unsupported_capability")
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -937,6 +975,8 @@ async def set_landuse_db(runid: str, config: str, request: Request) -> JSONRespo
         return JSONResponse({"message": "Landuse database updated"})
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -991,6 +1031,8 @@ async def modify_landuse_coverage(runid: str, config: str, request: Request) -> 
         return JSONResponse({"message": "Landuse coverage updated"})
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1097,6 +1139,8 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
         return error_response(str(exc), status_code=409, code="job_active")
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1196,10 +1240,10 @@ async def upload_landuse_user_defined_managements(runid: str, config: str, reque
         except ValueError as exc:
             return error_response(str(exc), status_code=400, code="INVALID_RUN_PATH")
 
-        payload = await parse_request_payload(request, boolean_fields={"replace"})
+        payload = await parse_request_payload(request, boolean_fields={"replace"}, blank_false_fields={"replace"})
         replace = bool(payload.get("replace", False))
 
-        form = await request.form()
+        form = await request_form(request)
         upload = _extract_upload(form, "management_upload")
         if upload is None:
             return error_response("management_upload is required", status_code=400)
@@ -1309,6 +1353,8 @@ async def upload_landuse_user_defined_managements(runid: str, config: str, reque
         )
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1388,6 +1434,8 @@ async def delete_landuse_user_defined_management(runid: str, config: str, reques
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except ValueError as exc:
         return error_response(str(exc), status_code=400, code="INVALID_RUN_PATH")
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1483,6 +1531,8 @@ async def update_landuse_user_defined_management_description(
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except ValueError as exc:
         return error_response(str(exc), status_code=400, code="INVALID_RUN_PATH")
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1776,6 +1826,8 @@ async def clear_landuse_map_override(runid: str, config: str, request: Request) 
         logger.exception("rq-engine landuse-map clear-override auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
+    await parse_request_payload(request)
+
     try:
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
@@ -1850,6 +1902,8 @@ async def modify_landuse(runid: str, config: str, request: Request) -> JSONRespo
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except ValueError as exc:
         return error_response(str(exc), status_code=400, code="validation_error")
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

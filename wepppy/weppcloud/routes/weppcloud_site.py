@@ -88,14 +88,7 @@ def _operator_token_redis_timeout_seconds() -> int:
 
 
 def _request_has_body() -> bool:
-    content_length = str(request.headers.get("Content-Length") or "").strip()
-    if content_length:
-        try:
-            return int(content_length) > 0
-        except (TypeError, ValueError):
-            return True
-    transfer_encoding = str(request.headers.get("Transfer-Encoding") or "").strip()
-    return bool(transfer_encoding)
+    return bool(request.get_data(cache=True))
 
 
 def _content_type_token() -> str:

@@ -5,6 +5,9 @@ import os
 from typing import Any
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -23,7 +26,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -59,7 +62,11 @@ async def acquire_polaris(runid: str, config: str, request: Request) -> JSONResp
         payload = await parse_request_payload(
             request,
             boolean_fields=("force_refresh", "keep_source_intermediates"),
+            extra_boolean_tokens=True,
         )
+
+        if any(payload.get(key) == "" for key in ('force_refresh', 'keep_source_intermediates')):
+            raise RequestPayloadError()
 
         allowed_keys = (
             "force_refresh",

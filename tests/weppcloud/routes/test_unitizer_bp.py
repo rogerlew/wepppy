@@ -119,3 +119,8 @@ def test_unitizer_view_preference_failure_is_sanitized(
     assert payload["error_id"]
     assert "details" not in payload["error"]
     assert "private database failure" not in response.get_data(as_text=True)
+
+
+def test_malformed_payload_route_matrix(unitizer_client, tmp_path):
+    from tests.factories.request_payload import assert_malformed_routes
+    assert_malformed_routes(unitizer_client[0], RUN_ID, CONFIG, tmp_path)

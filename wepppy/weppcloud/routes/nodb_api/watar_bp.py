@@ -1,8 +1,11 @@
 """Routes for watar blueprint extracted from app.py."""
 
+from wepppy.request_payload import RequestPayloadError
+
 import wepppy
 
 from ast import literal_eval
+import math
 
 from wepppy.nodb.mods.ash_transport.ash_type import AshType
 
@@ -172,7 +175,9 @@ def hillslope0_ash(runid, config, topaz_id):
 def task_set_ash_wind_transport(runid, config):
 
     try:
-        state = request.json.get('run_wind_transport', None)
+        state = parse_json_payload(request, boolean_fields={'run_wind_transport'}).get('run_wind_transport')
+    except RequestPayloadError:
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:164", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -294,6 +299,8 @@ def query_ash_out(runid, config):
 def report_contaminant(runid, config):
 
     try:
+        if request.method == "POST":
+            parse_request_payload(request, trim_strings=False)
         wd = get_wd(runid)
 
         climate = Climate.getInstance(wd)
@@ -319,7 +326,20 @@ def report_contaminant(runid, config):
                 contaminants = contaminant_keys
 
         if request.method == 'POST':
-            ash.parse_cc_inputs(dict(request.form))
+            values = dict(request.form)
+            numeric_fields = {"reservoir_capacity", "reservoir_storage"}
+            for prefix, levels in (("low", ash.low_contaminant_concentrations),
+                                   ("mod", ash.moderate_contaminant_concentrations),
+                                   ("high", ash.high_contaminant_concentrations)):
+                numeric_fields.update(f"{prefix}_{key}" for key in levels)
+            for field in numeric_fields.intersection(values):
+                try:
+                    numeric = float(values[field])
+                    if not math.isfinite(numeric):
+                        raise ValueError("non-finite value")
+                except (ValueError, TypeError, OverflowError) as exc:
+                    raise RequestPayloadError() from exc
+            ash.parse_cc_inputs(values)
             ash = Ash.getInstance(wd)
 
         unitizer = resolve_unitizer_presentation(wd)
@@ -347,6 +367,8 @@ def report_contaminant(runid, config):
 
     except PreferenceResolutionError:
         return preference_resolution_error_response(runid)
+    except RequestPayloadError:
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:324", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

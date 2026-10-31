@@ -5,6 +5,9 @@ import os
 from typing import Any
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -25,7 +28,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -67,6 +70,9 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
             request,
             boolean_fields=("force_polaris_refresh",),
         )
+        if any(payload.get(key) == "" for key in ('force_polaris_refresh',)):
+            raise RequestPayloadError()
+
         allowed_keys = (
             "r_mode",
             "c_mode",
@@ -108,6 +114,8 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
         return JSONResponse(response_payload)
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
+    except RequestPayloadError:
+        raise
     except Exception:
         logger.exception("rq-engine build-rusle enqueue failed")
         return error_response_with_traceback("Error Building RUSLE")

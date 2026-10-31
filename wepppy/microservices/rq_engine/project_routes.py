@@ -15,6 +15,9 @@ import uuid
 
 import redis
 import requests
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
@@ -58,7 +61,7 @@ from .responses import error_response
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_CREATE_SCOPES = ["rq:enqueue"]
 _CREATE_TRANSPORT_FIELDS = frozenset(
@@ -359,6 +362,8 @@ async def create(request: Request) -> Response:
     # and searchable correlation, including exceptions missed by stage handlers.
     try:
         response = await _create(request)
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         error_id = _creation_error_id()
         _log_creation_exception("rq-engine create unexpected failure", error_id)
@@ -392,13 +397,15 @@ async def _create(request: Request) -> Response:
 
     try:
         payload = await parse_request_payload(request)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         error_id = _creation_error_id()
         _log_creation_exception("rq-engine create payload parse failed", error_id)
         return error_response(
-            "Invalid payload",
-            status_code=400,
-            code="validation_error",
+            "Could not read request payload",
+            status_code=500,
+            code="internal_error",
             details="The request payload could not be parsed.",
             error_id=error_id,
             log_exception=False,

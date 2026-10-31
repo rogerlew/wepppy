@@ -16,6 +16,9 @@ from typing import Any, Callable, Mapping
 from contextlib import ExitStack, contextmanager
 
 import redis
+from .payloads import PayloadRoute, request_payload
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -77,7 +80,7 @@ def _archive_admission_boundary():
     except (OSError, redis.RedisError) as exc:
         raise ArchiveAdmissionUnavailable from exc
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -496,17 +499,15 @@ def _recover_stale_profile_fork_claim(
 
 
 async def _strict_request_boolean(request: Request, field: str) -> bool:
-    content_type = request.headers.get("content-type", "").lower()
-    if "application/json" in content_type:
-        raw = await request.json()
-        if not isinstance(raw, dict) or field not in raw:
+    raw = await request_payload(request)
+    if isinstance(raw, dict):
+        if field not in raw:
             return False
         value = raw[field]
         if not isinstance(value, bool):
             raise ValueError(field)
         return value
-
-    form = await request.form()
+    form = raw
     values = form.getlist(field)
     if not values:
         return False
@@ -823,6 +824,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         payload = await parse_request_payload(
             request,
             boolean_fields={"undisturbify", "skip_wepp_runs_output"},
+            blank_false_fields={"undisturbify", "skip_wepp_runs_output"},
         )
         undisturbify = bool(payload.get("undisturbify", False))
         skip_wepp_runs_output = bool(payload.get("skip_wepp_runs_output", False))
@@ -1389,6 +1391,8 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         return error_response_with_traceback(
             "Fork submission state could not be verified", status_code=503
         )
+    except RequestPayloadError:
+        raise
     except Exception:
         if profile_claimed and not profile_claim_handed_off:
             _release_profile_fork_claim(new_wd, fork_job_id)
@@ -1505,6 +1509,8 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     except ArchiveAdmissionUnavailable:
         logger.exception("rq-engine archive admission unavailable")
         return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
+    except RequestPayloadError:
+        raise
     except Exception:
         logger.exception("rq-engine archive enqueue failed")
         return error_response_with_traceback("Error enqueueing archive job", status_code=500)
@@ -1616,6 +1622,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
     except ArchiveAdmissionUnavailable:
         logger.exception("rq-engine restore admission unavailable")
         return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
+    except RequestPayloadError:
+        raise
     except Exception:
         logger.exception("rq-engine restore enqueue failed")
         return error_response_with_traceback("Error enqueueing restore job", status_code=500)
@@ -1709,6 +1717,8 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             status_code=503,
             code="service_unavailable",
         )
+    except RequestPayloadError:
+        raise
     except Exception:
         logger.exception("rq-engine delete-archive failed")
         return error_response_with_traceback("Error deleting archive", status_code=500)

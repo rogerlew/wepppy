@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from wepppy.request_payload import RequestPayloadError
+
 from typing import Any, Dict, List, Optional
 
 import redis
@@ -17,6 +19,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.path_ce import PathCostEffective
+from wepppy.nodb.mods.path_ce.path_cost_effective import _normalize_config
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.submission_recovery import (
@@ -147,8 +150,13 @@ def update_path_cost_effective_config(runid: str, config: str) -> Response:
     require_feature("path_ce", wd=wd)
     if single_input_uploads_enabled(Ron.getInstance(wd)):
         return jsonify({"error": {"message": "path_ce is unavailable for single-input upload projects.", "code": "unsupported_capability"}}), 400
-    controller = _ensure_controller(wd, f"{config}.cfg")
     raw_payload = parse_request_payload(request)
+    try:
+        proposed = _build_config_payload(raw_payload)
+        _normalize_config(proposed)
+    except (ValueError, TypeError) as exc:
+        raise RequestPayloadError() from exc
+    controller = _ensure_controller(wd, f"{config}.cfg")
     try:
         payload = _build_config_payload(raw_payload)
         controller.config = {**controller.config, **payload}
@@ -214,8 +222,13 @@ def run_path_cost_effective(runid: str, config: str) -> Response:
     if "path_ce" not in (ron.mods or []):
         return error_factory("PATH Cost-Effective module is not enabled for this run.")
 
-    controller = _ensure_controller(wd, f"{config}.cfg")
     raw_payload = parse_request_payload(request)
+    try:
+        proposed = _build_config_payload(raw_payload)
+        _normalize_config(proposed)
+    except (ValueError, TypeError) as exc:
+        raise RequestPayloadError() from exc
+    controller = _ensure_controller(wd, f"{config}.cfg")
     if raw_payload:
         try:
             payload = _build_config_payload(raw_payload)

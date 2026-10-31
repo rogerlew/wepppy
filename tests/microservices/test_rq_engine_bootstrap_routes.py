@@ -437,7 +437,7 @@ def test_bootstrap_checkout_requires_sha(monkeypatch: pytest.MonkeyPatch) -> Non
     assert response.json()["error"]["message"] == "sha required"
 
 
-def test_bootstrap_checkout_invalid_json_payload_falls_back_to_missing_sha(
+def test_bootstrap_checkout_invalid_json_payload_rejected_before_defaults(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(
@@ -452,7 +452,7 @@ def test_bootstrap_checkout_invalid_json_payload_falls_back_to_missing_sha(
         )
 
     assert response.status_code == 400
-    assert response.json()["error"]["message"] == "sha required"
+    assert response.json()["error"]["code"] == "invalid_request"
 
 
 def test_bootstrap_checkout_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -387,6 +387,9 @@ def test_build_landuse_parses_multipart_mofe_and_disturbance_fields(monkeypatch:
         def __init__(self) -> None:
             self.payloads: list[object] = []
 
+        def validate_mofe_buffer_selection(self, value):
+            assert value == 42
+
         def parse_inputs(self, payload) -> None:
             self.payloads.append(payload)
 
@@ -434,6 +437,9 @@ def test_build_landuse_maps_nodb_lock_conflict_from_parse_inputs(
         mode = landuse_routes.LanduseMode.Gridded
         lc_dir = "/tmp"
         lc_fn = "/tmp/lc.tif"
+
+        def validate_mofe_buffer_selection(self, value):
+            assert value == 42
 
         def parse_inputs(self, payload) -> None:
             raise NoDbAlreadyLockedError("already locked owner=alice token=secret-token")
@@ -1766,6 +1772,7 @@ def test_build_landuse_user_defined_propagates_mutation_nodir_errors(
         raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
 
     monkeypatch.setattr(landuse_routes, "mutate_root", _raise_nodir)
+    monkeypatch.setattr(landuse_routes, "_exists", lambda path: True)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(

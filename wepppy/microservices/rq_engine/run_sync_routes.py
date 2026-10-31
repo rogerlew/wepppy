@@ -8,6 +8,8 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -37,7 +39,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RUN_SYNC_TIMEOUT = int(os.getenv("RQ_ENGINE_RUN_SYNC_TIMEOUT", "86400"))
 MIGRATIONS_TIMEOUT = int(os.getenv("RQ_ENGINE_MIGRATIONS_TIMEOUT", "7200"))
@@ -198,6 +200,7 @@ async def run_sync(request: Request) -> JSONResponse:
         payload = await parse_request_payload(
             request,
             boolean_fields={"run_migrations", "archive_before"},
+            blank_false_fields={"run_migrations", "archive_before"},
         )
     except (UnicodeDecodeError, ValueError, RuntimeError) as exc:
         logger.info("rq-engine run-sync invalid payload: %s", exc)

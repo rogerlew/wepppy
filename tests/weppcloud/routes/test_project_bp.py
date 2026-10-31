@@ -257,9 +257,9 @@ def test_set_public_rejects_non_boolean_token(project_client):
         json={"public": "maybe"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["error"]["message"] == "state must be boolean"
+    assert payload["error"]["code"] == "invalid_request"
 
 
 def test_set_readonly_enqueues_background_job(project_client):
@@ -1041,3 +1041,46 @@ def test_developer_activation_real_authorization_and_persistence(tmp_path, monke
     assert Ron.load_detached(str(tmp_path)).developer_mode is False
     assert client.post(url, json={}, headers=headers).status_code == 200
     assert Ron.load_detached(str(tmp_path)).developer_mode is True
+
+
+@pytest.mark.parametrize('body', ['{', 'null', '[]'])
+def test_malformed_name_preserves_real_persistence_and_cache(monkeypatch, tmp_path, body):
+    from wepppy.nodb.core import Ron
+    from types import SimpleNamespace
+    from wepppy.weppcloud.utils import helpers
+    wd = str(tmp_path)
+    app = Flask(__name__)
+    app.register_blueprint(project_module.project_bp)
+    monkeypatch.setattr(helpers, 'authorize', lambda *a, **k: None)
+    monkeypatch.setattr(helpers, 'get_wd', lambda *a, **k: wd)
+    monkeypatch.setattr(project_module, 'load_run_context', lambda *a: SimpleNamespace(active_root=tmp_path))
+    client = app.test_client()
+    real = Ron(wd, 'canada-wbt-mofe.cfg', initialize_components=False)
+    real.name = 'accepted name'
+    monkeypatch.setattr(project_module, 'Ron', Ron)
+    path = Path(wd)/'ron.nodb'
+    before = path.read_bytes()
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/setname/',data=body,content_type='application/json')
+    assert response.status_code == 400
+    assert response.json['error']['code'] == 'invalid_request'
+    assert path.read_bytes() == before
+    assert Ron.load_detached(wd).name == 'accepted name'
+    assert Ron.getInstance(wd).name == 'accepted name'
+    valid = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/setname/',json={'name':'next name'})
+    assert valid.status_code == 200, valid.data
+    assert Ron.load_detached(wd).name == 'next name'
+
+
+def test_malformed_payload_route_matrix(project_client, tmp_path, monkeypatch):
+    from tests.factories.request_payload import assert_malformed_routes
+    from flask import g
+    from flask_principal import Identity, RoleNeed
+    client = project_client[0]
+    monkeypatch.setattr(project_module, 'get_run_owners_lazy', lambda runid: [])
+    monkeypatch.setattr(project_module, 'get_user_models', lambda: (None, None, None))
+    project_module.current_user.roles = {'Admin', 'Root', 'PowerUser'}
+    @client.application.before_request
+    def principal():
+        g.identity = Identity('test-user-id')
+        g.identity.provides.update({RoleNeed('Admin'), RoleNeed('Root'), RoleNeed('PowerUser')})
+    assert_malformed_routes(project_client[0], RUN_ID, CONFIG, tmp_path)

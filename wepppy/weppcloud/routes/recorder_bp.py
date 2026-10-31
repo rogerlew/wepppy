@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.weppcloud.routes._common import parse_json_payload, RequestPayloadError
+
+from wepppy.request_payload import RequestPayloadError
+
 from typing import Any, Dict, List
 
 from flask import abort
@@ -21,6 +25,8 @@ from wepppy.nodb.core.ron import Ron
 recorder_bp = Blueprint("recorder", __name__)
 
 
+recorder_bp.register_error_handler(RequestPayloadError, lambda exc: (jsonify(exc.envelope()), 400))
+
 def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     events = payload.get("events")
     if isinstance(events, list):
@@ -31,7 +37,7 @@ def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
 @recorder_bp.route("/runs/<runid>/<config>/recorder/events", methods=["POST"])
 @authorize_and_handle_with_exception_factory
 def recorder_events(runid: str, config: str) -> Response:
-    raw_json = request.get_json(silent=True)
+    raw_json = None if request.mimetype in {"application/x-www-form-urlencoded", "multipart/form-data"} else parse_json_payload(request)
     payload = (
         raw_json
         if isinstance(raw_json, dict)
@@ -76,7 +82,7 @@ def recorder_promote(runid: str, config: str) -> Response:
     if not current_user.has_role("PowerUser"):
         abort(403)
 
-    payload = request.get_json(silent=True) or {}
+    payload = parse_json_payload(request)
     slug = payload.get("slug")
     capture_id = payload.get("captureId") or "stream"
 

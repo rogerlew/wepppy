@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 
 import redis
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request, status
 from anyio import from_thread
 from .webhooks import reject_unsupported
@@ -15,7 +17,7 @@ from .responses import error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 TIMEOUT = 216_000
 

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
+import uuid
 from pathlib import Path
 from typing import IO, Callable, Optional, Sequence
 
@@ -69,10 +72,7 @@ def enforce_extension(filename: str, allowed_extensions: Sequence[str] | set[str
 def _rewind_stream(stream: IO[bytes]) -> None:
     seek = getattr(stream, "seek", None)
     if callable(seek):
-        try:
-            seek(0)
-        except (OSError, ValueError):
-            return
+        seek(0)
 
 
 def write_stream_to_destination(
@@ -84,32 +84,40 @@ def write_stream_to_destination(
     chunk_bytes: int = UPLOAD_STREAM_CHUNK_BYTES,
     size_error_message: str = "File exceeds maximum allowed size",
 ) -> int:
-    destination.parent.mkdir(parents=True, exist_ok=True)
-
-    if destination.exists():
-        if not overwrite:
-            raise UploadBoundaryError("File already exists")
-        destination.unlink()
-
+    if destination.exists() and not overwrite:
+        raise UploadBoundaryError("File already exists")
     _rewind_stream(stream)
-
-    bytes_written = 0
-    try:
-        with destination.open("wb") as handle:
-            while True:
-                chunk = stream.read(chunk_bytes)
-                if not chunk:
-                    break
-                if isinstance(chunk, str):
-                    chunk = chunk.encode("utf-8")
-                bytes_written += len(chunk)
-                if max_bytes is not None and bytes_written > max_bytes:
-                    raise UploadBoundaryError(size_error_message, status_code=413)
-                handle.write(chunk)
-    except Exception:
-        destination.unlink(missing_ok=True)
-        raise
-
+    # Transport validation owns temporary storage. Do not unlink an accepted
+    # source (or create its parent) until the entire incoming stream is valid.
+    with tempfile.TemporaryFile() as buffered:
+        bytes_written = 0
+        while True:
+            chunk = stream.read(chunk_bytes)
+            if not chunk:
+                break
+            if isinstance(chunk, str):
+                chunk = chunk.encode("utf-8")
+            bytes_written += len(chunk)
+            if max_bytes is not None and bytes_written > max_bytes:
+                raise UploadBoundaryError(size_error_message, status_code=413)
+            buffered.write(chunk)
+        buffered.seek(0)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        staged = destination.with_name(f".{destination.name}.{uuid.uuid4().hex}.upload")
+        try:
+            # Normal open preserves the existing umask-based creation policy.
+            with staged.open("xb") as handle:
+                while chunk := buffered.read(chunk_bytes):
+                    handle.write(chunk)
+            if overwrite:
+                os.replace(staged, destination)
+            else:
+                try:
+                    os.link(staged, destination)
+                except FileExistsError as exc:
+                    raise UploadBoundaryError("File already exists") from exc
+        finally:
+            staged.unlink(missing_ok=True)
     return bytes_written
 
 
@@ -127,6 +135,13 @@ def save_upload_from_stream(
     size_error_message: str = "File exceeds maximum allowed size",
     chunk_bytes: int = UPLOAD_STREAM_CHUNK_BYTES,
 ) -> Path:
+    """Validate transport and optional staged content before promoting a source.
+
+    The legacy ``post_save`` callback receives a temporary sibling path, not the
+    accepted destination. It must finish validation before returning and must not
+    retain that temporary pathname in metadata. Only successful validation permits
+    destination replacement; the return value is the accepted final path.
+    """
     if stream is None:
         raise UploadBoundaryError("Uploaded file stream is unavailable.")
 
@@ -138,24 +153,33 @@ def save_upload_from_stream(
     enforce_extension(filename, allowed_extensions)
 
     destination = dest_dir / filename
-    write_stream_to_destination(
-        stream,
-        destination,
-        overwrite=overwrite,
-        max_bytes=max_bytes,
-        chunk_bytes=chunk_bytes,
-        size_error_message=size_error_message,
-    )
-
-    if post_save is None:
-        return destination
-
-    try:
-        post_save(destination)
-    except Exception:
-        destination.unlink(missing_ok=True)
-        raise
-
+    if destination.exists() and not overwrite:
+        raise UploadBoundaryError("File already exists")
+    if post_save is not None:
+        # A sibling preserves relative VRT dependencies without replacing the
+        # accepted source. All transport staging is removed on every exit.
+        created_parents = []
+        parent = dest_dir
+        while not parent.exists():
+            created_parents.append(parent)
+            parent = parent.parent
+        staged = dest_dir / f".{uuid.uuid4().hex}.{filename}"
+        try:
+            write_stream_to_destination(stream, staged, max_bytes=max_bytes,
+                                        chunk_bytes=chunk_bytes, size_error_message=size_error_message)
+            post_save(staged)
+            with staged.open("rb") as validated:
+                write_stream_to_destination(validated, destination, overwrite=overwrite,
+                                            chunk_bytes=chunk_bytes)
+        finally:
+            staged.unlink(missing_ok=True)
+            for parent in created_parents:
+                if parent.exists() and not any(parent.iterdir()):
+                    parent.rmdir()
+    else:
+        write_stream_to_destination(stream, destination, overwrite=overwrite,
+                                    max_bytes=max_bytes, chunk_bytes=chunk_bytes,
+                                    size_error_message=size_error_message)
     return destination
 
 

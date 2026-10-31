@@ -432,7 +432,7 @@ def test_create_payload_failure_does_not_disclose_traceback_or_path(
 
     response = client.post("/create/", data={"config": CONFIG})
 
-    assert response.status_code == 400
+    assert response.status_code == 500
     assert response.json()["error_id"]
     assert "Traceback" not in response.text
     assert "/private/parser.py" not in response.text

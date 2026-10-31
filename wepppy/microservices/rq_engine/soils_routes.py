@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 from typing import Any
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -38,7 +42,7 @@ from .webhooks import reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -104,7 +108,10 @@ def _to_float(value: Any) -> float:
         if not value:
             raise ValueError("missing")
         return _to_float(value[0])
-    return float(value)
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError("must be finite")
+    return result
 
 
 def _first(value: Any) -> Any:
@@ -171,13 +178,14 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
         async with input_payload(
             request, "soils",
             boolean_fields={"clear_ssurgo_cache_on_rebuild"},
+            blank_false_fields={"clear_ssurgo_cache_on_rebuild"},
         ) as (payload, upload_form):
             webhook_error = reject_unsupported_payload(payload)
             if webhook_error is not None:
                 return webhook_error
             try:
                 initial_sat = _to_float(payload.get("initial_sat"))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 return error_response("initial_sat must be numeric", status_code=400)
 
             soils = Soils.getInstance(wd)
@@ -192,7 +200,7 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
                 try:
                     soil_mode = SoilsMode(int(soil_mode_raw)) if soil_mode_raw is not None else None
                     mode_alias = SoilsMode(int(mode_alias_raw)) if mode_alias_raw is not None else None
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     return error_response("Invalid soil mode", status_code=400)
                 if soil_mode is not None and mode_alias is not None and soil_mode != mode_alias:
                     return error_response(
@@ -213,17 +221,18 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
                         details=f"Unsupported soil builder mode: {requested_mode.value}",
                     )
 
+            disturbed = None
+            sol_ver = None
+            if "disturbed" in soils.mods:
+                disturbed = Disturbed.getInstance(wd)
+                try:
+                    sol_ver = _to_float(payload.get("sol_ver"))
+                except (TypeError, ValueError, OverflowError):
+                    return error_response("sol_ver must be numeric", status_code=400)
+
+
             with input_submission(soils, "soils", runid):
                 await accept_input(soils, "soils", upload_form, (requested_mode if requested_mode is not None else soils.mode))
-                disturbed = None
-                sol_ver = None
-                if "disturbed" in soils.mods:
-                    disturbed = Disturbed.getInstance(wd)
-                    try:
-                        sol_ver = _to_float(payload.get("sol_ver"))
-                    except (TypeError, ValueError):
-                        return error_response("sol_ver must be numeric", status_code=400)
-
                 prep = RedisPrep.getInstance(wd)
                 prep.remove_timestamp(TaskEnum.build_soils)
                 prep.remove_timestamp(TaskEnum.run_geneva)
@@ -269,6 +278,8 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
             exc.__name__ or "Building Soil Failed",
             status_code=400,
         )
+    except RequestPayloadError:
+        raise
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

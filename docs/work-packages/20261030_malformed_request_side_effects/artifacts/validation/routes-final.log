@@ -1,0 +1,375 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/microservices tests/weppcloud
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 4091 items
+
+tests/microservices/test_browse_auth_routes.py ......................... [  0%]
+........................................................................ [  2%]
+...................................                                      [  3%]
+tests/microservices/test_browse_dtale.py ..........                      [  3%]
+tests/microservices/test_browse_report_routes.py ..........              [  3%]
+tests/microservices/test_browse_routes.py ..................             [  4%]
+tests/microservices/test_browse_security.py .............                [  4%]
+tests/microservices/test_creation_idempotency.py .....                   [  4%]
+tests/microservices/test_dedicated_download_service.py ................. [  5%]
+                                                                         [  5%]
+tests/microservices/test_download.py ......                              [  5%]
+tests/microservices/test_dss_preview.py .                                [  5%]
+tests/microservices/test_dtale_freshness.py ......................       [  5%]
+tests/microservices/test_elevationquery.py ....                          [  5%]
+tests/microservices/test_feature_access_data.py ............             [  6%]
+tests/microservices/test_files_routes.py ............................... [  6%]
+................................................................         [  8%]
+tests/microservices/test_malformed_input_persistence.py ssssssss         [  8%]
+tests/microservices/test_malformed_route_matrix.py ..................... [  9%]
+..............................................................           [ 10%]
+tests/microservices/test_parquet_filters.py .......                      [ 10%]
+tests/microservices/test_request_payload_conformance.py ................ [ 11%]
+.................................................................        [ 12%]
+tests/microservices/test_rq_engine_admin_job_routes.py ....              [ 12%]
+tests/microservices/test_rq_engine_ag_fields_routes.py ................. [ 13%]
+.........................................                                [ 14%]
+tests/microservices/test_rq_engine_ash_routes.py ....................... [ 14%]
+...                                                                      [ 14%]
+tests/microservices/test_rq_engine_auth.py ............................. [ 15%]
+...........                                                              [ 15%]
+tests/microservices/test_rq_engine_auth_concurrency_routes.py .......... [ 16%]
+.......                                                                  [ 16%]
+tests/microservices/test_rq_engine_batch_routes.py ..................... [ 16%]
+...                                                                      [ 16%]
+tests/microservices/test_rq_engine_bootstrap_routes.py ................. [ 17%]
+................................                                         [ 18%]
+tests/microservices/test_rq_engine_builder_routes.py ................... [ 18%]
+                                                                         [ 18%]
+tests/microservices/test_rq_engine_catalog_startup.py ...                [ 18%]
+tests/microservices/test_rq_engine_climate_routes.py ................... [ 19%]
+..........                                                               [ 19%]
+tests/microservices/test_rq_engine_culverts.py ......................... [ 19%]
+                                                                         [ 19%]
+tests/microservices/test_rq_engine_debris_flow_routes.py .....           [ 20%]
+tests/microservices/test_rq_engine_dss_export_routes.py ..               [ 20%]
+tests/microservices/test_rq_engine_errors_progress_outputs_routes.py ... [ 20%]
+.........                                                                [ 20%]
+tests/microservices/test_rq_engine_export_routes.py .............        [ 20%]
+tests/microservices/test_rq_engine_features_export_routes.py ........... [ 21%]
+..........                                                               [ 21%]
+tests/microservices/test_rq_engine_fork_archive_routes.py .............. [ 21%]
+.....................................                                    [ 22%]
+tests/microservices/test_rq_engine_geneva_routes.py .........            [ 22%]
+tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py . [ 22%]
+....................                                                     [ 23%]
+tests/microservices/test_rq_engine_jobinfo.py .......................... [ 23%]
+............................................                             [ 24%]
+tests/microservices/test_rq_engine_landuse_routes.py ................... [ 25%]
+.....................................................                    [ 26%]
+tests/microservices/test_rq_engine_landuse_soils_routes.py ...           [ 26%]
+tests/microservices/test_rq_engine_lock_dump_efficiency_guard.py ....    [ 26%]
+tests/microservices/test_rq_engine_migration_routes.py ...........       [ 27%]
+tests/microservices/test_rq_engine_nodir_boundary_helpers.py ........... [ 27%]
+.........                                                                [ 27%]
+tests/microservices/test_rq_engine_omni_routes.py ...................... [ 28%]
+..................................................                       [ 29%]
+tests/microservices/test_rq_engine_openapi_contract.py .............     [ 29%]
+tests/microservices/test_rq_engine_openet_ts_routes.py ..                [ 29%]
+tests/microservices/test_rq_engine_orchestration_read_routes.py ........ [ 29%]
+.........................                                                [ 30%]
+tests/microservices/test_rq_engine_polaris_routes.py ..                  [ 30%]
+tests/microservices/test_rq_engine_postfire_debris_flow.py ............. [ 30%]
+......................                                                   [ 31%]
+tests/microservices/test_rq_engine_project_config_update_routes.py ..... [ 31%]
+...........                                                              [ 31%]
+tests/microservices/test_rq_engine_project_routes.py ................... [ 32%]
+........................................................................ [ 34%]
+......................                                                   [ 34%]
+tests/microservices/test_rq_engine_rap_ts_routes.py ..                   [ 34%]
+tests/microservices/test_rq_engine_rhem_routes.py ............           [ 35%]
+tests/microservices/test_rq_engine_roads_routes.py ...                   [ 35%]
+tests/microservices/test_rq_engine_run_sync_routes.py .......            [ 35%]
+tests/microservices/test_rq_engine_rusle_routes.py ..                    [ 35%]
+tests/microservices/test_rq_engine_schema_defaults_routes.py ........... [ 35%]
+......................................................................   [ 37%]
+tests/microservices/test_rq_engine_session_routes.py ................... [ 37%]
+........................................                                 [ 38%]
+tests/microservices/test_rq_engine_setup_discovery_routes.py ........... [ 38%]
+.................                                                        [ 39%]
+tests/microservices/test_rq_engine_soils_routes.py ...........           [ 39%]
+tests/microservices/test_rq_engine_treatments_routes.py ........         [ 39%]
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py ....... [ 40%]
+....                                                                     [ 40%]
+tests/microservices/test_rq_engine_upload_climate_routes.py ............ [ 40%]
+...                                                                      [ 40%]
+tests/microservices/test_rq_engine_upload_disturbed_routes.py .......... [ 40%]
+                                                                         [ 40%]
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py ........... [ 41%]
+......                                                                   [ 41%]
+tests/microservices/test_rq_engine_watershed_routes.py ................. [ 41%]
+........................................                                 [ 42%]
+tests/microservices/test_rq_engine_webhooks.py .........s.ss..           [ 42%]
+tests/microservices/test_rq_engine_wepp_routes.py ...................... [ 43%]
+................................................................         [ 45%]
+tests/microservices/test_shared_flask_context.py ...                     [ 45%]
+tests/microservices/test_single_input_uploads.py ........                [ 45%]
+tests/microservices/test_treatments_upload_persistence.py .              [ 45%]
+tests/microservices/test_upload_boundary_helpers.py ...........          [ 45%]
+tests/microservices/test_wepp_admission_persistence.py sssssssssssssssss [ 46%]
+ssssssssssssssssssssssssssssssssssssssssssssss                           [ 47%]
+tests/microservices/test_wepp_advanced_options_contract.py .             [ 47%]
+tests/microservices/test_weppcloudr_control_plane_adapters.py ....       [ 47%]
+tests/weppcloud/bootstrap/test_enable_jobs.py .........                  [ 47%]
+tests/weppcloud/bootstrap/test_pre_receive.py ..........                 [ 47%]
+tests/weppcloud/controllers_js/test_status_stream_js.py .                [ 47%]
+tests/weppcloud/controllers_js/test_unitizer_client_js.py ..             [ 47%]
+tests/weppcloud/controllers_js/test_unitizer_map_builder.py ........     [ 47%]
+tests/weppcloud/routes/test_admin_usermod_contract.py .............      [ 48%]
+tests/weppcloud/routes/test_agent_payload_routes.py ..............       [ 48%]
+tests/weppcloud/routes/test_archive_dashboard_route.py ...               [ 48%]
+tests/weppcloud/routes/test_batch_runner_create_route.py ..              [ 48%]
+tests/weppcloud/routes/test_batch_runner_snapshot.py ..                  [ 48%]
+tests/weppcloud/routes/test_blueprint_registration.py .                  [ 48%]
+tests/weppcloud/routes/test_bootstrap_auth_integration.py .....          [ 48%]
+tests/weppcloud/routes/test_bootstrap_bp.py ..................           [ 49%]
+tests/weppcloud/routes/test_cap_verify.py ..                             [ 49%]
+tests/weppcloud/routes/test_climate_bp.py .............................. [ 50%]
+....                                                                     [ 50%]
+tests/weppcloud/routes/test_climate_report_template.py ..                [ 50%]
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py ...... [ 50%]
+.................                                                        [ 50%]
+tests/weppcloud/routes/test_command_bar_mcp_token.py .......             [ 51%]
+tests/weppcloud/routes/test_config_builder_ui.py ........                [ 51%]
+tests/weppcloud/routes/test_csrf_rollout.py ...........                  [ 51%]
+tests/weppcloud/routes/test_debris_flow_bp.py .                          [ 51%]
+tests/weppcloud/routes/test_deval_loading.py ......................      [ 52%]
+tests/weppcloud/routes/test_diagnostics_page.py .......                  [ 52%]
+tests/weppcloud/routes/test_diff_bp.py ......                            [ 52%]
+tests/weppcloud/routes/test_disturbed_bp.py ............................ [ 53%]
+........................                                                 [ 53%]
+tests/weppcloud/routes/test_disturbed_panel_policy.py .................. [ 54%]
+....                                                                     [ 54%]
+tests/weppcloud/routes/test_exception_logging_routes.py .                [ 54%]
+tests/weppcloud/routes/test_feature_access_routes.py ................... [ 54%]
+..............................                                           [ 55%]
+tests/weppcloud/routes/test_feature_registry_runtime.py ................ [ 55%]
+........................................................................ [ 57%]
+..........................................................               [ 59%]
+tests/weppcloud/routes/test_fork_console_route.py ...................... [ 59%]
+........................................................................ [ 61%]
+...........                                                              [ 61%]
+tests/weppcloud/routes/test_geneva_bp.py ..................              [ 62%]
+tests/weppcloud/routes/test_geneva_wp08_routes.py ..............         [ 62%]
+tests/weppcloud/routes/test_gl_dashboard_batch_route.py ...              [ 62%]
+tests/weppcloud/routes/test_gl_dashboard_flow_duration.py .............. [ 62%]
+....................                                                     [ 63%]
+tests/weppcloud/routes/test_gl_dashboard_route.py ...................... [ 63%]
+..                                                                       [ 63%]
+tests/weppcloud/routes/test_interchange_bp.py ....                       [ 63%]
+tests/weppcloud/routes/test_landing_template.py .                        [ 63%]
+tests/weppcloud/routes/test_landuse_bp.py ......................         [ 64%]
+tests/weppcloud/routes/test_observed_bp.py ......                        [ 64%]
+tests/weppcloud/routes/test_omni_bp.py ...                               [ 64%]
+tests/weppcloud/routes/test_omni_bp_routes.py ..............             [ 65%]
+tests/weppcloud/routes/test_optional_payload_persistence.py .....        [ 65%]
+tests/weppcloud/routes/test_path_ce_bp.py ................               [ 65%]
+tests/weppcloud/routes/test_postfire_report_bp.py ...................... [ 66%]
+....                                                                     [ 66%]
+tests/weppcloud/routes/test_poweruser_onboarding_presentation.py ....... [ 66%]
+..............                                                           [ 66%]
+tests/weppcloud/routes/test_project_bp.py .............................. [ 67%]
+................................                                         [ 68%]
+tests/weppcloud/routes/test_pure_controls_render.py .................... [ 68%]
+........................................................................ [ 70%]
+........................................................................ [ 72%]
+............................................................             [ 73%]
+tests/weppcloud/routes/test_rangeland_cover_bp.py ........               [ 73%]
+tests/weppcloud/routes/test_readme_md.py ............................... [ 74%]
+........                                                                 [ 74%]
+tests/weppcloud/routes/test_recorder_bp.py .....                         [ 74%]
+tests/weppcloud/routes/test_return_period_scenarios.py ................. [ 75%]
+.....                                                                    [ 75%]
+tests/weppcloud/routes/test_rhem_bp.py ......                            [ 75%]
+tests/weppcloud/routes/test_roads_bp.py .........................        [ 76%]
+tests/weppcloud/routes/test_rq_engine_token_api.py ..................... [ 76%]
+......................................                                   [ 77%]
+tests/weppcloud/routes/test_rq_info_details.py ..........                [ 77%]
+tests/weppcloud/routes/test_rq_job_dashboard_template.py .....           [ 78%]
+tests/weppcloud/routes/test_run_0_builder_maturity.py .......            [ 78%]
+tests/weppcloud/routes/test_run_0_create_token.py ......                 [ 78%]
+tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py ................. [ 78%]
+...........                                                              [ 79%]
+tests/weppcloud/routes/test_run_0_openet_admin_gate.py ................. [ 79%]
+.............................................................            [ 81%]
+tests/weppcloud/routes/test_run_config.py ......................         [ 81%]
+tests/weppcloud/routes/test_run_context.py ...                           [ 81%]
+tests/weppcloud/routes/test_run_sync_dashboard_route.py ..               [ 81%]
+tests/weppcloud/routes/test_runs_catalog_contract.py ...                 [ 81%]
+tests/weppcloud/routes/test_security_auth_forms.py ...........           [ 82%]
+tests/weppcloud/routes/test_security_logging_role_cache.py .......       [ 82%]
+tests/weppcloud/routes/test_security_oauth_callback.py .                 [ 82%]
+tests/weppcloud/routes/test_security_oauth_routes.py ................... [ 82%]
+.........                                                                [ 82%]
+tests/weppcloud/routes/test_soils_bp.py .......                          [ 83%]
+tests/weppcloud/routes/test_storm_event_analyzer_route.py ...            [ 83%]
+tests/weppcloud/routes/test_team_bp.py .........                         [ 83%]
+tests/weppcloud/routes/test_test_bp.py ....                              [ 83%]
+tests/weppcloud/routes/test_treatments_bp.py ......                      [ 83%]
+tests/weppcloud/routes/test_ui_showcase_bp.py ......                     [ 83%]
+tests/weppcloud/routes/test_unitizer_bp.py ....                          [ 83%]
+tests/weppcloud/routes/test_user_meta_boundaries.py ..........           [ 84%]
+tests/weppcloud/routes/test_user_profile_contract.py ....                [ 84%]
+tests/weppcloud/routes/test_user_profile_token.py ...................... [ 84%]
+..                                                                       [ 84%]
+tests/weppcloud/routes/test_user_runs_admin_scope.py ...............     [ 85%]
+tests/weppcloud/routes/test_usersum_bp.py .............................. [ 85%]
+................................                                         [ 86%]
+tests/weppcloud/routes/test_usersum_docs_contracts.py ....               [ 86%]
+tests/weppcloud/routes/test_usersum_docs_index.py ..                     [ 86%]
+tests/weppcloud/routes/test_watar_bp.py .....                            [ 86%]
+tests/weppcloud/routes/test_watershed_channel_report.py ....             [ 87%]
+tests/weppcloud/routes/test_wepp_bp.py ................................. [ 87%]
+...............................................                          [ 88%]
+tests/weppcloud/routes/test_weppcloud_site_interfaces_route.py ......    [ 89%]
+tests/weppcloud/routes/test_weppcloudr_proxy_security.py ......          [ 89%]
+tests/weppcloud/test_auth_cap_captcha.py ...........                     [ 89%]
+tests/weppcloud/test_auth_remember_cookie.py ..........                  [ 89%]
+tests/weppcloud/test_auth_tokens.py ............                         [ 90%]
+tests/weppcloud/test_batch_runner_endpoints.py .............             [ 90%]
+tests/weppcloud/test_combined_viewer_generator.py ..                     [ 90%]
+tests/weppcloud/test_combined_viewer_preparation.py .........            [ 90%]
+tests/weppcloud/test_compile_dot_logs.py .............................   [ 91%]
+tests/weppcloud/test_config_logging.py ...                               [ 91%]
+tests/weppcloud/test_configuration.py .................................. [ 92%]
+                                                                         [ 92%]
+tests/weppcloud/test_context_processors_static_url.py ...                [ 92%]
+tests/weppcloud/test_controllers_gl_build_id_global.py .                 [ 92%]
+tests/weppcloud/test_feature_access.py ................................. [ 93%]
+...................                                                      [ 93%]
+tests/weppcloud/test_fork_console_template_contract.py ...               [ 93%]
+tests/weppcloud/test_gl_dashboard_et_sql.py .........                    [ 93%]
+tests/weppcloud/test_gl_dashboard_template.py .                          [ 93%]
+tests/weppcloud/test_jinja_filters.py ...                                [ 94%]
+tests/weppcloud/test_omni_report_templates.py ...                        [ 94%]
+tests/weppcloud/test_registration_name_validation.py ....                [ 94%]
+tests/weppcloud/test_run_catalog_cli.py ..                               [ 94%]
+tests/weppcloud/test_run_catalog_extractor.py .......................... [ 94%]
+                                                                         [ 94%]
+tests/weppcloud/test_run_catalog_postgres.py ........................    [ 95%]
+tests/weppcloud/test_run_catalog_reader.py ........                      [ 95%]
+tests/weppcloud/test_security_email_templates.py ..                      [ 95%]
+tests/weppcloud/test_session_cookie_migration.py .................       [ 96%]
+tests/weppcloud/test_stale_controllers_gl_template_wiring.py ........... [ 96%]
+................                                                         [ 96%]
+tests/weppcloud/test_ui_foundation_css.py ...                            [ 96%]
+tests/weppcloud/test_user_preferences.py ............................... [ 97%]
+...........                                                              [ 97%]
+tests/weppcloud/test_user_preferences_migration.py .                     [ 97%]
+tests/weppcloud/test_user_preferences_postgres.py ........               [ 98%]
+tests/weppcloud/test_usersum_template_wiring.py ...........              [ 98%]
+tests/weppcloud/test_watershed_sub_intersection.py .                     [ 98%]
+tests/weppcloud/test_watershed_terrain_processor_api.py .....            [ 98%]
+tests/weppcloud/utils/test_assets_controllers_gl_build_id.py .........   [ 98%]
+tests/weppcloud/utils/test_helpers_authorize.py ........                 [ 98%]
+tests/weppcloud/utils/test_helpers_error_responses.py .....              [ 99%]
+tests/weppcloud/utils/test_helpers_paths.py ..................           [ 99%]
+tests/weppcloud/utils/test_helpers_url_for_run.py .....                  [ 99%]
+tests/weppcloud/utils/test_run_ttl.py ......                             [ 99%]
+tests/weppcloud/utils/test_runid.py ...                                  [ 99%]
+tests/weppcloud/utils/test_uploads.py ......                             [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+tests/weppcloud/routes/test_security_auth_forms.py::test_real_security_routes_require_csrf_before_cap[/login-payload0]
+tests/weppcloud/routes/test_security_auth_forms.py::test_real_security_routes_require_csrf_before_cap[/register-payload1]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/microservices/test_files_routes.py::test_files_pattern_literal_underscore_percent
+tests/microservices/test_files_routes.py::test_files_sort_stability_matches_manifest
+tests/microservices/test_files_routes.py::test_files_manifest_cached_flag
+tests/microservices/test_files_routes.py::test_files_meta_skips_cached_flag
+tests/microservices/test_files_routes.py::test_files_manifest_pattern_filtering
+tests/microservices/test_files_routes.py::test_files_manifest_stale_cache_is_ignored
+tests/microservices/test_files_routes.py::test_files_dotfiles_hidden_by_default
+  /workdir/wepppy/wepppy/microservices/browse/listing.py:252: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    generated_at = datetime.utcnow().isoformat()
+
+tests/microservices/test_rq_engine_bootstrap_routes.py::test_bootstrap_checkout_invalid_json_payload_rejected_before_defaults
+tests/microservices/test_rq_engine_features_export_routes.py::test_features_export_submit_non_json_returns_415
+tests/microservices/test_rq_engine_jobinfo.py::test_jobinfo_batch_uses_query_args_when_payload_invalid
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_dry_run_invalid_json_returns_400
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_issues_with_cookie
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_allows_admin_non_owner_without_cached_session_roles
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_private_run_requires_authenticated_cookie_session
+tests/microservices/test_rq_engine_session_routes.py::test_session_token_stale_remember_cookie_avoids_destructive_recovery_guidance
+  /opt/venv/lib/python3.12/site-packages/httpx/_client.py:822: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    warnings.warn(message, DeprecationWarning)
+
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pre_receive_logs_push_for_multi_ofe_slp
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pre_receive_new_ref_logs_only_introduced_commits
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=919711) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/weppcloud/routes/test_climate_bp.py::test_climate_catalog_denies_before_controller_or_registry_access
+tests/weppcloud/routes/test_exception_logging_routes.py::test_logged_blueprint_logs_route_exception
+tests/weppcloud/routes/test_fork_console_route.py::test_fork_destination_readiness_http_route_enforces_authorization
+tests/weppcloud/routes/test_project_bp.py::test_set_public_requires_authenticated_user
+tests/weppcloud/routes/test_project_bp.py::test_set_readonly_requires_authenticated_user
+tests/weppcloud/routes/test_user_profile_token.py::test_run_token_mint_preserves_authorize_forbidden
+tests/weppcloud/routes/test_user_profile_token.py::test_run_token_mint_preserves_authorize_forbidden
+  /workdir/wepppy/wepppy/weppcloud/routes/_common.py:111: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/weppcloud/routes/test_user_runs_admin_scope.py: 14 warnings
+  /workdir/wepppy/tests/weppcloud/routes/test_user_runs_admin_scope.py:128: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/weppcloud/routes/test_wepp_bp.py: 14 warnings
+  /workdir/wepppy/wepppy/weppcloud/routes/nodb_api/wepp_bp.py:317: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+
+tests/weppcloud/test_auth_remember_cookie.py::test_opted_in_cookie_is_secure_and_refreshes
+tests/weppcloud/test_auth_remember_cookie.py::test_opted_in_cookie_is_secure_and_refreshes
+tests/weppcloud/test_auth_remember_cookie.py::test_remember_cookie_restores_identity_without_session
+tests/weppcloud/test_auth_remember_cookie.py::test_remember_cookie_restores_identity_without_session
+tests/weppcloud/test_auth_remember_cookie.py::test_opt_out_deletes_preexisting_remember_cookie
+tests/weppcloud/test_auth_remember_cookie.py::test_real_login_opt_out_clears_cookie_before_form_short_circuit
+tests/weppcloud/test_auth_remember_cookie.py::test_logout_deletes_remember_cookie
+tests/weppcloud/test_auth_remember_cookie.py::test_security_logout_deletes_session_and_remember_cookies
+tests/weppcloud/test_auth_remember_cookie.py::test_rotating_user_identity_invalidates_copied_remember_cookie
+  /opt/venv/lib/python3.12/site-packages/flask_login/login_manager.py:488: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires = datetime.utcnow() + duration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+========== 4017 passed, 74 skipped, 74 warnings in 204.31s (0:03:24) ===========

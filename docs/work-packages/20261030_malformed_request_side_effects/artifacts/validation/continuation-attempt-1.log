@@ -1,0 +1,207 @@
+INFO:wctl2:docker compose exec weppcloud env PYTHONPATH=/workdir/wepppy/.pytest_cache:/workdir/wepppy 'MRS_CONTINUE_FROM=tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_fresh_basin_run_prepares_sources_and_reuses_them[western-key7]' /opt/venv/bin/python -m pytest -p mrs_unique_tmp tests --maxfail=1 -rs
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 12819 items / 4241 deselected / 1 skipped / 8578 selected
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py ................ [  0%]
+....................................................                     [  0%]
+tests/nodb/mods/test_postfire_debris_flow_soil_thickness.py ............ [  0%]
+.......................                                                  [  1%]
+tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py ........ [  1%]
+......                                                                   [  1%]
+tests/nodb/mods/test_postfire_debris_flow_source_preparation.py ........ [  1%]
+........                                                                 [  1%]
+tests/nodb/mods/test_postfire_debris_flow_source_transport.py .......... [  1%]
+..                                                                       [  1%]
+tests/nodb/mods/test_postfire_debris_flow_staley2017.py ................ [  1%]
+........................................................................ [  2%]
+.........................................................                [  3%]
+tests/nodb/mods/test_postfire_debris_flow_wallow_fixtures.py .....       [  3%]
+tests/nodb/mods/test_rap_endpoint_url.py .                               [  3%]
+tests/nodb/mods/test_rap_ts_cover_transform.py ...                       [  3%]
+tests/nodb/mods/test_roads_controller.py ............................... [  3%]
+..................                                                       [  4%]
+tests/nodb/mods/test_roads_detachment_view.py ..................         [  4%]
+tests/nodb/mods/test_roads_monotonic_segments.py ...............         [  4%]
+tests/nodb/mods/test_roads_segment_loss_summary.py ..................... [  4%]
+........                                                                 [  4%]
+tests/nodb/mods/test_rusle_c_formula.py ......                           [  4%]
+tests/nodb/mods/test_rusle_c_integration.py .................            [  5%]
+tests/nodb/mods/test_rusle_c_lookup.py ............                      [  5%]
+tests/nodb/mods/test_rusle_controller.py ...........                     [  5%]
+tests/nodb/mods/test_rusle_k_compare.py ..                               [  5%]
+tests/nodb/mods/test_rusle_k_epic.py ...                                 [  5%]
+tests/nodb/mods/test_rusle_k_integration.py ............                 [  5%]
+tests/nodb/mods/test_rusle_k_nomograph.py .....                          [  5%]
+tests/nodb/mods/test_rusle_k_reference_harness.py ....                   [  5%]
+tests/nodb/mods/test_rusle_ls_integration.py ...                         [  5%]
+tests/nodb/mods/test_rusle_r_modes.py ......                             [  5%]
+tests/nodb/mods/test_swat_interchange.py ........                        [  5%]
+tests/nodb/mods/test_treatments_build.py ...F
+
+=================================== FAILURES ===================================
+____ test_validate_map_uses_valid_pixels_only_without_global_mode_fallback _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7c209c41f500>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-165/mrs-63f848369f4c43188a8448a8a9ad6e4e0')
+
+    @pytest.mark.unit
+    def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        treatments_dir = tmp_path / "treatments"
+        treatments_dir.mkdir(parents=True)
+        source_map = treatments_dir / "source.tif"
+        source_map.write_text("placeholder", encoding="ascii")
+
+        subwta_path = tmp_path / "subwta.tif"
+        subwta_path.write_text("placeholder", encoding="ascii")
+
+        class _DummyDs:
+            @staticmethod
+            def GetProjection() -> str:
+                return "EPSG:32611"
+
+        class _DummyLanduse:
+            @staticmethod
+            def getInstance(_wd):
+                return _DummyLanduse()
+
+            @staticmethod
+            def get_mapping_dict():
+                return {
+                    "140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True},
+                    "41": {"DisturbedClass": "forest", "IsTreatment": False},
+                }
+
+        class _DummyWatershed:
+            def __init__(self, subwta: str) -> None:
+                self.subwta = subwta
+
+        monkeypatch.setattr(treatments_module.gdal, "Open", lambda _path: _DummyDs())
+        monkeypatch.setattr(treatments_module, "validate_srs", lambda _srs: True)
+        monkeypatch.setattr(
+            treatments_module,
+            "raster_stacker",
+            lambda _src, _subwta, dst: Path(dst).write_text("stacked", encoding="ascii"),
+        )
+        monkeypatch.setattr(
+            treatments_module,
+            "count_intersecting_raster_key_pairs",
+            # 101 has valid treatment pixels, 102 is intentionally absent (nodata-only/off-map).
+            lambda **_kwargs: {"101": {"140": 12}},
+        )
+        monkeypatch.setattr(
+            treatments_module,
+            "Watershed",
+            type(
+                "_WatershedProxy",
+                (),
+                {"getInstance": staticmethod(lambda _wd: _DummyWatershed(str(subwta_path)))},
+            ),
+        )
+        monkeypatch.setattr(treatments_module, "Landuse", _DummyLanduse)
+        monkeypatch.setattr(
+            treatments_module.RedisPrep,
+            "getInstance",
+            staticmethod(lambda _wd: (_ for _ in ()).throw(FileNotFoundError())),
+        )
+
+        treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+        treatments.config_get_str = lambda section, option, default=None: default
+        treatments.wd = str(tmp_path)
+        treatments.logger = logging.getLogger("test.treatments.validate")
+        treatments._treatments_domlc_d = {}
+        treatments._treatments = {}
+
+>       treatments.validate(str(source_map))
+
+tests/nodb/mods/test_treatments_build.py:361:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+wepppy/nodb/mods/treatments/treatments.py:174: in validate
+    self.validate_upload_raster(treatment_path)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = '/tmp/pytest-of-unknown/pytest-165/mrs-63f848369f4c43188a8448a8a9ad6e4e0/treatments/source.tif'
+
+    @staticmethod
+    def validate_upload_raster(path):
+        """Check supplied raster content without publishing files or controller state."""
+        try:
+            dataset = gdal.Open(str(path))
+        except RuntimeError as exc:
+            raise ValueError("Invalid treatments raster") from exc
+        if dataset is None:
+            raise ValueError("Invalid treatments raster")
+        try:
+            try:
+>               dataset.GetRasterBand(1).Checksum()
+                ^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: '_DummyDs' object has no attribute 'GetRasterBand'
+
+wepppy/nodb/mods/treatments/treatments.py:145: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py: 11 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1580782) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:585: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:592: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_run_at = datetime.utcnow().isoformat()
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_status_partial_from_skipped
+tests/nodb/mods/test_swat_interchange.py::test_interchange_error_clears_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_failed_status_from_version_manifest
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback_skips_historical_run
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:748: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_swat_interchange_at = datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/sbs_map/test_sbs_map_large_fixtures.py:17: Set SBS_MAP_LARGE_FIXTURES=1 to run large SBS map fixture tests.
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+= 1 failed, 502 passed, 1 skipped, 4241 deselected, 29 warnings in 545.21s (0:09:05) =

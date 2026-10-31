@@ -1,0 +1,97 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/routes -k 'malformed_payload_route_matrix or malformed_body_before' -rP
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1689 items / 1671 deselected / 18 selected
+
+tests/weppcloud/routes/test_bootstrap_bp.py ..                           [ 11%]
+tests/weppcloud/routes/test_climate_bp.py .                              [ 16%]
+tests/weppcloud/routes/test_disturbed_bp.py .                            [ 22%]
+tests/weppcloud/routes/test_interchange_bp.py .                          [ 27%]
+tests/weppcloud/routes/test_observed_bp.py .                             [ 33%]
+tests/weppcloud/routes/test_omni_bp_routes.py .                          [ 38%]
+tests/weppcloud/routes/test_project_bp.py .                              [ 44%]
+tests/weppcloud/routes/test_rangeland_cover_bp.py .                      [ 50%]
+tests/weppcloud/routes/test_recorder_bp.py ..                            [ 61%]
+tests/weppcloud/routes/test_roads_bp.py .                                [ 66%]
+tests/weppcloud/routes/test_soils_bp.py .                                [ 72%]
+tests/weppcloud/routes/test_test_bp.py .                                 [ 77%]
+tests/weppcloud/routes/test_treatments_bp.py .                           [ 83%]
+tests/weppcloud/routes/test_unitizer_bp.py .                             [ 88%]
+tests/weppcloud/routes/test_watar_bp.py .                                [ 94%]
+tests/weppcloud/routes/test_wepp_bp.py .                                 [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/main/tasks/set_climatestation_mode/', '/runs/test-run/main/tasks/set_climatestation/', '/runs/test-run/main/tasks/set_climate_mode/', '/runs/test-run/main/tasks/set_climate_spatialmode/', '/runs/test-run/main/tasks/set_use_gridmet_wind_when_applicable/', '/runs/test-run/main/tasks/set_use_gridmet_wind_when_applicable', '/runs/test-run/main/tasks/set_adjust_mx_pt5/', '/runs/test-run/main/tasks/set_adjust_mx_pt5', '/runs/test-run/main/tasks/set_silent_pass_observed_quality_guard/', '/runs/test-run/main/tasks/set_silent_pass_observed_quality_guard']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/set_lookup_variant', '/runs/test-run/cfg/tasks/modify_burn_class', '/runs/test-run/cfg/tasks/modify_color_map', '/runs/test-run/cfg/tasks/set_firedate/', '/runs/test-run/cfg/tasks/build_uniform_sbs/test', '/runs/test-run/cfg/tasks/build_uniform_sbs']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/interchange/migrate']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/demo/live/tasks/run_model_fit/', '/runs/demo/live/tasks/run_model_fit']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/run-123/cfg/api/omni/delete_scenarios']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/adduser/', '/runs/test-run/cfg/tasks/removeuser/', '/runs/test-run/cfg/tasks/setname/', '/runs/test-run/cfg/tasks/setscenario/', '/runs/test-run/cfg/tasks/set_public', '/runs/test-run/cfg/tasks/set_ttl_disabled', '/runs/test-run/cfg/tasks/set_readonly', '/runs/test-run/cfg/tasks/set_mod/', '/runs/test-run/cfg/tasks/set_mod']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/query/rangeland_cover/current_cover_summary/', '/runs/test-run/cfg/tasks/set_rangeland_cover_mode/', '/runs/test-run/cfg/tasks/modify_rangeland_cover/', '/runs/test-run/cfg/tasks/build_rangeland_cover/']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/roads/set_params/', '/runs/test-run/cfg/tasks/roads/set_params', '/runs/test-run/cfg/api/roads/config']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/set_soil_mode/', '/runs/test-run/cfg/tasks/set_soils_ksflag/', '/runs/test-run/cfg/tasks/set_soils_ksflag', '/runs/test-run/cfg/tasks/set_disturbed_sol_ver/', '/runs/test-run/cfg/tasks/set_disturbed_sol_ver']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/demo-run/cfg/tasks/set_treatments_mode/']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/set_unit_preferences/', '/runs/test-run/cfg/report/tasks/set_unit_preferences/']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/set_ash_wind_transport/', '/runs/test-run/cfg/tasks/set_ash_wind_transport', '/runs/test-run/cfg/report/ash_contaminant/', '/runs/test-run/cfg/report/ash_contaminant']
+_____________________ test_malformed_payload_route_matrix ______________________
+----------------------------- Captured stdout call -----------------------------
+Covered malformed Flask routes: ['/runs/test-run/cfg/tasks/set_run_wepp_routine/', '/runs/test-run/cfg/tasks/set_run_wepp_routine']
+=============== 18 passed, 1671 deselected, 8 warnings in 14.06s ===============

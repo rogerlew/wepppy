@@ -11,6 +11,9 @@ from typing import Any, Callable, Sequence
 from uuid import uuid4
 
 import redis
+from .payloads import request_form, PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from rq import Queue
@@ -70,7 +73,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -135,6 +138,8 @@ def _authorize(request: Request, runid: str, scopes: Sequence[str]) -> Response 
 
 
 def _extract_upload(form: Any, key: str) -> UploadFile | None:
+    if len(form.getlist(key)) > 1:
+        raise RequestPayloadError()
     upload = form.get(key)
     return upload if isinstance(upload, UploadFile) else None
 
@@ -607,8 +612,8 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
         conflict = _active_job_conflict_response(wd)
         if conflict is not None:
             return conflict
+        form = await request_form(request)
         ag_fields = AgFields.getInstance(wd)
-        form = await request.form()
         upload = _extract_upload(form, "field_boundaries")
         if upload is None or not upload.filename:
             return error_response("field_boundaries upload is required", status_code=400, code="missing_upload_file")
@@ -656,6 +661,8 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
         return _upload_error_response(exc)
     except (FileNotFoundError, OSError, ValueError) as exc:
         return error_response(str(exc), status_code=400)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields boundary upload failed", extra={"runid": runid, "config": config})
         return error_response("Field boundary upload failed", status_code=500)
@@ -708,6 +715,8 @@ async def confirm_schema(runid: str, config: str, request: Request) -> JSONRespo
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields schema confirmation failed", extra={"runid": runid, "config": config})
         return error_response("Schema confirmation failed", status_code=500)
@@ -760,6 +769,8 @@ async def build_subfields(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except AgFieldsJobConflict as exc:
         return error_response(str(exc), status_code=409, code="agfields_job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields build enqueue failed", extra={"runid": runid, "config": config})
         return error_response("Could not enqueue sub-field build", status_code=500)
@@ -793,8 +804,8 @@ async def upload_plant_database(runid: str, config: str, request: Request) -> JS
         return webhook_error
     try:
         wd = get_wd(runid)
+        form = await request_form(request)
         ag_fields = AgFields.getInstance(wd)
-        form = await request.form()
         upload = _extract_upload(form, "plant_database")
         if upload is None or not upload.filename:
             return error_response("plant_database upload is required", status_code=400, code="missing_upload_file")
@@ -839,6 +850,8 @@ async def upload_plant_database(runid: str, config: str, request: Request) -> JS
     except OSError:
         logger.exception("rq-engine AgFields plant database save failed", extra={"runid": runid, "config": config})
         return error_response("Could not save plant database archive", status_code=500)
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields plant database enqueue failed", extra={"runid": runid, "config": config})
         return error_response("Could not enqueue plant database processing", status_code=500)
@@ -1097,6 +1110,8 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response(str(exc), status_code=400)
     except AgFieldsJobConflict as exc:
         return error_response(str(exc), status_code=409, code="agfields_job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields WEPP enqueue failed", extra={"runid": runid, "config": config})
         return error_response("Could not enqueue AgFields WEPP", status_code=500)
@@ -1164,6 +1179,8 @@ async def run_watershed(runid: str, config: str, request: Request) -> JSONRespon
         return error_response(str(exc), status_code=400)
     except AgFieldsJobConflict as exc:
         return error_response(str(exc), status_code=409, code="agfields_job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception(
             "rq-engine AgFields watershed enqueue failed",
@@ -1229,6 +1246,8 @@ async def clear_watershed(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except AgFieldsNoDbLockedException as exc:
         return error_response(str(exc), status_code=409, code="agfields_job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception(
             "rq-engine AgFields watershed clear failed",
@@ -1263,9 +1282,12 @@ async def clear_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         conflict = _active_job_conflict_response(wd)
         if conflict is not None:
             return conflict
+        await parse_request_payload(request)
         AgFields.getInstance(wd).clear_ag_field_wepp_artifacts()
         _invalidate_ag_fields_preflight(wd)
         return JSONResponse({"message": "AgFields WEPP runs and outputs cleared."})
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields clear failed", extra={"runid": runid, "config": config})
         return error_response("Could not clear AgFields WEPP artifacts", status_code=500)

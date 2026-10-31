@@ -10,6 +10,8 @@ from collections import deque
 from collections.abc import Mapping
 from typing import Any
 
+from .payloads import PayloadRoute
+
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 
@@ -33,7 +35,7 @@ from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 POLL_SCOPE = "rq:status"
 CANCELJOB_SCOPES = ("rq:status", "culvert:batch:submit")

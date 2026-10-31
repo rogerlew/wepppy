@@ -6,13 +6,31 @@ from typing import Any, Callable, Optional, Sequence
 from fastapi.responses import JSONResponse
 from starlette.datastructures import UploadFile
 
-from wepppy.microservices.upload_boundary import UploadBoundaryError, save_upload_from_stream
+from wepppy.microservices.upload_boundary import (UploadBoundaryError, save_upload_from_stream, prepare_filename, enforce_extension)
 
 from .responses import error_response
 
 
 class UploadError(UploadBoundaryError):
     """Raised when an upload validation or post-save check fails."""
+
+
+def validate_upload_file(upload: UploadFile, *, allowed_extensions: Sequence[str], max_bytes: int | None = None) -> None:
+    """Validate a completed transport spool before changing any project state."""
+    try:
+        filename = prepare_filename(upload.filename)
+        enforce_extension(filename, allowed_extensions)
+        stream = upload.file
+        position = stream.tell()
+        try:
+            stream.seek(0, 2)
+            size = stream.tell()
+        finally:
+            stream.seek(position)
+        if max_bytes is not None and size > max_bytes:
+            raise UploadBoundaryError("File exceeds maximum allowed size", status_code=413)
+    except UploadBoundaryError as exc:
+        raise UploadError(str(exc), status_code=exc.status_code) from exc
 
 
 def save_upload_file(
@@ -83,6 +101,7 @@ def upload_failure(error: str, status: int = 400, **extras: Any) -> JSONResponse
 __all__ = [
     "UploadError",
     "save_upload_file",
+    "validate_upload_file",
     "upload_failure",
     "upload_success",
 ]

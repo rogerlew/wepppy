@@ -20,6 +20,8 @@ from wepppy.rq.webhook_http import InvalidDestination, destination
 from wepppy.rq.webhook_tracking import AdmissionError, WebhookStore, bounded_root, encode
 from wepppy.rq import webhook_hooks, webhook_policy
 from .responses import error_response
+from .payloads import request_payload, payload_error_response
+from wepppy.request_payload import RequestPayloadError
 
 SUPPORTED = frozenset({'run-wepp', 'run-wepp-watershed', 'prep-wepp-watershed', 'culverts-wepp-batch'})
 
@@ -45,31 +47,16 @@ def submission_boundary(function):
 
 
 async def request_options(request, *, operation: str):
-    if 'application/json' in request.headers.get('content-type', ''):
-        try:
-            payload = await request.json()
-        except (ValueError, UnicodeError):
-            return None
-        return validate_option(payload, request.headers, operation=operation) if isinstance(payload, dict) else None
-    payload = await request.form()
+    payload = await request_payload(request)
     return validate_option(payload, request.headers, operation=operation)
 
 
 async def reject_unsupported(request) -> JSONResponse | None:
-    """Run after the owning route's auth block, before its first mutation."""
-    headers = getattr(request, 'headers', {})
-    content_type = headers.get('content-type', '').split(';', 1)[0].lower()
-    if not content_type and headers.get('content-length', '0') == '0':
-        return None
+    """Validate transport after auth, including body-optional submission routes."""
     try:
-        if content_type in {'application/json', ''}:
-            payload = await request.json()
-        elif content_type in {'multipart/form-data', 'application/x-www-form-urlencoded'}:
-            payload = await request.form()
-        else:
-            return None
-    except (ValueError, UnicodeError, HTTPException):
-        return None  # The owning parser retains its existing malformed-body policy.
+        payload = await request_payload(request)
+    except RequestPayloadError as exc:
+        return payload_error_response(exc)
     return reject_unsupported_payload(payload)
 
 

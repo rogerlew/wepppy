@@ -1,6 +1,6 @@
 # Mutation request payload contract
 
-Status: MRS-01 accepted checkpoint, 2026-10-30; implementation conformance pending.
+Status: MRS-01 accepted contract, 2026-10-30; local implementation evidence in the MRS-01 work package.
 Operator authorizes rejecting malformed requests before side effects while
 preserving intentional empty/default requests. Checkpoint commit authority granted 2026-10-30. This contract governs repository-owned Flask and rq-engine mutation
 and submission request parsing, including indirect webhook and upload adapters.
@@ -212,6 +212,27 @@ input, 500/HTML validation responses, leaked temporary files or false rejection 
 valid legacy requests. A recurrence warrants a new incident record and reinspection
 of both adapters, all enclosing catches and the first mutation. Deployment and
 production observation are separate from local conformance.
+
+## Developer integration
+
+`wepppy.request_payload` owns shared classification and the bounded
+`RequestPayloadError`. Flask uses `PayloadRequest` plus the route helpers in
+`routes/_common.py`; rq-engine uses `PayloadRoute` and `payloads.py`. Local broad
+route catches must propagate the typed failure to these canonical JSON boundaries.
+Do not replace a parse failure with an empty payload or initialize optional
+controllers before independent input validation.
+
+Use `request_form` and the bounded single-input adapter to reuse multipart state;
+close transport resources on rejection, cancellation and disconnect. Validate
+supplied files before promoting them. A sibling temporary file preserves relative
+VRT dependencies; clean staged files and newly created empty directories on failure.
+Temporary buffering is not accepted project state. Keep Flask form memory limits
+before body reads and preserve deferred parser errors after CSRF consumes forms.
+
+When adding a field, choose its scalar/list/raw adapter and null/blank/alias policy
+from its domain contract. Test a registered route, rejection before its first
+effect, and a valid same-process follow-up. Use actual controller/file readback for
+changes to persistence or upload boundaries; controller mocks alone cannot prove it.
 
 ## Required conformance evidence
 

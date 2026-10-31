@@ -136,3 +136,23 @@ def test_recorder_events_requires_and_accepts_session_bound_csrf_token(
 
     assert accepted.status_code == 204, accepted.get_data(as_text=True)
     assert len(recorder.events) == 1
+
+
+@pytest.mark.parametrize('operation', ['events', 'promote'])
+def test_malformed_body_before_recorder_mutation(monkeypatch, operation):
+    from flask_login import LoginManager
+    from wepppy.weppcloud.utils import helpers
+    app = Flask(__name__)
+    app.config.update(TESTING=True, SECRET_KEY='test')
+    app.register_blueprint(recorder_module.recorder_bp)
+    login = LoginManager(app)
+    login.request_loader(lambda req: SimpleNamespace(is_authenticated=True,
+        get_id=lambda: '1', has_role=lambda role: True))
+    monkeypatch.setattr(helpers, 'authorize', lambda *a, **k: None)
+    def unexpected(*args, **kwargs):
+        pytest.fail('malformed request reached recorder mutation')
+    monkeypatch.setattr(recorder_module, 'get_profile_recorder', unexpected)
+    response = app.test_client().post('/runs/test/cfg/recorder/' + operation,
+                                      data='{', content_type='application/json')
+    assert response.status_code == 400
+    assert response.json['error']['code'] == 'invalid_request'

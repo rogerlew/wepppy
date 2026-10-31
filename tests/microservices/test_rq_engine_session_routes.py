@@ -1067,3 +1067,28 @@ def test_hello_world_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-123"
+
+
+def test_session_token_malformed_stream_without_length_cannot_mint(monkeypatch):
+    monkeypatch.setattr(rq_auth, '_check_revocation', lambda jti: None)
+    monkeypatch.setattr(session_routes, 'authorize_run_access', lambda *a, **k: None)
+    effects = []
+    monkeypatch.setattr(session_routes, '_store_session_marker', lambda *a, **k: effects.append('marker'))
+    token = _issue_token(monkeypatch, runs=['run-1'])
+    original_issue = auth_tokens.issue_token
+    def record_issue(*args, **kwargs):
+        effects.append('mint')
+        return original_issue(*args, **kwargs)
+    monkeypatch.setattr(auth_tokens, 'issue_token', record_issue)
+    with TestClient(rq_engine.app) as client:
+        request = client.build_request('POST', '/api/runs/run-1/cfg/session-token',
+            content=b'{', headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'})
+        del request.headers['Content-Length']
+        response = client.send(request)
+        assert response.status_code == 400
+        assert response.json()['error']['code'] == 'validation_error'
+        assert effects == []
+        response = client.post('/api/runs/run-1/cfg/session-token',
+                               headers={'Authorization': f'Bearer {token}'})
+        assert response.status_code == 200
+        assert effects == ['mint', 'marker']

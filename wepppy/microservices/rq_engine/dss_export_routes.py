@@ -5,6 +5,9 @@ import os
 from typing import Any, Iterable
 
 import redis
+from .payloads import PayloadRoute
+from wepppy.request_payload import RequestPayloadError
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
@@ -26,7 +29,7 @@ from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
@@ -88,7 +91,7 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
         wepp = Wepp.getInstance(wd)
 
         boolean_fields = {f"dss_export_exclude_order_{i}" for i in range(1, 6)}
-        payload = await parse_request_payload(request, boolean_fields=boolean_fields)
+        payload = await parse_request_payload(request, boolean_fields=boolean_fields, blank_false_fields=boolean_fields)
 
         def _coerce_int_list(raw_value: Any) -> list[int]:
             if raw_value in (None, "", []):
@@ -104,8 +107,8 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
                     continue
                 try:
                     parsed = int(str(item).strip())
-                except (TypeError, ValueError):
-                    continue
+                except (TypeError, ValueError, OverflowError) as exc:
+                    raise RequestPayloadError() from exc
                 if parsed not in seen:
                     seen.add(parsed)
                     result.append(parsed)
@@ -122,16 +125,16 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
         raw_mode = payload.get("dss_export_mode")
         try:
             dss_export_mode = int(raw_mode) if raw_mode not in (None, "") else None
-        except (TypeError, ValueError):
-            dss_export_mode = None
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise RequestPayloadError("dss_export_mode") from exc
         if dss_export_mode not in (None, 1, 2):
-            dss_export_mode = None
+            raise RequestPayloadError("dss_export_mode")
 
         exclude_orders_payload = payload.get("dss_export_exclude_orders")
         if exclude_orders_payload is not None:
-            dss_excluded_channel_orders = [
-                order for order in _coerce_int_list(exclude_orders_payload) if 1 <= order <= 5
-            ]
+            dss_excluded_channel_orders = _coerce_int_list(exclude_orders_payload)
+            if any(not 1 <= order <= 5 for order in dss_excluded_channel_orders):
+                raise RequestPayloadError("dss_export_exclude_orders")
         else:
             dss_excluded_channel_orders = [
                 order
@@ -141,7 +144,7 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
 
         dss_export_channel_ids_payload = payload.get("dss_export_channel_ids")
         if isinstance(dss_export_channel_ids_payload, dict):
-            dss_export_channel_ids: list[int] = []
+            raise RequestPayloadError("dss_export_channel_ids")
         else:
             dss_export_channel_ids = _coerce_int_list(dss_export_channel_ids_payload)
 
@@ -205,6 +208,8 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
         return JSONResponse({"job_id": job.id})
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
+    except RequestPayloadError:
+        raise
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine post-dss-export enqueue failed")
         return error_response_with_traceback("Error Handling Request")

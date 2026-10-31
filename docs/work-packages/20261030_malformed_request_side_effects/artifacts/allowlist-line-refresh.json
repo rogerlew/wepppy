@@ -1,0 +1,240 @@
+[
+  {
+    "path": "wepppy/microservices/rq_engine/admin_job_routes.py",
+    "old_line": 110,
+    "new_line": 112,
+    "scope": "_hydrate_submitter_fields",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/admin_job_routes.py",
+    "old_line": 218,
+    "new_line": 220,
+    "scope": "recently_completed_jobs",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/admin_job_routes.py",
+    "old_line": 241,
+    "new_line": 243,
+    "scope": "recently_completed_jobs",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/admin_job_routes.py",
+    "old_line": 269,
+    "new_line": 271,
+    "scope": "jobs_detail",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/admin_job_routes.py",
+    "old_line": 285,
+    "new_line": 287,
+    "scope": "jobs_detail",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/debug_routes.py",
+    "old_line": 60,
+    "new_line": 62,
+    "scope": "hello_world",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/landuse_soils_routes.py",
+    "old_line": 70,
+    "new_line": 71,
+    "scope": "build_landuse_and_soils",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+    "old_line": 189,
+    "new_line": 191,
+    "scope": "run_sync",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+    "old_line": 358,
+    "new_line": 361,
+    "scope": "run_sync",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+    "old_line": 380,
+    "new_line": 383,
+    "scope": "run_sync_status",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/run_sync_routes.py",
+    "old_line": 389,
+    "new_line": 392,
+    "scope": "run_sync_status",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/agent.py",
+    "old_line": 93,
+    "new_line": 111,
+    "scope": "initialize_agent_chat",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 70,
+    "new_line": 72,
+    "scope": "verify_token",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 96,
+    "new_line": 98,
+    "scope": "enable_bootstrap",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 115,
+    "new_line": 117,
+    "scope": "mint_bootstrap_token",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 129,
+    "new_line": 131,
+    "scope": "bootstrap_commits",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 150,
+    "new_line": 152,
+    "scope": "bootstrap_checkout",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 164,
+    "new_line": 166,
+    "scope": "bootstrap_current_ref",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/bootstrap.py",
+    "old_line": 184,
+    "new_line": 186,
+    "scope": "bootstrap_disable",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/observed_bp.py",
+    "old_line": 45,
+    "new_line": 46,
+    "scope": "submit_task_run_model_fit",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/observed_bp.py",
+    "old_line": 52,
+    "new_line": 53,
+    "scope": "submit_task_run_model_fit",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "old_line": 146,
+    "new_line": 148,
+    "scope": "get_scenarios",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "old_line": 165,
+    "new_line": 167,
+    "scope": "get_scenario_run_state",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "old_line": 189,
+    "new_line": 193,
+    "scope": "delete_scenarios",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "old_line": 205,
+    "new_line": 209,
+    "scope": "omni_migration",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/omni_bp.py",
+    "old_line": 234,
+    "new_line": 238,
+    "scope": "query_omni_scenarios_report",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py",
+    "old_line": 92,
+    "new_line": 93,
+    "scope": "set_rangeland_cover_mode",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/treatments_bp.py",
+    "old_line": 41,
+    "new_line": 42,
+    "scope": "set_treatments_mode",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "old_line": 164,
+    "new_line": 167,
+    "scope": "hillslope0_ash",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/routes/nodb_api/watar_bp.py",
+    "old_line": 176,
+    "new_line": 181,
+    "scope": "task_set_ash_wind_transport",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/weppcloud/utils/uploads.py",
+    "old_line": 139,
+    "new_line": 138,
+    "scope": "save_run_file",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/wepp_routes.py",
+    "old_line": 59,
+    "new_line": 62,
+    "scope": "_persist_wepp_job_hint",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/culvert_routes.py",
+    "old_line": 251,
+    "new_line": 254,
+    "scope": "_callback_browse_response",
+    "proof": "identical ExceptHandler AST and enclosing function; existing allowlist entry only"
+  },
+  {
+    "path": "wepppy/microservices/rq_engine/export_routes.py",
+    "old_line": 151,
+    "new_line": 153,
+    "scope": "_is_public_run_for_download",
+    "proof": "identical AST and second broad handler in same function; manually disambiguated identical handler bodies"
+  }
+]

@@ -1,0 +1,167 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: e35d7a3e69497ddfd9709736af50107f56963584
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 76
+
+Files:
+  M wepppy/microservices/rq_engine/admin_job_routes.py
+  M wepppy/microservices/rq_engine/ag_fields_routes.py
+  M wepppy/microservices/rq_engine/ash_routes.py
+  M wepppy/microservices/rq_engine/batch_routes.py
+  M wepppy/microservices/rq_engine/bootstrap_routes.py
+  M wepppy/microservices/rq_engine/builder_routes.py
+  M wepppy/microservices/rq_engine/climate_routes.py
+  M wepppy/microservices/rq_engine/culvert_routes.py
+  M wepppy/microservices/rq_engine/debris_flow_routes.py
+  M wepppy/microservices/rq_engine/debug_routes.py
+  M wepppy/microservices/rq_engine/dss_export_routes.py
+  M wepppy/microservices/rq_engine/export_routes.py
+  M wepppy/microservices/rq_engine/fork_archive_routes.py
+  M wepppy/microservices/rq_engine/geneva_routes.py
+  M wepppy/microservices/rq_engine/job_routes.py
+  M wepppy/microservices/rq_engine/landuse_routes.py
+  M wepppy/microservices/rq_engine/landuse_soils_routes.py
+  M wepppy/microservices/rq_engine/migration_routes.py
+  M wepppy/microservices/rq_engine/omni_routes.py
+  M wepppy/microservices/rq_engine/openet_ts_routes.py
+  M wepppy/microservices/rq_engine/orchestration_read_routes.py
+  M wepppy/microservices/rq_engine/payloads.py
+  M wepppy/microservices/rq_engine/polaris_routes.py
+  M wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
+  M wepppy/microservices/rq_engine/project_config_update_routes.py
+  M wepppy/microservices/rq_engine/project_routes.py
+  M wepppy/microservices/rq_engine/rap_ts_routes.py
+  M wepppy/microservices/rq_engine/rhem_routes.py
+  M wepppy/microservices/rq_engine/roads_routes.py
+  M wepppy/microservices/rq_engine/run_sync_routes.py
+  M wepppy/microservices/rq_engine/rusle_routes.py
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py
+  M wepppy/microservices/rq_engine/session_routes.py
+  M wepppy/microservices/rq_engine/setup_discovery_routes.py
+  M wepppy/microservices/rq_engine/single_input_uploads.py
+  M wepppy/microservices/rq_engine/soils_routes.py
+  M wepppy/microservices/rq_engine/swat_routes.py
+  M wepppy/microservices/rq_engine/treatments_routes.py
+  M wepppy/microservices/rq_engine/upload_batch_runner_routes.py
+  M wepppy/microservices/rq_engine/upload_climate_routes.py
+  M wepppy/microservices/rq_engine/upload_disturbed_routes.py
+  M wepppy/microservices/rq_engine/upload_helpers.py
+  M wepppy/microservices/rq_engine/upload_huc_fire_routes.py
+  M wepppy/microservices/rq_engine/watershed_routes.py
+  M wepppy/microservices/rq_engine/webhooks.py
+  M wepppy/microservices/rq_engine/wepp_routes.py
+  M wepppy/microservices/rq_engine/wepp_run_payload.py
+  M wepppy/microservices/upload_boundary.py
+  M wepppy/nodb/core/landuse.py
+  M wepppy/nodb/mods/treatments/treatments.py
+  M wepppy/weppcloud/app.py
+  M wepppy/weppcloud/routes/_common.py
+  M wepppy/weppcloud/routes/agent.py
+  M wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py
+  M wepppy/weppcloud/routes/bootstrap.py
+  M wepppy/weppcloud/routes/nodb_api/climate_bp.py
+  M wepppy/weppcloud/routes/nodb_api/disturbed_bp.py
+  M wepppy/weppcloud/routes/nodb_api/geneva_bp.py
+  M wepppy/weppcloud/routes/nodb_api/interchange_bp.py
+  M wepppy/weppcloud/routes/nodb_api/observed_bp.py
+  M wepppy/weppcloud/routes/nodb_api/omni_bp.py
+  M wepppy/weppcloud/routes/nodb_api/path_ce_bp.py
+  M wepppy/weppcloud/routes/nodb_api/project_bp.py
+  M wepppy/weppcloud/routes/nodb_api/rangeland_bp.py
+  M wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py
+  M wepppy/weppcloud/routes/nodb_api/soils_bp.py
+  M wepppy/weppcloud/routes/nodb_api/treatments_bp.py
+  M wepppy/weppcloud/routes/nodb_api/unitizer_bp.py
+  M wepppy/weppcloud/routes/nodb_api/watar_bp.py
+  M wepppy/weppcloud/routes/nodb_api/watershed_bp.py
+  M wepppy/weppcloud/routes/nodb_api/wepp_bp.py
+  M wepppy/weppcloud/routes/recorder_bp.py
+  M wepppy/weppcloud/routes/test_bp.py
+  M wepppy/weppcloud/routes/weppcloud_site.py
+  M wepppy/weppcloud/utils/helpers.py
+  M wepppy/weppcloud/utils/uploads.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/microservices/rq_engine/admin_job_routes.py (base=5 current=0 delta=-5)
+  M wepppy/microservices/rq_engine/ag_fields_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/ash_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/batch_routes.py (base=4 current=3 delta=-1)
+  M wepppy/microservices/rq_engine/bootstrap_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/builder_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/climate_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/culvert_routes.py (base=5 current=4 delta=-1)
+  M wepppy/microservices/rq_engine/debris_flow_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/debug_routes.py (base=1 current=0 delta=-1)
+  M wepppy/microservices/rq_engine/dss_export_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/export_routes.py (base=2 current=1 delta=-1)
+  M wepppy/microservices/rq_engine/fork_archive_routes.py (base=11 current=11 delta=+0)
+  M wepppy/microservices/rq_engine/geneva_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/job_routes.py (base=5 current=5 delta=+0)
+  M wepppy/microservices/rq_engine/landuse_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/landuse_soils_routes.py (base=1 current=0 delta=-1)
+  M wepppy/microservices/rq_engine/migration_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/omni_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/openet_ts_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/orchestration_read_routes.py (base=2 current=2 delta=+0)
+  M wepppy/microservices/rq_engine/payloads.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/polaris_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/postfire_debris_flow_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/project_config_update_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/project_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/rap_ts_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/rhem_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/roads_routes.py (base=4 current=4 delta=+0)
+  M wepppy/microservices/rq_engine/run_sync_routes.py (base=4 current=2 delta=-2)
+  M wepppy/microservices/rq_engine/rusle_routes.py (base=2 current=2 delta=+0)
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/session_routes.py (base=1 current=1 delta=+0)
+  M wepppy/microservices/rq_engine/setup_discovery_routes.py (base=7 current=7 delta=+0)
+  M wepppy/microservices/rq_engine/single_input_uploads.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/soils_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/swat_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/treatments_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/upload_batch_runner_routes.py (base=7 current=7 delta=+0)
+  M wepppy/microservices/rq_engine/upload_climate_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/upload_disturbed_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/upload_helpers.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/upload_huc_fire_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/watershed_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/webhooks.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/wepp_routes.py (base=1 current=0 delta=-1)
+  M wepppy/microservices/rq_engine/wepp_run_payload.py (base=8 current=7 delta=-1)
+  M wepppy/microservices/upload_boundary.py (base=2 current=0 delta=-2)
+  M wepppy/nodb/core/landuse.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/treatments/treatments.py (base=1 current=0 delta=-1)
+  M wepppy/weppcloud/app.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/routes/_common.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/agent.py (base=1 current=0 delta=-1)
+  M wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/bootstrap.py (base=7 current=0 delta=-7)
+  M wepppy/weppcloud/routes/nodb_api/climate_bp.py (base=14 current=14 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/disturbed_bp.py (base=4 current=4 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/geneva_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/interchange_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/observed_bp.py (base=2 current=0 delta=-2)
+  M wepppy/weppcloud/routes/nodb_api/omni_bp.py (base=5 current=0 delta=-5)
+  M wepppy/weppcloud/routes/nodb_api/path_ce_bp.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/project_bp.py (base=2 current=2 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/rangeland_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py (base=1 current=0 delta=-1)
+  M wepppy/weppcloud/routes/nodb_api/soils_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/treatments_bp.py (base=1 current=0 delta=-1)
+  M wepppy/weppcloud/routes/nodb_api/unitizer_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/watar_bp.py (base=8 current=6 delta=-2)
+  M wepppy/weppcloud/routes/nodb_api/watershed_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/wepp_bp.py (base=26 current=26 delta=+0)
+  M wepppy/weppcloud/routes/recorder_bp.py (base=2 current=2 delta=+0)
+  M wepppy/weppcloud/routes/test_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/weppcloud_site.py (base=6 current=6 delta=+0)
+  M wepppy/weppcloud/utils/helpers.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/utils/uploads.py (base=1 current=0 delta=-1)
+
+Net delta (all changed files): -37
+Result: PASS
