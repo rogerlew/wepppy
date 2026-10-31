@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/downstream-hydraulics-r3-v1.tar.gz",
+  "sha256": "9720c176fed182798889dcc7407c221c3d6e593f02b3974f8aedd9b92aa8667b",
+  "bytes": 579205808,
+  "files": 9320,
+  "uncompressed_bytes": 2970545552,
+  "all_members_verified": true,
+  "manifest_sha256": "93cd2f9cc2678dac56040a2870bbe0cd247add26133eea17ddfb01847ac80ea9",
+  "omitted_aliases": {}
+}

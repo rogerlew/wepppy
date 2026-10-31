@@ -1,0 +1,35 @@
+{
+  "case": {
+    "climate": "site",
+    "soil": "1718465",
+    "design": "outunrut",
+    "surface": "gravel",
+    "traffic": "none",
+    "variant": "fill_fixed",
+    "runtime": "project"
+  },
+  "source_record_sha256": "cc4ab82675f9962e1842fd7a54a6ea33d56383b0ee4d4694fb74fb8c27dfb3dd",
+  "source_results_sha256": "2f36a002b9f8d8f55421e5ebb4c07024f8c8df93360bf33e556ce7e0ca3b6866",
+  "binary_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+  "exact_failed_output_replay": true,
+  "returncode": -8,
+  "inputs": {
+    "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "p1.sol": "dcf2e45418d99497ae8c78e7366b2d6adee2421680a100aa33a1f8dd17549a5f",
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+    "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+  },
+  "fixture": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-failure-r3-inputs.tar.gz",
+  "fixture_sha256": "4487d0900d87ddfdf267939d8d155b222ac880d58c1d681321e065df18f1f329",
+  "fixture_execution": "Create sibling output/ beside extracted runs/; from runs/ execute pinned binary with stdin p1.run. The fixture intentionally reproduces SIGFPE, not a passing simulation.",
+  "gdb_sha256": "c4e19718d675f5b63917a9bdc5b9d9bacf1df7cd6f730ee2f9e59d5658073350",
+  "script_sha256": "5e15e7e7151cea78eaef90b3d2ac6c00ecd591e6d6279fbbf52f0ecbd83c7b7e"
+}

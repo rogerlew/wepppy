@@ -1,0 +1,36 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.ubuntu.com>
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGFPE, Arithmetic exception.
+depend (xu=0.0500000007, xl=<optimized out>, a=0, b=0.131171137, du=-16.3956165, phi=88269.4375, theta=0, ktrato=0.970817983, qostar=2.05239344) at depend.for:185
+185	            xdend = xdend - f / df
+xu = 0.0500000007
+xl = <optimized out>
+a = 0
+b = 0.131171137
+du = -16.3956165
+phi = 88269.4375
+theta = 0
+ktrato = 0.970817983
+qostar = 2.05239344
+deriv = -2.5097609477447058e-45
+df = -2.80259693e-45
+f = 0.127341852
+itmpv1 = 1
+j = <optimized out>
+kkkk = 0
+loopfg = 0
+rate = 0.12734185611217827
+tmpvr1 = 7.24766e+32
+xdend = 7.24766e+32
+xmin = 1
+__result_depend = <optimized out>
+#0  depend (xu=0.0500000007, xl=<optimized out>, a=0, b=0.131171137, du=-16.3956165, phi=88269.4375, theta=0, ktrato=0.970817983, qostar=2.05239344) at depend.for:185
+#1  0x000000000047637c in route () at route.for:218
+#2  0x0000000000412ae9 in contin (iwpass=1) at contin.for:1248
+#3  0x00000000004644b7 in MAIN__ () at main.for:370

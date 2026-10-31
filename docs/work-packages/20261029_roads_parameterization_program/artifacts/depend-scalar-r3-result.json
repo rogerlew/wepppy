@@ -1,0 +1,64 @@
+{
+  "values_float32": {
+    "xu": 0.05000000074505806,
+    "xl": 1.0,
+    "a": 0.0,
+    "b": 0.13117113709449768,
+    "du": -16.39561653137207,
+    "phi": 88269.4375,
+    "theta": 0.0,
+    "ktrato": 0.9708179831504822,
+    "qostar": 2.0523934364318848
+  },
+  "xl_provenance": "GDB xmin=1; DEPEND initializes xmin=xl and does not change xmin when qostar>=0.",
+  "independent_root": "0.0501158917796527951291511395857882382551105263941761319706165409217209971434778",
+  "reference_precision_digits": 80,
+  "runs": [
+    {
+      "lane": "released",
+      "returncode": -8,
+      "binary_sha256": "6070e9821f6b8377079073e1f95a0484c6ddfd346ad21dbdd16252784db08bac",
+      "command": [
+        "/usr/bin/gfortran",
+        "-O2",
+        "-fno-align-commons",
+        "-ffixed-line-length-72",
+        "-ffpe-trap=invalid,zero,overflow",
+        "-I",
+        "/workdir/wepp-forest-release-20261009/src",
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-failure-r3/scalar/probe.for",
+        "/workdir/wepp-forest-release-20261009/src/depeqs.for",
+        "/workdir/wepp-forest-release-20261009/src/depend.for",
+        "-o",
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-failure-r3/scalar/released"
+      ],
+      "stdout": ""
+    },
+    {
+      "lane": "observed",
+      "returncode": -8,
+      "binary_sha256": "727079d58bb61608887840cddfd6cdd604a894d693c6ffd0cd9d5d4fb96cf977",
+      "command": [
+        "/usr/bin/gfortran",
+        "-O2",
+        "-fno-align-commons",
+        "-ffixed-line-length-72",
+        "-ffpe-trap=invalid,zero,overflow",
+        "-I",
+        "/workdir/wepp-forest-release-20261009/src",
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-failure-r3/scalar/probe.for",
+        "/workdir/wepp-forest-release-20261009/src/depeqs.for",
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-failure-r3/scalar/depend-observed.for",
+        "-o",
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-failure-r3/scalar/observed"
+      ],
+      "stdout": " TRIAL   1.00000000       3.05239344    \n TRIAL   6.00000024E-02   2.11239338    \n TRIAL   1.47882164E+11   1.47882164E+11\n TRIAL   1.03527757E+22   1.03527757E+22\n TRIAL   7.24766000E+32   7.24766000E+32\n"
+    }
+  ],
+  "native_source_sha256": {
+    "depend.for": "ebfa23fdcaa80a8ec07176af3e0c995284af49ca9b57feea59a18da67a3c302b",
+    "depeqs.for": "18b463bdcacab94c54912cf7b4e978114214b27e60a9a501c5194f8657d7f6b2"
+  },
+  "script_sha256": "e42b674e3a72b2671da6baf55888c8e613c89c7207ccfe9c38d18c5b00388d64",
+  "disposition": "Confirmed solver-domain/step overflow on a finite interior root; do not repair by loosening traps or changing soil parameters."
+}

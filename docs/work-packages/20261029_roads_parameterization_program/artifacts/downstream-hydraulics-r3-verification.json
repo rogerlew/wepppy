@@ -1,0 +1,90 @@
+{
+  "cases": 348,
+  "physical_pass": 347,
+  "groups": {
+    "fill_fixed": {
+      "meaningful_high": {
+        "cases": 5,
+        "physical_pass": 4,
+        "within": 0
+      },
+      "meaningful_low": {
+        "cases": 48,
+        "physical_pass": 48,
+        "within": 0
+      },
+      "meaningful_pass": {
+        "cases": 18,
+        "physical_pass": 18,
+        "within": 18
+      },
+      "small_exceedance": {
+        "cases": 43,
+        "physical_pass": 43,
+        "within": 8
+      },
+      "small_pass": {
+        "cases": 2,
+        "physical_pass": 2,
+        "within": 1
+      }
+    },
+    "buffer_cap": {
+      "meaningful_high": {
+        "cases": 5,
+        "physical_pass": 5,
+        "within": 0
+      },
+      "meaningful_low": {
+        "cases": 48,
+        "physical_pass": 48,
+        "within": 47
+      },
+      "meaningful_pass": {
+        "cases": 18,
+        "physical_pass": 18,
+        "within": 17
+      },
+      "small_exceedance": {
+        "cases": 43,
+        "physical_pass": 43,
+        "within": 0
+      },
+      "small_pass": {
+        "cases": 2,
+        "physical_pass": 2,
+        "within": 0
+      }
+    },
+    "both": {
+      "meaningful_high": {
+        "cases": 5,
+        "physical_pass": 5,
+        "within": 0
+      },
+      "meaningful_low": {
+        "cases": 48,
+        "physical_pass": 48,
+        "within": 44
+      },
+      "meaningful_pass": {
+        "cases": 18,
+        "physical_pass": 18,
+        "within": 17
+      },
+      "small_exceedance": {
+        "cases": 43,
+        "physical_pass": 43,
+        "within": 0
+      },
+      "small_pass": {
+        "cases": 2,
+        "physical_pass": 2,
+        "within": 0
+      }
+    }
+  },
+  "freshly_verified": true,
+  "declaration_sha256": "9adcbe15ed3906b549088758e5fa1ae1e8dd74c3b37176750c0e56bdee816a20",
+  "results_sha256": "2f36a002b9f8d8f55421e5ebb4c07024f8c8df93360bf33e556ce7e0ca3b6866"
+}

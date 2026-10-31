@@ -93,3 +93,46 @@ passes. Pore-only, conductivity-only and coupled lanes recover 1, 24 and 25 of
 reference misses remain under the coupled treatment. No standalone production
 rule is accepted; retain the conductivity response as a component hypothesis.
 See [results and verification](../work-packages/20261029_roads_parameterization_program/artifacts/road-pore-screen-r3-findings.md).
+
+## Same-format downstream continuation — 2026-10-31
+
+The requesting user's subsequent `proceed` continues autonomous scientific work;
+Codex selected the following narrower controls under that existing authority.
+The attempted whole-deck legacy-to-9002 bridge failed exact parity. Four of seven
+preflights match initialized state but add the format caution to LOSS; three also
+change surface conductivity through the remapping calculation. Retain the failed
+gate and do not execute mixed-role substitutions or relax production validation.
+
+The new 116-case × three-lane diagnostic keeps every role in the original
+generated format and holds the road treatment fixed:
+
+- Fill: change only fill `ksatadj` from 1 to 0, removing its saturation-dependent
+  effective-conductivity adjustment.
+- Buffer: cap only upper-200-mm buffer `ksat` at the configuration-matched legacy
+  buffer `avke`, without increasing any existing value.
+- Both: combine the preceding controls.
+
+The buffer value is an explicit template prior; it is not evidence that effective
+conductivity equals horizon saturated conductivity. Appended Rosetta predictions
+stay unchanged because these remain independent predictions, not active native
+K inputs in this revision. Source material, density, FC/WP, erodibility, road,
+deeper horizons, restrictions and runtime inputs are fixed. No new road divisor
+or per-climate fitting. These controls isolate narrower parameter mechanisms and
+do not claim to represent equivalent legacy roles or calibrated physical states.
+
+The rationale is the retained downstream boundary evidence: 42 small-load misses
+remain after the road screen, with net fill addition and net buffer deposition.
+Testing conductivity treatment directly avoids introducing native adapter code
+or accepting numeric drift merely to enable a whole-role comparison. Require
+fresh physical/input/output verification and retain all 20 passing controls.
+Results remain research-only until all existing scientific gates are met.
+
+### Downstream execution disposition
+
+Of 348 runs, 347 pass fresh physical audits. Fill-only, buffer-only and combined
+recover 8, 47 and 44 original misses but retain only 19, 17 and 17 of 20 passing
+controls. Reject all three standalone treatments. Fill-only exposes a reproducible
+DEPEND Newton-step SIGFPE; an independent scalar reference proves an interior
+root exists. Retain the fixture and prioritize bounded native root-search
+validation before further combinations. This ADR does not approve a native repair
+or binary delivery. [Results and next gate](../work-packages/20261029_roads_parameterization_program/artifacts/downstream-hydraulics-r3-findings.md).

@@ -1,0 +1,478 @@
+{
+  "cases": 7,
+  "completed": 7,
+  "exact_output_matches": 0,
+  "initialized_state_matches": 4,
+  "rows": [
+    {
+      "material": "1718465",
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718465",
+      "source_record_sha256": "1bb76291fc77b8f6f837a02634cf2150e6b4d65d3880347e5696c78f7ff30602",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "17462cff505804afd39f80c5c0fded36f4f20d4f121b737f9f161f9cc052b4e4",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718465-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "f18b236a75dd973168fa9cae26b7cb438b7f19297e17f4a667ebfc95672b932c",
+        "H1.soil.dat": "7f9a86214da6b10337086bc8faa4a39fd7758a4ac846f3654e26440eb29f69a2",
+        "H1.pass.dat": "6518f00563527aa3d3a9136688b306a0cf0209960c4d3c0814923364d8c5eb3a",
+        "H1.plot.dat": "7b0b6984ad853435de38e8173120b9415b98a2dffa64a815c044d5ac6d1b243e",
+        "H1.wat.dat": "728182b765ed7953b40597bd3541aa1a5032380c3f2840adf5c9cdf8be8ba442",
+        "H1.element.dat": "d0510619bdd444fe8785258de2d3bb2eb8b03894acc5d07c2908fbcb5d4742b8",
+        "H1.ebe.dat": "125ebd00757b3c37e760105044455c8e570a7935ba2593934241173f15517a82"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.wat.dat"
+      ],
+      "initialized_states_equal": false,
+      "state_rows_before": 22,
+      "state_rows_after": 22,
+      "state_differences": [
+        {
+          "before": "ROAD_INIT_SCON     2     1    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222222393466E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     2     1    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222223302961E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     2     2    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222222393466E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     2     2    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222223302961E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     1    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222222393466E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     1    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222223302961E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     2    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222222393466E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     2    1.417200073242E+03    2.999999932945E-02    4.552043974400E-01    7.167012691498E-01    1.511759459972E-01    2.272840403020E-02    7.222223302961E-06    1.240820996463E-02    4.324759915471E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     1    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333333425981E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     3     1    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333334335475E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     2    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333333425981E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     3     2    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333334335475E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     1    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333333425981E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     1    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333334335475E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     2    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333333425981E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     2    1.174200073242E+03    5.999999865890E-02    5.434271097183E-01    9.002735018730E-01    2.444716840982E-01    2.557365596294E-02    8.333334335475E-06    1.701195724308E-02    5.178534612060E-02    1.000000014901E-01    2.000000029802E-01"
+        }
+      ],
+      "stdout_sha256": "fc0f68d48138d993a004ee365c5546820a1eb235c0c311315a41843452500217",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "2711184",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/2711184",
+      "source_record_sha256": "af97de5710b0e4457d6d49ea6129b39b12f40aad211a9389e9de0352b71320e9",
+      "inputs": {
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "3f62c301c33ff4e2dfb8df94b6bbb6ada859a0b13db1cfbba67c6775749ce2cb",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/2711184-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "d49ddff1fa453c77d6700efcc9d5e59b63f6f4e25d58343a72b111b1f1b64460",
+        "H1.soil.dat": "8066b827f45c0168491cf96bcdadbc9c8ba11a686b703ffd9d97b6e418baf18a",
+        "H1.pass.dat": "63c0c745cdb694eb80c9c8831989c0089da34e922396ae7bec51e576fdcfabf0",
+        "H1.plot.dat": "68ede273d6c6b3aad59663a3824de6904faea714972d4a0c66eb19c370e71ee6",
+        "H1.wat.dat": "7a87ab20381c938b7538a771d8d27df75a184792070403abd904b4a32bfffd85",
+        "H1.element.dat": "134a567c1f4c6ce5a9bd241e1ee0c968f32d221d9b7ef033449c735999e3faea",
+        "H1.ebe.dat": "d85fc5979192d2036b05640a637164e0c3e1ab28c3ad67ccbf7575edd779f30e"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.loss.dat"
+      ],
+      "initialized_states_equal": true,
+      "state_rows_before": 18,
+      "state_rows_after": 18,
+      "state_differences": [],
+      "stdout_sha256": "2767974cd8daff282655fb38ae66ecd2fb14df49647fb19effa65e2acf14ed90",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "2711250",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/2711250",
+      "source_record_sha256": "14fc5c4f2cef01c967c40121421178c49cf5211ee4a7fc05cb5572c20b044e98",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "c71d5ad52fa22f5ff34ac8f7d64f32e618d26e5ae0c9038a6fd4aee18e379527",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/2711250-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "50b9028231bbcb8e2de972d8e4d615c0658722210787cd1fa9bb4c70879b04ef",
+        "H1.soil.dat": "105e8dcf4437c111b04e60349c373a3dbff0938c4b4e0cc15de35e926097d851",
+        "H1.pass.dat": "a8042db30187a910614824a819c3c02966ec2c58acf66950923e6c32f88241db",
+        "H1.plot.dat": "219bd94d67a909bf009d35ccd02260b7a9d818782e351a2abd49f4fc9c5d9011",
+        "H1.wat.dat": "0effc5488b91e085e545422f5e11707f51473a6de3b5648d778f92b726102acb",
+        "H1.element.dat": "5e825d558fdfcfc9f526598ac59c6d717dcf4253bd09e2ed4fad6c1492845181",
+        "H1.ebe.dat": "8675a77081ea050e44951c947a247e7d43b1883850431fd4fb672d1e9a3027c9"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.soil.dat",
+        "H1.wat.dat"
+      ],
+      "initialized_states_equal": false,
+      "state_rows_before": 22,
+      "state_rows_after": 22,
+      "state_differences": [
+        {
+          "before": "ROAD_INIT_SCON     2     1    1.405296142578E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333489136E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     2     1    1.405296142578E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333943883E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     2     2    1.405296142578E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333489136E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     2     2    1.405296142578E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333943883E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     1    1.401329223633E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333489136E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     1    1.401329223633E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333943883E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     2    1.401329223633E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333489136E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     2    1.401329223633E+03    2.999999932945E-02    4.512040317059E-01    7.184108495712E-01    2.277565002441E-01    7.176943868399E-02    5.833333943883E-06    7.409799844027E-03    3.794346004725E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     1    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444521650E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     3     1    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444976398E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     2    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444521650E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     3     2    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444976398E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     1    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444521650E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     1    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444976398E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     2    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444521650E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     2    1.279392089844E+03    5.999999865890E-02    4.989519119263E-01    8.923015594482E-01    3.304449021816E-01    7.712057232857E-02    6.944444976398E-06    1.009656675160E-02    4.218313470483E-02    1.000000014901E-01    2.000000029802E-01"
+        }
+      ],
+      "stdout_sha256": "2c434b5c5b16f28acdd48aff13a676dc634e8ae1c6dcbfafa708d1866affc044",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "1718510",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718510",
+      "source_record_sha256": "759f32bd6606c3e7e9135aa7af6208a9666d7c5be5bb08bd4293c5daaa300012",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "7b0d83570046657c6146b68852717e9e1299d9b9486fece3ab3302f66bcad2cf",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718510-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "c4d7006b03c14be1aeb64025a94725b054d0db0df13c911e1a2c2f6a13800305",
+        "H1.soil.dat": "416546b273eeb7737a1715809511eb2a29713d1fda35698fe045425842249025",
+        "H1.pass.dat": "abc3793f02efc3ba3be05df2e8fb6ed25e2bb17b4524165392f926e833468f9d",
+        "H1.plot.dat": "e690d4d6e3e0c90ce57ea2a6107dab05a34b4d5cd72426ce63997b1228b3fffc",
+        "H1.wat.dat": "60b4044e09642c843da1da205bd5f7b5ff6122f652913eb58e30771c1df41f09",
+        "H1.element.dat": "70c48579806785de07ce64a8d931a197456865dee8d45769192f2da819063667",
+        "H1.ebe.dat": "1f4e50fb4a5dbf807576f99529f5b9adcee68a85a770b7e690940969604f09b9"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.loss.dat"
+      ],
+      "initialized_states_equal": true,
+      "state_rows_before": 18,
+      "state_rows_after": 18,
+      "state_differences": [],
+      "stdout_sha256": "2a1a20913e05434942ca256d0df9b749721feb44843abcc181f90388f848dc1a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "1856573",
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1856573",
+      "source_record_sha256": "0eb812d755119fbf8918e2149584ee85120a8869ad5edb2c2167b0f7816992e7",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d5ad9c9ad2f6bea8b5c9a222fd0f5680dbc8155ad1fed3d4b51a197738287557",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1856573-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "4d9a98bf946a82eb959a5eb97a30eb40872310ced007142c02b1addf0a8870ab",
+        "H1.soil.dat": "5afe279a64b5b935ef7d03f4405f7703cccaaa93162610c2e7b6bd8ad8894be4",
+        "H1.pass.dat": "812c484f07539635337c198368ccf4df5978ac605f0f65278db10e6ab59bf621",
+        "H1.plot.dat": "10f60b78ad391b0a1170178f6286d1fa5143a277017f5a57b7da18ebbc68c2f6",
+        "H1.wat.dat": "c82f0a787b4357254bad1900cef069185dd35160ad28e1fee7f714bb8eac6af2",
+        "H1.element.dat": "8768900a678063848abae783a0a2846f80bb7f4f0ab70f29be5a206043521333",
+        "H1.ebe.dat": "e6ad6bdc56611cec041bb5cf31c5941c5eb2fc56ea3e5b5907ed4775818368e7"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.loss.dat"
+      ],
+      "initialized_states_equal": true,
+      "state_rows_before": 18,
+      "state_rows_after": 18,
+      "state_differences": [],
+      "stdout_sha256": "d728da4aec3f2fd0629a84573eee608fd372a87e6e56894d3cb6d0b0fff46902",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "53949",
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/53949",
+      "source_record_sha256": "3ffbc54e13270497d112219e70e4a5778a52cd2f7be9b0fef18b4c9691aded90",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d5ad9c9ad2f6bea8b5c9a222fd0f5680dbc8155ad1fed3d4b51a197738287557",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/53949-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "4d9a98bf946a82eb959a5eb97a30eb40872310ced007142c02b1addf0a8870ab",
+        "H1.soil.dat": "5afe279a64b5b935ef7d03f4405f7703cccaaa93162610c2e7b6bd8ad8894be4",
+        "H1.pass.dat": "812c484f07539635337c198368ccf4df5978ac605f0f65278db10e6ab59bf621",
+        "H1.plot.dat": "10f60b78ad391b0a1170178f6286d1fa5143a277017f5a57b7da18ebbc68c2f6",
+        "H1.wat.dat": "c82f0a787b4357254bad1900cef069185dd35160ad28e1fee7f714bb8eac6af2",
+        "H1.element.dat": "8768900a678063848abae783a0a2846f80bb7f4f0ab70f29be5a206043521333",
+        "H1.ebe.dat": "e6ad6bdc56611cec041bb5cf31c5941c5eb2fc56ea3e5b5907ed4775818368e7"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.loss.dat"
+      ],
+      "initialized_states_equal": true,
+      "state_rows_before": 18,
+      "state_rows_after": 18,
+      "state_differences": [],
+      "stdout_sha256": "d728da4aec3f2fd0629a84573eee608fd372a87e6e56894d3cb6d0b0fff46902",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "material": "1718494",
+      "case": {
+        "climate": "charleston",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718494",
+      "source_record_sha256": "1c3672fa277aa3c6511e15d8886ebf401a860cf1ec9bceae50f2d92358122a9e",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "7239d7fa8d2c719378312971848a5a133a683fd6fc66d0729560350e0768e2f9",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718494-legacy",
+      "returncode": 0,
+      "completed": true,
+      "outputs": {
+        "H1.loss.dat": "15f17816442736c01df52388f3eda37fca90dc5416bff9df4f00b9d11161398d",
+        "H1.soil.dat": "04aeab012fac32bdbf175d983bbd19303e3155684a620d63b719e89e8ab9acb1",
+        "H1.pass.dat": "24eaae097c0fb44dab0f033129b1c7bc72fa2de99f814ab86b40380385370ebd",
+        "H1.plot.dat": "7245223b0e8fe8376637af992f17aa03fff4c47cf427c093f10c7b721ec2681d",
+        "H1.wat.dat": "116e2c66b1e0b8132327091b2b4c529607334d0b00086eef6315fe9c60212191",
+        "H1.element.dat": "ac59ef841c411a3b56d587317f439cd3c961b1a22ec552c9b0a14609d8673fa7",
+        "H1.ebe.dat": "f5535855d50eda6d1d39098a6a3aa85bebc36d051ec93e50531875f0fe2cc94c"
+      },
+      "output_inventory_equal": true,
+      "changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.wat.dat"
+      ],
+      "initialized_states_equal": false,
+      "state_rows_before": 22,
+      "state_rows_after": 22,
+      "state_differences": [
+        {
+          "before": "ROAD_INIT_SCON     2     1    1.363095947266E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111110906204E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     2     1    1.363095947266E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111111360951E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     2     2    1.363095947266E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111110906204E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     2     2    1.363095947266E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111111360951E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     1    1.355916137695E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111110906204E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     1    1.355916137695E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111111360951E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     2     2    1.355916137695E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111110906204E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     2     2    1.355916137695E+03    2.999999932945E-02    4.652717411518E-01    7.245374917984E-01    2.321889698505E-01    9.495976567268E-02    6.111111360951E-06    5.673830397427E-03    3.703119978309E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     1    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222222393466E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_SCON     3     1    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222223302961E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_SCON     3     2    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222222393466E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_SCON     3     2    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222223302961E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    2.000000029802E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     1    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222222393466E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    1.000000014901E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     1    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222223302961E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    1.000000014901E-01"
+        },
+        {
+          "before": "ROAD_INIT_WATBAL_INIT     3     2    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222222393466E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    2.000000029802E-01",
+          "after": "ROAD_INIT_WATBAL_INIT     3     2    1.189191894531E+03    5.999999865890E-02    5.301026701927E-01    8.991286158562E-01    3.325768113136E-01    1.008871272206E-01    7.222223302961E-06    8.976507000625E-03    4.292155429721E-02    1.000000014901E-01    2.000000029802E-01"
+        }
+      ],
+      "stdout_sha256": "dc9825caef4b436653730b73d54f9d7017ad58125677f792fc06be0b18b2a299",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

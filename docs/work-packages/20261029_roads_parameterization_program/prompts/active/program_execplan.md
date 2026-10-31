@@ -24,7 +24,10 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Read back seven generated role profiles and first-day native states; retain source density/retention coupling as a hypothesis.
 - [x] Complete seven-material/21-role/96-horizon source audit and 14 exact-parity initialization observations.
 - [x] Execute 348 predeclared incremental road-pore/conductivity runs; fresh physical audits all pass, 24/25 misses recovered and all 20 controls retained. Seven coupled observation replays have exact output parity.
-- [ ] Establish initialization/output-equivalent legacy format bridge before downstream role isolation.
+- [x] Attempt legacy format bridge: seven physical passes, zero exact output matches; reject representation and do not execute mixed-role substitution.
+- [x] Execute and freshly verify 348 same-format downstream conductivity controls: 347 physical passes, reject standalone treatments on regressions.
+- [x] Retain DEPEND full-run fixture, exact failed-output replay, GDB locals and two scalar reproductions with independent interior-root reference.
+- [ ] Execute bounded DEPEND root-search ablation and required native/scientific review before further parameter combinations.
 
 - [x] D2 geometry/recession repair accepted and delivered as revision 3;
   permanent regression coverage and accepted ADR-0119 retained.
@@ -815,3 +818,81 @@ See [results](../../artifacts/road-pore-screen-r3-findings.md) and
 Retention complete: 10,323 archived files individually verified (3,170,098,899
 uncompressed bytes). Documentation lint passed for all 34 package Markdown files,
 ADR-0120 and the ADR index; spelling preview and whitespace checks are clean.
+
+## Legacy format equivalence execution — 2026-10-31
+
+Execute the seven-material preflight in `legacy_format_bridge_r3.py` before the
+full 116-case bridge or any role substitution. Preserve inferred legacy fields
+with diagnostic zero sentinels, supply top-200-mm legacy `avke`, and retain the
+native-added lower layer with its original estimation behavior. A duplicate
+terminal 200 mm road boundary is forensic input only: native extension makes it
+positive thickness; never allow this through production soil validation.
+Require exact initialized observations and full output inventories/bytes. If
+failed, trace format-selected branches rather than relax parity or proceed to
+mixed roles. No source/default/UI changes; existing observation binary only.
+
+### Equivalence preflight disposition and same-format continuation
+
+All seven bridge runs complete, but zero pass exact output parity. Four match
+initialized states with only a deterministic extended-format caution in LOSS;
+three have conductivity drift from the INPUT harmonic-remap numerator versus
+legacy TILAGE direct `avke` assignment. Do not waive metadata/numeric differences
+or proceed to whole-role substitutions. The equivalent-role bridge is rejected.
+
+Continue a narrower generated-only 348-run panel with `downstream_hydraulics_r3.py`:
+fill `ksatadj=0`; buffer upper-200-mm K capped at configuration-matched legacy
+buffer `avke`; both together. All original generated road and other soil state
+remain fixed. These are diagnostic component hypotheses, not legacy equivalents
+or physically accepted candidate values. No new road divisor, material swapping,
+per-case fitting, production defaults or withheld/UI changes. Declare and read
+back all inputs before execution; recompute every physical audit and compare
+all 96 misses and 20 controls. Source format parity remains failed, not bypassed.
+
+### DEPEND failure observation
+
+The downstream fill-only case exposes SIGFPE at DEPEND's unbounded Newton step.
+`capture_depend_failure_r3.py` repeats the failure on the released binary with
+identical partial outputs and retains a portable input fixture plus GDB locals.
+`depend_scalar_repro_r3.py` reproduces it in actual source and observation-only
+scalar lanes; an independent 80-digit closed-form solution lies at
+0.050115891779652795 inside the physical interval. No native behavior changed.
+The next required ablation is `depend-root-ablation-r3-plan.md`; resolve the
+solver domain/step contract before further parameter sweeps. Whole-role
+substitution stays unexecuted because format equivalence failed.
+
+## Downstream diagnostic checkpoint — 2026-10-31
+
+### Surprises & Discoveries
+
+The strict format bridge fails despite equal rounded annual sediment for all
+seven preflights. Four differ only by a deliberate report warning; three also
+have one-to-two-ULP conductivity-state differences through native remapping.
+Keep this distinction explicit; it does not establish another sediment defect.
+The generated-only buffer cap recovers 47 low-load misses but regresses three
+passing controls and no small-load misses. Fill-only recovers eight small-load
+misses but regresses one control and exposes a true native solver overflow.
+
+### Decision Log
+
+Reject all standalone downstream treatments and the exact-equivalence bridge.
+Do not relax parity, copy legacy role material, tune the road multiplier, or
+assemble unvalidated parameter combinations. Prioritize DEPEND's finite interior
+root with an out-of-domain Newton sequence. Require a bounded search with
+independent reference coverage, not guard suppression or soil tuning. The next
+normative scope is [the root-search plan](../../artifacts/depend-root-ablation-r3-plan.md).
+The same-format experimental rationale/disposition is durable in ADR-0120.
+
+### Outcomes & Retrospective
+
+Completed seven bridge runs and 348 downstream runs (347 physical passes), plus
+two full-model failure replays and two scalar failure reproductions. Recomputed
+physical audits and rehashed all input/output artifacts; the full native fixture
+is portable and retained in git. No production native/soil/default/UI change.
+The user-authorized undeployed same-name release preference applies only after
+future repair gates; this checkpoint does not release a new binary. Ledger v15
+supersedes v14. See [findings](../../artifacts/downstream-hydraulics-r3-findings.md)
+and [retention receipt](../../artifacts/downstream-hydraulics-r3-v1-retention.json).
+
+Retention complete: 9,320 archive members individually rehashed; 2,970,545,552
+uncompressed bytes. Documentation lint passed for 37 package Markdown files and
+ADR-0120, with clean spelling preview and whitespace checks.

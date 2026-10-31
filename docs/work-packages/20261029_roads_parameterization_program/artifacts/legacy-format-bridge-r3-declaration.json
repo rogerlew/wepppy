@@ -1,0 +1,249 @@
+{
+  "tasks": [
+    {
+      "material": "1718465",
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718465",
+      "source_record_sha256": "1bb76291fc77b8f6f837a02634cf2150e6b4d65d3880347e5696c78f7ff30602",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "17462cff505804afd39f80c5c0fded36f4f20d4f121b737f9f161f9cc052b4e4",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718465-legacy"
+    },
+    {
+      "material": "2711184",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/2711184",
+      "source_record_sha256": "af97de5710b0e4457d6d49ea6129b39b12f40aad211a9389e9de0352b71320e9",
+      "inputs": {
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "3f62c301c33ff4e2dfb8df94b6bbb6ada859a0b13db1cfbba67c6775749ce2cb",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/2711184-legacy"
+    },
+    {
+      "material": "2711250",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/2711250",
+      "source_record_sha256": "14fc5c4f2cef01c967c40121421178c49cf5211ee4a7fc05cb5572c20b044e98",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "c71d5ad52fa22f5ff34ac8f7d64f32e618d26e5ae0c9038a6fd4aee18e379527",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/2711250-legacy"
+    },
+    {
+      "material": "1718510",
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718510",
+      "source_record_sha256": "759f32bd6606c3e7e9135aa7af6208a9666d7c5be5bb08bd4293c5daaa300012",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "7b0d83570046657c6146b68852717e9e1299d9b9486fece3ab3302f66bcad2cf",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718510-legacy"
+    },
+    {
+      "material": "1856573",
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1856573",
+      "source_record_sha256": "0eb812d755119fbf8918e2149584ee85120a8869ad5edb2c2167b0f7816992e7",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d5ad9c9ad2f6bea8b5c9a222fd0f5680dbc8155ad1fed3d4b51a197738287557",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1856573-legacy"
+    },
+    {
+      "material": "53949",
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/53949",
+      "source_record_sha256": "3ffbc54e13270497d112219e70e4a5778a52cd2f7be9b0fef18b4c9691aded90",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d5ad9c9ad2f6bea8b5c9a222fd0f5680dbc8155ad1fed3d4b51a197738287557",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/53949-legacy"
+    },
+    {
+      "material": "1718494",
+      "case": {
+        "climate": "charleston",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-format-bridge-r3/cases/1718494",
+      "source_record_sha256": "1c3672fa277aa3c6511e15d8886ebf401a860cf1ec9bceae50f2d92358122a9e",
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "7239d7fa8d2c719378312971848a5a133a683fd6fc66d0729560350e0768e2f9",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+        "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "observation_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/cases/1718494-legacy"
+    }
+  ],
+  "build": {
+    "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+    "source_archive_sha256": "6e4e77b25001ecf508ef82c03a43a309be7707508a5ca6fd6480775e0cc6d9cf",
+    "patches": {
+      "scon.for": {
+        "original_sha256": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+        "observed_sha256": "cfcf2bb00d5adc3a5d0d5df9654bb7b32f3a2f268c377d3e41e4b7b15f0ddc36"
+      },
+      "watbal.for": {
+        "original_sha256": "ebe0921be87752bd446f7784a530b433edeae56d56fdb48578a20280b331a928",
+        "observed_sha256": "0d33442105adcdea0973ab61fa2961804bd9b01e42022494ec9c5bf14d3970df"
+      }
+    },
+    "binary": "/workdir/wepppy/out/roads-parameterization-program-20261031/hydraulic-init-r3/build/src/wepp",
+    "binary_sha256": "b122984176305d8b61f37aeb1fa8028982ee4d129e11a891ffb71a9b8ad233fb",
+    "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "script_sha256": "58440f851398aa333c885ce0c14fde2731ddf032ae04ada1deff038988eaaaf3",
+    "observation_fields": [
+      "bd_kg_m3",
+      "om_fraction",
+      "porosity",
+      "rock_correction",
+      "fc",
+      "wp",
+      "conductivity_m_s",
+      "available_water_m",
+      "upper_storage_m",
+      "layer_thickness_m",
+      "layer_bottom_m"
+    ],
+    "build_log_sha256": "ec25a7319617c3818c982be2720a2904c47eaf21be156006a1534eae4da54115"
+  },
+  "script_sha256": "01b465b2c5365fad465155e5b9bd1e20a3f57bc8d35fa530c082c3f6c36007a0",
+  "contract": "Seven material preflight before full116panel. Change only soil syntax; missing-field estimation sentinels preserved, explicit top200 K=legacy avke, lower K sentinel, anisotropy zero. Preserve native final200mm extension. No role substitution unless exact output/state equivalence passes.",
+  "limitation": "Diagnostic generator deliberately bypasses production validation; duplicate final200 boundary and zero FC/WP/BD/VG values are not deployable soils. No production/default changes."
+}

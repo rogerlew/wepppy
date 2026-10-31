@@ -1,25 +1,25 @@
 # Roads parameterization and configuration view
 
-The generated-role hydraulic audit and bounded road-only sensitivity are complete;
-[ledger v14](artifacts/candidate-ledger-v14.json) is current. All 348 treatment runs
-pass fresh physical audits. Conductivity-only recovers 24/96 misses and coupled
-pore/conductivity recovers 25/96; each retains all 20 passing controls. All 21
-initialization observation replays match released-binary raw outputs exactly.
-Seven raw sources, 21 role profiles and 96 horizons retain their 200 mm boundaries.
+The legacy-format preflight and generated downstream controls are complete;
+[ledger v15](artifacts/candidate-ledger-v15.json) is current. The format bridge
+fails exact equivalence in all seven cases, so whole-role substitution was not
+executed. The narrower 348-run same-format panel has 347 physical passes. Buffer
+conductivity caps recover 47/48 low-load misses but lose three passing controls;
+fill-only recovers eight small-load misses, loses one control and exposes SIGFPE.
+All standalone treatments are rejected. See [results](artifacts/downstream-hydraulics-r3-findings.md).
 
-No standalone treatment meets acceptance: 42 small-reference excesses remain.
-All have net fill addition and net buffer deposition; these are boundary budgets,
-not tagged particle origins. Next is an
-[initialization-verified legacy format bridge and downstream role isolation](artifacts/role-isolation-r3-plan.md).
-See [hydraulic audit](artifacts/generated-role-hydraulic-audit-r3-findings.md),
-[screen results](artifacts/road-pore-screen-r3-findings.md) and
-[research-only ADR-0120](../../adrs/ADR-0120-roads-generated-hydraulic-sensitivity.md).
+The failure reproduces on the released binary with exact partial-output parity.
+A portable fixture, GDB locals and two scalar reproductions locate an unbounded
+DEPEND Newton step; an independent 80-digit calculation confirms an interior root.
+Next is the [bounded root-search ablation](artifacts/depend-root-ablation-r3-plan.md),
+before further parameter combinations. No native patch or re-release yet.
 
 The full development baseline remains 840/840 physical, 713/766 meaningful and
-31/74 small magnitude passes. No generated parameterization is accepted.
+31/74 small magnitude passes. The new experimental failure is additional evidence,
+not covered by that baseline pass statement. No parameterization is accepted.
 Withheld materials, production defaults and the human UI specification/layout
-gate remain untouched. Evidence is in the
-[verified hydraulic study archive](artifacts/hydraulic-role-r3-v1-retention.json).
+gate remain untouched. Evidence is retained in the
+[verified downstream archive](artifacts/downstream-hydraulics-r3-v1-retention.json).
 
 Status: active. One outcome-driven program, authorized by the operator on
 2026-10-29 Pacific (2026-10-30 UTC). This supersedes the sequence of individually
