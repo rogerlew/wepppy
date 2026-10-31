@@ -1,0 +1,85 @@
+{
+  "base_commit": "e35d7a3e69497ddfd9709736af50107f56963584",
+  "scope": "Published base plus frozen release-owned overlay; complete module coverage through original shard 4, complete unchanged shard-2 replay, and original shards 1/3 plus their failed module/tail replays. No tests or thresholds changed.",
+  "shared_checkout_attempt": {
+    "command": "wctl run-pytest tests --maxfail=1",
+    "passed": 10160,
+    "skipped": 336,
+    "failed": 1,
+    "failure": "Concurrent unrelated bootstrap helper parse_json_payload is undefined; isolated bootstrap module passes all five tests."
+  },
+  "isolated_initial_shards": {
+    "2": {
+      "passed": 1267,
+      "skipped": 1,
+      "failed": 1,
+      "errors": 0,
+      "warnings": 391
+    },
+    "4": {
+      "passed": 2398,
+      "skipped": 49,
+      "failed": 0,
+      "errors": 0,
+      "warnings": 1746
+    },
+    "3": {
+      "passed": 2818,
+      "skipped": 97,
+      "failed": 1,
+      "errors": 0,
+      "warnings": 127
+    },
+    "1": {
+      "passed": 2875,
+      "skipped": 143,
+      "failed": 1,
+      "errors": 0,
+      "warnings": 101
+    }
+  },
+  "isolated_initial_failure": "Climate HTTP simulation 1.2390735149383545 s exceeded existing 1 s limit. Full unchanged seven-test module passes in replay.",
+  "isolated_shard2_replay": {
+    "passed": 3367,
+    "skipped": 43,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 3880
+  },
+  "isolated_shard1_tail_replay": {
+    "passed": 644,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 10
+  },
+  "isolated_shard1_setup_failure": "Ignored controllers-gl.js absent from detached checkout. Canonical generator builds the bundle from unchanged isolated sources; one prior passing test in the repeated module counted once.",
+  "isolated_shard3_tail_replay": {
+    "passed": 119,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 8
+  },
+  "isolated_shard3_setup_failure": "Detached checkout lacked Playwright module discovery; explicit NODE_PATH and PLAYWRIGHT_BROWSERS_PATH reuse existing main-checkout dependencies. No tracked files changed. Seven earlier passes in repeated catalog-reader module counted once.",
+  "completed_segmented_coverage": {
+    "passed": 12213,
+    "skipped": 332,
+    "failed": 0,
+    "errors": 0,
+    "collected": 12545,
+    "accounting": "Eight repeated passing tests (seven catalog reader, one unitizer) counted once; catalog tail has zero skips; completed pass+skip count equals all four original shard collections."
+  },
+  "log_sha256": {
+    "wepppy-full-suite.log": "3bf99f99f84f4aff35d0249f815dbc0af10ac5a88de6d9f2e555273b3b41d8b1",
+    "isolated-full-suite.log": "255c441b01ff910c285f7c9b7de73497218cd1d311e312436161c63a020c5c92",
+    "isolated-shard2-replay.log": "c9fcb0e7a19d45dd194ffa83c979d86da5d6e06546e2dee389f8cc6f997863d6",
+    "isolated-bootstrap-check.log": "b89de235757beef05b6d28d8af73633781a0ac497e4f7651430d8e2a35bfd832",
+    "isolated-preflight.log": "14f1ee3c25404d302264a8d42996d29b174c32af78b78b5e14abba04bf7d3dda",
+    "isolated-broad-exceptions.log": "37ad61ee2f0e432a9ed5b5b511522a5fed9dffbfe57d9c60413d9fbba52d63b2",
+    "isolated-shard3-tail-replay.log": "8bda8cf6c19750691ba690e5f4f40ac95a2d57a2eaaf884861408050fad14554",
+    "isolated-shard1-tail-replay.log": "b0388e8fd2d4de1a1b4b051da2009063661b012831084ee6a266771c9d784a03",
+    "isolated-bundle-build.log": "8d6ae7d5cdd03def9106151e6b2706ffc1bac2722b84ba922cecd2b495418bfe"
+  },
+  "disposition": "Release-specific native and runtime checks pass; complete isolated application regression coverage passes in segments. All initial failed attempts remain retained; this is not a claim of one uninterrupted green full-suite run."
+}

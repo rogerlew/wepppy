@@ -21,7 +21,9 @@ Completed locally: [WEPP admission before mutation](docs/work-packages/20261030_
 
 Completed: [WEPP 261029 release promotion](docs/work-packages/20261030_wepp_261029_release/package.md) — independent AI reviews accepted; matched Linux pair and illustrated defect/patch report pushed. Native 663 tests and WEPPpy 12,210 tests pass (298 skipped). Defaults and deployment unchanged.
 
-Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — autonomous outcome-driven search with frozen scientific gates, followed by a run-scoped user-facing parameterization view; CSV editing not required.
+Completed: [WEPP 261029 artifact revision 2](docs/work-packages/20261030_wepp_261029_rerelease/package.md) — accepted matched pair and illustrated report reissued; 1,059 native tests, 840 Roads physical cases, 99 Disturbed tests and fresh Cedar audits pass. Isolated WEPPpy coverage: 12,213 passed / 332 skipped; initial failures retained, all 14 archives verified. No deployment/default change.
+
+Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — final native accounting repairs accepted; 840/840 physical cases pass. Magnitude remains unmet: 719/766 meaningful-reference and 30/74 small-reference cases. Withheld panel untouched; human specification/layout approval required before UI implementation.
 
 Completed locally: [Roads drainage physical justification and validation](docs/work-packages/20261029_roads_drainage_validation/package.md) — 2,112 native runs; source drainage fixes 17 factor-ten failures but regresses 13. Missing UI-mode sidecar materially affects prior benchmark applicability; six negative-flux cases retained. No production candidate accepted; 12,186 tests passed / 298 skipped.
 

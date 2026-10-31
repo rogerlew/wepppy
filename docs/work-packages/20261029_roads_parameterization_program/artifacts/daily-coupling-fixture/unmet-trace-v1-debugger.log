@@ -1,0 +1,40 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.ubuntu.com>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+Stopped due to shared library event (no libraries added or removed)
+add symbol table from file "/workdir/wepppy/wepp_runner/bin/wepp_261029" at
+	.text_addr = 0x402300
+Breakpoint 1 at 0x4b82e1: file watbal_hourly.for, line 531.
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+
+Breakpoint 1, watbal_hourly (lunp=0, luns=1, lunw=1, nowcrp=1, elevm=185) at watbal_hourly.for:531
+531	              write(*,*) 'HOURLY_WATER_UNMET day,ofe,hour,demand,',
+#0  watbal_hourly (lunp=0, luns=1, lunw=1, nowcrp=1, elevm=185) at watbal_hourly.for:531
+#1  0x000000000048d985 in watbal (lunp=0, luns=0, lunw=0, nowcrp=0, elevm=<error reading variable: Cannot access memory at address 0x3c35adde00000000>) at watbal.for:253
+#2  0x000000000045fe3b in irs (nowcrp=..., wmelt=..., ibrkpt=0, runmax=0, pkrmax=0, pkefdn=0, effdrr=...) at irs.for:552
+#3  0x0000000000411f82 in contin (iwpass=1) at contin.for:963
+#4  0x0000000000462cc7 in MAIN__ () at main.for:370
+#5  0x0000000000402329 in main (argc=<optimized out>, argv=<optimized out>) at main.for:574
+year 7
+sdate 6
+iplane 2
+ii 21
+fin -0.155659601
+returnrouted 0.072907508150932082
+returntotal <optimized out>
+returnfrac 1
+returnbase -0.08275209294140648
+returnarea 13.339167788764277
+hrfin -0.0029330547
+wateravail 0.0025551870930939913
+nsl(iplane) 4
+st(1:nsl(iplane),iplane) (0, 0, 0, 0.00255518709)
+ui_SUrunf(1:24) (0, <repeats 20 times>, 0.00132334977, 0.00207116082, 0.00207116082, 0)
+ui_LfUrf(1:24) (3.06615075e-05, 3.09309398e-05, 3.12002994e-05, 3.14695899e-05, 3.17388076e-05, 3.20079562e-05, 3.20478612e-05, 3.20478612e-05, 3.24097637e-05, 3.29566428e-05, 3.35033837e-05, 3.40499719e-05, 3.45964181e-05, 3.51427334e-05, 3.56888922e-05, 3.62349128e-05, 3.67807843e-05, 3.73265175e-05, 3.78721052e-05, 3.84175473e-05, 3.86042993e-05, 3.86042993e-05, 3.86042993e-05, 3.83999759e-05)
+runoff(iplane) 0.0116133476
+rain(iplane) 0
+wmelt(iplane) 0.012304822
+[Inferior 1 (process 1338112) exited with code 01]

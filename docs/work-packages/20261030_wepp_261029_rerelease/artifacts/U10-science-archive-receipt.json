@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261030/native-accounting-U10-science-v1.tar.gz",
+  "sha256": "30e9d960afcca29d62f63963355d6114a7fefb1a716827d365d3803a1f2b556c",
+  "bytes": 5060043587,
+  "files": 44953,
+  "uncompressed_bytes": 30379307741,
+  "all_members_verified": true,
+  "already_retained_files": 0,
+  "member_manifest_sha256": "13666919fc72d7d4f45910c3ed35abe5da8e8de55b04841a8c2d9ef6cbdff792",
+  "scope": "Scientifically accepted final U10: exact dated build, native/Roads/Disturbed/watchlist controls, fresh24year Cedar with matched864 hillslopes, independent observation and complete output/readback/sign/source evidence. Post-vendor operational integration retained separately."
+}

@@ -1,0 +1,36 @@
+{
+  "release": "wepp_261029",
+  "artifact_revision": 2,
+  "binary_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "input_receipt_sha256": "bf4dd2e221a1afb1d3bd22256a4f80e55eab269fc574dd3df101de1fbb0e8636",
+  "fresh_same_build_pass_sha256": "0d2d156ccbe1e7d08da29866bb28516936aa507c9aa38c6cc38f7a967b7c73c8",
+  "native_output_sha256": {
+    "H1.loss.dat": "3b41d0d231d2d7068473bff3052d930a5bf8caeb0976641f374033740cc7c01c",
+    "H1.soil.dat": "d1c8ca3e3bee66c8149f913493dccbc8f05a4dfaa218936b5dc7e2135cfeab85",
+    "H1.pass.dat": "0d2d156ccbe1e7d08da29866bb28516936aa507c9aa38c6cc38f7a967b7c73c8",
+    "pass_pw0.txt": "2e3cdc203bdab8ffa6937b9fb1e5a18bdaf6f2cac3f1e0288f09b646e09242be",
+    "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+    "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+    "loss_pw0.txt": "63cb2a51cf3e70f6b3b948a4278e8fa651d06b965a689f12bd3e8531bbfd2133",
+    "chnwb.txt": "1040c8519cdaf0b03ff02e3ef24e1f0f38da11fa2fc8d77e1b58b63c3eec301d",
+    "H1.wat.dat": "dda8fc348c2ff9a0906c50688810c87395937a967a379deb29f5d6ba68e9b82a",
+    "H1.element.dat": "33303948e38b5794d232db40998f03d19c9aa3301630f9f0fcf3c6cc84b80be3",
+    "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+    "soil_pw0.txt": "6fd5c42fce7959a1f109d5072e0eec9dfbccb6aeec3485e7cc9b328ff887488a",
+    "ebe_pw0.txt": "a0156f07afd02771b85f6185e5eef3d3d97775ca3d74419c0671164a8142ae6a"
+  },
+  "channel_rows": 731,
+  "channel_calendar_days": 731,
+  "channel_native_projected_parquet_exact": true,
+  "native_fields": 27,
+  "parquet_native_fields": 22,
+  "native_profile_diagnostics_finite_nonnegative": true,
+  "event_rows": 731,
+  "runner_log_sha256": {
+    "p1.err": "94892c2513b387d79cb6421190747627ae1f4ca77dcc79a9268605c463f53f73",
+    "pw0.err": "17634ecd88487f52c84d07f748a05bd2fd91d7c7fe6b5e99c88894d33b52a925"
+  }
+}

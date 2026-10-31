@@ -1,0 +1,35 @@
+{
+  "cases": {
+    "charleston_cap": {
+      "returncode": 1,
+      "expected_stop": true,
+      "all_outputs_equal": true,
+      "outputs": {
+        "H1.soil.dat": "04a3f2b97c7a6ca3e3876dc03549450cac83b872d50e2ac1bc0d64ec85d6d49a",
+        "H1.pass.dat": "fdadaed81efac41098a48418a6def50f1cb0b1f9d5c889c02930b4ff3d04ef60",
+        "H1.loss.dat": "c09b345e56b8fa46c43d5085628c2564e2b99af136db31092774ed11f89c2878",
+        "H1.ebe.dat": "354801a2e153351c93aa876f5e6b5dc16e9ff0059abe7deb5fe67a2b8bd369ea",
+        "H1.wat.dat": "62f270b0560234607219267785cc7a024eabcb47f88809d8b49aac1ea677b975",
+        "H1.element.dat": "ca1bdbeedd4df2101e43b128375a0bd1b51ac83405a18a82105610b2ecf21573",
+        "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23"
+      }
+    },
+    "site_cap": {
+      "returncode": 0,
+      "expected_stop": true,
+      "all_outputs_equal": true,
+      "outputs": {
+        "H1.soil.dat": "9e3a99dd6be1ee0e46a4dfc82912ca4232fd659f8630b4f925e6473f1b7ff303",
+        "H1.pass.dat": "e93eebc29363b22f8946f800996841b17af5909378ff8eddccdf63f6e67726d6",
+        "H1.loss.dat": "c2bba462f9391bbabec8d14e56fb559b114fbf51800212c61c46553b20979a1b",
+        "H1.ebe.dat": "73ee6951e40ed94cb956d737ea4d5f4f56fd6cf8732ea1053ec2bcc8d20ee0ec",
+        "H1.wat.dat": "b1bb7c70f6518c900113626756c5e18488a81c0683d9b1c700290d91f00ea844",
+        "H1.element.dat": "02cf847d66758e7336e97cd397477e461d078d5cb086a47a06b46eac82fa3458",
+        "H1.plot.dat": "adcd46721610060d92d98b39faa12fad02fc584b60d45ba0790004bd05c5e322"
+      }
+    }
+  },
+  "binary_sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+  "fixture_manifest_sha256": "7fefd11aea0b50a0febf3167ded28a1df063d872490d16bd31809380de88b92b",
+  "script_sha256": "54d1225419dece95470e3fb8831e257905bc0821c6638aa49001170af7d33f32"
+}

@@ -1,7 +1,7 @@
 # Success criteria
 
-Status: working practical numerical gates; optional operator steering requested.
-Proceeding under delegated experimental judgment; record any response before freezing.
+Status: continuation gates frozen on 2026-10-30 under operator instruction to
+continue the recommended program. Numerical thresholds are unchanged.
 The operator requested order-of-magnitude reasonableness and delegated experiment
 selection. Freeze this document and a machine-readable manifest before candidate
 selection. Any later criterion change must be explicit and cannot retroactively
@@ -9,7 +9,7 @@ turn a failed validation into a pass.
 
 ## 1. Comparable executable baselines
 
-Use exact `wepp_261026` for the modern treatment and frozen FSWEPP2 Roads/WEPP2010
+Use the released matched `wepp_261029` pair for the modern treatment and frozen FSWEPP2 Roads/WEPP2010
 references. Retain modern-binary legacy-soil controls to distinguish engine effects
 from parameterization effects. Hash binaries, source, generated/prepared inputs,
 climates, runtime sidecars and native outputs. Confirm actual mode activation.
@@ -29,7 +29,7 @@ labels and duplicated MUKEY material do not create independent evidence.
 
 ## 2. Order-of-magnitude agreement
 
-Proposed practical gate: at least **95%** of meaningful-load comparisons lie in
+Frozen practical gate: at least **95%** of meaningful-load comparisons lie in
 **0.1–10 times** the FSWEPP2 annual sediment export, and at least **90%** pass within
 each declared climate, design/routing, surface, traffic and soil/restriction group.
 Apply these gates separately to the development confirmation and genuinely withheld
@@ -37,7 +37,7 @@ validation panels; count soil material groups with equal weight and report raw c
 Report all intersections and worst cases even where their sample size is small.
 No hidden material stratum can be excused by the overall mean.
 
-Proposed small-load convention for the frozen benchmark geometries: a reference
+Frozen small-load convention for the frozen benchmark geometries: a reference
 above **1 kg/year** uses the ratio gate. A reference at or below 1 kg/year has no
 ratio lower-bound requirement and must have candidate export no greater than
 `max(1 kg/year, 10 * reference)`. This is an explicitly chosen engineering tolerance,
@@ -118,3 +118,15 @@ user-facing view are implemented, wired and validated with actual artifacts, tes
 review and documentation. If no candidate meets the gates, report the limiting
 physics/model issue and continue justified investigation; do not lower the gates or
 ship a tuning interface as if an accepted default had been established.
+
+
+## Human gate for configuration specification and layout
+
+Operator instruction, 2026-10-30: continue the recommended scientific program
+with broad authority to use forest, up to a human review of the UI configuration
+specification and layout. Prepare concrete fields, units, ranges, applicability,
+version/adoption/reset behavior and a static layout proposal. Human approval of
+both specification and layout is required before implementing the configuration
+view or its production persistence/application wiring. Scientific experiments,
+disposable builder/full-project validation and reviewable design documents remain
+authorized. Do not treat silence, scientific acceptance or AI review as UI approval.

@@ -1,0 +1,8 @@
+{
+  "cases": 840,
+  "physical_pass": 840,
+  "differences": [],
+  "reference": "frozen experimental U9a",
+  "candidate": "frozen system dated261029-r2",
+  "scope": "Actual native outputs and audit/metric/input readback; not binary equivalence or channel scientific acceptance"
+}

@@ -1,0 +1,1508 @@
+{
+  "input_sha256": "8e3626e1ec3d6bfea1b7efba638e2bf545ba3ac797d1c294d9b4485aa3cde8ba",
+  "criteria_unchanged": true,
+  "failure_groups": {
+    "meaningful_low": {
+      "count": 41,
+      "climate": {
+        "birmingham": 3,
+        "charleston": 10,
+        "denver": 17,
+        "flagstaff": 2,
+        "site": 9
+      },
+      "design": {
+        "outunrut": 23,
+        "inveg": 6,
+        "inbare": 6,
+        "outrut": 6
+      },
+      "zero_predictions": 11,
+      "cases": [
+        {
+          "case": {
+            "climate": "birmingham",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 255.9157468357803,
+          "value_kg_yr": 24.613085976626333,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.09617652012801077
+        },
+        {
+          "case": {
+            "climate": "birmingham",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 177.29180844459566,
+          "value_kg_yr": 11.81083285043015,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.06661804035983467
+        },
+        {
+          "case": {
+            "climate": "birmingham",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 214.4916214005125,
+          "value_kg_yr": 12.457411291147128,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.05807877813504823
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 71.35128,
+          "value_kg_yr": 6.031079999999999,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.08452658452658451
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 28.621872309071605,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 18.4921434045056,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 8.01757266489054,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 13.750568172581087,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 13.750568172581087,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 1.982840551532069,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 12.888463584958448,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 12.888463584958448,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 1.1638411932905621,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 36.04392,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.008239947264337508
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 22.4532,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.013227513227513227
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 14.1372,
+          "value_kg_yr": 0.11484000000000001,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.008123249299719889
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 30.75336,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.00965748132886943
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 21.05136,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.014108352144469526
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 12.375,
+          "value_kg_yr": 0.11484000000000001,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.009280000000000002
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 36.186479999999996,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.008207485226526593
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 22.48488,
+          "value_kg_yr": 0.297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.013208876364917223
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711184",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 14.1372,
+          "value_kg_yr": 0.11484000000000001,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.008123249299719889
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 25.09452,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.04592078270474988
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 17.332919999999998,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.06648389307745031
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "inbare",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 9.7218,
+          "value_kg_yr": 0.95832,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.09857433808553971
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 22.3542,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.051550044286979624
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "inveg",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 16.311239999999998,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.07064821558630735
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 25.13016,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.04585565710683895
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 17.33688,
+          "value_kg_yr": 1.1523599999999998,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.06646870717222475
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "2711250",
+            "design": "outrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 9.7218,
+          "value_kg_yr": 0.95832,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.09857433808553971
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 1.1207359639094303,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 1.1207359639094303,
+          "value_kg_yr": 0.0,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 115.22027813576567,
+          "value_kg_yr": 5.77610073707168,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.05013093901982791
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 59.83005838101112,
+          "value_kg_yr": 2.931155597916972,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.0489913544668588
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 88.9260882132752,
+          "value_kg_yr": 5.34504844326036,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.06010664081434803
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 37.28602341467912,
+          "value_kg_yr": 1.3793673401962219,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.03699421965317919
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 37.28602341467912,
+          "value_kg_yr": 1.3793673401962219,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.03699421965317919
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711184",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 122.24643052489016,
+          "value_kg_yr": 0.8621045876226388,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.007052186177715093
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 92.2020856462412,
+          "value_kg_yr": 4.2674177087320615,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.04628330995792427
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 92.2020856462412,
+          "value_kg_yr": 4.2674177087320615,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.04628330995792427
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "2711250",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 192.16311258108618,
+          "value_kg_yr": 3.448418350490555,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 0.01794526693584567
+        }
+      ]
+    },
+    "meaningful_high": {
+      "count": 6,
+      "climate": {
+        "charleston": 2,
+        "site": 4
+      },
+      "design": {
+        "outunrut": 6
+      },
+      "zero_predictions": 0,
+      "cases": [
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 2.931155597916972,
+          "value_kg_yr": 32.9323952471848,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 11.235294117647058
+        },
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 1.982840551532069,
+          "value_kg_yr": 26.98387359258859,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 13.608695652173912
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 15.560987806588628,
+          "value_kg_yr": 175.82623064563714,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 11.299168975069252
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 14.00919954886788,
+          "value_kg_yr": 203.75841928461068,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 14.544615384615385
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 37.28602341467912,
+          "value_kg_yr": 378.37770350757614,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 10.147976878612718
+        },
+        {
+          "case": {
+            "climate": "site",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 37.28602341467912,
+          "value_kg_yr": 378.37770350757614,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 10.147976878612718
+        }
+      ]
+    },
+    "small_reference_above_absolute_limit": {
+      "count": 44,
+      "climate": {
+        "charleston": 1,
+        "denver": 28,
+        "flagstaff": 15
+      },
+      "design": {
+        "outunrut": 44
+      },
+      "zero_predictions": 0,
+      "cases": [
+        {
+          "case": {
+            "climate": "charleston",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.08621045876226387,
+          "value_kg_yr": 5.646785048928284,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 65.50000000000001
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 4.870890920067909,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 4.784680461305645,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 3.965681103064138,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.198573306649034,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.198573306649034,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 9.052098170037706,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 8.44862495870186,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 2.5001033041056524,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 19.871510744701823,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 19.871510744701823,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 2.5001033041056524,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 8.66415110560752,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 6.293363489645262,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 4.181207249969797,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.629625600460352,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.629625600460352,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1718510",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 1.3793673401962219,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 8.01757266489054,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 6.120942572120734,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 5.086417066973568,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.284783765411297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 7.284783765411297,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 1.0776307345282985,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 3.060471286060367,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 3.060471286060367,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 2.5001033041056524,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 6.422679177788658,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "denver",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 6.422679177788658,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.4310522938113194,
+          "value_kg_yr": 14.612672760203727,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 33.9
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.4310522938113194,
+          "value_kg_yr": 10.517675968996192,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 24.4
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.3879470644301874,
+          "value_kg_yr": 14.741988448347122,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 38.0
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.04310522938113193,
+          "value_kg_yr": 2.112156239675465,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 49.00000000000001
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.04310522938113193,
+          "value_kg_yr": 2.112156239675465,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 49.00000000000001
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718465",
+            "design": "outunrut",
+            "surface": "paved",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.0,
+          "value_kg_yr": 1.7242091752452775,
+          "within": false,
+          "physical_pass": true,
+          "ratio": null
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 18.70766955141126,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 33.38461538461539
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 11.207359639094303,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 20.0
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1718494",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5172627525735832,
+          "value_kg_yr": 15.302356430301836,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 29.583333333333332
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 20.130142120988616,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 35.92307692307693
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 11.465991015381094,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 20.46153846153846
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "1856573",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5172627525735832,
+          "value_kg_yr": 17.32830221121504,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 33.5
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "high",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 16.94035514678485,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 30.23076923076923
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "low",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5603679819547152,
+          "value_kg_yr": 7.3278889947924295,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 13.076923076923078
+        },
+        {
+          "case": {
+            "climate": "flagstaff",
+            "soil": "53949",
+            "design": "outunrut",
+            "surface": "gravel",
+            "traffic": "none",
+            "variant": "erosion_road_cap",
+            "runtime": "project"
+          },
+          "reference_kg_yr": 0.5172627525735832,
+          "value_kg_yr": 11.853938079811282,
+          "within": false,
+          "physical_pass": true,
+          "ratio": 22.916666666666668
+        }
+      ]
+    }
+  }
+}

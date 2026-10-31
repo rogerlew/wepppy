@@ -1,0 +1,22 @@
+{
+  "incident": "docs/ablation/20261030_roads_daily_coupling_and_event_state",
+  "checked_files": 654,
+  "working_tree_checksums": "all pass",
+  "git_index_lf_roundtrip": "all pass; actual Git clean filters with private index",
+  "real_git_index_modified": false,
+  "checksums_sha256": "fc13b5a5840168c7ac7bb4600adb85f1de66121c79ec90d3b962d50238a11cae",
+  "manifest_sha256": "0bf55abb9da4a25cb9115a662ff3957e410a401b6d05c8d4da42cbe278d5c4b9",
+  "matrix_sha256": "6534974a38f8f10a2788efc3984d47c07d7cf6ed668c233ade2d79e0add6e9fe",
+  "scientific_acceptance_sha256": "63b310b177220128cc18df988e2bea521af11dbc1be79724579b54050edea89c",
+  "canonical_tool_sha256": "377c4a68bb5c238cb9f87931a0399994044cd7d8bab38cbe52ef2bd353d4931e",
+  "finalization_log_sha256": "12d3e6e0133eee768ba115e2627d91d033d2e75acdd7f86d67989da0e9d4485c",
+  "artifact_policy_log_sha256": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352",
+  "verifier_sha256": "0d2e67160127c12a93ded0d3d8bb3f2b9402e7db8239c8bbd5577b2b1541d519",
+  "frozen_native_and_installed_release_files": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+    "wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f"
+  },
+  "scope": "Native incident closeout only; no model/runtime or frozen metadata change. Full WEPPpy suite and operational archives are separate."
+}

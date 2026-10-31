@@ -1,0 +1,21 @@
+{
+  "all_frozen_files_exact": true,
+  "sha256": {
+    "/workdir/wepppy/wepp_runner/bin/wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "/workdir/wepppy/wepp_runner/bin/wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+    "/workdir/wepppy/wepp_runner/bin/wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "/workdir/wepppy/wepp_runner/bin/wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
+    "/workdir/wepppy/out/261029-r2-isolated/wepp_runner/bin/wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "/workdir/wepppy/out/261029-r2-isolated/wepp_runner/bin/wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+    "/workdir/wepppy/out/261029-r2-isolated/wepp_runner/bin/wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "/workdir/wepppy/out/261029-r2-isolated/wepp_runner/bin/wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
+    "/workdir/wepp-forest-release-20261009/release/wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "/workdir/wepp-forest-release-20261009/release/wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+    "/workdir/wepp-forest-release-20261009/release/wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "/workdir/wepp-forest-release-20261009/release/wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
+    "/workdir/wepppy/wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r2.pdf": "c94db60e60ccd561a96dcdda89bad8bed209c32a783d3e699beb0e72485ddf44",
+    "/workdir/wepppy/wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r2.json": "28c3efb859ae339bfcf3d598b36f2a885486d219f62ddd7a9387d3310a93baf8",
+    "/workdir/wepppy/out/261029-r2-isolated/wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r2.pdf": "c94db60e60ccd561a96dcdda89bad8bed209c32a783d3e699beb0e72485ddf44",
+    "/workdir/wepppy/out/261029-r2-isolated/wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r2.json": "28c3efb859ae339bfcf3d598b36f2a885486d219f62ddd7a9387d3310a93baf8"
+  }
+}

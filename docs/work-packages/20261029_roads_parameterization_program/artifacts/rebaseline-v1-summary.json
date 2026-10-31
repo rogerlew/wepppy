@@ -1,0 +1,22 @@
+{
+  "roles": {
+    "cases": 96,
+    "numerical_pass": 80,
+    "physical_pass": 80
+  },
+  "erosion": {
+    "cases": 96,
+    "numerical_pass": 77,
+    "physical_pass": 80
+  },
+  "erosion_road_cap": {
+    "cases": 96,
+    "numerical_pass": 96,
+    "physical_pass": 96
+  },
+  "legacy_soil": {
+    "cases": 96,
+    "numerical_pass": 96,
+    "physical_pass": 96
+  }
+}

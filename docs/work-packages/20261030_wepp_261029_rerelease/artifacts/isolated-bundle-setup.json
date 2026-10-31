@@ -1,0 +1,5 @@
+{
+  "generated_bundle_sha256": "17145c16a66469b6ffbf07a8aa5ca6f7d5026a869b6eae90d4e77ac6b500cc52",
+  "generator_sha256": "816c0073b045d3f6e641ac08f8cf99c8a2873469e2192a60c575c95e843602f9",
+  "scope": "Canonical generation inside isolated published-base checkout; no tracked controller change and no deployment. Ignored output is test setup, excluded from release commit."
+}

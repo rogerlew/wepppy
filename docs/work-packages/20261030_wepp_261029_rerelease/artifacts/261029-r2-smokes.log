@@ -1,0 +1,4 @@
+pass_family=legacy_ascii (inferred from /home/workdir/wepp-forest-release-20261009/release/wepp_261029.json when present)
+p1	rc=0	success=1	expected_year=3	years=[1 2 3]	last= WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY	wd=/tmp/p1_host_smoke_Cq6nK5
+pass_family=legacy_ascii (inferred from /home/workdir/wepp-forest-release-20261009/release/wepp_261029_hill.json when present)
+p1	rc=0	success=1	expected_year=3	years=[1 2 3]	last= WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY	wd=/tmp/p1_host_smoke_yZI8zk

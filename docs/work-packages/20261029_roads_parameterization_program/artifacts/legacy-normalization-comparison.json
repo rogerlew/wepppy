@@ -1,0 +1,1543 @@
+{
+  "cases": 96,
+  "min_normalized_over_exact": 1.0,
+  "max_normalized_over_exact": 1.0,
+  "rows": [
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 660.61116,
+      "normalized_kg_yr": 660.61116,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17",
+      "normalized_soil_sha256": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 347.79888,
+      "normalized_kg_yr": 347.79888,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b",
+      "normalized_soil_sha256": "e1ca4b38fcf0dd0a382cd2b167bc6cf9161df78551181acb3d07ef56fb542a37"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1099.20492,
+      "normalized_kg_yr": 1099.20492,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "38b4531aff4efb715427cc477001da9ac7750403479b51cd18e102fe79031364",
+      "normalized_soil_sha256": "e6411c6f2a545d6296a1fdec12aceff1012c2dc46f70454e5cd1ad801a23e5f6"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 481.50828,
+      "normalized_kg_yr": 481.50828,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "19fbad099b85bc169cf287c1f29af6078ece1145e684b179ebaecf05543ead8c",
+      "normalized_soil_sha256": "fd661c86075fcec4920dd1beb9260d5e99dabf612e4e0a5511e8630e33d2ce6d"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 369.22644,
+      "normalized_kg_yr": 369.22644,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d",
+      "normalized_soil_sha256": "c9ab32fbaf26ab4013ecf99c431a01b2be1d44f6763d1da8349970519c3e105d"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 299.29283999999996,
+      "normalized_kg_yr": 299.29283999999996,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "a6cd2c2d75cfd68200540309cf54f76df6cc3c1aac9bbb49138a7b41f145f949",
+      "normalized_soil_sha256": "cdbf4a11fe92ad5993007bca3e9704bd2d767b95d7a3ecead08f7095fc5aaf96"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 589.14108,
+      "normalized_kg_yr": 589.14108,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5755087a48cad595e15a112b42baf09e0cf010316014a1f68639f83e5de57daf",
+      "normalized_soil_sha256": "b78c4a020a69082836e1f6b3c1dfd234249752b039f2fe63266348eff2d5b19f"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 390.6738,
+      "normalized_kg_yr": 390.6738,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9f3aca5301b1ec7bb2a60b5254642517b2da8d48e4e571b6321f74cdc33461cc",
+      "normalized_soil_sha256": "f403812b7b9f01ed5333b09ee76062542bca1ef16f13f7a5ad348168a1297d63"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1264.89528,
+      "normalized_kg_yr": 1264.89528,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "dea86ce012786625e3e6b1d9ef0c93ed2bb347239dcae676932f699f1e5c500b",
+      "normalized_soil_sha256": "d8b44201c3aea015f4e68350cf0d3aced5d948814680ba505b8810183ee2fae3"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 506.15531999999996,
+      "normalized_kg_yr": 506.15531999999996,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "81755db553f9c599792246a96caa41550962b9bdb2b47a4e3a9ff47f0a85c169",
+      "normalized_soil_sha256": "da4e8e1844ea36c8452e760c88409332dde199bc2aee5396f7ccf25e8d6a5e23"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1284.6715199999999,
+      "normalized_kg_yr": 1284.6715199999999,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ff5764d11c904699aecd461b15fff9c2463ef7e2b74aa1ac952aaa3791022cc9",
+      "normalized_soil_sha256": "d0f90013201f5a77bd2cdc7c70cd5728e2bf91e6988682041cb0bd2dd36e9876"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 705.5730000000001,
+      "normalized_kg_yr": 705.5730000000001,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c61104f20d1df9ff89ff5688bb426cfeefe632be412884728da81521b715de5f",
+      "normalized_soil_sha256": "b4e507f99fc1e809560f570a450436004a2970083a4caa6725db8d50a7891e28"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 813.03552,
+      "normalized_kg_yr": 813.03552,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b2b2c647234d981988b1a5aaa662fc76f0d02ca52dc1301eb7dc888eb937bf57",
+      "normalized_soil_sha256": "2a33f01399b5e1a7a5a4a9e174e60b1dd53b3cd453261a1453b6766192811074"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 467.23644,
+      "normalized_kg_yr": 467.23644,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c7d470b103ade297295ef8844a93a570c2957a4686db8db09aaf5a63e17bf441",
+      "normalized_soil_sha256": "c33ff9beacd2b2ff9a0e819a537a0c69c21f6c77b3cee760f645ff933a778b91"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 502.82099999999997,
+      "normalized_kg_yr": 502.82099999999997,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0de6c0d27ba81a68aab3b58b7c3a5e8bd73613426fca2560df222f47e7f4dd69",
+      "normalized_soil_sha256": "215cdc6fe201a1a07b1068493e8387e1d7116b4d3eaa93602a0a3fee97945ad5"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 403.15968000000004,
+      "normalized_kg_yr": 403.15968000000004,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5697d79455a859f87592ca5bed4406134e90f43db9f5962a20de58070f0309e1",
+      "normalized_soil_sha256": "ee0bf3482352edee716dd40e6d2f7b8cc5f1aa12f2bd28f10c0e959c0ecc8f9e"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1231.46496,
+      "normalized_kg_yr": 1231.46496,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5",
+      "normalized_soil_sha256": "184a06943a9ff673ae2ad69a4b3bbebeaee01c42f35e7ee2fd7aa803dc782d03"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 560.5657199999999,
+      "normalized_kg_yr": 560.5657199999999,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530",
+      "normalized_soil_sha256": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1089.26136,
+      "normalized_kg_yr": 1089.26136,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b4bdf60103c36948a75722e306b81fcbe6873d92f2123c09cf8ef2850d76baa9",
+      "normalized_soil_sha256": "379a6b5c730f06c67792cd4aa645670a2033e13e83c51c5c54505baffb883e59"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 439.71047999999996,
+      "normalized_kg_yr": 439.71047999999996,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3dd4b5e2d31893753e3bfe397cca837d393ad26fedbd13e48b920858d102aa38",
+      "normalized_soil_sha256": "d695df2722a11635bd87eb1ec27af641cca78b20c13935ecee59bb4f2b0cc3b5"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 787.02228,
+      "normalized_kg_yr": 787.02228,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "1bcc4821dcc04caca002dcaea9300e696f924184a8d7c691f93ed9c22e439f5e",
+      "normalized_soil_sha256": "fae0239801ecc4f0456f7ba1f752ee8350298810ce5bda3437c94e4f5cd296de"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 502.3062,
+      "normalized_kg_yr": 502.3062,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e",
+      "normalized_soil_sha256": "b013e5cd9f0973e1b5d16d00aea9cf5f5828b8780d5458f77470cdd2305d1435"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 507.60468,
+      "normalized_kg_yr": 507.60468,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9936b6468daab40935e5b3d7244f6d9242f4e07ba0500baed205c64e0aed58cd",
+      "normalized_soil_sha256": "2ccd4eefe64c715a329fd05b3b9c16c632384863ebd3db767ac064f1833909d8"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 356.49504,
+      "normalized_kg_yr": 356.49504,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "29e341bc7d5e5ad63bc85d37f2ea4ba0e0c9f95c708b0392ada041b739486e57",
+      "normalized_soil_sha256": "fff4ca3dcb33a3e868dab75bbaf6d7126ef888d4404e68a7510cde987144d05f"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1266.1585200000002,
+      "normalized_kg_yr": 1266.1585200000002,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6fce36cb534dce6f00a4bea899f9b3e626aef2602f66a0caa3a6b9ec9e945654",
+      "normalized_soil_sha256": "51f377d0a292bd1cf2fb61af93b607ed2bebc23c9fbd0bf31f5637e3f2e2a01a"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 507.10967999999997,
+      "normalized_kg_yr": 507.10967999999997,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34",
+      "normalized_soil_sha256": "de46b952fa8509a70c36e4b47b37c2bf7d92540cb1f3b9088f10073e5c21f4dc"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1120.6206,
+      "normalized_kg_yr": 1120.6206,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "2522eaa0b4fab81c90c18b98d49c234b0b701f5748ca29213e3e2f05017a95d2",
+      "normalized_soil_sha256": "fd54213bf5414f234138b53cae45b6eb14ed9ab5dbc1665a011cbdd9f78f4004"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 456.4494,
+      "normalized_kg_yr": 456.4494,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "24c5fa6c56092f2e93168ab5209508e7aa42ab16c7c27dbed63ed78856599c38",
+      "normalized_soil_sha256": "91814c416be867959c428baeaa53ea19ece0038590f3ac5fe5e99ac472609fea"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 826.8876,
+      "normalized_kg_yr": 826.8876,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "229e4c58c247761295b468e0bd9ef54c804ef4b180c6db8fc81679acfd5ff6fb",
+      "normalized_soil_sha256": "9ed464173eb16bae1f87188c84bf3d8f16855f8aa5cf5cdaad42c435756abef5"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 447.95916,
+      "normalized_kg_yr": 447.95916,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c0104364af97fc34326ff2e5f7b6129e698d8ec0320d4c7545d7bdcfd9f710a4",
+      "normalized_soil_sha256": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 529.0559999999999,
+      "normalized_kg_yr": 529.0559999999999,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6b6fb87a1ff0e80ad59d0114bc193c7c0e23e7caa41763d36a8db5f5d2280a7a",
+      "normalized_soil_sha256": "5c2d34947b9ce076e932b116959d5d4c1d26e032bb2e758535a8f59973ca98e8"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 370.40652,
+      "normalized_kg_yr": 370.40652,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3d266aafddd8d9387c80c713192b8b58888fd2f9671c638b99bb98c5caf34bff",
+      "normalized_soil_sha256": "f00f6edd5cac766f957cbb56c30608566a49dcdc28cd64c7de27aa7103b11560"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 759.33396,
+      "normalized_kg_yr": 759.33396,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17",
+      "normalized_soil_sha256": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 352.53504,
+      "normalized_kg_yr": 352.53504,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b",
+      "normalized_soil_sha256": "e1ca4b38fcf0dd0a382cd2b167bc6cf9161df78551181acb3d07ef56fb542a37"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1403.73684,
+      "normalized_kg_yr": 1403.73684,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "38b4531aff4efb715427cc477001da9ac7750403479b51cd18e102fe79031364",
+      "normalized_soil_sha256": "e6411c6f2a545d6296a1fdec12aceff1012c2dc46f70454e5cd1ad801a23e5f6"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 536.32656,
+      "normalized_kg_yr": 536.32656,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "19fbad099b85bc169cf287c1f29af6078ece1145e684b179ebaecf05543ead8c",
+      "normalized_soil_sha256": "fd661c86075fcec4920dd1beb9260d5e99dabf612e4e0a5511e8630e33d2ce6d"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 647.7174,
+      "normalized_kg_yr": 647.7174,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d",
+      "normalized_soil_sha256": "c9ab32fbaf26ab4013ecf99c431a01b2be1d44f6763d1da8349970519c3e105d"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 300.75408,
+      "normalized_kg_yr": 300.75408,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "a6cd2c2d75cfd68200540309cf54f76df6cc3c1aac9bbb49138a7b41f145f949",
+      "normalized_soil_sha256": "cdbf4a11fe92ad5993007bca3e9704bd2d767b95d7a3ecead08f7095fc5aaf96"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1087.8912,
+      "normalized_kg_yr": 1087.8912,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5755087a48cad595e15a112b42baf09e0cf010316014a1f68639f83e5de57daf",
+      "normalized_soil_sha256": "b78c4a020a69082836e1f6b3c1dfd234249752b039f2fe63266348eff2d5b19f"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 386.91576000000003,
+      "normalized_kg_yr": 386.91576000000003,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9f3aca5301b1ec7bb2a60b5254642517b2da8d48e4e571b6321f74cdc33461cc",
+      "normalized_soil_sha256": "f403812b7b9f01ed5333b09ee76062542bca1ef16f13f7a5ad348168a1297d63"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 999.19908,
+      "normalized_kg_yr": 999.19908,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "dea86ce012786625e3e6b1d9ef0c93ed2bb347239dcae676932f699f1e5c500b",
+      "normalized_soil_sha256": "d8b44201c3aea015f4e68350cf0d3aced5d948814680ba505b8810183ee2fae3"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 350.64612,
+      "normalized_kg_yr": 350.64612,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "81755db553f9c599792246a96caa41550962b9bdb2b47a4e3a9ff47f0a85c169",
+      "normalized_soil_sha256": "da4e8e1844ea36c8452e760c88409332dde199bc2aee5396f7ccf25e8d6a5e23"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1296.77328,
+      "normalized_kg_yr": 1296.77328,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ff5764d11c904699aecd461b15fff9c2463ef7e2b74aa1ac952aaa3791022cc9",
+      "normalized_soil_sha256": "d0f90013201f5a77bd2cdc7c70cd5728e2bf91e6988682041cb0bd2dd36e9876"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 540.67068,
+      "normalized_kg_yr": 540.67068,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c61104f20d1df9ff89ff5688bb426cfeefe632be412884728da81521b715de5f",
+      "normalized_soil_sha256": "b4e507f99fc1e809560f570a450436004a2970083a4caa6725db8d50a7891e28"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 845.07588,
+      "normalized_kg_yr": 845.07588,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b2b2c647234d981988b1a5aaa662fc76f0d02ca52dc1301eb7dc888eb937bf57",
+      "normalized_soil_sha256": "2a33f01399b5e1a7a5a4a9e174e60b1dd53b3cd453261a1453b6766192811074"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 310.13136000000003,
+      "normalized_kg_yr": 310.13136000000003,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c7d470b103ade297295ef8844a93a570c2957a4686db8db09aaf5a63e17bf441",
+      "normalized_soil_sha256": "c33ff9beacd2b2ff9a0e819a537a0c69c21f6c77b3cee760f645ff933a778b91"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 826.78068,
+      "normalized_kg_yr": 826.78068,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0de6c0d27ba81a68aab3b58b7c3a5e8bd73613426fca2560df222f47e7f4dd69",
+      "normalized_soil_sha256": "215cdc6fe201a1a07b1068493e8387e1d7116b4d3eaa93602a0a3fee97945ad5"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 348.57108,
+      "normalized_kg_yr": 348.57108,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5697d79455a859f87592ca5bed4406134e90f43db9f5962a20de58070f0309e1",
+      "normalized_soil_sha256": "ee0bf3482352edee716dd40e6d2f7b8cc5f1aa12f2bd28f10c0e959c0ecc8f9e"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1084.39056,
+      "normalized_kg_yr": 1084.39056,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5",
+      "normalized_soil_sha256": "184a06943a9ff673ae2ad69a4b3bbebeaee01c42f35e7ee2fd7aa803dc782d03"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 411.85188,
+      "normalized_kg_yr": 411.85188,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530",
+      "normalized_soil_sha256": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1432.14984,
+      "normalized_kg_yr": 1432.14984,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b4bdf60103c36948a75722e306b81fcbe6873d92f2123c09cf8ef2850d76baa9",
+      "normalized_soil_sha256": "379a6b5c730f06c67792cd4aa645670a2033e13e83c51c5c54505baffb883e59"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 421.71623999999997,
+      "normalized_kg_yr": 421.71623999999997,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3dd4b5e2d31893753e3bfe397cca837d393ad26fedbd13e48b920858d102aa38",
+      "normalized_soil_sha256": "d695df2722a11635bd87eb1ec27af641cca78b20c13935ecee59bb4f2b0cc3b5"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 893.55024,
+      "normalized_kg_yr": 893.55024,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "1bcc4821dcc04caca002dcaea9300e696f924184a8d7c691f93ed9c22e439f5e",
+      "normalized_soil_sha256": "fae0239801ecc4f0456f7ba1f752ee8350298810ce5bda3437c94e4f5cd296de"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 354.57444,
+      "normalized_kg_yr": 354.57444,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e",
+      "normalized_soil_sha256": "b013e5cd9f0973e1b5d16d00aea9cf5f5828b8780d5458f77470cdd2305d1435"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 984.28572,
+      "normalized_kg_yr": 984.28572,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9936b6468daab40935e5b3d7244f6d9242f4e07ba0500baed205c64e0aed58cd",
+      "normalized_soil_sha256": "2ccd4eefe64c715a329fd05b3b9c16c632384863ebd3db767ac064f1833909d8"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 288.92556,
+      "normalized_kg_yr": 288.92556,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "29e341bc7d5e5ad63bc85d37f2ea4ba0e0c9f95c708b0392ada041b739486e57",
+      "normalized_soil_sha256": "fff4ca3dcb33a3e868dab75bbaf6d7126ef888d4404e68a7510cde987144d05f"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1048.63176,
+      "normalized_kg_yr": 1048.63176,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6fce36cb534dce6f00a4bea899f9b3e626aef2602f66a0caa3a6b9ec9e945654",
+      "normalized_soil_sha256": "51f377d0a292bd1cf2fb61af93b607ed2bebc23c9fbd0bf31f5637e3f2e2a01a"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 370.05407999999994,
+      "normalized_kg_yr": 370.05407999999994,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34",
+      "normalized_soil_sha256": "de46b952fa8509a70c36e4b47b37c2bf7d92540cb1f3b9088f10073e5c21f4dc"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1433.4289199999998,
+      "normalized_kg_yr": 1433.4289199999998,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "2522eaa0b4fab81c90c18b98d49c234b0b701f5748ca29213e3e2f05017a95d2",
+      "normalized_soil_sha256": "fd54213bf5414f234138b53cae45b6eb14ed9ab5dbc1665a011cbdd9f78f4004"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 435.18816,
+      "normalized_kg_yr": 435.18816,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "24c5fa6c56092f2e93168ab5209508e7aa42ab16c7c27dbed63ed78856599c38",
+      "normalized_soil_sha256": "91814c416be867959c428baeaa53ea19ece0038590f3ac5fe5e99ac472609fea"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 880.15356,
+      "normalized_kg_yr": 880.15356,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "229e4c58c247761295b468e0bd9ef54c804ef4b180c6db8fc81679acfd5ff6fb",
+      "normalized_soil_sha256": "9ed464173eb16bae1f87188c84bf3d8f16855f8aa5cf5cdaad42c435756abef5"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 321.04116,
+      "normalized_kg_yr": 321.04116,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c0104364af97fc34326ff2e5f7b6129e698d8ec0320d4c7545d7bdcfd9f710a4",
+      "normalized_soil_sha256": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 1011.1068,
+      "normalized_kg_yr": 1011.1068,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6b6fb87a1ff0e80ad59d0114bc193c7c0e23e7caa41763d36a8db5f5d2280a7a",
+      "normalized_soil_sha256": "5c2d34947b9ce076e932b116959d5d4c1d26e032bb2e758535a8f59973ca98e8"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 305.12988,
+      "normalized_kg_yr": 305.12988,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3d266aafddd8d9387c80c713192b8b58888fd2f9671c638b99bb98c5caf34bff",
+      "normalized_soil_sha256": "f00f6edd5cac766f957cbb56c30608566a49dcdc28cd64c7de27aa7103b11560"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 28.17936,
+      "normalized_kg_yr": 28.17936,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17",
+      "normalized_soil_sha256": "d812b49d362526bd90612b23d4574a96921a933b7f7bd0bb3ad56613f3e8e2db"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 14.70744,
+      "normalized_kg_yr": 14.70744,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b",
+      "normalized_soil_sha256": "e1ca4b38fcf0dd0a382cd2b167bc6cf9161df78551181acb3d07ef56fb542a37"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 71.47008,
+      "normalized_kg_yr": 71.47008,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "38b4531aff4efb715427cc477001da9ac7750403479b51cd18e102fe79031364",
+      "normalized_soil_sha256": "e6411c6f2a545d6296a1fdec12aceff1012c2dc46f70454e5cd1ad801a23e5f6"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 28.82484,
+      "normalized_kg_yr": 28.82484,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "19fbad099b85bc169cf287c1f29af6078ece1145e684b179ebaecf05543ead8c",
+      "normalized_soil_sha256": "fd661c86075fcec4920dd1beb9260d5e99dabf612e4e0a5511e8630e33d2ce6d"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 22.21164,
+      "normalized_kg_yr": 22.21164,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d",
+      "normalized_soil_sha256": "c9ab32fbaf26ab4013ecf99c431a01b2be1d44f6763d1da8349970519c3e105d"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 11.71368,
+      "normalized_kg_yr": 11.71368,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "a6cd2c2d75cfd68200540309cf54f76df6cc3c1aac9bbb49138a7b41f145f949",
+      "normalized_soil_sha256": "cdbf4a11fe92ad5993007bca3e9704bd2d767b95d7a3ecead08f7095fc5aaf96"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 40.20984,
+      "normalized_kg_yr": 40.20984,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5755087a48cad595e15a112b42baf09e0cf010316014a1f68639f83e5de57daf",
+      "normalized_soil_sha256": "b78c4a020a69082836e1f6b3c1dfd234249752b039f2fe63266348eff2d5b19f"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "sand",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 13.2264,
+      "normalized_kg_yr": 13.2264,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9f3aca5301b1ec7bb2a60b5254642517b2da8d48e4e571b6321f74cdc33461cc",
+      "normalized_soil_sha256": "f403812b7b9f01ed5333b09ee76062542bca1ef16f13f7a5ad348168a1297d63"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 53.78076,
+      "normalized_kg_yr": 53.78076,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "dea86ce012786625e3e6b1d9ef0c93ed2bb347239dcae676932f699f1e5c500b",
+      "normalized_soil_sha256": "d8b44201c3aea015f4e68350cf0d3aced5d948814680ba505b8810183ee2fae3"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 19.07136,
+      "normalized_kg_yr": 19.07136,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "81755db553f9c599792246a96caa41550962b9bdb2b47a4e3a9ff47f0a85c169",
+      "normalized_soil_sha256": "da4e8e1844ea36c8452e760c88409332dde199bc2aee5396f7ccf25e8d6a5e23"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 98.604,
+      "normalized_kg_yr": 98.604,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ff5764d11c904699aecd461b15fff9c2463ef7e2b74aa1ac952aaa3791022cc9",
+      "normalized_soil_sha256": "d0f90013201f5a77bd2cdc7c70cd5728e2bf91e6988682041cb0bd2dd36e9876"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 37.916999999999994,
+      "normalized_kg_yr": 37.916999999999994,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c61104f20d1df9ff89ff5688bb426cfeefe632be412884728da81521b715de5f",
+      "normalized_soil_sha256": "b4e507f99fc1e809560f570a450436004a2970083a4caa6725db8d50a7891e28"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 44.24112,
+      "normalized_kg_yr": 44.24112,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b2b2c647234d981988b1a5aaa662fc76f0d02ca52dc1301eb7dc888eb937bf57",
+      "normalized_soil_sha256": "2a33f01399b5e1a7a5a4a9e174e60b1dd53b3cd453261a1453b6766192811074"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 15.84,
+      "normalized_kg_yr": 15.84,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c7d470b103ade297295ef8844a93a570c2957a4686db8db09aaf5a63e17bf441",
+      "normalized_soil_sha256": "c33ff9beacd2b2ff9a0e819a537a0c69c21f6c77b3cee760f645ff933a778b91"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 35.382600000000004,
+      "normalized_kg_yr": 35.382600000000004,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0de6c0d27ba81a68aab3b58b7c3a5e8bd73613426fca2560df222f47e7f4dd69",
+      "normalized_soil_sha256": "215cdc6fe201a1a07b1068493e8387e1d7116b4d3eaa93602a0a3fee97945ad5"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "clay",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 15.77664,
+      "normalized_kg_yr": 15.77664,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "5697d79455a859f87592ca5bed4406134e90f43db9f5962a20de58070f0309e1",
+      "normalized_soil_sha256": "ee0bf3482352edee716dd40e6d2f7b8cc5f1aa12f2bd28f10c0e959c0ecc8f9e"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 46.50624,
+      "normalized_kg_yr": 46.50624,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5",
+      "normalized_soil_sha256": "184a06943a9ff673ae2ad69a4b3bbebeaee01c42f35e7ee2fd7aa803dc782d03"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 19.01988,
+      "normalized_kg_yr": 19.01988,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530",
+      "normalized_soil_sha256": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 86.37552000000001,
+      "normalized_kg_yr": 86.37552000000001,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "b4bdf60103c36948a75722e306b81fcbe6873d92f2123c09cf8ef2850d76baa9",
+      "normalized_soil_sha256": "379a6b5c730f06c67792cd4aa645670a2033e13e83c51c5c54505baffb883e59"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 26.20728,
+      "normalized_kg_yr": 26.20728,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3dd4b5e2d31893753e3bfe397cca837d393ad26fedbd13e48b920858d102aa38",
+      "normalized_soil_sha256": "d695df2722a11635bd87eb1ec27af641cca78b20c13935ecee59bb4f2b0cc3b5"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 36.02808,
+      "normalized_kg_yr": 36.02808,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "1bcc4821dcc04caca002dcaea9300e696f924184a8d7c691f93ed9c22e439f5e",
+      "normalized_soil_sha256": "fae0239801ecc4f0456f7ba1f752ee8350298810ce5bda3437c94e4f5cd296de"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 15.717239999999999,
+      "normalized_kg_yr": 15.717239999999999,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e",
+      "normalized_soil_sha256": "b013e5cd9f0973e1b5d16d00aea9cf5f5828b8780d5458f77470cdd2305d1435"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 36.5904,
+      "normalized_kg_yr": 36.5904,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "9936b6468daab40935e5b3d7244f6d9242f4e07ba0500baed205c64e0aed58cd",
+      "normalized_soil_sha256": "2ccd4eefe64c715a329fd05b3b9c16c632384863ebd3db767ac064f1833909d8"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "loam",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 12.24036,
+      "normalized_kg_yr": 12.24036,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "29e341bc7d5e5ad63bc85d37f2ea4ba0e0c9f95c708b0392ada041b739486e57",
+      "normalized_soil_sha256": "fff4ca3dcb33a3e868dab75bbaf6d7126ef888d4404e68a7510cde987144d05f"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 45.342,
+      "normalized_kg_yr": 45.342,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6fce36cb534dce6f00a4bea899f9b3e626aef2602f66a0caa3a6b9ec9e945654",
+      "normalized_soil_sha256": "51f377d0a292bd1cf2fb61af93b607ed2bebc23c9fbd0bf31f5637e3f2e2a01a"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 15.562800000000001,
+      "normalized_kg_yr": 15.562800000000001,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34",
+      "normalized_soil_sha256": "de46b952fa8509a70c36e4b47b37c2bf7d92540cb1f3b9088f10073e5c21f4dc"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 84.78756,
+      "normalized_kg_yr": 84.78756,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "2522eaa0b4fab81c90c18b98d49c234b0b701f5748ca29213e3e2f05017a95d2",
+      "normalized_soil_sha256": "fd54213bf5414f234138b53cae45b6eb14ed9ab5dbc1665a011cbdd9f78f4004"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inbare",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 26.623079999999998,
+      "normalized_kg_yr": 26.623079999999998,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "24c5fa6c56092f2e93168ab5209508e7aa42ab16c7c27dbed63ed78856599c38",
+      "normalized_soil_sha256": "91814c416be867959c428baeaa53ea19ece0038590f3ac5fe5e99ac472609fea"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 36.28152,
+      "normalized_kg_yr": 36.28152,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "229e4c58c247761295b468e0bd9ef54c804ef4b180c6db8fc81679acfd5ff6fb",
+      "normalized_soil_sha256": "9ed464173eb16bae1f87188c84bf3d8f16855f8aa5cf5cdaad42c435756abef5"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 12.70764,
+      "normalized_kg_yr": 12.70764,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "c0104364af97fc34326ff2e5f7b6129e698d8ec0320d4c7545d7bdcfd9f710a4",
+      "normalized_soil_sha256": "3c44abc45948e0bbf6c06dc9b49cf6de3018e2d0e60a4a6defea13db0ac329db"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 37.88532,
+      "normalized_kg_yr": 37.88532,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "6b6fb87a1ff0e80ad59d0114bc193c7c0e23e7caa41763d36a8db5f5d2280a7a",
+      "normalized_soil_sha256": "5c2d34947b9ce076e932b116959d5d4c1d26e032bb2e758535a8f59973ca98e8"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "silt",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "legacy_exact",
+        "runtime": "project"
+      },
+      "exact_kg_yr": 13.3848,
+      "normalized_kg_yr": 13.3848,
+      "normalized_over_exact": 1.0,
+      "exact_soil_sha256": "3d266aafddd8d9387c80c713192b8b58888fd2f9671c638b99bb98c5caf34bff",
+      "normalized_soil_sha256": "f00f6edd5cac766f957cbb56c30608566a49dcdc28cd64c7de27aa7103b11560"
+    }
+  ]
+}

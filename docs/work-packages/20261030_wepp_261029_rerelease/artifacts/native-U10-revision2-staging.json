@@ -1,0 +1,15 @@
+{
+  "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "binary_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "sidecar_sha256": {
+    "wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f"
+  },
+  "source_manifest_sha256": "a57a9d4a4ac1e31d6ae73f8bc42aa9d0a36c547139ae27b5e4b426aa8a4000af",
+  "script_sha256": "e942d7242e2f6e4209d54cc88c0ef82d40f7ee582a57eaeb750247f8af7f75fc",
+  "installed_revision1_unchanged": true,
+  "acceptance": "Accepted native revision 2; sidecars frozen for downstream integration. Scientific scope limits and separate publication/deployment evidence remain explicit."
+}

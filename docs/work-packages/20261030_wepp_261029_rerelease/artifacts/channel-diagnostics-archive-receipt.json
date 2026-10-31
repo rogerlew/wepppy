@@ -1,0 +1,12 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261030/native-accounting-channel-diagnostics-v1.tar.gz",
+  "sha256": "70696cd976b22cd98c14782f5ab80498d62c6d9a6890bc88f57313b5535e7c84",
+  "bytes": 9100595999,
+  "files": 80328,
+  "uncompressed_bytes": 55216570741,
+  "all_members_verified": true,
+  "already_retained_files": 83872,
+  "prior_archive": "native-accounting-channel-controls-v1.tar.gz",
+  "member_manifest_sha256": "42f8a0946f3d9d1c47c65448a22634dad7c45a797f2a447266e8473310075198",
+  "scope": "Completed pre-U10 diagnostics including matched U9a and system Cedar, independent causal observations and retained original pairs; excludes active U10 and release integration."
+}

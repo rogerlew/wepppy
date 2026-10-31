@@ -1,0 +1,16 @@
+{
+  "hill": {
+    "native_outputs_exact": true,
+    "files": 7,
+    "receipt_sha256": "1be49086860c3ad1e1ae7b80eefd087f9a5030303ecfb6b672b959ec69c4a13b"
+  },
+  "watershed": {
+    "native_outputs_exact": true,
+    "files": 13,
+    "receipt_sha256": "135c99794e50c16f20a10b82c5726a46fd9c7e1d2051b3851a95c15eafca24fa"
+  },
+  "checkout": "/workdir/wepppy/out/261029-r2-isolated",
+  "base": "e35d7a3e69497ddfd9709736af50107f56963584",
+  "bootstrap_tests": "5 passed",
+  "scope": "Published base plus release-owned overlay; package imports verified within isolated checkout."
+}

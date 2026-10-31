@@ -1,0 +1,34 @@
+{
+  "cap_net_input_mm": 2.8885578088784762,
+  "cap_initial_mobile_mm": 66.62762728,
+  "road_effective_infiltration_mm_h": {
+    "uncapped": 5.511420576,
+    "capped": 10.000000944
+  },
+  "receiving_effective_plane_infiltration_mm_h": {
+    "uncapped": 5.315032332,
+    "capped": 9.490582584
+  },
+  "runoff_local_depth_reduction_mm": 74.56289812478602,
+  "interception_increase_mm": 0.011053750000000057,
+  "fin_increase_mm": 74.5518356,
+  "remaining_fin_rounding_delta_mm": 8.774786008913793e-06,
+  "cap_output_parity": {
+    "H1.element.dat": true,
+    "H1.pass.dat": true,
+    "H1.loss.dat": true,
+    "H1.plot.dat": true,
+    "H1.ebe.dat": true,
+    "H1.soil.dat": true,
+    "H1.wat.dat": true
+  },
+  "all_cap_native_outputs_equal": true,
+  "interpretation": "Treatment raises effective road infiltration in this event while reducing upper-horizon Ksat. Identical upstream hourly return/lateral and nearlyidentical receiving stock; smaller equivalent-plane runoff changes daily FIN. Greater interception closes the previouslyunexplained0.011mm difference within singleprecision arithmetic.",
+  "logs": {
+    "/wc1/runs/ro/roads-parameterization-program-20261030/cap-trace-v1/debugger.log": "1a4b903839721065e82b470c31ececce9ff50cd4ed19497db7add6b4ed55fff6",
+    "/workdir/wepppy/out/roads-parameterization-program-20261030/producer-trace-v1/roles/debugger.log": "2e7b24b16f334acf66c63ffe6cfc11f61d532535f64c3c75ecfcc29a44592e06",
+    "/workdir/wepppy/out/roads-parameterization-program-20261030/producer-trace-v1/erosion_road_cap/debugger.log": "7df342a894f2e2eb5265ac519eab42f9444d0abcda91dac84b9620faef117bae",
+    "/workdir/wepppy/out/roads-parameterization-program-20261030/producer-trace-v3/roles/debugger.log": "1fdac3232b7c281fd31bfc4895f61ebab05a093338904fafec68b85b42d4b69c",
+    "/workdir/wepppy/out/roads-parameterization-program-20261030/producer-trace-v3/erosion_road_cap/debugger.log": "9aaa78b67489e6fb3c332124d0e086820ff94af0b1163f956135090ded6bd831"
+  }
+}

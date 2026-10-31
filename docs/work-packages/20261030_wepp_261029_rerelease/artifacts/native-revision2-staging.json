@@ -1,0 +1,14 @@
+{
+  "binary_sha256": {
+    "wepp_261029": "c85f87ed4239c0b678a437d3b218cd93da27638bce331f5cd19c06bfa4ecef46",
+    "wepp_261029_hill": "5c08e905dbf6052b38d114290cf81b37d94d11866cecc5b8d77d7939a70324c2"
+  },
+  "sidecar_sha256": {
+    "wepp_261029.json": "51e0ea4087440321774fe691465551ea57a649774d9fe0e3b48464a23240400e",
+    "wepp_261029_hill.json": "7a43391f3e25505f305a9985f5defd21ad706f36b1e65d29a02aa775a448b706"
+  },
+  "source_commit": "2b4cd9fb52510d7ff9fbd79e657050efe06baed1",
+  "science": "pending",
+  "installed_revision1_unchanged": true,
+  "script_sha256": "53f7fb56c33fb473cf7ad59e6e557580ac6926e7608872737813a5586b780bd8"
+}

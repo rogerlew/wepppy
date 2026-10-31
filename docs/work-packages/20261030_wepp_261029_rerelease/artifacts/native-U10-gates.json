@@ -1,0 +1,34 @@
+{
+  "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "source_files_verified": 506,
+  "provenance_sha256": "193a8e11d1499898ebe4745d416d124ea0166ad705f919bf28699f589e029999",
+  "binary_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "sidecar_sha256": {
+    "wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f"
+  },
+  "logs_sha256": {
+    "U10-native-tests.log": "301c3a557ef8511de50c913a2456089556ddcc654fa1ca6d354be0fc9e0abb27",
+    "U10-watchlist.log": "4c2f72301247dbf8dd698a371e8466dc928ae4dd0a9dea6f170d24d604495764",
+    "U10-smokes.log": "744201712d497787c25ddc33b86bc75bf98fb396a20a6d4609d17a052994fbea",
+    "U10-binary-provenance.log": "13339b409a92de763a64df271a8c7ad41c0a5c3b153df40466393a11d5bd7eb5",
+    "U10-artifact-policy.log": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352"
+  },
+  "gates": {
+    "native": 1059,
+    "watchlist": 18,
+    "paired_smokes": 2,
+    "provenance": "pass",
+    "artifact_policy": "pass"
+  },
+  "native_elapsed_seconds": 615.74,
+  "warnings": "Two existing tarfile extraction deprecation warnings",
+  "focused_test_commit": "2934a24b8",
+  "focused_test_sha256": "a9e70661ede306b248b717493d180b110b44312fd47c026b5e81660802b6f4ba",
+  "installed_original_unchanged": true,
+  "verifier_sha256": "dd00eba0b64248b44547a5e1d0dcb198b3ee1c3f1498fb3b60c63f4fea8f7ffd",
+  "acceptance": "Local actual-byte gates pass; scientific acceptance remains separate. No vendoring."
+}

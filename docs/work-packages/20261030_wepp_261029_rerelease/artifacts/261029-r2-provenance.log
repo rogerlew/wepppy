@@ -1,0 +1,26 @@
+
+== /workdir/wepp-forest-release-20261009/release/wepp_261029 ==
+c85f87ed4239c0b678a437d3b218cd93da27638bce331f5cd19c06bfa4ecef46  /workdir/wepp-forest-release-20261009/release/wepp_261029
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007ffc421a5000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x000079b889800000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x000079b889b1f000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x000079b889400000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x000079b8897d2000)
+	/lib64/ld-linux-x86-64.so.2 (0x000079b889c27000)
+
+== /workdir/wepp-forest-release-20261009/release/wepp_261029_hill ==
+5c08e905dbf6052b38d114290cf81b37d94d11866cecc5b8d77d7939a70324c2  /workdir/wepp-forest-release-20261009/release/wepp_261029_hill
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007fff38f5a000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007b33ca000000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007b33c9f17000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007b33c9c00000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007b33c9ee9000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007b33ca350000)

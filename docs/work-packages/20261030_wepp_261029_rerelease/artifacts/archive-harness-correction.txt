@@ -1,0 +1,1 @@
+Both initial retention helpers failed while classifying a root-level disturbed log as a nested temporary path (IndexError). Neither created an archive or changed raw evidence. Corrected selector requires a nested relative path before indexing its second component; initial logs and empty metadata directories retained. Re-run frozen manifests from unchanged scientific files.

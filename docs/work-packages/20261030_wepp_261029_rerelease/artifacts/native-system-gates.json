@@ -1,0 +1,28 @@
+{
+  "source_commit": "2b4cd9fb52510d7ff9fbd79e657050efe06baed1",
+  "source_files_verified": 506,
+  "binary_sha256": {
+    "wepp_261029": "c85f87ed4239c0b678a437d3b218cd93da27638bce331f5cd19c06bfa4ecef46",
+    "wepp_261029_hill": "5c08e905dbf6052b38d114290cf81b37d94d11866cecc5b8d77d7939a70324c2"
+  },
+  "sidecar_sha256": {
+    "wepp_261029.json": "984d65c296435ee4ff0691478a43ad27c09435afc8333283b297b424f07ac3be",
+    "wepp_261029_hill.json": "60d5cbfe789813507009765b4624538fa5ed56a32c05e9c40a4d7a845d55a767"
+  },
+  "logs_sha256": {
+    "261029-r2-native-tests.log": "3901fd4dab2885145a9474331384a6266481aecde22f82ddf74b322a81e394ce",
+    "261029-r2-watchlist.log": "cf3af4bd8c492d97f2e46334e7ba21392b1c3f1d78afe355443cbad7ccfc62d5",
+    "261029-r2-smokes.log": "fbe7b8ecb68fd257bcaf6f586cdfed4b6f7b3dbf05cb643def393f88f0debbcf",
+    "261029-r2-provenance.log": "942a4f369cee6b3dc628f18ec0d8833f99ece379c2d207de620e02c62d43862b",
+    "261029-r2-artifact-policy.log": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352"
+  },
+  "gates": {
+    "native": 979,
+    "watchlist": 18,
+    "paired_smokes": 2,
+    "provenance": "pass",
+    "artifact_policy": "pass"
+  },
+  "installed_original_unchanged": true,
+  "acceptance": "Frozen system-candidate diagnostic evidence; scientific blocker open, no vendoring."
+}

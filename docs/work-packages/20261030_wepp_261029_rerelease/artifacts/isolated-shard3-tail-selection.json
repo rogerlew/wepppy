@@ -1,0 +1,16 @@
+{
+  "collected_files": 749,
+  "shard": 3,
+  "files": [
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/test_run_catalog_reader.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/test_stale_controllers_gl_template_wiring.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/test_ui_foundation_css.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/test_user_preferences.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/test_usersum_template_wiring.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/utils/test_assets_controllers_gl_build_id.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/utils/test_helpers_authorize.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/utils/test_helpers_url_for_run.py",
+    "/workdir/wepppy/out/261029-r2-isolated/tests/weppcloud/utils/test_uploads.py"
+  ],
+  "reason": "Repeat failed browser module and all remaining shard-3 modules with existing Playwright dependencies supplied by explicit environment. Seven prior passes in repeated module counted once."
+}
