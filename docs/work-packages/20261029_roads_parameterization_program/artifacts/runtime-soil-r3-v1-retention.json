@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/runtime-soil-r3-v1.tar.gz",
+  "sha256": "d12498ae6116d7745ea560479fe28a0811c4be265535527bfc89377a9bd4e495",
+  "bytes": 482827598,
+  "files": 7697,
+  "uncompressed_bytes": 2573145985,
+  "all_members_verified": true,
+  "manifest_sha256": "b586ac1fde54771c9dd6e3381fc4d6522dcfa458dca843c181335070aadb02a8",
+  "omitted_aliases": {}
+}

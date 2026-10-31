@@ -19,8 +19,10 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Recompute final revision-3 road/fill/buffer attribution for all 840 cases.
 - [x] Execute 116 same-engine whole-legacy-soil controls:79/96 misses recovered;
   all 20 passing controls retained. All 116 native audits recomputed; 3,037 retained files rehashed.
-- [ ] Execute the declared 16-input runtime bridge (112 new runs) before choosing
-  generated-soil hydraulic contrasts.
+- [x] Execute the 16-input runtime bridge: 112 new runs, 107 physical passes and five explicit native guard failures.
+- [x] Complete the generated/legacy by hourly/daily comparison: 196 new runs, all 464 labeled cells physically verified; reject global hourly-off (26/96 recovered, two control regressions).
+- [x] Read back seven generated role profiles and first-day native states; retain source density/retention coupling as a hypothesis.
+- [ ] Execute the source-supported generated role hydraulic audit before declaring new parameter values.
 
 - [x] D2 geometry/recession repair accepted and delivered as revision 3;
   permanent regression coverage and accepted ADR-0119 retained.
@@ -685,3 +687,62 @@ Reason: a soil-only explanation is incomplete, and prior runtime findings preced
 the shared recession correction. Do not tune generated hydraulic parameters to
 compensate for unseparated engine/runtime effects. No change to acceptance,
 withheld material, regional-runtime validation or the human UI gate.
+
+## Runtime bridge execution — 2026-10-31
+
+User: proceed with the designed 112-run comparison. Execute the frozen design with
+`artifacts/runtime_bridge_r3.py --declare`, then without `--declare`. The declaration
+binds binary, driver and direct audit dependencies plus all 16 source records. Each
+of seven new sidecar combinations is run for each selected input; retain the 16
+all-present baseline cells. Rehash every retained input and recompute all 128 native
+physical audits, including failures. Classify outcomes with unchanged magnitude
+criteria; summarize three-way interactions rather than selecting a global switch
+from the 11 preselected residuals. No production code/defaults or withheld data change.
+
+### Conditional completion of generated-soil runtime interaction
+
+The 112-run bridge completes with 107 physical passes and five negative-demand
+stops in hourly/original-Penman configurations. Daily/PMET with either snow setting
+recovers 10/11 legacy residuals and retains 5/5 controls; this does not establish a
+generated-soil recommendation. Complete the four-cell generated/legacy ×
+hourly/daily panel on the same 116 cases, retaining PMET/snow. `soil_hourly_r3.py`
+declares 196 unique new runs (116 generated, 80 legacy) for 464 labeled cells. Reuse 232
+hourly baselines and 22 daily bridge cells; 14 additional labels alias new legacy
+runs by exact complete input signature. Retain all 464 cells and report aliases.
+No parameter/default change, withheld inspection or new acceptance criterion.
+This conditional expansion is necessary to test transfer to the intended generated
+soils before selecting hydraulic changes; previous revision-2 interaction results
+are historical rather than current-engine validation.
+
+## Runtime/soil completion checkpoint — 2026-10-31
+
+### Surprises & Discoveries
+
+Daily mode recovers 93/96 legacy-soil misses but only 26/96 generated-soil misses;
+two generated passing controls regress. The 464 PMET-retained cells all pass
+physical checks. Separately, five hourly/original-Penman bridge runs stop at the
+native negative-demand guard and remain failed configurations. The seven
+source profiles retain equal input density and organic matter across roles;
+first-day native state confirms this is a useful audit target, not proof that
+a compaction rule will repair the discrepancies.
+
+### Decision Log
+
+Reject global hourly-off promotion. Keep current runtime, source soils, 200 mm
+normalization and deeper horizons fixed while tracing coupled role density,
+retention and conductivity. Require physical source support before declaring
+parameter ranges. No climate-specific fitting, withheld outcomes or UI changes.
+The normative next scope and rationale are in
+[the hydraulic audit plan](../../artifacts/generated-role-hydraulic-audit-r3-plan.md).
+
+### Outcomes & Retrospective
+
+This checkpoint adds 308 native executions with persisted declarations and
+fresh output/hash/physical readbacks. No generated parameterization is accepted;
+the full 840-case magnitude score is unchanged. Ledger v13 supersedes v12;
+prior designs remain immutable records of their pre-execution decisions.
+See the [soil/runtime findings](../../artifacts/soil-hourly-r3-findings.md).
+
+Archive retention is complete: every member was rehashed against its manifest;
+see [retention receipt](../../artifacts/runtime-soil-r3-v1-retention.json).
+Documentation lint: 31 files, zero errors or warnings.

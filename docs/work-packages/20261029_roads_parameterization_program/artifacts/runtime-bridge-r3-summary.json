@@ -1,0 +1,92 @@
+{
+  "cases": 112,
+  "completed": 107,
+  "physical_pass": 107,
+  "results_sha256": "1ed1b1ae513636cd59e548d7e8e1dcc32305b7c9d1b7ec2c3be39a589674ed71",
+  "lanes": {
+    "000": {
+      "residual": {
+        "cases": 11,
+        "within": 8,
+        "physical_pass": 11
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    },
+    "001": {
+      "residual": {
+        "cases": 11,
+        "within": 8,
+        "physical_pass": 11
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    },
+    "010": {
+      "residual": {
+        "cases": 11,
+        "within": 10,
+        "physical_pass": 11
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    },
+    "011": {
+      "residual": {
+        "cases": 11,
+        "within": 10,
+        "physical_pass": 11
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    },
+    "100": {
+      "residual": {
+        "cases": 11,
+        "within": 1,
+        "physical_pass": 9
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 4,
+        "physical_pass": 4
+      }
+    },
+    "101": {
+      "residual": {
+        "cases": 11,
+        "within": 1,
+        "physical_pass": 9
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    },
+    "110": {
+      "residual": {
+        "cases": 11,
+        "within": 0,
+        "physical_pass": 11
+      },
+      "passing_control": {
+        "cases": 5,
+        "within": 5,
+        "physical_pass": 5
+      }
+    }
+  }
+}

@@ -1,20 +1,30 @@
 # Roads parameterization program tracker
 
-## Current: parameterization resumption on revision 3
+## Current: revision-3 runtime studies complete
 
-Native release delivery and all reviews are complete (`d783e742e` WEPPpy,
-`eb601ce8d` native delivery; compiled source `6112b68bc`). Scientific baseline:
-840/840 physical, 713/766 meaningful and 31/74 small magnitude passes. There are
-96 misses: 48 meaningful low, five meaningful high, 43 small excess; 71 outunrut.
-Execute `artifacts/role_boundary_assessment_r3.py` against retained final outputs
-before declaring the next role-specific contrast. Historical checkpoints below
-are retained; they are not current release blockers. No withheld/UI/default changes.
+Revision-3 runtime studies are complete; [ledger v13](artifacts/candidate-ledger-v13.json)
+is current. The 112-run runtime bridge shows a strong daily-mode effect on legacy
+soils, but the 196-new-run soil/runtime completion rejects global hourly-off:
+only 26/96 generated-soil misses recover and two of 20 passing controls regress.
+All 464 PMET-retained comparison cells pass physical checks. Five native guard
+stops in the separate hourly/original-Penman bridge remain explicit failures.
+See [runtime findings](artifacts/runtime-bridge-r3-findings.md) and
+[generated-soil findings](artifacts/soil-hourly-r3-findings.md).
+
+The full development baseline remains 840/840 physical, 713/766 meaningful and
+31/74 small magnitude passes; no parameterization is accepted. Next is the
+[source-supported role hydraulic audit](artifacts/generated-role-hydraulic-audit-r3-plan.md),
+with the current runtime fixed. Withheld materials, production defaults and the
+human UI specification/layout gate remain untouched.
+
+Raw decks, outputs and verification evidence are retained in the
+[verified runtime/soil archive](artifacts/runtime-soil-r3-v1-retention.json).
 
 Active: [ExecPlan](prompts/active/program_execplan.md).
 
-## Current checkpoint
+## Historical checkpoints
 
-Current [ledger v10](artifacts/candidate-ledger-v10.json): D2 confirms the
+Historical [ledger v10](artifacts/candidate-ledger-v10.json): D2 confirms the
 EPLANE array-origin defect. Both twelve-case factorial lanes and clean-output
 parity pass. Combined source candidate implemented; broader gates underway.
 See [findings](artifacts/native-D2-geometry-findings.md) and proposed ADR-0119.

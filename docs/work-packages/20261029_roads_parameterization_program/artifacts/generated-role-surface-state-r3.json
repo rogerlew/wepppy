@@ -1,0 +1,602 @@
+{
+  "scope": "One fixed Birmingham/inbare/gravel/high case for each of seven development materials; emitted surface horizon and day1/year1 native state. Diagnostic state, not a compaction or causal validation.",
+  "source": "Final revision3 matrix",
+  "script_sha256": "ea8922b1014ea2f6977288c36039c1d27fe8252f3d007691191504458350632c",
+  "rows": [
+    {
+      "material": "1718465",
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "001ef76b29a47fe7b9100f129794d463550fe23f105c65cc2d6c2421fc869b7d",
+      "soil_output_sha256": "9e3118f6c73409bf2198ed77c2db2bb2023b7f2167d2ae57c0524392a5327da7",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 45.54,
+            "effective_conductivity_mm_h": 10.0,
+            "suction_mm": 5.85,
+            "field_capacity": 0.17,
+            "wilting_point": 0.1
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 45.54,
+            "effective_conductivity_mm_h": 3.86,
+            "suction_mm": 5.85,
+            "field_capacity": 0.17,
+            "wilting_point": 0.1
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 150.0,
+            "bd": 1.4,
+            "ksat": 60,
+            "anisotropy": 10.0,
+            "fc": 0.2615,
+            "wp": 0.1385,
+            "sand": 67.9,
+            "clay": 12.5,
+            "orgmat": 2.5,
+            "cec": 15.0,
+            "rfg": 48.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 45.78,
+            "effective_conductivity_mm_h": 60.0,
+            "suction_mm": 5.9,
+            "field_capacity": 0.17,
+            "wilting_point": 0.1
+          }
+        }
+      }
+    },
+    {
+      "material": "2711184",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "a95bcd56e04836a674db4487a148ecbfb786fff9190476d3f8d9f7fa0f7f7d93",
+      "soil_output_sha256": "fbffe69b9f2e0caac2742bd15ece0242cf36251cda6ab4e29beaff7eb3bf9ee2",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 180.0,
+            "bd": 0.78,
+            "ksat": 8.1,
+            "anisotropy": 10.0,
+            "fc": 0.3141,
+            "wp": 0.1424,
+            "sand": 42.2,
+            "clay": 15.0,
+            "orgmat": 11.0,
+            "cec": 50.0,
+            "rfg": 15.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 66.93,
+            "effective_conductivity_mm_h": 8.1,
+            "suction_mm": 13.01,
+            "field_capacity": 0.3,
+            "wilting_point": 0.13
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 180.0,
+            "bd": 0.78,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.3141,
+            "wp": 0.1424,
+            "sand": 42.2,
+            "clay": 15.0,
+            "orgmat": 11.0,
+            "cec": 50.0,
+            "rfg": 15.0
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 66.93,
+            "effective_conductivity_mm_h": 3.74,
+            "suction_mm": 13.01,
+            "field_capacity": 0.3,
+            "wilting_point": 0.13
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 180.0,
+            "bd": 0.78,
+            "ksat": 50,
+            "anisotropy": 10.0,
+            "fc": 0.3141,
+            "wp": 0.1424,
+            "sand": 42.2,
+            "clay": 15.0,
+            "orgmat": 11.0,
+            "cec": 50.0,
+            "rfg": 15.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 66.93,
+            "effective_conductivity_mm_h": 50.0,
+            "suction_mm": 13.01,
+            "field_capacity": 0.3,
+            "wilting_point": 0.13
+          }
+        }
+      }
+    },
+    {
+      "material": "2711250",
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "37c389b7f7211bbc57a4327a073c4a59df866b898968cec4e7826341207cdd5a",
+      "soil_output_sha256": "8e65d26bdfa5846d35e5325d6a27b69dd6436ee5742f544d1805128abce4b4e4",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 170.0,
+            "bd": 0.9,
+            "ksat": 6,
+            "anisotropy": 10.0,
+            "fc": 0.2995,
+            "wp": 0.1477,
+            "sand": 24.5,
+            "clay": 23.5,
+            "orgmat": 7.5,
+            "cec": 57.5,
+            "rfg": 2.5
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 62.85,
+            "effective_conductivity_mm_h": 6.0,
+            "suction_mm": 25.32,
+            "field_capacity": 0.3,
+            "wilting_point": 0.15
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 170.0,
+            "bd": 0.9,
+            "ksat": 6,
+            "anisotropy": 10.0,
+            "fc": 0.2995,
+            "wp": 0.1477,
+            "sand": 24.5,
+            "clay": 23.5,
+            "orgmat": 7.5,
+            "cec": 57.5,
+            "rfg": 2.5
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 62.85,
+            "effective_conductivity_mm_h": 2.28,
+            "suction_mm": 25.32,
+            "field_capacity": 0.3,
+            "wilting_point": 0.15
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 170.0,
+            "bd": 0.9,
+            "ksat": 40,
+            "anisotropy": 10.0,
+            "fc": 0.2995,
+            "wp": 0.1477,
+            "sand": 24.5,
+            "clay": 23.5,
+            "orgmat": 7.5,
+            "cec": 57.5,
+            "rfg": 2.5
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 62.85,
+            "effective_conductivity_mm_h": 40.0,
+            "suction_mm": 25.32,
+            "field_capacity": 0.3,
+            "wilting_point": 0.15
+          }
+        }
+      }
+    },
+    {
+      "material": "1718510",
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718510",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "9cee7d1241c06e2f275d7b1019788bb3ea1000f7cf5eab0cf6bcb1b9f6d289ca",
+      "soil_output_sha256": "349cfce4eded27b176f3dfa4bb3801155d5ecc61471af853c4d08da2d46fb44b",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 200.0,
+            "bd": 1.25,
+            "ksat": 6,
+            "anisotropy": 10.0,
+            "fc": 0.3411,
+            "wp": 0.2,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 20.0,
+            "rfg": 10.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 50.25,
+            "effective_conductivity_mm_h": 6.0,
+            "suction_mm": 23.62,
+            "field_capacity": 0.32,
+            "wilting_point": 0.19
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 200.0,
+            "bd": 1.25,
+            "ksat": 6,
+            "anisotropy": 10.0,
+            "fc": 0.3411,
+            "wp": 0.2,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 20.0,
+            "rfg": 10.0
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 50.25,
+            "effective_conductivity_mm_h": 2.34,
+            "suction_mm": 23.62,
+            "field_capacity": 0.32,
+            "wilting_point": 0.19
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 200.0,
+            "bd": 1.25,
+            "ksat": 35,
+            "anisotropy": 10.0,
+            "fc": 0.3411,
+            "wp": 0.2,
+            "sand": 35.4,
+            "clay": 31.0,
+            "orgmat": 2.5,
+            "cec": 20.0,
+            "rfg": 10.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 50.39,
+            "effective_conductivity_mm_h": 35.0,
+            "suction_mm": 23.68,
+            "field_capacity": 0.32,
+            "wilting_point": 0.19
+          }
+        }
+      }
+    },
+    {
+      "material": "1856573",
+      "case": {
+        "climate": "birmingham",
+        "soil": "1856573",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "e2b64f2f93c01122ab666ca503a46bf7c4eaf61bb2a85eaded6b8efcaed7d077",
+      "soil_output_sha256": "8ae72cf35f7db435cb8d23d77d98251cca4482065c84a07d07f18d813a0412d4",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 110.0,
+            "bd": 1.33,
+            "ksat": 8.1,
+            "anisotropy": 10.0,
+            "fc": 0.3702,
+            "wp": 0.1945,
+            "sand": 41.1,
+            "clay": 22.0,
+            "orgmat": 3.5,
+            "cec": 20.0,
+            "rfg": 36.25
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 47.38,
+            "effective_conductivity_mm_h": 8.1,
+            "suction_mm": 17.85,
+            "field_capacity": 0.3,
+            "wilting_point": 0.17
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 110.0,
+            "bd": 1.33,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.3702,
+            "wp": 0.1945,
+            "sand": 41.1,
+            "clay": 22.0,
+            "orgmat": 3.5,
+            "cec": 20.0,
+            "rfg": 36.25
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 47.38,
+            "effective_conductivity_mm_h": 3.87,
+            "suction_mm": 17.85,
+            "field_capacity": 0.3,
+            "wilting_point": 0.17
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 110.0,
+            "bd": 1.33,
+            "ksat": 50,
+            "anisotropy": 10.0,
+            "fc": 0.3702,
+            "wp": 0.1945,
+            "sand": 41.1,
+            "clay": 22.0,
+            "orgmat": 3.5,
+            "cec": 20.0,
+            "rfg": 36.25
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 47.76,
+            "effective_conductivity_mm_h": 50.0,
+            "suction_mm": 18.01,
+            "field_capacity": 0.3,
+            "wilting_point": 0.17
+          }
+        }
+      }
+    },
+    {
+      "material": "53949",
+      "case": {
+        "climate": "birmingham",
+        "soil": "53949",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "f2e2bae22a43ab74f80e926050d27500f777571d0613ddf468bb4f63f5e36e8c",
+      "soil_output_sha256": "30ef2ca339adedf9f0a9c13bf3d7c84d165a2a6eded8ebd6e23c67a7e8db1969",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 100.0,
+            "bd": 1.38,
+            "ksat": 8.1,
+            "anisotropy": 10.0,
+            "fc": 0.37,
+            "wp": 0.17,
+            "sand": 42.1,
+            "clay": 20.0,
+            "orgmat": 1.5,
+            "cec": 20.0,
+            "rfg": 50.4
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 48.7,
+            "effective_conductivity_mm_h": 8.1,
+            "suction_mm": 17.23,
+            "field_capacity": 0.25,
+            "wilting_point": 0.11
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 100.0,
+            "bd": 1.38,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.37,
+            "wp": 0.17,
+            "sand": 42.1,
+            "clay": 20.0,
+            "orgmat": 1.5,
+            "cec": 20.0,
+            "rfg": 50.4
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 48.7,
+            "effective_conductivity_mm_h": 3.73,
+            "suction_mm": 17.23,
+            "field_capacity": 0.25,
+            "wilting_point": 0.11
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 100.0,
+            "bd": 1.38,
+            "ksat": 50,
+            "anisotropy": 10.0,
+            "fc": 0.37,
+            "wp": 0.17,
+            "sand": 42.1,
+            "clay": 20.0,
+            "orgmat": 1.5,
+            "cec": 20.0,
+            "rfg": 50.4
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 48.77,
+            "effective_conductivity_mm_h": 50.0,
+            "suction_mm": 17.27,
+            "field_capacity": 0.25,
+            "wilting_point": 0.11
+          }
+        }
+      }
+    },
+    {
+      "material": "1718494",
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718494",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record_sha256": "a46517fe598afee095dd6db89e9f36a3510e02dcc4659ed992e5c6707ee250d9",
+      "soil_output_sha256": "9c27d969cf98cb6425836d37d798251ce3c27045a12d7637e811aa5b2c238ecc",
+      "roles": {
+        "road": {
+          "input_surface_horizon": {
+            "solthk": 50.0,
+            "bd": 1.5,
+            "ksat": 8.1,
+            "anisotropy": 10.0,
+            "fc": 0.28,
+            "wp": 0.126,
+            "sand": 43.0,
+            "clay": 17.5,
+            "orgmat": 1.5,
+            "cec": 15.0,
+            "rfg": 0.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 41.7,
+            "effective_conductivity_mm_h": 8.1,
+            "suction_mm": 22.51,
+            "field_capacity": 0.28,
+            "wilting_point": 0.13
+          }
+        },
+        "fill": {
+          "input_surface_horizon": {
+            "solthk": 50.0,
+            "bd": 1.5,
+            "ksat": 10,
+            "anisotropy": 10.0,
+            "fc": 0.28,
+            "wp": 0.126,
+            "sand": 43.0,
+            "clay": 17.5,
+            "orgmat": 1.5,
+            "cec": 15.0,
+            "rfg": 0.0
+          },
+          "ksatadj": "1",
+          "initial_reported_state": {
+            "porosity_percent": 41.99,
+            "effective_conductivity_mm_h": 3.65,
+            "suction_mm": 22.75,
+            "field_capacity": 0.28,
+            "wilting_point": 0.13
+          }
+        },
+        "buffer": {
+          "input_surface_horizon": {
+            "solthk": 50.0,
+            "bd": 1.5,
+            "ksat": 50,
+            "anisotropy": 10.0,
+            "fc": 0.28,
+            "wp": 0.126,
+            "sand": 43.0,
+            "clay": 17.5,
+            "orgmat": 1.5,
+            "cec": 15.0,
+            "rfg": 0.0
+          },
+          "ksatadj": "0",
+          "initial_reported_state": {
+            "porosity_percent": 42.25,
+            "effective_conductivity_mm_h": 50.0,
+            "suction_mm": 22.94,
+            "field_capacity": 0.28,
+            "wilting_point": 0.13
+          }
+        }
+      }
+    }
+  ]
+}

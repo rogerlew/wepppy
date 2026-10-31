@@ -1,0 +1,172 @@
+{
+  "analysis_sha256": "d081c31f01e4b5d2c078dfb3283dc27d21883f12a748249c05e564b9ced9c0be",
+  "frozen_reused_records_verified": true,
+  "new_record_inventory_verified": 196,
+  "labeled_cells": 464,
+  "summary": {
+    "generated-on": {
+      "recovered_misses": 0,
+      "miss_cases": 96,
+      "controls_retained": 20,
+      "controls": 20,
+      "physical_pass": 116
+    },
+    "generated-off": {
+      "recovered_misses": 26,
+      "miss_cases": 96,
+      "controls_retained": 18,
+      "controls": 20,
+      "physical_pass": 116
+    },
+    "legacy-on": {
+      "recovered_misses": 79,
+      "miss_cases": 96,
+      "controls_retained": 20,
+      "controls": 20,
+      "physical_pass": 116
+    },
+    "legacy-off": {
+      "recovered_misses": 93,
+      "miss_cases": 96,
+      "controls_retained": 20,
+      "controls": 20,
+      "physical_pass": 116
+    }
+  },
+  "generated_daily_regressions": [
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_pass",
+      "soil": "generated",
+      "hourly": false,
+      "lane": "generated-off",
+      "source": "/workdir/wepppy/out/roads-native-funding-20261031/r3-matrix840/matrix-v1/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "0ee6331207f82057261b35236a9114f63595a9e37367495548980f2601bccad2",
+      "destination": "/workdir/wepppy/out/roads-parameterization-program-20261031/soil-hourly-r3/cases/bb4fbf823126c2309c9661b8f5acbeea58afee298c5fe7731af500bf9396bb99",
+      "origin": "new_unique_input",
+      "input_signature": "bb4fbf823126c2309c9661b8f5acbeea58afee298c5fe7731af500bf9396bb99",
+      "reference_kg_yr": 0.0,
+      "status": "completed",
+      "physical_pass": true,
+      "export_kg_yr": 1.1207359639094303,
+      "within": false,
+      "record_sha256": "f7084af45412ea849fb1a51bf6a1daeba55efbfc1ac860d8417f67e8b97d30a2"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "soil": "generated",
+      "hourly": false,
+      "lane": "generated-off",
+      "source": "/workdir/wepppy/out/roads-native-funding-20261031/r3-matrix840/matrix-v1/site-1718465-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "8a2d987f4e4fbd105bf4a6be6aa5560eeecca3796b6b8ec0547cd99d034305d8",
+      "destination": "/workdir/wepppy/out/roads-parameterization-program-20261031/soil-hourly-r3/cases/927d87c0d260bdeca17b5bccc01ca38ee80f427d3ab44ca782c06cfc9024e60a",
+      "origin": "new_unique_input",
+      "input_signature": "927d87c0d260bdeca17b5bccc01ca38ee80f427d3ab44ca782c06cfc9024e60a",
+      "reference_kg_yr": 20.216352579750875,
+      "status": "completed",
+      "physical_pass": true,
+      "export_kg_yr": 1077.7169449870605,
+      "within": false,
+      "record_sha256": "fbb733b4453dc3c3164386f01fa700004d8cf3535e10e44e84c2f9bffc8584bb"
+    }
+  ],
+  "legacy_daily_residuals": [
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "soil": "legacy",
+      "hourly": false,
+      "lane": "legacy-off",
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "b7291799eb9cc4db83ea5c93d096e3aad387ee17f504f826588f9b744598206c",
+      "destination": "/workdir/wepppy/out/roads-parameterization-program-20261031/runtime-bridge-r3/011/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "origin": "retained_bridge",
+      "input_signature": "951bfee1ea6647e9087a0bbc174786e011fa3859d615f94bb0a6beb9f024df7e",
+      "reference_kg_yr": 0.5603679819547152,
+      "status": "completed",
+      "physical_pass": true,
+      "export_kg_yr": 7.500309912316956,
+      "within": false,
+      "record_sha256": "0e2c4558b05dc0015acd0ea731bf9cc634c5ba84100d490cc6a6dc9bf30041ea"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "soil": "legacy",
+      "hourly": false,
+      "lane": "legacy-off",
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "197013c28a903f331cc60e315be842bf4a435c7190f105152f80323f036e573e",
+      "destination": "/workdir/wepppy/out/roads-parameterization-program-20261031/runtime-bridge-r3/011/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "origin": "retained_bridge",
+      "input_signature": "951bfee1ea6647e9087a0bbc174786e011fa3859d615f94bb0a6beb9f024df7e",
+      "reference_kg_yr": 0.5603679819547152,
+      "status": "completed",
+      "physical_pass": true,
+      "export_kg_yr": 7.500309912316956,
+      "within": false,
+      "record_sha256": "0e2c4558b05dc0015acd0ea731bf9cc634c5ba84100d490cc6a6dc9bf30041ea"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "soil": "legacy",
+      "hourly": false,
+      "lane": "legacy-off",
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "1831633c9e9c48f81df38fe6113729c37e2f405415e844db57a55cbccd5e7813",
+      "destination": "/workdir/wepppy/out/roads-parameterization-program-20261031/runtime-bridge-r3/011/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "origin": "retained_bridge",
+      "input_signature": "951bfee1ea6647e9087a0bbc174786e011fa3859d615f94bb0a6beb9f024df7e",
+      "reference_kg_yr": 0.5603679819547152,
+      "status": "completed",
+      "physical_pass": true,
+      "export_kg_yr": 7.500309912316956,
+      "within": false,
+      "record_sha256": "0e2c4558b05dc0015acd0ea731bf9cc634c5ba84100d490cc6a6dc9bf30041ea"
+    }
+  ],
+  "disposition": "Reject global hourly-off promotion. Continue role-specific generated hydraulic/state audit with existing runtime fixed; no parameter defaults or withheld/UI changes.",
+  "verifier_sha256": "6ad537c197b5813d458775fe14d6389f75605692e7cf460d7805414e9fad92e3"
+}

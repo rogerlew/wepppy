@@ -1,0 +1,1048 @@
+{
+  "verified_cells": 128,
+  "physical_pass": 123,
+  "rejected_native_failures": 5,
+  "verification_sha256": "dc177f92a6236ee0ad631000c4ed1e4f002ddccbfe7405eb16c49d776982144a",
+  "contrasts": [
+    {
+      "factor": "hourly",
+      "off": "000",
+      "on": "100",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 9,
+      "on_recovers": 0,
+      "on_loses": 5,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 9,
+        "median": 4.698470002543381,
+        "minimum": 0.0,
+        "maximum": 115.69443565895811
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 9,
+          "median": -9.655579447098717e-09,
+          "minimum": -0.00012368123134365305,
+          "maximum": 81.74677122528286
+        },
+        "fill": {
+          "count": 9,
+          "median": 2.820085419865986,
+          "minimum": 1.6668899392736254,
+          "maximum": 140.1496378796609
+        },
+        "buffer": {
+          "count": 9,
+          "median": 1.6853417602483753,
+          "minimum": 0.23209242274852906,
+          "maximum": 217.67162449416438
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "000",
+      "on": "100",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 4,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 4,
+        "median": 29.35547999999997,
+        "minimum": 1.4058000000000028,
+        "maximum": 323.90028
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 4,
+          "median": 5.06474169988882,
+          "minimum": 2.100560977016965,
+          "maximum": 76.64624559710106
+        },
+        "fill": {
+          "count": 4,
+          "median": 5.115925330363444,
+          "minimum": 1.858772338869458,
+          "maximum": 84.83016550084469
+        },
+        "buffer": {
+          "count": 4,
+          "median": 2.4075962942745672,
+          "minimum": 0.3821584656438697,
+          "maximum": 98.04181209582933
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "001",
+      "on": "101",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 9,
+      "on_recovers": 0,
+      "on_loses": 5,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 9,
+        "median": 4.741575231924513,
+        "minimum": 0.0,
+        "maximum": 122.93611419498826
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 9,
+          "median": 1.7742115687724436e-07,
+          "minimum": -0.00012078803010240335,
+          "maximum": 83.40344834224159
+        },
+        "fill": {
+          "count": 9,
+          "median": 3.5214438411302176,
+          "minimum": 1.7284312475276185,
+          "maximum": 142.7549854597298
+        },
+        "buffer": {
+          "count": 9,
+          "median": 1.6852827394906758,
+          "minimum": 0.23198055158507158,
+          "maximum": 215.3031661020156
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "001",
+      "on": "101",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 5.785560000000004,
+        "minimum": 1.3265999999999991,
+        "maximum": 328.03452
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 4.355156871258295,
+          "minimum": 0.48430294903651117,
+          "maximum": 78.38292055034849
+        },
+        "fill": {
+          "count": 5,
+          "median": 4.210491010730628,
+          "minimum": 0.4039918539622187,
+          "maximum": 86.42407233834082
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.6302614817287182,
+          "minimum": 0.03475296882736467,
+          "maximum": 99.42330818588863
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "010",
+      "on": "110",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 0,
+      "on_loses": 10,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 1.465577798958486,
+        "minimum": 0.04310522938113248,
+        "maximum": 109.31486171055059
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": 0.0005265318855833812,
+          "minimum": -4.119609869235319e-06,
+          "maximum": 77.88669112097688
+        },
+        "fill": {
+          "count": 11,
+          "median": 2.316193225802877,
+          "minimum": 0.07099687889082862,
+          "maximum": 137.66746178346256
+        },
+        "buffer": {
+          "count": 11,
+          "median": 0.30220772810072755,
+          "minimum": 0.20249753690486022,
+          "maximum": 227.67025076095828
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "010",
+      "on": "110",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 4.478759999999994,
+        "minimum": 1.286999999999999,
+        "maximum": 233.06580000000002
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 3.417955223376765,
+          "minimum": 0.5511805551635351,
+          "maximum": 73.0852813395083
+        },
+        "fill": {
+          "count": 5,
+          "median": 3.0965566346391604,
+          "minimum": 0.4015707157609034,
+          "maximum": 80.77391377428377
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.527047280867547,
+          "minimum": 0.0346021280969685,
+          "maximum": 97.72920735773337
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "011",
+      "on": "111",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 0,
+      "on_loses": 10,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 1.465577798958486,
+        "minimum": 0.04310522938113248,
+        "maximum": 114.0564369424751
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": 0.0004937993477511782,
+          "minimum": -3.912920277571175e-06,
+          "maximum": 79.43232923946658
+        },
+        "fill": {
+          "count": 11,
+          "median": 2.4420060496496934,
+          "minimum": 0.07099210594439676,
+          "maximum": 140.2310841045682
+        },
+        "buffer": {
+          "count": 11,
+          "median": 1.4284622289231346,
+          "minimum": 0.20188559895798622,
+          "maximum": 225.19778117403433
+        }
+      }
+    },
+    {
+      "factor": "hourly",
+      "off": "011",
+      "on": "111",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 5.726159999999993,
+        "minimum": 1.3266000000000027,
+        "maximum": 234.72108000000003
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 3.6021043369563124,
+          "minimum": 0.5511588594210508,
+          "maximum": 74.69626896666443
+        },
+        "fill": {
+          "count": 5,
+          "median": 3.3374082006641856,
+          "minimum": 0.4015916055862183,
+          "maximum": 82.24704056151937
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.5255562375056813,
+          "minimum": 0.03459545029009958,
+          "maximum": 99.00534024694431
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "000",
+      "on": "010",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 2,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 0.0,
+        "minimum": -0.38794706443018734,
+        "maximum": 6.983047159743371
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": -0.00560596439665062,
+          "minimum": -5.360120680720911,
+          "maximum": -8.09769019980422e-05
+        },
+        "fill": {
+          "count": 11,
+          "median": -1.0756729534279046,
+          "minimum": -2.497960374209251,
+          "maximum": 2.396526824572234
+        },
+        "buffer": {
+          "count": 11,
+          "median": 0.0,
+          "minimum": -0.6233933125635147,
+          "maximum": 1.023720059060156
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "000",
+      "on": "010",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": -0.7880399999999952,
+        "minimum": -3.5283599999999993,
+        "maximum": 11.341440000000034
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": -3.4283549175779555,
+          "minimum": -5.8247262151429595,
+          "maximum": -0.27497392738053605
+        },
+        "fill": {
+          "count": 5,
+          "median": -2.4982499542077505,
+          "minimum": -4.0363367735057665,
+          "maximum": -0.4881975698442247
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.024637296379014018,
+          "minimum": -0.6626577772157134,
+          "maximum": 0.4336316252540868
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "001",
+      "on": "011",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 2,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 0.0,
+        "minimum": -0.38794706443018734,
+        "maximum": 7.026152389124501
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": -0.0075501803781889976,
+          "minimum": -5.138295207902516,
+          "maximum": -8.306491932330573e-05
+        },
+        "fill": {
+          "count": 11,
+          "median": -1.0771142247225214,
+          "minimum": -2.337995853909236,
+          "maximum": 2.1783329187355207
+        },
+        "buffer": {
+          "count": 11,
+          "median": 0.0,
+          "minimum": -0.7381853596642856,
+          "maximum": 1.204719673973465
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "001",
+      "on": "011",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": -0.0079200000000057,
+        "minimum": -3.4768800000000013,
+        "maximum": 10.862279999999998
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": -3.6736027036819188,
+          "minimum": -5.587057553120886,
+          "maximum": -0.2741761805034404
+        },
+        "fill": {
+          "count": 5,
+          "median": -2.6508407402170384,
+          "minimum": -3.893261317340688,
+          "maximum": -0.4844636481633753
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.012160993454969127,
+          "minimum": -0.5399786239667037,
+          "maximum": 0.43349410783047304
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "100",
+      "on": "110",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 9,
+      "on_recovers": 0,
+      "on_loses": 1,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 9,
+        "median": -0.38794706443018745,
+        "minimum": -5.1295222963547005,
+        "maximum": 6.50888963655092
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 9,
+          "median": -0.005625942377420756,
+          "minimum": -9.22020078502689,
+          "maximum": -8.508685628783041e-05
+        },
+        "fill": {
+          "count": 9,
+          "median": -1.2307293574197402,
+          "minimum": -3.5572052297220775,
+          "maximum": 2.3507856654998847
+        },
+        "buffer": {
+          "count": 9,
+          "median": -0.008380276902883593,
+          "minimum": -0.04741674018333919,
+          "maximum": 9.375232954230398
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "100",
+      "on": "110",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 4,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 4,
+        "median": -0.908820000000004,
+        "minimum": -79.49303999999995,
+        "maximum": 3.417479999999955
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 4,
+          "median": -5.5236203798622405,
+          "minimum": -9.385690472735718,
+          "maximum": -1.8189305823370994
+        },
+        "fill": {
+          "count": 4,
+          "median": -4.521562994556131,
+          "minimum": -7.92831844291959,
+          "maximum": -2.154446937328478
+        },
+        "buffer": {
+          "count": 4,
+          "median": 0.030685463171593264,
+          "minimum": -0.9752625153116696,
+          "maximum": 0.3768425881164639
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "101",
+      "on": "111",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 9,
+      "on_recovers": 0,
+      "on_loses": 1,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 9,
+        "median": -1.8104196340075407,
+        "minimum": -5.1295222963547005,
+        "maximum": 6.50888963655092
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 9,
+          "median": -0.007568977965277668,
+          "minimum": -9.109414310677522,
+          "maximum": -8.715526075775415e-05
+        },
+        "fill": {
+          "count": 9,
+          "median": -1.1462011947247177,
+          "minimum": -3.5908524536864093,
+          "maximum": 2.345716626320126
+        },
+        "buffer": {
+          "count": 9,
+          "median": -0.009255662050033947,
+          "minimum": -0.1147288144071803,
+          "maximum": 9.156429712354452
+        }
+      }
+    },
+    {
+      "factor": "PMET",
+      "off": "101",
+      "on": "111",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": -0.8355600000000152,
+        "minimum": -82.45115999999996,
+        "maximum": 3.342239999999947
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": -4.426655237983901,
+          "minimum": -9.27370913680494,
+          "maximum": -0.20732027011890075
+        },
+        "fill": {
+          "count": 5,
+          "median": -3.523923550283481,
+          "minimum": -7.811716325754844,
+          "maximum": -0.4868638965393757
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.012003474917704038,
+          "minimum": -0.9579465629110189,
+          "maximum": 0.3012224230499143
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "000",
+      "on": "001",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 0.0,
+        "minimum": -0.689683670098109,
+        "maximum": 0.0
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": 0.3122035060474815,
+          "minimum": -5.1093858160192696,
+          "maximum": 0.7123139785214825
+        },
+        "fill": {
+          "count": 11,
+          "median": 0.002422310250262072,
+          "minimum": -2.6155395351883044,
+          "maximum": 2.502652904486517
+        },
+        "buffer": {
+          "count": 11,
+          "median": 0.0,
+          "minimum": -8.238049727256701,
+          "maximum": 0.6674545214645206
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "000",
+      "on": "001",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 0.14652000000000598,
+        "minimum": -0.26135999999996784,
+        "maximum": 24.71040000000005
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 0.5471905828103072,
+          "minimum": -5.225074049594653,
+          "maximum": 1.6491436065388427
+        },
+        "fill": {
+          "count": 5,
+          "median": 0.40668467263678654,
+          "minimum": -4.568883129075672,
+          "maximum": 1.4147704915214199
+        },
+        "buffer": {
+          "count": 5,
+          "median": 4.6201516763488826e-06,
+          "minimum": -2.8553532108876567,
+          "maximum": 0.3595706263104743
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "010",
+      "on": "011",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 0.0,
+        "minimum": -0.6465784407169792,
+        "maximum": 0.5603679819547152
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": 0.3122014180301562,
+          "minimum": -4.8875603432008745,
+          "maximum": 1.004874593119963
+        },
+        "fill": {
+          "count": 11,
+          "median": 0.0025541471995040865,
+          "minimum": -2.559306153394232,
+          "maximum": 2.2844589986498036
+        },
+        "buffer": {
+          "count": 11,
+          "median": 0.0,
+          "minimum": -8.352841774357472,
+          "maximum": 0.5435204406860966
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "010",
+      "on": "011",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 2.6215200000000323,
+        "minimum": 0.0,
+        "maximum": 24.231240000000014
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 0.530069397370287,
+          "minimum": -4.987405387572579,
+          "maximum": 1.4038958204348795
+        },
+        "fill": {
+          "count": 5,
+          "median": 0.48443995163957876,
+          "minimum": -4.3315009616503914,
+          "maximum": 1.262179705512132
+        },
+        "buffer": {
+          "count": 5,
+          "median": -6.592985589604083e-05,
+          "minimum": -2.732674057638647,
+          "maximum": 0.3833367853486047
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "100",
+      "on": "101",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 9,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 9,
+        "median": 0.0,
+        "minimum": 0.0,
+        "maximum": 6.551994865932045
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 9,
+          "median": 0.31569553516548865,
+          "minimum": -3.452708699060537,
+          "maximum": 0.5804053345305391
+        },
+        "fill": {
+          "count": 9,
+          "median": 0.13743307475558453,
+          "minimum": -0.010191955119410068,
+          "maximum": 2.080770128296912
+        },
+        "buffer": {
+          "count": 9,
+          "median": -5.9020757699590476e-05,
+          "minimum": -10.606508119405476,
+          "maximum": 1.4753874871605417
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "100",
+      "on": "101",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 4,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 4,
+        "median": 4.603500000000002,
+        "minimum": -1.4176800000000185,
+        "maximum": 28.844640000000027
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 4,
+          "median": 0.5448858091288153,
+          "minimum": -3.488399096347223,
+          "maximum": 1.3598809069714193
+        },
+        "fill": {
+          "count": 4,
+          "median": 0.610461783751977,
+          "minimum": -2.9749762915795372,
+          "maximum": 1.4569017949999576
+        },
+        "buffer": {
+          "count": 4,
+          "median": 0.2557832548793104,
+          "minimum": -1.4738571208283702,
+          "maximum": 0.38461356807694447
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "110",
+      "on": "111",
+      "group": "residual",
+      "pairs": 11,
+      "physical_pairs": 11,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 11,
+        "median": 0.0,
+        "minimum": -0.04310522938113159,
+        "maximum": 4.094996791207535
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 11,
+          "median": 0.3122016247197479,
+          "minimum": -3.341922224711169,
+          "maximum": 0.6547480347926928
+        },
+        "fill": {
+          "count": 11,
+          "median": 0.12679386280246163,
+          "minimum": -0.00015909915524048301,
+          "maximum": 2.1652982909919345
+        },
+        "buffer": {
+          "count": 11,
+          "median": -0.000987256310607837,
+          "minimum": -10.825311361281422,
+          "maximum": 1.4080754129367006
+        }
+      }
+    },
+    {
+      "factor": "snow",
+      "off": "110",
+      "on": "111",
+      "group": "passing_control",
+      "pairs": 5,
+      "physical_pairs": 5,
+      "on_recovers": 0,
+      "on_loses": 0,
+      "sediment_on_minus_off_kg_yr": {
+        "count": 5,
+        "median": 0.11484000000000094,
+        "minimum": -1.4929200000000264,
+        "maximum": 25.88652000000002
+      },
+      "surface_out_on_minus_off_m3_yr": {
+        "road": {
+          "count": 5,
+          "median": 0.5361945666190167,
+          "minimum": -3.3764177604164445,
+          "maximum": 1.5880449340144267
+        },
+        "fill": {
+          "count": 5,
+          "median": 0.5836973230245235,
+          "minimum": -2.8583741744147915,
+          "maximum": 1.5030312715371572
+        },
+        "buffer": {
+          "count": 5,
+          "median": 0.21107919281419996,
+          "minimum": -1.4565411684277194,
+          "maximum": 0.38184574198673893
+        }
+      }
+    }
+  ],
+  "failures": [
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "100",
+      "group": "residual",
+      "record_sha256": "1bcaa540b614423648ce47a648a27d00b0ea72fcfa295bb1e76e55f0d5af8ce7",
+      "stdout_sha256": "061b249eead5581db460e4a321f6fa6d43570e80a0574944c0852c7895cf9629",
+      "guard_lines": [
+        "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           3           1  -9.70127711E-12   0.0000000000000000"
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "group": "residual",
+      "record_sha256": "8465cc4f65b63ac8707d8d3ab259602d1e39bd1d5b67d563a51fa018a133eddd",
+      "stdout_sha256": "061b249eead5581db460e4a321f6fa6d43570e80a0574944c0852c7895cf9629",
+      "guard_lines": [
+        "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           3           1  -9.70127711E-12   0.0000000000000000"
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "100",
+      "group": "residual",
+      "record_sha256": "b6b8ad3a78453533a6b01b93662fa73c8b32a6338ff480c706a3465cfd1d21c0",
+      "stdout_sha256": "0a40c3b08b8e56f403ae9046b06b14ae06f226cf76a90535db9d870579357ed1",
+      "guard_lines": [
+        "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           2           1  -9.70127711E-12   0.0000000000000000"
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "group": "residual",
+      "record_sha256": "f4eadf6c42f542ce878f266e0101971b509da85a0ba3ebad304c23f932d77ad3",
+      "stdout_sha256": "8a338b9ee6abf786bb21fd0fe4c28a668877c832b9e5cc7ff9dedccab2db4dbe",
+      "guard_lines": [
+        "HOURLY_WATER_UNMET day,ofe,hour,demand,available:          113           3           1  -2.42531928E-12   0.0000000000000000"
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "100",
+      "group": "passing_control",
+      "record_sha256": "99183cceb040815f4631b25639e49a94dd3e471f1d1bdb566d17dbe77bd0329c",
+      "stdout_sha256": "d4bca654fd9e5c68826f51dce88f4ca25b5299b90c6ca7cfa7f099d846038162",
+      "guard_lines": [
+        "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           3           1  -9.70127711E-12   0.0000000000000000"
+      ]
+    }
+  ],
+  "residual_daily_PMET_misses": [
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "residual",
+      "lane": "011",
+      "physical_pass": true,
+      "status": "completed",
+      "within": false,
+      "export_kg_yr": 7.500309912316956,
+      "runoff_mm_yr": 0.35,
+      "reference_kg_yr": 0.5603679819547152,
+      "record_sha256": "0e2c4558b05dc0015acd0ea731bf9cc634c5ba84100d490cc6a6dc9bf30041ea",
+      "water_ofes": [
+        {
+          "surface_out_m3_yr": 16.976402751312612,
+          "surface_in_m3_yr": 0.0,
+          "lateral_out_m3_yr": 0.07332199517730537,
+          "lateral_in_m3_yr": 0.0,
+          "precipitation_m3_yr": 142.31859611236078,
+          "rain_melt_m3_yr": 140.75409181197264,
+          "et_m3_yr": 62.04111956950146,
+          "deep_percolation_m3_yr": 60.56073600262507,
+          "apparent_soil_residual_m3": -0.031925627061382515,
+          "first_reported_stock_m3": 8.907264599317095,
+          "last_reported_stock_m3": 26.743518833559378
+        },
+        {
+          "surface_out_m3_yr": 9.84576722367968,
+          "surface_in_m3_yr": 16.97640153876277,
+          "lateral_out_m3_yr": 0.6742013493351423,
+          "lateral_in_m3_yr": 0.07313287098339565,
+          "precipitation_m3_yr": 116.14214004169435,
+          "rain_melt_m3_yr": 114.866131498139,
+          "et_m3_yr": 108.02586879427501,
+          "deep_percolation_m3_yr": 13.019642348774969,
+          "apparent_soil_residual_m3": 0.19163909360796674,
+          "first_reported_stock_m3": 12.50301231330942,
+          "last_reported_stock_m3": 18.038456554746233
+        },
+        {
+          "surface_out_m3_yr": 0.7629930986785785,
+          "surface_in_m3_yr": 9.845767942207722,
+          "lateral_out_m3_yr": 0.11100889722522898,
+          "lateral_in_m3_yr": 0.6724577428066755,
+          "precipitation_m3_yr": 1006.9040674949505,
+          "rain_melt_m3_yr": 995.2363919606335,
+          "et_m3_yr": 978.2947264148684,
+          "deep_percolation_m3_yr": 31.170007915783717,
+          "apparent_soil_residual_m3": 2.5329519317728115,
+          "first_reported_stock_m3": 141.32286531365688,
+          "last_reported_stock_m3": 66.02467641119003
+        }
+      ],
+      "sediment_ofes": [
+        {
+          "boundary_kg_yr": 104.36314848539301,
+          "net_kg_yr": 104.36314848539301,
+          "positive_daily_net_kg_yr": 104.36314848539301,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 87.70836548325822,
+          "net_kg_yr": -16.654783002134852,
+          "positive_daily_net_kg_yr": 0.49571013788301826,
+          "negative_daily_net_kg_yr": -17.15049314001787
+        },
+        {
+          "boundary_kg_yr": 7.497615835480636,
+          "net_kg_yr": -80.21074964777759,
+          "positive_daily_net_kg_yr": 0.25324322261415055,
+          "negative_daily_net_kg_yr": -80.46399287039173
+        }
+      ]
+    }
+  ],
+  "limitation": "Selected11residual and5control inputs; diagnostic paired effects, not global configuration acceptance or complete water-budget closure."
+}
