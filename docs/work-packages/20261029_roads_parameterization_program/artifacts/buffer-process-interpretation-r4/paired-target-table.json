@@ -1,0 +1,4223 @@
+[
+  {
+    "label": "B1 \u00b7 Denver paved / dry legacy",
+    "stratum": "small_paved_dry_legacy",
+    "lane": "legacy",
+    "case_id": "denver-1718465-outunrut-paved-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 89.80585634708405,
+    "observed_weighted_min_conductivity_mm_h": 10.253961954731494,
+    "local_effective_conductivity_mm_h": 30.000000333529897,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 17.5616455078125,
+    "published_surface_in_m3": 17.799456912055184,
+    "published_surface_out_m3": 0.0,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.0,
+    "return_m3_using_emitted_local_area": 0.0,
+    "published_sediment_in_kg": 198.06852900630108,
+    "published_sediment_out_kg": 0.0,
+    "native_grid_net_exchange_kg": -198.07608389889413,
+    "native_upstream_event_mass_kg": 198.07608389889413,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.012999999336898327,
+        "rate_kg_m_s": 1.7382467792346665e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.2599998414516449,
+        "rate_kg_m_s": 0.0003476491615827075
+      },
+      {
+        "index": 3,
+        "fraction": 0.08999999612569809,
+        "rate_kg_m_s": 0.00012034016259723345
+      },
+      {
+        "index": 4,
+        "fraction": 0.17273150384426117,
+        "rate_kg_m_s": 0.00023096153503441956
+      },
+      {
+        "index": 5,
+        "fraction": 0.46426865458488464,
+        "rate_kg_m_s": 0.0006207796420736843
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 2,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 3,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 4,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 5,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.0,
+      "observed_m": 0.0,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.045068128034472466,
+        "stock_m": 0.025351079180836678,
+        "available_upper_m": 0.07041920721530914,
+        "minimum_conductivity": {
+          "value": 2.2222222284540294e-08,
+          "day": 127,
+          "line": 2035
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03520960360765457,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03520960360765457
+            ],
+            "line": 3723
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.025351079180836678,
+              0.03520960360765457,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03520960360765457
+            ],
+            "line": 3724
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.07481149004888721,
+        "stock_m": 0.011683708260534331,
+        "available_upper_m": 0.08649519830942154,
+        "minimum_conductivity": {
+          "value": 3.1797023893886944e-06,
+          "day": 127,
+          "line": 2047
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.000342841463861987,
+              0.04324759915471077,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04324759915471077
+            ],
+            "line": 3721
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.011340866796672344,
+              0.04324759915471077,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04324759915471077
+            ],
+            "line": 3722
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.09785875654779375,
+        "stock_m": 0.005711935693398118,
+        "available_upper_m": 0.10357069224119186,
+        "minimum_conductivity": {
+          "value": 3.209548367522075e-06,
+          "day": 127,
+          "line": 2061
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0019449100363999605,
+              0.05178534612059593,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.05178534612059593
+            ],
+            "line": 3719
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.0037670256569981575,
+              0.05178534612059593,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.05178534612059593
+            ],
+            "line": 3720
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1174.2000732421875,
+          1174.2000732421875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2056
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1174.2000732421875,
+          1174.2000732421875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2058
+      }
+    ]
+  },
+  {
+    "label": "B1 \u00b7 Denver paved / dry legacy",
+    "stratum": "small_paved_dry_legacy",
+    "lane": "modern",
+    "case_id": "denver-1718465-outunrut-paved-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 66.06744974851608,
+    "observed_weighted_min_conductivity_mm_h": 8.635766789666377,
+    "local_effective_conductivity_mm_h": 60.00000721542165,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 13.663721084594727,
+    "published_surface_in_m3": 33.68290025800292,
+    "published_surface_out_m3": 14.652853869622465,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 4.7477651428636385,
+    "native_hourly_return_depth_local_m": 0.008579812943935394,
+    "return_m3_using_emitted_local_area": 14.652854973923283,
+    "published_sediment_in_kg": 54.18327333208279,
+    "published_sediment_out_kg": 54.18327333208279,
+    "native_grid_net_exchange_kg": 0.0,
+    "native_upstream_event_mass_kg": 54.18460803799591,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452499374747276,
+        "rate_kg_m_s": 4.367142411053105e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.0400867760181427,
+        "rate_kg_m_s": 3.9318289557571055e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.19091318547725677,
+        "rate_kg_m_s": 1.8725327034420955e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4907865524291992,
+        "rate_kg_m_s": 4.8137789306477996e-05
+      },
+      {
+        "index": 5,
+        "fraction": 0.23368853330612183,
+        "rate_kg_m_s": 2.292085902507032e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452499374747276,
+        "rate_kg_m_s": 4.367142411053105e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.0400867760181427,
+        "rate_kg_m_s": 3.9318289557571055e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.19091320037841797,
+        "rate_kg_m_s": 1.8725328495970694e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4907865524291992,
+        "rate_kg_m_s": 4.8137789306477996e-05
+      },
+      {
+        "index": 5,
+        "fraction": 0.23368853330612183,
+        "rate_kg_m_s": 2.292085902507032e-05
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.024878447875380516,
+      "observed_m": 0.024878447875380516,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.055394189432263374,
+        "stock_m": 0.016497379168868065,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.2222224060897133e-08,
+          "day": 127,
+          "line": 2187
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 4037
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.016497379168868065,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 4038
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.06751926196739078,
+        "stock_m": 0.0043723066337406635,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 127,
+          "line": 2201
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 4035
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.0043723066337406635,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 4036
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.06740859383717179,
+        "stock_m": 0.004482974763959646,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 127,
+          "line": 2219
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 4033
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.004482974763959646,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 4034
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1399.7803955078125,
+          1400.0,
+          6105.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 2210
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1399.7803955078125,
+          1400.0,
+          6105.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 2214
+      }
+    ]
+  },
+  {
+    "label": "B2 \u00b7 Flagstaff gravel / less runon",
+    "stratum": "small_gravel_less_runon",
+    "lane": "legacy",
+    "case_id": "flagstaff-1718494-outunrut-gravel-high",
+    "year": 5,
+    "julian": 320,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 72.7197602391243,
+    "observed_weighted_min_conductivity_mm_h": 8.357237948075635,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 10.68039655897967,
+    "published_surface_out_m3": 0.26506072048135737,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.0,
+    "return_m3_using_emitted_local_area": 0.0,
+    "published_sediment_in_kg": 147.76472631852016,
+    "published_sediment_out_kg": 3.3622078917282883,
+    "native_grid_net_exchange_kg": -144.39119795793837,
+    "native_upstream_event_mass_kg": 147.74985422181467,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.052116695791482925,
+        "rate_kg_m_s": 5.2505804844527396e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.09244439005851746,
+        "rate_kg_m_s": 9.313459016672965e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.25834113359451294,
+        "rate_kg_m_s": 0.0002602699372596107
+      },
+      {
+        "index": 4,
+        "fraction": 0.4515550434589386,
+        "rate_kg_m_s": 0.00045492640368600956
+      },
+      {
+        "index": 5,
+        "fraction": 0.14554277062416077,
+        "rate_kg_m_s": 0.0001466294091532344
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.704224169254303,
+        "rate_kg_m_s": 1.6128025804192027e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.03850271925330162,
+        "rate_kg_m_s": 8.81782927595843e-07
+      },
+      {
+        "index": 3,
+        "fraction": 0.25714877247810364,
+        "rate_kg_m_s": 5.889178785832788e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.00012441258877515793,
+        "rate_kg_m_s": 2.8492765936403113e-09
+      },
+      {
+        "index": 5,
+        "fraction": 9.424238919499483e-16,
+        "rate_kg_m_s": 2.1583236576430486e-20
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.02648467803373933,
+        "stock_m": 0.03851069277152419,
+        "available_upper_m": 0.06499537080526352,
+        "minimum_conductivity": {
+          "value": 2.114629523930489e-06,
+          "day": 320,
+          "line": 1746
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.006013007368892431,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 3120
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.03249768540263176,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 3121
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.06398843741044402,
+        "stock_m": 0.015223326627165079,
+        "available_upper_m": 0.0792117640376091,
+        "minimum_conductivity": {
+          "value": 2.331841869818163e-06,
+          "day": 320,
+          "line": 1758
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.007873736321926117,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3118
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.007349590305238962,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3119
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.08026187308132648,
+        "stock_m": 0.01589076779782772,
+        "available_upper_m": 0.0961526408791542,
+        "minimum_conductivity": {
+          "value": 2.349490159758716e-06,
+          "day": 320,
+          "line": 1770
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.008519002236425877,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3116
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.007371765561401844,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3117
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          2281.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1765
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          2281.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1767
+      }
+    ]
+  },
+  {
+    "label": "B2 \u00b7 Flagstaff gravel / less runon",
+    "stratum": "small_gravel_less_runon",
+    "lane": "modern",
+    "case_id": "flagstaff-1718494-outunrut-gravel-high",
+    "year": 5,
+    "julian": 320,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 39.65797275304794,
+    "observed_weighted_min_conductivity_mm_h": 41.61599208600819,
+    "local_effective_conductivity_mm_h": 50.00001037842594,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 10.385857505886564,
+    "published_surface_out_m3": 15.620309252574481,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 3.654754462492154,
+    "native_hourly_return_depth_local_m": 0.009127099066972733,
+    "return_m3_using_emitted_local_area": 15.587526189077835,
+    "published_sediment_in_kg": 73.27888994792423,
+    "published_sediment_out_kg": 83.32240839372797,
+    "native_grid_net_exchange_kg": 10.04683967163015,
+    "native_upstream_event_mass_kg": 73.29462108582308,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.0478324219584465,
+        "rate_kg_m_s": 0.00013317280245268848
+      },
+      {
+        "index": 2,
+        "fraction": 0.09265975654125214,
+        "rate_kg_m_s": 0.0002579789805312871
+      },
+      {
+        "index": 3,
+        "fraction": 0.322588711977005,
+        "rate_kg_m_s": 0.0008981364742705611
+      },
+      {
+        "index": 4,
+        "fraction": 0.3792136311531067,
+        "rate_kg_m_s": 0.0010557889381556107
+      },
+      {
+        "index": 5,
+        "fraction": 0.15770554542541504,
+        "rate_kg_m_s": 0.0004390764378370271
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04755124822258949,
+        "rate_kg_m_s": 0.0001505372936118762
+      },
+      {
+        "index": 2,
+        "fraction": 0.09211507439613342,
+        "rate_kg_m_s": 0.00029161703464732763
+      },
+      {
+        "index": 3,
+        "fraction": 0.32069242000579834,
+        "rate_kg_m_s": 0.0010152450418027537
+      },
+      {
+        "index": 4,
+        "fraction": 0.3811362385749817,
+        "rate_kg_m_s": 0.0012065975131485968
+      },
+      {
+        "index": 5,
+        "fraction": 0.15850511193275452,
+        "rate_kg_m_s": 0.0005017939899770937
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.03168886015191674,
+        "stock_m": 0.02650668239220977,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 2.2500005343317753e-06,
+          "day": 320,
+          "line": 5331
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.005452161189168692,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.029097771272063255
+            ],
+            "line": 8799
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.021054521203041077,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.029097771272063255
+            ],
+            "line": 8800
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.04969840683043003,
+        "stock_m": 0.00849713571369648,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 2.777778490781202e-06,
+          "day": 320,
+          "line": 5361
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.004494876135140657,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.029097771272063255
+            ],
+            "line": 8797
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.004002259578555822,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.029097771272063255
+            ],
+            "line": 8798
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.03962622955441475,
+        "stock_m": 0.01856931298971176,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 1.3888891771784984e-05,
+          "day": 320,
+          "line": 5391
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.009247593581676483,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.029097771272063255
+            ],
+            "line": 8795
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.009321719408035278,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.029097771272063255
+            ],
+            "line": 8796
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1499.5958251953125,
+          1500.0,
+          2281.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 5382
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1499.5958251953125,
+          1500.0,
+          2281.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 5386
+      }
+    ]
+  },
+  {
+    "label": "B3 \u00b7 Denver gravel / dry legacy",
+    "stratum": "small_gravel_dry_legacy",
+    "lane": "legacy",
+    "case_id": "denver-1718494-outunrut-gravel-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 83.45593512058258,
+    "observed_weighted_min_conductivity_mm_h": 8.357237948075635,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 17.81698989868164,
+    "published_surface_in_m3": 14.823935150758823,
+    "published_surface_out_m3": 0.0,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.0,
+    "return_m3_using_emitted_local_area": 0.0,
+    "published_sediment_in_kg": 172.7226541301955,
+    "published_sediment_out_kg": 0.0,
+    "native_grid_net_exchange_kg": -172.70561340358552,
+    "native_upstream_event_mass_kg": 172.70561340358552,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 7.44805870770992e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.0969117060303688,
+        "rate_kg_m_s": 0.0001388084832300322
+      },
+      {
+        "index": 3,
+        "fraction": 0.2893456816673279,
+        "rate_kg_m_s": 0.0004144353334241749
+      },
+      {
+        "index": 4,
+        "fraction": 0.42616739869117737,
+        "rate_kg_m_s": 0.0006104076858978562
+      },
+      {
+        "index": 5,
+        "fraction": 0.13557520508766174,
+        "rate_kg_m_s": 0.00019418694967480651
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 2,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 3,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 4,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 5,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.0,
+      "observed_m": 0.0,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.0367114432156086,
+        "stock_m": 0.028283927589654922,
+        "available_upper_m": 0.06499537080526352,
+        "minimum_conductivity": {
+          "value": 2.114629523930489e-06,
+          "day": 127,
+          "line": 1739
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 3275
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.028283927589654922,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 3276
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.07095621433109045,
+        "stock_m": 0.00825554970651865,
+        "available_upper_m": 0.0792117640376091,
+        "minimum_conductivity": {
+          "value": 2.331841869818163e-06,
+          "day": 127,
+          "line": 1751
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3273
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.00825554970651865,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3274
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.09150471433531493,
+        "stock_m": 0.004647926543839276,
+        "available_upper_m": 0.0961526408791542,
+        "minimum_conductivity": {
+          "value": 2.349490159758716e-06,
+          "day": 127,
+          "line": 1763
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0013030561385676265,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3271
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.0033448704052716494,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3272
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1758
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1760
+      }
+    ]
+  },
+  {
+    "label": "B3 \u00b7 Denver gravel / dry legacy",
+    "stratum": "small_gravel_dry_legacy",
+    "lane": "modern",
+    "case_id": "denver-1718494-outunrut-gravel-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 50.77851563692093,
+    "observed_weighted_min_conductivity_mm_h": 41.61599208600819,
+    "local_effective_conductivity_mm_h": 50.00001037842594,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 11.22252082824707,
+    "published_surface_in_m3": 16.310967642258287,
+    "published_surface_out_m3": 39.03422585718667,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 5.704149488188689,
+    "native_hourly_return_depth_local_m": 0.022856049239635468,
+    "return_m3_using_emitted_local_area": 39.034228015653326,
+    "published_sediment_in_kg": 94.52976803282226,
+    "published_sediment_out_kg": 94.52976803282226,
+    "native_grid_net_exchange_kg": 0.0,
+    "native_upstream_event_mass_kg": 94.50934055367567,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04624844714999199,
+        "rate_kg_m_s": 7.912057086925629e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.08959130942821503,
+        "rate_kg_m_s": 1.532703470863623e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.31190618872642517,
+        "rate_kg_m_s": 5.336005256490655e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.3900443911552429,
+        "rate_kg_m_s": 6.672772124103558e-05
+      },
+      {
+        "index": 5,
+        "fraction": 0.16220977902412415,
+        "rate_kg_m_s": 2.7750402679123983e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04624844714999199,
+        "rate_kg_m_s": 7.912057086925629e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.08959130942821503,
+        "rate_kg_m_s": 1.532703470863623e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.31190618872642517,
+        "rate_kg_m_s": 5.336005256490655e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.3900443911552429,
+        "rate_kg_m_s": 6.672772124103558e-05
+      },
+      {
+        "index": 5,
+        "fraction": 0.16220977902412415,
+        "rate_kg_m_s": 2.7750402679123983e-05
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.08069101721048355,
+      "observed_m": 0.08069101721048355,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.041211508214473724,
+        "stock_m": 0.016984034329652786,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 2.2500005343317753e-06,
+          "day": 127,
+          "line": 4851
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.029097771272063255
+            ],
+            "line": 8478
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.016984034329652786,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.029097771272063255
+            ],
+            "line": 8479
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.05358993075788021,
+        "stock_m": 0.0046056117862463,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 2.777778490781202e-06,
+          "day": 127,
+          "line": 4877
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.029097771272063255
+            ],
+            "line": 8476
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.0046056117862463,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.029097771272063255
+            ],
+            "line": 8477
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.051806467585265636,
+        "stock_m": 0.006389074958860874,
+        "available_upper_m": 0.05819554254412651,
+        "minimum_conductivity": {
+          "value": 1.3888891771784984e-05,
+          "day": 127,
+          "line": 4907
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.029097771272063255
+            ],
+            "line": 8474
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.006389074958860874,
+              0.029097771272063255,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.029097771272063255
+            ],
+            "line": 8475
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1499.7916259765625,
+          1500.0,
+          6105.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 4898
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1499.7916259765625,
+          1500.0,
+          6105.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 4902
+      }
+    ]
+  },
+  {
+    "label": "B4 \u00b7 Passing / same signature",
+    "stratum": "passing_same_signature",
+    "lane": "legacy",
+    "case_id": "site-1718465-outunrut-gravel-high",
+    "year": 2015,
+    "julian": 351,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 25.593958795070648,
+    "observed_weighted_min_conductivity_mm_h": 11.403732332837535,
+    "local_effective_conductivity_mm_h": 30.000000333529897,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 12.23892879486084,
+    "published_surface_in_m3": 35.79299153304383,
+    "published_surface_out_m3": 91.63047750156774,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.05365319177508354,
+    "return_m3_using_emitted_local_area": 91.63048694716537,
+    "published_sediment_in_kg": 40.69133653578851,
+    "published_sediment_out_kg": 40.69133653578851,
+    "native_grid_net_exchange_kg": 0.0,
+    "native_upstream_event_mass_kg": 40.68729531776316,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.012999999336898327,
+        "rate_kg_m_s": 3.309272028130905e-07
+      },
+      {
+        "index": 2,
+        "fraction": 0.1599999964237213,
+        "rate_kg_m_s": 4.0729503051835955e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.08999998867511749,
+        "rate_kg_m_s": 2.291034309588857e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.1953534632921219,
+        "rate_kg_m_s": 4.972906035742613e-06
+      },
+      {
+        "index": 5,
+        "fraction": 0.5416465997695923,
+        "rate_kg_m_s": 1.3788123332146183e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.012999999336898327,
+        "rate_kg_m_s": 3.3092722645995155e-07
+      },
+      {
+        "index": 2,
+        "fraction": 0.1599999964237213,
+        "rate_kg_m_s": 4.0729505962218936e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.08999998867511749,
+        "rate_kg_m_s": 2.2910344732978826e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.1953534632921219,
+        "rate_kg_m_s": 4.972906391088492e-06
+      },
+      {
+        "index": 5,
+        "fraction": 0.5416465997695923,
+        "rate_kg_m_s": 1.3788124317395609e-05
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.17368671298027039,
+      "observed_m": 0.17368671298027039,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.06864496320486069,
+        "available_upper_m": 0.06864496320486069,
+        "minimum_conductivity": {
+          "value": 2.833333383023273e-06,
+          "day": 351,
+          "line": 2307
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.034322481602430344,
+              0.034322481602430344,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.034322481602430344
+            ],
+            "line": 3961
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.034322481602430344,
+              0.034322481602430344,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.034322481602430344
+            ],
+            "line": 3962
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.0924835130572319,
+        "available_upper_m": 0.0924835130572319,
+        "minimum_conductivity": {
+          "value": 3.1985855457605794e-06,
+          "day": 351,
+          "line": 2319
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.04624175652861595,
+              0.04624175652861595,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04624175652861595
+            ],
+            "line": 3959
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.04624175652861595,
+              0.04624175652861595,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04624175652861595
+            ],
+            "line": 3960
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.03216363489627838,
+        "stock_m": 0.08338321000337601,
+        "available_upper_m": 0.11554684489965439,
+        "minimum_conductivity": {
+          "value": 3.2114025998453144e-06,
+          "day": 351,
+          "line": 2331
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.036928340792655945,
+              0.057773422449827194,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.057773422449827194
+            ],
+            "line": 3957
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.04645486921072006,
+              0.057773422449827194,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.057773422449827194
+            ],
+            "line": 3958
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1012.1998901367188,
+          1012.1998901367188,
+          6330.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2326
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1012.1998901367188,
+          1012.1998901367188,
+          6330.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2328
+      }
+    ]
+  },
+  {
+    "label": "B4 \u00b7 Passing / same signature",
+    "stratum": "passing_same_signature",
+    "lane": "modern",
+    "case_id": "site-1718465-outunrut-gravel-high",
+    "year": 2015,
+    "julian": 351,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 9.965535253286362,
+    "observed_weighted_min_conductivity_mm_h": 9.720000343804713,
+    "local_effective_conductivity_mm_h": 60.00000721542165,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 19.98875730483927,
+    "published_surface_out_m3": 143.0254957610636,
+    "published_lateral_in_m3": 8.897790069899122,
+    "published_lateral_out_m3": 40.66341296819541,
+    "native_hourly_return_depth_local_m": 0.043848104774951935,
+    "return_m3_using_emitted_local_area": 74.88507317667248,
+    "published_sediment_in_kg": 27.93218863897347,
+    "published_sediment_out_kg": 162.0325572436748,
+    "native_grid_net_exchange_kg": 134.0829746957009,
+    "native_upstream_event_mass_kg": 27.9381134621575,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452503100037575,
+        "rate_kg_m_s": 3.852986568362313e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.040086809545755386,
+        "rate_kg_m_s": 3.4689237778855273e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.1909133344888687,
+        "rate_kg_m_s": 1.6520741187146283e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4907868504524231,
+        "rate_kg_m_s": 4.2470383517668325e-05
+      },
+      {
+        "index": 5,
+        "fraction": 0.23368869721889496,
+        "rate_kg_m_s": 2.0222319700459977e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452500492334366,
+        "rate_kg_m_s": 2.2344554035055343e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.040086787194013596,
+        "rate_kg_m_s": 2.0117266333614502e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.19091321527957916,
+        "rate_kg_m_s": 9.580842634751043e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4907865524291992,
+        "rate_kg_m_s": 0.0002462977075311512
+      },
+      {
+        "index": 5,
+        "fraction": 0.2336885631084442,
+        "rate_kg_m_s": 0.00011727492753208987
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.0032612495124340057,
+        "stock_m": 0.06863031908869743,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 351,
+          "line": 2821
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.032684534788131714,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 4785
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.03594578430056572,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 4786
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.045541321858763695,
+        "stock_m": 0.026350246742367744,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 351,
+          "line": 2835
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.011040846817195415,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 4783
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.015309399925172329,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 4784
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.006809620186686516,
+        "stock_m": 0.06508194841444492,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 351,
+          "line": 2853
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.029136164113879204,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 4781
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.03594578430056572,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 4782
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1399.9591064453125,
+          1400.0,
+          6330.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 2844
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1399.9591064453125,
+          1400.0,
+          6330.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 2848
+      }
+    ]
+  },
+  {
+    "label": "B5 \u00b7 Underprediction / lower supply",
+    "stratum": "underprediction_less_supply",
+    "lane": "legacy",
+    "case_id": "site-2711184-outunrut-gravel-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 0.0,
+    "observed_weighted_min_conductivity_mm_h": 8.357237948075635,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 68.04131527305918,
+    "published_surface_out_m3": 312.1946975800825,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.10932557284832001,
+    "return_m3_using_emitted_local_area": 186.70940431397597,
+    "published_sediment_in_kg": 119.78943245016555,
+    "published_sediment_out_kg": 396.95605737084367,
+    "native_grid_net_exchange_kg": 277.2028134234941,
+    "native_upstream_event_mass_kg": 119.76794495110164,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 1.2228416120874715e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.09223738312721252,
+        "rate_kg_m_s": 2.1690714621398072e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.2577626705169678,
+        "rate_kg_m_s": 6.061594915937607e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.45054396986961365,
+        "rate_kg_m_s": 0.00010595075817963415
+      },
+      {
+        "index": 5,
+        "fraction": 0.14745602011680603,
+        "rate_kg_m_s": 3.4676032028679166e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 4.0531076984614113e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.09673862159252167,
+        "rate_kg_m_s": 7.540232152210714e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.28817617893218994,
+        "rate_kg_m_s": 0.00022461714402324112
+      },
+      {
+        "index": 4,
+        "fraction": 0.42707008123397827,
+        "rate_kg_m_s": 0.000332877138908564
+      },
+      {
+        "index": 5,
+        "fraction": 0.1360151469707489,
+        "rate_kg_m_s": 0.00010601616681044264
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.06499537080526352,
+        "available_upper_m": 0.06499537080526352,
+        "minimum_conductivity": {
+          "value": 2.114629523930489e-06,
+          "day": 324,
+          "line": 2506
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.03249768540263176,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 4700
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.03249768540263176,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03249768540263176
+            ],
+            "line": 4701
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.0792117640376091,
+        "available_upper_m": 0.0792117640376091,
+        "minimum_conductivity": {
+          "value": 2.331841869818163e-06,
+          "day": 324,
+          "line": 2518
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.03960588201880455,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 4698
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.03960588201880455,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 4699
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.0961526408791542,
+        "available_upper_m": 0.0961526408791542,
+        "minimum_conductivity": {
+          "value": 2.349490159758716e-06,
+          "day": 324,
+          "line": 2530
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0480763204395771,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 4696
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.0480763204395771,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 4697
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2525
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2527
+      }
+    ]
+  },
+  {
+    "label": "B5 \u00b7 Underprediction / lower supply",
+    "stratum": "underprediction_less_supply",
+    "lane": "modern",
+    "case_id": "site-2711184-outunrut-gravel-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 40.963251143693924,
+    "observed_weighted_min_conductivity_mm_h": 27.610932011157274,
+    "local_effective_conductivity_mm_h": 50.00001037842594,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 5.33677864074707,
+    "published_surface_in_m3": 32.410260103629135,
+    "published_surface_out_m3": 167.56448107240698,
+    "published_lateral_in_m3": 4.559903932174789,
+    "published_lateral_out_m3": 19.366782992832253,
+    "native_hourly_return_depth_local_m": 0.09811548888683319,
+    "return_m3_using_emitted_local_area": 167.5644957237163,
+    "published_sediment_in_kg": 7.370994224173555,
+    "published_sediment_out_kg": 7.370994224173555,
+    "native_grid_net_exchange_kg": 0.0,
+    "native_upstream_event_mass_kg": 7.37156219769359,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.06288685649633408,
+        "rate_kg_m_s": 1.2447835436334862e-07
+      },
+      {
+        "index": 2,
+        "fraction": 0.2428211122751236,
+        "rate_kg_m_s": 4.806405367462959e-07
+      },
+      {
+        "index": 3,
+        "fraction": 0.435370534658432,
+        "rate_kg_m_s": 8.617732020956088e-07
+      },
+      {
+        "index": 4,
+        "fraction": 0.17010653018951416,
+        "rate_kg_m_s": 3.367091650651095e-07
+      },
+      {
+        "index": 5,
+        "fraction": 0.08881525695323944,
+        "rate_kg_m_s": 1.758010758343705e-07
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.06288685649633408,
+        "rate_kg_m_s": 1.2447835436334862e-07
+      },
+      {
+        "index": 2,
+        "fraction": 0.2428211122751236,
+        "rate_kg_m_s": 4.806405367462959e-07
+      },
+      {
+        "index": 3,
+        "fraction": 0.435370534658432,
+        "rate_kg_m_s": 8.617732020956088e-07
+      },
+      {
+        "index": 4,
+        "fraction": 0.17010651528835297,
+        "rate_kg_m_s": 3.3670913556972483e-07
+      },
+      {
+        "index": 5,
+        "fraction": 0.08881525695323944,
+        "rate_kg_m_s": 1.758010758343705e-07
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.7284048795700073,
+      "observed_m": 0.7284048795700073,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.04362648166716099,
+        "stock_m": 0.06341898255050182,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.2500005343317753e-06,
+          "day": 324,
+          "line": 5483
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.02765544317662716,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.053522732108831406
+            ],
+            "line": 9776
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.035763539373874664,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.053522732108831406
+            ],
+            "line": 9777
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.05563788861036301,
+        "stock_m": 0.051407575607299805,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.777778490781202e-06,
+          "day": 324,
+          "line": 5509
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.02038714848458767,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 9774
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.031020427122712135,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 9775
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0388941690325737,
+        "stock_m": 0.06815129518508911,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 9.000002137327101e-06,
+          "day": 324,
+          "line": 5535
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.028978459537029266,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 9772
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.039172835648059845,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 9773
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          800.0,
+          800.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 5530
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          800.0,
+          800.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 5532
+      }
+    ]
+  },
+  {
+    "label": "B6 \u00b7 Underprediction / unresolved tiny supply",
+    "stratum": "underprediction_not_less_supply",
+    "lane": "legacy",
+    "case_id": "site-2711184-outunrut-paved-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 4.462799057364464,
+    "observed_weighted_min_conductivity_mm_h": 7.4939592195732985,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 68.93848918043348,
+    "published_surface_out_m3": 314.6177679598134,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.10795779526233673,
+    "return_m3_using_emitted_local_area": 184.3734738298315,
+    "published_sediment_in_kg": 0.0,
+    "published_sediment_out_kg": 139.5747327361051,
+    "native_grid_net_exchange_kg": 139.5677079138242,
+    "native_upstream_event_mass_kg": 0.00014583318122613655,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 1.5185295690145897e-11
+      },
+      {
+        "index": 2,
+        "fraction": 0.09223738312721252,
+        "rate_kg_m_s": 2.693561553685006e-11
+      },
+      {
+        "index": 3,
+        "fraction": 0.2577626407146454,
+        "rate_kg_m_s": 7.52731176303779e-11
+      },
+      {
+        "index": 4,
+        "fraction": 0.45054394006729126,
+        "rate_kg_m_s": 1.315700634673559e-10
+      },
+      {
+        "index": 5,
+        "fraction": 0.14745600521564484,
+        "rate_kg_m_s": 4.306082989811723e-11
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 1.4532900721807187e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.0986834168434143,
+        "rate_kg_m_s": 2.757993025052398e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.30131658911705017,
+        "rate_kg_m_s": 8.421162113144472e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4169279932975769,
+        "rate_kg_m_s": 0.00011652256622694639
+      },
+      {
+        "index": 5,
+        "fraction": 0.1310720443725586,
+        "rate_kg_m_s": 3.663186741217905e-05
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.03967906883917749,
+        "stock_m": 0.0324296320322901,
+        "available_upper_m": 0.07210870087146759,
+        "minimum_conductivity": {
+          "value": 2.2222222284540294e-08,
+          "day": 324,
+          "line": 2821
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0006253572646528482,
+              0.036054350435733795,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.036054350435733795
+            ],
+            "line": 5281
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.03180427476763725,
+              0.036054350435733795,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.036054350435733795
+            ],
+            "line": 5282
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.07406239956617355,
+        "available_upper_m": 0.07406239956617355,
+        "minimum_conductivity": {
+          "value": 2.3152356334321667e-06,
+          "day": 324,
+          "line": 2833
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.03703119978308678,
+              0.03703119978308678,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03703119978308678
+            ],
+            "line": 5279
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.03703119978308678,
+              0.03703119978308678,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03703119978308678
+            ],
+            "line": 5280
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.08584310859441757,
+        "available_upper_m": 0.08584310859441757,
+        "minimum_conductivity": {
+          "value": 2.3457989755115705e-06,
+          "day": 324,
+          "line": 2847
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.042921554297208786,
+              0.042921554297208786,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.042921554297208786
+            ],
+            "line": 5277
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.042921554297208786,
+              0.042921554297208786,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.042921554297208786
+            ],
+            "line": 5278
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1189.19189453125,
+          1189.19189453125,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2842
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1189.19189453125,
+          1189.19189453125,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2844
+      }
+    ]
+  },
+  {
+    "label": "B6 \u00b7 Underprediction / unresolved tiny supply",
+    "stratum": "underprediction_not_less_supply",
+    "lane": "modern",
+    "case_id": "site-2711184-outunrut-paved-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 37.39175945520401,
+    "observed_weighted_min_conductivity_mm_h": 26.7089033513912,
+    "local_effective_conductivity_mm_h": 50.00001037842594,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 5.720955848693848,
+    "published_surface_in_m3": 53.686942634075514,
+    "published_surface_out_m3": 189.1908671086139,
+    "published_lateral_in_m3": 2.6471352415246905,
+    "published_lateral_out_m3": 20.049914668064435,
+    "native_hourly_return_depth_local_m": 0.1107785701751709,
+    "return_m3_using_emitted_local_area": 189.1908755589748,
+    "published_sediment_in_kg": 0.0,
+    "published_sediment_out_kg": 0.0,
+    "native_grid_net_exchange_kg": 0.0,
+    "native_upstream_event_mass_kg": 8.838877856280126e-05,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.03977999836206436,
+        "rate_kg_m_s": 9.441397580935737e-13
+      },
+      {
+        "index": 2,
+        "fraction": 0.1536000370979309,
+        "rate_kg_m_s": 3.645548211160829e-12
+      },
+      {
+        "index": 3,
+        "fraction": 0.27539998292922974,
+        "rate_kg_m_s": 6.5363520353921876e-12
+      },
+      {
+        "index": 4,
+        "fraction": 0.34900107979774475,
+        "rate_kg_m_s": 8.283202831120961e-12
+      },
+      {
+        "index": 5,
+        "fraction": 0.18221887946128845,
+        "rate_kg_m_s": 4.32478873449946e-12
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.03977999836206436,
+        "rate_kg_m_s": 9.441397580935737e-13
+      },
+      {
+        "index": 2,
+        "fraction": 0.1536000370979309,
+        "rate_kg_m_s": 3.645548211160829e-12
+      },
+      {
+        "index": 3,
+        "fraction": 0.27539998292922974,
+        "rate_kg_m_s": 6.5363520353921876e-12
+      },
+      {
+        "index": 4,
+        "fraction": 0.34900107979774475,
+        "rate_kg_m_s": 8.283202831120961e-12
+      },
+      {
+        "index": 5,
+        "fraction": 0.18221887946128845,
+        "rate_kg_m_s": 4.32478873449946e-12
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.7671876549720764,
+      "observed_m": 0.7671876549720764,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.03342817910015583,
+        "stock_m": 0.07361728511750698,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.2222227613610812e-08,
+          "day": 324,
+          "line": 5684
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.020153721794486046,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.053522732108831406
+            ],
+            "line": 10082
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.053463563323020935,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.053522732108831406
+            ],
+            "line": 10083
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.04893016628921032,
+        "stock_m": 0.05811529792845249,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.777778490781202e-06,
+          "day": 324,
+          "line": 5710
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0256271343678236,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 10080
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.03248816356062889,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 10081
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.036621078848838806,
+        "stock_m": 0.070424385368824,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 9.000002137327101e-06,
+          "day": 324,
+          "line": 5736
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.029854096472263336,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 10078
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.04057028889656067,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 10079
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          800.0,
+          800.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 5731
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          800.0,
+          800.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 5733
+      }
+    ]
+  },
+  {
+    "label": "B7 \u00b7 Small-reference passing control",
+    "stratum": "small_passing_control",
+    "lane": "legacy",
+    "case_id": "denver-1718465-outunrut-paved-none",
+    "year": 4,
+    "julian": 233,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 81.17527514696121,
+    "observed_weighted_min_conductivity_mm_h": 10.253961954731494,
+    "local_effective_conductivity_mm_h": 30.000000333529897,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 9.701044082641602,
+    "published_surface_in_m3": 8.981401971289165,
+    "published_surface_out_m3": 0.0,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.0,
+    "return_m3_using_emitted_local_area": 0.0,
+    "published_sediment_in_kg": 1.1207359639094294,
+    "published_sediment_out_kg": 0.0,
+    "native_grid_net_exchange_kg": -1.1117352655907113,
+    "native_upstream_event_mass_kg": 1.1117352655907113,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.012999998405575752,
+        "rate_kg_m_s": 3.578736975575156e-07
+      },
+      {
+        "index": 2,
+        "fraction": 0.2599981129169464,
+        "rate_kg_m_s": 7.1574228799640505e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.08999998867511749,
+        "rate_kg_m_s": 2.477587129047986e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.1727319061756134,
+        "rate_kg_m_s": 4.755093348527751e-06
+      },
+      {
+        "index": 5,
+        "fraction": 0.4642699956893921,
+        "rate_kg_m_s": 1.27807723384883e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 2,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 3,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 4,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      },
+      {
+        "index": 5,
+        "fraction": 0.0,
+        "rate_kg_m_s": 0.0
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.0,
+      "observed_m": 0.0,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.04705950804054737,
+        "stock_m": 0.023359699174761772,
+        "available_upper_m": 0.07041920721530914,
+        "minimum_conductivity": {
+          "value": 2.2222222284540294e-08,
+          "day": 233,
+          "line": 2873
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03520960360765457,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03520960360765457
+            ],
+            "line": 4588
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.023359699174761772,
+              0.03520960360765457,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03520960360765457
+            ],
+            "line": 4589
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.058438580483198166,
+        "stock_m": 0.028056617826223373,
+        "available_upper_m": 0.08649519830942154,
+        "minimum_conductivity": {
+          "value": 3.1797023893886944e-06,
+          "day": 233,
+          "line": 2885
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.012887333519756794,
+              0.04324759915471077,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04324759915471077
+            ],
+            "line": 4586
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.01516928430646658,
+              0.04324759915471077,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.04324759915471077
+            ],
+            "line": 4587
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.08861986640840769,
+        "stock_m": 0.014950825832784176,
+        "available_upper_m": 0.10357069224119186,
+        "minimum_conductivity": {
+          "value": 3.209548367522075e-06,
+          "day": 233,
+          "line": 2899
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.007422075606882572,
+              0.05178534612059593,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.05178534612059593
+            ],
+            "line": 4584
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.007528750225901604,
+              0.05178534612059593,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.05178534612059593
+            ],
+            "line": 4585
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1174.2000732421875,
+          1174.2000732421875,
+          1828.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2894
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1174.2000732421875,
+          1174.2000732421875,
+          1828.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2896
+      }
+    ]
+  },
+  {
+    "label": "B7 \u00b7 Small-reference passing control",
+    "stratum": "small_passing_control",
+    "lane": "modern",
+    "case_id": "denver-1718465-outunrut-paved-none",
+    "year": 4,
+    "julian": 233,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 61.51452660560608,
+    "observed_weighted_min_conductivity_mm_h": 8.635766789666377,
+    "local_effective_conductivity_mm_h": 60.00000721542165,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 17.824237513574232,
+    "published_surface_out_m3": 0.2493023927965599,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.0,
+    "return_m3_using_emitted_local_area": 0.0,
+    "published_sediment_in_kg": 4.094996791207531,
+    "published_sediment_out_kg": 8.060677894271665,
+    "native_grid_net_exchange_kg": 3.9546325993475153,
+    "native_upstream_event_mass_kg": 4.087489006214482,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452499374747276,
+        "rate_kg_m_s": 2.404789898334276e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.0400867760181427,
+        "rate_kg_m_s": 2.1650822585615737e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.19091317057609558,
+        "rate_kg_m_s": 0.00010311198844051989
+      },
+      {
+        "index": 4,
+        "fraction": 0.49078649282455444,
+        "rate_kg_m_s": 0.0002650732320990806
+      },
+      {
+        "index": 5,
+        "fraction": 0.23368851840496063,
+        "rate_kg_m_s": 0.0001262149056335017
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.04452499374747276,
+        "rate_kg_m_s": 4.7314163265602116e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.0400867760181427,
+        "rate_kg_m_s": 4.259792322647282e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.19091318547725677,
+        "rate_kg_m_s": 0.00020287251871292655
+      },
+      {
+        "index": 4,
+        "fraction": 0.49078652262687683,
+        "rate_kg_m_s": 0.0005215307562270732
+      },
+      {
+        "index": 5,
+        "fraction": 0.23368851840496063,
+        "rate_kg_m_s": 0.0002483274175358319
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.05735664255917072,
+        "stock_m": 0.014534926041960716,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.2222224060897133e-08,
+          "day": 233,
+          "line": 3213
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 5123
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.014534926041960716,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.03594578430056572
+            ],
+            "line": 5124
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.06352793611586094,
+        "stock_m": 0.0083636324852705,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 233,
+          "line": 3231
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0030175521969795227,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 5121
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.0053460802882909775,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03594578430056572
+            ],
+            "line": 5122
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0618699761107564,
+        "stock_m": 0.010021592490375042,
+        "available_upper_m": 0.07189156860113144,
+        "minimum_conductivity": {
+          "value": 2.7000000955013093e-06,
+          "day": 233,
+          "line": 3249
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.003948679193854332,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 5119
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.00607291329652071,
+              0.03594578430056572,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.03594578430056572
+            ],
+            "line": 5120
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1399.378173828125,
+          1400.0,
+          1828.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 3240
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1399.378173828125,
+          1400.0,
+          1828.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "line": 3244
+      }
+    ]
+  },
+  {
+    "label": "B8 \u00b7 Meaningful overprediction",
+    "stratum": "meaningful_high",
+    "lane": "legacy",
+    "case_id": "site-1856573-outunrut-paved-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 4.462799057364464,
+    "observed_weighted_min_conductivity_mm_h": 7.4939592195732985,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 68.93848918043348,
+    "published_surface_out_m3": 314.6177679598134,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.10795779526233673,
+    "return_m3_using_emitted_local_area": 184.3734738298315,
+    "published_sediment_in_kg": 0.0,
+    "published_sediment_out_kg": 139.5747327361051,
+    "native_grid_net_exchange_kg": 139.5677079138242,
+    "native_upstream_event_mass_kg": 0.00014583318122613655,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 1.5185295690145897e-11
+      },
+      {
+        "index": 2,
+        "fraction": 0.09223738312721252,
+        "rate_kg_m_s": 2.693561553685006e-11
+      },
+      {
+        "index": 3,
+        "fraction": 0.2577626407146454,
+        "rate_kg_m_s": 7.52731176303779e-11
+      },
+      {
+        "index": 4,
+        "fraction": 0.45054394006729126,
+        "rate_kg_m_s": 1.315700634673559e-10
+      },
+      {
+        "index": 5,
+        "fraction": 0.14745600521564484,
+        "rate_kg_m_s": 4.306082989811723e-11
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 1.4532900721807187e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.0986834168434143,
+        "rate_kg_m_s": 2.757993025052398e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.30131658911705017,
+        "rate_kg_m_s": 8.421162113144472e-05
+      },
+      {
+        "index": 4,
+        "fraction": 0.4169279932975769,
+        "rate_kg_m_s": 0.00011652256622694639
+      },
+      {
+        "index": 5,
+        "fraction": 0.1310720443725586,
+        "rate_kg_m_s": 3.663186741217905e-05
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.03967906883917749,
+        "stock_m": 0.0324296320322901,
+        "available_upper_m": 0.07210870087146759,
+        "minimum_conductivity": {
+          "value": 2.2222222284540294e-08,
+          "day": 324,
+          "line": 2821
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0006253572646528482,
+              0.036054350435733795,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.036054350435733795
+            ],
+            "line": 5281
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.03180427476763725,
+              0.036054350435733795,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.036054350435733795
+            ],
+            "line": 5282
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.07406239956617355,
+        "available_upper_m": 0.07406239956617355,
+        "minimum_conductivity": {
+          "value": 2.3152356334321667e-06,
+          "day": 324,
+          "line": 2833
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.03703119978308678,
+              0.03703119978308678,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03703119978308678
+            ],
+            "line": 5279
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.03703119978308678,
+              0.03703119978308678,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03703119978308678
+            ],
+            "line": 5280
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.08584310859441757,
+        "available_upper_m": 0.08584310859441757,
+        "minimum_conductivity": {
+          "value": 2.3457989755115705e-06,
+          "day": 324,
+          "line": 2847
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.042921554297208786,
+              0.042921554297208786,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.042921554297208786
+            ],
+            "line": 5277
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.042921554297208786,
+              0.042921554297208786,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.042921554297208786
+            ],
+            "line": 5278
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1189.19189453125,
+          1189.19189453125,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2842
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1189.19189453125,
+          1189.19189453125,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 2844
+      }
+    ]
+  },
+  {
+    "label": "B8 \u00b7 Meaningful overprediction",
+    "stratum": "meaningful_high",
+    "lane": "modern",
+    "case_id": "site-1856573-outunrut-paved-high",
+    "year": 2012,
+    "julian": 324,
+    "roughness_mm": 6.000000052154064,
+    "depression_storage_mm": 0.0,
+    "observed_first_two_layer_weighted_available_storage_mm": 2.6812078431248665,
+    "observed_weighted_min_conductivity_mm_h": 8.635765152575914,
+    "local_effective_conductivity_mm_h": 9.719999525259482,
+    "initial_equivalent_length_m": 49.790000915527344,
+    "final_irs_effective_length_m": 49.790000915527344,
+    "published_surface_in_m3": 60.95262866209367,
+    "published_surface_out_m3": 320.48550437981726,
+    "published_lateral_in_m3": 6.745925292917761,
+    "published_lateral_out_m3": 31.270352433752954,
+    "native_hourly_return_depth_local_m": 0.10142698138952255,
+    "return_m3_using_emitted_local_area": 173.21995927591877,
+    "published_sediment_in_kg": 10.948728262807503,
+    "published_sediment_out_kg": 317.6855405389421,
+    "native_grid_net_exchange_kg": 306.7435397706868,
+    "native_upstream_event_mass_kg": 10.953548566285159,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.06889999657869339,
+        "rate_kg_m_s": 1.0041130531844415e-06
+      },
+      {
+        "index": 2,
+        "fraction": 0.07057416439056396,
+        "rate_kg_m_s": 1.0285115123512788e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.2817758321762085,
+        "rate_kg_m_s": 4.1064558085556445e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.49666979908943176,
+        "rate_kg_m_s": 7.238209769990238e-06
+      },
+      {
+        "index": 5,
+        "fraction": 0.08208020776510239,
+        "rate_kg_m_s": 1.1961946606324958e-06
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.06890000402927399,
+        "rate_kg_m_s": 2.9123333056318024e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.07057417184114456,
+        "rate_kg_m_s": 2.9830986814314295e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.2817758619785309,
+        "rate_kg_m_s": 0.00011910379964775054
+      },
+      {
+        "index": 4,
+        "fraction": 0.49666979908943176,
+        "rate_kg_m_s": 0.00020993728783746338
+      },
+      {
+        "index": 5,
+        "fraction": 0.08208021521568298,
+        "rate_kg_m_s": 3.469447467731573e-05
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 5.599999904632568,
+        "capacity_m_double": 0.023838810622692108,
+        "stock_m": 0.03725665435194969,
+        "available_upper_m": 0.0610954649746418,
+        "minimum_conductivity": {
+          "value": 2.2222220508183455e-08,
+          "day": 324,
+          "line": 3880
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.01196286641061306,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.0305477324873209
+            ],
+            "line": 7086
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.025293787941336632,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              5.599999904632568,
+              0.0305477324873209
+            ],
+            "line": 7087
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.0610954649746418,
+        "available_upper_m": 0.0610954649746418,
+        "minimum_conductivity": {
+          "value": 2.699999868127634e-06,
+          "day": 324,
+          "line": 3898
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0305477324873209,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.0305477324873209
+            ],
+            "line": 7084
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.0305477324873209,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.0305477324873209
+            ],
+            "line": 7085
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.0,
+        "stock_m": 0.0610954649746418,
+        "available_upper_m": 0.0610954649746418,
+        "minimum_conductivity": {
+          "value": 2.699999868127634e-06,
+          "day": 324,
+          "line": 3916
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0305477324873209,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0305477324873209
+            ],
+            "line": 7082
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.0305477324873209,
+              0.0305477324873209,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0305477324873209
+            ],
+            "line": 7083
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1330.0,
+          1330.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 3911
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1330.0,
+          1330.0,
+          5207.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 3913
+      }
+    ]
+  },
+  {
+    "label": "B9 \u00b7 Underprediction / rutted geometry",
+    "stratum": "underprediction_other_geometry",
+    "lane": "legacy",
+    "case_id": "denver-2711184-outrut-gravel-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 58.33791568875313,
+    "observed_weighted_min_conductivity_mm_h": 7.965231725393096,
+    "local_effective_conductivity_mm_h": 26.000000616477337,
+    "initial_equivalent_length_m": 105.14999389648438,
+    "final_irs_effective_length_m": 105.14999389648438,
+    "published_surface_in_m3": 12.287098537559997,
+    "published_surface_out_m3": 8.75425080024,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.0,
+    "native_hourly_return_depth_local_m": 0.02022480219602585,
+    "return_m3_using_emitted_local_area": 3.1731743855059142,
+    "published_sediment_in_kg": 178.8336,
+    "published_sediment_out_kg": 196.92684,
+    "native_grid_net_exchange_kg": 18.093467559814453,
+    "native_upstream_event_mass_kg": 178.8349136352539,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 0.0009938316136306191
+      },
+      {
+        "index": 2,
+        "fraction": 0.09519244730472565,
+        "rate_kg_m_s": 0.0018193320833829185
+      },
+      {
+        "index": 3,
+        "fraction": 0.2777291536331177,
+        "rate_kg_m_s": 0.0053080005189700685
+      },
+      {
+        "index": 4,
+        "fraction": 0.4351333677768707,
+        "rate_kg_m_s": 0.008316333059625203
+      },
+      {
+        "index": 5,
+        "fraction": 0.13994508981704712,
+        "rate_kg_m_s": 0.0026746511832080877
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.05199999734759331,
+        "rate_kg_m_s": 0.0010943816565550449
+      },
+      {
+        "index": 2,
+        "fraction": 0.09551318734884262,
+        "rate_kg_m_s": 0.002010151644719585
+      },
+      {
+        "index": 3,
+        "fraction": 0.2798963487148285,
+        "rate_kg_m_s": 0.005890643180665844
+      },
+      {
+        "index": 4,
+        "fraction": 0.43346068263053894,
+        "rate_kg_m_s": 0.009122527771256606
+      },
+      {
+        "index": 5,
+        "fraction": 0.1391298472881317,
+        "rate_kg_m_s": 0.0029280992407297313
+      }
+    ],
+    "grna_excess_flag": 1.0,
+    "rochek_to_irs_addition": null,
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 60.959999084472656,
+        "capacity_m_double": 0.036584917455911636,
+        "stock_m": 0.028410453349351883,
+        "available_upper_m": 0.06499537080526352,
+        "minimum_conductivity": {
+          "value": 2.114629523930489e-06,
+          "day": 127,
+          "line": 1739
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              60.959999084472656,
+              0.03249768540263176
+            ],
+            "line": 3284
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.028410453349351883,
+              0.03249768540263176,
+              0.0,
+              0.10000000149011612,
+              60.959999084472656,
+              0.03249768540263176
+            ],
+            "line": 3285
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.06207779538817704,
+        "stock_m": 0.017133968649432063,
+        "available_upper_m": 0.0792117640376091,
+        "minimum_conductivity": {
+          "value": 2.331841869818163e-06,
+          "day": 127,
+          "line": 1751
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.002172777196392417,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3282
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.014961191453039646,
+              0.03960588201880455,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.03960588201880455
+            ],
+            "line": 3283
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.09137606900185347,
+        "stock_m": 0.004776571877300739,
+        "available_upper_m": 0.0961526408791542,
+        "minimum_conductivity": {
+          "value": 2.349490159758716e-06,
+          "day": 127,
+          "line": 1763
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0013489564880728722,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3280
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.003427615389227867,
+              0.0480763204395771,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.0480763204395771
+            ],
+            "line": 3281
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1758
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          1076.4560546875,
+          1076.4560546875,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 1760
+      }
+    ]
+  },
+  {
+    "label": "B9 \u00b7 Underprediction / rutted geometry",
+    "stratum": "underprediction_other_geometry",
+    "lane": "modern",
+    "case_id": "denver-2711184-outrut-gravel-high",
+    "year": 16,
+    "julian": 127,
+    "roughness_mm": 100.00000149011612,
+    "depression_storage_mm": 11.45000196993351,
+    "observed_first_two_layer_weighted_available_storage_mm": 92.93834865093231,
+    "observed_weighted_min_conductivity_mm_h": 17.338703401037492,
+    "local_effective_conductivity_mm_h": 50.00001037842594,
+    "initial_equivalent_length_m": 105.14999389648438,
+    "final_irs_effective_length_m": 16.61606216430664,
+    "published_surface_in_m3": 7.448668653887999,
+    "published_surface_out_m3": 0.4504450357440001,
+    "published_lateral_in_m3": 0.0,
+    "published_lateral_out_m3": 0.22122223199999996,
+    "native_hourly_return_depth_local_m": 0.002870991826057434,
+    "return_m3_using_emitted_local_area": 0.4504448367476463,
+    "published_sediment_in_kg": 24.40548,
+    "published_sediment_out_kg": 1.10088,
+    "native_grid_net_exchange_kg": -23.30848083972931,
+    "native_upstream_event_mass_kg": 24.40742156982422,
+    "native_incoming_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.043666012585163116,
+        "rate_kg_m_s": 2.0999925649651825e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.16860485076904297,
+        "rate_kg_m_s": 8.108570306059049e-05
+      },
+      {
+        "index": 3,
+        "fraction": 0.30230316519737244,
+        "rate_kg_m_s": 0.00014538410120268873
+      },
+      {
+        "index": 4,
+        "fraction": 0.31891530752182007,
+        "rate_kg_m_s": 0.00015337323813188405
+      },
+      {
+        "index": 5,
+        "fraction": 0.16651064157485962,
+        "rate_kg_m_s": 8.00785527675131e-05
+      }
+    ],
+    "native_outgoing_class_rates": [
+      {
+        "index": 1,
+        "fraction": 0.5724853873252869,
+        "rate_kg_m_s": 1.2396247233708462e-05
+      },
+      {
+        "index": 2,
+        "fraction": 0.09897062927484512,
+        "rate_kg_m_s": 2.143049266460279e-06
+      },
+      {
+        "index": 3,
+        "fraction": 0.32683783769607544,
+        "rate_kg_m_s": 7.077145951865367e-06
+      },
+      {
+        "index": 4,
+        "fraction": 0.001706186798401177,
+        "rate_kg_m_s": 3.694472181846775e-08
+      },
+      {
+        "index": 5,
+        "fraction": 8.518416062354222e-16,
+        "rate_kg_m_s": 1.8445255352611518e-20
+      }
+    ],
+    "grna_excess_flag": 0.0,
+    "rochek_to_irs_addition": {
+      "before_m": 0.0,
+      "expected_m": 0.006845707073807716,
+      "observed_m": 0.006845707073807716,
+      "exact": true
+    },
+    "post_irs_to_day_end_runoff_unchanged": true,
+    "first_two_layer_contributors": [
+      {
+        "ofe": 1,
+        "length_m": 60.959999084472656,
+        "capacity_m_double": 0.08788115531206131,
+        "stock_m": 0.0191643089056015,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.2500005343317753e-06,
+          "day": 127,
+          "line": 4839
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 101,
+            "v": [
+              0.0,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              60.959999084472656,
+              0.053522732108831406
+            ],
+            "line": 8449
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 102,
+            "v": [
+              0.0191643089056015,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              60.959999084472656,
+              0.053522732108831406
+            ],
+            "line": 8450
+          }
+        ]
+      },
+      {
+        "ofe": 2,
+        "length_m": 4.570000171661377,
+        "capacity_m_double": 0.09855988994240761,
+        "stock_m": 0.008485574275255203,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 2.777778490781202e-06,
+          "day": 127,
+          "line": 4865
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 201,
+            "v": [
+              0.0,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 8447
+          },
+          {
+            "tag": "BP_GA_UP_LAYER",
+            "index": 202,
+            "v": [
+              0.008485574275255203,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              4.570000171661377,
+              0.053522732108831406
+            ],
+            "line": 8448
+          }
+        ]
+      },
+      {
+        "ofe": 3,
+        "length_m": 39.619998931884766,
+        "capacity_m_double": 0.10007100412622094,
+        "stock_m": 0.00697446009144187,
+        "available_upper_m": 0.10704546421766281,
+        "minimum_conductivity": {
+          "value": 9.000002137327101e-06,
+          "day": 127,
+          "line": 4891
+        },
+        "layers": [
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 301,
+            "v": [
+              0.0,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 8445
+          },
+          {
+            "tag": "BP_GA_LOCAL_LAYER",
+            "index": 302,
+            "v": [
+              0.00697446009144187,
+              0.053522732108831406,
+              0.0,
+              0.10000000149011612,
+              39.619998931884766,
+              0.053522732108831406
+            ],
+            "line": 8446
+          }
+        ]
+      }
+    ],
+    "native_soil_density_branches": [
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 1,
+        "v": [
+          800.0,
+          800.0,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 4886
+      },
+      {
+        "tag": "BP_SOIL_DENSITY",
+        "index": 2,
+        "v": [
+          800.0,
+          800.0,
+          6105.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "line": 4888
+      }
+    ]
+  }
+]

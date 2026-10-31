@@ -1,0 +1,10 @@
+{
+  "files": 3983,
+  "all_current_raw_files_covered": true,
+  "all_current_raw_hashes_verified": true,
+  "retention_receipt_sha256": {
+    "revision4-buffer-process-observation-retention.json": "31209ff33d87bc8d989e65e8435acbaa11e4b1aa4ff1e6a98e04a893644ca7b9",
+    "revision4-buffer-process-review-failure-retention.json": "af29e018b6fcd421bcc579161b2df96bc71b5a5fa5543093901c157cb8a87a1a"
+  },
+  "supplement_reason": "Two retained reviewer-failure files were added after the first3981-file archive snapshot. All original3981 files remain unchanged; the two additions have a separate verified archive. No archive was rewritten."
+}

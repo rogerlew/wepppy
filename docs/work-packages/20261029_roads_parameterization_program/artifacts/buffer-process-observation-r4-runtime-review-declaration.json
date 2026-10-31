@@ -1,0 +1,17 @@
+{
+  "scope": "Independent runtime/output parity and scientific readback. No native execution, parameter change or automatic mechanism acceptance.",
+  "script_sha256": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8",
+  "map_sha256": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+  "seeds_sha256": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+  "stage": "Prepared before first-pair observation receipt; first-pair then full18 readback",
+  "first_pair_receipt_present_at_declaration": false,
+  "checks": [
+    "Rehash all seven original and observed native outputs per lane, model inputs and auxiliary input",
+    "Bind completed record, logs, trace, strict particle audit, source-record hashes and execution dependencies",
+    "Independently parse bounded calendar/OFE traces and verify daily owners,24 hourly source/allocation/outflow bins and layer-state pairing",
+    "Reconstruct consumed GRNA storage from actual saved-state operands and contributor lengths; report double-reconstruction residuals without changing tolerances",
+    "Report roughness/consolidation, depression storage, runoff support and distinct incoming rate/current-duration versus prior-OFE event-mass handoffs",
+    "Preserve grid net exchange as net, not gross or tagged source; retain all same-sign passing and opposite underprediction controls"
+  ],
+  "interpretation_gate": "No mechanistic conclusion before all18 exact-output/coverage/audit gates and source-unit reconciliation. First pair is preflight quality inspection only."
+}

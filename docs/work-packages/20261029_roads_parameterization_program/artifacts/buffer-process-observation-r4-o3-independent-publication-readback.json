@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "Exact source-expression and publication integrity readback only; no native runs or whole-water-budget claim.",
+  "published_files_rehashed": 15,
+  "raw_evidence_files_rehashed": 8,
+  "hourly_REAL_accumulation_steps": 2592,
+  "rochek_to_irs_REAL_additions": 21,
+  "day_ofe_frames": 108,
+  "evidence_sha256": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-interpretation-r4/publication-manifest.json": "328a40f1e46b7917d9524c28a633137599284e436ea5672c116d0f40116e8d83",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-interpretation-r4/hourly-return-reconciliation.json": "7ab3c2c551b46bba91a9bc2c7476b1f037871e20d605dc7a932ff96b1d83277d",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-interpretation-r4/summary-declaration.json": "43b797ae075535a071c7ba78bc1dc9b9d5660072fdde5b23ee2e33cf8a800660",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_publication_r4.py": "a0297340975d13da303b5cad319b176ae273267faf272f0a103ee255aa8aeb65"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "reviewer": "independent implementation reviewer",
+  "reviewed_at_utc": "2026-10-31T23:20:50.597806+00:00",
+  "disposition": "accepted_for_isolated_build_only",
+  "scope": "Nine-pair buffer-process observation candidate O1; review-only, no source edits, compilation or model execution by reviewer.",
+  "candidate_root": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1",
+  "reviewed_artifact_sha256": {
+    "observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+    "observer.patch": "eb4ecda65727fe42bfd6025bb43769bd9534a92853c4b9c8cdf73e567388f107",
+    "prebuild-manifest.json": "0f5d41b34dbb41bf68f1f163c69d32ab26933e9d5cfb7e6ab36577bd2b0d551f"
+  },
+  "prepare_script_sha256": "d24cd1c5da69cf68f217d69fc80d74d54f0cdaa3115373537999f0be932a5e15",
+  "freeze_script_sha256": "9df6b93a9603de18bcfa6367ccc8e3da93de3551ad1954c480c221ea680c1613",
+  "seed_sha256": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+  "baseline_binary_sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+  "blocking_findings": [],
+  "independent_checks": {
+    "baseline_inventory_files_verified": 977,
+    "nested_capacity_include_files_verified": 8,
+    "observer_sources_verified": 11,
+    "map_entries": 103,
+    "erod_sites": 23,
+    "depos_sites": 3,
+    "conditional_erod_saved_predicates": 7,
+    "all_original_model_lines_retained_in_order": true,
+    "added_code_within_fixed_form_72_columns": true,
+    "baseline_io_unit_collisions": [],
+    "current_watershed_include_copies_match": true,
+    "all_recorded_toolchain_and_runtime_hashes_verified": true,
+    "native_source_worktree_clean": true,
+    "native_default_ref": "refs/remotes/origin/wepp_260430_negmeltfix_comparator"
+  },
+  "source_checks": [
+    {
+      "file": "contin.for",
+      "observer_sha256": "78adeaed5495910a61bfc06dc3f91481b51af2d8c6e95b6044b713e7393ab069",
+      "base_sha256": "a9bf340f08a9a26f5b910e4df5a3aa36df9a2cc57c7471776c72c337245cad30",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 62
+    },
+    {
+      "file": "enrich.for",
+      "observer_sha256": "fe9fd432cc43070c365e2488f1f43b46587a93370899f809e10ea5e951f74b59",
+      "base_sha256": "b81eb9822c4fb15797ef112280d3907fafd16585b70c46856b9ae3fc86257989",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 42
+    },
+    {
+      "file": "grna.for",
+      "observer_sha256": "e8b43f7edecf51596a8a3d41df385fef91999c8dcb413f7e1f1e9c7681ece2af",
+      "base_sha256": "f1cbd5638b4b415ceb21fe0262cfc4329b5b0de797f480b301ca769f393f2e1d",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 59
+    },
+    {
+      "file": "infpar.for",
+      "observer_sha256": "b49321644cb62487088bd072f2d30fc99dc621cdcf62b519db5e2f24c3a312af",
+      "base_sha256": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 44
+    },
+    {
+      "file": "irs.for",
+      "observer_sha256": "8beae52254d69ce84f95b18768d8afc76151eecb3e67a52fdd9bd6e508e24751",
+      "base_sha256": "8c7723c55caa9608cd74d8e6d15423df6fdbdbb983973121992779bd5a8f1ccc",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 42
+    },
+    {
+      "file": "param.for",
+      "observer_sha256": "88dd5d8abba23e1d742b33c72b786c31d247baf49cab303898a88805e475af99",
+      "base_sha256": "889a0557fc43778097377165394bd6b10e0f7eb8d1cef96b849b516d651d262f",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 41
+    },
+    {
+      "file": "rochek.for",
+      "observer_sha256": "06841e70fd1361629c84fedb06237ab1db3fb0087b375d7fd93f3185ae00b3d5",
+      "base_sha256": "96169e22cc81218b2a58f2523c579e08f7ef144affceaa8c23f32bbabf05365f",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 39
+    },
+    {
+      "file": "route.for",
+      "observer_sha256": "0f8047486e86ffbd2c499f3937709c31291a14551308ca9d79a8ff8607c3176b",
+      "base_sha256": "83a9ddd665aab6404e09e9ff2398b194fb24694a1f87d1a4955306f8f8d57f68",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 39
+    },
+    {
+      "file": "sloss.for",
+      "observer_sha256": "80847f44610248895336b86fae74a746b1246028a1e19dae418171636cb55c7b",
+      "base_sha256": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 39
+    },
+    {
+      "file": "soil.for",
+      "observer_sha256": "3f776166cd250897029f8ae1d994a9e4f59ae57780b722cdc4554afd5d563c58",
+      "base_sha256": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 58
+    },
+    {
+      "file": "watbal_hourly.for",
+      "observer_sha256": "aded3f09a03dd4f80fe3ccb1a23d040b586e185e771bec681615cdcb1cc35e59",
+      "base_sha256": "c1fe46626fa9b49dea44a2116b3152a11897b42148b3c13d5bcf96fcf746ee20",
+      "original_lines_retained": true,
+      "maximum_added_code_columns": 50
+    }
+  ],
+  "review_findings_closed": [
+    "All ROUTE erosion/deposition call sites now have unique input/output pairs; conditional-call predicates are saved in observer-only state without changing the original call or its condition.",
+    "Wetting-front values are read inside their actual producer branches. GRNA avoids the no-excess unassigned-index read. ROUTE initializes the retained endpoint/rate values before any observed call; crossing interpretation remains conditional on the native deposition flag.",
+    "GRNA current/upstream storage observations are taken where the native first-two-layer operands are consumed, with contributor length and cache-epoch qualification. Constructed grid1:k is initialized, including inserted ponding points; final excess grid is guarded by the producer flag and includes the native zero terminal rate.",
+    "SOIL consolidation and roughness observations use persistent prebranch state; decay locals are read only after their native assignment. IRS depression storage is read after its native nonnegative clamp.",
+    "Hourly source and outgoing bins are observed before transfer to the next OFE, with distinct local/upstream area support. Entry sediment mapping names the actual incoming load and padding, not the uninitialized current output grid.",
+    "Unconditional daily OFE owner/end records survive legitimate dry/erosion-skip branches. Observer date selection is disarmed during initialization and uses the declared calendar year/day.",
+    "The manifest already includes all eight nested capacity include inputs; independent inspection and readback found no missing include provenance."
+  ],
+  "remaining_gates": [
+    "Build in the isolated declared tree only. Retain actual compile/link commands, changed/retained object hashes, installed include equality, final observer binary and ELF/runtime identity. No release or production substitution is approved.",
+    "Review and freeze the executable runner and coverage checks before any model run; this receipt evaluates the written run contract and does not certify an absent runner.",
+    "Run both lanes of the first declared pair for the complete original period. Require exact ordinary output file sets and bytes, unchanged input/auxiliary files, successful runtime/log checks, and target/prior-day owning and executed-branch trace coverage before broader execution.",
+    "Apply the same gates to the remaining eight pairs, rehash all source/build/input/output evidence, and rerun the unchanged particle audit. No model interpretation or parameter acceptance before all18 lanes pass."
+  ],
+  "residual_limits": [
+    "Static review cannot prove floating-point noninterference after recompilation; exact full-period ordinary-output parity is mandatory.",
+    "Layer temperature is explicitly unavailable; frost/ice values are not a temperature substitute. Conditional stored conductivity is not automatically the currently applied conductivity.",
+    "Retained values and upstream storage-cache epochs must follow their map qualifications. GRNA time coordinates and hourly allocation bins are different supports.",
+    "No claim of tagged provenance or complete gross erosion/deposition is approved from endpoint, net-grid or regional-average observations."
+  ],
+  "publication": "Source-free reviewer receipt. Native source, excerpts, preparation generator and patch remain in ignored private research storage."
+}

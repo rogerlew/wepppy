@@ -1,0 +1,30 @@
+{
+  "scope": "Source-free publication of bounded observational findings; no native source/patch, behavioral change, parameter acceptance or new simulation.",
+  "files": {
+    "analysis-declaration.json": "dbe24bb4ec228be644bc5521289bf06dc985085a55c403d36c0d91313010ee0e",
+    "analyze_observations.py": "363976972a44aa467b4063843297f86e887b9cde82bb5ba282250db675efb463",
+    "figure-receipt.json": "e2f96ecdf0ae1caa807fe6e5c53821f1f1d01e2e0ad5d29362ace761409e44c2",
+    "findings.md": "2e1b9aa60566a5de638988b770d8369c5bcc47a2a1b6bf557b316701cac3fd7d",
+    "hourly-return-reconciliation.json": "7ab3c2c551b46bba91a9bc2c7476b1f037871e20d605dc7a932ff96b1d83277d",
+    "paired-buffer-process.pdf": "e8becc6c355b30200a43438c7d2343ebde72e03cb23e1365ab77642b0c165ece",
+    "paired-buffer-process.png": "be5ea229e3df36d15b8d6d2595c3de5a438228e6d2543c0896142c974e43db4e",
+    "paired-buffer-process.svg": "70c80a33e0d3f652d34046796142c61a642c2094b5b359ee1d7bd172becb24f5",
+    "paired-target-table.json": "80430665d3a6db914cd89f8daf47c481f902599854d950e0fcff3f3ddba12bcd",
+    "paired-target-table.md": "883af1c0e7147606d411c91a76371477febc3791213cee11e2260adbd61b6193",
+    "plot_process.py": "29578041a64aa92426f415b735069f16fbed17c598174a8ad4e66de0f4b312cc",
+    "reconciliation.json": "3f95f58f35d85f767777b54028c967712e9be26519dd906a24d996fbe2393b09",
+    "reproduction.md": "1ef9e16b802cb2bd3ef14553f28bcb8b26948bc95f5182661e3083ce734056a9",
+    "summarize_process.py": "e6ff8c7bed6958a83d39223dba24602fb25a6339b015d31c1e5497e32f819411",
+    "summary-declaration.json": "43b797ae075535a071c7ba78bc1dc9b9d5660072fdde5b23ee2e33cf8a800660"
+  },
+  "raw_evidence_sha256": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/verification.json": "c066c072c9637e8e75cf74c61b98b438e1379de7dda67c104993ed61e2314c4b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/execution-declaration.json": "89d3ef796941ab8a3c399ba01eb7dbd2339c0052d5cbdb8304f78c608413275b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/analysis-o3/declaration.json": "dbe24bb4ec228be644bc5521289bf06dc985085a55c403d36c0d91313010ee0e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/analysis-o3/reconciliation.json": "3f95f58f35d85f767777b54028c967712e9be26519dd906a24d996fbe2393b09",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/analysis-o3/results.json": "b1b451d23d81f47b4c30e9e8f73b67d629f88b108cd1297c4f5189d8dc10ce4a",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-interpretation-r4/summary-declaration.json": "43b797ae075535a071c7ba78bc1dc9b9d5660072fdde5b23ee2e33cf8a800660",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-interpretation-r4/hourly-return-reconciliation.json": "7ab3c2c551b46bba91a9bc2c7476b1f037871e20d605dc7a932ff96b1d83277d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-interpretation-r4/paired-target-table.json": "80430665d3a6db914cd89f8daf47c481f902599854d950e0fcff3f3ddba12bcd"
+  }
+}

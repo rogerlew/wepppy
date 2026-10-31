@@ -1,0 +1,4145 @@
+{
+  "runtime_and_exact_output_readback_passed": true,
+  "accepted_mechanistic_interpretation": false,
+  "scope": "Independent structural/hash readback and diagnostic operand reconstruction; no native runs. Derived residuals are not new acceptance tolerances.",
+  "lanes": 2,
+  "ordinary_output_pairs_rehashed": 14,
+  "results": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "trace_rows": 5013,
+      "trace_sha256": "aa553ac34a8698f160d797f63fe959a67ef3802139874acb415e3f487187970b",
+      "day_ofe": [
+        {
+          "day": 126,
+          "ofe": 1,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 47
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 601
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  5.599999904632568,
+                  5.599999904632568,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 46
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 45
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  1635.6375732421875,
+                  1672.2598876953125,
+                  339.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 1
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  1635.6375732421875,
+                  1672.2598876953125,
+                  339.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 5
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.019999999552965164,
+                  -0.12993532419204712,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.019999999552965164,
+                  -0.12993532419204712,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 6
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  -3.175313711166382,
+                  0.9999818205833435,
+                  1636.774658203125,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.12993532419204712
+                ],
+                "line": 3
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  -3.175313711166382,
+                  0.9999818205833435,
+                  1636.774658203125,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.12993532419204712
+                ],
+                "line": 7
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -3.175313711166382,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -3.175313711166382,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 8
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 0.00017809169366955757
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 126,
+          "ofe": 2,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 610
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 1308
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  4.570000171661377,
+                  10.170000076293945,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 609
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 608
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  1417.2000732421875,
+                  1417.2000732421875,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 17
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  1417.2000732421875,
+                  1417.2000732421875,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 19
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.04747169837355614,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 18
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.04747169837355614,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 20
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 4.0978194171259474e-08
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 126,
+          "ofe": 3,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 1319
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2017
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  39.619998931884766,
+                  49.790000915527344,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 1318
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 1317
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  1174.2000732421875,
+                  1174.2000732421875,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 31
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  1174.2000732421875,
+                  1174.2000732421875,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 33
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.10000000149011612,
+                  0.10000000149011612,
+                  -0.04111989587545395,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 32
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.10000000149011612,
+                  0.10000000149011612,
+                  -0.04111989587545395,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 34
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 0.0
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 1,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.08188307285308838,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 4581
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.08188307285308838,
+                  5.638587026624009e-06,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 4709
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  5.599999904632568,
+                  5.599999904632568,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4580
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 4579
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.006000000052154064,
+                  0.05999999865889549,
+                  0.00035160002880729735,
+                  2.2222222284540294e-08,
+                  9.383036376675591e-05,
+                  0.0
+                ],
+                "line": 2071
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  2.2222222284540294e-08,
+                  9.383036376675591e-05,
+                  5.599999904632568,
+                  0.0003515999997034669,
+                  1.7358224795316346e-05,
+                  0.0
+                ],
+                "line": 2072
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.08189880102872849,
+                  1.6453395801363513e-05,
+                  6.4529581322858576e-06,
+                  12815.708984375,
+                  12815.708984375,
+                  1.0
+                ],
+                "line": 2223
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.08188307285308838,
+                  2.3826492906664498e-05,
+                  3436.6396484375,
+                  5.599999904632568,
+                  1.0,
+                  6.4529581322858576e-06
+                ],
+                "line": 4576
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.08188307285308838,
+                  0.0,
+                  0.0
+                ],
+                "line": 4586
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  1636.774658203125,
+                  1672.2598876953125,
+                  340.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2026
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  1636.774658203125,
+                  1672.2598876953125,
+                  340.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2030
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.019999999552965164,
+                  -0.12993532419204712,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2027
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.019999999552965164,
+                  -0.12993532419204712,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2031
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  -3.175314426422119,
+                  0.9999819397926331,
+                  1636.8392333984375,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.12993532419204712
+                ],
+                "line": 2028
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  -3.175314426422119,
+                  0.9999819397926331,
+                  1636.8392333984375,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.12993532419204712
+                ],
+                "line": 2032
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -3.175314426422119,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2029
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -3.175314426422119,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2033
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.00032842173823155463,
+                  2.5088908672332764,
+                  2.4092454964375065e-07,
+                  4.367307186126709,
+                  0.0,
+                  1.0
+                ],
+                "line": 4583
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  5.0,
+                  0.3811182379722595,
+                  9.999999974752427e-07,
+                  0.9999635219573975,
+                  10.0,
+                  1.0
+                ],
+                "line": 4584
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  3.9858250617980957,
+                  3.9858250617980957,
+                  7.840484372856338e-10,
+                  0.06796080619096756,
+                  0.00013342835882212967,
+                  0.0
+                ],
+                "line": 4585
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.045068129897117615,
+              "reconstructed_storage_m_double": 0.045068128034472466,
+              "residual_m": 1.862645149230957e-09,
+              "effective_length_m": 5.599999904632568,
+              "sum_contributor_lengths_m": 5.599999904632568,
+              "percolation_coefficient_m_s": 2.2222222284540294e-08,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.045068128034472466,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 1,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 2073
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 1,
+                      "index": 102,
+                      "values": [
+                        0.025351079180836678,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 2074
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              0.0,
+              0.06796080619096756,
+              0.10020679980516434,
+              1.0,
+              3436.6396484375,
+              0.0
+            ],
+            "outgoing_scale_raw": [
+              0.0,
+              0.06796080619096756,
+              0.10020679980516434,
+              1.0,
+              3436.6396484375,
+              1.640726887686128e-09
+            ],
+            "incoming_rate_kg_m_s": 0.0,
+            "incoming_class_rates": null,
+            "incoming_event_using_current_duration_kg_m": 0.0,
+            "upstream_published_event_kg_m": null,
+            "incoming_event_minus_upstream_event_kg_m": null,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 5.6385872609077615e-06,
+            "observed_outgoing_event_kg_m": 5.638587026624009e-06,
+            "grid_first_event_kg_m": 0.0,
+            "grid_last_event_kg_m": 5.638587026624009e-06,
+            "grid_positive_net_exchange_kg_m": 5.638587026624009e-06,
+            "grid_negative_net_exchange_kg_m": 0.0,
+            "grid_net_exchange_kg_m": 5.638587026624009e-06,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0008169263892341405,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 0.00018601926603878383
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 2,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.04060276597738266,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 4718
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.04060276597738266,
+                  4.595175266265869,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 4856
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  4.570000171661377,
+                  10.170000076293945,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4717
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 4716
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.05000000074505806,
+                  0.48899999260902405,
+                  0.0,
+                  7.222222393465927e-06,
+                  0.026268165558576584,
+                  1.0
+                ],
+                "line": 2825
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  3.25762084685266e-06,
+                  0.011855552904307842,
+                  10.170000076293945,
+                  0.00019360471924301237,
+                  1.7358224795316346e-05,
+                  1.0
+                ],
+                "line": 2826
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.03246496245265007,
+                  1.1899487617483828e-05,
+                  1.066707045538351e-05,
+                  5426.982421875,
+                  5426.982421875,
+                  1.0
+                ],
+                "line": 2981
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.04060276597738266,
+                  1.181467087008059e-05,
+                  3436.6396484375,
+                  10.170000076293945,
+                  1.0,
+                  1.066707045538351e-05
+                ],
+                "line": 4577
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.04060276597738266,
+                  0.0,
+                  0.0
+                ],
+                "line": 4723
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  1417.2000732421875,
+                  1417.2000732421875,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2042
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  1417.2000732421875,
+                  1417.2000732421875,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2044
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.04747169837355614,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2043
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.04747169837355614,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2045
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.04454716295003891,
+                  0.48102471232414246,
+                  0.0,
+                  -33.819541931152344,
+                  -10.052495002746582,
+                  1.0007222890853882
+                ],
+                "line": 4720
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1600000.0,
+                  0.15756461024284363,
+                  0.00039999998989515007,
+                  0.9987302422523499,
+                  2.0,
+                  2.0
+                ],
+                "line": 4721
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  8.315581321716309,
+                  8.404681205749512,
+                  0.0,
+                  0.34079796075820923,
+                  0.00012015520042041317,
+                  0.0
+                ],
+                "line": 4722
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.05843363329768181,
+              "reconstructed_storage_m_double": 0.058433631327683366,
+              "residual_m": 1.9699984421528427e-09,
+              "effective_length_m": 10.170000076293945,
+              "sum_contributor_lengths_m": 10.170000076293945,
+              "percolation_coefficient_m_s": 1.4410702533496078e-06,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.045068128034472466,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 2829
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 102,
+                      "values": [
+                        0.025351079180836678,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 2830
+                    }
+                  ]
+                },
+                {
+                  "ofe": 2,
+                  "length_m": 4.570000171661377,
+                  "available_capacity_m_double_reconstruction": 0.07481149004888721,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 201,
+                      "values": [
+                        0.000342841463861987,
+                        0.04324759915471077,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.04324759915471077
+                      ],
+                      "line": 2827
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 202,
+                      "values": [
+                        0.011340866796672344,
+                        0.04324759915471077,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.04324759915471077
+                      ],
+                      "line": 2828
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              3.209578736118601e-08,
+              0.34079796075820923,
+              0.15000000596046448,
+              1.0,
+              3436.6396484375,
+              1.640726887686128e-09
+            ],
+            "outgoing_scale_raw": [
+              3.209578736118601e-08,
+              0.34079796075820923,
+              0.15000000596046448,
+              1.0,
+              3436.6396484375,
+              0.001337112975306809
+            ],
+            "incoming_rate_kg_m_s": 1.640726887686128e-09,
+            "incoming_class_rates": [
+              {
+                "class": 1,
+                "fraction": 0.012999999336898327,
+                "rate_kg_m_s": 2.132944845195092e-11
+              },
+              {
+                "class": 2,
+                "fraction": 0.1599999964237213,
+                "rate_kg_m_s": 2.625162961620839e-10
+              },
+              {
+                "class": 3,
+                "fraction": 0.08999999612569809,
+                "rate_kg_m_s": 1.476654135350802e-10
+              },
+              {
+                "class": 4,
+                "fraction": 0.1953534483909607,
+                "rate_kg_m_s": 3.205216553772536e-10
+              },
+              {
+                "class": 5,
+                "fraction": 0.5416465997695923,
+                "rate_kg_m_s": 8.88694139865737e-10
+              }
+            ],
+            "incoming_event_using_current_duration_kg_m": 5.638587107999538e-06,
+            "upstream_published_event_kg_m": 5.638587026624009e-06,
+            "incoming_event_minus_upstream_event_kg_m": 8.137552928049775e-14,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 4.595175215508139,
+            "observed_outgoing_event_kg_m": 4.595175266265869,
+            "grid_first_event_kg_m": 5.638587026624009e-06,
+            "grid_last_event_kg_m": 4.595175266265869,
+            "grid_positive_net_exchange_kg_m": 4.5951696276788425,
+            "grid_negative_net_exchange_kg_m": 0.0,
+            "grid_net_exchange_kg_m": 4.5951696276788425,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.11159034445881844,
+            "outgoing_surface_return": 0.019024796783924103,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 4.0978194171259474e-08
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 3,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 4867
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 5005
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  39.619998931884766,
+                  49.790000915527344,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4866
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 4865
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.10000000149011612,
+                  0.2562499940395355,
+                  0.01145000196993351,
+                  8.333333425980527e-06,
+                  0.033786628395318985,
+                  1.0
+                ],
+                "line": 3717
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  7.2965785875567235e-06,
+                  0.029307032003998756,
+                  49.790000915527344,
+                  0.0091507937759161,
+                  1.7358224795316346e-05,
+                  1.0
+                ],
+                "line": 3718
+              }
+            ],
+            "BP_RUNON_CAP": [
+              {
+                "tag": "BP_RUNON_CAP",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  3.52449893951416,
+                  7.951455116271973,
+                  8.333333425980527e-06,
+                  0.033786628395318985,
+                  0.01145000196993351,
+                  12816.0
+                ],
+                "line": 3877
+              }
+            ],
+            "BP_ROCHEK_ENTER": [
+              {
+                "tag": "BP_ROCHEK_ENTER",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  8.333333425980527e-06,
+                  0.033786628395318985,
+                  0.01145000196993351,
+                  10.170000076293945,
+                  0.04060276597738266,
+                  0.0
+                ],
+                "line": 3876
+              }
+            ],
+            "BP_ROCHEK_OUT": [
+              {
+                "tag": "BP_ROCHEK_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  17.5616455078125,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 3878
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 3875
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  3436.6396484375,
+                  17.5616455078125,
+                  1.0,
+                  0.0
+                ],
+                "line": 4578
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4872
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  1174.2000732421875,
+                  1174.2000732421875,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2056
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  1174.2000732421875,
+                  1174.2000732421875,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2058
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.10000000149011612,
+                  0.10000000149011612,
+                  -0.04111989587545395,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2057
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.10000000149011612,
+                  0.10000000149011612,
+                  -0.04111989587545395,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2059
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0538057088851929,
+                  2.480117082595825,
+                  0.0,
+                  -14.356493949890137,
+                  -0.4432520568370819,
+                  1.0456640720367432
+                ],
+                "line": 4869
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  130000.0,
+                  0.029999999329447746,
+                  0.00039999998989515007,
+                  0.9272231459617615,
+                  2.0,
+                  2.0
+                ],
+                "line": 4870
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.6128270626068115,
+                  2.353921413421631,
+                  0.0,
+                  0.022489819675683975,
+                  0.00012015520042041317,
+                  0.0
+                ],
+                "line": 4871
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.08980585634708405,
+              "reconstructed_storage_m_double": 0.08980586026792751,
+              "residual_m": -3.920843469340518e-09,
+              "effective_length_m": 49.790000915527344,
+              "sum_contributor_lengths_m": 49.78999900817871,
+              "percolation_coefficient_m_s": 2.848322765203193e-06,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.045068128034472466,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 3723
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 102,
+                      "values": [
+                        0.025351079180836678,
+                        0.03520960360765457,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03520960360765457
+                      ],
+                      "line": 3724
+                    }
+                  ]
+                },
+                {
+                  "ofe": 2,
+                  "length_m": 4.570000171661377,
+                  "available_capacity_m_double_reconstruction": 0.07481149004888721,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 201,
+                      "values": [
+                        0.000342841463861987,
+                        0.04324759915471077,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.04324759915471077
+                      ],
+                      "line": 3721
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 202,
+                      "values": [
+                        0.011340866796672344,
+                        0.04324759915471077,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.04324759915471077
+                      ],
+                      "line": 3722
+                    }
+                  ]
+                },
+                {
+                  "ofe": 3,
+                  "length_m": 39.619998931884766,
+                  "available_capacity_m_double_reconstruction": 0.09785875654779375,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 301,
+                      "values": [
+                        0.0019449100363999605,
+                        0.05178534612059593,
+                        0.0,
+                        0.10000000149011612,
+                        39.619998931884766,
+                        0.05178534612059593
+                      ],
+                      "line": 3719
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 302,
+                      "values": [
+                        0.0037670256569981575,
+                        0.05178534612059593,
+                        0.0,
+                        0.10000000149011612,
+                        39.619998931884766,
+                        0.05178534612059593
+                      ],
+                      "line": 3720
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              0.39636093378067017,
+              0.022489819675683975,
+              0.15000000596046448,
+              1.0,
+              3436.6396484375,
+              0.001337112975306809
+            ],
+            "outgoing_scale_raw": [
+              0.39636093378067017,
+              0.022489819675683975,
+              0.15000000596046448,
+              1.0,
+              3436.6396484375,
+              0.0
+            ],
+            "incoming_rate_kg_m_s": 0.001337112975306809,
+            "incoming_class_rates": [
+              {
+                "class": 1,
+                "fraction": 0.012999999336898327,
+                "rate_kg_m_s": 1.7382467792346665e-05
+              },
+              {
+                "class": 2,
+                "fraction": 0.2599998414516449,
+                "rate_kg_m_s": 0.0003476491615827075
+              },
+              {
+                "class": 3,
+                "fraction": 0.08999999612569809,
+                "rate_kg_m_s": 0.00012034016259723345
+              },
+              {
+                "class": 4,
+                "fraction": 0.17273150384426117,
+                "rate_kg_m_s": 0.00023096153503441956
+              },
+              {
+                "class": 5,
+                "fraction": 0.46426865458488464,
+                "rate_kg_m_s": 0.0006207796420736843
+              }
+            ],
+            "incoming_event_using_current_duration_kg_m": 4.595175351651693,
+            "upstream_published_event_kg_m": 4.595175266265869,
+            "incoming_event_minus_upstream_event_kg_m": 8.538582374484349e-08,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 0.0,
+            "observed_outgoing_event_kg_m": 0.0,
+            "grid_first_event_kg_m": 4.595175266265869,
+            "grid_last_event_kg_m": 0.0,
+            "grid_positive_net_exchange_kg_m": 0.0,
+            "grid_negative_net_exchange_kg_m": -4.595175266265869,
+            "grid_net_exchange_kg_m": -4.595175266265869,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.08895756537094712,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 0.0
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.019024796783924103,
+            "incoming_lateral": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "trace_rows": 5326,
+      "trace_sha256": "c126ea4e60419a207bc125c74f297545c5fa70afd64d33d9b7dbb73499a9f065",
+      "day_ofe": [
+        {
+          "day": 126,
+          "ofe": 1,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 53
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 751
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  5.599999904632568,
+                  5.599999904632568,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 52
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 51
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  1365.9549560546875,
+                  1400.0,
+                  339.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 1
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  1365.9549560546875,
+                  1400.0,
+                  339.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 5
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.00880402885377407,
+                  0.019999999552965164,
+                  -0.034573592245578766,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.008592023514211178,
+                  0.019999999552965164,
+                  -0.034573592245578766,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 6
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  -0.8448979258537292,
+                  0.9999825358390808,
+                  1366.875,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.034573592245578766
+                ],
+                "line": 3
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  -0.8448979258537292,
+                  0.9999825358390808,
+                  1366.875,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.034573592245578766
+                ],
+                "line": 7
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.008592023514211178,
+                  0.006000000052154064,
+                  -0.8448979258537292,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.008592023514211178,
+                  0.006000000052154064,
+                  -0.8448979258537292,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 8
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.00021006511542509543,
+            "deep_percolation": 3.69646841136273e-05
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 126,
+          "ofe": 2,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 762
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 1460
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  4.570000171661377,
+                  10.170000076293945,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 761
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 760
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  1400.0,
+                  1400.0,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 19
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  1400.0,
+                  1400.0,
+                  6104.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 21
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 20
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 22
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.000257410195445118,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 3.69646841136273e-05
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.00021006511542509543
+          }
+        },
+        {
+          "day": 126,
+          "ofe": 3,
+          "route_entered": false,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 1471
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2169
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  39.619998931884766,
+                  49.790000915527344,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 1470
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.9000000953674316,
+                  26.700000762939453,
+                  15.300000190734863
+                ],
+                "line": 1469
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  1399.780029296875,
+                  1400.0,
+                  6104.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 33
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  1399.780029296875,
+                  1400.0,
+                  6104.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 37
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.10000000149011612,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 34
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.10000000149011612,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 38
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  -6.547388076782227,
+                  0.9999812841415405,
+                  1399.7803955078125,
+                  0.10000000149011612,
+                  6.245291709899902,
+                  -0.034573592245578766
+                ],
+                "line": 35
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  -6.547388076782227,
+                  0.9999812841415405,
+                  1399.7803955078125,
+                  0.10000000149011612,
+                  6.245291709899902,
+                  -0.034573592245578766
+                ],
+                "line": 39
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -6.547388076782227,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 36
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 126,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -6.547388076782227,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 40
+              }
+            ]
+          },
+          "ga_capacity": [],
+          "sediment_handoff": null,
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 0.0
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 1,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.07965481281280518,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 4894
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.07965481281280518,
+                  4.981362053513294e-06,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 5022
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  5.599999904632568,
+                  5.599999904632568,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4893
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 4892
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.008592023514211178,
+                  0.05999999865889549,
+                  0.0005725319497287273,
+                  2.2222225837253973e-08,
+                  0.00882302038371563,
+                  0.0
+                ],
+                "line": 2229
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  2.2222227613610812e-08,
+                  0.00882302038371563,
+                  5.599999904632568,
+                  0.0005725319497287273,
+                  1.7358224795316346e-05,
+                  0.0
+                ],
+                "line": 2230
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.07969333231449127,
+                  1.6349742509191856e-05,
+                  6.543064500874607e-06,
+                  12516.0,
+                  12516.0,
+                  1.0
+                ],
+                "line": 2383
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.07965481281280518,
+                  6.2152630562195554e-06,
+                  12816.0,
+                  5.599999904632568,
+                  1.0,
+                  6.543064500874607e-06
+                ],
+                "line": 4889
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.07965481281280518,
+                  0.0,
+                  0.0
+                ],
+                "line": 4899
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  1366.875,
+                  1400.0,
+                  340.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2178
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  1366.875,
+                  1400.0,
+                  340.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2182
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.008592023514211178,
+                  0.019999999552965164,
+                  -0.034573592245578766,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2179
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.008592023514211178,
+                  0.019999999552965164,
+                  -0.034573592245578766,
+                  0.20580002665519714,
+                  0.0,
+                  0.0
+                ],
+                "line": 2183
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  -0.844897985458374,
+                  0.9999826550483704,
+                  1366.9517822265625,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.034573592245578766
+                ],
+                "line": 2180
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  -0.844897985458374,
+                  0.9999826550483704,
+                  1366.9517822265625,
+                  0.019999999552965164,
+                  0.20580002665519714,
+                  -0.034573592245578766
+                ],
+                "line": 2184
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 1,
+                "values": [
+                  0.008592023514211178,
+                  0.006000000052154064,
+                  -0.844897985458374,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2181
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 2,
+                "values": [
+                  0.008592023514211178,
+                  0.006000000052154064,
+                  -0.844897985458374,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2185
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  0.0002501240815035999,
+                  4.928696155548096,
+                  1.1496444329850419e-07,
+                  17.959924697875977,
+                  0.0,
+                  1.0
+                ],
+                "line": 4896
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  5.0,
+                  0.3811189830303192,
+                  9.999999974752427e-07,
+                  0.9999641180038452,
+                  10.0,
+                  1.0207362174987793
+                ],
+                "line": 4897
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 1,
+                "index": 0,
+                "values": [
+                  2.0710065364837646,
+                  2.0710065364837646,
+                  9.746772278163007e-10,
+                  0.04636586457490921,
+                  3.4805470932042226e-05,
+                  0.0
+                ],
+                "line": 4898
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.055394191294908524,
+              "reconstructed_storage_m_double": 0.055394189432263374,
+              "residual_m": 1.862645149230957e-09,
+              "effective_length_m": 5.599999904632568,
+              "sum_contributor_lengths_m": 5.599999904632568,
+              "percolation_coefficient_m_s": 2.2222224060897133e-08,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.055394189432263374,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 1,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 2231
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 1,
+                      "index": 102,
+                      "values": [
+                        0.016497379168868065,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 2232
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              0.0,
+              0.04636586457490921,
+              0.07291779667139053,
+              1.0,
+              12816.0,
+              0.0
+            ],
+            "outgoing_scale_raw": [
+              0.0,
+              0.04636586457490921,
+              0.07291779667139053,
+              1.0,
+              12816.0,
+              3.886830579613587e-10
+            ],
+            "incoming_rate_kg_m_s": 0.0,
+            "incoming_class_rates": null,
+            "incoming_event_using_current_duration_kg_m": 0.0,
+            "upstream_published_event_kg_m": null,
+            "incoming_event_minus_upstream_event_kg_m": null,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 4.981362269526371e-06,
+            "observed_outgoing_event_kg_m": 4.981362053513294e-06,
+            "grid_first_event_kg_m": 0.0,
+            "grid_last_event_kg_m": 4.981362053513294e-06,
+            "grid_positive_net_exchange_kg_m": 4.981362053513294e-06,
+            "grid_negative_net_exchange_kg_m": 0.0,
+            "grid_net_exchange_kg_m": 4.981362053513294e-06,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.0030451862839981914,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.00021479190309037222,
+            "deep_percolation": 3.69646841136273e-05
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 2,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.07683487981557846,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 5033
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.07683487981557846,
+                  1.257030963897705,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 5171
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  4.570000171661377,
+                  10.170000076293945,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 5032
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 5031
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.05000000074505806,
+                  0.48899999260902405,
+                  0.0,
+                  1.500427373457569e-07,
+                  0.013724598102271557,
+                  1.0
+                ],
+                "line": 3129
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  7.965976323021096e-08,
+                  0.011025597341358662,
+                  10.170000076293945,
+                  0.00031525848316960037,
+                  1.7358224795316346e-05,
+                  1.0
+                ],
+                "line": 3130
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.07691871374845505,
+                  1.617713860468939e-05,
+                  6.543064500874607e-06,
+                  12516.0,
+                  12516.0,
+                  1.0
+                ],
+                "line": 3285
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.07683487981557846,
+                  5.9952308220090345e-06,
+                  12816.0,
+                  10.170000076293945,
+                  1.0,
+                  6.543064500874607e-06
+                ],
+                "line": 4890
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.07683487981557846,
+                  0.0,
+                  0.0
+                ],
+                "line": 5038
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  1400.0,
+                  1400.0,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2196
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  1400.0,
+                  1400.0,
+                  6105.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2198
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 1,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2197
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 2,
+                "values": [
+                  0.05000000074505806,
+                  0.05000000074505806,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2199
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  0.011131595820188522,
+                  0.7118668556213379,
+                  0.0,
+                  19.495861053466797,
+                  1.330177903175354,
+                  1.0006439685821533
+                ],
+                "line": 5035
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  400000.0,
+                  0.6984749436378479,
+                  9.999999747378752e-05,
+                  0.9990924000740051,
+                  2.0,
+                  2.0
+                ],
+                "line": 5036
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 2,
+                "index": 0,
+                "values": [
+                  5.619028091430664,
+                  5.678601264953613,
+                  0.0,
+                  0.23047596216201782,
+                  6.097149889683351e-05,
+                  0.0
+                ],
+                "line": 5037
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.06084272265434265,
+              "reconstructed_storage_m_double": 0.060842722682140346,
+              "residual_m": -2.779769470162563e-11,
+              "effective_length_m": 10.170000076293945,
+              "sum_contributor_lengths_m": 10.170000076293945,
+              "percolation_coefficient_m_s": 1.2255108003955684e-06,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.055394189432263374,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 3133
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 102,
+                      "values": [
+                        0.016497379168868065,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 3134
+                    }
+                  ]
+                },
+                {
+                  "ofe": 2,
+                  "length_m": 4.570000171661377,
+                  "available_capacity_m_double_reconstruction": 0.06751926196739078,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 201,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.03594578430056572
+                      ],
+                      "line": 3131
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 2,
+                      "index": 202,
+                      "values": [
+                        0.0043723066337406635,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.03594578430056572
+                      ],
+                      "line": 3132
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              9.381876608927087e-09,
+              0.23047596216201782,
+              0.17975470423698425,
+              1.0,
+              12816.0,
+              3.886830579613587e-10
+            ],
+            "outgoing_scale_raw": [
+              9.381876608927087e-09,
+              0.23047596216201782,
+              0.17975470423698425,
+              1.0,
+              12816.0,
+              9.80829427135177e-05
+            ],
+            "incoming_rate_kg_m_s": 3.886830579613587e-10,
+            "incoming_class_rates": [
+              {
+                "class": 1,
+                "fraction": 0.04452499374747276,
+                "rate_kg_m_s": 1.730611072547809e-11
+              },
+              {
+                "class": 2,
+                "fraction": 0.0400867760181427,
+                "rate_kg_m_s": 1.5581050686543764e-11
+              },
+              {
+                "class": 3,
+                "fraction": 0.19091317057609558,
+                "rate_kg_m_s": 7.420471494461532e-11
+              },
+              {
+                "class": 4,
+                "fraction": 0.49078649282455444,
+                "rate_kg_m_s": 1.9076039483717826e-10
+              },
+              {
+                "class": 5,
+                "fraction": 0.23368851840496063,
+                "rate_kg_m_s": 9.083076794409936e-11
+              }
+            ],
+            "incoming_event_using_current_duration_kg_m": 4.981362155876697e-06,
+            "upstream_published_event_kg_m": 4.981362053513294e-06,
+            "incoming_event_minus_upstream_event_kg_m": 1.0236340312712311e-13,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 1.2570310142700993,
+            "observed_outgoing_event_kg_m": 1.257030963897705,
+            "grid_first_event_kg_m": 4.981362508260645e-06,
+            "grid_last_event_kg_m": 1.257030963897705,
+            "grid_positive_net_exchange_kg_m": 1.2570259825351968,
+            "grid_negative_net_exchange_kg_m": 0.0,
+            "grid_net_exchange_kg_m": 1.2570259825351968,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.009549881651764736,
+            "outgoing_surface_return": 0.0,
+            "outgoing_lateral": 0.0,
+            "deep_percolation": 3.69646841136273e-05
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.00021479190309037222
+          }
+        },
+        {
+          "day": 127,
+          "ofe": 3,
+          "route_entered": true,
+          "raw_operands": {
+            "BP_OWNER": [
+              {
+                "tag": "BP_OWNER",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.024878447875380516,
+                  0.0,
+                  0.0,
+                  1.0,
+                  1.0
+                ],
+                "line": 5182
+              }
+            ],
+            "BP_OFE_END": [
+              {
+                "tag": "BP_OFE_END",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  0.024878447875380516,
+                  1.257030963897705,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "line": 5318
+              }
+            ],
+            "BP_GEOMETRY": [
+              {
+                "tag": "BP_GEOMETRY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  43.105228424072266,
+                  39.619998931884766,
+                  49.790000915527344,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 5181
+              }
+            ],
+            "BP_OWNER_FORCING": [
+              {
+                "tag": "BP_OWNER_FORCING",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.08269999921321869,
+                  0.0,
+                  0.08269999921321869,
+                  3.5999999046325684,
+                  38.599998474121094,
+                  21.099998474121094
+                ],
+                "line": 5180
+              }
+            ],
+            "BP_IRS_LOCAL": [
+              {
+                "tag": "BP_IRS_LOCAL",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.006000000052154064,
+                  0.2562499940395355,
+                  0.0,
+                  1.6666668670950457e-05,
+                  0.013677720911800861,
+                  1.0
+                ],
+                "line": 4031
+              }
+            ],
+            "BP_EQUIV": [
+              {
+                "tag": "BP_EQUIV",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.3278639926284086e-05,
+                  0.013136004097759724,
+                  49.790000915527344,
+                  6.439402932301164e-05,
+                  1.7358224795316346e-05,
+                  1.0
+                ],
+                "line": 4032
+              }
+            ],
+            "BP_RUNON_CAP": [
+              {
+                "tag": "BP_RUNON_CAP",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  3.913905143737793,
+                  11.348952293395996,
+                  1.6666668670950457e-05,
+                  0.013677720911800861,
+                  0.0,
+                  12816.0
+                ],
+                "line": 4190
+              }
+            ],
+            "BP_ROCHEK_ENTER": [
+              {
+                "tag": "BP_ROCHEK_ENTER",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.6666668670950457e-05,
+                  0.013677720911800861,
+                  0.0,
+                  10.170000076293945,
+                  0.07683487981557846,
+                  0.0
+                ],
+                "line": 4189
+              }
+            ],
+            "BP_ROCHEK_OUT": [
+              {
+                "tag": "BP_ROCHEK_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  13.663721084594727,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4191
+              }
+            ],
+            "BP_GA_OUT": [
+              {
+                "tag": "BP_GA_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 4188
+              }
+            ],
+            "BP_IRS_OUT": [
+              {
+                "tag": "BP_IRS_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.024878447875380516,
+                  5.327183316694573e-07,
+                  12816.0,
+                  13.663721084594727,
+                  1.0,
+                  0.0
+                ],
+                "line": 4891
+              }
+            ],
+            "BP_ROUTE_DECISION": [
+              {
+                "tag": "BP_ROUTE_DECISION",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  0.024878447875380516,
+                  0.0,
+                  0.0
+                ],
+                "line": 5187
+              }
+            ],
+            "BP_SOIL_DENSITY": [
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  1399.7803955078125,
+                  1400.0,
+                  6105.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2210
+              },
+              {
+                "tag": "BP_SOIL_DENSITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  1399.7803955078125,
+                  1400.0,
+                  6105.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "line": 2214
+              }
+            ],
+            "BP_SOIL_ROUGH": [
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.10000000149011612,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2211
+              },
+              {
+                "tag": "BP_SOIL_ROUGH",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.10000000149011612,
+                  -0.034573592245578766,
+                  6.245291709899902,
+                  0.0,
+                  0.0
+                ],
+                "line": 2215
+              }
+            ],
+            "BP_SOIL_DECAY": [
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  -6.547388553619385,
+                  0.9999813437461853,
+                  1399.7803955078125,
+                  0.10000000149011612,
+                  6.245291709899902,
+                  -0.034573592245578766
+                ],
+                "line": 2212
+              },
+              {
+                "tag": "BP_SOIL_DECAY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  -6.547388553619385,
+                  0.9999813437461853,
+                  1399.7803955078125,
+                  0.10000000149011612,
+                  6.245291709899902,
+                  -0.034573592245578766
+                ],
+                "line": 2216
+              }
+            ],
+            "BP_SOIL_DECAY_OUT": [
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 1,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -6.547388553619385,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2213
+              },
+              {
+                "tag": "BP_SOIL_DECAY_OUT",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 2,
+                "values": [
+                  0.006000000052154064,
+                  0.006000000052154064,
+                  -6.547388553619385,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "line": 2217
+              }
+            ],
+            "BP_PARAM": [
+              {
+                "tag": "BP_PARAM",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.9005527496337891,
+                  11.818687438964844,
+                  0.0,
+                  -82.36906433105469,
+                  -1.1355664730072021,
+                  0.9926382899284363
+                ],
+                "line": 5184
+              }
+            ],
+            "BP_ERODIBILITY": [
+              {
+                "tag": "BP_ERODIBILITY",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  400000.0,
+                  0.05052404850721359,
+                  7.999999797903001e-05,
+                  0.9321526885032654,
+                  2.0,
+                  1.7070358991622925
+                ],
+                "line": 5185
+              }
+            ],
+            "BP_STRESS": [
+              {
+                "tag": "BP_STRESS",
+                "year": 16,
+                "day": 127,
+                "ofe": 3,
+                "index": 0,
+                "values": [
+                  0.288870632648468,
+                  0.2845553755760193,
+                  0.0,
+                  0.0009477324201725423,
+                  7.278914836206241e-06,
+                  0.0
+                ],
+                "line": 5186
+              }
+            ]
+          },
+          "ga_capacity": [
+            {
+              "observed_storage_m": 0.06606744974851608,
+              "reconstructed_storage_m_double": 0.06606746032659837,
+              "residual_m": -1.0578082285106483e-08,
+              "effective_length_m": 49.790000915527344,
+              "sum_contributor_lengths_m": 49.78999900817871,
+              "percolation_coefficient_m_s": 2.3988241082406603e-06,
+              "contributors": [
+                {
+                  "ofe": 1,
+                  "length_m": 5.599999904632568,
+                  "available_capacity_m_double_reconstruction": 0.055394189432263374,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 101,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 4037
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 102,
+                      "values": [
+                        0.016497379168868065,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        5.599999904632568,
+                        0.03594578430056572
+                      ],
+                      "line": 4038
+                    }
+                  ]
+                },
+                {
+                  "ofe": 2,
+                  "length_m": 4.570000171661377,
+                  "available_capacity_m_double_reconstruction": 0.06751926196739078,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 201,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.03594578430056572
+                      ],
+                      "line": 4035
+                    },
+                    {
+                      "tag": "BP_GA_UP_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 202,
+                      "values": [
+                        0.0043723066337406635,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        4.570000171661377,
+                        0.03594578430056572
+                      ],
+                      "line": 4036
+                    }
+                  ]
+                },
+                {
+                  "ofe": 3,
+                  "length_m": 39.619998931884766,
+                  "available_capacity_m_double_reconstruction": 0.06740859383717179,
+                  "consumed_layers": [
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 301,
+                      "values": [
+                        0.0,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        39.619998931884766,
+                        0.03594578430056572
+                      ],
+                      "line": 4033
+                    },
+                    {
+                      "tag": "BP_GA_LOCAL_LAYER",
+                      "year": 16,
+                      "day": 127,
+                      "ofe": 3,
+                      "index": 302,
+                      "values": [
+                        0.004482974763959646,
+                        0.03594578430056572,
+                        0.0,
+                        0.10000000149011612,
+                        39.619998931884766,
+                        0.03594578430056572
+                      ],
+                      "line": 4034
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sediment_handoff": {
+            "incoming_scale_raw": [
+              0.6899482011795044,
+              0.0009477324201725423,
+              0.15000000596046448,
+              1.0,
+              12816.0,
+              9.80829427135177e-05
+            ],
+            "outgoing_scale_raw": [
+              0.6899482011795044,
+              0.0009477324201725423,
+              0.15000000596046448,
+              1.0,
+              12816.0,
+              9.80829427135177e-05
+            ],
+            "incoming_rate_kg_m_s": 9.80829427135177e-05,
+            "incoming_class_rates": [
+              {
+                "class": 1,
+                "fraction": 0.04452499374747276,
+                "rate_kg_m_s": 4.367142411053105e-06
+              },
+              {
+                "class": 2,
+                "fraction": 0.0400867760181427,
+                "rate_kg_m_s": 3.9318289557571055e-06
+              },
+              {
+                "class": 3,
+                "fraction": 0.19091318547725677,
+                "rate_kg_m_s": 1.8725327034420955e-05
+              },
+              {
+                "class": 4,
+                "fraction": 0.4907865524291992,
+                "rate_kg_m_s": 4.8137789306477996e-05
+              },
+              {
+                "class": 5,
+                "fraction": 0.23368853330612183,
+                "rate_kg_m_s": 2.292085902507032e-05
+              }
+            ],
+            "incoming_event_using_current_duration_kg_m": 1.2570310317336015,
+            "upstream_published_event_kg_m": 1.257030963897705,
+            "incoming_event_minus_upstream_event_kg_m": 6.783589645564803e-08,
+            "normalized_outgoing_event_kg_m_double_reconstruction": 1.2570310317336015,
+            "observed_outgoing_event_kg_m": 1.257030963897705,
+            "grid_first_event_kg_m": 1.257030963897705,
+            "grid_last_event_kg_m": 1.257030963897705,
+            "grid_positive_net_exchange_kg_m": 0.0,
+            "grid_negative_net_exchange_kg_m": 0.0,
+            "grid_net_exchange_kg_m": 0.0,
+            "warning": "Grid signs are resolved net exchange, not gross subgrid production/deposition. Incoming receiving-duration mass and upstream published event mass are distinct support quantities."
+          },
+          "hourly_local_depth_sums_m": {
+            "allocated_fin": 0.09878610447049141,
+            "outgoing_surface_return": 0.008579812943935394,
+            "outgoing_lateral": 0.0027805636054836214,
+            "deep_percolation": 0.0
+          },
+          "hourly_upstream_depth_sums_m": {
+            "incoming_surface_return": 0.0,
+            "incoming_lateral": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "evidence_sha256": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/legacy/record.json": "3a96cff84caee31efc8539d544a2fe784eaa992c9e53f68f9638b20657aaa612",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json": "c7fa594491c9a59c0e9f3f8d6f676a97ffcba70cb65469fef19ebfd4741c6cc5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/legacy/observations/buffer-observation.txt": "aa553ac34a8698f160d797f63fe959a67ef3802139874acb415e3f487187970b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/legacy/particle-audit.json": "d46cc04884fc1e04039f0309993f0087217357cd32b366fc4524105307e4a317",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/modern/record.json": "349f64518b2af88527fdd9409c6076beb13ca3e0580ff8b99363b99d9074e977",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json": "c4d5e74ddb6398452ada1744d8a248bad409eeb71cf70ef3ec2830d96bdcaf99",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/modern/observations/buffer-observation.txt": "c126ea4e60419a207bc125c74f297545c5fa70afd64d33d9b7dbb73499a9f065",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/cases/small_paved_dry_legacy/modern/particle-audit.json": "3a4447955f7fd175757e31c434a950049b0a1cb87a54a8b6ad82d33624acc4d3",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/execution-declaration.json": "89d3ef796941ab8a3c399ba01eb7dbd2339c0052d5cbdb8304f78c608413275b",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build-receipt.json": "9e4434b9dd74097170f716aa88ff9d296d971f07f62b5c6d3c860df6e5b118cb",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_runtime_r4.py": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "reviewer": "independent implementation reviewer",
+  "reviewed_at_utc": "2026-10-31T23:27:05.024319+00:00",
+  "disposition": "accepted_for_isolated_o2_build_only",
+  "blocking_findings": [],
+  "candidate_root": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2",
+  "reviewed_artifact_sha256": {
+    "observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+    "observer.patch": "eb4ecda65727fe42bfd6025bb43769bd9534a92853c4b9c8cdf73e567388f107",
+    "prebuild-manifest.json": "4820fbb3d5cfefbbb2e9c77042a33eb653610d817f5ccd9aa0cec2581cd42988",
+    "staging-receipt.json": "5c53b500fcabbe32ee1c552c5e5e8cdf3c4c5eab2868e8790246c89b6fa58265",
+    "build_observer.py": "c7457994f8ca69bb8391a8d86cfe361949dbedf2b26a94a3510f9dbd4d99833f",
+    "stage_build.py": "be229cde15684e424ee90be62e59a14b12774598a7679f5a941cf0879a13d3f9",
+    "build-dry-run.log": "e02f9ee226272da5eaef66f21317773ddb257f1b39a17bfcaeb6de5f0f760cc8",
+    "prepare_observer.py": "d24cd1c5da69cf68f217d69fc80d74d54f0cdaa3115373537999f0be932a5e15",
+    "freeze_prebuild.py": "3017f8d481aca09d874b177c6ce3d485a3015b2667b80f2d0c698f24dd0851b2"
+  },
+  "prior_source_review": {
+    "path": "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-implementation-prebuild-review.json",
+    "sha256": "5afd5574cc4e0800a276d355d6211d9ad43496dbab27c253e71a84c2db0fe860"
+  },
+  "scope": "Bounded staging dependency correction only. Eleven observer sources, variable map and patch exactly match approved O1; no new model/source behavior.",
+  "o1_failure": {
+    "build_receipt_sha256": "b42e82d8cb3993f9de7951bc1207e49f0a7eaafbf074c2c252e5c8d0fb309d45",
+    "build_log_sha256": "433fd9db9aa63c23350ce3e2c594613c178eb73cf8ca22d5d1b17cd4a1f4b2b5",
+    "returncode": 2,
+    "cause": "Required sibling calendar source was absent from staged build tree. make stopped before compilation.",
+    "retained_objects_unchanged": 486,
+    "staged_binary_unchanged": true,
+    "native_model_runs": 0,
+    "review_gap": "The initial build review verified the declared source-tree inventory but missed a make prerequisite outside that tree."
+  },
+  "independent_checks": {
+    "baseline_inventory_verified": 977,
+    "staged_files_verified": 978,
+    "sibling_source_inventory": {
+      "fpm-src/wepp_calendar.f90": "4f62406c7feb204ea865dffa0b5cfe94f574183babad8d5bc1b868562f8052af"
+    },
+    "sibling_matches_existing_committed_revision4_receipt": true,
+    "all_relative_external_make_prerequisites_accounted_for": true,
+    "independent_complete_make_dry_run_returncode": 0,
+    "independent_dry_run_byte_identical_to_retained_plan": true,
+    "dry_run_compiler_link_command_lines": 151,
+    "no_compiler_or_native_execution_in_review": true,
+    "same_observer_source_hashes_as_o1": true,
+    "build_driver_reviewed": true
+  },
+  "required_next_gates": [
+    "Retain actual build command/object/source/include/ELF/runtime provenance and confirm it against this staged inventory.",
+    "Review frozen executable runner and trace-coverage validator, then execute only the declared first pair with full original periods.",
+    "Exact ordinary output file-set/byte parity, actual runtime/log/input/auxiliary checks, particle audits and trace coverage remain mandatory before the remaining eight pairs."
+  ],
+  "continuation_lesson": "Derive staging closure from actual make prerequisites, including paths outside src, and require a successful complete make dry-run on the staged tree before compilation. A large file inventory alone does not prove dependency closure.",
+  "publication": "Source-free receipt; native source and patches remain private."
+}

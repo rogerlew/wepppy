@@ -1,0 +1,33 @@
+{
+  "accepted_scientific_prebuild": true,
+  "accepted_observation_interpretation": false,
+  "reviewer": "Independent AI scientific delta review",
+  "scope": "O2 dependency-closure staging only; no scientific observation/model/seed change",
+  "delta": "Adds exact frozen sibling fpm-src/wepp_calendar.f90 required by make. O1 failed before compilation and remains retained. O2 map, observer patch, all11 modified source hashes and baseline977-file inventory exactly match accepted O1.",
+  "checks": {
+    "staged_files_independently_rehashed": 978,
+    "staging_make_dry_run_returncode": 0,
+    "scientific_map_identical": true,
+    "observer_patch_identical": true,
+    "observer_source_hashes_identical": true,
+    "new_calendar_dependency_matches_frozen_source": true
+  },
+  "remaining_conditions": [
+    "Record and validate actual compile/link provenance and observer binary",
+    "First-pair full-period runtime/output-parity/coverage preflight",
+    "All18 lanes seven ordinary outputs exact to corresponding R4 records before interpretation",
+    "Unchanged strict particle audits and valid-state/source-unit reconciliation"
+  ],
+  "limitations": "All limitations of the accepted O1 scientific review remain; no runtime or interpretation acceptance is implied.",
+  "evidence_sha256": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-prebuild-scientific-acceptance.json": "72ae2c807ee34d33b1bfd1c47dd4e075de15ad011851f520d8b48a8f0c720134",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-prebuild-scientific-review.md": "ee345e48bebe2f9d4960e65b86218f43a17c07d0c4f6d1c549ab1a1f62a0b5c9",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-implementation-o2-build-review.json": "48f2a85f801fc71fa85775201533ca9bb7e722e1a0a6eb7ade11da89c7a89d65",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1/build-receipt.json": "b42e82d8cb3993f9de7951bc1207e49f0a7eaafbf074c2c252e5c8d0fb309d45",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/prebuild-manifest.json": "4820fbb3d5cfefbbb2e9c77042a33eb653610d817f5ccd9aa0cec2581cd42988",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/staging-receipt.json": "5c53b500fcabbe32ee1c552c5e5e8cdf3c4c5eab2868e8790246c89b6fa58265",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/observer.patch": "eb4ecda65727fe42bfd6025bb43769bd9534a92853c4b9c8cdf73e567388f107",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/build-dry-run.log": "e02f9ee226272da5eaef66f21317773ddb257f1b39a17bfcaeb6de5f0f760cc8"
+  }
+}

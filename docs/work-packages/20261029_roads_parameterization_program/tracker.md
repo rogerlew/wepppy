@@ -1,9 +1,10 @@
 # Roads parameterization program tracker
 
-## Current: paired event comparison accepted; buffer process observations next
+## Current: buffer process observations accepted; roughness-conditioning test next
 
-Current [candidate ledger v17](artifacts/candidate-ledger-v17.json) records the
-completed paired event study and the next bounded source-observation question.
+Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
+completed paired event and buffer-process studies. The next controlled question
+is the contribution of buffer roughness conditioning, with all other inputs fixed.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -69,15 +70,38 @@ The same annual pattern occurs in 13/18 meaningful passing controls, while all
 48 meaningful underpredictions have lower generated export. No uniform parameter
 correction is justified. See [findings](artifacts/event-supply-ledger-r4/findings.md).
 
-The [nine-pair source observation design](artifacts/buffer-process-observation-r4-plan.md)
-is independently accepted for preparation: 18 full-period runs with bounded
-target/prior-day traces. Compilation and execution remain gated on the actual
-variable/unit/valid-state map, private observer patch and implementation review.
-Observe buffer infiltration, layerwise storage, actual inflow/routing rates and sediment exchange. Include both error
-directions and passing controls; require full-period ordinary-output byte parity.
-The core design is outsloped/unrutted, with a separate non-outunrut supply control;
-this does not claim all four design mechanisms are covered. Failed ledger v1/v2
-attempts and the successful v3 are archived with all members verified.
+The nine-pair buffer-process study is complete and independently accepted for
+bounded observational interpretation. All 18 full-period O3 runs preserve all
+126 ordinary output files byte-for-byte; physical, strict particle and trace-coverage gates
+pass. Independent readback covers 133,468 trace rows, 90 present sediment rows,
+108 water rows, 2,592 hourly REAL accumulations and 21 runoff additions. See
+[findings and paired figure](artifacts/buffer-process-interpretation-r4/findings.md).
+
+Two Denver contrasts have no GRNA excess in either lane, yet generated hourly
+surface return accounts for all outlet surface water (14.653 and 39.034 m³).
+Generated outgoing bulk sediment equals incoming mass there; legacy deposits
+it. Six generated buffer histories reach 6 mm roughness while their legacy
+controls retain 100 mm. The three underprediction controls retain equal
+roughness across lanes and still diverge in storage and exchange. Whole-profile
+confounding remains; neither a universal adjustment nor a new defect is proven.
+
+Next predeclare a full-period roughness-conditioning-only counterfactual on the
+same pairs, holding other inputs and bulk-density handling fixed. Observe its
+hydraulic and derived erosion responses; it is not a depression-storage-only
+intervention or an accepted parameter rule. Preserve both directions and passing
+controls. No counterfactual was executed in this observation study.
+
+The O1 missing-calendar build and O2 lazy-reader dependency failure remain
+retained; O2 includes one completed legacy run, not an accepted pair. The O3
+correction eagerly binds existing reader modules and reuses the same observer
+binary. [Retention coverage](artifacts/buffer-process-observation-r4-retention-coverage.json)
+verifies 3,983 raw files across the original archive and a two-file reviewer-failure
+supplement. The original archive was not rewritten. The core design covers
+outsloped/unrutted roads plus one rutted control, not all four design mechanisms.
+The [publication review](artifacts/buffer-process-observation-r4-implementation-publication-review.json)
+also executed the documented reproduction: numerical results match, the PNG is
+byte-identical, and existing destinations reject a rerun unchanged. All 34
+interpretation/replay files have a [separate verified archive](artifacts/revision4-buffer-process-interpretation-retention.json).
 
 Application coverage is complete: 12,533 passed and 422 skipped across all
 12,955 unique test IDs. Retained failures identify a preexisting Redis test-order

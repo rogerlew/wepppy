@@ -1,0 +1,57 @@
+{
+  "accepted_bounded_observation_interpretation": true,
+  "accepted_parameterization": false,
+  "new_native_defect_established": false,
+  "reviewer": "Independent AI scientific review; not institutional peer review",
+  "scope": "Nine predeclared same-engine paired soil-profile observations; no model or parameter change",
+  "evidence_counts": {
+    "full_period_lanes": 18,
+    "ordinary_output_pairs_exact": 126,
+    "trace_rows": 133468,
+    "day_ofe_groups": 108,
+    "consumed_capacity_frames": 76,
+    "sediment_routing_groups": 83,
+    "present_ELEMENT_print_checks": 90,
+    "WAT_print_checks": 108,
+    "absent_ELEMENT_rows_retained": 18,
+    "exact_REAL_hourly_accumulation_steps": 2592,
+    "exact_ROCHEK_to_IRS_additions": 21,
+    "published_files_rehashed": 15,
+    "strict_particle_EVENTs": 1677,
+    "strict_particle_flags": 0
+  },
+  "accepted_findings": [
+    "Whole-profile contrasts involve different retention and positive local net-exchange regimes; no universal buffer coefficient identified.",
+    "Roughness/conditioning and connected upper-storage differences are observed, with equal-roughness opposite-direction controls preserved.",
+    "No source-time transfer defect established in the observed sediment handoffs.",
+    "Final source-free narrative and figure correctly qualify printed zeros, selected-day scope, net-versus-gross exchange, unknown state epoch and incomplete thermodynamic/hydrograph coverage."
+  ],
+  "next_study_boundary": "A separately declared full-period roughness-conditioning counterfactual may test contribution with other inputs and density fixed, naturally responding derived shear/erosion operands observed, both directions and passing controls retained. It is not depression-storage-only attribution or production parameter selection.",
+  "limitations": [
+    "Selected extremes are not prevalence estimates or annual causal shares.",
+    "Whole profiles, initial states and multiple effective parameters differ.",
+    "Grid net exchange does not identify gross subgrid erosion/deposition or tagged provenance.",
+    "Layer temperature and final routed hydrograph remain unavailable.",
+    "Generated-soil candidate is the existing erosion_road_cap treatment, not unmodified SSURGO or all production Roads configurations.",
+    "No withheld materials or UI gate changed."
+  ],
+  "retention": "The original3981-file archive is immutable; two later failed-review assertion artifacts are retained in a separately bound supplemental archive.",
+  "evidence_sha256": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-o3-independent-scientific-review.md": "f7b3dc1956097e850a5ac537702c61aa7a4128e765fa5a1579a4de0aeb4782ea",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-o3-independent-full-readback.json": "79312ff088676f1db4d5730474acec3134b6a4935017a20b6fbcac3f824c7b35",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-o3-independent-reconciliation.json": "aa8efed5666dc0c0825d89dd9b7964fa7d1347af348a7724e8f4b78371e78bd4",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-o3-independent-publication-readback.json": "6f09b52196fa60f8ea656e3b4f1ce3130a1f49964d0f6c0094cccbf7729bea53",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_runtime_r4.py": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_reconciliation_r4.py": "943e0963036bb6aa5ef36bd9671d57c2de3ed8ece45c3bd5a727475285eb7b31",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_publication_r4.py": "a0297340975d13da303b5cad319b176ae273267faf272f0a103ee255aa8aeb65",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-implementation-final-readback.json": "8fdaa343f2fc48b35a15b5eca1cdb7d0ec7423ece6d1ee230d9abe7300956c41",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-interpretation-r4/publication-manifest.json": "328a40f1e46b7917d9524c28a633137599284e436ea5672c116d0f40116e8d83",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-buffer-process-observation-retention.json": "31209ff33d87bc8d989e65e8435acbaa11e4b1aa4ff1e6a98e04a893644ca7b9",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-buffer-process-review-failure-retention.json": "af29e018b6fcd421bcc579161b2df96bc71b5a5fa5543093901c157cb8a87a1a",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/verification.json": "c066c072c9637e8e75cf74c61b98b438e1379de7dda67c104993ed61e2314c4b",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/execution-declaration.json": "89d3ef796941ab8a3c399ba01eb7dbd2339c0052d5cbdb8304f78c608413275b",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build-receipt.json": "9e4434b9dd74097170f716aa88ff9d296d971f07f62b5c6d3c860df6e5b118cb",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e"
+  }
+}

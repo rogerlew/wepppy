@@ -5,10 +5,11 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: paired event comparison accepted; buffer process observations next
+## Current: buffer process observations accepted; roughness-conditioning test next
 
-Current [candidate ledger v17](../../artifacts/candidate-ledger-v17.json) records the
-completed paired event study and the next bounded source-observation question.
+Current [candidate ledger v18](../../artifacts/candidate-ledger-v18.json) records the
+completed paired event and buffer-process studies. The next controlled question
+is the contribution of buffer roughness conditioning, with all other inputs fixed.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -62,15 +63,34 @@ The same annual pattern occurs in 13/18 meaningful passing controls, while all
 48 meaningful underpredictions have lower generated export. No uniform parameter
 correction is justified. See [findings](../../artifacts/event-supply-ledger-r4/findings.md).
 
-The [nine-pair source observation design](../../artifacts/buffer-process-observation-r4-plan.md)
-is independently accepted for preparation: 18 full-period runs with bounded
-target/prior-day traces. Compilation and execution remain gated on the actual
-variable/unit/valid-state map, private observer patch and implementation review.
-Observe buffer infiltration, layerwise storage, actual inflow/routing rates and sediment exchange. Include both error
-directions and passing controls; require full-period ordinary-output byte parity.
-The core design is outsloped/unrutted, with a separate non-outunrut supply control;
-this does not claim all four design mechanisms are covered. Failed ledger v1/v2
-attempts and the successful v3 are archived with all members verified.
+The nine-pair buffer-process study is complete and independently accepted for
+bounded observational interpretation. All 18 full-period O3 runs preserve all
+126 ordinary output files byte-for-byte; physical, strict particle and trace-coverage gates
+pass. Independent readback covers 133,468 trace rows, 90 present sediment rows,
+108 water rows, 2,592 hourly REAL accumulations and 21 runoff additions. See
+[findings and paired figure](../../artifacts/buffer-process-interpretation-r4/findings.md).
+
+Two Denver contrasts have no GRNA excess in either lane, yet generated hourly
+surface return accounts for all outlet surface water (14.653 and 39.034 m³).
+Generated outgoing bulk sediment equals incoming mass there; legacy deposits
+it. Six generated buffer histories reach 6 mm roughness while their legacy
+controls retain 100 mm. The three underprediction controls retain equal
+roughness across lanes and still diverge in storage and exchange. Whole-profile
+confounding remains; neither a universal adjustment nor a new defect is proven.
+
+Next predeclare a full-period roughness-conditioning-only counterfactual on the
+same pairs, holding other inputs and bulk-density handling fixed. Observe its
+hydraulic and derived erosion responses; it is not a depression-storage-only
+intervention or an accepted parameter rule. Preserve both directions and passing
+controls. No counterfactual was executed in this observation study.
+
+The O1 missing-calendar build and O2 lazy-reader dependency failure remain
+retained; O2 includes one completed legacy run, not an accepted pair. The O3
+correction eagerly binds existing reader modules and reuses the same observer
+binary. [Retention coverage](../../artifacts/buffer-process-observation-r4-retention-coverage.json)
+verifies 3,983 raw files across the original archive and a two-file reviewer-failure
+supplement. The original archive was not rewritten. The core design covers
+outsloped/unrutted roads plus one rutted control, not all four design mechanisms.
 
 Application coverage is complete: 12,533 passed and 422 skipped across all
 12,955 unique test IDs. Retained failures identify a preexisting Redis test-order
@@ -100,8 +120,13 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Complete 116 exact-R4 legacy-soil anchors; diagnose 91 false particle flags as fixed-width audit parsing.
 - [x] Complete and independently review all 116 paired event ledgers; archive v1/v2 failures and verified v3.
 - [x] Predeclare nine paired buffer-process cases and independently reproduce seed eligibility/selection.
-- [ ] Freeze/review actual variable-unit map and private observer patch before compiling.
-- [ ] Execute 18 full-period observer runs; require exact ordinary-output parity and valid trace coverage before interpretation.
+- [x] Freeze and independently review actual variable-unit map, private observer patch and 977 baseline inputs; 103 observation tags across 11 source files accepted for isolated build.
+- [x] Complete O2 isolated build and runner review with all 978 build inputs bound. O1 stopped before compilation because staging omitted the required sibling calendar source; retain both attempts.
+- [x] Complete O3 pair preflight with 547 stable dependency bindings. Retain O2's one successful legacy run and blocked generated lane as an incomplete pair; the correction eagerly binds nine lazily imported audit modules without changing the observer binary.
+- [x] Execute all 18 O3 full-period runs: 126 ordinary output files exactly match revision 4; all physical, strict particle and trace-coverage gates pass.
+- [x] Complete independent full runtime and scientific review, bounded process reconciliation and raw retention; no parameter ablation in this observation study.
+- [x] Complete independent source-free publication and actual documented reproduction checks; retain 34 interpretation/replay files in a separate verified archive. The regenerated PNG is byte-identical; rerunning into existing destinations fails without changing them.
+- [ ] Predeclare and independently review a full-period roughness-conditioning-only counterfactual, keeping other inputs and bulk-density handling fixed; then execute its bounded diagnostic panel before broader validation.
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
 - [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.
@@ -265,6 +290,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Two Denver target contrasts have no GRNA excess in either lane, but hourly surface return supplies all generated outlet water. Equal-roughness underprediction controls still diverge in storage/runoff/exchange. Roughness also affects derived erosion corrections, so a roughness-only intervention cannot be described as depression-storage-only causality. The complete profile comparisons do not identify a single correct coefficient.
+
 - The nine fixed observer pairs have legacy buffer roughness of 100 mm throughout. Six conditioned generated profiles decline to 6 mm; the three selected underprediction profiles retain 100 mm. This is post hoc descriptive context, not causal evidence. The SOIL consolidation branch and IRS depression-storage operands require native observation. See artifacts/buffer-published-soil-context-r4.json.
 
 - Exact-R4 paired outputs shift the next question toward buffer runoff support: all 115 printing-separated lower-incoming-sediment/higher-export case-days have higher generated surface outflow, including 101 with zero legacy outflow. Higher printed Keff does not isolate layerwise infiltration or storage; whole profiles differ. The modern lane is the conditioned U12 erosion_road_cap candidate, not raw SSURGO output.
@@ -356,6 +383,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-10-31: accept O3 for bounded observational interpretation after exact output parity and independent runtime, boundary and scientific review. Choose a separately declared roughness-conditioning-only counterfactual next; preserve density, other inputs, both error directions and passing controls. Do not manipulate density to force the roughness branch or treat legacy behavior as the physical target.
+
 - 2026-10-31: add published SOIL history as supplemental context without changing frozen seeds or execution design. Preserve v1/v2 provenance attempts and use a fresh v3 conversion binding the actual native callable module; facade identity alone does not identify the Rust reader.
 
 - Accept the 116-case ledger for observational accounting only. Before further tuning, observe actual storm-time buffer hydrology and sediment processes in paired profiles, with passing controls and both discrepancy directions. The pattern also occurs in passing controls and meaningful underpredictions move oppositely, so a blanket buffer correction is unsupported. Preserve the original FSWEPP2/WEPP2010 criteria; same-engine legacy controls are diagnostic anchors, not replacement targets.
@@ -444,7 +473,7 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-- Buffer observation preparation remains active. Published SOIL context narrows the roughness hypothesis but does not accept a parameter change. Actual prebuild scientific/implementation review and ordinary-output parity remain required before interpreting native traces.
+- Buffer observation is complete: 18 accepted full-period runs, 126 exact ordinary outputs and independently reconciled process observations. O1/O2 staging/inventory failures and the separate review summation-order failure remain retained. Bind external make prerequisites and load existing lazy audit modules before freezing execution dependencies. The findings support a controlled surface-conditioning test, not a default change or a new engine repair.
 
 - WEPPpy revision-4 delivery is pushed as a5c40031a. The 116-case ledger has independent scientific and implementation acceptance, complete raw retention and a source-free reproduction packet. No model/parameter change follows from this observational result; the next bounded source study is predeclared separately.
 
@@ -1285,3 +1314,10 @@ No new parameters are promoted. Execute the
 rebaseline the full existing 116 whole-legacy-soil controls on exact revision 4,
 then compare event supply and retention at each OFE boundary. This avoids using
 revision-3 legacy results to assign a revision-4 soil mechanism.
+
+Revision note, 2026-10-31: the current sections now record completed paired-event
+and O3 buffer-process studies, independent reviews and retained failed attempts.
+The next question is a separately declared roughness-conditioning counterfactual,
+because observed storage/return/exchange differences do not identify a universal
+parameter adjustment. Corrected stale revision-3 identities in Context and
+Orientation to the delivered revision-4 inputs; earlier entries remain history.

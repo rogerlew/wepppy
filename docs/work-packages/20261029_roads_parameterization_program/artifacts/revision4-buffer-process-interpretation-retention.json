@@ -1,0 +1,13 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/revision4-buffer-process-interpretation.tar.gz",
+  "sha256": "61d42cf150de865ca1d05479137e5131be531c50a457d34805125744665f7f79",
+  "bytes": 902243,
+  "files": 34,
+  "uncompressed_bytes": 2706522,
+  "all_members_verified": true,
+  "manifest_sha256": "7206466efc9a6e901c69c101d95124569e2f987d157ecb3377a7d13cf71eb8e7",
+  "omitted_aliases": {
+    "buffer-process-observation-r4-review-replay-001/observer-o3": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3",
+    "buffer-process-observation-r4-review-replay-001/seeds.json": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/seeds.json"
+  }
+}

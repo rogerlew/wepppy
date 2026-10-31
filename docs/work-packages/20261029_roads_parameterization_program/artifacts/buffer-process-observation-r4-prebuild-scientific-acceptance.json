@@ -1,0 +1,38 @@
+{
+  "accepted_scientific_prebuild": true,
+  "accepted_observation_interpretation": false,
+  "reviewer": "Independent AI scientific review; not institutional peer review",
+  "scope": "Nine-pair observational study only; no parameter or production change",
+  "remaining_conditions": [
+    "Independent implementation review of exact observer patch/provenance before compilation",
+    "First-pair full-period preflight before remaining eight pairs",
+    "All18 lanes seven ordinary output files byte-identical to their own accepted R4 outputs",
+    "Unchanged source/input hashes, normal completion, strict particle audit and owning/executed-branch coverage",
+    "Source-supported unit/normalization reconciliation before interpreting derived rates or local integration"
+  ],
+  "independent_file_hash_readback": {
+    "frozen_base_source_include_object_files": 977,
+    "modified_observer_sources": 11,
+    "map_tags": 103
+  },
+  "limitations": [
+    "Layer temperature unavailable; ice/frost is not full thermal state",
+    "Cumulative/excess grids are not final routed hydrographs",
+    "Cached upstream state epoch must be established or labeled unknown",
+    "Published upstream event mass and solver incoming rate/current duration are separate quantities",
+    "Grid net exchange does not resolve simultaneous subgrid erosion/deposition or tagged origin",
+    "Whole-profile and selected-extreme confounding remain"
+  ],
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1/prebuild-manifest.json": "0f5d41b34dbb41bf68f1f163c69d32ab26933e9d5cfb7e6ab36577bd2b0d551f",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1/observer-map.json": "14e4f0d288e38def36bb46feada374cb77efa4e55ba76597162115fad6edec6e",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1/observer.patch": "eb4ecda65727fe42bfd6025bb43769bd9534a92853c4b9c8cdf73e567388f107",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o1/prepare_observer.py": "d24cd1c5da69cf68f217d69fc80d74d54f0cdaa3115373537999f0be932a5e15",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-plan.md": "08f60383ae444dec91a7e29cdb8dff436506015c9c20bc1a07e88cc7eb6d00f5",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-prebuild-scientific-review.md": "ee345e48bebe2f9d4960e65b86218f43a17c07d0c4f6d1c549ab1a1f62a0b5c9",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-independent-acceptance.json": "be256b83fb83150a2eceaac0bd220ed9d9faee17c1531aa6e601faa1fe3d56ae",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-published-soil-context-r4-independent-readback.json": "708bcf1a88852814a75dc89234cb12b7a7dad77ad21451d5a7bb94a2a222d44e",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-published-soil-context-r4-independent-review.md": "2697fbdf48a392b7608c28b240cdecf86b04f4601df8bff336a6457080b5329a"
+  }
+}

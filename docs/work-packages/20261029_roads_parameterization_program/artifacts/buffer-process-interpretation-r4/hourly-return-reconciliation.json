@@ -1,0 +1,1088 @@
+{
+  "passed": true,
+  "day_ofe_rows": 108,
+  "exact_REAL_hourly_additions": 2592,
+  "exact_rochek_to_irs_additions": 21,
+  "rows": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.019024796783924103,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.008579812943935394,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.024878447875380516,
+        "observed_m": 0.024878447875380516,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 319,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 319,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 319,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 320,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 320,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "day": 320,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 319,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 319,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 319,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 320,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 320,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "day": 320,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.009127099066972733,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.001042589545249939,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.022856049239635468,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.08069101721048355,
+        "observed_m": 0.08069101721048355,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 350,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.014254793524742126,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 350,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.004251740872859955,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.010637245140969753,
+        "observed_m": 0.010637245140969753,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 350,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 351,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.04643842577934265,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 351,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.09660013765096664,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "day": 351,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.05365319177508354,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.17368671298027039,
+        "observed_m": 0.17368671298027039,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 350,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 350,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 350,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 351,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.03697125241160393,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 351,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "day": 351,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.043848104774951935,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.027164291590452194,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.04553050547838211,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0008784271776676178,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.00427239341661334,
+        "observed_m": 0.00427239341661334,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.08527582883834839,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.18674582242965698,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.10932557284832001,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.02164805307984352,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0016421675682067871,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.09811548888683319,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.7284048795700073,
+        "observed_m": 0.7284048795700073,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.058832887560129166,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0039411261677742004,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.018894167616963387,
+        "observed_m": 0.018894167616963387,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.15141594409942627,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.10795779526233673,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.1107785701751709,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.7671876549720764,
+        "observed_m": 0.7671876549720764,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 232,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 232,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 232,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 233,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 233,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "day": 233,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 232,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 232,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 232,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.0,
+        "observed_m": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 233,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 233,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "day": 233,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.058832887560129166,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0039411261677742004,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.018894167616963387,
+        "observed_m": 0.018894167616963387,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.15141594409942627,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.10795779526233673,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0022826343774795532,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 323,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.011218627914786339,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.08391707390546799,
+        "observed_m": 0.08391707390546799,
+        "exact": true
+      }
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.09107201546430588,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "day": 324,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.10142698138952255,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.014707576483488083,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.02022480219602585,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 126,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 1,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 2,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.0,
+      "rochek_to_irs_addition": null
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "day": 127,
+      "ofe": 3,
+      "all24_accumulations_exact": true,
+      "return_depth_local_m": 0.002870991826057434,
+      "rochek_to_irs_addition": {
+        "before_m": 0.0,
+        "expected_m": 0.006845707073807716,
+        "observed_m": 0.006845707073807716,
+        "exact": true
+      }
+    }
+  ],
+  "units": "Surface-return depths use the local OFE area; incoming per-bin return/lateral depths use upstream OFE area. The emitted-area table and native REAL geometry are retained separately.",
+  "scope": "Exact source-expression readback for these observed additions only; not a full layer water-balance or final hydrograph validation.",
+  "summary_declaration_sha256": "43b797ae075535a071c7ba78bc1dc9b9d5660072fdde5b23ee2e33cf8a800660"
+}

@@ -1,0 +1,17 @@
+{
+  "script_sha256": "29578041a64aa92426f415b735069f16fbed17c598174a8ad4e66de0f4b312cc",
+  "data_sha256": "80430665d3a6db914cd89f8daf47c481f902599854d950e0fcff3f3ddba12bcd",
+  "rows": 18,
+  "pairs": 9,
+  "fields": [
+    "observed_first_two_layer_weighted_available_storage_mm",
+    "published_surface_out_m3",
+    "published_sediment_out_kg"
+  ],
+  "matplotlib_version": "3.9.0",
+  "outputs": {
+    "paired-buffer-process.png": "be5ea229e3df36d15b8d6d2595c3de5a438228e6d2543c0896142c974e43db4e",
+    "paired-buffer-process.pdf": "e8becc6c355b30200a43438c7d2343ebde72e03cb23e1365ab77642b0c165ece",
+    "paired-buffer-process.svg": "70c80a33e0d3f652d34046796142c61a642c2094b5b359ee1d7bd172becb24f5"
+  }
+}

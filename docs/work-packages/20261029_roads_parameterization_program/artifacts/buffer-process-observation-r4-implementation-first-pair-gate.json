@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "reviewer": "independent implementation reviewer",
+  "reviewed_at_utc": "2026-10-31T23:33:03.911556+00:00",
+  "accepted_first_pair_execution": true,
+  "accepted_interpretation": false,
+  "blocking_findings": [],
+  "runner_sha256": "a1f394d0a78a40a38f2bc1ace6a4966c6c937baa26508181ec3fc51ecdf5a94a",
+  "execution_declaration_sha256": "57b0089687d5e60e6f1aca28943f6ef1434bedbec1e9ea2214a29d2a0d958b6c",
+  "build_receipt_sha256": "9e4434b9dd74097170f716aa88ff9d296d971f07f62b5c6d3c860df6e5b118cb",
+  "binary_sha256": "ec9b733bb3336825a217d678dfa8f894c8d3cbf93437862c79a36223e7abc947",
+  "scope": "Authorize only the declared first legacy/generated pair, each for the unchanged original full16-year period. Broad continuation requires the existing successful preflight gate; interpretation still requires all18 successful ordinary-output parity and coverage readbacks.",
+  "first_pair": "small_paved_dry_legacy",
+  "tasks_verified": 18,
+  "dependencies_rehashed": 537,
+  "source_input_auxiliary_output_files_rehashed": 360,
+  "staged_input_auxiliary_files_rehashed": 234,
+  "staged_control_files_rehashed": 18,
+  "no_model_runs_at_gate": true,
+  "build_readback": {
+    "build_receipt_sha256": "9e4434b9dd74097170f716aa88ff9d296d971f07f62b5c6d3c860df6e5b118cb",
+    "binary_sha256": "ec9b733bb3336825a217d678dfa8f894c8d3cbf93437862c79a36223e7abc947",
+    "postbuild_files_verified": 977,
+    "changed_objects_verified": 150,
+    "actual_commands_equal_dry_run": true,
+    "staging_sha256": "5c53b500fcabbe32ee1c552c5e5e8cdf3c4c5eab2868e8790246c89b6fa58265"
+  },
+  "coverage_controls": {
+    "runner_sha256": "a1f394d0a78a40a38f2bc1ace6a4966c6c937baa26508181ec3fc51ecdf5a94a",
+    "checks": [
+      {
+        "name": "valid mixed dry/wet with global IRS, inserted grid point and EROD pair",
+        "expected_acceptance": true,
+        "passed": true
+      },
+      {
+        "name": "missing global IRS owner",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing OFE owner",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing hourly allocation bin",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing all PURK layer snapshots",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing one hourly AFTER layer",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing entire constructed GRNA grid",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing inserted GRNA grid point",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing final excess grid point",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing GRNA local second layer",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "missing GRNA interval",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "unpaired EROD exit",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "nonfinite observation",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "wrong calendar year",
+        "expected_acceptance": false,
+        "passed": true
+      },
+      {
+        "name": "unknown global marker",
+        "expected_acceptance": false,
+        "passed": true
+      }
+    ],
+    "passed": 15,
+    "scope": "Independent parser/coverage controls only; no native model run and no numerical interpretation."
+  },
+  "retained_independent_evidence": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/independent-review/buffer-observer-o2-runner-controls.json": "f87129c676f688cef437b622eeb598dda1b6f2de1688fc3f30c0bb36c4c9d593",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/independent-review/buffer-observer-o2-build-independent-check.json": "4931f3e9321a222a11a1f9a0d83deb7ef0301e8fca8742f4c3f3473e57ebefdc",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o2/independent-review/review_buffer_observer_runner.py": "2bf323d4dccf87910c3ebf3a07a957372c94fbcc9bbffc6ff7128dbcfada0975"
+  },
+  "review_findings_closed": [
+    "Global IRS marker uses OFE0 and is retained separately, with matching per-OFE IRS exit coverage. Unknown global markers fail.",
+    "Coverage requires every daily owner/end, all24 hourly bins and complete before/percolation/after layer snapshots. Each GRNA call requires current first-two-layer operands, complete constructed grid including inserted points, and the producer-guarded complete excess grid.",
+    "Input, auxiliary, stdout/stderr and ordinary-output inventory checks stay canonical. Only declared observer control/trace extras are archived; exact output bytes and file sets must match accepted references.",
+    "Actual source, compiled inventory and sibling dependency readback occurs before and after run phases; sources and binary remain bound to reviewed build receipts."
+  ],
+  "source_particle_audit_check": {
+    "records": 18,
+    "events": 1677,
+    "strict_flags": 0,
+    "audit_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "scope": "Fresh read-only audit of reference outputs; no simulation or threshold change."
+  },
+  "remaining_gates": [
+    "Actual first-pair full-period completion, all seven ordinary files byte-identical, unchanged inputs/log/runtime checks, physical recomputation and particle comparison, complete target/prior-day trace coverage.",
+    "Retain preflight receipt and bind its two accepted records before the remaining eight pairs.",
+    "Final all18 record/input/output/log/source/build reread before any scientific interpretation."
+  ],
+  "residual_limits": [
+    "Static/synthetic coverage controls do not establish numerical noninterference; exact native ordinary-output parity remains mandatory.",
+    "Temperature and complete gross/source-origin accounting remain outside this observer dataset; do not infer them from frost states or net loads."
+  ],
+  "publication": "Source-free review. Independent parser controls contain original Python only; all native source and patch bytes remain ignored/private."
+}

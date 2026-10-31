@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "reviewer": "independent implementation reviewer",
+  "reviewed_at_utc": "2026-10-31T23:38:53.923549+00:00",
+  "preflight_accepted": true,
+  "accepted_interpretation": false,
+  "remaining_declared_pairs_may_proceed": true,
+  "blocking_findings": [],
+  "preflight_sha256": "aa81f9929fb5162bde7d280917ebe14c723698b177752b179ec2e058bf2249d7",
+  "declaration_sha256": "89d3ef796941ab8a3c399ba01eb7dbd2339c0052d5cbdb8304f78c608413275b",
+  "runner_sha256": "f9f36d3bf20893816a386734d0a8636a83e093f56e9e2b2aa90023cef21e2d5c",
+  "binary_sha256": "ec9b733bb3336825a217d678dfa8f894c8d3cbf93437862c79a36223e7abc947",
+  "dependencies_rehashed": 547,
+  "lanes": [
+    {
+      "lane": "legacy",
+      "record_sha256": "3a96cff84caee31efc8539d544a2fe784eaa992c9e53f68f9638b20657aaa612",
+      "trace_sha256": "aa553ac34a8698f160d797f63fe959a67ef3802139874acb415e3f487187970b",
+      "trace_rows": 5013,
+      "full_period_year_markers": 16,
+      "ordinary_output_files_exact": 7,
+      "particle_events": 0,
+      "strict_flags": 0
+    },
+    {
+      "lane": "modern",
+      "record_sha256": "349f64518b2af88527fdd9409c6076beb13ca3e0580ff8b99363b99d9074e977",
+      "trace_sha256": "c126ea4e60419a207bc125c74f297545c5fa70afd64d33d9b7dbb73499a9f065",
+      "trace_rows": 5326,
+      "full_period_year_markers": 16,
+      "ordinary_output_files_exact": 7,
+      "particle_events": 2,
+      "strict_flags": 0
+    }
+  ],
+  "scope": "Independent actual first-pair readback, raw byte parity, full-period completion and exact frozen coverage recomputation. Remaining16 runs still require their own full gates and final global readback.",
+  "publication": "Source-free receipt; no native source excerpts or behavioral changes."
+}

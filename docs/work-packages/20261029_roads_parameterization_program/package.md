@@ -1,9 +1,10 @@
 # Roads parameterization and configuration view
 
-## Current: paired event comparison accepted; buffer process observations next
+## Current: buffer process observations accepted; roughness-conditioning test next
 
-Current [candidate ledger v17](artifacts/candidate-ledger-v17.json) records the
-completed paired event study and the next bounded source-observation question.
+Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
+completed paired event and buffer-process studies. The next controlled question
+is the contribution of buffer roughness conditioning, with all other inputs fixed.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -40,7 +41,12 @@ also completed. An independently diagnosed fixed-width audit parser defect
 explains their 91 apparent particle/bulk mismatches; unchanged-bound replay
 clears all of them in both engine generations. See the
 [audit disposition](artifacts/review-legacy-particle-disposition.md).
-The next analysis compares paired daily sediment supply and retention.
+The paired event ledger and nine-pair native buffer observations are complete.
+All 18 observer runs retain 126 exact ordinary output files, with independent
+accounting and scientific review. [Findings and a paired figure](artifacts/buffer-process-interpretation-r4/findings.md)
+identify hourly surface return and differing storage/conditioning as controlled
+study targets. Next isolate buffer roughness conditioning with other inputs and
+density fixed; no parameter candidate or new native defect is established.
 The six withheld materials and human UI specification/layout gate remain intact.
 
 Status: active. One outcome-driven program, authorized by the operator on
