@@ -1,0 +1,13 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/erod-u5-through-u11.tar.gz",
+  "sha256": "d76ce77b7959113d2cd94d5f0cf07dddb1dda2f5cb96a4016cdd0c20dfc1eb9c",
+  "bytes": 5050566755,
+  "files": 54380,
+  "uncompressed_bytes": 29256956379,
+  "all_members_verified": true,
+  "manifest_sha256": "15619d9a4175e6ba91f47006947d1e879724e4404edd0c8506233c2f21937442",
+  "omitted_aliases": {
+    "erod-wet-domain-u11/disturbed/disturbed_matrixcurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-wet-domain-u11/disturbed/disturbed_matrix0",
+    "erod-wet-domain-u11/disturbed/secretscurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-wet-domain-u11/disturbed/secrets0"
+  }
+}

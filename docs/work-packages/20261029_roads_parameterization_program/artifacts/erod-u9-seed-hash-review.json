@@ -1,0 +1,54 @@
+[
+  {
+    "seed": "seed-buffer_cap",
+    "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-handoff-u9/seed-buffer_cap/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+    "source_sha": "8f0762c51618528030901801c4664cb565f787da05e9dbc172048658f43cb4cb",
+    "binary": "f7b3d9d7e35d2b84ed911f9ee43796aaf2a08d54fab990657cba871e3779c5a7",
+    "physical_pass": true,
+    "years": 16,
+    "old_export": 412.56015040681376,
+    "new_export": 412.60325563619483,
+    "actual_annual_delta": 0.04310522938106942,
+    "water_unchanged": true,
+    "soil_unchanged": true
+  },
+  {
+    "seed": "seed-buffer_control",
+    "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-handoff-u9/seed-buffer_control/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+    "source_sha": "cdf72701fceaaee612466277950d3693846af767f0c06de2884702923e60c584",
+    "binary": "f7b3d9d7e35d2b84ed911f9ee43796aaf2a08d54fab990657cba871e3779c5a7",
+    "physical_pass": true,
+    "years": 16,
+    "old_export": 175.43828358120697,
+    "new_export": 175.43828358120697,
+    "actual_annual_delta": 0.0,
+    "water_unchanged": true,
+    "soil_unchanged": true
+  },
+  {
+    "seed": "seed-depend_failure",
+    "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-handoff-u9/seed-depend_failure/site-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+    "source_sha": "4ad07b9dd362f03c2826501afaf424c49e7fd9def6bc4b512cb453525c91cafd",
+    "binary": "f7b3d9d7e35d2b84ed911f9ee43796aaf2a08d54fab990657cba871e3779c5a7",
+    "physical_pass": true,
+    "years": 16,
+    "old_export": 192.12000735170503,
+    "new_export": 192.16311258108618,
+    "actual_annual_delta": 0.043105229381154686,
+    "water_unchanged": true,
+    "soil_unchanged": true
+  },
+  {
+    "seed": "seed-ordinary",
+    "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-handoff-u9/seed-ordinary/site-1718465-inveg-paved-high-erosion_road_cap-project/record.json",
+    "source_sha": "a46024b887133a47577e371895712fe2a1848b94f83cc7adb797c030e59122b3",
+    "binary": "f7b3d9d7e35d2b84ed911f9ee43796aaf2a08d54fab990657cba871e3779c5a7",
+    "physical_pass": true,
+    "years": 16,
+    "old_export": 223.47072,
+    "new_export": 223.47468,
+    "actual_annual_delta": 0.003960000000006403,
+    "water_unchanged": true,
+    "soil_unchanged": true
+  }
+]

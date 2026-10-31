@@ -1,0 +1,114 @@
+{
+  "erod_source_sha256": "fff9125e81e3eb1d9e237e7cb492f8ae68ae61fef1456c0ee65f2da2e2944dd8",
+  "runge_source_sha256": "7f751b4903e65bdb678161ef7adf11a3fde213952cd411d0f2884239415ed561",
+  "rows": [
+    {
+      "xb": 0.0,
+      "xe": 0.009,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 1.0,
+      "expected_root": 0.0013862943611198904,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00300000119,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 1.1640434197369949,
+      "contains_grid": false
+    },
+    {
+      "xb": 0.0,
+      "xe": 0.009,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 10.0,
+      "expected_root": 0.00034339872044851434,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00300000119,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 7.736203751958328,
+      "contains_grid": false
+    },
+    {
+      "xb": 0.0,
+      "xe": 0.01,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 1.0,
+      "expected_root": 0.0013862943611198904,
+      "native_result": [
+        0.0010005103,
+        0.0,
+        0.00300510321,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 1.1677237492132528,
+      "contains_grid": true
+    },
+    {
+      "xb": 0.0,
+      "xe": 0.01,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 10.0,
+      "expected_root": 0.00034339872044851434,
+      "native_result": [
+        0.0010005103,
+        0.0,
+        0.00300510321,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 7.751061174820406,
+      "contains_grid": true
+    },
+    {
+      "xb": 0.0,
+      "xe": 0.02,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 1.0,
+      "expected_root": 0.0013862943611198904,
+      "native_result": [
+        0.0010005103,
+        0.0,
+        0.00300510321,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 1.1677237492132528,
+      "contains_grid": true
+    },
+    {
+      "xb": 0.0,
+      "xe": 0.02,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "capacity": 0.001,
+      "erodibility": 10.0,
+      "expected_root": 0.00034339872044851434,
+      "native_result": [
+        0.0010005103,
+        0.0,
+        0.00300510321,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 7.751061174820406,
+      "contains_grid": true
+    }
+  ]
+}

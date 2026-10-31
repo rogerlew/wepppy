@@ -1,0 +1,254 @@
+{
+  "reviewer": "Independent Codex AI implementation reviewer",
+  "reviewed_utc": "2026-10-31T22:26:33.445971+00:00",
+  "disposition": "Accepted for the five declared particle-only research panels; no native/model/default/parameter acceptance is added",
+  "blocking_findings": [],
+  "closed_findings": [
+    {
+      "issue": "Literal private native format descriptor was embedded in the new public fixture",
+      "resolution": "Removed after frozen readback; original retained privately with explicit old/new hash provenance; all generated numeric fields are unchanged",
+      "evidence": "particle-audit-v2-disclosure.json",
+      "evidence_sha256": "b3d659f41b4ab8bae71f7de5085a0788139679fa3dc54ec3ae99f89fa1469efb"
+    }
+  ],
+  "nonblocking_findings": [
+    {
+      "severity": "low",
+      "file": "audit_particle_closure_v2.py:91; reverify_particle_audit_v2.py:23",
+      "issue": "Malformed PASS Decimal text raises InvalidOperation, which aborts the runner instead of becoming a per-record ValueError rejection",
+      "effect": "Fails closed; no malformed or rejected record occurred among all 2348 declared cases",
+      "future_action": "Before reusing on unverified inputs, normalize expected Decimal conversion failures at the parser boundary or catch that exact exception in the runner. Preserve this frozen execution source."
+    }
+  ],
+  "implementation_findings": [
+    "All 26 ELEMENT widths match the public canonical Rust descriptor and native SEDOUT/CONTIN boundaries, including adjacent duration and enrichment fields.",
+    "V1 fraction, concentration, volume-to-mass and printed-precision Decimal bounds remain unchanged; there is no renormalization or new tolerance.",
+    "Duplicate ELEMENT and PASS keys, invalid calendar, missing terminal OFE, required SedLeave absence, output hash mismatch, negative/nonfinite PASS data and invalid width fail explicitly.",
+    "All-star unrelated diagnostics are retained as unavailable fields, never imputed or interpreted as valid values. All observed unavailable diagnostics are Sm.",
+    "The parser intentionally requires the declared current 26-column format and terminal OFE 3; general 24-column or arbitrary-OFE interoperability is outside scope.",
+    "The original audit and U12 acceptance remain byte-identical; the one post-run public fixture sanitization resolves through its retained byte-exact private alias."
+  ],
+  "regression": {
+    "passed": true,
+    "checks": 20,
+    "scope": "Exact native adjacent-field regression, ordinary-field parity, unchanged strict failure controls, malformed/duplicate rejection and canonical widths",
+    "fixture_sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+    "audit_v2_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "regression_script_sha256": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+    "canonical_element_source_sha256": "8205708270a8b428ba7b75d56c29d5b015174a0deaf96e0a9b593d3da6be7dde",
+    "exact_example": {
+      "causes": [],
+      "fraction_sum": "1.0000050000000032270",
+      "fraction_bound": "0.00000600000000000010",
+      "class_mass_kg": "0.0388997659700001255329296",
+      "bulk_mass_kg": "0.03960",
+      "mass_bound_kg": "0.001980684921500000006489450"
+    }
+  },
+  "independent_full_entry_probes": {
+    "count": 17,
+    "passed": true,
+    "historical_fixture_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+    "checks": [
+      {
+        "name": "native_adjacent_fields",
+        "events": 1,
+        "flags": 0,
+        "unavailable_diagnostics": 0
+      },
+      {
+        "name": "multiline_native_event",
+        "events": 1,
+        "flags": 0,
+        "unavailable_diagnostics": 0
+      },
+      {
+        "name": "duplicate_event",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Duplicate PASS EVENT: (2002, 103)"
+      },
+      {
+        "name": "duplicate_element",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Duplicate ELEMENT OFE/date at line 4: (3, 13, 4, 3)"
+      },
+      {
+        "name": "missing_terminal",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Missing terminal ELEMENT row: (3, 13, 4, 3)"
+      },
+      {
+        "name": "truncated_event",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Truncated PASS EVENT"
+      },
+      {
+        "name": "invalid_calendar",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid PASS EVENT calendar"
+      },
+      {
+        "name": "hash_mismatch",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Output hash mismatch: /tmp/particle-v2-independent-0pjejnbd/record.json"
+      },
+      {
+        "name": "zero_width",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid declared hillslope width"
+      },
+      {
+        "name": "nonfinite_width",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid declared hillslope width"
+      },
+      {
+        "name": "nonfinite_concentration",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Nonfinite or negative PASS particle value"
+      },
+      {
+        "name": "negative_concentration",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Nonfinite or negative PASS particle value"
+      },
+      {
+        "name": "malformed_concentration",
+        "rejected": true,
+        "exception": "InvalidOperation",
+        "error": "[<class 'decimal.ConversionSyntax'>]"
+      },
+      {
+        "name": "nonfinite_volume",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid PASS EVENT volume"
+      },
+      {
+        "name": "negative_volume",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid PASS EVENT volume"
+      },
+      {
+        "name": "missing_required_sedleave",
+        "rejected": true,
+        "exception": "ValueError",
+        "error": "Invalid ELEMENT date or numeric field"
+      },
+      {
+        "name": "reported_unavailable_Sm",
+        "events": 1,
+        "flags": 0,
+        "unavailable_diagnostics": 1
+      }
+    ]
+  },
+  "full_panel_readback": {
+    "passed": true,
+    "review_scope": "Independent receipt arithmetic, record/PASS/ELEMENT exact-byte rehash and frozen file readback; numerical model rerun not needed",
+    "parser_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "runner_sha256": "dde3532b22ba75a9396dc2b8e9bc67d229f65e881a8f74743251f809f0a47f52",
+    "receipt_sha256": "e5d42b7e8de31ecaa94e76e145dd1682c6370da932e144357a30a594a1c76ae9",
+    "declaration_sha256": "021521ca6eef2eef6decf15cd23ac6e141ed54cdff9f29a0f53b93a9b3808249",
+    "frozen_files_verified": 3425,
+    "frozen_fixture_disclosure_alias_explicit": true,
+    "records_rehashed": 2348,
+    "raw_outputs_rehashed": 4696,
+    "panels": {
+      "legacy_r3": {
+        "selected_cases": 116,
+        "cases": 116,
+        "rejected_record_count": 0,
+        "events": 5887,
+        "positive_events": 5031,
+        "flagged_cases": 0,
+        "flagged_events": 0,
+        "causes": {},
+        "unavailable_diagnostic_fields": 0,
+        "cases_with_unavailable_diagnostics": 0
+      },
+      "legacy_r4": {
+        "selected_cases": 116,
+        "cases": 116,
+        "rejected_record_count": 0,
+        "events": 5887,
+        "positive_events": 5039,
+        "flagged_cases": 0,
+        "flagged_events": 0,
+        "causes": {},
+        "unavailable_diagnostic_fields": 0,
+        "cases_with_unavailable_diagnostics": 0
+      },
+      "factorial_r4": {
+        "selected_cases": 928,
+        "cases": 928,
+        "rejected_record_count": 0,
+        "events": 47993,
+        "positive_events": 36527,
+        "flagged_cases": 3,
+        "flagged_events": 3,
+        "causes": {
+          "fraction_sum": 3
+        },
+        "unavailable_diagnostic_fields": 16428,
+        "cases_with_unavailable_diagnostics": 112
+      },
+      "U12_roads": {
+        "selected_cases": 840,
+        "cases": 840,
+        "rejected_record_count": 0,
+        "events": 117145,
+        "positive_events": 96775,
+        "flagged_cases": 1,
+        "flagged_events": 1,
+        "causes": {
+          "fraction_sum": 1
+        },
+        "unavailable_diagnostic_fields": 74267,
+        "cases_with_unavailable_diagnostics": 99
+      },
+      "U12_downstream": {
+        "selected_cases": 348,
+        "cases": 348,
+        "rejected_record_count": 0,
+        "events": 18620,
+        "positive_events": 13105,
+        "flagged_cases": 1,
+        "flagged_events": 1,
+        "causes": {
+          "fraction_sum": 1
+        },
+        "unavailable_diagnostic_fields": 6074,
+        "cases_with_unavailable_diagnostics": 42
+      }
+    },
+    "events": 195532,
+    "numeric_criteria_unchanged": true,
+    "acceptance_sha256": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb"
+  },
+  "new_event_certificate_disclosure": {
+    "approved": true,
+    "certificate_sha256": "fef6d272986de39102ceafeaf6e2c8f08b8f65a597beb3e38911607d98414692",
+    "disposition_sha256": "292f8425aab6dfe5cd891343f15ac22c1f53624de193e1ed30bcb0276e602e25",
+    "scope": "Disclosure review only, without repeating arithmetic proof",
+    "public_content": "Generated output tokens, observed scalar values, arithmetic explanation, source paths and source hashes",
+    "private_content": "Instrumented Fortran copies, observer build and certificate execution code remain in ignored out/ research paths and are absent from the Git index"
+  },
+  "limitations": [
+    "Five reported fraction-flag occurrences across overlapping panels remain strict failures; the review does not silently waive them or count them as five independent defects.",
+    "This audit is a particle-only output re-read, not a rerun of model science, application acceptance or parameter selection.",
+    "Unrelated unavailable Sm values do not become numeric-validity claims; broader diagnostic availability remains separate.",
+    "No production deployment, UI implementation or default parameter change is approved."
+  ]
+}

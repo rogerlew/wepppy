@@ -1,0 +1,19 @@
+{
+  "candidate": "U11; unpromoted",
+  "source_tests": 209,
+  "source_test_log_sha256": "4b3392ec7549d420a75d54e36861dd0b358921a5990ddb9749b63246255b6d1f",
+  "build": {
+    "binaries": {
+      "wepp": "a4b9e7de28e3ebc813e844124547248da99f664c76613d5ef5d0b37b753edf38",
+      "wepp_hill": "cafdbfb5f05238a2d90c23e0e466a8ef4c166928487ab82bb668f7a1103b541f"
+    },
+    "build_log_sha256": "158dbdb39cf25bae62742e37c300c2155ad34bd032f569223e38e9ec87b5bb11",
+    "status": "unpromoted EROD U6b + ROUTE U7/U9/U10 + DEPOS U8/U11 + DEPEND G1 diagnostic candidate"
+  },
+  "source_manifest_sha256": "c23249b37670d74c71143886b6c72ed2a63987cfa9e13e6c415bc8ee38b6bcb0",
+  "open": [
+    "full-period seeds/broad exact-pair gates",
+    "independent source/science reviews",
+    "two strict fraction-sum source explanations"
+  ]
+}

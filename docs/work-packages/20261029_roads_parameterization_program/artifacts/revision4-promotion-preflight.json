@@ -1,0 +1,20 @@
+{
+  "artifact_revision": 4,
+  "entries": {
+    "wepp_261029": {
+      "candidate": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/bin/wepp",
+      "sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "sidecar_sha256": "162756de2f43428f53149c5d6703eb7224be9911d3a4fcd69a615ca07cd80c83"
+    },
+    "wepp_261029_hill": {
+      "candidate": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/bin/wepp_hill",
+      "sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+      "sidecar_sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d"
+    }
+  },
+  "matched_pair_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804"
+}

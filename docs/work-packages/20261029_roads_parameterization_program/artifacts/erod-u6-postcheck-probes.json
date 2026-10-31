@@ -1,0 +1,64 @@
+[
+  {
+    "name": "endpoint_no_transition_0.49992",
+    "inputs": [
+      0.499,
+      0.49992,
+      0,
+      9.260612188199957e-08,
+      0.2500001,
+      1,
+      50,
+      0,
+      1,
+      -1,
+      0,
+      1
+    ],
+    "returncode": 0,
+    "stdout": " RESULT   9.26061219E-08   0.00000000      0.499913663               1          50\n",
+    "stderr": "",
+    "seconds": 0.0021978840231895447,
+    "result": [
+      9.26061219e-08,
+      0.0,
+      0.499913663,
+      1.0,
+      50.0
+    ],
+    "endpoint_capacity_double": 9.58052766009132e-08,
+    "endpoint_capacity_single": 8.940696716308594e-08,
+    "expected_ndep": 0
+  },
+  {
+    "name": "endpoint_no_transition_0.49993",
+    "inputs": [
+      0.499,
+      0.49993,
+      0,
+      9.185736615791029e-08,
+      0.2500001,
+      1,
+      50,
+      0,
+      1,
+      -1,
+      0,
+      1
+    ],
+    "returncode": 0,
+    "stdout": " RESULT   9.18573662E-08   0.00000000      0.499913663               1          50\n",
+    "stderr": "",
+    "seconds": 0.0016366878990083933,
+    "result": [
+      9.18573662e-08,
+      0.0,
+      0.499913663,
+      1.0,
+      50.0
+    ],
+    "endpoint_capacity_double": 9.430775893548571e-08,
+    "endpoint_capacity_single": 8.940696716308594e-08,
+    "expected_ndep": 0
+  }
+]

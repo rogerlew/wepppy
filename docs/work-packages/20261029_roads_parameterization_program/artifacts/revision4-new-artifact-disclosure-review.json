@@ -1,0 +1,382 @@
+{
+  "reviewer": "Independent Codex AI implementation reviewer",
+  "reviewed_utc": "2026-10-31T22:26:34.147333+00:00",
+  "scope": "Native-source disclosure review of exactly the newly untracked Roads program artifacts listed below. Prior staged 156-file review is unchanged. This is not a scientific approval of every listed artifact.",
+  "approved": true,
+  "blocking_findings": [],
+  "closed_finding": "Unnecessary literal private Fortran format descriptor removed from the public fixture after frozen readback, original preserved privately and hashes explicitly resolved.",
+  "methods": [
+    "Read newly added audit, test, panel runner and review scripts; checked previously reviewed factorial/anchor source hashes unchanged.",
+    "Inspected Python AST string content and recursively decoded JSON/Markdown text for native source fragments, raw source payloads and observer-build code.",
+    "Reviewed the new-event certificate and disclosure boundaries; private observer source and build files are ignored and absent from the Git index.",
+    "Inspected the generated hydraulic factorial figure; it contains only aggregate outcome data.",
+    "Read new application completion metadata, candidate ledger v16 and final audit receipts. These contain public scripts, test identifiers, generated numeric evidence, paths and hashes."
+  ],
+  "allowed_public_material": "Original Python audit/harness/plot/test tooling; canonical public fixed-width schema; generated model output; scalar arithmetic and findings; provenance paths/hashes; aggregate figure.",
+  "private_native_source_in_allowlist": false,
+  "private_gitignored_roots": [
+    "out/roads-parameterization-program-20261031/fraction-arithmetic-r4-new-event-v2/",
+    "out/roads-parameterization-program-20261031/private-research-tools/particle-audit-v2-disclosure/"
+  ],
+  "file_count": 71,
+  "files": [
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py",
+      "sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+      "bytes": 8854
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v16.json",
+      "sha256": "b141827cf877aad9f4d8c4c1bfdfdee26bd812558ecee30530bd0ff13a18c671",
+      "bytes": 3280
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_particle_audit_v2.py",
+      "sha256": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+      "bytes": 4583
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-attempt1-failure.json",
+      "sha256": "175c6b89ae5db942c3809d52281e2124b28dcf4fc593a2cab956d37ac63dd322",
+      "bytes": 9744
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-declaration.json",
+      "sha256": "11792fff8cea00ac3e74f35c324decc573283f85774a22a9d06e35d7ca61b849",
+      "bytes": 9168396
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-final-evidence-review.json",
+      "sha256": "3b7f7aa13b73d0da7e382c9a552127fc4789ba2a0eebe02d62917835c430e7a0",
+      "bytes": 1539
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-findings.md",
+      "sha256": "e0c09bdc63603853685886ca69df418a5133b62fcc7dcc9bb69d56798ee36588",
+      "bytes": 3756
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-implementation-scheduling-addendum.md",
+      "sha256": "19b4c2a5b7a6e44ef182556088d1c7c386e579c23557a181ae60c625763741cd",
+      "bytes": 1690
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-input-review.json",
+      "sha256": "8766da9f74e32490b0ebd016dadab0125af67fddf37d91a931f37f97288e6b55",
+      "bytes": 1186
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-outcomes.png",
+      "sha256": "a245310c936480ac3b9527d6559c1caee5ffff20ef68b9a9a144fa22fab282fa",
+      "bytes": 90684
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-plan.md",
+      "sha256": "408f20a61ad686ddea49e97281690cbfec46ed39d08af6dd8d820244d61eadeb",
+      "bytes": 5988
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-design-review.json",
+      "sha256": "dcfa93cb952cf75ea5a40725750f1e336adef0f14b245781f06b57df44bee3b6",
+      "bytes": 2411
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-results-review.json",
+      "sha256": "c9f730cd1478890c0932d7a8d4fa44701cbc539abc8ae196381d12b1dd71224e",
+      "bytes": 18142
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-results-review.md",
+      "sha256": "89428df1fd01fab5047c355fad7924a275810730bba1707e84bd4c18be2baa5a",
+      "bytes": 6506
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-scheduling-addendum.json",
+      "sha256": "0ab820dd9e5513bb4e8675c280db64c0599bdf0a8295b0490fb3cd34a9922ab9",
+      "bytes": 1392
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-summary.json",
+      "sha256": "b4b3b1e4f70222dcc83534331fc66a45403d94f6d1d820a6c53d75f6e5ad6b84",
+      "bytes": 155416
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-implementation-review.json",
+      "sha256": "9bf3f504d1fe559605d90476e55c92be69bbbbe1396d3bbdd6ab560a835ad677",
+      "bytes": 2142
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-implementation-review.md",
+      "sha256": "95c152d6e59897c5b6b1a97588c3cb6ea08febfede121debf2b270567108a9df",
+      "bytes": 3635
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-preflight.json",
+      "sha256": "636af2cc8f98d6afd2ba64502d4e6abbafeee2c4b0f5459f732c19bacefb64c8",
+      "bytes": 689
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-scientific-delta.json",
+      "sha256": "8453fb41d816219a3eb5274d96a6ec2f62bfd787f3fec866ab6dda7d59cbe833",
+      "bytes": 950
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-verification.json",
+      "sha256": "de07228cbb893070f3e885a833980382436677ea7b665eac2882084d9eed38ca",
+      "bytes": 562643
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined_hydraulics_r4.py",
+      "sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+      "bytes": 19409
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/complete_application_r4_tails.py",
+      "sha256": "ff1daa2afbb12bd24bf0d4e9efd5fbc3ec38602eaa44d0976cc49e339c06e2cf",
+      "bytes": 3088
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-ledger-scientific-contract.md",
+      "sha256": "78a81280dd4841cfa4814bb8b70dbe3591e34b57ddbd1758b0bbf16c7e1d2e24",
+      "bytes": 5661
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-plan.md",
+      "sha256": "3257325fc8e7870cb016fddf4a0797537025af88f65fca3452c00a69f5cf0206",
+      "bytes": 2882
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/factorial-final-and-legacy-anchor-implementation-review.md",
+      "sha256": "ed4348ebde5bf37921199076ec2550a4602be0d0efca9686ee6ae035514dab1c",
+      "bytes": 3295
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-r4-new-event-certificate.json",
+      "sha256": "fef6d272986de39102ceafeaf6e2c8f08b8f65a597beb3e38911607d98414692",
+      "bytes": 8026
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-r4-new-event-disposition.md",
+      "sha256": "292f8425aab6dfe5cd891343f15ac22c1f53624de193e1ed30bcb0276e602e25",
+      "bytes": 4305
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-declaration.json",
+      "sha256": "c259aae606bf01d33b6d1de777fa864c9dcc8ddf806b4b30ffb755772e9f3484",
+      "bytes": 656686
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-implementation-review.json",
+      "sha256": "97c2e37a286deb4c09c9f2181e06de8c75d593c413de1b82cbc5fb36d1f62955",
+      "bytes": 964
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-scientific-scope-review.json",
+      "sha256": "1e29a697ea7248a998c8f341828da21cb4a4edc30ecf9f919096892499ddb94e",
+      "bytes": 3479
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-verification.json",
+      "sha256": "0c4f38e3e6b524bcdf162f8b7b5d313253cd7343c2c6dbcc71a557902a1cfbe1",
+      "bytes": 160964
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-particle-generations-r3-r4.json",
+      "sha256": "9e32be1a82ab8c5eb1ca752ba1b16fabc8d4d574e71a57c03e9cecf9afe13344",
+      "bytes": 565373
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy_soil_anchors_r4.py",
+      "sha256": "adfb7068a3e6e5070522edf2759483721d6131576da8528a3c38d8cf9aefd761",
+      "bytes": 8218
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-disclosure.json",
+      "sha256": "b3d659f41b4ab8bae71f7de5085a0788139679fa3dc54ec3ae99f89fa1469efb",
+      "bytes": 1175
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-findings.md",
+      "sha256": "306d4b34979fa93ae87c64912dcabea08b3f57c4a6dc56cb044b12106e458417",
+      "bytes": 5373
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-independent-implementation-review.json",
+      "sha256": "15a5be67c136fb3466b8913ae0c61807ed15de0d72a69c90a28ce203c3814370",
+      "bytes": 10278
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression-final.json",
+      "sha256": "27f4c7387673f3db35655581077ca1fe4d0719133cd60f82fda2c33d128189c4",
+      "bytes": 853
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression-public.json",
+      "sha256": "89c4878385ac0ce541052532ec2f56cc4a2fe1ceef5d632f40ee0027c4d022b7",
+      "bytes": 853
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression.json",
+      "sha256": "6831ba080f6f097f3ef66ac9e58ce46797fe6ddb8931864987f0fb4b6f232537",
+      "bytes": 853
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-reverification.json",
+      "sha256": "8f91e3d46876340a9ca85863d06ff1a4627e8760abcb96d357e2e6da9c81ef43",
+      "bytes": 12498
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-scope.md",
+      "sha256": "9653e037e887272caa06ad19eb2552c88ea58e069e56953d5feed4dc6893ba75",
+      "bytes": 1926
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/plot_combined_hydraulics_r4.py",
+      "sha256": "230e8dd87c9e1fb1c341d6bed72c5d1f84d3026c96be240a837de79e70ab3e84",
+      "bytes": 1677
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/reverify_particle_audit_v2.py",
+      "sha256": "dde3532b22ba75a9396dc2b8e9bc67d229f65e881a8f74743251f809f0a47f52",
+      "bytes": 6930
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-element-fixed-width-fixture.json",
+      "sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+      "bytes": 1788
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-disposition.json",
+      "sha256": "8bcf856ca0fb819601c51a6cadc66cdd732f1c34ace2fdbd8784696b49608ae5",
+      "bytes": 1237
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-disposition.md",
+      "sha256": "832d341fec0f88f21e2e5339443fb8df71cf24fad5131daa98d2aec95e26ee9b",
+      "bytes": 4200
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-fixed-width.json",
+      "sha256": "463f7ba57630080128b3ec45b93223a9389b37be2fead2f19c753516d9277730",
+      "bytes": 365328
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_combined_hydraulics_r4_science.py",
+      "sha256": "666be8ac4643c0271c310970a1b70b211486530e3822d7d295b44bca5eb9f9aa",
+      "bytes": 7617
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_legacy_particle_fixed_width.py",
+      "sha256": "3473d3f915c4ce9ccd4a8f23c392b1e7871494f3dcf41d97f7bcb5c1f8a24c96",
+      "bytes": 4642
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-completion-declaration.json",
+      "sha256": "2a2718ab27b4c57b06d1705865472d62b8dfadff34efe1fd3b8791d3b265ff14",
+      "bytes": 94893
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-completion-exits.json",
+      "sha256": "4a78f8fd719374241fd05ec4f4a635df0579ddf031aed19d79a9ff9d94610c2e",
+      "bytes": 263
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-coverage-review.md",
+      "sha256": "e37e608db93c7e8bf1f83dfc7d49ae03ee2c60c7ac3654161fc752fb7d9b7ab5",
+      "bytes": 3147
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-delivery-retention.json",
+      "sha256": "625f8d15d77764af544ba6137ab70d859483b05a072b6abbda2b2e80e19dafe1",
+      "bytes": 406
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-disposition.json",
+      "sha256": "0e21eadccb06668950b8499d058393549754af988c66da53330b26f5e02f561d",
+      "bytes": 1235
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-failure-independent-review.json",
+      "sha256": "d5f9eff8e7912dfe6d931b814000c61b5b46bed68df13f61dd13419be357dbe3",
+      "bytes": 2940
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-failure-independent-review.md",
+      "sha256": "aeb60ecd318bb3aea01f008c70e1074e07f143e99f8c3d25ba40cf2097d4d02d",
+      "bytes": 4333
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-lifecycle-readback.json",
+      "sha256": "4687930b7e9518b18b0666eccfd312aa6c6079bca5547d4e76c31e5d61998ee5",
+      "bytes": 5613
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-shard8-replay.json",
+      "sha256": "7404f11e455004e067889ed58ffa61051be5cd20ecf850e8935fbc5f23e4d234",
+      "bytes": 59795
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-shards-declaration.json",
+      "sha256": "e97eec30af7e878e01f34d6606d85115dcf02613934b28c53ce9c6898ba5b1c8",
+      "bytes": 1654747
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-unique-coverage.json",
+      "sha256": "ea56c255a728466b8dddd4b8017c4c57a3dd40f39b0f66e911c2b2c3340358fe",
+      "bytes": 2831777
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-hydraulic-factorial-and-legacy-anchors-retention.json",
+      "sha256": "e0268ffcdc636dd2e6e61c856e16bc19e5ceed74ccf840e4eff11556f99a4964",
+      "bytes": 432
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-installed-and-factorial-implementation-review.md",
+      "sha256": "7ff4a1c90e2363cf0a5feb12da1456051542f8045dcf0047d54eef055daf2b89",
+      "bytes": 3989
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-installed-independent-review.json",
+      "sha256": "0191558a9cb056920b9e304db65239990f2cfd8926977a93fde6391e61a0a72e",
+      "bytes": 1171
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-particle-audit-v2-retention.json",
+      "sha256": "9a8118e2cb46c3c680bddb2996420d85be109cebe61ac0170516c0cef3afe962",
+      "bytes": 402
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-residual-attribution.json",
+      "sha256": "15179a360b86683c3beb701b155a269152069c045f7a7e12559fa2dce6889685",
+      "bytes": 276600
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-residual-attribution.md",
+      "sha256": "df9a9cdcfcb9143a64d40f784988dcb4a290aa1f3dcfd1a70f12bb40af4d476e",
+      "bytes": 1572
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4_residual_attribution.py",
+      "sha256": "48f9793c2af800bd74ae70c376a41b61e01a292e45e41cc85be5c37412186529",
+      "bytes": 2156
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/run_application_shards_r4.py",
+      "sha256": "e7a02e8883a76a181b947ec2d972522e92508e542f90d59fcd6e2f5289eee3cc",
+      "bytes": 3440
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_application_r4_coverage.py",
+      "sha256": "2e63c308955451097d45cbfab5e0240abe1def8051cef4a7aeda32bcb5b6c3a4",
+      "bytes": 7148
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_combined_hydraulics_r4.py",
+      "sha256": "2c058ca8bcb3ab3207d6fee716cfef05d086b94ce3dd02d873c1606510253f1d",
+      "bytes": 3675
+    }
+  ],
+  "application_disposition_scope": "Scanned for disclosure only; independent application review owns acceptance. Segmented coverage must not be described as a clean uninterrupted suite.",
+  "future_additions": "Any subsequently added or changed bytes require a fresh readback; this allowlist does not approve unknown future files.",
+  "review_receipt_self_excluded": true
+}

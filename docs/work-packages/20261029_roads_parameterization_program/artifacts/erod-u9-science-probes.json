@@ -1,0 +1,101 @@
+{
+  "observer": "/tmp/erod-u9-science-186dam7t",
+  "source_sha256": {
+    "/tmp/erod-u9-science-186dam7t/route.for": "7bab092a7cd4260c118a7832ffcd5952db0a45f316307afc65a554c636715acc",
+    "/workdir/wepp-forest-release-20261009/src/erod.for": "422d30692ac31327ee01a9ef8ea83b9543c46f9c1f985434fbd9037720847814",
+    "/workdir/wepp-forest-release-20261009/src/runge.for": "9d450d55beca548c714925d309774e9a4d0d8a40e08b248a413f187b31dc31bb",
+    "/tmp/erod-u9-science-186dam7t/depos.for": "24dbd8c37764fa60d5e12f1d73a0359c1ce89b3a19d208e8ffb546497cef03cd",
+    "/workdir/wepp-forest-release-20261009/src/depeqs.for": "0b8229de965954d88e085c80644ac52c2bbab8c072877a4d0acdc28237a55d62",
+    "/workdir/wepp-forest-release-20261009/src/depend.for": "8a3178548b21969a48d159f74eee86e7b2ed4f32cf32020a48f130004ea7d01e",
+    "/workdir/wepp-forest-release-20261009/src/enrich.for": "b81eb9822c4fb15797ef112280d3907fafd16585b70c46856b9ae3fc86257989",
+    "/workdir/wepp-forest-release-20261009/src/xcrit.for": "0dae619522531ac8502e6d33785df7ea0bd4419d23db2de288ae7ea8ee8ef2f8",
+    "/workdir/wepp-forest-release-20261009/src/root.for": "28dd2e2b357ccb45758095066a39b5b6034e218e848740586b1b2113b3f845d3",
+    "/workdir/wepp-forest-release-20261009/src/shear.for": "927aec3f009ef6f08b122de23d3f92f22c6de39182c248a9050b6c5967263dd2",
+    "/workdir/wepp-forest-release-20261009/src/undflo.for": "1bbd30b4deb6018c080110afabf4c922c3da666208639e5cba3e1b0ac3276d03",
+    "/workdir/wepp-forest-release-20261009/src/cross.for": "8f77f355604c77028d0a7b355e8963283a992497d000b7954680506308f0b27f"
+  },
+  "rows": [
+    {
+      "name": "negative_normal_cancellation",
+      "mode": 5,
+      "q": -2,
+      "initial_load": 1e-07,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " HANDOFF  0.499897063       1.00000001E-07   4.04507894E-12\n BOUNDARY  0.499897063      0.499920011       4.04507894E-12   9.99999372E-08\n BOUNDARY  0.499920011      0.500020027      -5.59258373E-09   9.99993759E-08\n HANDOFF  0.500020027       9.99993759E-08  -5.59220714E-09\n BOUNDARY  0.500020027       1.00000000      -5.59220714E-09   9.76693713E-08\nRESULT    1.00000001168609742E-07    1.00000001168609742E-07    9.76693712573251105E-08    2.40100085735321045E-01    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": "",
+      "reference_first_endpoint": "9.999993436114775697127149459056101589595846951259981250946626430948995E-8",
+      "reference_outlet": "9.766937012311506661194174079529767628273751145728656854268597560880367E-8"
+    },
+    {
+      "name": "no_inflow_immediate_crossing",
+      "mode": 7,
+      "q": 0,
+      "initial_load": 0,
+      "theta": 0.1,
+      "returncode": 0,
+      "stdout": " HANDOFF   3.33785977E-08   3.33785977E-09   0.00000000    \n BOUNDARY   3.33785977E-08   1.00000000       0.00000000       9.50000063E-02\nRESULT    0.00000000000000000E+00    9.99500043690204620E-04    9.50000062584877014E-02    9.99000039882957935E-04    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_0.03",
+      "mode": 6,
+      "q": -0.03,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " HANDOFF   1.89636145E-02   1.10363839E-02   1.68773127E-07\n BOUNDARY   1.89636145E-02   1.00000000       1.68773127E-07   0.00000000    \nRESULT    0.00000000000000000E+00    8.10930225998163223E-03    0.00000000000000000E+00    1.99999995529651642E-02    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_0.02",
+      "mode": 6,
+      "q": -0.02,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " HANDOFF   1.26424106E-02   7.35758897E-03   0.00000000    \n BOUNDARY   1.26424106E-02   1.00000000       0.00000000       0.00000000    \nRESULT    0.00000000000000000E+00    6.93147163838148117E-03    0.00000000000000000E+00    9.99999977648258209E-03    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_0.01",
+      "mode": 6,
+      "q": -0.01,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " HANDOFF   6.32120529E-03   3.67879448E-03   0.00000000    \n BOUNDARY   6.32120529E-03   1.00000000       0.00000000       0.00000000    \nRESULT    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    1.00024044513702393E-06    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_0.009",
+      "mode": 6,
+      "q": -0.009,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": "RESULT    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_0.001",
+      "mode": 6,
+      "q": -0.001,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": "RESULT    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    },
+    {
+      "name": "case4_closing_1e-05",
+      "mode": 6,
+      "q": -1e-05,
+      "initial_load": 0,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": "RESULT    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    0.00000000000000000E+00    4.99999988824129105E-03\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,25 +1,45 @@
 # Roads parameterization and configuration view
 
-The legacy-format preflight and generated downstream controls are complete;
-[ledger v15](artifacts/candidate-ledger-v15.json) is current. The format bridge
-fails exact equivalence in all seven cases, so whole-role substitution was not
-executed. The narrower 348-run same-format panel has 347 physical passes. Buffer
-conductivity caps recover 47/48 low-load misses but lose three passing controls;
-fill-only recovers eight small-load misses, loses one control and exposes SIGFPE.
-All standalone treatments are rejected. See [results](artifacts/downstream-hydraulics-r3-findings.md).
+## Current: U12 accepted; revision-4 delivery in progress
 
-The failure reproduces on the released binary with exact partial-output parity.
-A portable fixture, GDB locals and two scalar reproductions locate an unbounded
-DEPEND Newton step; an independent 80-digit calculation confirms an interior root.
-Next is the [bounded root-search ablation](artifacts/depend-root-ablation-r3-plan.md),
-before further parameter combinations. No native patch or re-release yet.
+Current [candidate ledger v16](artifacts/candidate-ledger-v16.json) records the
+accepted native engine, rejected parameter factorial and exact-R4 legacy controls.
 
-The full development baseline remains 840/840 physical, 713/766 meaningful and
-31/74 small magnitude passes. The new experimental failure is additional evidence,
-not covered by that baseline pass statement. No parameterization is accepted.
-Withheld materials, production defaults and the human UI specification/layout
-gate remain untouched. Evidence is retained in the
-[verified downstream archive](artifacts/downstream-hydraulics-r3-v1-retention.json).
+The exact combined U12 native pair is scientifically accepted. The
+[acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
+completed evidence: 1,253 native tests, 28 watchlist cases, 99 Disturbed cases,
+840 Roads and 348 downstream physical checks, and a fresh 864-hillslope,
+24-year Cedar simulation. All 1,187 successful panel baselines retain identical
+water and soil outputs. Cedar outlet sediment changes +1.20 kg over 24 years
+against revision 3; its water/soil outputs are identical.
+
+Two strict fraction predicates remain failed but have exact arithmetic
+certificates. All 40,006 observed negative raw-capacity calls have quantified
+terminal support; no unexplained support class remains. These are bounded
+explanations, not changed tolerances or universal numerical guarantees. The
+[mixed-reconstruction clarification](artifacts/param-u12-mixed-reconstruction-clarification.md)
+defines the local error equation precisely without changing frozen evidence.
+
+The authorized same-name `wepp_261029` revision-4 delivery is in progress:
+source `b01a739957bef5aacf35b4a89bc13eddc9d94804`, watershed hash
+`2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`,
+hillslope hash `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.
+All 489 frozen build inputs match committed source. The build preceded that
+commit; promotion preserves the exact tested bytes. Report approval and
+application delivery are separate gates. No production deployment is implied.
+
+Roads parameterization remains unaccepted: 713/766 meaningful references and
+31/74 small references pass, unchanged from revision 3. Focused delivery and independent reviews pass. Complete segmented application
+coverage is 12,533 passed and 422 skipped across 12,955 unique test IDs.
+Original failures and the preexisting Redis test-order defect remain recorded;
+this is not one uninterrupted green suite. The [928-cell hydraulic factorial](artifacts/combined-hydraulics-r4-plan.md)
+is complete and rejects parameter promotion. All 116 exact-R4 legacy anchors
+also completed. An independently diagnosed fixed-width audit parser defect
+explains their 91 apparent particle/bulk mismatches; unchanged-bound replay
+clears all of them in both engine generations. See the
+[audit disposition](artifacts/review-legacy-particle-disposition.md).
+The next analysis compares paired daily sediment supply and retention.
+The six withheld materials and human UI specification/layout gate remain intact.
 
 Status: active. One outcome-driven program, authorized by the operator on
 2026-10-29 Pacific (2026-10-30 UTC). This supersedes the sequence of individually

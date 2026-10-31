@@ -1,0 +1,74 @@
+{
+  "erod-root-u2": {
+    "build": {
+      "binaries": {
+        "wepp": "2986e9816abb05291ec700e8e9b50f8c3a0c298785ea23dc50acdd98f8191dfe",
+        "wepp_hill": "07128dc0b0e92432492d60e408291696f105672cd28164cd59a3d4610cf2f40b"
+      },
+      "build_log_sha256": "e40423871875052f17591509fecf1515baf55d48951cc87de797661824c1b984",
+      "status": "unpromoted EROD U1 + DEPEND G1 candidate"
+    },
+    "source_manifest_sha256": "2abfa0abbbc3a656f43eea8b9997063e42f6c50d160102ea2d37067370f88ea1",
+    "seed_count": 4,
+    "seed_physical_passes": 4,
+    "seed-particles.json": {
+      "cases": 4,
+      "events": 1306,
+      "positive_events": 1036,
+      "flagged_cases": 0,
+      "flagged_events": 0,
+      "script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302"
+    }
+  },
+  "erod-stable-u3": {
+    "build": {
+      "binaries": {
+        "wepp": "f93dd2f5575d02367b48397e4342cfe565b1c19b0412f0c36b00e0301b2caee2",
+        "wepp_hill": "52182425846d6e3024657023e3be9c24f2ea2b1f11e777ace63a8eade16b97b3"
+      },
+      "build_log_sha256": "7b565c830cb2cd7edf6f34dbbf2f16955d85c3419f300cd6a61a178b6b159fe8",
+      "status": "unpromoted EROD U2 + RUNGE U3 + DEPEND G1 candidate"
+    },
+    "source_manifest_sha256": "6c227d8cff87e17533f95087c96b44d8ab25c7c8f2712f6ee9d636fdf7fc9fa5",
+    "seed_count": 4,
+    "seed_physical_passes": 4,
+    "roads-particles.json": {
+      "cases": 840,
+      "events": 117145,
+      "positive_events": 95159,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302"
+    },
+    "downstream-particles.json": {
+      "cases": 348,
+      "events": 18620,
+      "positive_events": 13100,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302"
+    },
+    "seed-particles.json": {
+      "cases": 4,
+      "events": 1306,
+      "positive_events": 1036,
+      "flagged_cases": 0,
+      "flagged_events": 0,
+      "script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302"
+    }
+  },
+  "erod-boundary-u5": {
+    "build": {
+      "binaries": {
+        "wepp": "1c6edd18946191e04d873d5973695011fbb1bbad15f399f3accddc179672e998",
+        "wepp_hill": "4cb9cf3344375602b97be84239f41d040ba35f421b06a33c2f4604c67a75e596"
+      },
+      "build_log_sha256": "debfd3450f58dd41ca83919f47831f4e8a0072dfd73ab8951ec5fbcc26c6b632",
+      "status": "unpromoted EROD U5 + RUNGE U4 + DEPEND G1 candidate"
+    },
+    "source_manifest_sha256": "a8820702ec66ae8bd767cc3894dd72408514cf11c0664a9649019577024a2d81",
+    "seed_count": 4,
+    "seed_physical_passes": 4
+  },
+  "disposition": "U2-U5 diagnostic only, no release acceptance; first-transition and tiny-capacity contracts remain under investigation."
+}

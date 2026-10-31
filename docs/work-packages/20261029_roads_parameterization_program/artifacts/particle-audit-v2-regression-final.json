@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": 20,
+  "scope": "Exact native adjacent-field regression, ordinary-field parity, unchanged strict failure controls, malformed/duplicate rejection and canonical widths",
+  "fixture_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+  "audit_v2_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+  "regression_script_sha256": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+  "canonical_element_source_sha256": "8205708270a8b428ba7b75d56c29d5b015174a0deaf96e0a9b593d3da6be7dde",
+  "exact_example": {
+    "causes": [],
+    "fraction_sum": "1.0000050000000032270",
+    "fraction_bound": "0.00000600000000000010",
+    "class_mass_kg": "0.0388997659700001255329296",
+    "bulk_mass_kg": "0.03960",
+    "mass_bound_kg": "0.001980684921500000006489450"
+  }
+}

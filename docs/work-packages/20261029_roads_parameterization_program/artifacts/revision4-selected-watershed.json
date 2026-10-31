@@ -1,0 +1,36 @@
+{
+  "release": "wepp_261029",
+  "artifact_revision": 4,
+  "binary_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "input_receipt_sha256": "34f9ed1ec7a59facf7949e99873133d3e09334a0f402ed713fb0c7898669b9c4",
+  "fresh_same_build_pass_sha256": "1a4ae04fcf3d3d88344ebb04c6ee7b173c0ab573594a05d0bb3977ba97325889",
+  "native_output_sha256": {
+    "H1.loss.dat": "b0dd37897bf87b12010b7504344e61a47aac4860662a0609a482e53a0bb4383c",
+    "H1.soil.dat": "5abf70cbbff570696e55098c203da715d7f9d294b4fb3d54efc6a5fc81c0cf04",
+    "H1.pass.dat": "1a4ae04fcf3d3d88344ebb04c6ee7b173c0ab573594a05d0bb3977ba97325889",
+    "pass_pw0.txt": "cb43cf1a01b3c30d6f71fa85537d20b6ac5cb693801848a16a20983d7f4c2e1a",
+    "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+    "H1.plot.dat": "6e941fea232a2b443548302f79a2e9d86f8d2e0e031cd100f6cabb4a08a24db5",
+    "loss_pw0.txt": "84d459627bc2940b94163b4abc9a437d30eb56ebfac732ff1e7fc19c19adaac7",
+    "chnwb.txt": "6a5439d3c26de037c16bc365ecc4659289f04ff3c0d0ce1812bc96eb38a5e982",
+    "H1.wat.dat": "64e8f2262ef31e648fe15e14192e47d13d71e6c3fe8b028d90bf3c1d76dd74e5",
+    "H1.element.dat": "1886255010152a409260845e16b2264b1a99f9091d63ac92bc64a4915631991d",
+    "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+    "soil_pw0.txt": "cae31ac96b19fc883b3d95a4f337239a5ca9a64d63abbc4faf05babe87bc9c00",
+    "ebe_pw0.txt": "f8837ec29971e72d114feeb629dabbba4f639e69c5ce804a7e8e62d921df4f41"
+  },
+  "channel_rows": 731,
+  "channel_calendar_days": 731,
+  "channel_native_projected_parquet_exact": true,
+  "native_fields": 27,
+  "parquet_native_fields": 22,
+  "native_profile_diagnostics_finite_nonnegative": true,
+  "event_rows": 731,
+  "runner_log_sha256": {
+    "p1.err": "9f4190d1008defd9f9fb3500b8ed316974cbbe2c474bf30e468f3f25892133a8",
+    "pw0.err": "2042c9a1670f2fa132639840928390cec209abeffb70a694174f5c2b86d6c07f"
+  }
+}

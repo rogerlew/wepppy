@@ -1,0 +1,13 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/erod-u1-through-u4-rejected.tar.gz",
+  "sha256": "1a575dbc5855d153d8615a3331d9b891a349a8236b0130a8a12b5d2b0c457ba5",
+  "bytes": 7114631014,
+  "files": 80894,
+  "uncompressed_bytes": 39289660748,
+  "all_members_verified": true,
+  "manifest_sha256": "885dc6b67b197f58624bcb9d6ede1e44d8695c8054dece7c90b4f21c7c92cc95",
+  "omitted_aliases": {
+    "erod-support-u1/disturbed/disturbed_matrixcurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-support-u1/disturbed/disturbed_matrix0",
+    "erod-support-u1/disturbed/secretscurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-support-u1/disturbed/secrets0"
+  }
+}

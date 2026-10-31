@@ -1,0 +1,8 @@
+{
+  "command": "python tools/check_ablation_artifact_policy.py",
+  "cwd": "/workdir/wepp-forest-release-20261009",
+  "exit_code": 0,
+  "log_path": "out/roads-parameterization-program-20261031/revision4-promotion/artifact-policy.log",
+  "log_sha256": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352",
+  "result": "ablation artifact policy OK (root=/home/workdir/wepp-forest-release-20261009/docs/ablation, max_file=100.00 MiB, max_watershed_repro=250.00 MiB, max_incident_artifacts=500.00 MiB, exemptions=1)"
+}

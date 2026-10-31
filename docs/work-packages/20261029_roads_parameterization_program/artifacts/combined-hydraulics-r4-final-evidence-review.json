@@ -1,0 +1,40 @@
+{
+  "status": "final_runtime_log_and_artifact_evidence_verified",
+  "cells": 928,
+  "core_auxiliary_and_output_files_rehashed": 19488,
+  "execution_logs_rehashed": 1856,
+  "actual_runtime_validator_passes": 928,
+  "record_hashes_verified": 928,
+  "particle_audits_independently_reproduced": 928,
+  "strict_particle_flagged_events": 3,
+  "flags": [
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_buffer_cap/denver-1718465-outunrut-gravel-none",
+      "year": 8,
+      "julian": 228,
+      "causes": [
+        "fraction_sum"
+      ]
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_baseline/site-2711250-outunrut-paved-low",
+      "year": 2003,
+      "julian": 29,
+      "causes": [
+        "fraction_sum"
+      ]
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_fill_fixed/site-1718465-outrut-gravel-high",
+      "year": 2008,
+      "julian": 278,
+      "causes": [
+        "fraction_sum"
+      ]
+    }
+  ],
+  "receipt_sha256": "de07228cbb893070f3e885a833980382436677ea7b665eac2882084d9eed38ca",
+  "script_sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+  "verifier_sha256": "2c058ca8bcb3ab3207d6fee716cfef05d086b94ce3dd02d873c1606510253f1d",
+  "acceptance": "Artifact/runtime evidence only; three particle flags retained and scientific/parameter acceptance separate."
+}

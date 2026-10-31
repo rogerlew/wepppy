@@ -1,0 +1,468 @@
+{
+  "script_sha256": "ccaf37877c5804a6a7bd12fa1c1e40051b76bd59294d27ebdf7ee83b0e081b93",
+  "roots": {
+    "candidate": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar",
+    "u11": "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-wet-domain-u11/cedar",
+    "revision3": "/workdir/wepppy/out/roads-native-funding-20261031/D2-cedar"
+  },
+  "evidence_hashes": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/off/inputs.json": "4d6506fe88b3689006551b700a6170b0a7832f4e6c0a67b34c0f45fc2d7c43e0",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/off/outputs.json": "727095b22a3578c3059eac8c4530e6b6258ff860c7403981af8afa4e4b3a9c35",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-wet-domain-u11/cedar/candidate/off/inputs.json": "4d6506fe88b3689006551b700a6170b0a7832f4e6c0a67b34c0f45fc2d7c43e0",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-wet-domain-u11/cedar/candidate/off/outputs.json": "d79b61548b649b7413946a14698603e5b7ba46895520a65b6faf7e42245dff82",
+    "/workdir/wepppy/out/roads-native-funding-20261031/D2-cedar/candidate/off/inputs.json": "4d6506fe88b3689006551b700a6170b0a7832f4e6c0a67b34c0f45fc2d7c43e0",
+    "/workdir/wepppy/out/roads-native-funding-20261031/D2-cedar/candidate/off/outputs.json": "32141e34474c072cc84100a7cd05298b7eafa75760c5cbd36e3dd8aa8c1fc90c",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/semantic-analysis/manifest.json": "393f3d4c28bbc9811076750d4e41d0dbe6036aaffa37445a0644e4ac7cab5156",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/yield-optimized/summary.json": "8300a9b79d9711f01540128925f0a39869a04cb3977d7d5cd3d0a3b5391d25fb",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/audit_pass_sediment.log": "f6bcf4a3113ad3a0d7a50fddb1f8364c0a996ac5ee4b682b60efc334f58b16af",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/off/watershed.json": "b59488d2b9d8771ce31fbea55a55c0418a71a77c7c2e29243b40d96a56bc324d",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/build.json": "a646ef79106e22a697a845bbe68b91b4a566933c19131f11c41f6a331c4c46f0"
+  },
+  "raw_parity": {
+    "u11": {
+      "water_files_identical": 864,
+      "soil_files_identical": 864,
+      "changed_output_names": [
+        "H296.ebe.dat",
+        "H296.element.dat",
+        "H296.pass.dat",
+        "pass_pw0.txt"
+      ]
+    },
+    "revision3": {
+      "water_files_identical": 864,
+      "soil_files_identical": 864,
+      "changed_output_names": [
+        "H111.ebe.dat",
+        "H111.element.dat",
+        "H111.pass.dat",
+        "H143.pass.dat",
+        "H146.pass.dat",
+        "H148.ebe.dat",
+        "H148.loss.dat",
+        "H148.pass.dat",
+        "H157.ebe.dat",
+        "H157.loss.dat",
+        "H157.pass.dat",
+        "H178.ebe.dat",
+        "H178.element.dat",
+        "H178.loss.dat",
+        "H178.pass.dat",
+        "H179.ebe.dat",
+        "H179.element.dat",
+        "H179.pass.dat",
+        "H191.ebe.dat",
+        "H2.ebe.dat",
+        "H2.loss.dat",
+        "H2.pass.dat",
+        "H217.ebe.dat",
+        "H217.element.dat",
+        "H217.pass.dat",
+        "H257.ebe.dat",
+        "H257.pass.dat",
+        "H266.ebe.dat",
+        "H266.pass.dat",
+        "H280.ebe.dat",
+        "H280.pass.dat",
+        "H281.pass.dat",
+        "H285.ebe.dat",
+        "H285.element.dat",
+        "H285.pass.dat",
+        "H296.ebe.dat",
+        "H296.element.dat",
+        "H296.loss.dat",
+        "H296.pass.dat",
+        "H298.ebe.dat",
+        "H308.ebe.dat",
+        "H308.pass.dat",
+        "H310.ebe.dat",
+        "H310.pass.dat",
+        "H312.pass.dat",
+        "H313.ebe.dat",
+        "H313.pass.dat",
+        "H314.ebe.dat",
+        "H314.pass.dat",
+        "H315.ebe.dat",
+        "H315.pass.dat",
+        "H316.ebe.dat",
+        "H316.pass.dat",
+        "H319.ebe.dat",
+        "H319.pass.dat",
+        "H320.ebe.dat",
+        "H321.ebe.dat",
+        "H321.element.dat",
+        "H321.loss.dat",
+        "H321.pass.dat",
+        "H321.plot.dat",
+        "H414.ebe.dat",
+        "H414.element.dat",
+        "H414.pass.dat",
+        "H422.pass.dat",
+        "H439.ebe.dat",
+        "H440.pass.dat",
+        "H504.ebe.dat",
+        "H504.element.dat",
+        "H504.pass.dat",
+        "H516.ebe.dat",
+        "H516.element.dat",
+        "H516.pass.dat",
+        "H526.pass.dat",
+        "H534.pass.dat",
+        "H539.ebe.dat",
+        "H539.element.dat",
+        "H539.pass.dat",
+        "H545.ebe.dat",
+        "H545.element.dat",
+        "H545.pass.dat",
+        "H615.pass.dat",
+        "H640.pass.dat",
+        "H715.ebe.dat",
+        "H715.element.dat",
+        "H715.pass.dat",
+        "H722.pass.dat",
+        "H744.ebe.dat",
+        "H744.element.dat",
+        "H753.ebe.dat",
+        "H753.element.dat",
+        "H772.pass.dat",
+        "H790.element.dat",
+        "H790.pass.dat",
+        "H791.ebe.dat",
+        "H791.loss.dat",
+        "H822.ebe.dat",
+        "H822.element.dat",
+        "H822.pass.dat",
+        "H864.pass.dat",
+        "ebe_pw0.txt",
+        "loss_pw0.txt",
+        "pass_pw0.txt"
+      ]
+    }
+  },
+  "input_files_per_run": 5201,
+  "semantic_metrics_identical_to_u11": true,
+  "revision3_changes": {
+    "sampled_volume_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "published_volume_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "hill_stream_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "hill_surface_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "hill_lateral_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "hill_baseflow_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "sampled_minus_published_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "sediment_kg": {
+      "absolute": 1.2000000000698492,
+      "percent": 0.00023180762642738273
+    },
+    "printed_volume_rounding_bound_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "mean_sampled_discharge_m3s": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "maximum_sampled_peak_m3s": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "maximum_reported_peak_m3s": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "sum_absolute_daily_sampled_published_gap_m3": {
+      "absolute": 0.0,
+      "percent": 0.0
+    },
+    "increased_daily_peaks": 0,
+    "decreased_daily_peaks": 0,
+    "max_daily_hillslope_yield_change_m3": 0.0
+  },
+  "event_screen_count": 358,
+  "event_screen_ranges": {
+    "volume_change_percent": {
+      "minimum": 0.0,
+      "maximum": 0.0
+    },
+    "peak_change_percent": {
+      "minimum": 0.0,
+      "maximum": 0.0
+    },
+    "centroid_shift_minutes": {
+      "minimum": 0.0,
+      "maximum": 0.0
+    }
+  },
+  "candidate_binaries": {
+    "wepp": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "conversion": {
+    "conversion": {
+      "pass": {
+        "rows_written": 7573824,
+        "candidate_records": 7573824,
+        "accepted_records": 7573824,
+        "rejected_records": 0,
+        "row_groups": 864,
+        "elapsed_ms": 24356,
+        "schema_version": "1",
+        "output_paths": [
+          "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/yield-optimized/H.pass.parquet"
+        ]
+      },
+      "wat": {
+        "rows_written": 16690464,
+        "candidate_records": 16690464,
+        "accepted_records": 16690464,
+        "rejected_records": 0,
+        "row_groups": 864,
+        "elapsed_ms": 75241,
+        "schema_version": "1",
+        "output_paths": [
+          "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/yield-optimized/H.wat.parquet"
+        ]
+      }
+    },
+    "dates": 8766,
+    "extension_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+    "table_minima": {
+      "Streamflow": 0.16333268557138902,
+      "Runoff": 0.0,
+      "Lateral Flow": 0.02305222812112775,
+      "Baseflow": 0.0,
+      "Area": 19258143.089999996
+    },
+    "output_sha256": {
+      "H.wat.parquet": "7c41b0f48edc860f7ae60d3571c2347325a6dda939e600cf1beddf2603daca55",
+      "totalwatsed3.parquet": "90f07bd258b98d7446a66fdbd92c5ca7f0b536dc35542dd58fb545998986f97a",
+      "water-audit.json": "5ee0e9993b62e072405ce52d3b457cc148dc724d2c8d2753404f582dd05eff2e",
+      "H.pass.parquet": "7cf5abc9ad9c22f16382f7a638a6acce1a72d7e7c51ca3bc84ecfbbc30242730"
+    },
+    "method": "Fresh same-build PASS/WAT, native conversion, standard totalwatsed3; GW coefficients match inputs"
+  },
+  "water_audit": {
+    "P": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "RM": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Q": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Ep": {
+      "minimum": 0.01,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Es": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Er": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Dp": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "UpStrmQ": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "SubRIn": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "latqcc": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Total-Soil Water": {
+      "minimum": 41.35,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "frozwt": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Snow-Water": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "QOFE": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Tile": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Irr": {
+      "minimum": 0.0,
+      "negative": 0,
+      "nonfinite": 0
+    },
+    "Area": {
+      "minimum": 94.43,
+      "negative": 0,
+      "nonfinite": 0
+    }
+  },
+  "particle_audit": {
+    "rows": 7573824,
+    "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/cedar/candidate/yield-optimized/H.pass.parquet",
+    "source_sha256": "7cf5abc9ad9c22f16382f7a638a6acce1a72d7e7c51ca3bc84ecfbbc30242730",
+    "fields": {
+      "sedcon_1": {
+        "minimum": 0.0,
+        "maximum": 0.026529,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "sedcon_2": {
+        "minimum": 0.0,
+        "maximum": 0.11244,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "sedcon_3": {
+        "minimum": 0.0,
+        "maximum": 0.15654,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "sedcon_4": {
+        "minimum": 0.0,
+        "maximum": 0.20483,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "sedcon_5": {
+        "minimum": 0.0,
+        "maximum": 0.17611,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "clot": {
+        "minimum": 0.0,
+        "maximum": 1.0,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "slot": {
+        "minimum": 0.0,
+        "maximum": 0.65531,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "saot": {
+        "minimum": 0.0,
+        "maximum": 0.75973,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "laot": {
+        "minimum": 0.0,
+        "maximum": 0.4091,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      },
+      "sdot": {
+        "minimum": 0.0,
+        "maximum": 0.46472,
+        "negative": 0,
+        "nonfinite": 0,
+        "nulls": 0
+      }
+    },
+    "passed": true
+  },
+  "watershed": {
+    "run": "pw0.run",
+    "returncode": 0,
+    "years": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "seconds": 717.8007865890395,
+    "success": true
+  },
+  "rehashed_files": 20813,
+  "all_requested_hashes_verified": true,
+  "limitations": [
+    "PASS concentration/fraction positivity is not an all-event class/bulk closure proof.",
+    "Discharge publication consistency is not a full physical water budget.",
+    "Converted Parquet hashes need not match; metadata-only differences are not assumed."
+  ]
+}

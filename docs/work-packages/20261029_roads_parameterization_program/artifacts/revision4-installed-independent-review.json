@@ -1,0 +1,27 @@
+{
+  "status": "installed_bytes_and_selected_workflow_verified",
+  "entries": {
+    "wepp_261029": {
+      "binary_sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "sidecar_sha256": "162756de2f43428f53149c5d6703eb7224be9911d3a4fcd69a615ca07cd80c83",
+      "native_and_wepppy_equal_commit": true
+    },
+    "wepp_261029_hill": {
+      "binary_sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+      "sidecar_sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d",
+      "native_and_wepppy_equal_commit": true
+    }
+  },
+  "native_release_commit": "1959d8f619068dbbbc8e0043fc1d37f83ddf0129",
+  "delivery_log_hashes_verified": 8,
+  "selected_inputs_rehashed": 20,
+  "selected_native_outputs_rehashed": 13,
+  "selected_native_channel_rows": 731,
+  "projected_parquet_exact": true,
+  "parquet_sha256": {
+    "chnwb.parquet": "f9080eca4af69576bb97d650932e65b5df9021ceb77765dce7ee344f01bc08e7",
+    "ebe_pw0.parquet": "e5041d292054c1e63cd2970d0ca946093882f13eebff4082f8966468d7800fc3"
+  },
+  "full_application_suite": "pending; no full-suite acceptance inferred",
+  "production_deployed": false
+}

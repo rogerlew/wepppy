@@ -1,0 +1,13 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/param-u12-final-candidate.tar.gz",
+  "sha256": "add436efd47f5f56cec6cecd8ecaf417da8f208556c4aa9b83218ac0cf2d04a8",
+  "bytes": 4959904813,
+  "files": 47852,
+  "uncompressed_bytes": 28907966627,
+  "all_members_verified": true,
+  "manifest_sha256": "ebba35f90f9819581e9704c8c25e2af1a2e3c05de98ec1fe687c1153366c4781",
+  "omitted_aliases": {
+    "param-sign-u12-combined/disturbed/disturbed_matrixcurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/disturbed/disturbed_matrix0",
+    "param-sign-u12-combined/disturbed/secretscurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/disturbed/secrets0"
+  }
+}

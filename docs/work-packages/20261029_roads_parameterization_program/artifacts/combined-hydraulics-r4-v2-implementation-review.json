@@ -1,0 +1,39 @@
+{
+  "status": "repair_verified_for_continued_execution_pending_final_all_case_readback",
+  "script_sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+  "declaration_sha256": "11792fff8cea00ac3e74f35c324decc573283f85774a22a9d06e35d7ca61b849",
+  "preflight_sha256": "636af2cc8f98d6afd2ba64502d4e6abbafeee2c4b0f5459f732c19bacefb64c8",
+  "scientific_task_definitions_unchanged": 928,
+  "reference_files_verified": 928,
+  "reused_log_files_verified": 928,
+  "reused_cases_actual_validate_runtime_passed": 464,
+  "effective_dependencies_verified": 70,
+  "actual_preflight_records": [
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_baseline/birmingham-2711184-inveg-gravel-low",
+      "road_on": false,
+      "record_sha256": "f4fdca7626e2f071a5893fb502de5ffbfd3c2403f86ab152c5f99fc3586637f0",
+      "actual_execution_logs": {
+        "stdout": "77335fc94e190b8cc28c437eb1dbb9c6e9f6ab6a5218de5e03f8fbc1b1fa7520",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "actual_runtime_validation": "independently passed in runtime container",
+      "physical_pass": true,
+      "particle_pass": true
+    },
+    {
+      "folder": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_baseline/birmingham-2711184-inveg-gravel-low",
+      "road_on": true,
+      "record_sha256": "2adf79cee5734788fae67298ffd40fc54c73b25b1a53464cccf1406e436a56b6",
+      "actual_execution_logs": {
+        "stdout": "4056221e5576f4b6d6492c846f37c7bc7dbbff099940f597b5c9ab29be872fb0",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "actual_runtime_validation": "independently passed in runtime container",
+      "physical_pass": true,
+      "particle_pass": true
+    }
+  ],
+  "remaining_requirement": "Hash all generated and reused logs and call actual validate_runtime for every final case before acceptance; fresh logs are not hash-bound by frozen v2 record schema.",
+  "full_application_suite": "separate handoff gate"
+}

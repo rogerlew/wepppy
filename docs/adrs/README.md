@@ -48,6 +48,10 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0121`: [Bounded deposition endpoint search](ADR-0121-depend-bounded-root-search.md) (Proposed; shared native numerical repair).
+- `ADR-0122`: [EROD integration and first-transition support](ADR-0122-erod-subgrid-interval-support.md) (Proposed; includes stiff integration and shared capacity evaluation).
+- `ADR-0123`: [Actual sediment inflow and wet-coordinate boundaries](ADR-0123-roads-nonzero-inflow-sediment-boundary.md) (Proposed; shared native routing).
+- `ADR-0124`: [Rounded PARAM continuity-denominator sign](ADR-0124-param-rounded-continuity-denominator-sign.md) (Proposed; isolated U12, broad validation pending).
 - `ADR-0120`: [Bounded generated-road hydraulic sensitivity](ADR-0120-roads-generated-hydraulic-sensitivity.md) (Research execution only, 2026-10-31; no production rule).
 
 - `ADR-0111`: [RAP Production Data Correction Awareness](ADR-0111-rap-production-data-correction-awareness.md) (Accepted reference record, 2026-10-29; no runtime change).

@@ -1,0 +1,67 @@
+{
+  "accepted": true,
+  "reviewed_at_utc": "2026-10-31T21:28:34.553579+00:00",
+  "reviewer": "Independent AI scientific reviewer; not human peer review or institutional endorsement",
+  "scope": "Scientific accuracy and scope of the exact revision-4 PDF; publication/operational delivery approval is separate.",
+  "pdf_sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+  "pages": 7,
+  "figures": 2,
+  "model_source_identity": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "matched_pair_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "report_source_files_sha256": {
+    "main-r4.tex": "357cc9b0f8e8e860f766616bff8b0f455dbc371aea592395e6f0cf992196cfd4",
+    "release-identities-r4.tex": "4592a288d73b9e506ff3582b5d4ecc1a20d3ca10b04e352fef7503674227db14",
+    "change-register-r4.csv": "80a26731cc0541a37e56f80f694800023b0a539cc273dff51b5cf6faaef578d4",
+    "REVISION-4.md": "31b68300245becd50494f4005028cba6b05700a0fbea3b38deab679434c81aac",
+    "evidence/source-coverage-r4.json": "2cdf51bddd1f2ffd4b13039babfeabd8976e06163508045684a95ba757b568f4",
+    "figures/r4/plot_param_sign_r4.py": "ee71b9bd4ae37c92fc5738b8c8fde8a9b4a5ccc40a6d34843b1919186c48485c",
+    "figures/r4/depend-bounded-root.png": "da5cda3996b1361f7d3898ba135101eac39645e63e60decc12651fcb458ba05a",
+    "figures/r4/param-denominator-sign.pdf": "9af44986f4992f577cb774177d11aee2000359cb73706ecd6051628c0c92bb26"
+  },
+  "source_freeze_sha256": "3ee87d1cc5b6523c01c50949d121ce8e613163703d2470e4339e1816668ce892",
+  "manifest_identity_checked": {
+    "release_tag": "wepp_261029",
+    "artifact_revision": 4,
+    "document_revision": "4",
+    "document_date": "2026-10-31",
+    "model_source_identity": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+    "source_comparison_baseline": "6112b68bce0e21a77f510bde5c24af067a47a647",
+    "pdf_sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+    "pages": 7,
+    "figures": 2,
+    "binary_sha256": {
+      "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+    },
+    "scientific_acceptance_sha256": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb"
+  },
+  "manifest_identity_sha256": "d67c052455212254d5531e851c686e948dcb5293d38cdfb040325bd5750e7dfb",
+  "native_scientific_acceptance_sha256": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
+  "clarification_addendum_sha256": "3599a5889036e59615b9284679aafed8bcd0baa22f1cfd74390031504c797c8b",
+  "initial_reviewed_pdf_sha256": "e9240a4ad01bc449a495f05779bf6d3b8d435d272bcc68cd2f9bddc54f2d9807",
+  "resolved_review_findings": [
+    "Defined E=Lm-Lc for actual mixed capacity/rate reconstruction; derivative-forcing equation verified directly against DEPEQS/DEPOS, not asserted for two consistent raw/clipped ODEs.",
+    "Qualified negative-flow wet domain x<-q and dry terminal only when inside the OFE.",
+    "Clarified normalized source quantities and compiled capacity limits.",
+    "PARAM illustration labels raw polynomial before normalization factor k; the omitted factor is no longer ambiguous."
+  ],
+  "technical_checks": [
+    "Seven runtime source units and numerical mechanisms match the source comparison and accepted evidence.",
+    "Erosion and deposition equations, G versus total load derivative, stiffness switch limits and first-transition argument are consistent.",
+    "Both figures and their scientific labels inspected; final mixed-reconstruction equation visually checked in rendered PDF.",
+    "Native, Roads/downstream, Cedar, magnitude and residual counts/units agree with accepted U12 evidence.",
+    "Cedar raw water/soil parity is distinguished from real sediment-class/deposition changes; no sediment-distribution parity claim.",
+    "Two strict fraction predicates remain failed and visible; dimensional and terminal-band limitations are preserved.",
+    "No field-calibration, universal water-budget, Windows release, UI acceptance or deployment claim."
+  ],
+  "unresolved_scientific_findings": [],
+  "limits": [
+    "This decision applies only to the stated PDF/source identity and executable pair.",
+    "A changed PDF requires renewed report applicability review.",
+    "Publication status/approval metadata may be finalized separately; the checked manifest identity payload is explicit.",
+    "Roads magnitude acceptance remains unmet and configuration specification/layout remains human-gated."
+  ]
+}

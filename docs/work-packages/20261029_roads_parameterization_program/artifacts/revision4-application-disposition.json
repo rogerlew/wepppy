@@ -1,0 +1,24 @@
+{
+  "reviewer": "Independent Codex AI implementation reviewer",
+  "scoped_native_release_handoff_recommended": true,
+  "complete_segmented_coverage": true,
+  "clean_original_suite": false,
+  "collected_unique_nodes": 12955,
+  "unique_passed": 12533,
+  "unique_skipped": 422,
+  "unexecuted_nodes": 0,
+  "unresolved_failed_nodes_without_passing_reexecution": 0,
+  "baseline_upload_order_defect_open": true,
+  "original_failures_retained": true,
+  "assertions_timeouts_credentials_unchanged": true,
+  "application_source_unchanged_from": "3cf0e331de17ab422c90b5711b2481387ad45b14",
+  "binary_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "production_deployment_authorized_by_review": false,
+  "unique_coverage_receipt_sha256": "ea56c255a728466b8dddd4b8017c4c57a3dd40f39b0f66e911c2b2c3340358fe",
+  "coverage_review_sha256": "e37e608db93c7e8bf1f83dfc7d49ae03ee2c60c7ac3654161fc752fb7d9b7ab5",
+  "failure_assessment_sha256": "d5f9eff8e7912dfe6d931b814000c61b5b46bed68df13f61dd13419be357dbe3",
+  "completion_exits_sha256": "4a78f8fd719374241fd05ec4f4a635df0579ddf031aed19d79a9ff9d94610c2e"
+}

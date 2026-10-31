@@ -1,0 +1,21 @@
+{
+  "name": "capacity_closing_endpoint",
+  "inputs": [
+    0.0,
+    0.009,
+    0.0,
+    0.0,
+    0.009,
+    1.0,
+    1,
+    1.0,
+    0.0,
+    -1.0,
+    0.0,
+    1.0
+  ],
+  "returncode": 1,
+  "elapsed_seconds": 3.8259107989724725,
+  "stdout": " RUNEXP failed endpoint convergence   0.00000000       8.99999961E-03   0.00000000    \n",
+  "stderr": "STOP 1\n"
+}

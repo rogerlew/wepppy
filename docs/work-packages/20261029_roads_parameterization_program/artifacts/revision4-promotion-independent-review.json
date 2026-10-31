@@ -1,0 +1,39 @@
+{
+  "source_files_verified": 489,
+  "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "default_branch": "wepp_260430_negmeltfix_comparator",
+  "scientific_acceptance_evidence_files_verified": 25,
+  "entries": {
+    "wepp_261029": {
+      "binary_sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "prepared_sidecar_sha256": "162756de2f43428f53149c5d6703eb7224be9911d3a4fcd69a615ca07cd80c83",
+      "prior_sidecar_sha256": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+      "validated_evidence_files": 8,
+      "runtime_contracts_unchanged": true
+    },
+    "wepp_261029_hill": {
+      "binary_sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+      "prepared_sidecar_sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d",
+      "prior_sidecar_sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99",
+      "validated_evidence_files": 8,
+      "runtime_contracts_unchanged": true
+    }
+  },
+  "artifact_policy": {
+    "command": "python tools/check_ablation_artifact_policy.py",
+    "cwd": "/workdir/wepp-forest-release-20261009",
+    "exit_code": 0,
+    "log_path": "out/roads-parameterization-program-20261031/revision4-promotion/artifact-policy.log",
+    "log_sha256": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352",
+    "result": "ablation artifact policy OK (root=/home/workdir/wepp-forest-release-20261009/docs/ablation, max_file=100.00 MiB, max_watershed_repro=250.00 MiB, max_incident_artifacts=500.00 MiB, exemptions=1)"
+  },
+  "checked_artifact_sha256": {
+    "revision4-source-commit-verification.json": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0",
+    "revision4-promotion-preflight.json": "7fc4cc8ae22875d72f32f39f0d5d599c152cbf724719b8d2d40b03d58cec1e47",
+    "revision4-artifact-policy.json": "32b9539e91f5ca9b3809da3588e2c7a12864f38bf336a7d170b5ab0b06754630",
+    "param-u12-scientific-acceptance.json": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb"
+  },
+  "errors": [],
+  "status": "accepted_for_exact_byte_promotion"
+}

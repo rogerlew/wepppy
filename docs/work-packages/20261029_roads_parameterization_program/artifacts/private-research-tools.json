@@ -1,0 +1,62 @@
+{
+  "native_root": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools",
+  "files": [
+    {
+      "name": "depend-g1.patch",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/depend-g1.patch",
+      "sha256": "38edb4ccf9a8f90e82f3d7aa1fb5dea4007310b0c65673d150a445eb850a4ae1",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "observe_param_continuity_u11.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/observe_param_continuity_u11.py",
+      "sha256": "31549af22f90c8fddeedbd0a0248cd00e7541287a866affa3eafb236b704449a",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "observe_particle_capacity_u11.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/observe_particle_capacity_u11.py",
+      "sha256": "c3ed6454a66ac57681bca61727e07ef5ed069da7e477b8697a7a5fee264fc3be",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "observe_particle_closure.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/observe_particle_closure.py",
+      "sha256": "807d24a662ab924f3148b17a99437a4bf80d940961bc069b126d8f28bea4599f",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "observe_erod_intervals.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/observe_erod_intervals.py",
+      "sha256": "113802c3b74260a302585e11190137f1ec0943e96b7930e3d5901a1a07a259c2",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "observe_fraction_arithmetic_u11.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/observe_fraction_arithmetic_u11.py",
+      "sha256": "9c78388fbd01d96390e562d0ee6541e29bf50434601b33bf26d8c5a8780a6b91",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "param_sign_ablation.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/param_sign_ablation.py",
+      "sha256": "ceea4ffc8fcc3049deb83ca00b05f262256ab33f54f576e8d821e3e00de81837",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "review_route_fixture.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/review_route_fixture.py",
+      "sha256": "c01bc5aec50c5f1c923a3cf70f550900a9138f9921901166bf8e662ab1f1abef",
+      "disposition": "private mixed-origin instrumentation; no public source authorization"
+    },
+    {
+      "name": "replay_fraction_arithmetic_u11.py",
+      "native_path": "/workdir/wepp-forest-release-20261009/docs/ablation/20261031_roads_erod_interval_support/artifacts/private-tools/replay_fraction_arithmetic_u11.py",
+      "sha256": "940575f935ddd5e8279e104b8d8207b9d48b456312f1e828fef7450230f20a32",
+      "disposition": "original public replay copied privately to preserve sibling dependency"
+    }
+  ],
+  "note": "Original instrumenter bytes preserved; public Python paths now explicit source-free entry points. Historical script hashes identify retained private files.",
+  "execution_mirror": "/workdir/wepppy/out/roads-parameterization-program-20261031/private-research-tools",
+  "execution_mirror_reason": "Existing weppcloud bind mount exposes wepppy/out but not the native checkout; exact private copy avoids changing container mounts."
+}

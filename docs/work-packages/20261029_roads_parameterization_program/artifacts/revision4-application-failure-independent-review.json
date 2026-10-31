@@ -1,0 +1,39 @@
+{
+  "reviewer": "Independent Codex AI implementation reviewer",
+  "baseline_commit": "3cf0e331de17ab422c90b5711b2481387ad45b14",
+  "production_or_test_edits": false,
+  "implicated_source_sha256": {
+    "tests/wepp/interchange/test_roads_lifecycle.py": "92503441fc4eb8336552c0f7cc686b275dea112cf4482b8548fb35ffc88aeeb0",
+    "tests/microservices/test_rq_engine_upload_disturbed_routes.py": "69baf96b95b37a90a3be05ad70053d9902286cf15bb66b2f9ce9ba6d646f2337",
+    "tests/test_redis_settings.py": "fe36196725e2a52d138efba183394b9a23f5e7eae30073a51971f46446a35fab",
+    "tests/conftest.py": "75a28b792572703e60f0895ed301fa3bab2d63c8dc74414489bb10a93dd82eda",
+    "tests/microservices/conftest.py": "aba2546aa7f3f4a44ce57916f7892f84bd56f2530e217d37a088cbe38d50a389",
+    "wepppy/wepp/interchange/_roads_lifecycle.py": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
+    "wepppy/query_engine/catalog_refresh.py": "2a74b77377cea2a801df816ab189ed4cefc653bc595fceeec3308f8331ff1183",
+    "wepppy/query_engine/activate.py": "890551f0ca615afa2731dfa4f8666f1735a4e634e0f98eda4f40417838f4c7fb",
+    "wepppy/wepp/interchange/_rust_interchange.py": "9323a9b0ed15ef8def683b012aa8e4aa9658c8626272ca36de14f0a2b10a2c59",
+    "wepppy/microservices/rq_engine/__init__.py": "690755817abfb4dc9d918373becce8dd1b43fe3abb263eb90d79d22a73ffa3a6",
+    "wepppy/rq/submission_recovery.py": "a40318bbcbe18f28c7f845f1fc18f298b6acb3769496df206f45d26ef44b93ba",
+    "wepppy/config/redis_settings.py": "e11c87ec548d0bd81afaee312846d6884f433ea1ff8a79a69337a607f9f0e521"
+  },
+  "installed_binaries_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "log_sha256": {
+    "application-shard-2.log": "c848c70096cbaea4bfe69214234862688ed801f4ae2b7e198f3761c5657ecbb4",
+    "application-shard-8.log": "3668acdaea8ed9bfb07d2a8b35f48f0aa0f28b3c526fc4dab7c4c4ee847559c4",
+    "application-shard-8-replay.log": "47cdaa55833e3ad961b1754b871e40e6899ceb63640de4c305cc8ea22fee9338",
+    "review-upload-single.log": "62f78c87794eeb1c87b5aba5de0de3f4a663a0723ffad7fec74a3e2111428824",
+    "review-upload-redis-order.log": "a8a9785bd2d12321fd3413b2eb2644d2c86b79567de5e93e744391bcce014476",
+    "review-roads-single.log": "47e6d171bd9cf88e5fa27e3111ded658d20ba760476104a2ed4c367768e17810",
+    "review-roads-module.log": "4a914ae64ccc6b21dc4952d25b14b656edb7b41fbdcf1e4c23b25ddf91d2e4d9"
+  },
+  "confirmed_upload_order_failure": true,
+  "original_roads_failures_both_completed_exact_catalog_archive": true,
+  "persistent_lock_inversion_supported": false,
+  "precise_original_delay_cause_measured": false,
+  "full_application_accepted": false,
+  "lifecycle_readback_sha256": "4687930b7e9518b18b0666eccfd312aa6c6079bca5547d4e76c31e5d61998ee5",
+  "review_sha256": "aeb60ecd318bb3aea01f008c70e1074e07f143e99f8c3d25ba40cf2097d4d02d"
+}

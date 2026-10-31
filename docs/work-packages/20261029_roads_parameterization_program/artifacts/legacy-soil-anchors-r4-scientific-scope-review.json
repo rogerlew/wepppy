@@ -1,0 +1,43 @@
+{
+  "disposition": "Scientifically acceptable to execute all 116 exact-R4 whole-legacy-soil anchors, followed by paired event accounting. No coefficient search or parameterization acceptance.",
+  "reviewed_inputs": {
+    "cases": 116,
+    "core_files_rehashed": 1392,
+    "all_nonsoil_inputs_match_corresponding_U12": true,
+    "all_legacy_soils_match_original_98_4_and_reference_sol": true,
+    "unique_legacy_soil_bytes": 21,
+    "unchanged_development_materials": 7,
+    "unchanged_climates": 5,
+    "original_misses": 96,
+    "passing_controls": 20,
+    "effective_dependencies_rehashed": 70
+  },
+  "preflight_receipt_verified": {
+    "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project/record.json",
+    "completed": true,
+    "prior_physical_pass": true,
+    "particle_pass": true,
+    "note": "This scope review verified retained preflight hashes and reported results, not a second native execution."
+  },
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/declaration.json": "c259aae606bf01d33b6d1de777fa864c9dcc8ddf806b4b30ffb755772e9f3484",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy_soil_anchors_r4.py": "adfb7068a3e6e5070522edf2759483721d6131576da8528a3c38d8cf9aefd761",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/combined_hydraulics_r4.py": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-plan.md": "3257325fc8e7870cb016fddf4a0797537025af88f65fca3452c00a69f5cf0206",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/preflight.json": "bdda4ca3e05310deda40b136f4d61ab4761e079d7d4a4c5c70c08be4d9ae3292",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project/record.json": "5c590dabac535bbe3f7c52f9310b12ae81738ad5385deaa95448ff84cd65598a",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project/particle-audit.json": "a54123f18d2546d450e7f3c297466f9bda3695f062efee90bb37709bba831af9"
+  },
+  "comparability": {
+    "primary": "Exact R4 legacy versus exact R4 generated: same nonsoil inputs; difference is the complete soil deck and its format-specific interpretation/initialization, not one hydraulic or erosion parameter.",
+    "engine_delta": "Exact copied R3 legacy versus R4 legacy supports an engine-artifact comparison.",
+    "WEPP2010": "Retain annual benchmark only until producer-specific calendar, output and water-volume conventions are verified; do not apply current QOFE/area rules blindly.",
+    "replication": "116 paired cases reuse 21 legacy soil decks; cases are diagnostic strata, not independent material replicates."
+  },
+  "remaining_gates": [
+    "All 116 complete native periods and full artifact/runtime/accounting verification.",
+    "All EVENT particle checks and explicit disposition of any strict flags.",
+    "Event-ledger implementation and independent unit/calendar/zero-support verification.",
+    "Full application suite remains required for release handoff; UI remains human gated."
+  ]
+}

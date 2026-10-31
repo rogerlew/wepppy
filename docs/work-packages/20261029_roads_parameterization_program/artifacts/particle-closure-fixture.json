@@ -1,0 +1,84 @@
+{
+  "status": "observation fixture; no repair accepted",
+  "event": {
+    "year": 2012,
+    "julian": 302
+  },
+  "cases": {
+    "seed": {
+      "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/downstream-hydraulics-r3/cases/buffer_cap/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "9a2abe911cda89eb867eface9ea85a1c911d3375f15f3563ca2ad586c6606dca",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "buffer_cap",
+        "runtime": "project"
+      },
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "03b78a5895988e936d4f8c35786b0656f470bd9687b0fe0012effaca71bbc99d",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "outputs": {
+        "H1.loss.dat": "612ca14de11b922549a96952c32f450ccd05a16fc04ff73c10862aff50ee86c8",
+        "H1.soil.dat": "0eb17f230db6d09eff1c2598b305759c8e9ac3c5deadf639f2fde66ae8cb3cb4",
+        "H1.pass.dat": "1f5a3564623e60be20bf00a6b84d805b04fb3e520715d0b66b6fec565b3f2091",
+        "H1.plot.dat": "a514442034c5c4fb66bfc62a53299a161af898fe219de8e8ddbb195ea3229b0b",
+        "H1.wat.dat": "677c93ea6bf5e4c55a5bb0a7f8c703c590314a6f89bfd3fad2aacabe570a5f7c",
+        "H1.element.dat": "4de1aa6bac05c280bfc3171f8a4657866efa137fbd715c7d46537d96079fa47e",
+        "H1.ebe.dat": "61f22a47004141ea0f3f2035bc32de2b31a3e892d64b1281418ffbbe82933423"
+      },
+      "binary_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531"
+    },
+    "control": {
+      "source": "/workdir/wepppy/out/roads-native-funding-20261031/r3-matrix840/matrix-v1/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+      "record_sha256": "93882627209437c8c0ecba75e3437a09675455e4f726b10e4a2c512489876902",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "inputs": {
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "835e78135a9a43982e6e739b8616663592b3e1096833400109a105cac69a8cf6",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "outputs": {
+        "H1.loss.dat": "7d212947cced065e6f5fb2f8a35b194bfb6db55cd8f136e77b1270cc8a50bdaa",
+        "H1.soil.dat": "63516e6aacb35ae56d20f0335dab8ccbbd1832a9b6ed7236f17ffabde36949b5",
+        "H1.pass.dat": "f9d524aa23d0561a037295f1380e2a1faf1bf8d5842a4396a3b404a3551343bd",
+        "H1.plot.dat": "95b7c7ed9da946f5a4919f522e3cebf3bc89ef6a07128e9c50bf42b4beb06f4c",
+        "H1.wat.dat": "5049239e2502c60fbc495984eb1f284558d8165461b7db1312511b7a709051d7",
+        "H1.element.dat": "0777b61e5f257da77111ad91f889c298bebe60f4a17579ca9f29bd649ee1ee2b",
+        "H1.ebe.dat": "17178dab2b0d6da9a42019660c94a0f30b3710d2ccf259b2a699e43b57dabe80"
+      },
+      "binary_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531"
+    }
+  },
+  "fixture_sha256": "5ab5d792182b471d537379859fca7eed4d2e7bb892053acd6d48f4cabd6b32c8"
+}

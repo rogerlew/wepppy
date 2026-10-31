@@ -1,0 +1,19 @@
+{
+  "status": "accepted_for_authorized_pdf_publication",
+  "reviewer": "Independent Codex publication-review agent",
+  "date": "2026-10-31",
+  "pdf_sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+  "reviewed_preapproval_manifest_sha256": "86f49333c5d2f6dba2746c8ca5ddbb584e1793af357389e63d930098e120c769",
+  "source_freeze_sha256": "3ee87d1cc5b6523c01c50949d121ce8e613163703d2470e4339e1816668ce892",
+  "review_sha256": "07424c9c7deb5223fd63d16bf953465fa1390b05a11e8959b05a1258fa5a7ada",
+  "verification_sha256": "162abe2edff3778b77a00e41409fc77361a15c4130a2f807246f34d1e4bbab7e",
+  "pages_inspected": 7,
+  "figures_inspected": 2,
+  "blocking_findings": [],
+  "publication_performed": false,
+  "deployment_performed": false,
+  "remaining_gates": [
+    "approval-only final manifest readback",
+    "exact copy and HTTP content/hash validation"
+  ]
+}

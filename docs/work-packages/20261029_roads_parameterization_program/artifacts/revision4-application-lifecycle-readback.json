@@ -1,0 +1,162 @@
+{
+  "r4s8": {
+    "catalog_published": true,
+    "status_current": true,
+    "archive_catalog_exact": true,
+    "pending_requests": 0,
+    "catalog_file_count": 11,
+    "files": {
+      "runs/demo/_query_engine/catalog.json": {
+        "sha256": "943d5fa72fc34671d14800e904860681898b6f8b289c15d6c6b368f5d751d7eb",
+        "size": 3334,
+        "mtime_ns": 1793484249780857738,
+        "times_and_state": {
+          "generated_at": "2026-10-31T22:04:09.746727+00:00"
+        }
+      },
+      "runs/demo/_query_engine/refresh/status.json": {
+        "sha256": "377273a7495f7e5900a5a0b9eec09441a540cbf8168b3efc3547be7281e49d2c",
+        "size": 366,
+        "mtime_ns": 1793484255506926044,
+        "times_and_state": {
+          "state": "current",
+          "updated_at": "2026-10-31T22:04:11.516331+00:00"
+        }
+      },
+      "project.zip": {
+        "sha256": "0a3e0b5467e709bd22e7d81ca800bc4b98931d13d6f72c3e873895314a5ef18c",
+        "size": 3456,
+        "mtime_ns": 1793484257985955614
+      },
+      "runs/demo/_query_engine/refresh/attempts/37d48e4a-2e8f-4525-8793-000affff7aef.json": {
+        "sha256": "6db91c3c39026da8023e087a2e001eb9dc5a166a53c49894b641b4a083b11bf2",
+        "size": 435,
+        "mtime_ns": 1793484253126897653,
+        "times_and_state": {
+          "state": "published",
+          "updated_at": "2026-10-31T22:04:11.516331+00:00"
+        }
+      }
+    }
+  },
+  "r4s8r": {
+    "catalog_published": true,
+    "status_current": true,
+    "archive_catalog_exact": true,
+    "pending_requests": 0,
+    "catalog_file_count": 11,
+    "files": {
+      "runs/demo/_query_engine/catalog.json": {
+        "sha256": "2df8204836151c0d0849e61e93b8cd07e516b2667eb60701152df04afeb19818",
+        "size": 3335,
+        "mtime_ns": 1793484559320541991,
+        "times_and_state": {
+          "generated_at": "2026-10-31T22:09:19.256689+00:00"
+        }
+      },
+      "runs/demo/_query_engine/refresh/status.json": {
+        "sha256": "31921010ca0e8f0e4140b7abf0f18d48b28623199e54867983d4afc5a5d0affc",
+        "size": 366,
+        "mtime_ns": 1793484568001645120,
+        "times_and_state": {
+          "state": "current",
+          "updated_at": "2026-10-31T22:09:21.750658+00:00"
+        }
+      },
+      "project.zip": {
+        "sha256": "e28fcd7ad32b4b59fe1e69cd3344730b07c8d0ced35c6cfc176062dc0cf08ada",
+        "size": 3457,
+        "mtime_ns": 1793484571248683692
+      },
+      "runs/demo/_query_engine/refresh/attempts/be26957b-2d8b-450c-b45f-fcf82bbba38d.json": {
+        "sha256": "71cd346b6598c32bfcc4551f5910850b6fc253afa3337766bc69100816f266ac",
+        "size": 435,
+        "mtime_ns": 1793484564496603482,
+        "times_and_state": {
+          "state": "published",
+          "updated_at": "2026-10-31T22:09:21.750658+00:00"
+        }
+      }
+    }
+  },
+  "r4_review_roads": {
+    "catalog_published": true,
+    "status_current": true,
+    "archive_catalog_exact": true,
+    "pending_requests": 0,
+    "catalog_file_count": 11,
+    "files": {
+      "runs/demo/_query_engine/catalog.json": {
+        "sha256": "50cadd1022b345b8df840a3adf3d70965d9bdaa1a63d90e9f5cae3dd2fefdb52",
+        "size": 3345,
+        "mtime_ns": 1793484823327675007,
+        "times_and_state": {
+          "generated_at": "2026-10-31T22:13:43.290990+00:00"
+        }
+      },
+      "runs/demo/_query_engine/refresh/status.json": {
+        "sha256": "a7f262f1c47e613eb07bdda445b4ffd6e7d61d0ae800c53d62b646f381dd36c8",
+        "size": 366,
+        "mtime_ns": 1793484823333675078,
+        "times_and_state": {
+          "state": "current",
+          "updated_at": "2026-10-31T22:13:43.330049+00:00"
+        }
+      },
+      "project.zip": {
+        "sha256": "7c60737486ddcb5b3199cf3ae3a78c0209acd3b5773ea6ba2673cc64f37f3502",
+        "size": 3467,
+        "mtime_ns": 1793484823338675137
+      },
+      "runs/demo/_query_engine/refresh/attempts/8af01d8f-6765-4e5a-9679-6c02db3597dc.json": {
+        "sha256": "c91323bd2f2f06436dd1b4fdf68352e924029eec6d2ccf493b01b4f12e96bdc3",
+        "size": 435,
+        "mtime_ns": 1793484823331675055,
+        "times_and_state": {
+          "state": "published",
+          "updated_at": "2026-10-31T22:13:43.330049+00:00"
+        }
+      }
+    }
+  },
+  "r4_review_roads_module": {
+    "catalog_published": true,
+    "status_current": true,
+    "archive_catalog_exact": true,
+    "pending_requests": 0,
+    "catalog_file_count": 11,
+    "files": {
+      "runs/demo/_query_engine/catalog.json": {
+        "sha256": "5b84fc5fd34122742b3db19a6be9efa83ec9aaea8d9f49c5530ec9781f434a45",
+        "size": 3352,
+        "mtime_ns": 1793484887945440988,
+        "times_and_state": {
+          "generated_at": "2026-10-31T22:14:47.909327+00:00"
+        }
+      },
+      "runs/demo/_query_engine/refresh/status.json": {
+        "sha256": "17d6346e7fd2fbd2dbabee012b84f5d87aa43572a4f7331b991efa58dab83846",
+        "size": 366,
+        "mtime_ns": 1793484887952441071,
+        "times_and_state": {
+          "state": "current",
+          "updated_at": "2026-10-31T22:14:47.946986+00:00"
+        }
+      },
+      "project.zip": {
+        "sha256": "196839dbc123d6750d4c9e800dda19f2faaa6e00ee7ed11543c6289d1af34918",
+        "size": 3474,
+        "mtime_ns": 1793484887957441130
+      },
+      "runs/demo/_query_engine/refresh/attempts/3f4e81c0-0b58-46eb-974f-18cb8350183f.json": {
+        "sha256": "2db9b48e8a7cc604db043ab118f441f870a5d3d532c4fabc9a5276e7b0a182d9",
+        "size": 435,
+        "mtime_ns": 1793484887949441035,
+        "times_and_state": {
+          "state": "published",
+          "updated_at": "2026-10-31T22:14:47.946986+00:00"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "script_sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+  "declaration_sha256": "11792fff8cea00ac3e74f35c324decc573283f85774a22a9d06e35d7ca61b849",
+  "records": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_baseline/birmingham-2711184-inveg-gravel-low": "f4fdca7626e2f071a5893fb502de5ffbfd3c2403f86ab152c5f99fc3586637f0",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_baseline/birmingham-2711184-inveg-gravel-low": "2adf79cee5734788fae67298ffd40fc54c73b25b1a53464cccf1406e436a56b6"
+  },
+  "reused_and_fresh_actual_audits_pass": true
+}

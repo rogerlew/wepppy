@@ -1,0 +1,290 @@
+{
+  "completed_utc": "2026-10-31T22:23:32.609623+00:00",
+  "scope": "Particle-only reread; no native rerun, parameter acceptance or threshold change",
+  "old_audit_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302",
+  "new_audit_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+  "declaration_sha256": "021521ca6eef2eef6decf15cd23ac6e141ed54cdff9f29a0f53b93a9b3808249",
+  "frozen_files_verified_unchanged": 3425,
+  "panels": {
+    "legacy_r3": {
+      "selected_cases": 116,
+      "cases": 116,
+      "rejected_record_count": 0,
+      "events": 5887,
+      "positive_events": 5031,
+      "flagged_cases": 0,
+      "flagged_events": 0,
+      "causes": {},
+      "unavailable_diagnostic_fields": 0,
+      "cases_with_unavailable_diagnostics": 0
+    },
+    "legacy_r4": {
+      "selected_cases": 116,
+      "cases": 116,
+      "rejected_record_count": 0,
+      "events": 5887,
+      "positive_events": 5039,
+      "flagged_cases": 0,
+      "flagged_events": 0,
+      "causes": {},
+      "unavailable_diagnostic_fields": 0,
+      "cases_with_unavailable_diagnostics": 0
+    },
+    "factorial_r4": {
+      "selected_cases": 928,
+      "cases": 928,
+      "rejected_record_count": 0,
+      "events": 47993,
+      "positive_events": 36527,
+      "flagged_cases": 3,
+      "flagged_events": 3,
+      "causes": {
+        "fraction_sum": 3
+      },
+      "unavailable_diagnostic_fields": 16428,
+      "cases_with_unavailable_diagnostics": 112
+    },
+    "U12_roads": {
+      "selected_cases": 840,
+      "cases": 840,
+      "rejected_record_count": 0,
+      "events": 117145,
+      "positive_events": 96775,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "causes": {
+        "fraction_sum": 1
+      },
+      "unavailable_diagnostic_fields": 74267,
+      "cases_with_unavailable_diagnostics": 99
+    },
+    "U12_downstream": {
+      "selected_cases": 348,
+      "cases": 348,
+      "rejected_record_count": 0,
+      "events": 18620,
+      "positive_events": 13105,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "causes": {
+        "fraction_sum": 1
+      },
+      "unavailable_diagnostic_fields": 6074,
+      "cases_with_unavailable_diagnostics": 42
+    }
+  },
+  "receipts": {
+    "legacy_r3": {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/legacy_r3.json",
+      "sha256": "9117a031665d7c52a86159ac61532d66d052035de8e08f7e4d1340ed248bc840"
+    },
+    "legacy_r4": {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/legacy_r4.json",
+      "sha256": "b5422d36fa86b7e4a28a7c5042797f18ff197f58c68f241c6741e153a3d801d1"
+    },
+    "factorial_r4": {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/factorial_r4.json",
+      "sha256": "2d505ec87766f6406e8d429c421f2eaafcffb65811bf664fbb7217eca4234664"
+    },
+    "U12_roads": {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/U12_roads.json",
+      "sha256": "12a0a30d58186b4ecacbb72fc18f4082d2ea3fb9fd91be9b986a09fe5c279a24"
+    },
+    "U12_downstream": {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/U12_downstream.json",
+      "sha256": "2375f9f1c63ca7b98f2f909f596ee7265cb8eac29fa97f6a9c16260404c16f0d"
+    }
+  },
+  "numerical_criteria_changed": false,
+  "strict_flags_retained": true,
+  "original_records_and_verifications_unchanged": true,
+  "parameter_promotion_approved": false,
+  "full_readback_receipt": "/workdir/wepppy/out/roads-parameterization-program-20261031/particle-audit-v2-readback-run3/receipt.json",
+  "full_readback_receipt_sha256": "e5d42b7e8de31ecaa94e76e145dd1682c6370da932e144357a30a594a1c76ae9",
+  "numeric_unavailable_by_column": {
+    "legacy_r3": {},
+    "legacy_r4": {},
+    "factorial_r4": {
+      "Sm": 16428
+    },
+    "U12_roads": {
+      "Sm": 74267
+    },
+    "U12_downstream": {
+      "Sm": 6074
+    }
+  },
+  "strict_flag_details": [
+    {
+      "panel": "factorial_r4",
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "road_off_buffer_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_buffer_cap/denver-1718465-outunrut-gravel-none/record.json",
+      "year": 8,
+      "julian": 228,
+      "causes": [
+        "fraction_sum"
+      ],
+      "fraction_sum": "1.000017",
+      "fraction_bound": "0.0000160",
+      "class_mass_kg": "17.250126942",
+      "bulk_mass_kg": "17.242091752452773600",
+      "mass_bound_kg": "0.0221085761905659670"
+    },
+    {
+      "panel": "factorial_r4",
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "road_off_baseline",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_off_baseline/site-2711250-outunrut-paved-low/record.json",
+      "year": 2003,
+      "julian": 29,
+      "causes": [
+        "fraction_sum"
+      ],
+      "fraction_sum": "1.000005010000286038",
+      "fraction_bound": "0.0000050050000000015",
+      "class_mass_kg": "3.124909087608893863656E-7",
+      "bulk_mass_kg": "0E-18",
+      "mass_bound_kg": "0.02155261470825554057500518752"
+    },
+    {
+      "panel": "factorial_r4",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "road_on_fill_fixed",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_fill_fixed/site-1718465-outrut-gravel-high/record.json",
+      "year": 2008,
+      "julian": 278,
+      "causes": [
+        "fraction_sum"
+      ],
+      "fraction_sum": "1.0000050780000065298",
+      "fraction_bound": "0.00000505050000000010",
+      "class_mass_kg": "0.00868450059088005670892512",
+      "bulk_mass_kg": "0.00792",
+      "mass_bound_kg": "0.0019802971141617500011840550"
+    },
+    {
+      "panel": "U12_roads",
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711250-outunrut-paved-low-erosion_road_cap-project/record.json",
+      "year": 2003,
+      "julian": 29,
+      "causes": [
+        "fraction_sum"
+      ],
+      "fraction_sum": "1.000005010000286038",
+      "fraction_bound": "0.0000050050000000015",
+      "class_mass_kg": "3.124909087608893863656E-7",
+      "bulk_mass_kg": "0E-18",
+      "mass_bound_kg": "0.02155261470825554057500518752"
+    },
+    {
+      "panel": "U12_downstream",
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "buffer_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/downstream-buffer_cap/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+      "year": 8,
+      "julian": 228,
+      "causes": [
+        "fraction_sum"
+      ],
+      "fraction_sum": "1.000017",
+      "fraction_bound": "0.0000160",
+      "class_mass_kg": "17.250126942",
+      "bulk_mass_kg": "17.242091752452773600",
+      "mass_bound_kg": "0.0221085761905659670"
+    }
+  ],
+  "unchanged_strict_flag_checks": {
+    "factorial_r4": {
+      "old_strict_flags_preserved": true,
+      "old_receipt": "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/verification.json",
+      "old_receipt_sha256": "de07228cbb893070f3e885a833980382436677ea7b665eac2882084d9eed38ca"
+    },
+    "U12_roads": {
+      "old_strict_flags_preserved": true,
+      "old_receipt": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads-particles.json",
+      "old_receipt_sha256": "434c14984e983c9e7145da955be45407b103d46c57344e311efafc86f56d3119"
+    },
+    "U12_downstream": {
+      "old_strict_flags_preserved": true,
+      "old_receipt": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/downstream-particles.json",
+      "old_receipt_sha256": "e0fbbb752a9171e3e594e5e15acf42d2d0594925c8a75f4187f554cd804c75c0"
+    }
+  },
+  "disclosure": {
+    "reason": "Remove unnecessary literal private native format descriptor from public research fixture after completed frozen readback",
+    "original_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+    "private_original": "/workdir/wepppy/out/roads-parameterization-program-20261031/private-research-tools/particle-audit-v2-disclosure/review-legacy-element-fixed-width-fixture-original.json",
+    "private_original_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+    "public_fixture": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-element-fixed-width-fixture.json",
+    "public_sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+    "all_numeric_output_and_expected_fields_unchanged": true,
+    "readback_completed_before_sanitization": true,
+    "prior_readback_receipt_sha256": "e5d42b7e8de31ecaa94e76e145dd1682c6370da932e144357a30a594a1c76ae9",
+    "historical_hash_resolution": "Prior receipts/declaration reference the original fixture hash, retained byte-exact at private_original. New public regression binds sanitized fixture; native/math results unchanged."
+  },
+  "regression": {
+    "passed": true,
+    "checks": 20,
+    "scope": "Exact native adjacent-field regression, ordinary-field parity, unchanged strict failure controls, malformed/duplicate rejection and canonical widths",
+    "fixture_sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+    "audit_v2_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "regression_script_sha256": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+    "canonical_element_source_sha256": "8205708270a8b428ba7b75d56c29d5b015174a0deaf96e0a9b593d3da6be7dde",
+    "exact_example": {
+      "causes": [],
+      "fraction_sum": "1.0000050000000032270",
+      "fraction_bound": "0.00000600000000000010",
+      "class_mass_kg": "0.0388997659700001255329296",
+      "bulk_mass_kg": "0.03960",
+      "mass_bound_kg": "0.001980684921500000006489450"
+    }
+  },
+  "future_malformed_PASS_limit": "Malformed PASS Decimal text fails closed via InvalidOperation; current runner collects ValueError per-record but this exception aborts rather than yielding a rejected_records row. No actual declared record rejected or affected.",
+  "evidence_sha256": {
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure.py": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_particle_audit_v2.py": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/reverify_particle_audit_v2.py": "dde3532b22ba75a9396dc2b8e9bc67d229f65e881a8f74743251f809f0a47f52",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-scope.md": "9653e037e887272caa06ad19eb2552c88ea58e069e56953d5feed4dc6893ba75",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-disclosure.json": "b3d659f41b4ab8bae71f7de5085a0788139679fa3dc54ec3ae99f89fa1469efb",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression-public.json": "89c4878385ac0ce541052532ec2f56cc4a2fe1ceef5d632f40ee0027c4d022b7"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/depend-g1-erod-observation.tar.gz",
+  "sha256": "cd818fe5b3f7ade3b1928aaceb405361fa9e25618a5df4feb6102f59da774b73",
+  "bytes": 4962590000,
+  "files": 48374,
+  "uncompressed_bytes": 28928009554,
+  "all_members_verified": true,
+  "manifest_sha256": "99f93d0eb6140a73c435c7ac75b321a23ba8fdb797440a16d4cb106123a4f744",
+  "omitted_aliases": {
+    "depend-bounded-g1/disturbed/disturbed_matrixcurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/disturbed/disturbed_matrix0",
+    "depend-bounded-g1/disturbed/secretscurrent": "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/disturbed/secrets0"
+  }
+}

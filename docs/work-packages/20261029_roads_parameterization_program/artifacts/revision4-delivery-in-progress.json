@@ -1,0 +1,44 @@
+{
+  "artifact_revision": 4,
+  "status": "Post-vendor focused checks pass; full application suite running",
+  "logs": {
+    "provenance": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/provenance.log",
+      "sha256": "f396037ccd7faea004fcab27c0cdb28f7f5d1ad16ffdf58cd384861471a1c9a7"
+    },
+    "host-watershed": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/host-watershed.log",
+      "sha256": "c3cdbb89d4b6bc47cbb632557d71a8f9a03ad8ce44f67f024d14fdee35fe6143"
+    },
+    "host-hill": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/host-hill.log",
+      "sha256": "7caa140c73148cc9d6282840ad40c83c286a64e020def4348d46678bc3e62ee4"
+    },
+    "container-watershed": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/container-watershed.log",
+      "sha256": "9a62872aa3a9ffd6d09349f5c61a58280daf1a3b9416610ebf5f57e65f478d89"
+    },
+    "container-hill": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/container-hill.log",
+      "sha256": "f46ffaba345166841a227a220659beb82dabef60544058e3641ec2d2f63e8f57"
+    },
+    "targeted-tests": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/targeted-tests.log",
+      "sha256": "24069fc522de341275484dfd06aae53aa3dc0c8fb1da35b3de971bfdedbe9df6"
+    },
+    "selected-watershed": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/selected-watershed.log",
+      "sha256": "379b92cdbc989769cbdd58762fbdb262e602ada55d96323b1fd788bf0d0e689e"
+    },
+    "artifact-policy": {
+      "path": "out/roads-parameterization-program-20261031/revision4-promotion/artifact-policy.log",
+      "sha256": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352"
+    }
+  },
+  "targeted_tests_passed": 8,
+  "host_smokes_passed": 2,
+  "container_smokes_passed": 2,
+  "selected_same_build_hill_pass_watershed_reader": "pass",
+  "local_report_http": "pass; PDF and manifest exact approved bytes",
+  "production_deployed": false
+}

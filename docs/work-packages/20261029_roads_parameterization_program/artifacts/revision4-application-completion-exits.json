@@ -1,0 +1,12 @@
+[
+  {
+    "shard": 2,
+    "exit_code": 0,
+    "log_sha256": "04bb30db657b7bd536e692be2617314860cc2dc8952a012f3dfb2768e608effb"
+  },
+  {
+    "shard": 8,
+    "exit_code": 0,
+    "log_sha256": "b2d816e9c88df9b89791e6e6f5ff63857d0f0dd8d3fd2cf155fcd9b84880f511"
+  }
+]

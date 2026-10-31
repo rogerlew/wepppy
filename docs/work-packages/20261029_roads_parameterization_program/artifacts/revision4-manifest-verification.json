@@ -1,0 +1,25 @@
+{
+  "status": "final_public_manifest_accepted",
+  "reviewer": "Independent Codex publication-review agent",
+  "date": "2026-10-31",
+  "manifest_sha256": "ff2b8f86890dbc023c16c7c886f14c909611c662570b1fcca107156be2220433",
+  "compared_preapproval_manifest_sha256": "86f49333c5d2f6dba2746c8ca5ddbb584e1793af357389e63d930098e120c769",
+  "changed_top_level_keys": [
+    "approval_date",
+    "approval_record",
+    "publication_status",
+    "review_receipts"
+  ],
+  "approval_only_delta": true,
+  "review_receipt_hashes_verified": {
+    "scientific_report_sha256": true,
+    "publication_acceptance_sha256": true
+  },
+  "pdf_sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+  "source_freeze_sha256": "3ee87d1cc5b6523c01c50949d121ce8e613163703d2470e4339e1816668ce892",
+  "all_frozen_files_unchanged": true,
+  "actual_git_clean_manifest_bytes_match": true,
+  "publication_performed": false,
+  "http_verification": "pending parent exact-copy and local HTTP check",
+  "deployment_performed": false
+}

@@ -1,0 +1,189 @@
+{
+  "source_sha256": {
+    "src/erod.for": "fff9125e81e3eb1d9e237e7cb492f8ae68ae61fef1456c0ee65f2da2e2944dd8",
+    "src/runge.for": "7f751b4903e65bdb678161ef7adf11a3fde213952cd411d0f2884239415ed561",
+    "tests/test_erod_interval_support.py": "6048e601dff654dcd2ba7338cfaa60e14a2f08fd596679d2535bfb8309406c7c"
+  },
+  "cases": [
+    {
+      "inputs": {
+        "xb": 0.0,
+        "xe": 0.009,
+        "theta": 0.1,
+        "initial_load": 0.0007,
+        "capacity": 0.001,
+        "qostar": 1.0,
+        "ilast": 1,
+        "erodibility": 0.001,
+        "shear": 1.0,
+        "critical_shear": 0.0,
+        "ktrato": 1.0
+      },
+      "equation": "Lprime=D*(1-L/C)+theta; L=E+(L0-E)*exp(-D*x/C), E=C*(1+theta/D)",
+      "independent_root": 0.002995508979798451,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00299551012,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 3.806369990269122e-07
+    },
+    {
+      "inputs": {
+        "xb": 0.0,
+        "xe": 0.009,
+        "theta": 0.1,
+        "initial_load": 0.0007,
+        "capacity": 0.001,
+        "qostar": 1.0,
+        "ilast": 1,
+        "erodibility": 0.1,
+        "shear": 1.0,
+        "critical_shear": 0.0,
+        "ktrato": 1.0
+      },
+      "equation": "Lprime=D*(1-L/C)+theta; L=E+(L0-E)*exp(-D*x/C), E=C*(1+theta/D)",
+      "independent_root": 0.0026236426446749096,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00262377271,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 4.957432955073825e-05
+    },
+    {
+      "inputs": {
+        "xb": 0.0,
+        "xe": 0.009,
+        "theta": 0.1,
+        "initial_load": 0.0007,
+        "capacity": 0.001,
+        "qostar": 1.0,
+        "ilast": 1,
+        "erodibility": 1.0,
+        "shear": 1.0,
+        "critical_shear": 0.0,
+        "ktrato": 1.0
+      },
+      "equation": "Lprime=D*(1-L/C)+theta; L=E+(L0-E)*exp(-D*x/C), E=C*(1+theta/D)",
+      "independent_root": 0.0013862943611198904,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00300000119,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 1.1640434197369949
+    },
+    {
+      "inputs": {
+        "xb": 0.0,
+        "xe": 0.009,
+        "theta": 0.1,
+        "initial_load": 0.0007,
+        "capacity": 0.001,
+        "qostar": 1.0,
+        "ilast": 1,
+        "erodibility": 10.0,
+        "shear": 1.0,
+        "critical_shear": 0.0,
+        "ktrato": 1.0
+      },
+      "equation": "Lprime=D*(1-L/C)+theta; L=E+(L0-E)*exp(-D*x/C), E=C*(1+theta/D)",
+      "independent_root": 0.00034339872044851434,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00300000119,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 7.736203751958328
+    },
+    {
+      "inputs": {
+        "xb": 0.0,
+        "xe": 0.009,
+        "theta": 0.1,
+        "initial_load": 0.0007,
+        "capacity": 0.001,
+        "qostar": 1.0,
+        "ilast": 1,
+        "erodibility": 100.0,
+        "shear": 1.0,
+        "critical_shear": 0.0,
+        "ktrato": 1.0
+      },
+      "equation": "Lprime=D*(1-L/C)+theta; L=E+(L0-E)*exp(-D*x/C), E=C*(1+theta/D)",
+      "independent_root": 5.7071102647489605e-05,
+      "native_result": [
+        0.00100000016,
+        0.0,
+        0.00300000119,
+        1.0,
+        1.0
+      ],
+      "relative_root_error": 51.56602817944611
+    }
+  ],
+  "disposition": "Reject U1 for stiff root and initial-equality defects; all840+348 readbacks complete. Source omission mechanism supported; U2 broader shared-consumer repair requires independent tests and repeat broad gates. Two unchanged strict fraction-normalization flags need source arithmetic disposition.",
+  "broad_readback": {
+    "downstream": {
+      "cases": 348,
+      "physical": 348,
+      "changed_output_cases": 293,
+      "meaningful_total": 213,
+      "meaningful_within": 143,
+      "recovered_magnitude": 0,
+      "regressed_magnitude": 0,
+      "increased_annual": 21,
+      "decreased_annual": 0,
+      "unchanged_annual": 327,
+      "small_total": 135,
+      "small_within": 9,
+      "control_total": 60,
+      "control_within": 53
+    },
+    "roads": {
+      "cases": 840,
+      "physical": 840,
+      "changed_output_cases": 806,
+      "meaningful_total": 766,
+      "meaningful_within": 713,
+      "recovered_magnitude": 0,
+      "regressed_magnitude": 0,
+      "increased_annual": 157,
+      "decreased_annual": 1,
+      "unchanged_annual": 682,
+      "small_total": 74,
+      "small_within": 31
+    }
+  },
+  "broad_readback_scope": "Emitted input/output hashes checked against U1 record and declared R3 source. changed_output_cases uses declared R3 output hashes. Annual changes and magnitude transitions compare U1 against matched complete G1 records; all water/soil bytes equal G1.",
+  "particle_audits": {
+    "roads": {
+      "cases": 840,
+      "events": 117145,
+      "positive_events": 95159,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "script_sha256": "c84aa470e3aab6fff1314d4ec761f9fec1bf9e118889193dedc7a48fe013854d",
+      "artifact_sha256": "4343f2a2dc988f08571603c8dbfdeb4733780b10f537087b9e0ec87e3e0c6c6f"
+    },
+    "downstream": {
+      "cases": 348,
+      "events": 18620,
+      "positive_events": 13100,
+      "flagged_cases": 1,
+      "flagged_events": 1,
+      "script_sha256": "c84aa470e3aab6fff1314d4ec761f9fec1bf9e118889193dedc7a48fe013854d",
+      "artifact_sha256": "a1c2c74ecff70c30788ab4a709d382d0fe747261333dd7697aa50144b3b72472"
+    }
+  },
+  "shared_grid_failure_artifact": "/tmp/erod-grid-failure-class.json"
+}

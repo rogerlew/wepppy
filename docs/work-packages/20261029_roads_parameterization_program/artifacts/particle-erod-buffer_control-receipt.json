@@ -1,0 +1,32 @@
+{
+  "label": "buffer_control",
+  "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outunrut-gravel-low-erosion_road_cap-project",
+  "source_record_sha256": "cdf72701fceaaee612466277950d3693846af767f0c06de2884702923e60c584",
+  "inputs": {
+    "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "p1.sol": "835e78135a9a43982e6e739b8616663592b3e1096833400109a105cac69a8cf6",
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+  },
+  "outputs": {
+    "H1.loss.dat": "5f6f1ebc44184ab97510f176a74f1509983a6b2c4698a73753235df30dedd368",
+    "H1.soil.dat": "63516e6aacb35ae56d20f0335dab8ccbbd1832a9b6ed7236f17ffabde36949b5",
+    "H1.pass.dat": "9518c19c2f03d51d90a3c73b1882afaae4b5cd6ddaaa4a64cf0174f777656c71",
+    "H1.plot.dat": "538f65ea9c860174f36bba654c552b75890df94f609a7c4ae37c7819e369abc4",
+    "H1.wat.dat": "5049239e2502c60fbc495984eb1f284558d8165461b7db1312511b7a709051d7",
+    "H1.element.dat": "11ab43f2c9df7c1de2fa44d25b22a972e39b55e38995050f3dc7be00b0b8073e",
+    "H1.ebe.dat": "320afd7023174ab34f2b81c17d0f72fd2c852b23844b8be3f2a565846f2da4ac"
+  },
+  "trace_sha256": "aa45a9de1fe2f4207fa21ef529b3e1c1193780595be386dd2350aa16db43bdc6",
+  "exact_output_parity": true,
+  "returncode": 0,
+  "binary_sha256": "4497f41d35464198063e57d224003389fec64da024aa0f0fd56f215a251dccd5"
+}

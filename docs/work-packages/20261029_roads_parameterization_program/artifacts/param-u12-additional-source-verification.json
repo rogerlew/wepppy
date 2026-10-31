@@ -1,0 +1,15 @@
+{
+  "scope": "Copied fpm-src and both include trees, supplementing source.json top-level src hashes",
+  "files": {
+    "fpm-src/wepp_calendar.f90": "4f62406c7feb204ea865dffa0b5cfe94f574183babad8d5bc1b868562f8052af",
+    "src/includes_hill/pmxelm.inc": "243de8b1e558ce8e0e920c38179afcb021df46bce5033a2c11d9d62b8f72a58f",
+    "src/includes_hill/pmxhil.inc": "a70b5988254310c051b611835da0be7d8eaafb4d0638d2f91cb4e6fe9d7bfc00",
+    "src/includes_hill/pmxpln.inc": "9c5569a3ddd9b4aba07c293d1e111bcefaed5e8212d8e8c35b3623663e6367fa",
+    "src/includes_hill/pntype.inc": "99c884099ca8d6fa0b0948f9339181caa7900163b986aee321a7004da89711f1",
+    "src/includes_watershed/pmxelm.inc": "6bb79ace71b125757622c805288d81966815c6f663eec287325d01ddc8e67245",
+    "src/includes_watershed/pmxhil.inc": "23ccc0606ae74be34b6e64c7370aaaccebd0b20aee21b8456d1c7a2479ff480c",
+    "src/includes_watershed/pmxpln.inc": "bce6ada0bd2f45e4840245329d241a9b98fb8f702bde1dbe2b6f122f63af3cbb",
+    "src/includes_watershed/pntype.inc": "64cf4b0de48f14cc5c2c3ff701603179a8368fa0f2ec5500ece937c8ac78be0e"
+  },
+  "all_native_files_equal_frozen_build": true
+}

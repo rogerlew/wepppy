@@ -1,0 +1,1385 @@
+{
+  "all_index_clean_and_restored_bytes_match": true,
+  "files": 228,
+  "lfs_files": 2,
+  "rows": [
+    {
+      "path": "docs/adrs/ADR-0120-roads-generated-hydraulic-sensitivity.md",
+      "git_object": "d25f2c928cb4dee069e269ded312f60467685d1c",
+      "sha256": "7941d3854157b6851aa83f87b5f28c47d0724aea79842f1c38ed683ed721ca1c",
+      "lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0121-depend-bounded-root-search.md",
+      "git_object": "64459beb101cefe1ca99bad80bba683d6d80f778",
+      "sha256": "531d2adb6d5446b9099c3cb02c109984b18417859e3f783abdf2eca976923a30",
+      "lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0122-erod-subgrid-interval-support.md",
+      "git_object": "0939330f2f54ac5a8ed3ab7c64d1e01ca716ce50",
+      "sha256": "8476874fcffcead8b33c77ff428b4370f25f3da1b9a7c5804f2d4d8ee99cd89b",
+      "lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0123-roads-nonzero-inflow-sediment-boundary.md",
+      "git_object": "6ef5d9f8760bfd0c965f8b6fec9c8cd50b5decff",
+      "sha256": "327774c91087924e6786489211c535d55fe21232c5bf7e27b512c361aadf31a7",
+      "lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0124-param-rounded-continuity-denominator-sign.md",
+      "git_object": "a200f601cf0ab8f9c8227b2de8c24c69e9fa686d",
+      "sha256": "15daef290a283953be9bdc4ac521d1d2d0a49fe8d0af4c0c87a7936b65e982a0",
+      "lfs": false
+    },
+    {
+      "path": "docs/adrs/README.md",
+      "git_object": "be52d48b5736c7c0a92245d50a348964ec507650",
+      "sha256": "bf99894addee20ecb58897d34f30a58d3decdf88934833c960d661794d929ddd",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_param_terminal_matrix_u12.py",
+      "git_object": "756f8eecb2805e1a646437279069fa27cd515626",
+      "sha256": "5aa4beda66d077755b60fbd48faa1ea286c9da2ce2e8bbe8aa824f12b48f42e9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure.py",
+      "git_object": "ed6c9e668848dad95c90ac695b881dfed32567b1",
+      "sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py",
+      "git_object": "fc2ef7532493e4d4a1cec34ff2b3506784e2716a",
+      "sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/build_erod_candidate.py",
+      "git_object": "cf78ff471cc3110be642c5ce8174256ee490eab5",
+      "sha256": "4da2ded6f2762505d43c2d118340af5f7581ee4cd17dbd6e110b1b4eaece92df",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/build_erod_candidate_u3_u5.py",
+      "git_object": "6ca0973be1d96033d331f82c112b812b02e1a517",
+      "sha256": "16827c34dbefb28cc2db618e0596550c92ff5d73a54309570f747da3efadd680",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v16.json",
+      "git_object": "814b014caa8c5d1ea385383a4e3701ed1d0077d0",
+      "sha256": "b141827cf877aad9f4d8c4c1bfdfdee26bd812558ecee30530bd0ff13a18c671",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/capture_particle_seed.py",
+      "git_object": "fb216395b4c1be1ae421e50ff44c7a7d19d38f76",
+      "sha256": "a47661afba1618f2d733b232443bd42408bac15c51a50a6b38320a571937a595",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/certify_fraction_arithmetic_u11.py",
+      "git_object": "a6e378e4277dba7946d7bf0b4c08e54a21bba318",
+      "sha256": "0f19763f46ed04809d07bb78832bbdbbcc660f47fa8b4239b66654781a99ab96",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_fraction_certificate_applicability.py",
+      "git_object": "d6c4e8eb1d2c695980f9cd189eb82ce16ada6cd8",
+      "sha256": "0e60d75442b111b85e446bf81e34fb2faf4efa610545e224ac235e5e0467e601",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_particle_audit_v2.py",
+      "git_object": "065165a658a4f9f2d209df007d42671d29bcb4b1",
+      "sha256": "5029fa33a20309f61ac80b390b13f84ca6680dc8277426421971ad9598b56a14",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-attempt1-failure.json",
+      "git_object": "638aa0b79358232ce55405d9d22246c57e25fea0",
+      "sha256": "175c6b89ae5db942c3809d52281e2124b28dcf4fc593a2cab956d37ac63dd322",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-declaration.json",
+      "git_object": "d6441273e376efad1ce16681825b5fc40e05cc40",
+      "sha256": "11792fff8cea00ac3e74f35c324decc573283f85774a22a9d06e35d7ca61b849",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-final-evidence-review.json",
+      "git_object": "e9714fa106fc031ee5ac535ccef6332a0dc4750f",
+      "sha256": "3b7f7aa13b73d0da7e382c9a552127fc4789ba2a0eebe02d62917835c430e7a0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-findings.md",
+      "git_object": "6f7af5316134739d424ce9e6890b58f7043b8b8b",
+      "sha256": "e0c09bdc63603853685886ca69df418a5133b62fcc7dcc9bb69d56798ee36588",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-implementation-scheduling-addendum.md",
+      "git_object": "e184107331a3bc927da6556424b942bfb7822ba4",
+      "sha256": "19b4c2a5b7a6e44ef182556088d1c7c386e579c23557a181ae60c625763741cd",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-input-review.json",
+      "git_object": "e1c99d9338919e4c24774456be4caa995cb4efe0",
+      "sha256": "8766da9f74e32490b0ebd016dadab0125af67fddf37d91a931f37f97288e6b55",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-outcomes.png",
+      "git_object": "1580666b2f2e31d136374d29d8b547705b889056",
+      "sha256": "a245310c936480ac3b9527d6559c1caee5ffff20ef68b9a9a144fa22fab282fa",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-plan.md",
+      "git_object": "f0715240f58b50aa65ef7574d07b69a1cc46ca63",
+      "sha256": "408f20a61ad686ddea49e97281690cbfec46ed39d08af6dd8d820244d61eadeb",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-design-review.json",
+      "git_object": "12197180c47d8c60ec3dead7c9a4fac6d0deecc9",
+      "sha256": "dcfa93cb952cf75ea5a40725750f1e336adef0f14b245781f06b57df44bee3b6",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-results-review.json",
+      "git_object": "4c44ac63937403d754b537543798766a3b82a475",
+      "sha256": "c9f730cd1478890c0932d7a8d4fa44701cbc539abc8ae196381d12b1dd71224e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-results-review.md",
+      "git_object": "383205912100f14fabb446b294cb2309c51f68b2",
+      "sha256": "89428df1fd01fab5047c355fad7924a275810730bba1707e84bd4c18be2baa5a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-scientific-scheduling-addendum.json",
+      "git_object": "ebdb5fe2c5b63fe9679124df70efc3162b423f31",
+      "sha256": "0ab820dd9e5513bb4e8675c280db64c0599bdf0a8295b0490fb3cd34a9922ab9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-summary.json",
+      "git_object": "c60759025c60d121fd040f7c82f4e2eac61fb8b6",
+      "sha256": "b4b3b1e4f70222dcc83534331fc66a45403d94f6d1d820a6c53d75f6e5ad6b84",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-implementation-review.json",
+      "git_object": "8f0f6ef9f15e09436fc75f76b166fb67f828aa54",
+      "sha256": "9bf3f504d1fe559605d90476e55c92be69bbbbe1396d3bbdd6ab560a835ad677",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-implementation-review.md",
+      "git_object": "9ee4bb22932ac93a20459bf0d504ad11f22a11fb",
+      "sha256": "95c152d6e59897c5b6b1a97588c3cb6ea08febfede121debf2b270567108a9df",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-preflight.json",
+      "git_object": "65a276a55034937f29784af6dc878764e044ba68",
+      "sha256": "636af2cc8f98d6afd2ba64502d4e6abbafeee2c4b0f5459f732c19bacefb64c8",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-v2-scientific-delta.json",
+      "git_object": "0e6f9086feae2c4e64ee3ff8d76d7114daf9dd29",
+      "sha256": "8453fb41d816219a3eb5274d96a6ec2f62bfd787f3fec866ab6dda7d59cbe833",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-verification.json",
+      "git_object": "ac74b618b07671795e352b4d41cb06318e2153b6",
+      "sha256": "de07228cbb893070f3e885a833980382436677ea7b665eac2882084d9eed38ca",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined_hydraulics_r4.py",
+      "git_object": "5e3c56704c8b804c53437244dfc8d38c86003e04",
+      "sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/complete_application_r4_tails.py",
+      "git_object": "8fe53d36b4dc9072e27f21d1e8e159725e060e91",
+      "sha256": "ff1daa2afbb12bd24bf0d4e9efd5fbc3ec38602eaa44d0976cc49e339c06e2cf",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-bounded-g1-release-note.md",
+      "git_object": "ea9730d37cf53886a2e330bef0e708eea7e1300c",
+      "sha256": "f542f58eda4ac912f786661bf05783b6ae791c06aaeb3ad367efe8731dfd117c",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-bounded-g1-summary.json",
+      "git_object": "7a9f39b843c3c2197282f082f895fd7be0e7b7f7",
+      "sha256": "b887011d343c64b1586384f44353f3a1191c2955e26cb2a5d326a18f2d51c9b7",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-bounded-root.png",
+      "git_object": "d3283b10d2b87c0b2c0e79654c25876712dcb253",
+      "sha256": "da5cda3996b1361f7d3898ba135101eac39645e63e60decc12651fcb458ba05a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-bounded-root.svg",
+      "git_object": "ad07188e201dc0f22b2ee2fc9efec9cfceb1c1d5",
+      "sha256": "6d22fad132fea3b9077140359de641d8fca8aa8d7ba4f933d941b1cc64108e82",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-g1-erod-observation-retention.json",
+      "git_object": "9e92e5810f3b677c2d6c346e60aecab2b60a670c",
+      "sha256": "0afe9259562ec1c7a080d8a961b7d777fe32bcad7ebf22deed16149ee89f7146",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-implementation-review.md",
+      "git_object": "227ece9beb4712a6b7f4b05773a0a87fee8a9481",
+      "sha256": "48114e1f9890919adf1be2e8aebdb40d51c7878dcbd8509fb93999d481a37030",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-particle-quantification.json",
+      "git_object": "3359c8cc4498f4c2cfb61c5cb38ea31c148f5952",
+      "sha256": "59f3c5eefca867730d75d26910c6ec3ccd691764a6a990d715beb2a5521ed09e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-particle-review.json",
+      "git_object": "2b68e87749df01dcf02e94601264f75a0b222d32",
+      "sha256": "ea3943d956638f09237aa8b5c5d99e2c0fbfb410094b35efb919fd46e92f2ed0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-root-ablation-r3-plan.md",
+      "git_object": "dcdf338e79b1aa1680da090e0c6bb67ee08cafa3",
+      "sha256": "5ddf8aa4c9bf7e8f1d00124a4343549632cc4ecdb2a600ac5a2adb65c0c71182",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-scientific-output-review.json",
+      "git_object": "9b7992284ea1125d4d6c2cbac45082f62ee1a7a5",
+      "sha256": "da468b7e8a2626aebe42b99c14f02311f20a44209130b1fcbb1b0ae23127cf44",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-scientific-output-review.md",
+      "git_object": "5334a772733b3f72a01bf568a88e3f08c83b3cd8",
+      "sha256": "08811897e3171eff5c3306172c45176783e0eec822af995509938b50f1e449be",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend_bounded_replay.py",
+      "git_object": "5b837ceb31674718819c44719c03c9554d2c7727",
+      "sha256": "e4ac36c3fc992936a17ea9c5a93be3b1759bfbc9da5a2d30181d54bb00420381",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend_particle_quantify.py",
+      "git_object": "861d5128d65dc1f94c26012a63a645bf97d0f438",
+      "sha256": "85c2576d15dc7f552568d2ce8bda760f2868336a4d702312b2642b6ae9314796",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend_review_outputs.py",
+      "git_object": "e0a07ab359a2da6402592e737c45843d1c0f70d3",
+      "sha256": "ccc3e094a4e7c5f830ba427e0145a28e1ed84ed32006fa051a3c56e43ab2fe7e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend_review_particles.py",
+      "git_object": "8b850c249f3a391cd9d733d3d249d835a7cb2721",
+      "sha256": "4169c7791299fa3dafba732ffa1ddb3025d92207856d7736ae7a34ff0d363327",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-clipped-capacity-disposition.md",
+      "git_object": "ec7b0948c55c647c04a955968a07d1cb1e1c9151",
+      "sha256": "f772c91659703b6ff69d4c18f179becf8b11244ea1bb838033037118c0987486",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-grid-failure-class.json",
+      "git_object": "792e8ddb7d230940072a6474f0890c32e715757c",
+      "sha256": "2bced9342b93db99681d14878966f9938f7981d589a27af4e3a7008a4033b7c3",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-implementation-review.md",
+      "git_object": "80e4327d29b4a904b76f9e6b0ce1c65dc002feea",
+      "sha256": "84e52a3a7a27933e74a2eac496541e7a509cf9771b32df6a88be98c5faaebe7f",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-paired-output-review.json",
+      "git_object": "80824d8fc4fbcfa341722f2ccd87d6f21d00560c",
+      "sha256": "d5138cd3b31dbe8e49eb94604fb724fd5741a83f7c22626d5084ef423cb33f53",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-review-probe.py",
+      "git_object": "300a3ec85c6b3acf93efd409d78ad7a127a7c6b8",
+      "sha256": "955066957fb0a9b681923184663e1efb6604d3f51662880fc862a9bdf9c559d3",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-scientific-review.json",
+      "git_object": "785b743a720157ffd453192f1904074032f29ea7",
+      "sha256": "7c143402eb9c8b4c3d47aec0e7c3cbb4978f25739626f3c211a2f133b3848eb9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-scientific-review.md",
+      "git_object": "dff35c0cc7e0a67474bc42db7dfa7284325df0c0",
+      "sha256": "f42cc7a7fed473ee20e87fa330436bced43685854d25df77749657a8a8b7a630",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-subgrid-ablation-plan.md",
+      "git_object": "74af25a1d52926b82d27b2ae2924e9e80f2add59",
+      "sha256": "04cbcd8fbaa5f5ecb93f43bdb0cb177b51d2116c02a8fd857b8e755a6779a2ca",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u1-through-u4-rejected-retention.json",
+      "git_object": "6e907e4ae4f267a7751aa495cfc56937e5ccf676",
+      "sha256": "68651397a9aef98c6c5951c082c365e24ef7a28cbcba7fe9f7315d1e6f185d94",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-broad-summary.json",
+      "git_object": "054778417aebc3eb8083078848550fa950492893",
+      "sha256": "3a7a09a241b342ee7d3626be3a44d04e5c0b7689fecc532d94e2760c35b9ac53",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-implementation-review.md",
+      "git_object": "1343d7f2ede16664f9c2319c0482743a7232f3db",
+      "sha256": "19ddc57072cdf40b81c4f285549c70d1d072328d64e566a2ef8dfbfd82e56402",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-science-probes.json",
+      "git_object": "382b35a00e5872765ad3f29b9693c2c936cc2ca0",
+      "sha256": "6242cfaa290062e7c23012e71d415d1ad56e28813be8166e9d9293e7bee9e3e0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-science-review.md",
+      "git_object": "ac6338de1a08909c9e723c07aa32d254cc0993e1",
+      "sha256": "eb4f1cf239236574528cd23dc507a73a46289262918b9b0bdf2d47d02db9213a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-seed-particles-review.json",
+      "git_object": "830fd6454384305ccdf64e9e7c61330eb768b906",
+      "sha256": "c393703dadbc0622902445086d4c66e6c00ea148c7888245a6b40688f4fd2fb9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-seed-review.json",
+      "git_object": "7495eff4e6c3cda7698dd692d326b9be2f2cb987",
+      "sha256": "a9df23908bfad630f3d6f60908cdc8d71aebfd1a11e8f5b72fee04e32618d525",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u11-source-checkpoint.json",
+      "git_object": "63fd7c9d144917c0b1a360c5dde53ab8c9efc19e",
+      "sha256": "33eee8fb5b32fa946c74f5fb55e9388c390f14ba0e7359e1928cd3d65bd81753",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u2-through-u5-checkpoint.json",
+      "git_object": "d34889fd39407f4646845b0eca1fcbcfdd3ae89f",
+      "sha256": "16f442e6873e443f1c1587e132580683517370d936a6a6d31f6291bba3a9b4ff",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u3-closing-capacity.json",
+      "git_object": "10f755eb485dadfb034770cd7ffde58133f537d0",
+      "sha256": "7b47742c7a82a8cac801169f26e8916fb1f5a7fb730bb5e0642b85fcf1798eb6",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u3-design-review.md",
+      "git_object": "ed766575dbff946a0d4c8baf67bc8e9a82ae8fa8",
+      "sha256": "f8bfbeb51a743a06f6ecfb0cbc78e886a12e63003a11996435862fa878b34857",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u3-implementation-review.md",
+      "git_object": "426f42b9b64026df25a1b69b728f0730a5da9860",
+      "sha256": "e0d78e3bab7907c22a74b36d517f340c462b7ce8ccb2ae82c2de78c09f389b25",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u3-review-probe.py",
+      "git_object": "0f3ded741356f7d8660363acb368d3f8961c57b5",
+      "sha256": "83664e944cf4e27a1884ea3df0b9fd9d0ccdf3a24fdd6c3496fd6a5dcb994c47",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u3-science-review.md",
+      "git_object": "92fe40ca75a9b0be7faa01b8338ee6d167f9c40f",
+      "sha256": "c2864b4f684daf584a656cf97676bd6aeeeada021256f275f637d282d5ccb19f",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u4-implementation-review.md",
+      "git_object": "d5142aea5e1f2e84b9185abb0ec3a78c5c4cbe8e",
+      "sha256": "a7e0d298aeb33f2704bc0fd2b4f690f987c6b994d12b6011ae4cfbfb83028764",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u5-first-transition-probe.py",
+      "git_object": "1f953eaa68bffb40b1330887125f815332deb460",
+      "sha256": "f979597131784ccd2a3b7cf1ef8f32483540b85e4c6a3b09ed16f7b4b4937802",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u5-implementation-review.md",
+      "git_object": "1194e876ffd4b976b79aaf56e4654b0b3977a318",
+      "sha256": "bc23004f887c87817944aed0f29724691065ef378474e0cb419908f1d5545be9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u5-through-u11-retention.json",
+      "git_object": "c9df1cc41046d1133b0600072e6ee9b202c4770a",
+      "sha256": "23401679376c6356d6e65e48d2a1c2297c9441092716bf962c4622fb6cd93083",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u6-cancellation-probes.json",
+      "git_object": "62fc73065bc4fc34a6ed7ac6f18d42cfadce6017",
+      "sha256": "c947c7ae7d042aa03776b2e5377f6f0809dc2f4bd8886e3df8e1ebc809f22ce0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u6-implementation-review.md",
+      "git_object": "fbe8eecc75ef6c3148f7ebe2ec633a049291a652",
+      "sha256": "2dbdcd418150d45ca03c37878788ee250e14973448f8fc42d60e9aa373d3b338",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u6-postcheck-probes.json",
+      "git_object": "5842d96b038bdf305a6afcbfb49ccc62c6e8ece4",
+      "sha256": "6e40d6ec88f36103c713aabd18ccf6b8fffe0fa915ebe61d7728a7c119bd844b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u6-science-review.md",
+      "git_object": "08e1180378c15b7c211bb887a95e872ecc4a200d",
+      "sha256": "f08adddcc2b0f94d1e71c096a079e508422471d774823dd8865eac516b9374a2",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u6b-u7-science-review.md",
+      "git_object": "0b3b8c92157650a6126a2801e6858afdf14add89",
+      "sha256": "3a9148891d4e10288381bd7df0b361eb28680605d392738b412a1fd101f75b79",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u7-route-fixture-review.json",
+      "git_object": "00f5c3d905772db6bd2f44d2b4872b0d5d414f4d",
+      "sha256": "612875b0ab2b8bffa3dc807e696c5ba0349c1cc6d75d7eafe1f2816270f7cc1c",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u7-u8-route-extra-review.json",
+      "git_object": "4366e733341ca182c9b4ae076edb833bd1435e8a",
+      "sha256": "2623d1dd1b6d2ca6f5e1a8a11f4f0decf9b8ff9ddb5952dbcbc3f232b24215e2",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u9-implementation-review.md",
+      "git_object": "a3059586fc0b7e4e8676ce7c0ee32882191f2529",
+      "sha256": "1e2db5a74e5eca2ad5cd2201b793ab0cee47468d78675f2bf69287df9273c3e8",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u9-science-probes.json",
+      "git_object": "f4211edbca5096bfdb2bc3cc70611e4a42df97d2",
+      "sha256": "f498ba7ca85d74be87c29cc931f7ad4b73021c239bb36b35ac44c6a09c978c2a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u9-science-review.md",
+      "git_object": "f396742b775aa86579986599fb3858afaed6a82c",
+      "sha256": "4e8bb00c6fbd68875c4adfa77aeb4668bb5c533483799fcb535c9ba0ba13faaf",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u9-seed-hash-review.json",
+      "git_object": "e62185c4908898c679c9a615ee48c81562299b6e",
+      "sha256": "e049303b0f91c2e960be36c268ceda4b443a83c86e6e2fba8a909b1df7b3cf84",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/erod-u9-seed-particles-review.json",
+      "git_object": "503fa2d4ec3efbb7cc054d13b10bf2eb46d06a50",
+      "sha256": "e97cde47e41f493fee74bd026b3a9a73f61a58dc85821010b5cf926f07ed83a5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-ledger-scientific-contract.md",
+      "git_object": "f999dfdaa136989c5d7ec9f4fad53f74d4236fd5",
+      "sha256": "78a81280dd4841cfa4814bb8b70dbe3591e34b57ddbd1758b0bbf16c7e1d2e24",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-plan.md",
+      "git_object": "c3c5003b4d70dd6cec9b474c266f35536198c6eb",
+      "sha256": "3257325fc8e7870cb016fddf4a0797537025af88f65fca3452c00a69f5cf0206",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/factorial-final-and-legacy-anchor-implementation-review.md",
+      "git_object": "03f10d61809effd6182f0aa04590f9857f29a4a5",
+      "sha256": "ed4348ebde5bf37921199076ec2550a4602be0d0efca9686ee6ae035514dab1c",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-r4-new-event-certificate.json",
+      "git_object": "ed7cdcc2acbd9aaee9f6e4d9892431614c5052b7",
+      "sha256": "fef6d272986de39102ceafeaf6e2c8f08b8f65a597beb3e38911607d98414692",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-r4-new-event-disposition.md",
+      "git_object": "7d895ca7f1b7307b89f0237d6348dcfe17d4efc5",
+      "sha256": "292f8425aab6dfe5cd891343f15ac22c1f53624de193e1ed30bcb0276e602e25",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-scientific-disposition.md",
+      "git_object": "18dd6239eebf513b38ca0fde4fa1582ae5837291",
+      "sha256": "eee7885be259750d5f81bedf4e2d33613c1f24df7960dc8d628d5629ac29a99c",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-u11-certificate.json",
+      "git_object": "7eff4f4ff77a3df64019df29cac3afd6bbed4a33",
+      "sha256": "0d4349560485f3fed471f12ee9b8e905c05c027ef4b4e58314ff56ff37647f9b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/fraction-arithmetic-u12-applicability.json",
+      "git_object": "c8712045a3811d4547907df67cde4b095a1fba95",
+      "sha256": "a6ec8c3d70dd2fe592b5621035a46f3ffe1de24200eb84eda92d50c7f86cab73",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-declaration.json",
+      "git_object": "b8985c2764afe57b7291d4d63f72c5614005daa5",
+      "sha256": "c259aae606bf01d33b6d1de777fa864c9dcc8ddf806b4b30ffb755772e9f3484",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-implementation-review.json",
+      "git_object": "7acde55a68259a55951299ba1ef7ae11e0649ac5",
+      "sha256": "97c2e37a286deb4c09c9f2181e06de8c75d593c413de1b82cbc5fb36d1f62955",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-scientific-scope-review.json",
+      "git_object": "0305c36351ebd9f741bc7cd93665b4263f4b26ce",
+      "sha256": "1e29a697ea7248a998c8f341828da21cb4a4edc30ecf9f919096892499ddb94e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-anchors-r4-verification.json",
+      "git_object": "9eaf93cd09449832df2945c7d5b6fab531eca94e",
+      "sha256": "0c4f38e3e6b524bcdf162f8b7b5d313253cd7343c2c6dbcc71a557902a1cfbe1",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-particle-generations-r3-r4.json",
+      "git_object": "c8b600150b8bd5836e8744cdb2e8c745c0fae930",
+      "sha256": "9e32be1a82ab8c5eb1ca752ba1b16fabc8d4d574e71a57c03e9cecf9afe13344",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy_soil_anchors_r4.py",
+      "git_object": "54a0f930d76d8f7ec74ff0c0e17cb5fa9286d78d",
+      "sha256": "adfb7068a3e6e5070522edf2759483721d6131576da8528a3c38d8cf9aefd761",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_erod_intervals.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_fraction_arithmetic_u11.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_param_continuity_u11.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_param_sign_matrix_u12.py",
+      "git_object": "17f2be78c69c2203cbc36122bd25eac0fe954cdb",
+      "sha256": "7aa5533496b306629a62c611aaed0775674d316aa889f2fc84bfe1521b4d0854",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_param_sign_u12.py",
+      "git_object": "48ce1211c60373306b54e04f7cb1d13ed0893b35",
+      "sha256": "5208f14f6898b67857dd1b0b5458a98518cd5e1bd456cecf278156b770bbbbd4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_particle_capacity_u11.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/observe_particle_closure.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-continuity-observer-independent-review.json",
+      "git_object": "01c2401cee5cdaf2f07a1d59c821ad0d581dff98",
+      "sha256": "13fec429ea6512b2bac8561b295ef584c56a113d430d08db42e893d54506831b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-continuity-u11-observation.json",
+      "git_object": "5ee1e425211e60b9b4a21b314a521645668d7825",
+      "sha256": "1de9a15d79b0940a633763418ecfb20fa945b776e5f4186b3302690c217102a4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-denominator-sign-science-review.md",
+      "git_object": "bd817ce146a0b3168d32de29b479f67c342072f2",
+      "sha256": "74ae7e2f4603e39f214a6148c9e04683fa22bb9b12c526a68e42e7b4d40f8a94",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-denominator-sign.pdf",
+      "git_object": "bfb5d2bea1d843153bb88008ec6e416bf384904a",
+      "sha256": "9e50709036e999052168829621ad7aaa5671ca48964995e6a7c0ffb917996663",
+      "lfs": true
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-denominator-sign.png",
+      "git_object": "f0a15131913694f4ae7d57a9e2db2d318c9a962a",
+      "sha256": "a233174c9dd1d57ed859d3c937f315ae89c5c79497d0be6738bcd1a3c6f2fdad",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-denominator-sign.svg",
+      "git_object": "b6362b03e169a55c18323e778622f8481b2ea25c",
+      "sha256": "b0655368edced44981ede285d5189f8a20bed74c7ff5ec856f9b68ff162c196a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-sign-u12-release-note.md",
+      "git_object": "c79dff130b9cc6470e74b3e47e2b786a80c3e793",
+      "sha256": "aeb98bb776daab232b2141d544a01acc1fe7fd905299df880692df54800f05a1",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-additional-source-verification.json",
+      "git_object": "bff374bb394a78eae0bc2ea80a842ef276ccc40b",
+      "sha256": "99fa2ab4d2a151e8a894a92890dbc7389856e5448ad6c6f0b8a1a4c575114ba2",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-capacity-matrix-retention.json",
+      "git_object": "9499603f7b4301234f7dbe3caa783381175e76c9",
+      "sha256": "f5bef1f30ab7a5e4a60f342f9c5248815682c50659560937c6d80a97711cf673",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-cedar-scientific-review.json",
+      "git_object": "b741c1e4d6959665384394f9dc22e850e6ae3fcc",
+      "sha256": "31385d3f53da6de0b3cf8c900ccd82ec4ad211833d9d1d3be39db0d8e9f0b1e9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-final-candidate-retention.json",
+      "git_object": "4a38332df85a40681e82b2f6499875cd538ae1fa",
+      "sha256": "8f1a8c64cb263053e9c9a0d9b0197f2867b7c26074ed245bb18b278132276dcd",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-gates-final.json",
+      "git_object": "f8303476f90bb8dedcd03349a1e276baade1d4e2",
+      "sha256": "e874c38766d19f713362ef578337ee3486b136611512b44aa99be47f70ed7631",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-gates-in-progress.json",
+      "git_object": "da4053fe3260039ae56711c35d00d3cc1db2e654",
+      "sha256": "be959659b25a28b78cbb8427d5d5b9d05f44695561075ff35cf18cc637226db0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-implementation-review.md",
+      "git_object": "74670ae38e1f016c08b623f0cded949000bdffe8",
+      "sha256": "6c989b5fb1b5e5f87285d7a138998c20c7e1873c8ce41f16a4d7417955aa4939",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-mixed-reconstruction-clarification.md",
+      "git_object": "6a395fd3d65226154e795c0f43d3180601e35b8e",
+      "sha256": "3599a5889036e59615b9284679aafed8bcd0baa22f1cfd74390031504c797c8b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-review-probe.py",
+      "git_object": "6cb00fb5215157d236612ee22bde692193db007d",
+      "sha256": "6574353ab96434d541bd4c770f063b15bc6f1c4e3d564fca09ce25bb5a80587b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-scientific-acceptance.json",
+      "git_object": "bb48372ec399a7466675329cbfeed46f0bb7763f",
+      "sha256": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-scientific-disposition.md",
+      "git_object": "dd2ba6c2963aac9ba77d9d80dd730c0efa173056",
+      "sha256": "4e2b8d5d2a60107670147abde0e792349c0e71e86feaaa11fcbf5d14c440968d",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-scientific-output-review.json",
+      "git_object": "692223c5af246f37619c541bf120ece004f08324",
+      "sha256": "225d37a77ee8718088c4ac571fb9fd8f1eb351cba5a8fc4ddb01b131e98ab587",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-seed-and-fraction-evidence-retention.json",
+      "git_object": "9e85b825a252655a24fcccb5c4ce32c0539ceaee",
+      "sha256": "8782255df4dd9a4672bf00c371ec33a293571dc0b60f2e4c5c4410dafffefded",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-seed-comparison.json",
+      "git_object": "b657bf0a70cd800c573101933b82f52173b10c05",
+      "sha256": "80b9a5bb2c4f9c663c3bc06a93911b84830cdf55dfde9ea521fca1d7f6b3f6a4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-source-scientific-verification.json",
+      "git_object": "2e9d2ce35178dc28a8ddb306e778c14c70a21de8",
+      "sha256": "0cbb772b7daa2d61df63d86cade7604e22635782c32c402b141897eb5139956a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-terminal-matrix-summary.json",
+      "git_object": "1d8e8c39ce7a9a09a6fe796232a22b857f0845ff",
+      "sha256": "a50a727e68358d993c52ff9f0697b46af5e939f7147e8d8893ac0507e1037a11",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-terminal-quadrature-verification.json",
+      "git_object": "e77b3d5f9c696fe18ea6f34723c9022babfe66b0",
+      "sha256": "786ae6fbedf3570427e2436fe5cd9cee29f3cf3c316ef4486dfb6d4d7a2af608",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-terminal-support.json",
+      "git_object": "0de93d82467465a4e9e755afc73ae16c75d860e5",
+      "sha256": "20478814f343888415ceca22aa367b87e92f8bba375953e05bf40e77eed5fc98",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-terminal-support.py",
+      "git_object": "5cea9f7b456941fd09f466a83e96da1d1289aa35",
+      "sha256": "14114f48f2c9d60d61d64532f71bd550e8a278a59f29d2c847d31f68344e10b9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-u12-terminal-weighted.py",
+      "git_object": "37d1fea843889f891edfc681dee7c49a92da15e7",
+      "sha256": "51dbda59f6fd4fd50a5b2dac7294effaa830c58deb80f17376652321ebbfcfef",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/param_sign_ablation.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-disclosure.json",
+      "git_object": "64357d76296fe26236094901070c3545ca4a33df",
+      "sha256": "b3d659f41b4ab8bae71f7de5085a0788139679fa3dc54ec3ae99f89fa1469efb",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-findings.md",
+      "git_object": "d37d904df2883b51faf49a16bce6f7276b3e33b4",
+      "sha256": "306d4b34979fa93ae87c64912dcabea08b3f57c4a6dc56cb044b12106e458417",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-independent-implementation-review.json",
+      "git_object": "095e62a1c232ca88e35a465d2d7530964681fbb0",
+      "sha256": "15a5be67c136fb3466b8913ae0c61807ed15de0d72a69c90a28ce203c3814370",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression-final.json",
+      "git_object": "a506ad61ff44a77a4d16445a94d8a830cbdda71e",
+      "sha256": "27f4c7387673f3db35655581077ca1fe4d0719133cd60f82fda2c33d128189c4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression-public.json",
+      "git_object": "a809261770a7f3006181f4c0d8859e41bbb2b490",
+      "sha256": "89c4878385ac0ce541052532ec2f56cc4a2fe1ceef5d632f40ee0027c4d022b7",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-regression.json",
+      "git_object": "38c4b614579598f7cccc18a7cd6099140cd8f2fe",
+      "sha256": "6831ba080f6f097f3ef66ac9e58ce46797fe6ddb8931864987f0fb4b6f232537",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-reverification.json",
+      "git_object": "5f660b958819a982d1d4b3d8c285153282df5923",
+      "sha256": "8f91e3d46876340a9ca85863d06ff1a4627e8760abcb96d357e2e6da9c81ef43",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-audit-v2-scope.md",
+      "git_object": "9d016f12e09fde3c5047d0e14c565edc31d65952",
+      "sha256": "9653e037e887272caa06ad19eb2552c88ea58e069e56953d5feed4dc6893ba75",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-closure-ablation-plan.md",
+      "git_object": "ab74df016f66a50e39d5a22dad47f33f887fc95d",
+      "sha256": "769aa32d0f5da656c0f7abc43f6ff757dac73e163e723933a7f4c9adc3f7c270",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-closure-fixture.json",
+      "git_object": "0fefeef76f5b685fe119c7b7651b8897854dd935",
+      "sha256": "e2cdb904071f24a3a9d14cb8cbd1b0d96db69626bdbbfaa89748dada3965111d",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-closure-inputs.tar.gz",
+      "git_object": "9663ad9fda4492b639cf743b9bc0a39c366440a8",
+      "sha256": "5ab5d792182b471d537379859fca7eed4d2e7bb892053acd6d48f4cabd6b32c8",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-erod-buffer_cap-receipt.json",
+      "git_object": "4724efbcf31218d6fce55c06bdcf5dc1d7312340",
+      "sha256": "577eb8ed5855d8cd9b244e870eea320bafb2b97c49e9a8498f6e5d71333745eb",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-erod-buffer_control-receipt.json",
+      "git_object": "bf449d8a4db5fc0aa83a677db87909b8818ea589",
+      "sha256": "c48343ae002a2fd607906f83bc10c3b3cc3616a2372e12f30317bfa31cdf6d46",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-erod-observation.json",
+      "git_object": "f89554c9bb6b97961acb7cd00128e4b789cbf329",
+      "sha256": "6fd9e9fd5057a79c0873579d548567286d0ddca417b07caf365327ef472d2ff1",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/particle-erod-ordinary-receipt.json",
+      "git_object": "a1d344675ae67faae55baf5404718f466b24890d",
+      "sha256": "7f93292d8e1aa6810f5c780360ef31dadf34c11d6a095e8d19644f19eca7fdbe",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/plot_combined_hydraulics_r4.py",
+      "git_object": "5d5e1f579ad24b17fe3c3a309cdcca31d7e9a6b6",
+      "sha256": "230e8dd87c9e1fb1c341d6bed72c5d1f84d3026c96be240a837de79e70ab3e84",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/plot_depend_root.py",
+      "git_object": "452f7d65969bd569b9704c46904028be9523ad42",
+      "sha256": "8479cf6e0cf5177e92ca240a49ade1268b474794bd657a1897b8cdf680e2927e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/plot_param_sign.py",
+      "git_object": "b9cd37def718e0d61be06d6f50f2dc2d0037c278",
+      "sha256": "7e542881475d502848b1f6612ac367858e1e27ad784a658119fa7bdf417064eb",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/private-research-tools.json",
+      "git_object": "83533e351c24bb381f5b84efa29c166af0d33ec3",
+      "sha256": "cd968f171260e91d771abdfdc3e70b8ed981ef67a77cacc46278d37c8d921928",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_erod_candidate.py",
+      "git_object": "3385d4a53985b1712c7f962fd08273bf9ab588ca",
+      "sha256": "9901821984e5ef8c417150aa3fdbb74b1fae65cbcecc058266376521516842d5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_fraction_arithmetic_u11.py",
+      "git_object": "2823bf9e87231dddfa183c5097888a7fef98889c",
+      "sha256": "940575f935ddd5e8279e104b8d8207b9d48b456312f1e828fef7450230f20a32",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_param_sign_u12.py",
+      "git_object": "a966a8493077939e4509eb1706667b808d984231",
+      "sha256": "0e494d11c27f5222e8c98a890481655aa1fceba6591c43954a8eae0541613158",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_particle_capacity_u11.py",
+      "git_object": "eb3230f71f662279cf2568eda7a8a6652404a5d4",
+      "sha256": "a44d1aad27baffe0d115646902d23fb22cdf5cb306fd53e0157fe75c48612daf",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/replay_particle_observation.py",
+      "git_object": "ddaf1d35ab613c7b1aaa556642524c8400abf2bd",
+      "sha256": "e5a63fbef625e34a99615437b0456f3221dcd26938ec587b761e0bbbbe790a80",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/research-code-provenance.md",
+      "git_object": "751d3152d3b66d5bf284891ec835c200056b3399",
+      "sha256": "6caf7073c6373b6662b99c99ebb75c74e0e5b5d88e16d4b9016a0845c47afe01",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/reverify_particle_audit_v2.py",
+      "git_object": "9d130a34c7d6998e6cd5e86e5ab7ff6efbc897c4",
+      "sha256": "dde3532b22ba75a9396dc2b8e9bc67d229f65e881a8f74743251f809f0a47f52",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-element-fixed-width-fixture.json",
+      "git_object": "8a2588cfb7fee3aec6bcc39e1497f7f68f64294a",
+      "sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-disposition.json",
+      "git_object": "7f050a70d9c48fa99ab9ff96d4ebc284b8e20e58",
+      "sha256": "8bcf856ca0fb819601c51a6cadc66cdd732f1c34ace2fdbd8784696b49608ae5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-disposition.md",
+      "git_object": "428a66c02e425ce257f79aeb63ff489fc7d29cdd",
+      "sha256": "832d341fec0f88f21e2e5339443fb8df71cf24fad5131daa98d2aec95e26ee9b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-particle-fixed-width.json",
+      "git_object": "fb0373b414da8de198255aee161c26f8c832cbec",
+      "sha256": "463f7ba57630080128b3ec45b93223a9389b37be2fead2f19c753516d9277730",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_combined_hydraulics_r4_science.py",
+      "git_object": "8f79567ae4616101af5fdd8035f2dadd207a23ef",
+      "sha256": "666be8ac4643c0271c310970a1b70b211486530e3822d7d295b44bca5eb9f9aa",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_legacy_particle_fixed_width.py",
+      "git_object": "5bb917790c2b07042e81798470707e52c36ece29",
+      "sha256": "3473d3f915c4ce9ccd4a8f23c392b1e7871494f3dcf41d97f7bcb5c1f8a24c96",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_param_sign_u12_outputs.py",
+      "git_object": "454b2b63d049b3e31fbf7e94e9a571810698575f",
+      "sha256": "170ac63435ae2abe44ba271e3da2927ba10950f239fa344e1a3013edffaa96af",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_param_u12_cedar.py",
+      "git_object": "f740022c94b1c3d7b529ca01d968517222ad3c3a",
+      "sha256": "ccaf37877c5804a6a7bd12fa1c1e40051b76bd59294d27ebdf7ee83b0e081b93",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_route_fixture.py",
+      "git_object": "19518cb6c9c1e5bdafaff57e559f68855d0f2a59",
+      "sha256": "cf7c8c0ea0e728491d733eecef5ac8c6894ad3714a17c1ccd32be071bcef8427",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_route_fixture_extra.py",
+      "git_object": "47f7bc30d9b834ed9a373101e29dc3c2597dee35",
+      "sha256": "3d01d1cbf5319de24dd2fea0564b851e07cc1bace738771772d28c0e841b0131",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-completion-declaration.json",
+      "git_object": "47bf04d803d2a27d7132b5287c6cec4e4418be01",
+      "sha256": "2a2718ab27b4c57b06d1705865472d62b8dfadff34efe1fd3b8791d3b265ff14",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-completion-exits.json",
+      "git_object": "c404eddd8a694068a9ffdf66a0350328b53a3ac1",
+      "sha256": "4a78f8fd719374241fd05ec4f4a635df0579ddf031aed19d79a9ff9d94610c2e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-coverage-review.md",
+      "git_object": "39e03aa78178b31bf82bd170210ac797d5369346",
+      "sha256": "e37e608db93c7e8bf1f83dfc7d49ae03ee2c60c7ac3654161fc752fb7d9b7ab5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-delivery-retention.json",
+      "git_object": "0d467d3d904134c72812614b608624cc9b941406",
+      "sha256": "625f8d15d77764af544ba6137ab70d859483b05a072b6abbda2b2e80e19dafe1",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-disposition.json",
+      "git_object": "90eb07d7a0380e70faaa01df181cba28acea31d3",
+      "sha256": "0e21eadccb06668950b8499d058393549754af988c66da53330b26f5e02f561d",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-failure-independent-review.json",
+      "git_object": "5586e172bcdaf53f46e5ae6c000200894eb437d1",
+      "sha256": "d5f9eff8e7912dfe6d931b814000c61b5b46bed68df13f61dd13419be357dbe3",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-failure-independent-review.md",
+      "git_object": "dd873f8dfa2e9422245fef81430d34fc240afdab",
+      "sha256": "aeb60ecd318bb3aea01f008c70e1074e07f143e99f8c3d25ba40cf2097d4d02d",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-lifecycle-readback.json",
+      "git_object": "a3960594596f1c5d5d6db8aaea0f250deaa3bdbe",
+      "sha256": "4687930b7e9518b18b0666eccfd312aa6c6079bca5547d4e76c31e5d61998ee5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-shard8-replay.json",
+      "git_object": "a45031d87b002e069932179d341bb22aadf2a39d",
+      "sha256": "7404f11e455004e067889ed58ffa61051be5cd20ecf850e8935fbc5f23e4d234",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-shards-declaration.json",
+      "git_object": "4084f086dcec1878b1e7d5682c7a86af68805628",
+      "sha256": "e97eec30af7e878e01f34d6606d85115dcf02613934b28c53ce9c6898ba5b1c8",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-application-unique-coverage.json",
+      "git_object": "f606441de349e13949dfd25a633b19aa4aeefc4a",
+      "sha256": "ea56c255a728466b8dddd4b8017c4c57a3dd40f39b0f66e911c2b2c3340358fe",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-artifact-policy.json",
+      "git_object": "cc13dc2e04edd340696d88d78814d7ace32c1779",
+      "sha256": "32b9539e91f5ca9b3809da3588e2c7a12864f38bf336a7d170b5ab0b06754630",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-delivery-in-progress.json",
+      "git_object": "feec40bfbf86c1fe4c39a75e3ce36600fbb3d0e4",
+      "sha256": "890a132f70583267deaee0679e184bd41572be5069526b736537dade5e5b3ead",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-hydraulic-factorial-and-legacy-anchors-retention.json",
+      "git_object": "766d14b55e9c26e049b58da373b368cc7a9c91e6",
+      "sha256": "e0268ffcdc636dd2e6e61c856e16bc19e5ceed74ccf840e4eff11556f99a4964",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-installed-and-factorial-implementation-review.md",
+      "git_object": "cefe40a4ac2198281ab320d4e6133d6fcc20cb25",
+      "sha256": "7ff4a1c90e2363cf0a5feb12da1456051542f8045dcf0047d54eef055daf2b89",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-installed-independent-review.json",
+      "git_object": "4d6794ab59b58e552f0064625ccdc9a56db0ace4",
+      "sha256": "0191558a9cb056920b9e304db65239990f2cfd8926977a93fde6391e61a0a72e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-manifest-verification.json",
+      "git_object": "d327d3728189cdd3a58d4388b8f4cb1146c72c95",
+      "sha256": "29ed3d6ec94b20c754778ae8f07c3ada20bf22606e3e31f5d9b2ec39cbb10c17",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-new-artifact-disclosure-review.json",
+      "git_object": "7454b1056126f21e65f83eb48b758d32f37c3d24",
+      "sha256": "9b6d3ad8d0c4f7956c437883767b7edbccade79b5b056625e1ea7345889cd006",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-particle-audit-v2-retention.json",
+      "git_object": "c055c82bf1379265bfdaad0f336db7f301fd3408",
+      "sha256": "9a8118e2cb46c3c680bddb2996420d85be109cebe61ac0170516c0cef3afe962",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-promotion-independent-review.json",
+      "git_object": "ec6f08431436f283ebb67e11604849e539715e65",
+      "sha256": "46c7ce718a943450f981b78a90a023c45c637906bd678e4d3c273b99c8da5461",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-promotion-independent-review.md",
+      "git_object": "7cccf1f6abf482815817a16152f269f5443b6387",
+      "sha256": "c22fed926925fe62aa2bde6a234b0bc4bcfb2577ef297ebe3147f3c5a00bc9d5",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-promotion-preflight.json",
+      "git_object": "64f1d17dade404badbb1dbab57b5505e3effd545",
+      "sha256": "7fc4cc8ae22875d72f32f39f0d5d599c152cbf724719b8d2d40b03d58cec1e47",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-publication-acceptance.json",
+      "git_object": "fd84eb6c196703b046b48ac58d3271f1d3c82446",
+      "sha256": "01cec6b5f62ac02b07dd3474d296901436b35fda59545107fc9cc070f77fe65b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-publication-review.md",
+      "git_object": "10b4d107257e83126f515e3b69020b85cf511c33",
+      "sha256": "07424c9c7deb5223fd63d16bf953465fa1390b05a11e8959b05a1258fa5a7ada",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-report-download-check.json",
+      "git_object": "323b7ba2b5d1661d2b99e920fd9181303173b4be",
+      "sha256": "e39868867646928e35cfc11aa65052eba33b1482937171f3f663ebff58f992bd",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-report-scientific-acceptance.json",
+      "git_object": "e8f0ec4af32369e4ca2ed3b1a2d9ddac0c1e11ae",
+      "sha256": "078a7e1e83e3199df113295606b5abf6004b9265ed09b5c974c1f6d4c0197979",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-residual-attribution.json",
+      "git_object": "734175953a36783527ff855910502ea4d74ff407",
+      "sha256": "15179a360b86683c3beb701b155a269152069c045f7a7e12559fa2dce6889685",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-residual-attribution.md",
+      "git_object": "d1cd3a01d26e31f8ce295a12e4d7ed9e9c0a440b",
+      "sha256": "df9a9cdcfcb9143a64d40f784988dcb4a290aa1f3dcfd1a70f12bb40af4d476e",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-selected-watershed.json",
+      "git_object": "93864424f7537690dc4548d00b38744f88a96ca6",
+      "sha256": "103c98cac3cad9c63cb49f0148e4a78f76d2fbbcdad87b98ecc9f9ec51c06c21",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-source-commit-verification.json",
+      "git_object": "ea0ade1944e9f8aaa8d32a7f23efbade0560ac5c",
+      "sha256": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-vendoring.json",
+      "git_object": "2d7153e0adb01f7aecdc6119387363541d3e6570",
+      "sha256": "2a629c371884acebb18d823e1d5d6e9ff309b556a1b2d4144b6d4bb15baa69d4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4_residual_attribution.py",
+      "git_object": "b5332975c088ade5e16d2b3b30127378521571c9",
+      "sha256": "48f9793c2af800bd74ae70c376a41b61e01a292e45e41cc85be5c37412186529",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/roads-u12-disclosure-remediation-addendum.md",
+      "git_object": "58aa881205ceaa3617364090fde49b76c8cfa3cc",
+      "sha256": "238c61d5f5e338f9363686f9a048bd33fe746669aae91a18a40b588ad04f97a9",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/roads-u12-disclosure-remediation-verification.json",
+      "git_object": "f6cddfbbbefaeca71e1fb9b0ddec3aed887cdb50",
+      "sha256": "d214b95baf150aed2f15f1c39547921ef78f869797aded6b3bfc6d45ebe6baea",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/roads-u12-disclosure-review.md",
+      "git_object": "c73eaa6edb051d2112eafd0c97307fb165537ddc",
+      "sha256": "06bd0399db163620cc16bb351041167c285d98eab8149b53c245b488190dc28b",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/route-u11-clipped-polynomial-probe.py",
+      "git_object": "eaf935c8aadfd0c0f6bc9da03eba6a6df8ded5b1",
+      "sha256": "9b4ca3a136e983dc48b3bed1d3e7f6d21433bcb972ebf9780c00d8a849c51664",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/route-u9-negative-capacity-probe.py",
+      "git_object": "89898135f26101b4e372fd074715a6811290870a",
+      "sha256": "9578bbe9271a94bee8b6f1c221969ad2e93c028db622a71dc3e40e1ff909e48f",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/route-u9-small-flow-probe.py",
+      "git_object": "158e088c49e7296de5ffd4406d2f6533ee8fd8ee",
+      "sha256": "2831676605d4fe490624f31a9a97e00f101ade8b795a47c825a20d12535c8905",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/run_application_shards_r4.py",
+      "git_object": "7eb8e7c680cca3a9b3bf4ea389071e13132ad482",
+      "sha256": "e7a02e8883a76a181b947ec2d972522e92508e542f90d59fcd6e2f5289eee3cc",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_application_r4_coverage.py",
+      "git_object": "c2d3dc9f6731da1be3cb7c5007cd0430c0827f4e",
+      "sha256": "2e63c308955451097d45cbfab5e0240abe1def8051cef4a7aeda32bcb5b6c3a4",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_combined_hydraulics_r4.py",
+      "git_object": "debe52cccc03484a10a7b123e2875d4501eb6b27",
+      "sha256": "2c058ca8bcb3ab3207d6fee716cfef05d086b94ce3dd02d873c1606510253f1d",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_param_terminal_quadrature_u12.py",
+      "git_object": "e79139df60359cff7a76163bf148aabb2b9f034c",
+      "sha256": "2204475c409b569f59e2babbf0bd6492d7ba9e927bff20d9acf90f9aa14dbacf",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_revision4_report_download.py",
+      "git_object": "fae9b4df52e8afe7c40855136b78860424084a25",
+      "sha256": "180d351d6851872f703d66c0e0d2c64501a915f15ba42e4708420ff47fe4ad25",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_revision4_selected_watershed.py",
+      "git_object": "98ec444a7248e3a589603ba4931e09810f35f538",
+      "sha256": "61e37925db0dbb35fe7c97291be5550c9366e2b5858805b1e181fa604d7f55ce",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/package.md",
+      "git_object": "f5ab47004ba0d048a23870e789712aaae0134bdb",
+      "sha256": "63a3e119000ccb1400e8927a1455dc8afa911a3a37a998ca476fa888e5d2b140",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md",
+      "git_object": "ab52772f4b1336f7c311c3c0c83e5b2a52ef61d2",
+      "sha256": "bbaf00019cc8d6b63825a7309d0b9f7d0612c65df8f38483f6441b512daefe6a",
+      "lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+      "git_object": "4f32735d7bca22e4586dcb0959e8f2e9a79f2fdc",
+      "sha256": "42fe649ec00180f81d75d9553648b408ac17f0f57fac7d8f6882cde73a2fe7c1",
+      "lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029",
+      "git_object": "171ab61d60d58b62676aba61e2cd031229c5b7e9",
+      "sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029.json",
+      "git_object": "1dfd0cec063dbab184805ee8fc62a67f5117a378",
+      "sha256": "162756de2f43428f53149c5d6703eb7224be9911d3a4fcd69a615ca07cd80c83",
+      "lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029_hill",
+      "git_object": "5fb19eee48768faee6b533a8397374d93d47ede6",
+      "sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+      "lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029_hill.json",
+      "git_object": "13f49f840df81f2fc9796c1f247cdae4d4d9ced7",
+      "sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d",
+      "lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/routes/usersum/weppcloud/wepp-model.md",
+      "git_object": "a6ca22d45d35b05bfac363386514cb8a8fe00f51",
+      "sha256": "1292057c2e72e025e356d81811d05d63476dff2e4f9b4d840142039647d62fd3",
+      "lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r4.json",
+      "git_object": "f7041ee5351fb305acf448c097273d9dc94e07af",
+      "sha256": "ff2b8f86890dbc023c16c7c886f14c909611c662570b1fcca107156be2220433",
+      "lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r4.pdf",
+      "git_object": "9397249dc055f8ed2747e24cb05f7011b94d7f91",
+      "sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+      "lfs": true
+    }
+  ],
+  "scope": "Staged checkpoint before adding this receipt; no unrelated dirty files included",
+  "whitespace_check": {
+    "status": "retained_frozen_whitespace_only",
+    "paths": [
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/depend-bounded-root.svg",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/param-denominator-sign.svg",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/combined_hydraulics_r4.py:79"
+    ],
+    "reason": "Preserve exact frozen execution/figure hashes; no code logic changes for formatting."
+  }
+}

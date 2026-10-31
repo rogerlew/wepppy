@@ -1,0 +1,8 @@
+{
+  "source_manifest": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/source.json",
+  "source_manifest_sha256": "aa21435c12615c6bc119b2dcffd6bef4283bd2cb3ce6b7a0118d059858ecf447",
+  "files": 480,
+  "native_source": "/workdir/wepp-forest-release-20261009/src",
+  "candidate_source": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src",
+  "all_source_hashes_match": true
+}

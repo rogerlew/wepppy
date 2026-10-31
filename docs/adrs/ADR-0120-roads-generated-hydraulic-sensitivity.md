@@ -136,3 +136,15 @@ DEPEND Newton-step SIGFPE; an independent scalar reference proves an interior
 root exists. Retain the fixture and prioritize bounded native root-search
 validation before further combinations. This ADR does not approve a native repair
 or binary delivery. [Results and next gate](../work-packages/20261029_roads_parameterization_program/artifacts/downstream-hydraulics-r3-findings.md).
+
+## Revision-4 factorial continuation
+
+On 2026-10-31, the operator's continuing autonomous-work instruction authorizes
+combining the already declared diagnostic factors after native repair acceptance.
+Use a complete road-coupled x fill-fixed x buffer-cap factorial on the same
+116-case panel, without changing any coefficient. Reuse only exact-revision-4
+outputs with fresh artifact verification; execute the four missing road-enabled
+cells. This tests interactions that separate screens cannot establish. Existing
+physical-transfer limitations and control-regression rejection remain in force.
+No production rule is accepted by this research decision. See the
+[predeclared plan](../work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-plan.md).

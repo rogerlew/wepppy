@@ -1,0 +1,17 @@
+{
+  "status": "accepted_for_declared_anchor_pool_execution",
+  "cases": 116,
+  "core_input_files_verified": 1392,
+  "reference_files_verified": 116,
+  "source_inputs_exact": true,
+  "only_soil_differs_from_modern": true,
+  "legacy_soil_parse_readback_passes": 116,
+  "actual_preflight_runtime_logs_outputs_and_particles": "pass",
+  "declaration_sha256": "c259aae606bf01d33b6d1de777fa864c9dcc8ddf806b4b30ffb755772e9f3484",
+  "script_sha256": "adfb7068a3e6e5070522edf2759483721d6131576da8528a3c38d8cf9aefd761",
+  "common_script_sha256": "803d4a41587a7dc5eea03c31d16e82377c77b28de4d9d85abc30a4bba4adf526",
+  "preflight_sha256": "bdda4ca3e05310deda40b136f4d61ab4761e079d7d4a4c5c70c08be4d9ae3292",
+  "preflight_record_sha256": "5c590dabac535bbe3f7c52f9310b12ae81738ad5385deaa95448ff84cd65598a",
+  "effective_dependencies_verified": 70,
+  "remaining": "All final cases must complete the implemented verify() pass; scientific and parameter acceptance remain separate."
+}

@@ -1,0 +1,29 @@
+{
+  "reviewer": "Independent AI scientific review",
+  "classification": "audit_contract_error",
+  "native_regression_established": false,
+  "legacy_native_defect_established": false,
+  "mechanism": "Whitespace parsing merges adjacent full-width EffDur/Enrich fields and misreads QRain as SedLeave",
+  "r3": {
+    "cases": 116,
+    "events": 5887,
+    "old_mass_flags": 91,
+    "fixed_width_flags": 0
+  },
+  "r4": {
+    "cases": 116,
+    "events": 5887,
+    "old_mass_flags": 91,
+    "fixed_width_flags": 0
+  },
+  "changed_numerical_tolerances": false,
+  "native_observation_required": false,
+  "repair_required": "Research audit fixed-width parsing plus retained regression and regenerated verification",
+  "parameter_promotion_approved": false,
+  "evidence_sha256": {
+    "review_legacy_particle_fixed_width.py": "3473d3f915c4ce9ccd4a8f23c392b1e7871494f3dcf41d97f7bcb5c1f8a24c96",
+    "review-legacy-particle-fixed-width.json": "463f7ba57630080128b3ec45b93223a9389b37be2fead2f19c753516d9277730",
+    "review-legacy-element-fixed-width-fixture.json": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+    "review-legacy-particle-disposition.md": "832d341fec0f88f21e2e5339443fb8df71cf24fad5131daa98d2aec95e26ee9b"
+  }
+}

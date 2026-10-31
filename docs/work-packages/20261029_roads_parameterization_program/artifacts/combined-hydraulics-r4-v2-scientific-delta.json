@@ -1,0 +1,13 @@
+{
+  "disposition": "Scientific design acceptance retained for v2 staging correction; broad execution remains gated on successful actual reused/fresh preflight.",
+  "original_declaration_sha256": "830cb7a8d49189ad0c2decc02e788ab55cce8fa2265c0f875cff29bf411c522c",
+  "v2_declaration_sha256": "0f902fbeaaf11beee41e5147a82e28691fbd8e55b3b75a099e04a67feef1fe5e",
+  "cells": 928,
+  "original_scientific_task_fields_equal_except_folder": true,
+  "core_input_files_rehashed": 11136,
+  "auxiliary_inputs_source_parity": 928,
+  "reused_log_source_parity": 928,
+  "engine_and_effective_dependencies_unchanged": true,
+  "findings": "No changes to the scientific treatment, reference values, input core, or thresholds. Auxiliary reference.sol is not selected by the retained p1.run native command decks. Failed attempt remains excluded from accepted results.",
+  "preflight_status": "Not claimed here; requires retained actual evidence before broad execution."
+}

@@ -1,0 +1,208 @@
+{
+  "disposition": "The strict fraction-sum failure is explained by bounded native REAL normalization error plus valid printed-field rounding. The audit remains failed and unchanged; no renormalization, tolerance relaxation or parameter acceptance.",
+  "event": {
+    "year": 2008,
+    "julian": 278,
+    "case": {
+      "climate": "site",
+      "soil": "1718465",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "road_on_fill_fixed",
+      "runtime": "project"
+    }
+  },
+  "source_record": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_fill_fixed/site-1718465-outrut-gravel-high/record.json",
+  "source_record_sha256": "87da5734c00d4d5cf238ef75495910bf939e7d2a9fad6aa8c421c2ee20e90271",
+  "released_binary_sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+  "observer_receipt_sha256": "9f0daf3e0c6efb02b3886d33c026fb53dc6d9a6be202152999b8ebadc836da8c",
+  "observer_build_manifest_sha256": "d0f961878d5eb16881d808de78c19e2c0ed15badb0baea0a8ce8d0f9029f78cf",
+  "exact_full_period_output_parity": true,
+  "trace_sha256": "9133a3fb24239f2e14008fdb790a67c2d698461707802b27dc0e632d4ad0f93e",
+  "observation_source_units": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/enrich.for": "b81eb9822c4fb15797ef112280d3907fafd16585b70c46856b9ae3fc86257989",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/sloss.for": "0dfb9c8458733a0e23539291c1a775a83ceee0f642c6c5770c43224d257a0ae0"
+  },
+  "instrumented_source_units": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/fraction-arithmetic-r4-new-event-v2/build/enrich.for": "ba1758cdb76e3854acadff377ac55faef4e304fca45e4831cca7870d381b9b0d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/fraction-arithmetic-r4-new-event-v2/build/sloss.for": "d0d95438cb1974c8cd075a1f8c5b1e844e20d64217b4ed068de45c08f6f830c9"
+  },
+  "script_sha256": "a426221086f6df965fe907d7063672e2c3fad1824b04d62b93cab01b2fbc8f64",
+  "reused_certificate_algorithm_sha256": "0f19763f46ed04809d07bb78832bbdbbcc660f47fa8b4239b66654781a99ab96",
+  "audit_script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302",
+  "strict_audit": {
+    "case": {
+      "climate": "site",
+      "soil": "1718465",
+      "design": "outrut",
+      "surface": "gravel",
+      "traffic": "high",
+      "variant": "road_on_fill_fixed",
+      "runtime": "project"
+    },
+    "record": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/cases/road_on_fill_fixed/site-1718465-outrut-gravel-high/record.json",
+    "record_sha256": "87da5734c00d4d5cf238ef75495910bf939e7d2a9fad6aa8c421c2ee20e90271",
+    "pass_sha256": "5c670daea312d7807f22ae949f1ed81d4d3ddc1115c0d74e6195e3556067fb30",
+    "element_sha256": "de1747f3ff89431b6c06cef72db7933a17a4673161e1f58e5c5cc39bff2709b1",
+    "events": 568,
+    "positive_events": 444,
+    "flags": [
+      {
+        "year": 2008,
+        "julian": 278,
+        "causes": [
+          "fraction_sum"
+        ],
+        "fraction_sum": "1.0000050780000065298",
+        "fraction_bound": "0.00000505050000000010",
+        "class_mass_kg": "0.00868450059088005670892512",
+        "bulk_mass_kg": "0.00792",
+        "mass_bound_kg": "0.0019802971141617500011840550",
+        "pass_tokens": [
+          "EVENT",
+          "2008",
+          "278",
+          "0.17280E+05",
+          "0.18589E+00",
+          "0.38727E-01",
+          "0.10159E-01",
+          "0.33328E+00",
+          "0.35512E-02",
+          "0.55716E+00",
+          "0.00000E+00",
+          "0.00000E+00",
+          "0.19287E-04",
+          "0.37460E+01",
+          "-.37373E+01",
+          "0.25995E-01",
+          "0.24150E-05",
+          "0.60256E-04",
+          "0.85077E-16",
+          "0.85077E-16",
+          "0.99760E+00",
+          "0.92678E-04",
+          "0.23124E-02",
+          "0.32649E-14",
+          "0.32649E-14",
+          "0.99525E-02",
+          "0.00000E+00"
+        ],
+        "element_tokens": [
+          "3",
+          "4",
+          "10",
+          "9",
+          "36.800",
+          "0.800",
+          "0.000",
+          "0.167",
+          "4.800",
+          "5.437",
+          "60.000",
+          "159.591",
+          "5.000",
+          "6.000",
+          "99.900",
+          "1.703",
+          "1.703",
+          "13.192",
+          "0.003",
+          "0.142",
+          "0.034",
+          "3.414",
+          "0.181",
+          "0.002",
+          "0.800",
+          "0.000"
+        ]
+      }
+    ],
+    "passed": false
+  },
+  "normalization": {
+    "key": [
+      "2008",
+      "278",
+      "3",
+      "3"
+    ],
+    "class_loads": [
+      0.3055512607097626,
+      2.838620093825739e-05,
+      0.0007082469528540969,
+      1.0000000036274937e-15,
+      1.0000000036274937e-15
+    ],
+    "native_sequential_sum": 0.30628788471221924,
+    "exact_class_sum": 0.3062878938635569,
+    "native_fractions": [
+      0.9975950121879578,
+      9.267817222280428e-05,
+      0.002312357071787119,
+      3.2649022594770935e-15,
+      3.2649022594770935e-15
+    ],
+    "normalization_error": 4.743197421666627e-08,
+    "derived_normalization_bound": 2.9802335177470655e-07,
+    "exact_native_replay": true
+  },
+  "per_class_printing": [
+    {
+      "printed_token": "0.99760E+00",
+      "native": 0.9975950121879578,
+      "actual_print_error": 4.987812042236328e-06,
+      "half_last_printed_place": 5e-06
+    },
+    {
+      "printed_token": "0.92678E-04",
+      "native": 9.267817222280428e-05,
+      "actual_print_error": -1.722228042781353e-10,
+      "half_last_printed_place": 5e-10
+    },
+    {
+      "printed_token": "0.23124E-02",
+      "native": 0.002312357071787119,
+      "actual_print_error": 4.292821288108826e-08,
+      "half_last_printed_place": 5e-08
+    },
+    {
+      "printed_token": "0.32649E-14",
+      "native": 3.2649022594770935e-15,
+      "actual_print_error": -2.2594770935393195e-21,
+      "half_last_printed_place": 5e-20
+    },
+    {
+      "printed_token": "0.32649E-14",
+      "native": 3.2649022594770935e-15,
+      "actual_print_error": -2.2594770935393195e-21,
+      "half_last_printed_place": 5e-20
+    }
+  ],
+  "final_enrich_and_sloss_identical": true,
+  "arithmetic": {
+    "native_fraction_sum": 1.0000000474319741,
+    "native_fraction_excess": 4.743197421666627e-08,
+    "exact_native_excess_fraction": "111995582628561/2361183241434822606848",
+    "printed_fraction_sum": "1.0000050780000065298",
+    "printed_fraction_excess": 5.0780000065298e-06,
+    "actual_printing_error": 5.0305680323131335e-06,
+    "printing_bound": "0.00000505050000000010",
+    "strict_bound_exceedance": 2.75000065297e-08,
+    "native_bulk_avsole_kg_m": 0.0021931035444140434,
+    "width_m_from_record_and_slope": 3.96,
+    "native_bulk_mass_kg": 0.008684690035879612,
+    "implied_native_normalization_excess_mass_kg": 4.119319938615802e-10
+  },
+  "bounds": {
+    "unit_roundoff": 5.960464477539063e-08,
+    "assumptions": "Five positive normal binary32 class loads; sum from zero has four effective rounded additions; each division rounds once. No overflow, underflow, negative terms or final fractional changes.",
+    "derivation": "With exact class sum S and sequential sum S_hat=S*(1+e), |e|<=gamma4; normalized fraction sum=(1+d)/(1+e), |d|<=u. Thus |sum(f)-1| <= (gamma4+u)/(1-gamma4).",
+    "normalization_bound": 2.9802335177470655e-07
+  },
+  "limitations": [
+    "Case-specific evidence; the two older certificate artifacts do not automatically transfer to this new event. The same existing source-derived method was independently applied to the new exact states.",
+    "The certificate explains fraction normalization only; it is not proof of universal particle conservation or all-event arithmetic correctness.",
+    "This rejected experimental lane remains rejected. The review makes no parameterization, default, UI or release change."
+  ]
+}

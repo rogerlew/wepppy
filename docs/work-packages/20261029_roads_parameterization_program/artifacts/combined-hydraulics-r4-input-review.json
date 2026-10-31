@@ -1,0 +1,41 @@
+{
+  "status": "input_factorial_and_reuse_verified",
+  "cases": 116,
+  "cells": 928,
+  "new_cells": 464,
+  "reused_cells": 464,
+  "checked_input_files": 11136,
+  "reused_native_output_files": 3248,
+  "unique_climates": [
+    "birmingham",
+    "charleston",
+    "denver",
+    "flagstaff",
+    "site"
+  ],
+  "unique_materials": [
+    "1718465",
+    "1718494",
+    "1718510",
+    "1856573",
+    "2711184",
+    "2711250",
+    "53949"
+  ],
+  "groups": {
+    "meaningful_low": 48,
+    "small_exceedance": 43,
+    "meaningful_high": 5,
+    "meaningful_pass": 18,
+    "small_pass": 2
+  },
+  "declaration_sha256": "65e11c3ef78795e4faae29d7ac3951bc5c654b4f2f1f8e74574e8cce2d72d781",
+  "script_sha256": "30340616218f23dc354e306e97a746dab3de79c67f0a11ecc6406fede66b6194",
+  "new_output_folders_already_populated": 0,
+  "all_nonsoil_inputs_match_baseline": true,
+  "all_soil_text_matches_independent_factor_reconstruction": true,
+  "previous_reviewed_declaration_sha256": "45e02499249be0fa48940f709de68816930d8c1f170fda83f17b8b2bf6824f57",
+  "current_declaration_tasks_equal_reviewed_input_decks": true,
+  "container_effective_dependency_preflight": "pass",
+  "effective_dependencies_verified": 70
+}

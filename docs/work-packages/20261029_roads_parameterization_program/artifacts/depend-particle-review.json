@@ -1,0 +1,484 @@
+{
+  "downstream-fill_fixed": {
+    "cases": 116,
+    "event_rows": 4695,
+    "positive_sediment_rows": 3452,
+    "max_fraction_sum_delta": 1.6000000000016e-05,
+    "failures": []
+  },
+  "downstream-buffer_cap": {
+    "cases": 116,
+    "event_rows": 7013,
+    "positive_sediment_rows": 4948,
+    "max_fraction_sum_delta": 0.00710999999999995,
+    "failures": [
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2",
+          "330"
+        ],
+        "fraction sum",
+        0.00050400000000006,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/charleston-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "5",
+          "78"
+        ],
+        "fraction sum",
+        0.002010999999999985,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "8",
+          "228"
+        ],
+        "fraction sum",
+        1.6999999999933735e-05,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "8",
+          "234"
+        ],
+        "fraction sum",
+        0.000296000000000074,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2",
+          "242"
+        ],
+        "fraction sum",
+        0.0006250000000000977,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2",
+          "242"
+        ],
+        "fraction sum",
+        0.0011179999999999524,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2012",
+          "302"
+        ],
+        "fraction sum",
+        0.006844000000000072,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-buffer_cap/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2012",
+          "302"
+        ],
+        "fraction sum",
+        0.00710999999999995,
+        1.6000000000000003e-05
+      ]
+    ]
+  },
+  "downstream-both": {
+    "cases": 116,
+    "event_rows": 6912,
+    "positive_sediment_rows": 4700,
+    "max_fraction_sum_delta": 0.005554999999999977,
+    "failures": [
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2",
+          "330"
+        ],
+        "fraction sum",
+        0.00036199999999997345,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "15",
+          "360"
+        ],
+        "fraction sum",
+        0.003605999999999998,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "10",
+          "229"
+        ],
+        "fraction sum",
+        0.00022400000000000198,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "11",
+          "331"
+        ],
+        "fraction sum",
+        0.0007010000000000627,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/charleston-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "10",
+          "229"
+        ],
+        "fraction sum",
+        0.003573999999999966,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/charleston-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "15",
+          "50"
+        ],
+        "fraction sum",
+        0.00017500000000003624,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/denver-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "8",
+          "234"
+        ],
+        "fraction sum",
+        0.00041200000000007897,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/denver-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "12",
+          "190"
+        ],
+        "fraction sum",
+        0.002038999999999902,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/denver-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "8",
+          "234"
+        ],
+        "fraction sum",
+        0.0005880000000000329,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/denver-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "12",
+          "190"
+        ],
+        "fraction sum",
+        0.0038370000000000903,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "8",
+          "130"
+        ],
+        "fraction sum",
+        0.00042600000000003746,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2012",
+          "302"
+        ],
+        "fraction sum",
+        0.005303999999999975,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2012",
+          "302"
+        ],
+        "fraction sum",
+        0.005554999999999977,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/downstream-both/site-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2001",
+          "234"
+        ],
+        "fraction sum",
+        0.0004690000000000527,
+        1.6000000000000003e-05
+      ]
+    ]
+  },
+  "roads": {
+    "cases": 840,
+    "event_rows": 117145,
+    "positive_sediment_rows": 95159,
+    "max_fraction_sum_delta": 0.006032999999999955,
+    "failures": [
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/charleston-1718494-inveg-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "3",
+          "292"
+        ],
+        "fraction sum",
+        5.069999989060214e-06,
+        5.055000000000101e-06
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inbare-paved-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.00018699999999993722,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inbare-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2002",
+          "71"
+        ],
+        "fraction sum",
+        3.500000000000725e-05,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inbare-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.0006789999999998741,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inbare-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2000",
+          "358"
+        ],
+        "fraction sum",
+        0.00013299999999993872,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inbare-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2001",
+          "325"
+        ],
+        "fraction sum",
+        0.0005370000000000097,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2002",
+          "71"
+        ],
+        "fraction sum",
+        0.0002750000000000252,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.006010999999999989,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2002",
+          "71"
+        ],
+        "fraction sum",
+        0.0002750000000000252,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.006010999999999989,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2000",
+          "358"
+        ],
+        "fraction sum",
+        0.0026889999999999414,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2001",
+          "325"
+        ],
+        "fraction sum",
+        0.0021100000000000563,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2002",
+          "71"
+        ],
+        "fraction sum",
+        0.0002750000000000252,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-high-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.006032999999999955,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2002",
+          "71"
+        ],
+        "fraction sum",
+        0.0002750000000000252,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2005",
+          "309"
+        ],
+        "fraction sum",
+        0.006032999999999955,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2000",
+          "358"
+        ],
+        "fraction sum",
+        0.0026889999999999414,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-outrut-paved-none-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2001",
+          "325"
+        ],
+        "fraction sum",
+        0.0021100000000000563,
+        1.6000000000000003e-05
+      ],
+      [
+        "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-2711250-outunrut-paved-low-erosion_road_cap-project/record.json",
+        [
+          "EVENT",
+          "2003",
+          "29"
+        ],
+        "fraction sum",
+        5.0100002859654325e-06,
+        5.0050000000015005e-06
+      ]
+    ]
+  }
+}

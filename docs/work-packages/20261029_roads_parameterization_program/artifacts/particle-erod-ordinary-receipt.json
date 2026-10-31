@@ -1,0 +1,32 @@
+{
+  "label": "ordinary",
+  "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/depend-bounded-g1/roads/site-1718465-inveg-paved-high-erosion_road_cap-project",
+  "source_record_sha256": "a46024b887133a47577e371895712fe2a1848b94f83cc7adb797c030e59122b3",
+  "inputs": {
+    "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "p1.sol": "d9b5b8b7f9763a8a32c38c81844671b2db143824d7a0310c47830159038c41e1",
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+    "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+  },
+  "outputs": {
+    "H1.loss.dat": "1a8fc992560f66292ae5c3e492e7177b6ba2085cce363d426bc670b5c4aa3bb9",
+    "H1.soil.dat": "adc4401a71d5e2487d05c5989d13ef26e7db95c1ea144ecc6f23984598259d05",
+    "H1.pass.dat": "738d4a17d769afe8e549196b8c590c69f9aa733133a90930edd2d30ded4c74d8",
+    "H1.plot.dat": "b7ebcd022bf8e3e2251552a5438375ea36c92e93e1b97846f7117bd32217a6d6",
+    "H1.wat.dat": "360a09105c5c8b35ec2a50f1862b647dd932c93ed7c1c2fbdaa232611434c950",
+    "H1.element.dat": "86cba6a335386813218bc72a2516c4dcc4985eff8a9c5536bacc72184128bea9",
+    "H1.ebe.dat": "e8639221447c48dcc87ec2acae269ed48a5be45be975a0177e944b50761907cd"
+  },
+  "trace_sha256": "c6648afc9abc7abecd61c902803b130d4a18b02c96151f888b03181aca4af38d",
+  "exact_output_parity": true,
+  "returncode": 0,
+  "binary_sha256": "4497f41d35464198063e57d224003389fec64da024aa0f0fd56f215a251dccd5"
+}

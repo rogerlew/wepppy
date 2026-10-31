@@ -1,0 +1,21 @@
+{
+  "disposition": "Scientific design acceptance retained after scheduling-only amendment. Direct-native diagnostic runs may proceed concurrently; full application suite remains required before release handoff.",
+  "changed_declaration_fields": [
+    "plan_sha256",
+    "scheduling_amendment"
+  ],
+  "unchanged": [
+    "script hash",
+    "928 task records and input hashes",
+    "70 effective dependencies",
+    "factors and acceptance criteria"
+  ],
+  "pre_execution_new_output_directories_empty": true,
+  "sha256": {
+    "/tmp/combined-hydraulics-r4-scientific-design-review.json": "dcfa93cb952cf75ea5a40725750f1e336adef0f14b245781f06b57df44bee3b6",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4/declaration-before-scheduling-clarification.json": "65e11c3ef78795e4faae29d7ac3951bc5c654b4f2f1f8e74574e8cce2d72d781",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4/declaration.json": "830cb7a8d49189ad0c2decc02e788ab55cce8fa2265c0f875cff29bf411c522c",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-plan.md": "408f20a61ad686ddea49e97281690cbfec46ed39d08af6dd8d820244d61eadeb"
+  },
+  "limitation": "This review verifies the scheduling delta and preserved scientific design; it does not claim the unfinished full application suite has passed."
+}

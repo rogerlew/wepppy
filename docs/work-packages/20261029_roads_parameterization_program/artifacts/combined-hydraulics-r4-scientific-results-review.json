@@ -1,0 +1,532 @@
+{
+  "disposition": "No production parameterization accepted. Downstream combinations regress original controls; road-only package remains a component hypothesis. Final full artifact verification and the new strict fraction flag remain separate pending gates.",
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/declaration.json": "11792fff8cea00ac3e74f35c324decc573283f85774a22a9d06e35d7ca61b849",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/results.json": "ccd138250b4d180b82e1c71e47217e82b3399b7a04441039a85be99afd0f69aa",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/summary.json": "b4b3b1e4f70222dcc83534331fc66a45403d94f6d1d820a6c53d75f6e5ad6b84",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/paired-cells.json": "5cffbf5027e7aefd98b6567b6c76a26f46aaa5c4851edc8d064aa90c2c60bae7",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4-v2/continuous-contrasts.json": "93bf454711f91d3b9f6162c6c2c4988d0ebfffa9e2762d517bb81ce23e9d6529"
+  },
+  "role_reference_evidence_sha256": "eba406ca4e5cc5fa02b32244242df79994fce08b1c1baaea45589d5fb6c58e36",
+  "script_sha256": "666be8ac4643c0271c310970a1b70b211486530e3822d7d295b44bca5eb9f9aa",
+  "recomputed_contrasts": {
+    "contrasts": 2204,
+    "scalar_values": 37468,
+    "maximum_difference_from_independent_fsum": 0
+  },
+  "groups": {
+    "road_off_baseline": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 18,
+      "small_cases": 45,
+      "small_within": 2,
+      "original_misses": 96,
+      "recovered_original_misses": 0,
+      "passing_controls": 20,
+      "control_regressions": 0,
+      "strict_particle_flagged_cases": 1,
+      "zero_export_meaningful": 11,
+      "mean_positive_meaningful_log10_ratio": -0.8481748782217602,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_off_both": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 61,
+      "small_cases": 45,
+      "small_within": 0,
+      "original_misses": 96,
+      "recovered_original_misses": 44,
+      "passing_controls": 20,
+      "control_regressions": 3,
+      "strict_particle_flagged_cases": 0,
+      "zero_export_meaningful": 0,
+      "mean_positive_meaningful_log10_ratio": -0.32512980500814576,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_off_buffer_cap": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 64,
+      "small_cases": 45,
+      "small_within": 0,
+      "original_misses": 96,
+      "recovered_original_misses": 47,
+      "passing_controls": 20,
+      "control_regressions": 3,
+      "strict_particle_flagged_cases": 1,
+      "zero_export_meaningful": 0,
+      "mean_positive_meaningful_log10_ratio": -0.28302993590363307,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_off_fill_fixed": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 18,
+      "small_cases": 45,
+      "small_within": 9,
+      "original_misses": 96,
+      "recovered_original_misses": 8,
+      "passing_controls": 20,
+      "control_regressions": 1,
+      "strict_particle_flagged_cases": 0,
+      "zero_export_meaningful": 11,
+      "mean_positive_meaningful_log10_ratio": -0.9775481802780334,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_on_baseline": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 42,
+      "small_cases": 45,
+      "small_within": 3,
+      "original_misses": 96,
+      "recovered_original_misses": 25,
+      "passing_controls": 20,
+      "control_regressions": 0,
+      "strict_particle_flagged_cases": 0,
+      "zero_export_meaningful": 11,
+      "mean_positive_meaningful_log10_ratio": -0.4473813749108773,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_on_both": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 63,
+      "small_cases": 45,
+      "small_within": 0,
+      "original_misses": 96,
+      "recovered_original_misses": 46,
+      "passing_controls": 20,
+      "control_regressions": 3,
+      "strict_particle_flagged_cases": 0,
+      "zero_export_meaningful": 0,
+      "mean_positive_meaningful_log10_ratio": -0.17731946559713085,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_on_buffer_cap": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 64,
+      "small_cases": 45,
+      "small_within": 0,
+      "original_misses": 96,
+      "recovered_original_misses": 47,
+      "passing_controls": 20,
+      "control_regressions": 3,
+      "strict_particle_flagged_cases": 0,
+      "zero_export_meaningful": 0,
+      "mean_positive_meaningful_log10_ratio": -0.13494229477766864,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    },
+    "road_on_fill_fixed": {
+      "cases": 116,
+      "completed": 116,
+      "existing_physical_audit_pass": 116,
+      "meaningful_cases": 71,
+      "meaningful_within": 41,
+      "small_cases": 45,
+      "small_within": 6,
+      "original_misses": 96,
+      "recovered_original_misses": 28,
+      "passing_controls": 20,
+      "control_regressions": 1,
+      "strict_particle_flagged_cases": 1,
+      "zero_export_meaningful": 11,
+      "mean_positive_meaningful_log10_ratio": -0.47664096587681204,
+      "reviewed_physical_acceptance": "pending independent review; flags require exact applicability or new explanation"
+    }
+  },
+  "small_original_misses": {
+    "cases": 43,
+    "designs": {
+      "outunrut": 43
+    },
+    "climates": {
+      "charleston": 1,
+      "denver": 28,
+      "flagstaff": 14
+    },
+    "zero_references": 28,
+    "unresolved_all_eight": 35,
+    "original_and_road_on_positive_fill_negative_buffer": true,
+    "paired_effects": {
+      "road": {
+        "median_paired_kg_yr": 1.3793673401962216,
+        "increases": 34,
+        "decreases": 7,
+        "unchanged": 2
+      },
+      "fill": {
+        "median_paired_kg_yr": -0.8189993582415074,
+        "increases": 1,
+        "decreases": 42,
+        "unchanged": 0
+      },
+      "buffer": {
+        "median_paired_kg_yr": 8.27620404117733,
+        "increases": 43,
+        "decreases": 0,
+        "unchanged": 0
+      }
+    }
+  },
+  "control_regressions": [
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none"
+      },
+      "reference_kg_yr": 0.0,
+      "lanes": {
+        "road_off_baseline": {
+          "export_kg_yr": 0.7758941288603748,
+          "within": true
+        },
+        "road_on_baseline": {
+          "export_kg_yr": 0.7758941288603748,
+          "within": true
+        },
+        "road_off_fill_fixed": {
+          "export_kg_yr": 0.646578440716979,
+          "within": true
+        },
+        "road_on_fill_fixed": {
+          "export_kg_yr": 0.6896836700981109,
+          "within": true
+        },
+        "road_off_buffer_cap": {
+          "export_kg_yr": 4.612259543781117,
+          "within": false
+        },
+        "road_on_buffer_cap": {
+          "export_kg_yr": 4.612259543781117,
+          "within": false
+        },
+        "road_off_both": {
+          "export_kg_yr": 4.138102020588666,
+          "within": false
+        },
+        "road_on_both": {
+          "export_kg_yr": 4.051891561826402,
+          "within": false
+        }
+      }
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none"
+      },
+      "reference_kg_yr": 0.0,
+      "lanes": {
+        "road_off_baseline": {
+          "export_kg_yr": 0.9914202757660345,
+          "within": true
+        },
+        "road_on_baseline": {
+          "export_kg_yr": 0.9483150463849025,
+          "within": true
+        },
+        "road_off_fill_fixed": {
+          "export_kg_yr": 1.1638411932905621,
+          "within": false
+        },
+        "road_on_fill_fixed": {
+          "export_kg_yr": 1.2069464226716942,
+          "within": false
+        },
+        "road_off_buffer_cap": {
+          "export_kg_yr": 4.870890920067909,
+          "within": false
+        },
+        "road_on_buffer_cap": {
+          "export_kg_yr": 4.698470002543381,
+          "within": false
+        },
+        "road_off_both": {
+          "export_kg_yr": 4.396733396875457,
+          "within": false
+        },
+        "road_on_both": {
+          "export_kg_yr": 4.396733396875457,
+          "within": false
+        }
+      }
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 20.216352579750875,
+      "lanes": {
+        "road_off_baseline": {
+          "export_kg_yr": 180.52470064818053,
+          "within": true
+        },
+        "road_on_baseline": {
+          "export_kg_yr": 193.1545328568522,
+          "within": true
+        },
+        "road_off_fill_fixed": {
+          "export_kg_yr": 178.67117578479184,
+          "within": true
+        },
+        "road_on_fill_fixed": {
+          "export_kg_yr": 186.17148569710884,
+          "within": true
+        },
+        "road_off_buffer_cap": {
+          "export_kg_yr": 419.28456619027037,
+          "within": false
+        },
+        "road_on_buffer_cap": {
+          "export_kg_yr": 447.00122868233814,
+          "within": false
+        },
+        "road_off_both": {
+          "export_kg_yr": 418.81040866707787,
+          "within": false
+        },
+        "road_on_both": {
+          "export_kg_yr": 437.130131154059,
+          "within": false
+        }
+      }
+    }
+  ],
+  "next_study_seed_evidence": [
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 0.0,
+      "candidate_kg_yr": 7.155468077267901,
+      "candidate_boundary_kg_yr": [
+        0.0,
+        46.55634180845882,
+        7.163550307776863
+      ],
+      "reference_boundary_kg_yr": [
+        0.0,
+        98.83220874042657,
+        0.0
+      ],
+      "reference_record_sha256": "e29c5925f43e54e5d2b687e63b2d8dc534d22bec5fc1fcae95f6a499f66ec40c",
+      "reference_element_sha256": "9741dd56886c74da1554e8804cb5eb6b233f8faab6f140b92d58bec121780736",
+      "candidate_record_sha256": "8c2cda5f94eeaafd64d903abd2f39a3881700f1d1c9a3afb060484bfab525a9c",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 0.4310522938113194,
+      "candidate_kg_yr": 13.664357713818823,
+      "candidate_boundary_kg_yr": [
+        34.653910345593744,
+        35.35975847670978,
+        13.65088732963722
+      ],
+      "reference_boundary_kg_yr": [
+        54.967249691452174,
+        53.29961612976963,
+        0.41488783279339486
+      ],
+      "reference_record_sha256": "ff60b1721ac26d5445e320ccc014b8b361a383a202ae4df911b063b874d195f3",
+      "reference_element_sha256": "a3b35279dc63023323b04e162653c70ff7ff814b751b1bf46a618cf4dca046b6",
+      "candidate_record_sha256": "bc6df89a0555549431fffed4f374307d7d9e2a9426b10283ddeb368e112d8c54",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none"
+      },
+      "reference_kg_yr": 0.08621045876226387,
+      "candidate_kg_yr": 4.482943855637721,
+      "candidate_boundary_kg_yr": [
+        0.0,
+        5.891946041033476,
+        4.485637932474043
+      ],
+      "reference_boundary_kg_yr": [
+        0.0,
+        1.1557589627816,
+        0.09159861243490537
+      ],
+      "reference_record_sha256": "b9254fcb4af48f21793c77a5b4f88831e8189fa3e68092fa83d88d9843a26fe4",
+      "reference_element_sha256": "1287f670a40369c8fe1c05b8725dc949af0c714e3065e48b2f57605195999d5a",
+      "candidate_record_sha256": "dfdf2b5b840fc0cf3881ce4cdaf07b0e136eb700bfa8d1dc108292bb60754e3e",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none"
+      },
+      "reference_kg_yr": 0.0,
+      "candidate_kg_yr": 0.7758941288603748,
+      "candidate_boundary_kg_yr": [
+        0.0,
+        3.601980730160838,
+        0.7947526667146201
+      ],
+      "reference_boundary_kg_yr": [
+        0.0,
+        0.3744766802485837,
+        0.0
+      ],
+      "reference_record_sha256": "831a73b6b3a362cc19b7025be05b3be3ee918cf866ab2e444a56cf2c49e155e2",
+      "reference_element_sha256": "25bc26b563383dbc764240d6588bcef60bc6a822d00bedf33868721da303956d",
+      "candidate_record_sha256": "2f04acbf482755396b58bb918fc533b9f61508e7605c23f130444109af14e9f8",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none"
+      },
+      "reference_kg_yr": 0.0,
+      "candidate_kg_yr": 0.9914202757660345,
+      "candidate_boundary_kg_yr": [
+        0.0,
+        1.4467192611042403,
+        1.0021965831113175
+      ],
+      "reference_boundary_kg_yr": [
+        0.0,
+        0.21283207006933896,
+        0.0
+      ],
+      "reference_record_sha256": "2a7f55f0126aba7eb26476c4b5abc38245dc697a154979f57f088f0ebd76cd7e",
+      "reference_element_sha256": "ffeb9ff857de2be60d285ed2fa3bd6e69695ff9ed01d1e2d80339fda3b030169",
+      "candidate_record_sha256": "753f8d33d8cfa377feaad7cffeb086bc735bb94ce606668715ebfe5fee3e6fea",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 20.216352579750875,
+      "candidate_kg_yr": 180.52470064818053,
+      "candidate_boundary_kg_yr": [
+        76.8808706780851,
+        78.257543941445,
+        180.55433549338002
+      ],
+      "reference_boundary_kg_yr": [
+        119.18326516199349,
+        120.91555656774773,
+        20.22712888709616
+      ],
+      "reference_record_sha256": "80141b411368c684155c65d4fb6580935766faefdea64cb4d91a53bbb7fdfa04",
+      "reference_element_sha256": "c766dac084bef9a64f120e1f1e5adc194f655cc61743a8cb2ac805ae02e05fb5",
+      "candidate_record_sha256": "2cf2a9517c6cc7cac723bc31bc01dbbcd8cce41ec1fdc30edd601a23c8d76cde",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 1.1207359639094303,
+      "candidate_kg_yr": 0.0,
+      "candidate_boundary_kg_yr": [
+        0.0,
+        4.792762691814607,
+        0.0
+      ],
+      "reference_boundary_kg_yr": [
+        0.0,
+        5.902722348378754,
+        1.1207359639094303
+      ],
+      "reference_record_sha256": "1906292144cb28fbff0c5076d1f8191cd0715ce704fabcda8f005718014b7cab",
+      "reference_element_sha256": "a00f477320ae8b1553d4a77ea85ef8eacefbd1112ac5a3007d9dd1a6a74babe9",
+      "candidate_record_sha256": "32300d42dd6b9d62f8c511ba247e46ea4f4acad29d7b81f46ccd83b4a00aaf7f",
+      "matched_climate_management_slope": true
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high"
+      },
+      "reference_kg_yr": 0.0,
+      "candidate_kg_yr": 8.146888353033935,
+      "candidate_boundary_kg_yr": [
+        19.8822870520471,
+        75.89483855599168,
+        8.152276506706578
+      ],
+      "reference_boundary_kg_yr": [
+        73.09299864621815,
+        124.4043860707831,
+        0.0
+      ],
+      "reference_record_sha256": "16471a61ace0e6cc4500c3aecdfa840bee2ff90ea2297916126437a17214aadd",
+      "reference_element_sha256": "32e9dc31ef2fe3e30a7632bd08bb299dcbe80cf05b3c26564f6b131cf6f26d16",
+      "candidate_record_sha256": "72c1353633aed78e23a2d8c7960f58e63629f7b1b9cf5aae498bc449c879dace",
+      "matched_climate_management_slope": true
+    }
+  ],
+  "limitations": [
+    "Selected diagnostic panel is not a population estimate or broad success estimate.",
+    "Boundary net exchange is not tagged source attribution; gross local source and deposition may coexist.",
+    "Comparing legacy WEPP2010 to modern generated soils confounds engine and soil state; add exact-R4 legacy-soil seed anchors before attribution.",
+    "The tested factors do not exhaust hydraulic mechanisms; these results do not prove a new native defect or justify changing generated texture/erodibility to match templates.",
+    "No holdout, production default, coefficient search, or UI implementation is approved."
+  ]
+}

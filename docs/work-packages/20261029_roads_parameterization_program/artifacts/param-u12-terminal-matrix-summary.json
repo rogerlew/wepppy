@@ -1,0 +1,49 @@
+{
+  "receipt": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-terminal-matrix-audit-u12/final-receipt.json",
+  "receipt_sha256": "b768e3fbe05b21de714ddc601929efd33025a9ceb9d499db599eb21174dad6c5",
+  "summary": {
+    "expected_cases": 1188,
+    "completed_cases": 1188,
+    "pending_cases": 0,
+    "final_inventory_verified": true,
+    "all_input_output_bytes_rehashed": true,
+    "negative_calls": 40006,
+    "classification_counts": {
+      "seed_terminal_sliver": 39765,
+      "wider_terminal_band_requires_disposition": 235,
+      "positive_hump_terminal_requires_disposition": 6
+    },
+    "negative_calls_by_panel": {
+      "downstream-fill_fixed": 2330,
+      "downstream-buffer_cap": 2051,
+      "downstream-both": 2497,
+      "roads": 33128
+    },
+    "negative_calls_by_soil": {
+      "2711184": 4041,
+      "2711250": 3127,
+      "1718465": 10720,
+      "1718494": 6638,
+      "1718510": 5599,
+      "1856573": 5255,
+      "53949": 4626
+    },
+    "native_wet_coordinate_count_histogram": {
+      "0": 38060,
+      "1": 1711,
+      "2": 228,
+      "3": 7
+    },
+    "support_shape_counts": {
+      "whole_interval_monotone": 40000,
+      "positive_hump_then_terminal_band": 6
+    },
+    "calls_with_negative_native_wet_coordinate": 1946,
+    "max_negative_native_wet_coordinates": 3,
+    "max_negative_width": 5.223192725322588e-08,
+    "max_continuous_terminal_integral_bound": 0.0027601493424835844,
+    "max_native_wet_integral_bound": 0.001198802501100558,
+    "max_native_wet_weighted_model_error": 8.798294615081948e-07,
+    "disposition": "Evidence inventory only; no physical/magnitude criterion is waived."
+  }
+}

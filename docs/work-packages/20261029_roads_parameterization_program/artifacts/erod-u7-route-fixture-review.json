@@ -1,0 +1,60 @@
+{
+  "observer": "/tmp/erod-u7-route-review-iwwmwj9w",
+  "source_sha256": {
+    "/tmp/erod-u7-route-review-iwwmwj9w/route.for": "a632bd87a03cf790db1b4eaae1a393f036b1afdc468d48f4947704933fcf4d92",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-event-u6/probe/src/erod.for": "422d30692ac31327ee01a9ef8ea83b9543c46f9c1f985434fbd9037720847814",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-event-u6/probe/src/runge.for": "9d450d55beca548c714925d309774e9a4d0d8a40e08b248a413f187b31dc31bb",
+    "/tmp/erod-u7-route-review-iwwmwj9w/depos.for": "ea0ab4ba89be57275e47ebb7595fd97ab5e1326d268591727d64a86cb7b2ae94",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-event-u6/probe/src/depeqs.for": "0b8229de965954d88e085c80644ac52c2bbab8c072877a4d0acdc28237a55d62",
+    "/workdir/wepp-forest-release-20261009/src/depend.for": "8a3178548b21969a48d159f74eee86e7b2ed4f32cf32020a48f130004ea7d01e",
+    "/workdir/wepp-forest-release-20261009/src/enrich.for": "b81eb9822c4fb15797ef112280d3907fafd16585b70c46856b9ae3fc86257989",
+    "/workdir/wepp-forest-release-20261009/src/xcrit.for": "0dae619522531ac8502e6d33785df7ea0bd4419d23db2de288ae7ea8ee8ef2f8",
+    "/workdir/wepp-forest-release-20261009/src/root.for": "28dd2e2b357ccb45758095066a39b5b6034e218e848740586b1b2113b3f845d3",
+    "/workdir/wepp-forest-release-20261009/src/shear.for": "927aec3f009ef6f08b122de23d3f92f22c6de39182c248a9050b6c5967263dd2",
+    "/workdir/wepp-forest-release-20261009/src/undflo.for": "1bbd30b4deb6018c080110afabf4c922c3da666208639e5cba3e1b0ac3276d03",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/erod-event-u6/probe/src/cross.for": "8f77f355604c77028d0a7b355e8963283a992497d000b7954680506308f0b27f"
+  },
+  "rows": [
+    {
+      "name": "ordinary_transition",
+      "q": 1,
+      "initial_load": 0.0007,
+      "theta": 0.1,
+      "returncode": 0,
+      "stdout": " ROUTE_NDEP   3.00000096E-03   1.00000005E-03\n DEPOS_ENTRY   3.00000096E-03   1.00000000       0.00000000       1.00000005E-03           1\nRESULT    6.99999975040555000E-04    1.69515958987176418E-03    5.92581070959568024E-02    1.00000004749745131E-03    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": "",
+      "expected_first_grid_load": 0.0016951596916676553
+    },
+    {
+      "name": "small_wet_inflow_excess",
+      "q": 0.001,
+      "initial_load": 0.01,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " ROUTE_NDEP   0.00000000       9.99999978E-03\n DEPOS_ENTRY   0.00000000       1.00000000       0.00000000       9.99999978E-03           1\nRESULT    9.99999977648258209E-03    1.00000004749745131E-03    1.00000004749745131E-03    1.00000004749745131E-03    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": "",
+      "expected_first_grid_load": 0.0010743802199930873
+    },
+    {
+      "name": "ordinary_wet_inflow_excess",
+      "q": 1,
+      "initial_load": 0.01,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": " DEPOS_ENTRY   0.00000000       1.00000000      -1.79999992E-02   9.99999978E-03           1\nRESULT    9.99999977648258209E-03    9.82266478240489960E-03    3.25000006705522537E-03    1.00000004749745131E-03    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": "",
+      "expected_first_grid_load": 0.009822664230389922
+    },
+    {
+      "name": "no_transition",
+      "q": 1,
+      "initial_load": 0.0007,
+      "theta": 0,
+      "returncode": 0,
+      "stdout": "RESULT    6.99999975040555000E-04    6.99999975040555000E-04    6.99999975040555000E-04    1.00000004749745131E-03    1.00000000000000000E+00    1.00499999523162842E+00\n",
+      "stderr": "",
+      "expected_first_grid_load": 0.000699999975040555
+    }
+  ],
+  "scope": "Actual ROUTE, EROD, DEPOS, DEPEND, XCRIT, ENRICH with observation-only WRITE statements in ROUTE and DEPOS copies; no physics mocks."
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261029",
+  "artifact_revision": 4,
+  "document_revision": "4",
+  "document_date": "2026-10-31",
+  "publication_status": "approved for authorized publication",
+  "approval_record": "Owner authorized same-name replacement of undeployed release and updated release notes. Independent AI scientific and publication reviewers approved the exact revision-4 PDF; no claim of owner review of revision 4 or institutional peer review.",
+  "pdf_filename": "wepp_261029_release-notes-r4.pdf",
+  "pdf_sha256": "ff2c0643c22ed2d4e0135d403f27675e1db9923cc21c6a61a0addb7cec4c61fd",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r4.pdf",
+  "pages": 7,
+  "figures": 2,
+  "model_source_identity": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "source_comparison_baseline": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "binary_sha256": {
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "superseded_artifact": {
+    "artifact_revision": 3,
+    "document_revision": "3",
+    "pdf_filename": "wepp_261029_release-notes-r3.pdf",
+    "pdf_sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+    "model_source_identity": "6112b68bce0e21a77f510bde5c24af067a47a647",
+    "binary_sha256": {
+      "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+      "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+    }
+  },
+  "preserve_issued_earlier_pdfs": true,
+  "scientific_acceptance_sha256": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
+  "completed_actual_byte_gates": {
+    "native_tests": 1253,
+    "hillslope_watchlist": 28,
+    "disturbed_tests": 99,
+    "roads_physical_cases": 840,
+    "downstream_physical_cases": 348,
+    "exact_parity_source_observations": 1188,
+    "host_smokes": 2
+  },
+  "final_cedar": {
+    "hillslopes": 864,
+    "years": 24,
+    "outlet_sediment_kg": 517671.83,
+    "revision3_outlet_sediment_kg": 517670.63,
+    "sediment_change_kg": 1.2,
+    "water_metrics_unchanged": true,
+    "raw_water_and_soil_files_identical": 1728,
+    "input_files_identical": 5201,
+    "pass_conversion_rows": 7573824,
+    "water_conversion_rows": 16690464,
+    "rejected_conversion_records": 0
+  },
+  "known_limitations": [
+    "Roads magnitude remains713/766 meaningful and31/74 small; no parameterization or UI implementation accepted.",
+    "Two strict fraction flags remain reported with exact-source arithmetic certificates; no tolerance relaxation or renormalization.",
+    "Raw capacity is not strictly nonnegative:40006 observed negative calls have quantified dry-terminal support, including up to three native wet coordinates. Local dimensionless error bounds are not annual mass-error certificates.",
+    "Reported discharge consistency is not a universal physical water budget; complete contour coverage and arbitrary-input universality are not claimed.",
+    "No new Windows release or production deployment. Earlier report revisions remain immutable."
+  ],
+  "public_attachments": [
+    "PDF report",
+    "this manifest"
+  ],
+  "legacy_source_attached": false,
+  "source_freeze_sha256": "3ee87d1cc5b6523c01c50949d121ce8e613163703d2470e4339e1816668ce892",
+  "comparison_baselines": {
+    "source": "revision 3",
+    "roads": "frozen revision-3 840-case benchmark",
+    "downstream": "revision-3 downstream-hydraulics 348 treatments",
+    "cedar": [
+      "U11",
+      "revision 3"
+    ]
+  },
+  "approval_date": "2026-10-31",
+  "review_receipts": {
+    "scientific_report_sha256": "078a7e1e83e3199df113295606b5abf6004b9265ed09b5c974c1f6d4c0197979",
+    "publication_acceptance_sha256": "01cec6b5f62ac02b07dd3474d296901436b35fda59545107fc9cc070f77fe65b"
+  }
+}

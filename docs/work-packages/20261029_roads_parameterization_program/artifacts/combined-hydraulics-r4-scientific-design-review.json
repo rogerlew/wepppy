@@ -1,0 +1,33 @@
+{
+  "reviewer": "depend_science_review",
+  "disposition": "Scientifically acceptable to execute the predeclared diagnostic factorial; parameterization acceptance remains pending.",
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/combined-hydraulics-r4/declaration.json": "65e11c3ef78795e4faae29d7ac3951bc5c654b4f2f1f8e74574e8cce2d72d781",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/combined-hydraulics-r4-plan.md": "9d3a7c802c576cd13bc089abb0a8b6deefff702f103d230f6158c68f69a4b02f",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/combined_hydraulics_r4.py": "30340616218f23dc354e306e97a746dab3de79c67f0a11ecc6406fede66b6194",
+    "/workdir/wepppy/docs/adrs/ADR-0120-roads-generated-hydraulic-sensitivity.md": "7941d3854157b6851aa83f87b5f28c47d0724aea79842f1c38ed683ed721ca1c"
+  },
+  "checked": {
+    "cells": 928,
+    "new_cells": 464,
+    "empty_new_output_directories": true,
+    "effective_dependencies": 70,
+    "dependency_hashes_match": true,
+    "controls_per_combination": 20
+  },
+  "findings_resolved": [
+    "All passing controls required for every candidate combination.",
+    "First-, second-, and third-order paired continuous finite differences declared and implemented at every background.",
+    "Five individual strata, original outcome groups, and all case intersections retained.",
+    "Strict particle flags and reviewed physical acceptance remain separate from historical within and physical_pass fields.",
+    "Effective transitive helpers, owned readers, installed native reader bytes and resolved climate calendar are pinned."
+  ],
+  "scope_limits": [
+    "The 116-case panel was selected for diagnosis; it does not estimate full-matrix success or general population effects.",
+    "Road pore and conductivity changes are coupled and cannot be separately attributed.",
+    "Uniform 200 mm treatment, paved transfer, fixed normalized retention shape and legacy buffer avke-to-horizon Ksat transfer remain hypotheses.",
+    "OFE net boundary exchange is not tagged sediment-source attribution.",
+    "Every candidate requires all 20 controls, closure of new unexplained accounting flags, and fresh broad validation before holdouts or production consideration.",
+    "No UI implementation or parameter/default changes are approved by this design review."
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "status": "harness staging failure; no accepted results",
+  "cause": "Reused stdout/stderr and all reference.sol auxiliary files omitted; validate_runtime requires them. New native executions were unaffected but audits could not accept incomplete staging.",
+  "source_declaration_sha256": "830cb7a8d49189ad0c2decc02e788ab55cce8fa2265c0f875cff29bf411c522c",
+  "run_log_sha256": "5cc2954a17672c2aa3a249cc6deb3b4f64b1bfc19b1d8f913ef6f754eb34d6cb",
+  "new_native_executions": 9,
+  "accepted_records": 0,
+  "attempt_root": "out/roads-parameterization-program-20261031/combined-hydraulics-r4",
+  "executions": [
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_baseline/birmingham-2711184-inveg-gravel-low",
+      "stdout_sha256": "4056221e5576f4b6d6492c846f37c7bc7dbbff099940f597b5c9ab29be872fb0",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "e9bff9b18107aaf52c28c6c069bec442be4a5872fa88eea83f62d61c92f30e20",
+        "H1.soil.dat": "2d002e015d0338e67235c9d23a9c4321730f30d781bac63d295c495fefd6dc44",
+        "H1.pass.dat": "542d2006ebcc48e36242a6b4a4e2bcbddbfc530c95e1543af524eea93c49586e",
+        "H1.plot.dat": "ab315cd31eb37edc0f5201c9bc1acb4fbf27fff47ef537a3c2993ecd690bf4bb",
+        "H1.wat.dat": "26c86b8728f8919341af06667b6b828a2d94dee2b2e1d066410b92789fe4f30a",
+        "H1.element.dat": "6a41000b2164771f7b6db17a9269ebfa5a04f5bb35553ed1aef65c36c3448507",
+        "H1.ebe.dat": "9db6fb696c21d3854302e91cbd329b6f06a3219513cecec099b53790b9cf477f"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_baseline/birmingham-2711184-outunrut-gravel-none",
+      "stdout_sha256": "0720dcd849b4ea9767e94b4c274cb344e19d82399cc78ad4f6030d2351a60b62",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "516e72b8ca6ba1ec55f4be577ebb7d2876eb6405bfeb29f43f19fbcd5ba679d2",
+        "H1.soil.dat": "0b3e806c284b2f2fa835769ceb4984c6744b1f737d1fa9505f1da73fb2a7078a",
+        "H1.pass.dat": "4d3185afd4e654ca7bbd9289f67229c6eb583e48a67f512972f89abbd4f3c3cc",
+        "H1.plot.dat": "8d97e8d767ab4ee2519d7968f1b644d1ed08e583144673f0f26292dd9759db3c",
+        "H1.wat.dat": "03d312b4e1a30976e0238874f3f18dbde1d9db741c4aa37ea496787872f5be2d",
+        "H1.element.dat": "caf12f33b6e8194fb534fc4f1104bd90329275be688a202dd52fed106da38796",
+        "H1.ebe.dat": "712f76cf01f7a17925b0482cd3c03da73d6e16403d7261d259518c85298725dc"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_baseline/birmingham-2711184-outunrut-paved-none",
+      "stdout_sha256": "95b7e4fe51d3335c828b1f4fa83311837a0295c474b1e908fed2522b2d186681",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "9242ec13e7661d08a8f7160a55e15b7a98d23d08d04b67c36934f9666cb58942",
+        "H1.soil.dat": "19937b7df713b623ee22ede9582569ccf0f439033ffb264138afee5ca1958571",
+        "H1.pass.dat": "466906f30be0e26e22c1094ae32a1a038717f53f1460e04de75abf34b899c119",
+        "H1.plot.dat": "f1cd83a131b8b47d13af2bb65a146f95bb7dcd6768b1e2d020972526e6f4c724",
+        "H1.wat.dat": "14e9307a3b6a7118a1daaacf0ad555f1d3c094c4e0b7766dd23543bf5e74e6b3",
+        "H1.element.dat": "e081a10a36c84c5e306783e52ebe95b390deb758545237af11c605f166c0f6f1",
+        "H1.ebe.dat": "3f0a6c10a2cfdf5955d972ced661706da5bbfedbde524fbba71b9fc426496770"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_both/birmingham-2711184-inveg-gravel-low",
+      "stdout_sha256": "9ea1958e9b90e545abe4e7705b6f3ed6a814a88bd7d1c68b17929e156cad8c28",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "c77469cc406b548415cf3b627b102049dd40ac39858285d34345d68b2b8ea745",
+        "H1.soil.dat": "646f7ed0e003b7903ccf43fb2f2e2d75897a6a41070126f6555bda67fad71d1a",
+        "H1.pass.dat": "4013405fb33872df6cf45e52b0de87681d73f1749c1aad68e31b952c2efc93ab",
+        "H1.plot.dat": "9f89ec56604107d6f4e58eb6366594ebe021db5495ffc7b57cceaa73d2c326b7",
+        "H1.wat.dat": "684a14185fb15d005f9310bcf20e98f9cbf2a7bf9eb566e588946dc43db1802d",
+        "H1.element.dat": "03d47c1fa12216d4eefcaaf6b6cabc4b13c21ab30e2ee90472e669606314976e",
+        "H1.ebe.dat": "f023ac12fcc3d40b258083239dbd347a2274cac0e65ffcdca48887222f60aaf8"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_both/birmingham-2711184-outunrut-gravel-none",
+      "stdout_sha256": "52b2d4b5c282c45eb3a3644fe38b3644653c756c50451f19566fb1b4e71a0c83",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "e4593340cabc6c95177eb6cb16e1ad9b34671d61ef1a8305aa8f2c7e7d1ff71f",
+        "H1.soil.dat": "342d94077bb363d6b180a8df787c6a639d53edc5a9db61ac20072f4e3c1ee96a",
+        "H1.pass.dat": "3329ba01a288dc89ed32c2751684130781124590f9f812ebe2a19b8827a5f67e",
+        "H1.plot.dat": "587780a2d2cafa950df83932d87ddc6a9580c1344a7553725ca70c3b58813156",
+        "H1.wat.dat": "fc8acfe883bbc346dca7c12a8c78e6b54c60359edefbc3732c2b8d7dbb5242bf",
+        "H1.element.dat": "b8bae1c41458bd27def2006ef9f90fc4c988124a3de52e8f0ec468ad54384be4",
+        "H1.ebe.dat": "ce623ceb6a9be9d123a05ad160cff408764681bdd6375b9fead6e24d40d39666"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_buffer_cap/birmingham-2711184-inveg-gravel-low",
+      "stdout_sha256": "4056221e5576f4b6d6492c846f37c7bc7dbbff099940f597b5c9ab29be872fb0",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "633d958f177467159b12ede9b6c7c2f073f8c1b282f66d221789cd17cdfa576e",
+        "H1.soil.dat": "af20a07f9aa3e39a7f9e923edd8eaff63fd01c58284ee581ca80cbc7eb792ea3",
+        "H1.pass.dat": "06ed88775e1687e1ff76d47e6f1b29d9e0dd367f6f0c5e3bded7fdf32daf0df1",
+        "H1.plot.dat": "8a4a958c3c88249f1e15f0a88f87ef5240c88fa73df12bddaa64416610bac7e6",
+        "H1.wat.dat": "788c7dc6bf8f2ce795b1739b41665444bc113c54237255bdc23b43749c6115a1",
+        "H1.element.dat": "404c27fbcccd2c395d338569b09b1ea0dab440a4143658420f59af3039505a9f",
+        "H1.ebe.dat": "d9abbeed7858e2e2c1271ecb58137eddc51d2150365bf0d7dffefb7458c412fd"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_buffer_cap/birmingham-2711184-outunrut-gravel-none",
+      "stdout_sha256": "0720dcd849b4ea9767e94b4c274cb344e19d82399cc78ad4f6030d2351a60b62",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "20f32a5c10d445fc2c2e577457955e899a1b6ee8bae4ccfa3aea90cd3f84d603",
+        "H1.soil.dat": "4286b56113a026f276b65291a0180bccf03c8f66c305bbc6ef518e687b315881",
+        "H1.pass.dat": "116ed5030bdaffb1931ea467c1994b26d897004fbebec5e30107009a79823708",
+        "H1.plot.dat": "bc679b855960795b8e2707a44900e7579b0b8f42f9af75b028074d77db367150",
+        "H1.wat.dat": "c1ef5581e04ad193aa33016f29830fa7065b7a2233bf8a5aaac7bf566fd55db0",
+        "H1.element.dat": "705052ea4b05dc078801de1223cb693ab20fc4a703b21da1c196385b803e8498",
+        "H1.ebe.dat": "e828f03500bc25a73782c62bb963c47ea74fa1482e573505d2f1e6fff4ecdb40"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_fill_fixed/birmingham-2711184-inveg-gravel-low",
+      "stdout_sha256": "9ea1958e9b90e545abe4e7705b6f3ed6a814a88bd7d1c68b17929e156cad8c28",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "030be1cfb289b152d96606b1b8f7c9b8380b9e6ae82cb1edc1f05ae8758029ce",
+        "H1.soil.dat": "28b691be44874ba5dc7dd9995837c00dfd6fe5431b814fa4584fe34088e3e0e1",
+        "H1.pass.dat": "cf2c5de4a40528d3b3e82b26f4f9fec0977a2beef223a4a23f23652ed8b50f9b",
+        "H1.plot.dat": "2448d7e0257c5a471ccc3da51dd8dbef92452ac0a1b51bf8b8c99c56d12a8525",
+        "H1.wat.dat": "ce51ae5e7de69e7a53bdb4dd3116fe63bd4aa603a97a79539b68ac6d3b9e8761",
+        "H1.element.dat": "c19edc22e504d75bdaff1c3bc6cb20777c9863c5c56d5e3ae44ed0d477a0df34",
+        "H1.ebe.dat": "1e97fc9fc95aeaec6e5c7acd406300989ef6a4e7c7f832890e532340bacaa0ca"
+      }
+    },
+    {
+      "folder": "out/roads-parameterization-program-20261031/combined-hydraulics-r4/cases/road_on_fill_fixed/birmingham-2711184-outunrut-gravel-none",
+      "stdout_sha256": "52b2d4b5c282c45eb3a3644fe38b3644653c756c50451f19566fb1b4e71a0c83",
+      "completed_banner": true,
+      "missing_reference_sol": true,
+      "native_outputs": {
+        "H1.loss.dat": "8189c6669e397ceeece67606fd10fbc0acbb8498c2c622fe2dd3a16f68fe6894",
+        "H1.soil.dat": "dabb2b701b42a9d55488cb544ec969aa068587793b8adfa3216d0b2f4a87517d",
+        "H1.pass.dat": "ceac1a8e302c22c5815395f4ec5929d287447ede429d8c2e2582b3b6919a5df8",
+        "H1.plot.dat": "6978b477335e57fa278632b745ad628c9ff8329802aaaa5e4568fbb3b685bd89",
+        "H1.wat.dat": "9720854754b819b6c0f0e53483ff947adb2a08e5f89c22dec9b2027714557a49",
+        "H1.element.dat": "34206d6f734bf86a676673de57004e347ff0a27d26814f9d268bcb5a3ba773c1",
+        "H1.ebe.dat": "7aca478f11372fca484bc6d828a8dd83d70834a78307ee94c690aedd12c11fba"
+      }
+    }
+  ],
+  "remedy": "New v2 directories explicitly copy/hash required auxiliary files and reused runtime logs; one reused and one fresh full audit must pass before broad execution. Factors and executable unchanged."
+}

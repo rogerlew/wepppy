@@ -1,17 +1,17 @@
 {
-  "artifact_revision": 3,
+  "artifact_revision": 4,
   "binary_name": "wepp_261029_hill",
   "binary_role": "hillslope",
   "build": {
-    "build_log_sha256": "d2b42ed8f6f00b3373765c06a582075b821458c5122ed5e7319370874396f9b1",
-    "build_script_sha256": "555cdd7ae93cadc1238962e9f663e8ed3c478cd4c82d5db3f130cc004f05320b",
-    "fixture_first_commit": "986ffe6e4d23ea7116ccb9309474ddbc799107e7",
+    "build_log_sha256": "0f188f92c90281b90eb8536a110cd0eab8817c408e9829254e417415401416bb",
+    "build_preceded_source_commit": true,
+    "candidate_source_manifest_sha256": "aa21435c12615c6bc119b2dcffd6bef4283bd2cb3ce6b7a0118d059858ecf447",
     "path_prefix": "/usr/bin:/bin",
-    "research_toolchain_comparison": "Research D2 used different binutils; all final gates rerun on canonical dated bytes. Instruction parity is narrower than whole-ELF equivalence.",
-    "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
-    "source_manifest_files": 506,
-    "source_manifest_path": "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/revision3-build-source-manifest.json",
-    "source_manifest_sha256": "d8d9cd041663ace3183558954df56cf7c64c1a719d25fee1978e1769a0b5f13c",
+    "source_base_commit": "5089a1b262c3f142fc0fa1223ebbe217c5dba36c",
+    "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+    "source_manifest_files": 489,
+    "source_manifest_sha256": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0",
+    "source_verification": "All 489 retained build inputs match committed source; no rebuild or strip at promotion",
     "toolchain": {
       "as": {
         "path": "/usr/bin/as",
@@ -40,7 +40,8 @@
       }
     }
   },
-  "built_utc": "2026-10-31T15:56:52Z",
+  "built_utc": "2026-10-31T20:39:11Z",
+  "built_utc_basis": "Retained exact candidate executable mtime; not promotion time",
   "capacity": {
     "ofes": 32
   },
@@ -65,6 +66,10 @@
     "process_mode_pass_pw0_required": true,
     "single_user_defined_inputs_supported": true
   },
+  "inherited_revision3_evidence": {
+    "scope": "Earlier defects and unchanged runtime contracts; historical validation counts do not describe revision 4",
+    "sidecar_sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  },
   "known_limitations": [
     "Acceptance is bounded by retained scalar/interface/native controls, full-period intermediate sign/finiteness checks and a 34-date local source/bed audit. It does not establish universal heterogeneous source ownership, whole-watershed closure or measured calibration.",
     "QINF also serves CONRUN contour runoff and WSHIRS channel-surface runoff. Complete CONRUN event empirical validation is not claimed. The idealized uniform-plane scalar domain does not prove arbitrary heterogeneous or unsteady routing.",
@@ -75,16 +80,15 @@
     "Storage subtotal repair preserves the existing contributing set and does not redefine channel processing-order membership or upstream state freshness.",
     "Channel transport retains segment-average width, linear capacity, onset/cohort handoff, hydraulic limiting guard and historical unit-conversion approximations.",
     "The stable Yalin factor applies to hillslope and channel capacities; correcting one negative class can change allocation for all classes. Fresh outputs were validated; complete output parity with the preceding candidate is not claimed.",
-    "Current Cedar outlet sediment is 517670.63 kg versus revision 2 517815.77 kg (-0.028029%). Annual differences range from -0.244772% to +0.009982%; one smaller event decreases 46.74%. Aggregate similarity is not event or calibration parity.",
-    "Water outputs change on 29/481 single-OFE and 26/383 multi-OFE Cedar hillslopes. Published volume changes -26.61 m3; sampled and reported peak products have distinct precision/support. No single-OFE or complete output parity with revision 2 is claimed.",
-    "Roads magnitude remains unmet: 713/766 meaningful references (93.081%) and 31/74 small references (41.892%); each requires 95% overall and 90% per declared major stratum. The 744/840 aggregate is descriptive only; two cases recover and seven regress. No parameterization, withheld-soil or UI acceptance is implied.",
-    "Disturbed outputs match D2 exactly; 96 generated soil inputs differ solely in one same-position Build Date comment. Raw inputs are not claimed byte-identical.",
-    "Regenerate the complete hillslope/PASS/watershed chain with this exact matched pair; the unchanged 261029 tag alone does not identify executable bytes.",
-    "No new Windows release, project default switch, completed application integration or production deployment is certified by this native metadata."
+    "Revision 4 Cedar outlet sediment 517671.83 kg versus revision 3 517670.63 kg over 24 years; +1.20 kg. All 5201 inputs and 1728 raw water/soil files match revision 3 and U11. Four raw sediment files differ from U11; aggregate similarity is not universal event parity.",
+    "Roads magnitude remains 713/766 meaningful and31/74 small. No parameterization, withheld-soil or UI acceptance.",
+    "Two strict fraction flags remain visible and explained by exact native arithmetic replay; no threshold or particle renormalization changes.",
+    "40006 negative raw-capacity observations are quantitatively explained on dry-terminal bands; raw capacity is not everywhere nonnegative. Local dimensionless error bounds are not annual mass certificates.",
+    "No new Windows release, project default switch or production deployment. Regenerate complete matched hillslope/PASS/watershed chain."
   ],
   "matched_pair_sha256": {
-    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
-    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
   },
   "math_runtime": {
     "architecture": "x86_64",
@@ -101,75 +105,47 @@
     "sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
     "source_commit": "c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307"
   },
-  "release_status": "revision 3 native repair accepted; application integration, publication and deployment are tracked separately",
+  "release_status": "Revision 4 native repair scientifically accepted; exact accepted bytes promoted; application and publication tracked separately",
   "release_tag": "261029",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
+  "sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
   "source_branch": "wepp_260430_negmeltfix_comparator",
-  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "supersedes": {
-    "artifact_revision": 2,
+    "artifact_revision": 3,
     "matched_pair_sha256": {
-      "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
-      "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+      "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+      "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
     },
-    "sha256": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
-    "sidecar_sha256": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
-    "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e"
+    "sha256": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
+    "sidecar_sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99",
+    "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647"
   },
   "validation": {
-    "application_suite": "Not certified by this native metadata; isolated application and post-vendor checks tracked separately",
-    "artifact_policy": "Final incident retention and policy closeout tracked separately; not asserted by this frozen native metadata",
-    "binary_provenance": "pass; actual dated system loader/runtime libraries; /usr/bin:/bin build PATH",
-    "channel_source_bed_audit": "pass within 34 declared dates: 12614 channel-events, 63070 source-class records; maximum source relative residual 2.0353e-7 and local signed-bed closure relative residual 2.7799e-8; exact segment joins",
-    "clean_full_period_parity": "12/12 final dated full-period output sets exactly match instrumented U3",
-    "disturbed_matrix": "99 tests pass over 96 final dated simulations; 768 native outputs exactly match D2, with 96 input Build Date comment-only differences retained",
-    "downstream_vendoring": "Tracked separately in WEPPpy docs/work-packages/20261031_wepp_261029_rerelease_r3; not included in native counts",
-    "elf_interpreter": "/lib64/ld-linux-x86-64.so.2",
-    "focused_geometry_controls": "35 permanent geometry/reference/fixture checks plus 4 watchlist-contract checks pass; native QINF compares to 21 independent finite-volume references under the original 0.005 gate",
-    "hillslope_watchlist": "28/28 pass on the actual dated hillslope binary; includes all ten sixteen-year funding trigger/control decks",
-    "host_smoke": "pass; both actual dated profiles complete the three-year host fixture",
-    "independent_implementation_review": "accepted by independent AI review for the exact source/pair and completed native gates; downstream delivery remains separate",
-    "independent_scientific_review": "accepted by independent AI review for the exact source/pair within documented limits; not institutional peer review or measured calibration",
-    "production_deployment": "No deployment is certified by this native metadata",
-    "pytest": "1095 passed, 2 existing tarfile deprecation warnings in 715.32 seconds on final source/pair",
-    "release_report": "Revision 3 report and publication approval tracked separately in docs/release-notes/wepp_261029/publication-manifest-r3.json",
-    "roads_development_panel": "840/840 physical/accounting pass; 5880 outputs and 10080 inputs exactly match D2. Magnitude remains unmet: 713/766 meaningful and 31/74 small; 744/840 aggregate descriptive only",
-    "same_build_watershed_replay": "pass; 864 fresh hillslopes and 24-year final dated Cedar watershed; all 6057 native outputs exactly match the reviewed D2 chain, with input/PASS provenance retained",
-    "scientific_observer": "nine standard watershed outputs exactly match; zero negative/nonfinite intermediate class transfers over all 24 years"
+    "application_suite": "Post-vendor gates tracked in revision4-delivery receipt",
+    "artifact_policy": "pass",
+    "binary_provenance": "System loader/runtime pass; no Homebrew/Conda paths",
+    "disturbed_matrix": "99 passed",
+    "downstream_panel": "348 physical checks pass, including one recovered native failure",
+    "hillslope_watchlist": "28 passed",
+    "host_smoke": "Both exact binaries pass",
+    "independent_scientific_review": "exact pair scientifically accepted",
+    "production_deployment": "not deployed",
+    "pytest": "1253 passed; 2 known tarfile deprecation warnings",
+    "roads_development_panel": "840 physical checks pass; magnitude remains unaccepted",
+    "same_build_watershed_replay": "864 fresh Cedar hillslopes and24 years; semantic/particle review passes within declared scope",
+    "source_observers": "1188 exact-output-parity replays; residual certificates accepted"
   },
   "validation_evidence": {
-    "implementation_review_path": "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-implementation-review.md",
-    "implementation_review_sha256": "bd57c3d0505d8b4141e127a10dea1d4ae65a78406fe323d2715c9908e0984cbb",
-    "native_gate_logs_sha256": {
-      "roads-native-funding-r3-clean-parity.log": "147db0db1b749c22d54c94ebb77c87d1e826edd851c7389fcccc3c339c3730e4",
-      "roads-native-funding-r3-dated-build.log": "d2b42ed8f6f00b3373765c06a582075b821458c5122ed5e7319370874396f9b1",
-      "roads-native-funding-r3-disturbed-parity-v2.log": "331e8a6905b35cca1c8451da00f47acf5d08889210590441c945889c1fc21994",
-      "roads-native-funding-r3-disturbed-parity.log": "3a0a41fa25471c21373a20f084d897bbfa23da42b489bd812ab7961988526b34",
-      "roads-native-funding-r3-disturbed.log": "4cdf59cd515a9711e534c776e541a5e7b57b874b555553a2c1c53abe74ddc2cd",
-      "roads-native-funding-r3-final-watchlist.log": "672c1e332301b9c2006db9cfe8928db356e56cb4aea9588be1e7aea42fda5c98",
-      "roads-native-funding-r3-full-tests.log": "f06468570aad76e85997591a82ff195652a3855095405a999f3866abfcfddc74",
-      "roads-native-funding-r3-isolated-preflight-v2.log": "28d4344ac6a5a7039ed227b15ef8c5eea8357ed0f2d1c6598581d42a939169c6",
-      "roads-native-funding-r3-isolated-setup.log": "1c291667c2c4e2b7c8d364c83a77b37f7b10eab3cf3e2c766ff55a5dcc1f1ae5",
-      "roads-native-funding-r3-matrix840.log": "ff01790cbaf684a4afab6855f27b51eea450dd446b8e328ceec224d3089f43ba",
-      "roads-native-funding-r3-provenance.log": "be6caa1f35146c37044f57e750728054a4ba695f06ab96a32d2762bb5302df6e",
-      "roads-native-funding-r3-smoke.log": "6228ee0be9c0fae6f4fbdc4cf2f820c6a50d9cdc2c3cc6a077410862dec52c26"
-    },
-    "receipt_sha256": {
-      "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-dated-instruction-review.json": "2538b9b25616f523e6afdd6283b60a7d9ab278021c4cd8193f6e6bd0ce272d6d",
-      "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-final-native-gates-review.json": "7f7afa36ede04d4ce9609b9c71179a51d2bab115e1ed0734fb19c86c201c4d67",
-      "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-final-scientific-acceptance.json": "c57c39d392680fda2a2f5a72ae76b40b616a6bb5ee216ffb686c6b0a26bf8247",
-      "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-implementation-review.md": "bd57c3d0505d8b4141e127a10dea1d4ae65a78406fe323d2715c9908e0984cbb",
-      "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-review.md": "27260d847c37f461655362fbed278db1dfe1638945e165dedf1d3d6eac918144",
-      "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/final-cedar-parity.json": "0ad968cee6fd8b80f764f2c3a39f96a04e3210422be78f8a9351c96a970fc662",
-      "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/final-disturbed-parity.json": "c1e49b187d183cd2a6378efcfe858e4abe378c73ab27bf5aa2a6c9492b1ade8a",
-      "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/final-roads-parity.json": "de507e69459c2c330fc4cfe3c3f775a4df310b68d2b08a7c16440c7aa9e2490b"
-    },
-    "scientific_acceptance_path": "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-final-scientific-acceptance.json",
-    "scientific_acceptance_sha256": "c57c39d392680fda2a2f5a72ae76b40b616a6bb5ee216ffb686c6b0a26bf8247",
-    "scientific_review_path": "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-review.md",
-    "scientific_review_sha256": "27260d847c37f461655362fbed278db1dfe1638945e165dedf1d3d6eac918144"
+    "param-u12-cedar-scientific-review.json": "31385d3f53da6de0b3cf8c900ccd82ec4ad211833d9d1d3be39db0d8e9f0b1e9",
+    "param-u12-gates-final.json": "e874c38766d19f713362ef578337ee3486b136611512b44aa99be47f70ed7631",
+    "param-u12-implementation-review.md": "6c989b5fb1b5e5f87285d7a138998c20c7e1873c8ce41f16a4d7417955aa4939",
+    "param-u12-mixed-reconstruction-clarification.md": "3599a5889036e59615b9284679aafed8bcd0baa22f1cfd74390031504c797c8b",
+    "param-u12-scientific-acceptance.json": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
+    "param-u12-scientific-disposition.md": "4e2b8d5d2a60107670147abde0e792349c0e71e86feaaa11fcbf5d14c440968d",
+    "revision4-artifact-policy.json": "32b9539e91f5ca9b3809da3588e2c7a12864f38bf336a7d170b5ab0b06754630",
+    "revision4-source-commit-verification.json": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0"
   },
   "wepp_banner_version": "2020.500"
 }

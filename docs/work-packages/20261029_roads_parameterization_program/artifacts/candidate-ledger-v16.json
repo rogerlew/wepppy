@@ -1,0 +1,66 @@
+{
+  "version": 16,
+  "predecessor": {
+    "path": "candidate-ledger-v15.json",
+    "sha256": "e8fb3ac00ba404748da9ae78bfbd5b08ed1094d1506bf3b7f3afda6f4f885487"
+  },
+  "engine": "wepp_261029 revision 4",
+  "binary_sha256": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+  "status": "no_parameter_candidate_accepted",
+  "native_engine_scientifically_accepted": true,
+  "full_development_gate": {
+    "cases": 840,
+    "meaningful_within": 713,
+    "meaningful_cases": 766,
+    "small_within": 31,
+    "small_cases": 74,
+    "thresholds_unchanged": true
+  },
+  "hydraulic_factorial": {
+    "cells": 928,
+    "original_misses": 96,
+    "controls": 20,
+    "no_treatment_accepted": true,
+    "summary": "combined-hydraulics-r4-summary.json",
+    "strict_fraction_flags_retained": 3,
+    "new_event_certificate": "fraction-arithmetic-r4-new-event-certificate.json"
+  },
+  "legacy_anchors": {
+    "cases": 116,
+    "within_magnitude": 99,
+    "diagnostic_only": true,
+    "prior_mass_flags": 91,
+    "disposition": "Whitespace audit parsing defect, not native mass defect; fixed-width independent replay removes all91 in both generations without changing bounds",
+    "evidence": "review-legacy-particle-disposition.md"
+  },
+  "application_delivery": {
+    "unique_passed": 12533,
+    "unique_skipped": 422,
+    "clean_uninterrupted_suite": false,
+    "baseline_order_defect_remains_open": true,
+    "disposition": "revision4-application-disposition.json",
+    "production_deployed": false
+  },
+  "next": "Paired full-calendar/event supply and retention ledger on exactR4 generated versus whole legacy soils; physical hypothesis before further parameterization.",
+  "withheld_materials_untouched": true,
+  "ui_implementation_requires_human_specification_and_layout_approval": true,
+  "evidence_sha256": {
+    "param-u12-scientific-acceptance.json": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
+    "combined-hydraulics-r4-summary.json": "b4b3b1e4f70222dcc83534331fc66a45403d94f6d1d820a6c53d75f6e5ad6b84",
+    "combined-hydraulics-r4-verification.json": "de07228cbb893070f3e885a833980382436677ea7b665eac2882084d9eed38ca",
+    "fraction-arithmetic-r4-new-event-certificate.json": "fef6d272986de39102ceafeaf6e2c8f08b8f65a597beb3e38911607d98414692",
+    "review-legacy-particle-disposition.json": "8bcf856ca0fb819601c51a6cadc66cdd732f1c34ace2fdbd8784696b49608ae5",
+    "revision4-application-disposition.json": "0e21eadccb06668950b8499d058393549754af988c66da53330b26f5e02f561d",
+    "revision4-hydraulic-factorial-and-legacy-anchors-retention.json": "e0268ffcdc636dd2e6e61c856e16bc19e5ceed74ccf840e4eff11556f99a4964",
+    "revision4-application-delivery-retention.json": "625f8d15d77764af544ba6137ab70d859483b05a072b6abbda2b2e80e19dafe1",
+    "particle-audit-v2-reverification.json": "8f91e3d46876340a9ca85863d06ff1a4627e8760abcb96d357e2e6da9c81ef43",
+    "revision4-particle-audit-v2-retention.json": "9a8118e2cb46c3c680bddb2996420d85be109cebe61ac0170516c0cef3afe962"
+  },
+  "particle_reverification": {
+    "cases_including_overlapping_panels": 2348,
+    "class_bulk_mass_flags": 0,
+    "strict_fraction_case_event_observations": 5,
+    "unavailable_Sm_diagnostics_preserved": true,
+    "evidence": "particle-audit-v2-reverification.json"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "reason": "Remove unnecessary literal private native format descriptor from public research fixture after completed frozen readback",
+  "original_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+  "private_original": "/workdir/wepppy/out/roads-parameterization-program-20261031/private-research-tools/particle-audit-v2-disclosure/review-legacy-element-fixed-width-fixture-original.json",
+  "private_original_sha256": "d5c5a5a15f74f10bcc0cdd8f8652dd0968cb3951289f2a41c28a46840f9051f7",
+  "public_fixture": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review-legacy-element-fixed-width-fixture.json",
+  "public_sha256": "d9e055695486cd621e8f93365b7de6b5f817ade369cb55b0aaa7edd6203425e5",
+  "all_numeric_output_and_expected_fields_unchanged": true,
+  "readback_completed_before_sanitization": true,
+  "prior_readback_receipt_sha256": "e5d42b7e8de31ecaa94e76e145dd1682c6370da932e144357a30a594a1c76ae9",
+  "historical_hash_resolution": "Prior receipts/declaration reference the original fixture hash, retained byte-exact at private_original. New public regression binds sanitized fixture; native/math results unchanged."
+}

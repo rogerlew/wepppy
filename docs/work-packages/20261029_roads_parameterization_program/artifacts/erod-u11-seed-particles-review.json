@@ -1,0 +1,86 @@
+{
+  "cases": 4,
+  "events": 1306,
+  "positive_events": 1036,
+  "flagged_cases": 0,
+  "flagged_events": 0,
+  "rows": [
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "buffer_cap",
+        "runtime": "project"
+      },
+      "record": "out/roads-parameterization-program-20261031/erod-wet-domain-u11/seed-buffer_cap/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+      "record_sha256": "9221be96a2acec50423dea568cd00e818f8faac2d3265971992b9bcbb9b0b42a",
+      "pass_sha256": "6f2f35aa6d4f8c519b3ed496c4941abc651b436368876f9f6935bcb600292e69",
+      "element_sha256": "d4142ddbdee240067d8195335bc66341eac45060f0f74a1297b58b10a6a19cbe",
+      "events": 326,
+      "positive_events": 219,
+      "flags": [],
+      "passed": true
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "out/roads-parameterization-program-20261031/erod-wet-domain-u11/seed-buffer_control/site-1718465-outunrut-gravel-low-erosion_road_cap-project/record.json",
+      "record_sha256": "f511dd03dc9eeea3bd73600a14e5c45cef268ae3f6f020ce7826218c3bf05aac",
+      "pass_sha256": "b997044ce2de9e9005539e83bef08fac430c2492c13a3d78e4d52a0c90392018",
+      "element_sha256": "11ab43f2c9df7c1de2fa44d25b22a972e39b55e38995050f3dc7be00b0b8073e",
+      "events": 201,
+      "positive_events": 162,
+      "flags": [],
+      "passed": true
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "fill_fixed",
+        "runtime": "project"
+      },
+      "record": "out/roads-parameterization-program-20261031/erod-wet-domain-u11/seed-depend_failure/site-1718465-outunrut-gravel-none-erosion_road_cap-project/record.json",
+      "record_sha256": "5cef73f6cf04638d7e7614cfdc4ff134c2f60e489734061c92eca999bb5e9294",
+      "pass_sha256": "9063ecd68c2c965fcb2d0ddb14b8689170e9cce49f1a242a65b6af020f165f17",
+      "element_sha256": "a4797102957a99be51597e09d4c8c81d57e37bcd2597e94bcbf21b86454f1006",
+      "events": 198,
+      "positive_events": 159,
+      "flags": [],
+      "passed": true
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "out/roads-parameterization-program-20261031/erod-wet-domain-u11/seed-ordinary/site-1718465-inveg-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "dc84f4b056775db63359e6c5eb7fd9148b2fa8a11cdc4937b3ed41910d62280c",
+      "pass_sha256": "fe00a7a55905656359fd3e70ae24531b00966d13717e85fdf75f57c55556d4af",
+      "element_sha256": "21f97937c11bec683474f236518f500622a1b2268b68b36e4122ecaf867f9bfe",
+      "events": 581,
+      "positive_events": 496,
+      "flags": [],
+      "passed": true
+    }
+  ],
+  "script_sha256": "f8c3c21b00d90f507106c6b5c813d646fbf7e7a6fcb978223efb9c4189412302"
+}

@@ -1,0 +1,64 @@
+{
+  "candidate_binaries": {
+    "wepp": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+    "wepp_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+  },
+  "native_source_matches_build_manifest": true,
+  "logs": {
+    "native-full": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-native-full.log",
+      "sha256": "8483c182eb914ca8f0886852205b0883c8b8353bedac326c3d431ad8bf0e2100"
+    },
+    "disturbed": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-disturbed.log",
+      "sha256": "af7e9374a10e82286e7bb319a0572f66058c7a6fbe4e5a6da01f05ef4fe734a2"
+    },
+    "watchlist": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-watchlist.log",
+      "sha256": "aca954051f471c6fcb09ef03c42ac862dde2a4701d941a2e788885fed1c8e964"
+    },
+    "smoke-watershed": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-smoke-watershed.log",
+      "sha256": "0c8f47b47a506d7cb9c2bd2939656f35bfd1dfd94d8ebcf27c42f966f23d4c53"
+    },
+    "smoke-hill": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-smoke-hill.log",
+      "sha256": "a42f76369f9b8c38f3cb3c5fd30565b6816e2d244fffa6808b0e58df648f563f"
+    },
+    "roads": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-roads.log",
+      "sha256": "aa1debae3c1c44fab2a0c6376b2ec89f05452c7ce4741c7106bd8037edecd152"
+    },
+    "downstream": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-downstream.log",
+      "sha256": "df4fa4dc4d9816b82a8ab43267ca4d97626d38d1c3889b9f203d633e1e906511"
+    },
+    "roads-particles": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-roads-particles.log",
+      "sha256": "54d8df66fdb1196b763fd5118a412a4d6dfdc0fe93a432fc33e6950e77db07ab"
+    },
+    "downstream-particles": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-downstream-particles.log",
+      "sha256": "ed67576d048392bcf2b8131bb0e91d0efea591cb1dc43216102c6de30e6465d7"
+    },
+    "output-review": {
+      "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/gate-logs/param-u12-output-review.log",
+      "sha256": "8e811459768e3bb7b0f3e8546b84c9d529912148d1931419e2143e0d29d3ee77"
+    }
+  },
+  "completed_counts": {
+    "native": 1253,
+    "watchlist": 28,
+    "disturbed": 99,
+    "roads": 840,
+    "downstream": 348
+  },
+  "pending": [
+    "Cedar final semantic analysis",
+    "full capacity observation and scientific review"
+  ],
+  "strict_fraction_flags": 2,
+  "unexplained_fraction_flags": 0,
+  "fraction_disposition": "fraction-arithmetic-scientific-disposition.md",
+  "promoted": false
+}

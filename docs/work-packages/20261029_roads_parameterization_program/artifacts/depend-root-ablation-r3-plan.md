@@ -1,6 +1,6 @@
 # Next native ablation: bounded DEPEND root search
 
-Status: designed, not executed. Continue the active Roads program and native
+Status: executing; scalar regression reproduced and candidate under validation. Continue the active Roads program and native
 ablation protocol. No release change is accepted by this declaration.
 
 ## Confirmed failure and scientific reference

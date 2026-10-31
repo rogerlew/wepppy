@@ -1,0 +1,90 @@
+{
+  "status": "numerical_repair_supported_not_promoted",
+  "binary_sha256": {
+    "wepp": "635ec1fce1aba3dd2ac166a56751971c90857d5daecc5b5fee9064318b77de50",
+    "wepp_hill": "586120dde785408473766073362cb5cc385d334c6ad8c551aaab345d96fec630"
+  },
+  "native_tests": 1142,
+  "watchlist": 28,
+  "disturbed_tests": 99,
+  "roads": {
+    "cases": 840,
+    "physical": 840,
+    "changed": 166,
+    "binary_sha256": "635ec1fce1aba3dd2ac166a56751971c90857d5daecc5b5fee9064318b77de50"
+  },
+  "downstream": {
+    "cases": 348,
+    "physical": 348,
+    "changed": 43,
+    "binary_sha256": "635ec1fce1aba3dd2ac166a56751971c90857d5daecc5b5fee9064318b77de50"
+  },
+  "cedar": {
+    "hillslopes": 864,
+    "watershed_years": 24,
+    "completed": true,
+    "outlet_semantics_change": {
+      "sampled_volume_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "published_volume_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "hill_stream_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "hill_surface_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "hill_lateral_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "hill_baseflow_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "sampled_minus_published_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "sediment_kg": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "printed_volume_rounding_bound_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "mean_sampled_discharge_m3s": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "maximum_sampled_peak_m3s": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "maximum_reported_peak_m3s": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "sum_absolute_daily_sampled_published_gap_m3": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "increased_daily_peaks": 0,
+      "decreased_daily_peaks": 0,
+      "max_daily_hillslope_yield_change_m3": 0.0
+    }
+  },
+  "particle_limit": "20 class-vs-bulk discrepancies beyond printing bounds also present in revision3; no G1 regression, but frozen physical gate blocks promotion",
+  "next": "Independent EROD interval-support U1 ablation; no normalization patch",
+  "run_notes": [
+    "First native full pass used hill includes accidentally; two source probes failed; restored watershed includes, both isolated reruns and all1142 full tests pass.",
+    "First Cedar analysis started before conversion completed; failed missing derived file. Retained failure; complete analysis rerun in semantic-analysis-complete after conversion."
+  ]
+}

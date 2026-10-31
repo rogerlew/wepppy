@@ -4,6 +4,59 @@ This living plan follows docs/prompt_templates/codex_exec_plans.md. The current
 turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
+
+## Current: U12 accepted; revision-4 delivery in progress
+
+Current [candidate ledger v16](../../artifacts/candidate-ledger-v16.json) records the
+accepted native engine, rejected parameter factorial and exact-R4 legacy controls.
+
+The exact combined U12 native pair is scientifically accepted. The
+[acceptance receipt](../../artifacts/param-u12-scientific-acceptance.json) binds the
+completed evidence: 1,253 native tests, 28 watchlist cases, 99 Disturbed cases,
+840 Roads and 348 downstream physical checks, and a fresh 864-hillslope,
+24-year Cedar simulation. All 1,187 successful panel baselines retain identical
+water and soil outputs. Cedar outlet sediment changes +1.20 kg over 24 years
+against revision 3; its water/soil outputs are identical.
+
+Two strict fraction predicates remain failed but have exact arithmetic
+certificates. All 40,006 observed negative raw-capacity calls have quantified
+terminal support; no unexplained support class remains. These are bounded
+explanations, not changed tolerances or universal numerical guarantees. The
+[mixed-reconstruction clarification](../../artifacts/param-u12-mixed-reconstruction-clarification.md)
+defines the local error equation precisely without changing frozen evidence.
+
+The authorized same-name `wepp_261029` revision-4 delivery is in progress:
+source `b01a739957bef5aacf35b4a89bc13eddc9d94804`, watershed hash
+`2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`,
+hillslope hash `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.
+All 489 frozen build inputs match committed source. The build preceded that
+commit; promotion preserves the exact tested bytes. Report approval and
+application delivery are separate gates. No production deployment is implied.
+
+Roads parameterization remains unaccepted: 713/766 meaningful references and
+31/74 small references pass, unchanged from revision 3. Next, finish delivery
+and resume combined generated-soil hydraulic experiments on the frozen engine.
+The six withheld materials and human UI specification/layout gate remain intact.
+
+## Latest continuation findings
+
+The 928-cell factorial is complete; no parameter candidate is accepted. All
+116 exact-revision-4 legacy-soil anchors also completed. Their 91 apparent
+particle/bulk mismatches were a research-audit fixed-width parsing defect:
+independent replay clears all 91 in both revision 3 and revision 4, with unchanged
+bounds (5,887 EVENT records per generation). See the
+[independent parser disposition](../../artifacts/review-legacy-particle-disposition.md). Preserve original evidence;
+the corrected v2 auditor now covers all 2,348 overlapping panel records,
+with zero mass flags and unchanged strict fraction findings. The third factorial
+fraction flag has a new exact-state arithmetic certificate; its strict predicate
+remains failed. Paired event supply/retention analysis is next.
+
+Application coverage is complete: 12,533 passed and 422 skipped across all
+12,955 unique test IDs. Retained failures identify a preexisting Redis test-order
+defect and a Roads concurrency test deadline exceeded under load. Neither invokes
+the native binary. Independent review recommends the scoped native release
+handoff; do not claim one clean original suite or closure of the order defect.
+
 ## Purpose / Big Picture
 
 Produce a physically defensible generated-soil Roads parameterization within an
@@ -13,6 +66,17 @@ The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
 This execution stops at the explicit human specification/layout gate.
 
 ## Progress
+
+- [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
+- [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
+- [x] Complete independent revision-4 PDF/manifest approval, exact-byte delivery, host/container smokes and actual selected hill/PASS/watershed/reader checks.
+- [x] Complete all 12,955 unique application test IDs through declared shards/replays; retain original failures and baseline test-order defect.
+- [ ] Commit/push reviewed WEPPpy revision-4 delivery; no production deployment.
+- [x] Predeclare and independently verify the 928-cell hydraulic factorial, all 11,136 inputs, 3,248 reused native outputs and 70 effective dependencies.
+- [x] Complete all 928 factorial cells and fresh log/runtime/accounting verification; independent paired contrast review rejects parameter promotion.
+- [x] Complete versioned particle audit repair, 20 regression controls and 2,348-case readback; preserve all frozen evidence and unavailable diagnostic values.
+- [x] Complete 116 exact-R4 legacy-soil anchors; diagnose 91 false particle flags as fixed-width audit parsing.
+- [ ] Complete paired event supply/retention diagnosis (scaffolded; fresh preflight pending after a receipt-serialization correction).
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
 - [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.
@@ -27,7 +91,15 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Attempt legacy format bridge: seven physical passes, zero exact output matches; reject representation and do not execute mixed-role substitution.
 - [x] Execute and freshly verify 348 same-format downstream conductivity controls: 347 physical passes, reject standalone treatments on regressions.
 - [x] Retain DEPEND full-run fixture, exact failed-output replay, GDB locals and two scalar reproductions with independent interior-root reference.
-- [ ] Execute bounded DEPEND root-search ablation and required native/scientific review before further parameter combinations.
+- [x] Execute DEPEND G1 source repair and independent reviews; 1142 native, 28 watchlist, 99 Disturbed and 840+348 prior physical audits pass. Expanded particle closure fails on baseline discrepancies; withhold promotion.
+- [x] Complete six exact-output-parity particle/source observations; identify omitted EROD intervals before the next grid point.
+- [x] Execute separate EROD/RUNGE/capacity/inflow/wet-domain ablations; retain independent counterexamples and rejected lanes.
+- [x] Freeze U11 source/binary pair after209 targeted tests, four full-period seeds and independent reviews.
+- [x] U11:1238 native,28 watchlist,99 Disturbed and840+348 prior physical gates pass; fresh Cedar complete, water unchanged, sediment+1.20kg/24years.
+- [x] Confirm real PARAM sign defect with five exact-output-parity producer observations.
+- [x] Execute U12:15 scalar controls, three separate four-seed lanes, four exact-parity observations; material negative capacity removed.
+- [x] Complete exact-U12 broad gates; retain quantified terminal residual and exact fraction arithmetic certificates before promotion.
+- [x] Explain original residual fraction-sum flags and quantify negative varying-capacity exposure; preserve strict predicates and exact certificates.
 
 - [x] D2 geometry/recession repair accepted and delivered as revision 3;
   permanent regression coverage and accepted ADR-0119 retained.
@@ -169,6 +241,27 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
+
+
+Final review clarified the terminal error equation: it compares the mixed clipped-capacity/raw-rate reconstruction with the consistent clipped solution, not two ordinary raw/clipped ODE solutions. The bound and engine remain unchanged; the clarification is retained separately so frozen acceptance hashes remain valid.
+
+U11 is held: PARAM loses a small positive continuity quantity in REAL arithmetic,
+then selects the wrong sign for its zero denominator. Retained operands and
+U12 predeclaration are in artifacts/erod-subgrid-ablation-plan.md.
+
+
+Actual ROUTE fixtures prove that small nonzero inflow used a no-inflow
+approximation, single capacity evaluation lost precision across consumers,
+and DEPEQS changed caller-owned wet coordinates. U11 closes209 targeted
+references; broad acceptance remains separate. A raw-versus-clipped deposition
+forcing mismatch needs actual exposure/variation evidence, not assumptions
+from negative coefficients alone.
+
+EROD U1 independent review exposed shared transition errors: initial equality
+is not immediate deposition, and legacy RUNGE can return inaccurate stiff
+loads. U2 corrects nine of15 expanded scalar failures; six stiff cases remain.
+
 D2: EPLANE received a zero-based length array as one-based, shifting lengths relative to coefficients. Homogeneous probes hid the error. Corrected integral probes pass 8/8 versus released 2/8.
 
 D1 confirms uniform-plane continuous formula independently but finds 0.027406 m³
@@ -235,6 +328,25 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
+
+
+2026-10-31: Accept the exact U12 numerical repair within its declared scope and promote the already tested bytes as undeployed revision 4. Do not rebuild merely to change provenance: all 489 build inputs match committed source, and metadata explicitly records the earlier research build. Numerical acceptance does not accept Roads parameters.
+
+- Decision: advance combined U12 to broad validation after separate-lane seed attribution and independent sign/terminal-support review.
+  Rationale: the observed producer error is closed, water/soil unchanged; bounded terminal roundoff and fraction-sum flags remain explicit acceptance items. See ADR-0124 and the active ablation plan.
+  Date/Author: 2026-10-31, Codex.
+
+
+2026-10-31: freeze U11 for broad validation after independent source/seed
+review. Keep its raw/clipped capacity exposure question and earlier two
+fraction-sum flags open; use exact-parity observations before additional
+solver changes. Do not change scientific or magnitude thresholds.
+
+2026-10-31: reject U1 promotion despite broad execution passes. Separate U2
+anchored transition search from proposed U3 stable integration so numerical
+changes remain attributable. Keep strict particle flags visible.
+
 D2, 2026-10-31: defer cascade redesign in favor of confirmed minimal array-origin repair plus independently supported scalar continuity. Advance U3 as an unreleased source candidate; retain origin-only control. See proposed ADR-0119.
 
 D1: reject standalone U1 promotion; retain supported scalar component and
@@ -299,6 +411,24 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+
+
+U12 scientific investigation is complete. Two retained fraction flags and terminal-capacity precision have source-derived explanations; no threshold was relaxed. Revision-4 application/report delivery is active, followed by combined physical parameter experiments. The magnitude classifications remain unchanged.
+
+U12 is implemented as an isolated matched pair and now undergoing broad
+validation. No release promotion or parameter default change has occurred.
+Source-executed regressions and exact-parity observations distinguish the
+material PARAM sign error from residual REAL accumulation/terminal precision.
+
+
+Current U11 milestone: targeted and seed gates pass; broad validation is
+running. Shipped revision3 and ledger v15 remain authoritative until all
+scientific/release gates pass. UI implementation remains human gated.
+
+EROD continuation: missing support is confirmed and mass closure improves,
+but scalar review prevents premature release. Shipped revision3 is unchanged.
 
 Current: artifact revision 3 delivery is complete; ledger v12 records the current baseline and completed resumption studies.
 All 840 physical cases pass; 713/766 meaningful and 31/74 small references pass
@@ -723,6 +853,9 @@ are historical rather than current-engine validation.
 
 ### Surprises & Discoveries
 
+- The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
+
+
 Daily mode recovers 93/96 legacy-soil misses but only 26/96 generated-soil misses;
 two generated passing controls regress. The 464 PMET-retained cells all pass
 physical checks. Separately, five hourly/original-Penman bridge runs stop at the
@@ -733,6 +866,9 @@ a compaction rule will repair the discrepancies.
 
 ### Decision Log
 
+- Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
+
+
 Reject global hourly-off promotion. Keep current runtime, source soils, 200 mm
 normalization and deeper horizons fixed while tracing coupled role density,
 retention and conductivity. Require physical source support before declaring
@@ -741,6 +877,9 @@ The normative next scope and rationale are in
 [the hydraulic audit plan](../../artifacts/generated-role-hydraulic-audit-r3-plan.md).
 
 ### Outcomes & Retrospective
+
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+
 
 This checkpoint adds 308 native executions with persisted declarations and
 fresh output/hash/physical readbacks. No generated parameterization is accepted;
@@ -784,6 +923,9 @@ Require all physical checks and report control regressions; no default promotion
 
 ### Surprises & Discoveries
 
+- The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
+
+
 Generated role density/retention preservation is confirmed, with all 200 mm
 breaks present. Initialization—not day-one weather output—shows the substantial
 legacy/generated state difference. Nevertheless, a modest pore/retention treatment
@@ -796,6 +938,9 @@ and initialization/tillage apply; observation preserves this distinction.
 
 ### Decision Log
 
+- Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
+
+
 No standalone parameterization accepted. Forty-two small-load misses remain,
 already preventing the full small-reference gate; do not spend a new 840-case
 sweep on these standalone treatments. Retain conductivity as a component
@@ -806,6 +951,9 @@ non-production scope are durable in ADR-0120. The next normative scope is
 [role-isolation-r3-plan.md](../../artifacts/role-isolation-r3-plan.md).
 
 ### Outcomes & Retrospective
+
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+
 
 369 native executions: 348 treatment runs and 21 observation replays. No binary,
 shared soil writer, default, withheld or UI changes. Ledger v14 supersedes v13.
@@ -864,6 +1012,9 @@ substitution stays unexecuted because format equivalence failed.
 
 ### Surprises & Discoveries
 
+- The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
+
+
 The strict format bridge fails despite equal rounded annual sediment for all
 seven preflights. Four differ only by a deliberate report warning; three also
 have one-to-two-ULP conductivity-state differences through native remapping.
@@ -874,6 +1025,9 @@ misses but regresses one control and exposes a true native solver overflow.
 
 ### Decision Log
 
+- Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
+
+
 Reject all standalone downstream treatments and the exact-equivalence bridge.
 Do not relax parity, copy legacy role material, tune the road multiplier, or
 assemble unvalidated parameter combinations. Prioritize DEPEND's finite interior
@@ -883,6 +1037,9 @@ normative scope is [the root-search plan](../../artifacts/depend-root-ablation-r
 The same-format experimental rationale/disposition is durable in ADR-0120.
 
 ### Outcomes & Retrospective
+
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+
 
 Completed seven bridge runs and 348 downstream runs (347 physical passes), plus
 two full-model failure replays and two scalar failure reproductions. Recomputed
@@ -896,3 +1053,199 @@ and [retention receipt](../../artifacts/downstream-hydraulics-r3-v1-retention.js
 Retention complete: 9,320 archive members individually rehashed; 2,970,545,552
 uncompressed bytes. Documentation lint passed for 37 package Markdown files and
 ADR-0120, with clean spelling preview and whitespace checks.
+
+## DEPEND bounded-search ablation — active execution
+
+Executing `artifacts/depend-root-ablation-r3-plan.md` in the native default
+branch checkout `/workdir/wepp-forest-release-20261009`. Baseline regression
+reproduces SIGFPE. The candidate preserves legacy convergent searches and
+positive-flow endpoint returns, but uses interval bisection when a Newton step
+leaves the physical segment, a derivative vanishes, or ten iterations expire.
+Bisection ends at adjacent float32 coordinates and returns the non-depositing
+side; there is no fitted deposition tolerance. Decreasing-flow overflow checks
+precede conversion, retaining its existing terminal and no-root conventions.
+
+Progress: scalar regression and 100 deposition/reference tests pass; matched
+native build and full-model gates are underway. Release pair unchanged. Candidate
+is unaccepted pending full fixture, Roads 840 + downstream 348, native regression,
+watchlist, Disturbed, Cedar, and independent review. Withheld soils and UI gate
+remain untouched. Native incident: `docs/ablation/20261031_roads_depend_bounded_root`.
+
+Decision: keep the first candidate bounded to the confirmed search failure;
+retain the governing DEPVAL equation and existing successful convergence behavior.
+Surprise: positive-flow searches have no upper bound, whereas decreasing-flow
+searches clamp only after division, leaving a separate overflow exposure.
+Outcome so far: reproduction and scalar repair only; no scientific promotion.
+
+## EROD interval-support continuation
+
+Current scientific findings are in `artifacts/particle-erod-observation.json`;
+execute `artifacts/erod-subgrid-ablation-plan.md`. No release promotion or
+parameter combination is accepted while particle accounting remains unexplained.
+Cedar G1 execution completed all24years; conversion/semantic checks are ongoing.
+
+Decision: trace and repair missing bulk support before changing particle
+normalization. Rationale: exact-parity observations show EROD returns without
+integrating a nonempty interval that contains no grid point. The following
+interval starts downstream using an unchanged load. This is independent of the
+DEPEND search defect and requires a separate behavioral lane.
+
+## EROD U1 rejection and U2 transition result — 2026-10-31
+
+U1 completed840 Roads,348 downstream,99 Disturbed,28 watchlist and the full
+Cedar864-hillslope/24-year watershed execution. The initial1160-test native
+suite passed, but expanded independent scalar references reject promotion.
+All135765 EVENT class-versus-bulk mass comparisons pass; two strict fraction
+sum flags remain unresolved. Magnitude classifications are unchanged.
+
+U2 replaces the shared transition search with a fixed upstream coordinate/load
+and strict initial excess; RUNGE remains unchanged. Expanded34-test comparison:
+U1 has15 failures; U2 has6 failures, all stiff constant-coefficient roots.
+The nine corrected cases include six initial-equality/later-crossing cases
+and three constant-source transitions after the first grid. Thus the shared
+grid/partial path is confirmed affected, not only the newly supported interval.
+Raw evidence: out/roads-parameterization-program-20261031/erod-root-u2.
+Next: independently review the stable integration lane, close stiff scalar
+references, then repeat physical/full-period gates. Neither candidate is released.
+
+## Stiff integration and boundary review — U3 through U5
+
+U3 passes43 scalar cases and four full-period seeds but is rejected for missing
+short positive-capacity tails. U4 partitions capacity zeros and passes48 cases
+but is rejected for continuing detachment to a closing zero-capacity endpoint
+despite an earlier deposition transition. U5 establishes a prefix-supply
+bracket first;55 scalar cases and four full-period seeds pass. Review rejects
+U5 because capacity can close and reopen inside an interval, hiding the first
+transition from an endpoint-only check. No numerical candidate is promoted.
+
+Raw source/pairs: out/roads-parameterization-program-20261031/erod-stable-u3,
+erod-capacity-u4 (scalar-only), and erod-boundary-u5. Reproduction commits
+are3c226ce55 and167e421d3 in /workdir/wepp-forest-release-20261009.
+U3 broad execution completed840+348 prior physical checks; expanded particle
+review is separate. U1 Cedar analysis is complete: unchanged water metrics,
+outlet sediment+1.18kg over24 years, finite/nonnegative PASS fields.
+That audit does not certify full particle normalization. Two small strict
+fraction-sum flags and unsafe tiny-capacity arithmetic remain open.
+
+Next lane design: locate the first supported transition within an interval,
+partitioning capacity zeros and residual-forcing turning points. Independent
+scientific review must establish the interval contract before implementation.
+No magnitude thresholds, soils, withheld materials, shipped binary, or UI
+human-approval gate have changed.
+
+## Combined U9 candidate — active validation
+
+Actual-source review extends the failure class beyond EROD: small nonzero
+positive/negative inflows used the zero-inflow boundary approximation; DEPOS
+reconstructed capacity with cancellation; and DU0 at a finite-coordinate
+transition changed the actual boundary load. These are independently
+reproduced, separately ablated mechanisms, not Roads calibration changes.
+U7 closes four actual-chain failures; U8 removes6.4% cancellation; U9 closes
+the residual30ppm boundary jump. All15 actual-chain controls and65 scalar
+references pass in the isolated prototype.
+
+The native working tree now matches combined U9 source under
+out/roads-parameterization-program-20261031/erod-handoff-u9/probe/src, plus
+DEPEND G1. Matched binaries are under that candidate's bin directory; source
+manifests name exact overrides. Source commits3c226ce55,167e421d3,890f1c891,
+d3705c48b and5c92f2633 retain reproductions before new release gates. Native
+U5 previously passed1197 tests but remains rejected for independent failures.
+U9 source gates, full-period seeds and independent reviews are now active.
+
+No scientific/release acceptance is implied. Next complete matched broad
+Roads/downstream, particle, native/watchlist, Disturbed and fresh Cedar gates;
+resolve the two strict fraction-sum flags and any real wet/dry boundary
+failures. Only then revisit release promotion and parameter comparisons.
+See ADR-0122 and ADR-0123 for numerical/caller contracts and rationale.
+
+## U11 frozen broad validation checkpoint
+
+Candidate root: out/roads-parameterization-program-20261031/erod-wet-domain-u11.
+Watershed SHA256a4b9e7de28e3ebc813e844124547248da99f664c76613d5ef5d0b37b753edf38;
+matched hill identity and exact source overrides are in build.json/source.json.
+Native checkout /workdir/wepp-forest-release-20261009 now matches these sources.
+Full regression uses the matched pair copied to src/wepp and src/wepp_hill.
+All shipped wepppy artifacts remain unchanged.
+
+Active observer: artifacts/observe_particle_capacity_u11.py and
+replay_particle_capacity_u11.py; raw root particle-capacity-observe-u11.
+It traces selected ENRICH/SLOSS dates for earlier rounding flags and records
+negative raw capacity on actual wet DEPOS support, with PARAM denominator
+context. Require exact output parity before using observations. Constant
+negative capacity has zero raw-derivative mismatch; varying negative support
+requires quantitative scientific disposition. No production prevalence is
+inferred from a scalar or source hypothesis.
+
+## U12 accepted native pair: revision-4 promotion sequence
+
+Independent scientific acceptance binds watershed SHA2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48
+and hill SHA9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010.
+The owner previously authorized another same-name replacement of the undeployed
+261029 pair. This sequence does not change Roads defaults, withholdings, deployment
+or the explicit human UI specification/layout gate.
+
+Commit the reviewed native source/fixtures/docs on the verified default branch,
+retaining the exact tested binaries. Verify all compiled source/include/math
+inputs against that commit and record pinned system-toolchain provenance. Promote
+those identical bytes as artifact revision4 with matched sidecars; do not silently
+rebuild or strip them. A different executable requires renewed exact-pair gates.
+Preserve revision3 identities and evidence for rollback.
+
+Author a revision4 release report explaining bounded root search, integration
+support/first transitions, stiff integration, shared capacity, actual inflow/wet
+coordinates and PARAM sign correction. Include original numerical figures,
+unchanged magnitude outcomes, Cedar effects and the certified residual precision
+limits. Preserve earlier PDF revisions. Independent publication review must
+approve the public report/manifest; raw legacy source remains private. Eight
+mixed-context artifacts have already been retained privately with source-free
+public entry points and explicit container-safe research paths.
+
+After scientific/publication gates, vendor the exact pair and sidecars through
+wepp_runner's canonical provenance/smoke/application checks, run required WEPPpy
+sanity tests, and verify the report download/navigation path. Update ADRs and both
+active plan/tracker with actual source/binary/PDF hashes and validation outcomes.
+Only after delivery is recorded may generated-soil parameter experiments resume
+against the new frozen engine. The current713/766 meaningful and31/74 small
+magnitude score remains scientifically insufficient; no parameter rule is adopted.
+
+## Revision-4 parameter continuation: complete hydraulic factorial
+
+After focused actual-workflow delivery gates, execute the predeclared
+[hydraulic factorial](../../artifacts/combined-hydraulics-r4-plan.md) under amended
+ADR-0120. Its eight cells combine existing road, fill and buffer factors without
+coefficient fitting: 464 exact-U12 cells reused with fresh verification and 464
+new executions on the same 116 cases. Preserve all 96 misses and 20 controls,
+report physical and strict particle checks separately, and retain the six withheld
+materials. A diagnostic pass cannot substitute for fresh 840-case confirmation,
+physical justification or the human UI-design gate.
+
+The full application suite can run concurrently with the direct-native factorial:
+its focused actual-workflow checks already pass, and all model/dependency bytes
+are frozen. No full-suite acceptance or release handoff is claimed until the
+suite completes. This scheduling decision does not change scientific gates.
+
+### Factorial staging correction
+
+The first factorial attempt omitted audit-required `reference.sol` and reused
+`stdout`/`stderr`, although its model-consumed inputs matched. The runtime auditor
+correctly rejected staging; nine native executions completed but zero results
+were accepted. Preserve that directory and `combined-hydraulics-r4-attempt1-failure.json`.
+The independently reviewed v2 uses separate directories, hashes these auxiliary
+artifacts, and requires one actual reused/fresh preflight before the broad pool.
+Both passed. Final verification must rehash fresh logs and rerun the runtime
+validator on every case, including cached preflight records. Do not modify the
+frozen execution source while the batch runs. This exposes a repeatability lesson:
+model input manifests alone do not describe the complete audit replay contract.
+
+## Event supply/retention continuation
+
+The completed 928-cell factorial does not close magnitude acceptance. All 43
+small-reference misses are outsloped/unrutted and 35 fail every tested combination;
+several controls regress under downstream treatments. Final artifact/runtime
+verification passes all 928 cases, with three strict fraction flags retained
+(two previously certified reused cases, one new unresolved flag in a rejected lane).
+No new parameters are promoted. Execute the
+[event comparison plan](../../artifacts/event-supply-retention-r4-plan.md): first
+rebaseline the full existing 116 whole-legacy-soil controls on exact revision 4,
+then compare event supply and retention at each OFE boundary. This avoids using
+revision-3 legacy results to assign a revision-4 soil mechanism.
