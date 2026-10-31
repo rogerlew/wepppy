@@ -46,3 +46,13 @@ Operator answered "yes" to committing this reviewed checkpoint and proceeding,
 including explicit reconciliation for already-partial legacy hashes with a true
 loaded marker. Commit authority and that acceptance disposition are granted.
 Implementation and environment validation remain pending.
+
+## Implementation-driven coordination detail
+
+Read-only correctness review found immediate nonblocking self-contention could
+fail parallel successful worker setters. The implementation now reuses the same
+POSIX record-lock machinery for a short RedisPrep serializer, then tries lifecycle
+ownership nonblockingly. This is within RPS-01's existing coordination budget;
+no new state schema/lease/service. Four actual worker processes performing receipt
+setters without retries are the regression. Namespace binding is rechecked under
+the mutation guard, and nested archive snapshots do not imply live Redis authority.

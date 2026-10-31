@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 PROTOCOL = 1
 REFRESH_PATH = Path('_query_engine/refresh')
 __all__ = ['RootConfig', 'CatalogScope', 'CatalogRefreshConflict', 'configured_roots',
-           'catalog_worker_configuration', 'resolve_scope', 'catalog_lifecycle_guard',
+           'catalog_worker_configuration', 'resolve_scope', 'catalog_lifecycle_guard', 'redisprep_snapshot_guard',
            'invalidate_catalog_incarnation', 'record_catalog_refresh', 'request_catalog_refresh',
            'pending_catalog_requests', 'refresh_catalog', 'ensure_catalog_fresh',
            'catalog_refresh_status', 'catalog_snapshot', 'publish_catalog', 'atomic_json',
@@ -55,6 +55,7 @@ class CatalogScope:
     managed: bool
     incarnation: str | None
     directory_identity: tuple[int, int] | None
+    initialization_only: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {'wd': str(self.base), 'namespace': self.namespace,
@@ -171,6 +172,7 @@ def resolve_scope(wd: str | Path, *, create: bool = False) -> CatalogScope:
     scope_id = _hash(namespace + '\0' + relative)
     marker = base / REFRESH_PATH / 'incarnation.json'
     incarnation = None
+    initialization_only = False
     if marker.exists():
         data = _read_json(marker)
         if data.get('scope_id') != scope_id or bool(data.get('managed')) != bool(root):
@@ -185,9 +187,10 @@ def resolve_scope(wd: str | Path, *, create: bool = False) -> CatalogScope:
                 return resolve_scope(base)
         else:
             incarnation = str(data['incarnation'])
+            initialization_only = data.get('initialization_only') is True
     identity = _identity(base) if base.exists() else None
     scope = CatalogScope(base, owner, namespace, relative, scope_id, root is not None,
-                         incarnation, identity)
+                         incarnation, identity, initialization_only)
     if create and incarnation is None:
         with catalog_lifecycle_guard(base):
             if is_catalog_readonly(base):
@@ -196,7 +199,8 @@ def resolve_scope(wd: str | Path, *, create: bool = False) -> CatalogScope:
                 return resolve_scope(base)
             incarnation = str(uuid4())
             atomic_json(marker, {'protocol': PROTOCOL, 'scope_id': scope_id,
-                                 'managed': root is not None, 'incarnation': incarnation})
+                                 'managed': root is not None, 'incarnation': incarnation,
+                                 'initialization_only': True})
         return resolve_scope(base)
     return scope
 
@@ -226,7 +230,7 @@ os.register_at_fork(after_in_child=_after_fork)
 
 
 @contextmanager
-def catalog_lifecycle_guard(wd: str | Path, *, allow_missing: bool = False, blocking: bool = True) -> Iterator[None]:
+def _filesystem_guard(wd: str | Path, *, allow_missing: bool = False, blocking: bool = True, snapshot_only: bool = False) -> Iterator[None]:
     """Stable managed-owner record lock, with process-local thread exclusion.
 
     Standalone missing directories have no asynchronous/lifecycle participants.
@@ -244,13 +248,15 @@ def catalog_lifecycle_guard(wd: str | Path, *, allow_missing: bool = False, bloc
     if root:
         owner = _owner(root, base)
         key = _hash(root.namespace + '\0' + owner.relative_to(root.path.resolve()).as_posix())
-        lock_path = root.coordination / (key + '.lock')
+        lock_path = root.coordination / (key + ('.redisprep.lock' if snapshot_only else '.lock'))
+        registry_key = root.namespace + '\0' + key + ('\0redisprep' if snapshot_only else '')
     else:
         if not base.exists():
             yield
             return
-        lock_path = base / REFRESH_PATH / 'publication.lock'
-    key = str(lock_path.resolve())
+        lock_path = base / REFRESH_PATH / ('redisprep.lock' if snapshot_only else 'publication.lock')
+        registry_key = str(lock_path.resolve())
+    key = registry_key
     with _registry_guard:
         thread_lock = _lock_registry.setdefault(key, threading.RLock())
     held = getattr(_held, 'locks', {})
@@ -275,10 +281,32 @@ def catalog_lifecycle_guard(wd: str | Path, *, allow_missing: bool = False, bloc
             yield
         finally:
             held.pop(key, None)
-            fcntl.lockf(fd, fcntl.LOCK_UN)
-            os.close(fd)
+            try:
+                fcntl.lockf(fd, fcntl.LOCK_UN)
+            finally:
+                os.close(fd)
     finally:
         thread_lock.release()
+
+
+@contextmanager
+def catalog_lifecycle_guard(wd: str | Path, *, allow_missing: bool = False, blocking: bool = True) -> Iterator[None]:
+    """Serialize catalog publication and project lifecycle replacement."""
+    with _filesystem_guard(wd, allow_missing=allow_missing, blocking=blocking):
+        yield
+
+
+@contextmanager
+def redisprep_snapshot_guard(wd: str | Path) -> Iterator[None]:
+    """Serialize short metadata operations before trying the lifecycle guard.
+
+    Ordinary concurrent setters wait for each other. A snapshot holder never
+    waits for lifecycle ownership, so a lifecycle owner can safely call Prep
+    without introducing an opposing lock-order wait cycle.
+    """
+    with _filesystem_guard(wd, allow_missing=True, snapshot_only=True):
+        with catalog_lifecycle_guard(wd, allow_missing=True, blocking=False):
+            yield
 
 
 def atomic_json(path: Path, data: dict[str, Any], *, metadata_source: Path | None = None) -> None:

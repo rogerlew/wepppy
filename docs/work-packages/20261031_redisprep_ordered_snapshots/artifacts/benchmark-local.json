@@ -1,0 +1,30 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "root": "/tmp/bench-509b0d893c454b92b55499961f823c50",
+  "iterations": 100,
+  "baseline": {
+    "setter": {
+      "median_ms": 0.7476679747924209,
+      "p95_ms": 0.8778800256550312
+    },
+    "startup": {
+      "median_ms": 0.12166053056716919,
+      "p95_ms": 0.1532919704914093
+    },
+    "fd_delta_after_1000_wrappers": 0,
+    "snapshot_bytes": 1887
+  },
+  "candidate": {
+    "setter": {
+      "median_ms": 4.519557347521186,
+      "p95_ms": 4.93567599914968
+    },
+    "startup": {
+      "median_ms": 1.049770973622799,
+      "p95_ms": 1.2136409059166908
+    },
+    "fd_delta_after_1000_wrappers": 0,
+    "snapshot_bytes": 1887
+  }
+}

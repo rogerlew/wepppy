@@ -57,11 +57,11 @@ def now():
 
 
 def notify(wd):
-    from wepppy.nodb.redis_prep import RedisPrep
+    from wepppy.nodb.redis_prep import RedisPrep, RedisPrepSnapshotError
     try:
         prep = RedisPrep.getInstance(str(wd))
-        prep.redis.hset(prep.run_id, 'postfire_debris_flow:revision', uuid.uuid4().hex)
-    except RedisError:
+        prep.update_metadata({'postfire_debris_flow:revision': uuid.uuid4().hex}, persist=False)
+    except (RedisError, OSError, RedisPrepSnapshotError):
         logging.getLogger(__name__).exception('Preflight notification failed after durable postfire state commit; reload reconciles state')
 
 

@@ -128,10 +128,13 @@ def _install_redis_stub():
         def delete(self, key):
             self.store.pop(key, None)
 
-        def hset(self, name, key, value):
+        def hset(self, name, key=None, value=None, mapping=None):
             bucket = self.hashes.setdefault(name, {})
-            bucket[key] = value
-            return 1
+            fields = dict(mapping or {})
+            if key is not None:
+                fields[key] = value
+            bucket.update(fields)
+            return len(fields)
 
         def hget(self, name, key):
             return self.hashes.get(name, {}).get(key)
@@ -139,12 +142,44 @@ def _install_redis_stub():
         def hgetall(self, name):
             return dict(self.hashes.get(name, {}))
 
-        def hdel(self, name, key):
-            bucket = self.hashes.get(name)
-            if bucket and key in bucket:
-                del bucket[key]
-                return 1
-            return 0
+        def hdel(self, name, *keys):
+            bucket = self.hashes.get(name, {})
+            removed = 0
+            for key in keys:
+                if key in bucket:
+                    del bucket[key]
+                    removed += 1
+            return removed
+
+        def pipeline(self):
+            # Recording-only transaction surface. Concurrency proofs use real Redis.
+            client = self
+            class RecordingPipeline:
+                def __init__(self):
+                    self.commands = []
+                    self.watching = False
+                def __enter__(self):
+                    return self
+                def __exit__(self, *args):
+                    return False
+                def watch(self, *keys):
+                    self.watching = True
+                def multi(self):
+                    self.watching = False
+                def hgetall(self, key):
+                    return client.hgetall(key)
+                def hset(self, *args, **kwargs):
+                    self.commands.append(('hset', args, kwargs))
+                    return self
+                def hdel(self, *args, **kwargs):
+                    self.commands.append(('hdel', args, kwargs))
+                    return self
+                def execute(self):
+                    result = [getattr(client, method)(*args, **kwargs)
+                              for method, args, kwargs in self.commands]
+                    self.commands.clear()
+                    return result
+            return RecordingPipeline()
 
         def publish(self, channel, message):
             self.published.append((channel, message))

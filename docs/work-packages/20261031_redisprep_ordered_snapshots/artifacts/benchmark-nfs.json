@@ -1,0 +1,30 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "root": "/wc1/runs/rps-validation-xkfrIZeK/bench-c3f4ce326d784ae9900d84c319d05c48",
+  "iterations": 100,
+  "baseline": {
+    "setter": {
+      "median_ms": 2.5086450623348355,
+      "p95_ms": 3.1357097905129194
+    },
+    "startup": {
+      "median_ms": 0.1653039362281561,
+      "p95_ms": 0.22837892174720764
+    },
+    "fd_delta_after_1000_wrappers": 0,
+    "snapshot_bytes": 1887
+  },
+  "candidate": {
+    "setter": {
+      "median_ms": 9.942383505403996,
+      "p95_ms": 12.373810866847634
+    },
+    "startup": {
+      "median_ms": 1.8098130822181702,
+      "p95_ms": 3.0804090201854706
+    },
+    "fd_delta_after_1000_wrappers": 0,
+    "snapshot_bytes": 1887
+  }
+}

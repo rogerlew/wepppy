@@ -7,6 +7,7 @@ from wepppy.query_engine.catalog_refresh import (
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import errno
+import logging
 import os
 import shutil
 import stat
@@ -371,6 +372,23 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         _clear_archive_job_id(runtime, prep, runid)
 
 
+def _clear_restore_query_engine(path: Path) -> None:
+    """Remove incoming-replaced metadata without unlinking held lifecycle fences."""
+    for entry in sorted(path.iterdir()):
+        if entry.name == 'refresh' and entry.is_dir() and not entry.is_symlink():
+            for child in sorted(entry.iterdir()):
+                if child.name in {'incarnation.json', 'publication.lock', 'redisprep.lock'}:
+                    continue
+                if child.is_dir() and not child.is_symlink():
+                    _remove_restore_directory(child)
+                else:
+                    _remove_restore_file(child)
+        elif entry.is_dir() and not entry.is_symlink():
+            _remove_restore_directory(entry)
+        else:
+            _remove_restore_file(entry)
+
+
 def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime) -> None:
     job = runtime.get_current_job()
     job_id = getattr(job, "id", "sync")
@@ -379,6 +397,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     runtime.publish_status(status_channel, f"rq:{job_id} STARTED {func_name}({runid}, {archive_name})")
 
     prep = None
+    restore_started = False
+    restore_completed = False
     try:
         prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
@@ -427,49 +447,95 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     + ", ".join(locked)
                 )
 
+            # Validate every incoming recovery snapshot before deleting project data.
+            from wepppy.nodb._redis_prep_snapshot import validate_snapshot, publish_snapshot
+            from wepppy.nodb.redis_prep import RedisPrep
+            import json
+            snapshots = {}
+            for member, target_path, _ in restore_members:
+                if not member.is_dir() and target_path.name == 'redisprep.dump':
+                    snapshots[target_path.parent] = validate_snapshot(json.loads(zf.read(member)))
+
             roads_guard = roads_lifecycle.restore_operation(wd)
             with roads_guard:
-                for entry in sorted(wd.iterdir()):
-                    if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock"}:
-                        continue
-
-                    try:
-                        if entry.is_dir() and not entry.is_symlink():
-                            runtime.publish_status(status_channel, f"Removing directory {entry.relative_to(wd)}")
-                            _remove_restore_directory(entry)
-                        else:
-                            runtime.publish_status(status_channel, f"Removing file {entry.relative_to(wd)}")
-                            _remove_restore_file(entry)
-                    except FileNotFoundError:
-                        continue
-
-                # ZIP ordering cannot expose a private payload before its ancestry
-                # is restricted. Owner access is temporary for readonly directories.
-                for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
-                    directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
-                    os.chmod(directory, mode | 0o700)
-
-                for member, target_path, relative_target in restore_members:
-                    if member.is_dir():
-                        target_path.mkdir(parents=True, exist_ok=True)
-                        runtime.publish_status(status_channel, f"Restored directory {relative_target}")
-                        continue
-
-                    target_path.parent.mkdir(parents=True, exist_ok=True)
-                    with zf.open(member, "r") as src, open(target_path, "wb") as dst:
-                        shutil.copyfileobj(src, dst)
-
-                    perm = member.external_attr >> 16
-                    if perm:
-                        try:
-                            os.chmod(target_path, perm)
-                        except OSError:
-                            pass
-
-                    runtime.publish_status(status_channel, f"Restored file {relative_target}")
-
-                # Copied refresh receipts are historical, never authority for old jobs.
+                # Commit the replacement fence BEFORE destruction; a killed
+                # restorer must not later masquerade as first initialization.
                 invalidate_catalog_incarnation(wd)
+                restore_started = True
+                try:
+                    for entry in sorted(wd.iterdir()):
+                        if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
+                            continue
+
+                        try:
+                            if entry.name == '_query_engine' and entry.is_dir() and not entry.is_symlink():
+                                _clear_restore_query_engine(entry)
+                                continue
+                            if entry.is_dir() and not entry.is_symlink():
+                                runtime.publish_status(status_channel, f"Removing directory {entry.relative_to(wd)}")
+                                _remove_restore_directory(entry)
+                            else:
+                                runtime.publish_status(status_channel, f"Removing file {entry.relative_to(wd)}")
+                                _remove_restore_file(entry)
+                        except FileNotFoundError:
+                            continue
+
+                    # ZIP ordering cannot expose a private payload before its ancestry
+                    # is restricted. Owner access is temporary for readonly directories.
+                    for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
+                        directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
+                        os.chmod(directory, mode | 0o700)
+
+                    for member, target_path, relative_target in restore_members:
+                        if member.is_dir():
+                            target_path.mkdir(parents=True, exist_ok=True)
+                            runtime.publish_status(status_channel, f"Restored directory {relative_target}")
+                            continue
+
+                        if relative_target.as_posix() in {
+                            '_query_engine/refresh/incarnation.json',
+                            '_query_engine/refresh/publication.lock',
+                            '_query_engine/refresh/redisprep.lock',
+                        }:
+                            continue
+                        target_path.parent.mkdir(parents=True, exist_ok=True)
+                        if target_path.name == 'redisprep.dump':
+                            directory_fd = os.open(target_path.parent, os.O_RDONLY | os.O_DIRECTORY)
+                            try:
+                                publish_snapshot(directory_fd, snapshots[target_path.parent],
+                                                 target_mode=(member.external_attr >> 16) & 0o7777
+                                                 if member.external_attr >> 16 else None)
+                            finally:
+                                os.close(directory_fd)
+                        else:
+                            with zf.open(member, "r") as src, open(target_path, "wb") as dst:
+                                shutil.copyfileobj(src, dst)
+
+                        perm = member.external_attr >> 16
+                        if perm and target_path.name != 'redisprep.dump':
+                            try:
+                                os.chmod(target_path, perm)
+                            except OSError:
+                                pass
+
+                        runtime.publish_status(status_channel, f"Restored file {relative_target}")
+
+                finally:
+                    # The pre-destructive fence survives failures and SIGKILL.
+                    # Do not use the old wrapper for receipt cleanup.
+                    prep = None
+
+                # Retire copied requests and nested catalog identities as before.
+                # The pre-destructive root fence remains safe if this fails.
+                invalidate_catalog_incarnation(wd)
+
+                # Incoming metadata replaces prior receipts atomically, preserving
+                # independently owned live mirrors. No per-field loaded window.
+                # Nested snapshots can be retained provenance or repeated scenario
+                # leaf names. Only the archive's root has proven live-run authority.
+                RedisPrep(str(wd)).restore_snapshot(snapshots.get(wd, {}))
+                prep = runtime.get_prep_from_runid(runid)
+                restore_completed = True
 
                 for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
                     os.chmod(directory, mode)
@@ -498,4 +564,12 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_FAILED")
         raise
     finally:
-        _clear_archive_job_id(runtime, prep, runid)
+        if not restore_started or restore_completed:
+            _clear_archive_job_id(runtime, prep, runid)
+        else:
+            # Old live metadata is not reconciled with committed incoming bytes.
+            # Receipt cleanup must not publish that old hash over recovery evidence.
+            logging.getLogger(__name__).warning(
+                'Restore failed after replacement began; retaining RedisPrep snapshot and receipt for reconciliation',
+                extra={'runid': runid},
+            )

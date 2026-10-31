@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation
+from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation, catalog_lifecycle_guard
 
 import errno
 import os
@@ -1211,59 +1211,22 @@ def _require_regular_fork_file(run_wd: str, name: str) -> None:
 
 def _rewrite_fork_redisprep_dump(run_wd: str) -> dict[str, Any]:
     """Atomically reset copied RedisPrep metadata without following paths."""
+    from wepppy.nodb._redis_prep_snapshot import read_snapshot, publish_snapshot
+
     root_fd = _open_fork_dir(run_wd)
-    source_fd = None
-    temp_fd = None
-    temp_name = f".redisprep.dump.{secrets.token_hex(8)}.tmp"
     try:
-        flags = os.O_RDONLY
-        if hasattr(os, "O_NOFOLLOW"):
-            flags |= os.O_NOFOLLOW
-        source_fd = os.open("redisprep.dump", flags, dir_fd=root_fd)
-        source_stat = os.fstat(source_fd)
-        if not stat.S_ISREG(source_stat.st_mode):
-            raise ValueError("Fork destination redisprep.dump must be a regular non-symlink file")
-        with os.fdopen(source_fd, "r", encoding="utf-8") as stream:
-            source_fd = None
-            payload = json.load(stream)
-        if not isinstance(payload, dict):
-            raise ValueError("Fork destination redisprep.dump must contain an object")
-
-        payload.pop(f"timestamps:run_omni_scenarios", None)
-        payload.pop(f"timestamps:run_omni_contrasts", None)
-        payload.pop("archive:job_id", None)
-        for key in tuple(payload):
-            if str(key).startswith("rq:"):
-                payload.pop(key, None)
-        payload["attrs:loaded"] = "true"
-
-        temp_fd = os.open(
-            temp_name,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
-            0o600,
-            dir_fd=root_fd,
-        )
-        encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        written = 0
-        while written < len(encoded):
-            count = os.write(temp_fd, encoded[written:])
-            if count <= 0:
-                raise OSError("Short write while persisting fork RedisPrep metadata")
-            written += count
-        os.fsync(temp_fd)
-        os.close(temp_fd)
-        temp_fd = None
-        os.replace(temp_name, "redisprep.dump", src_dir_fd=root_fd, dst_dir_fd=root_fd)
-        return payload
+        with catalog_lifecycle_guard(run_wd, blocking=False):
+            payload = read_snapshot(root_fd)
+            payload.pop('timestamps:run_omni_scenarios', None)
+            payload.pop('timestamps:run_omni_contrasts', None)
+            payload.pop('archive:job_id', None)
+            for key in tuple(payload):
+                if key.startswith('rq:'):
+                    payload.pop(key)
+            payload['attrs:loaded'] = 'true'
+            publish_snapshot(root_fd, payload, target_mode=0o600)
+            return payload
     finally:
-        if source_fd is not None:
-            os.close(source_fd)
-        if temp_fd is not None:
-            os.close(temp_fd)
-        try:
-            os.unlink(temp_name, dir_fd=root_fd)
-        except FileNotFoundError:
-            pass
         os.close(root_fd)
 
 

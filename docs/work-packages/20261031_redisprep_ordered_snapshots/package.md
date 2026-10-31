@@ -12,7 +12,7 @@ request is retained in `artifacts/operator-prompt.md`.
 Complexity budget: one bounded snapshot/recovery protocol using existing Redis
 and filesystem coordination; no service, database, dependency, deployment, queue
 rewiring, auth/identity/privilege change or scientific parameter change. Preserve
-WAM-01, MRS-01 and NFMS-01. No branch change. Commit authority is not granted.
+WAM-01, MRS-01 and NFMS-01. No branch change. Operator authorized checkpoint commits, then implementation commit and push.
 
 ## Authority and execution
 
@@ -34,7 +34,7 @@ is not final implementation approval. No parameterization change; ADR not requir
 RedisPrep reader and yield coherent receipts/timestamps to submission/preflight
 consumers. Preserve the RQ database during metadata-loss tests. Exercise real
 archive/restore and browse under representative identities; no model run needed
-unless scientific execution changes. Current claim: source-level diagnosis only.
+unless scientific execution changes. Current claim: locally verified implementation; production rollout remains held.
 
 ## Hardening and precedent
 
@@ -52,9 +52,9 @@ artifact evidence. Rollout evidence remains separate; no temporary calluses.
 
 ## Exit criteria
 
-- [ ] Accepted contract ancestor exists before production/test implementation.
-- [ ] Confirmed writers repaired; consumer/state matrix dispositions evidenced.
-- [ ] Deterministic real Redis/process/filesystem failures and restore pass.
-- [ ] Required broad/static/docs gates and independent reviews pass.
-- [ ] Identity/mount evidence or exact rollout blockers retained.
-- [ ] Operator/developer recovery guidance, plan and tracker current.
+- [x] Accepted contract ancestor exists before production/test implementation.
+- [x] Confirmed writers repaired; consumer/state matrix dispositions evidenced.
+- [x] Deterministic real Redis/process/filesystem failures and restore pass.
+- [x] Required broad/static/docs checks executed; split-run results and reviews retained.
+- [x] Identity/mount evidence or exact rollout blockers retained.
+- [x] Operator/developer recovery guidance, plan and tracker current.

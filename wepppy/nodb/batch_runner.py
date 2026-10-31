@@ -57,6 +57,7 @@ from wepppy.runtime_paths.thaw_freeze import (
 
 from ._derived_build import finalize as finalize_derived_build
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks, lock_statuses
+from wepppy.query_engine.catalog_refresh import redisprep_snapshot_guard, invalidate_catalog_incarnation
 from .redis_prep import RedisPrep, TaskEnum
 
 
@@ -569,61 +570,63 @@ class BatchRunner(NoDbBase):
 
         base_wd = self.base_wd
         logger.info(f'base_wd: {base_wd}')
-        init_required = False
-        if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.if_exists_rmtree):
-            logger.info(f'removing existing runid_wd: {runid_wd}')
-            _reset_run_workspace(runid_wd, logger)
-            init_required = True
+        with redisprep_snapshot_guard(runid_wd):
+            init_required = False
+            if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.if_exists_rmtree):
+                logger.info(f'removing existing runid_wd: {runid_wd}')
+                _reset_run_workspace(runid_wd, logger)
+                init_required = True
 
-        if not os.path.exists(runid_wd):
-            init_required = True
+            if not os.path.exists(runid_wd):
+                init_required = True
         
-        logger.info(f'init_required: {init_required}')
-        prep = None
-        locks_cleared = None
-        if init_required:
-            logger.info(f'copying base project to runid_wd: {runid_wd}')
-            shutil.copytree(base_wd, runid_wd)
+            logger.info(f'init_required: {init_required}')
+            prep = None
+            locks_cleared = None
+            if init_required:
+                logger.info(f'copying base project to runid_wd: {runid_wd}')
+                shutil.copytree(base_wd, runid_wd)
+                invalidate_catalog_incarnation(runid_wd)
 
-            logger
-            for nodb_fn in glob(_join(runid_wd, '*.nodb')):
-                with open(nodb_fn, 'r') as fp:
-                    state = json.load(fp)
-                # Handle both old (flat) and new (py/state) jsonpickle formats
-                if 'py/state' in state:
-                    state['py/state']['wd'] = runid_wd
-                else:
-                    state['wd'] = runid_wd
-                with open(nodb_fn, 'w') as fp:
-                    json.dump(state, fp)
-                    fp.flush()
-                    os.fsync(fp.fileno())
+                logger
+                for nodb_fn in glob(_join(runid_wd, '*.nodb')):
+                    with open(nodb_fn, 'r') as fp:
+                        state = json.load(fp)
+                    # Handle both old (flat) and new (py/state) jsonpickle formats
+                    if 'py/state' in state:
+                        state['py/state']['wd'] = runid_wd
+                    else:
+                        state['wd'] = runid_wd
+                    with open(nodb_fn, 'w') as fp:
+                        json.dump(state, fp)
+                        fp.flush()
+                        os.fsync(fp.fileno())
 
-            locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
+                locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
 
-            try:
-                watershed_feature.save_geojson(_join(runid_wd, 'dem','target_watershed.geojson'))
-                if _exists(_join(runid_wd, 'dem','target_watershed.geojson')):
-                    logger.info('saved watershed GeoJSON to dem/target_watershed.geojson')
-                    ron = Ron.getInstance(runid_wd)
-                    with ron.locked():
-                        ron._boundary = f'/weppcloud/runs/batch;;{self.batch_name};;{watershed_feature.runid}/browse/dem/target_watershed.geojson'
-                        ron._boundary_color = 'blue'
-                        ron._boundary_name = 'target_watershed'
+                try:
+                    watershed_feature.save_geojson(_join(runid_wd, 'dem','target_watershed.geojson'))
+                    if _exists(_join(runid_wd, 'dem','target_watershed.geojson')):
+                        logger.info('saved watershed GeoJSON to dem/target_watershed.geojson')
+                        ron = Ron.getInstance(runid_wd)
+                        with ron.locked():
+                            ron._boundary = f'/weppcloud/runs/batch;;{self.batch_name};;{watershed_feature.runid}/browse/dem/target_watershed.geojson'
+                            ron._boundary_color = 'blue'
+                            ron._boundary_name = 'target_watershed'
 
-            except (OSError, ValueError, RuntimeError) as e:
-                logger.error(f"Failed to save GeoJSON: {e}")
-        else:
-            locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.error(f"Failed to save GeoJSON: {e}")
+            else:
+                locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
 
-        logger.info('getting RedisPrep instance')
-        prep = RedisPrep.getInstance(runid_wd)
-        logger.info(prep.timestamps_report())
-
-        if init_required:
-            logger.info(f'init_required: {init_required} removing all RedisPrep timestamps')
-            prep.remove_all_timestamp()
+            logger.info('getting RedisPrep instance')
+            prep = RedisPrep.getInstance(runid_wd)
             logger.info(prep.timestamps_report())
+
+            if init_required:
+                logger.info(f'init_required: {init_required} removing all RedisPrep timestamps')
+                prep.remove_all_timestamp()
+                logger.info(prep.timestamps_report())
 
         self._resync_base_project_attributes_owned(runid_wd, prep, logger)
 
@@ -1097,14 +1100,15 @@ class BatchRunner(NoDbBase):
     def _init_base_project(self) -> None:
         from wepppy.nodb.core import Ron
 
-        if os.path.exists(self._base_wd):
-            shutil.rmtree(self._base_wd)
-        os.makedirs(self._base_wd)
-        batch_name = self.batch_name
-        if not batch_name:
-            raise ValueError("Batch name cannot be empty")
+        with redisprep_snapshot_guard(self._base_wd):
+            if os.path.exists(self._base_wd):
+                shutil.rmtree(self._base_wd)
+            os.makedirs(self._base_wd)
+            batch_name = self.batch_name
+            if not batch_name:
+                raise ValueError("Batch name cannot be empty")
 
-        Ron(self._base_wd, self._base_config, run_group='batch', group_name=self.batch_name)
+            Ron(self._base_wd, self._base_config, run_group='batch', group_name=self.batch_name)
 
     # ------------------------------------------------------------------
     # Watershed GeoJSON

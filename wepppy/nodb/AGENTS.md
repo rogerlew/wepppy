@@ -189,3 +189,12 @@ after failure. New manual producers need the shared acquired recovery boundary.
   global process state.
 
 Artifact producers use `wepppy.query_engine.request_catalog_refresh` after publication. Managed asynchronous refresh is rollout-gated; standalone calls remain synchronous. Do not swallow durable admission errors. Keep query/report/finalizer readiness barriers synchronous; see `docs/schemas/query-engine-catalog-refresh-contract.md`.
+
+## RedisPrep snapshots
+
+RedisPrep is not a NoDbBase singleton. Follow
+`docs/schemas/redisprep-snapshot-contract.md` and
+`docs/dev-notes/redisprep-snapshot-recovery.md` for atomic ordered snapshot
+publication, conditional restore, lifecycle fencing and split-store failures.
+Use `update_metadata` for multi-field changes; do not rebuild the shared hash
+field by field or delete unrelated live ownership.

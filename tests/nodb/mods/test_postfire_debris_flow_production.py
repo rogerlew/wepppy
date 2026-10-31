@@ -478,16 +478,17 @@ def test_preflight_projects_durable_publication(tmp_path, monkeypatch, case, exp
     lock.owned.return_value = True
     monkeypatch.setattr(RedisPrep, 'getInstance', lambda wd: prep)
     preflight.notify(tmp_path)
-    pipe = prep.redis.pipeline.return_value.__enter__.return_value
+    values = prep.update_metadata.call_args.args[0]
+    remove = prep.update_metadata.call_args.kwargs['remove']
     key = 'timestamps:run_postfire_debris_flow'
     if expected is None:
-        pipe.hdel.assert_any_call('test-run', key)
+        assert key in remove and key not in values
     else:
         assert expected == int(p.datetime.fromisoformat(state['last_successful_run']['completed_at']).timestamp())
-        assert ('test-run', key, expected) in [call.args for call in pipe.hset.call_args_list]
-        pipe.hdel.assert_called_once_with('test-run','postfire_debris_flow:soil_policy')
-    pipe.execute.assert_called_once()
-    prep.dump.assert_called_once()
+        assert values[key] == expected and key not in remove
+    assert 'postfire_debris_flow:soil_policy' in remove
+    assert values['postfire_debris_flow:model'] == 'M1'
+    prep.update_metadata.assert_called_once()
     assert TaskEnum.run_postfire_debris_flow.emoji() == '🌋'
     assert TaskEnum.run_postfire_debris_flow.label() == 'Run Post-fire Debris Flow'
 
@@ -527,9 +528,8 @@ def test_delayed_preflight_notifier_reads_replacement_after_acquiring_lock(tmp_p
     monkeypatch.setattr(RedisPrep, 'getInstance', lambda wd: prep)
     monkeypatch.setattr(p, 'state_at', lambda wd: state)
     preflight.notify(tmp_path)
-    pipe = prep.redis.pipeline.return_value.__enter__.return_value
-    pipe.hdel.assert_any_call('test-run', 'timestamps:run_postfire_debris_flow')
-    assert len(pipe.hset.call_args_list) == 2  # Model and revision notification.
+    assert 'timestamps:run_postfire_debris_flow' in prep.update_metadata.call_args.kwargs['remove']
+    assert set(prep.update_metadata.call_args.args[0]) == {'postfire_debris_flow:model', 'postfire_debris_flow:revision'}
 
 
 def test_model_selection_legacy_roundtrip(tmp_path, monkeypatch):

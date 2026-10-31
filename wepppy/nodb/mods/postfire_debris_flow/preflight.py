@@ -9,7 +9,7 @@ __all__ = ['notify']
 
 def notify(wd):
     from .production import state_at
-    from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+    from wepppy.nodb.redis_prep import RedisPrep, TaskEnum, RedisPrepSnapshotError
     try:
         prep = RedisPrep.getInstance(str(wd))
         # Serialize notifiers, then read durable state: an older callback must
@@ -24,19 +24,18 @@ def notify(wd):
             if not lock.owned():
                 raise LockError('Postfire preflight projection lease expired.')
             key = f'timestamps:{TaskEnum.run_postfire_debris_flow}'
-            with prep.redis.pipeline() as pipe:
-                if completed is None:
-                    pipe.hdel(prep.run_id, key)
-                else:
-                    pipe.hset(prep.run_id, key, completed)
-                pipe.hset(prep.run_id, 'postfire_debris_flow:model', model)
-                policy = result.get('soil_policy') if result else None
-                if policy is None:
-                    pipe.hdel(prep.run_id, 'postfire_debris_flow:soil_policy')
-                else:
-                    pipe.hset(prep.run_id, 'postfire_debris_flow:soil_policy', policy)
-                pipe.hset(prep.run_id, 'postfire_debris_flow:revision', uuid.uuid4().hex)
-                pipe.execute()
-            prep.dump()
-    except (RedisError, OSError):
+            values = {'postfire_debris_flow:model': model,
+                      'postfire_debris_flow:revision': uuid.uuid4().hex}
+            remove = []
+            if completed is None:
+                remove.append(key)
+            else:
+                values[key] = completed
+            policy = result.get('soil_policy') if result else None
+            if policy is None:
+                remove.append('postfire_debris_flow:soil_policy')
+            else:
+                values['postfire_debris_flow:soil_policy'] = policy
+            prep.update_metadata(values, remove=tuple(remove))
+    except (RedisError, OSError, RedisPrepSnapshotError):
         logging.getLogger(__name__).exception('Preflight notification failed after durable postfire state commit; reconcile the completion marker from durable state')

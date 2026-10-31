@@ -204,3 +204,28 @@ cannot replace it. If pre-replacement fencing fails, do not start destruction.
 An absent marker after interrupted replacement is not evidence of initialization.
 Test kill/failure after destructive work begins followed by normal catalog
 initialization and an old markerless wrapper's attempted mutation.
+
+## Participating setter serialization
+
+RedisPrep operations first take a short process-held serializer using the existing
+catalog filesystem-guard implementation, then attempt lifecycle ownership
+nonblockingly. Ordinary competing setters wait for the serializer and do not
+need caller retries. A serializer holder never waits for lifecycle ownership;
+therefore a lifecycle holder can safely invoke RedisPrep without an opposing
+wait cycle. No serializer is held across model execution. Genuine lifecycle
+contention is an explicit retryable conflict before mutation.
+
+Managed serializer files are `<owner-hash>.redisprep.lock` beside existing
+lifecycle locks. Standalone files are `_query_engine/refresh/redisprep.lock`.
+These empty coordination inodes are retained across in-place replacement with
+the existing publication lock. They contain no model record. Reuse was extended
+because tests/review showed immediate rejection of parallel successful setters
+would otherwise turn completion into workflow failure. No new lock service,
+lease protocol, datastore or runtime dependency is introduced.
+
+Effective profile namespace is revalidated under the mutation guard. A wrapper
+created during transient archive extraction cannot later write a different hash.
+Archive restoration activates only the root's proven run namespace. Nested
+snapshots remain byte artifacts unless an independently governed workflow proves
+their live namespace; repeated scenario leaves and provenance directories do not
+authorize whole-system Redis mutation.

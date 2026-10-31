@@ -482,8 +482,7 @@ def _lookup_job_status(
 
 def _clear_tracked_job(prep: RedisPrep, job_key: str) -> None:
     try:
-        prep.redis.hdel(prep.run_id, f"rq:{job_key}")
-        prep.dump()
+        prep.update_metadata(remove=(f"rq:{job_key}",))
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:331", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

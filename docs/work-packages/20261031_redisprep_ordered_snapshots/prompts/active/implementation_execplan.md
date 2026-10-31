@@ -17,10 +17,12 @@ file, restoring through RedisPrep, and inspecting a real downstream consumer.
 - [x] (2026-10-31 14:32 UTC) Recorded revision/status, inspected primary and related writers, read applicable guidance and skills.
 - [x] (2026-10-31 14:32 UTC) Drafted canonical contract, authority/compatibility checkpoint and bounded package.
 - [x] (2026-10-31 UTC) Two independent reviews complete; presentation findings closed. Historic damaged-state acceptance remains an explicit operator decision.
-- [ ] Obtain missing commit authority and create standalone contract ancestor.
-- [ ] Implement smallest protocol after coordination/identity feasibility evidence.
-- [ ] Complete deterministic concurrency, failure and real consumer evidence.
-- [ ] Run required gates, final independent correctness/security/QA and documentation handoff.
+- [x] (2026-10-31 UTC) Operator approved legacy reconciliation limit and checkpoint commits 88b5c174f / ea95e1298.
+- [x] (2026-10-31 UTC) Implemented atomic writer, ordered capture, conditional recovery and direct consumers.
+- [x] (2026-10-31 UTC) 52 real Redis/NFS snapshot tests, 183 consumer tests and 199 preservation tests pass.
+- [x] (2026-10-31 UTC) Independent correctness/security/QA reviews and stub/exception gates pass.
+- [x] (2026-10-31 UTC) Broad continuation: 8,619 passed / 295 skipped; docs, source manifest and diff checks pass.
+- [ ] Before rollout: cross-host lock, alias, ACL and authenticated browse parity (outside this local delivery).
 
 ## Surprises & Discoveries
 
@@ -45,9 +47,10 @@ file, restoring through RedisPrep, and inspecting a real downstream consumer.
 
 ## Outcomes & Retrospective
 
-Reviewed checkpoint ready for operator disposition and commit authority.
-Existing fork baseline: 113 passed. No production implementation changed.
-Commit approval is the external gate after reviewed checkpoint preparation.
+Implementation and direct consumers are wired and locally verified. Checkpoint
+ancestors are committed; operator authorized implementation commit and push. No deployment.
+See artifacts/validation.md for final split-run results, performance cost and limits.
+Local delivery is complete; package remains open for external rollout parity.
 Local filesystem is ext4; `/wc1` is NFSv4.2 with `local_lock=none`. This mount
 observation is not multi-host identity/locking validation.
 
@@ -119,7 +122,7 @@ No branch/dependency/deployment changes. Commit only named package/contract file
 Retain contract reviews, decision/disposition, consumer matrix, reproducible
 scripts/test commands, parsed snapshot/consumer evidence, performance/access/mount
 results and final reviews under `../../artifacts/`. Update tracker alongside this
-plan at every milestone. Current checkpoint cannot support a repair claim.
+plan at every milestone. Local implementation evidence supports the bounded repair, not production rollout.
 
 ## Interfaces and Dependencies
 
@@ -135,4 +138,42 @@ implementation, including the legacy/mount/namespace constraints found in source
 Operator answered "yes" to committing this reviewed checkpoint and proceeding,
 including explicit reconciliation for already-partial legacy hashes with a true
 loaded marker. Commit authority and that acceptance disposition are granted.
-Implementation and environment validation remain pending.
+Implementation and local environment validation are complete; broader rollout parity remains open.
+
+## Implementation decisions and final evidence — 2026-10-31 UTC
+
+A short blocking serializer precedes nonblocking lifecycle acquisition. This
+retains existing lifecycle exclusion while ordinary parallel setters wait safely;
+actual kernel contention and two real batch leaf initializations exercise it.
+No model execution runs under this guard. First catalog initialization is marked
+explicitly so existing wrappers may adopt it once; destructive replacements never
+qualify. Held directory descriptors prevent inode reuse from defeating fencing.
+
+Archive restore durably rotates the root identity before destruction and preserves
+its coordination files across failure/kill. A second rotation after extraction
+retains existing copied-request/nested-identity retirement. Nested snapshots are
+artifacts only; activating their basename hashes could overwrite unrelated runs.
+
+Redis EXEC response loss and filesystem publication uncertainty are explicit
+error states. Already committed Redis updates are never described as rolled back
+when disk publication fails. Shared recording stubs test API shape only; disposable
+real Redis/process tests establish concurrency. Wrapper descriptor churn has zero
+net growth after 1,000 constructions. NFS setter median rises from 2.51 to 9.94ms
+for a 1,887-byte payload; this is the measured durability/coordination cost.
+
+Broad validation began before the final mock assertions changed: 3,958 passed,
+125 skipped, one stale assertion failure. Continue from that module on current
+files and retain exact file list/log; do not call this one final-revision full pass.
+
+Revision note: records approved ancestors, wired implementation, independent
+review closure, real artifact results and explicit production-parity limits.
+
+Final validation: current-file continuation completed with 8,619 passed and
+295 skipped in 1,893s. The earlier 3,958 passes are historical partial-run
+evidence, not one exact-final-candidate full pass. All 52 snapshot cases passed
+separately on NFS/real Redis. Cleanup removed only owned disposable server/scratch.
+No deployment; remaining parity gate is explicit, not an inferred approval.
+
+Delivery authorization: operator requested “commit and push” after reviewing the
+implementation handoff. Commit the bounded repair and push the current master;
+preserve unrelated workspace changes. Deployment remains outside scope.

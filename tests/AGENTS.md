@@ -14,6 +14,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Smoke/import checks | `tests/test_0_imports.py`, `tests/test_imports.py` | Early detection of missing optional dependencies or circular imports |
 | Utility modules | `tests/test_all_your_base*.py` | Core helpers used across controllers, raster IO, geometry utilities |
 | NoDb controllers | `tests/nodb/` | Singleton behavior, locking semantics, serialization |
+| RedisPrep snapshots | `tests/nodb/test_redis_prep_snapshots.py` | Disposable real Redis, deterministic process/file failures, archive and receipt consumer readback; optional marked `RQ212_TEST_REDIS_SOCKET` |
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Disturbed matrix | `tests/disturbed/` | 96 canonical hourly hillslope cases including young forest; committed finite climate; legacy/v3 PASS and event-accounting contracts |
 | Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; separate opt-in full-project checks; reviewed Usersum report |

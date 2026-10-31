@@ -1,0 +1,4 @@
+{"role": "weppcloud", "uid": 1000, "gid": 993, "file_uid": 1000, "file_gid": 993, "mode": "0o640", "fields": ["attrs:loaded", "rq:access"]}
+{"role": "rq-worker", "uid": 1000, "gid": 993, "file_uid": 1000, "file_gid": 993, "mode": "0o640", "fields": ["attrs:loaded", "rq:access", "timestamps:rq-worker"]}
+{"role": "rq-worker-fork-archive", "uid": 1000, "gid": 993, "file_uid": 1000, "file_gid": 993, "mode": "0o640", "fields": ["attrs:loaded", "rq:access", "timestamps:rq-worker", "timestamps:rq-worker-fork-archive"]}
+{"role": "browse", "uid": 1000, "gid": 993, "file_uid": 1000, "file_gid": 993, "mode": "0o640", "fields": ["attrs:loaded", "rq:access", "timestamps:rq-worker", "timestamps:rq-worker-fork-archive"]}

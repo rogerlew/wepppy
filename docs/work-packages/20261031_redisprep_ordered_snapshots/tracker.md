@@ -1,51 +1,40 @@
 # RPS-01 tracker
 
-Started/updated: 2026-10-31 14:32 UTC. Phase: reviewed checkpoint awaiting operator disposition and commit authority.
+Updated: 2026-10-31 UTC. Phase: local implementation and validation delivered. Package open for rollout parity.
 Starting revision: `967627f4c1afa3bfbae687bb99b76bd18bce5a7d`, branch `master`.
-Security impact high; dedicated final review required. Checkpoint ancestor: none.
+Approved contract ancestors: `88b5c174f`, `ea95e1298`. Operator authorized implementation commit and push on 2026-10-31.
 
 ## Progress
 
-- [x] Source-level failure and direct-consumer investigation.
-- [x] Canonical contract, decision/compatibility plan and active ExecPlan drafted.
-- [x] Two independent contract reviews; presentation findings resolved; explicit legacy-limit approval pending.
-- [ ] Commit authority and standalone ancestor.
-- [ ] Implementation, real Redis/filesystem/process evidence and consumer readback.
-- [ ] Required gates, final independent reviews and environment validation.
+- [x] Consumer inventory, compatibility plan and two independent contract reviews.
+- [x] Operator accepted historic partial-loaded reconciliation limit and checkpoint commits.
+- [x] Atomic ordered snapshots, conditional recovery and confirmed direct consumers.
+- [x] 52 NFS/real Redis snapshot tests; 183 consumer and 199 preservation tests.
+- [x] Independent correctness, security and QA reviews; stub and exception gates.
+- [x] Broad continuation: 8,619 passed, 295 skipped; final documentation checks pass.
+- [ ] Production cross-host/alias/ACL/authenticated browser parity before rollout.
 
 ## Decisions and discoveries
 
-Use RPS-01 canonical authority; preserve WAM/MRS/NFMS. No production edits before
-contract ancestor. Evaluate catalog POSIX record locks rather than flock or an
-expiring Redis token check. Directory inode alone misses archive replacement.
-Healthy live Redis is authoritative; disk is recovery evidence, never RQ itself.
-Legacy partial readiness and basename aliasing require honest unresolved limits.
+See canonical snapshot contract and active plan implementation decisions. Reuse
+existing POSIX lifecycle coordination with short setter serialization. Preserve
+flat schema and legacy namespaces. Durably fence restore before destruction,
+then retire copied nested catalog identities after extraction. Never activate
+nested archive basename hashes. Historical partial-loaded hashes need explicit
+operator reconciliation; no safe automatic inference exists.
 
 ## Verification
 
-Existing fork baseline: 113 passed (11.04s). Two independent reviews confirm
-checkpoint readiness for explicit operator disposition. See artifacts/validation.md
-and artifacts/20261031_contract_reviews.md. New behavior tests,
-full suite, fault injection, mount/identity parity and performance are pending.
-Current evidence supports source diagnosis only, not implementation or repair.
+See [validation](artifacts/validation.md), retained logs and review artifacts.
+Actual web/worker/fork-worker/browse identity access passed on one NFS client.
+NFS setters median 9.94ms versus 2.51ms baseline; 1,000 wrappers leaked no fds.
+Broad initial run: 3,958 passed, 125 skipped, stale pre-edit assertion failure;
+current-file continuation: 8,619 passed, 295 skipped. No deployment or production jobs. Disposable server/scratch cleaned.
 
-## Blockers and next action
+## Rollout blockers
 
-Request acceptance of the explicitly recorded historic partial-loaded legacy
-reconciliation limit and authority to commit the reviewed checkpoint. The new
-reader must still prove atomic recovery of snapshots containing loaded=true.
-The operator prompt explicitly withholds commit authority. The repository's
-contract-first standard requires a committed ancestor before implementation.
-No other confirmation is needed for the already-authorized bounded correction.
-
-## Signal log
-
-Baseline: primary dump truncates, captures are unordered, restoration is per-field.
-Post-change signals: not yet available. No temporary mitigations or deployment.
-
-## Operator approval — 2026-10-31 UTC
-
-Operator answered "yes" to committing this reviewed checkpoint and proceeding,
-including explicit reconciliation for already-partial legacy hashes with a true
-loaded marker. Commit authority and that acceptance disposition are granted.
-Implementation and environment validation remain pending.
+Cross-host NFS/local-server locking, physical aliases and production ACL parity
+are not proven. Browse identity parsed the artifact; authenticated HTTP browse
+was not exercised. Existing repeated-basename namespace collisions and profile
+skeletonization remain explicitly bounded unresolved cases. These prevent a
+class-wide isolation or production-rollout claim, not the local repair evidence.

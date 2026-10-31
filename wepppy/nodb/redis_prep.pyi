@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Dict, Optional
+from ._redis_prep_snapshot import RedisPrepSnapshotError as RedisPrepSnapshotError
 
 class TaskEnum(Enum):
     if_exists_rmtree = "rmtree"
@@ -123,3 +124,7 @@ class RedisPrep:
     def get_archive_job_id(self) -> Optional[str]: ...
 
     def clear_archive_job_id(self) -> None: ...
+
+    def update_metadata(self, values: dict | None = ..., *, remove: tuple = ..., persist: bool = ...) -> None: ...
+
+    def restore_snapshot(self, payload: dict | None = ...) -> None: ...

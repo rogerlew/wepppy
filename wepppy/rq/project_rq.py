@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from wepppy.query_engine.catalog_refresh import catalog_guard_identity, catalog_lifecycle_guard
+from wepppy.query_engine.catalog_refresh import catalog_guard_identity, catalog_lifecycle_guard, invalidate_catalog_incarnation, redisprep_snapshot_guard
 
 """
 RQ tasks that manage project-level preparation, execution, and archival flows.
@@ -944,46 +944,48 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
         runid_wd = get_primary_wd(new_runid)
 
         StatusMessenger.publish(status_channel, f'base_wd: {base_wd}')
-        init_required = False
-        if os.path.exists(runid_wd) and TaskStub.is_task_enabled(TaskEnum.fetch_dem):
-            StatusMessenger.publish(status_channel, f'removing existing runid_wd: {runid_wd}')
-            shutil.rmtree(runid_wd)
-            init_required = True
+        with redisprep_snapshot_guard(runid_wd):
+            init_required = False
+            if os.path.exists(runid_wd) and TaskStub.is_task_enabled(TaskEnum.fetch_dem):
+                StatusMessenger.publish(status_channel, f'removing existing runid_wd: {runid_wd}')
+                shutil.rmtree(runid_wd)
+                init_required = True
 
-        if not os.path.exists(runid_wd):
-            init_required = True
+            if not os.path.exists(runid_wd):
+                init_required = True
         
-        StatusMessenger.publish(status_channel, f'init_required: {init_required}')
-        prep: RedisPrep | None = None
-        locks_cleared: list[str] | None = None
-        if init_required:
-            StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
-            shutil.copytree(base_wd, runid_wd)
+            StatusMessenger.publish(status_channel, f'init_required: {init_required}')
+            prep: RedisPrep | None = None
+            locks_cleared: list[str] | None = None
+            if init_required:
+                StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
+                shutil.copytree(base_wd, runid_wd)
+                invalidate_catalog_incarnation(runid_wd)
 
-            for nodb_fn in glob(_join(runid_wd, '*.nodb')):
-                with open(nodb_fn, 'r') as fp:
-                    state = json.load(fp)
-                state.setdefault('py/state', {})['wd'] = runid_wd
-                with open(nodb_fn, 'w') as fp:
-                    json.dump(state, fp)
-                    fp.flush()
-                    os.fsync(fp.fileno())
-            clear_nodb_file_cache(runid)
-            StatusMessenger.publish(status_channel, 'cleared NoDb file cache')
-            try:
-                locks_cleared = clear_locks(runid)
-                StatusMessenger.publish(status_channel, f'cleared NoDb locks: {locks_cleared}')
-            except RuntimeError:
-                pass
+                for nodb_fn in glob(_join(runid_wd, '*.nodb')):
+                    with open(nodb_fn, 'r') as fp:
+                        state = json.load(fp)
+                    state.setdefault('py/state', {})['wd'] = runid_wd
+                    with open(nodb_fn, 'w') as fp:
+                        json.dump(state, fp)
+                        fp.flush()
+                        os.fsync(fp.fileno())
+                clear_nodb_file_cache(runid)
+                StatusMessenger.publish(status_channel, 'cleared NoDb file cache')
+                try:
+                    locks_cleared = clear_locks(runid)
+                    StatusMessenger.publish(status_channel, f'cleared NoDb locks: {locks_cleared}')
+                except RuntimeError:
+                    pass
 
-        StatusMessenger.publish(status_channel, 'getting RedisPrep instance')
-        prep = RedisPrep.getInstance(runid_wd)
-        StatusMessenger.publish(status_channel, prep.timestamps_report())
-
-        if init_required:
-            StatusMessenger.publish(status_channel, f'init_required: {init_required} removing all RedisPrep timestamps')
-            prep.remove_all_timestamp()
+            StatusMessenger.publish(status_channel, 'getting RedisPrep instance')
+            prep = RedisPrep.getInstance(runid_wd)
             StatusMessenger.publish(status_channel, prep.timestamps_report())
+
+            if init_required:
+                StatusMessenger.publish(status_channel, f'init_required: {init_required} removing all RedisPrep timestamps')
+                prep.remove_all_timestamp()
+                StatusMessenger.publish(status_channel, prep.timestamps_report())
 
         StatusMessenger.publish(status_channel, 'getting NoDb instances')
         ron = Ron.getInstance(runid_wd)
@@ -2702,7 +2704,7 @@ def _finish_fork_rq(
                 str(root_fork_job_id or job.id),
                 "succeeded",
             )
-    except Exception:
+    except Exception:  # broad-except: existing RQ fork finalization boundary
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -2745,10 +2747,8 @@ def _reset_forked_run_job_markers(
     prep = RedisPrep.tryGetInstance(new_wd) if reset_redisprep else None
     if prep is not None:
         queued_job_keys = tuple(prep.get_rq_job_ids().keys())
-        for key in queued_job_keys:
-            prep.redis.hdel(prep.run_id, f"rq:{key}")
         if queued_job_keys:
-            prep.dump()
+            prep.update_metadata(remove=tuple(f"rq:{key}" for key in queued_job_keys))
 
         if prep.get_archive_job_id():
             prep.clear_archive_job_id()
@@ -2767,9 +2767,7 @@ def _reset_forked_omni(new_runid: str, new_wd: str, status_channel: str) -> None
 
     redisprep_payload = _fork_helpers._rewrite_fork_redisprep_dump(new_wd)
     prep = RedisPrep(new_wd)
-    prep.redis.delete(prep.run_id)
-    for key, value in redisprep_payload.items():
-        prep.redis.hset(prep.run_id, key, value)
+    prep.restore_snapshot(redisprep_payload)
 
     _fork_helpers._reset_fork_omni_directories(new_wd)
     _fork_helpers._clear_query_engine_catalog_cache(

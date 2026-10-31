@@ -1,3 +1,5 @@
+Active repair: [RedisPrep atomic ordered snapshots](docs/work-packages/20261031_redisprep_ordered_snapshots/package.md) — implemented and independently reviewed; local NFS/consumer checks pass. Broad continuation: 8,619 passed / 295 skipped; production parity remains a rollout hold. No deployment.
+
 Active: [Caddy MPTCP and homelab Tailscale migration](docs/work-packages/20261029_caddy_mptcp_tailscale/package.md) — patch all active Caddy Compose variants; validate private TLS and auth before homelab cutover.
 
 Completed: [Extended landsoil developer panel](docs/work-packages/20261029_extended_landsoil_developer_panel/package.md) — conditional run/report panels preserve current Extended projects and simplify normal Base projects. Runtime/browser acceptance and independent reviews pass; Python 12,072 passed / 298 skipped, frontend 1,021 passed. No backend mode enforcement or role assignment; production deployment separate.

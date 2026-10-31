@@ -1,0 +1,33 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 967627f4c1afa3bfbae687bb99b76bd18bce5a7d
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 9
+
+Files:
+  M wepppy/nodb/batch_runner.py
+  M wepppy/nodb/mods/postfire_debris_flow/preflight.py
+  M wepppy/nodb/mods/postfire_debris_flow/production.py
+  M wepppy/nodb/redis_prep.py
+  M wepppy/query_engine/catalog_refresh.py
+  M wepppy/rq/project_rq.py
+  M wepppy/rq/project_rq_archive.py
+  M wepppy/rq/project_rq_fork.py
+  M wepppy/weppcloud/routes/weppcloudr.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/nodb/batch_runner.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/preflight.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/production.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/redis_prep.py (base=0 current=0 delta=+0)
+  M wepppy/query_engine/catalog_refresh.py (base=0 current=0 delta=+0)
+  M wepppy/rq/project_rq.py (base=23 current=23 delta=+0)
+  M wepppy/rq/project_rq_archive.py (base=5 current=5 delta=+0)
+  M wepppy/rq/project_rq_fork.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/routes/weppcloudr.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

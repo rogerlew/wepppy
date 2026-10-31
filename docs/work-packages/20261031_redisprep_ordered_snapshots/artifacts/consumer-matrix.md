@@ -15,28 +15,29 @@ NoDbBase uses different composite group/pup keys. Ordinary, batch/pup and Omni
 scenario repeated leaf names can therefore alias RedisPrep hashes; unresolved
 until representative configured paths prove isolation. No namespace migration
 is authorized. Fork destinations are copies, not source generations. Archive
-restore retains root inode and changes catalog incarnation after extraction.
+restore retains root inode; the repair fences before destruction and retires
+copied catalog identities after extraction.
 
 | Writer/reader | Ordering/fields/observable consequence | Disposition and evidence |
 | --- | --- | --- |
-| `nodb/redis_prep.py` dump | HGETALL before open(w); excludes locked only; complete hash snapshot can regress/truncate | Confirmed defect by source; deterministic runtime characterization pending |
-| RedisPrep init/lazy_load | Missing file sets loaded/dumps; per-field restoration can expose saved true marker early | Confirmed defect by source; fresh/empty/legacy and two-loader/live-writer tests pending |
-| RedisPrep setters | attrs, timestamps, rq, archive; mutation before dump; repeated HDEL for all timestamps | Confirmed publication exposure; multi-field reset and crash-gap evidence pending |
-| `rq/project_rq_fork.py` rewrite | Temp/fsync/replace; strips rq, archive, Omni completion; mode 0600 | Atomic byte path exists, coordination/access parity unresolved; existing fork tests cover preservation/symlink |
-| `rq/project_rq.py` reset | Whole hash delete then per-field population after copied rewrite | Confirmed coherent-reset defect; preserve intentional fork reset while retaining unrelated live ownership |
-| `project_rq.py` inherited receipts | Direct HDEL per receipt then dump | Confirmed shared publication exposure; test removed receipts survive reload |
-| `routes/weppcloudr.py` cleanup | Direct HDEL then dump inside best-effort caller boundary | Confirmed shared publication exposure; preserve logged best-effort semantics |
-| Postfire preflight notify | Own Redis lease, atomic pipeline timestamp/model/policy/revision then dump | Shared publication exposure; pipeline atomicity exists, restore interaction unresolved |
-| Postfire production notify | Direct revision HSET without dump | Live revision not guaranteed durable; do not invent a persistence guarantee |
-| `nodb/base.py` mirrors | locked:* and last_modified share some hashes; lock authority is separate keys | Unrelated live fields; ordinary whole-hash deletion prohibited; concurrent mirror test pending |
-| Go preflight2 HGETALL | Reads timestamps/locks/last_modified without loaded gating | Confirmed partial-restore exposure; actual checklist consumer test pending |
-| WEPP route/context readers | Direct HGET/HGETALL timestamp reads | Shared partial visibility exposure; representative coherent-read test pending |
-| Omni contrast snapshot | Reads JSON timestamps; decode failure becomes None, changes eligibility | Confirmed corrupt-publication consumer; actual normal reader test pending |
-| Postfire report | Snapshot existence/non-symlink gates optional currentness | Unresolved regression/access check |
-| Submission recovery / WEPP / RHEM | Reads rq receipts and checks real RQ state | Shared receipt-loss consequence; metadata-loss test must retain RQ jobs |
-| Archive/restore | Catalog/config/Roads guards; archive includes dump; extraction writes member in place | Confirmed lifecycle boundary requiring common coordination; real archive/readback pending |
-| Project delete/recreate and latest copy | Destructive replacement, sometimes same root path | Unresolved participation/old-wrapper fence; test old operation across replacement |
-| Skeletonize | Retains dump; allowlist omits profile namespace file | Unresolved supported profile invocation; retain namespace if supported |
+| `nodb/redis_prep.py` dump | HGETALL before open(w); excludes locked only; complete hash snapshot can regress/truncate | Repaired; real process ordered-capture, reader, kill and stage-failure tests pass |
+| RedisPrep init/lazy_load | Missing file sets loaded/dumps; per-field restoration can expose saved true marker early | Repaired; fresh/empty/legacy, two-loader and WATCH live-writer conflict tests pass |
+| RedisPrep setters | attrs, timestamps, rq, archive; mutation before dump; repeated HDEL for all timestamps | Repaired; grouped update/delete and committed-live/file-failure tests pass |
+| `rq/project_rq_fork.py` rewrite | Temp/fsync/replace; strips rq, archive, Omni completion; mode 0600 | Shared coordinated atomic writer; fork preservation, root/snapshot symlink and 0600 tests pass |
+| `rq/project_rq.py` reset | Whole hash delete then per-field population after copied rewrite | Atomic explicit reset preserves unrelated fields; real receipt-removal/reload tests pass |
+| `project_rq.py` inherited receipts | Direct HDEL per receipt then dump | Grouped mutation/persistence; removed receipts remain absent on reload |
+| `routes/weppcloudr.py` cleanup | Direct HDEL then dump inside best-effort caller boundary | Actual cleanup consumer and reload test pass; existing best-effort logging retained |
+| Postfire preflight notify | Own Redis lease, atomic pipeline timestamp/model/policy/revision then dump | Shared grouped update protocol; postfire suite and live-writer conflict tests pass |
+| Postfire production notify | Direct revision HSET without dump | Participates in coordination with persist=False; existing live-only behavior retained |
+| `nodb/base.py` mirrors | locked:* and last_modified share some hashes; lock authority is separate keys | Cold recovery/explicit reset tests preserve unrelated live fields; WATCH catches concurrent writes |
+| Go preflight2 HGETALL | Reads timestamps/locks/last_modified without loaded gating | Atomic Redis transaction removes partial visibility; real HGETALL reader coverage; Go HTTP checklist not exercised |
+| WEPP route/context readers | Direct HGET/HGETALL timestamp reads | Real atomic restore and retained RQ receipt consumer tests pass; no all-route runtime claim |
+| Omni contrast snapshot | Reads JSON timestamps; decode failure becomes None, changes eligibility | Actual Omni JSON reader succeeds after copied snapshot reset |
+| Postfire report | Snapshot existence/non-symlink gates optional currentness | Postfire report regression suite and real service-identity snapshot access pass |
+| Submission recovery / WEPP / RHEM | Reads rq receipts and checks real RQ state | Real RQ job retained during metadata deletion/recovery; duplicate admission blocked; missing job stays missing |
+| Archive/restore | Catalog/config/Roads guards; archive includes dump; extraction writes member in place | Real archive roundtrip, incoming mode, extraction failure/kill, root fence and nested collision tests pass |
+| Project delete/recreate and latest copy | Destructive replacement, sometimes same root path | Old-wrapper recreation fence, latest/batch initialization guards and two real leaf-boundary tests pass |
+| Skeletonize | Retains dump; allowlist omits profile namespace file | Only traced caller is culvert flow; profile invocation unproven, namespace omission remains explicit open boundary |
 
 All `wepppy/` paths above are relative to repository root with that prefix unless
 explicitly identified as Go services. Concrete anchors: `redis_prep.py:201,212`,
@@ -53,7 +54,7 @@ Submission leases, postfire lease and authoritative NoDb lock tokens are separat
 keys, not snapshot records. No further exclusion is presumed without a traced
 field and explicit contract amendment. A saved job ID does not imply job existence.
 
-## State and failure coverage to execute
+## State and failure coverage assessment
 
 - Absent file/hash, empty object, live hash without file, missing/false loaded
   marker, loaded legacy hash, known interrupted legacy restore, corrupt/non-object/
@@ -70,3 +71,13 @@ field and explicit contract amendment. A saved job ID does not imply job existen
 Actual mount observation: workspace `/home` ext4; `/wc1` NFSv4.2, `local_lock=none`,
 soft mount. Existing catalog source explains POSIX record-lock interoperability.
 Neither observation proves new-protocol cross-host/identity parity.
+
+## Final disposition — 2026-10-31 UTC
+
+52 snapshot tests pass with disposable real Redis and NFS files. 183 direct
+consumer tests pass, including archive nested catalog retirement. The matrix
+records bounded evidence, not universal namespace isolation. Physical bind-mount
+aliases, multi-host locks and profile skeletonization are unproven. Existing
+basename collisions remain outside authorized schema migration. Historical
+partial-loaded state requires operator reconciliation, explicitly accepted.
+See validation.md for exact commands, revision provenance and retained logs.

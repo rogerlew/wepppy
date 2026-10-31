@@ -435,12 +435,15 @@ def test_reset_forked_omni_clears_exact_destination_state(monkeypatch: pytest.Mo
             self.run_id = "destination"
             self.redis = DummyRedis()
 
+        def restore_snapshot(self, payload):
+            calls.append(('restore', payload))
+
     monkeypatch.setattr(project, "RedisPrep", DummyPrep)
 
     project._reset_forked_omni("destination", "/runs/destination", "fork")
 
     assert calls.count(("reset",)) == 1
-    assert ("hset", "destination", "timestamps:build_landuse", "123") in calls
+    assert ("restore", {"attrs:loaded": "true", "timestamps:build_landuse": "123"}) in calls
     assert ("dirs", "/runs/destination") in calls
 
 
@@ -1550,6 +1553,11 @@ def test_reset_forked_run_job_markers_clears_wepp_hints_and_redis_job_keys(
 
         def dump(self) -> None:
             self.dump_calls += 1
+
+        def update_metadata(self, *, remove=()):
+            for key in remove:
+                self.redis.hdel(self.run_id, key)
+            self.dump()
 
         def get_archive_job_id(self) -> str | None:
             return self.archive_job_id
