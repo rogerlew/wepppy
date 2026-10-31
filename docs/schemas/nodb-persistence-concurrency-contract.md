@@ -18,6 +18,13 @@
 - Applies to all NoDb controllers inheriting `NoDbBase`.
 - Does not redefine RQ/API payload schema (see `docs/schemas/rq-response-contract.md`).
 
+## RedisPrep metadata boundary
+
+RedisPrep does not inherit NoDbBase. Its live Redis authority, recovery snapshots
+and pending RPS-01 repair are governed separately by the
+[RedisPrep snapshot contract](redisprep-snapshot-contract.md). The singleton,
+disk-authority and NFMS-01 rules below remain unchanged.
+
 ## Derived query catalog refresh (specified; implementation pending)
 
 [Query-engine catalog refresh](query-engine-catalog-refresh-contract.md) governs

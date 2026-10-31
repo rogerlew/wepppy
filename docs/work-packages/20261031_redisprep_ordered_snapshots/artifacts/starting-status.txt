@@ -1,0 +1,67 @@
+ M PROJECT_TRACKER.md
+ M docs/work-packages/20261029_roads_parameterization_program/package.md
+ M docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md
+ M docs/work-packages/20261029_roads_parameterization_program/tracker.md
+ M wepppy/soils/ssurgo/ssurgo.md
+ M wepppy/weppcloud/routes/usersum/generated/docs_index.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/analyze_no_detected_boundary.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/analyze_soil_hourly.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v3.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v4.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v5.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v6.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v7.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/erosion-ablation-v1-declaration.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/erosion-ablation-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-control-r2-comparison.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-control-r2-declaration-v2.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-control-r2-declaration.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy-soil-control-r2-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/legacy_soil_control_r2.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-funding-observation-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-funding-observation-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-funding-observation-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-joint-ownership-experiment.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-shadow-ledger-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-shadow-ledger-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-shadow-ledger-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-stage-ledger-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-stage-ledger-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/native-stage-ledger-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/no-detected-boundary-v1-analysis.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/no-detected-boundary-v1-declaration.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/no-detected-boundary-v1-failures.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/no-detected-boundary-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/no_detected_boundary.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/plot_soil_hourly.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/restriction-boundary-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/restriction-provenance-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/restriction-provenance-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/restriction-source-retention-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/restriction_provenance.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/retain_restriction_boundary.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/retain_role_runtime.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/retain_role_study.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/retain_soil_hourly.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-attribution-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-attribution-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-boundary-assessment-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-runtime-ablation-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-runtime-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role-runtime-verification-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role_boundary_assessment.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/role_runtime_ablation.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/runtime-ablation-v1-declaration.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/runtime-ablation-v1-failures.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/runtime-ablation-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-archive-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-boundary-context-v1.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-interaction-findings.md
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-interaction-v1-analysis.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-interaction-v1-declaration.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-interaction-v1-summary.json
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil-hourly-interaction-v1.png
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/soil_hourly_interaction.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/summarize_role_control.py
+?? docs/work-packages/20261029_roads_parameterization_program/artifacts/verify_role_runtime.py
+?? docs/work-packages/20261031_redisprep_ordered_snapshots/
