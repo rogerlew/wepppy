@@ -1,0 +1,29 @@
+{
+  "finding": "Confirmed ELEMENT erodibility metadata omit native printed scaling; model arithmetic and soil inputs are unaffected.",
+  "native_printed_values": {
+    "Ki": "effective Ki / 1e6",
+    "Kr": "effective Kr * 1e3"
+  },
+  "current_metadata": {
+    "Ki": "kg s/m^4",
+    "Kr": "s/m"
+  },
+  "ledger_conversions": {
+    "ki_si_kg_s_m4": "Ki * 1e6",
+    "kr_si_s_m": "Kr / 1e3"
+  },
+  "confirmed_consumers": [
+    "WEPPpy hill_element_interchange.SCHEMA labels raw Ki/Kr as unscaled SI.",
+    "WEPPpyo3 hill_element_schema emits the same labels in native Parquet metadata.",
+    "WEPPpyo3 hill_element parser preserves raw printed floats, without erodibility scaling."
+  ],
+  "scope_limit": "No specific dashboard/report miscalculation has been demonstrated. Other output families with similarly named Ki/Kr fields are not automatically implicated.",
+  "minimal_future_correction": "Correct metadata in both schema definitions to state the native scales while preserving existing numeric columns and values. If SI fields are desired, add explicit new fields under a separately reviewed compatibility contract. Do not silently rescale existing Parquet values.",
+  "evidence_sha256": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/sedout.for": "e9b73b1d620b221ad7717b1d16a970e52be19c754cb4751fe6089da6f9e9dcd4",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/contin.for": "a9bf340f08a9a26f5b910e4df5a3aa36df9a2cc57c7471776c72c337245cad30",
+    "/home/workdir/wepppy/wepppy/wepp/interchange/hill_element_interchange.py": "3ef87fd496be28350d7ef404242ee2fc2baeeee8e48a756d5dba1400ce7e8a07",
+    "/home/workdir/wepppyo3/wepp_interchange/src/schema.rs": "0a45929c64bf30f23f1546e7efcd3f28eae01497d746491a3e01cfa6c73ad0cc",
+    "/home/workdir/wepppyo3/wepp_interchange/src/hill_element.rs": "8205708270a8b428ba7b75d56c29d5b015174a0deaf96e0a9b593d3da6be7dde"
+  }
+}

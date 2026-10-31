@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "scope": "Complete calendar, three OFEs, exact R4 legacy and generated soils; no native executions.",
+  "compatibility": "New analysis-only Parquet/JSON under a separate ignored root; no existing data/schema edits.",
+  "calendar": "WAT and PASS require every declared calendar day; ELEMENT and EBE retain sparse observation support and NULL for missing rows. Native ELEMENT year index is mapped using the frozen climate first year.",
+  "water": "Surface Q times cumulative exact slope area /1000; all other local water depths times local exact slope area /1000. QOFE retained as raw diagnostic only. PASS volume is separately threshold-filtered.",
+  "sediment": "ELEMENT kg/m times emitted hillslope width; net is out minus upstream boundary. Missing ELEMENT stays NULL. reported_delta uses zero ONLY for absent contributions to the sum of reported rows, never as a physical-zero claim.",
+  "erosion_units": "Native writer scales Ki/1e6 and Kr*1e3. Preserve raw values; SI Ki=raw*1e6, Kr=raw/1e3. Current parser metadata has incomplete units; no parser rewrite.",
+  "ratios": "Concentration only for positive matching physical surface volume and observed mass; delivery only for positive incoming mass. No epsilon or clipping.",
+  "particles": "Versioned v2 fixed-width audit, unchanged criteria; terminal PASS class data only for EVENT. No per-OFE particle origin inference. Particle mass audit retains historical record-width basis.",
+  "residual": "Soil stock residual is apparent and incomplete; interception/snow/support limitations remain explicit.",
+  "comparison": "Daily same-support physical differences separate from reported-row contribution differences. No WEPP2010 event comparison.",
+  "regression": "Rehash all original inputs/ordinary outputs before and after conversion; freshly reparse all four output families; exact calendar and duplicate checks; annual sediment/water comparisons against accepted audits; full output readback and hash receipt.",
+  "geometry_bridge": "Exact Decimal token intervals validate historical unrounded metadata. Ledger uses emitted width/areas. Historical sediment audits retain record width; compare via emitted_width/record_width. This changes no native/audit threshold."
+}

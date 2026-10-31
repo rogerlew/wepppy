@@ -1,9 +1,10 @@
 # Roads parameterization and configuration view
 
-## Current: U12 accepted; revision-4 delivery in progress
+## Current: paired event comparison accepted; buffer process observations next
 
-Current [candidate ledger v16](artifacts/candidate-ledger-v16.json) records the
-accepted native engine, rejected parameter factorial and exact-R4 legacy controls.
+Current [candidate ledger v17](artifacts/candidate-ledger-v17.json) records the
+completed paired event study and the next bounded source-observation question.
+Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
@@ -20,7 +21,8 @@ explanations, not changed tolerances or universal numerical guarantees. The
 [mixed-reconstruction clarification](artifacts/param-u12-mixed-reconstruction-clarification.md)
 defines the local error equation precisely without changing frozen evidence.
 
-The authorized same-name `wepp_261029` revision-4 delivery is in progress:
+The authorized same-name `wepp_261029` revision-4 repository delivery is complete
+in pushed WEPPpy commit `a5c40031a`; see the [delivery receipt](artifacts/revision4-delivery-complete.json). Native release commit is `1959d8f61`, with
 source `b01a739957bef5aacf35b4a89bc13eddc9d94804`, watershed hash
 `2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`,
 hillslope hash `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.

@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "scope": "Artifact hash readback only; numerical independent acceptance is separately retained.",
+  "script_sha256": "db73e0731a1e256ca9050d3de911f4fcfcad48183e9632af5bac9eb96802953f",
+  "dependencies_rehashed": 541,
+  "counts": {
+    "case_receipts": 116,
+    "source_records": 232,
+    "parsed_parquets": 928,
+    "derived_parquets": 696,
+    "particle_audits": 232
+  },
+  "figure_all43_points_unchanged": true,
+  "strict_audit_criteria_unchanged": true,
+  "files": {
+    "declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+    "analysis-declaration.json": "dfc36bfdbf4523e205755b2ba68177131f6b50e73f83a4dc1fb687303f5ec641",
+    "ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+    "summarize.py": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+    "schema.json": "376ca20a2c99d6c9e588374bc16b3dd97a0714d36450adff375e9e891e2a9444",
+    "results.json": "64de0dec346f53f6d60f9f06a485358dfdaeffa94348be76a3f9ed471d2a8078",
+    "preflight.json": "5eb257f194900e9bf4b69b92431fdc3fe1a36f28fb20e7f8566eaa48c5b62a7a",
+    "summary.json": "1167e05f9eb1276196e063c5700b4a97dd86dcefae7940f1e16acbb5f8e17370",
+    "case-summary.json": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+    "interpretation-metadata.json": "db1b918814babe67d1f591feb03dc0b420e142b1a0dae0fdef984ca72e376d6e",
+    "explore_hydrology.py": "93ae5ad7890bb3fe98efb3400950cc67caa30a5e268afd64e69ba994d5772552",
+    "exploratory-hydrology.json": "a3c8c84a4840462256a31730b8dd03829910c8e3e6f687ea65afaae290a7076b",
+    "top-discrepancy-events.json": "362d820382634d44fd081c9ac92e8f21c40035e453a933dc4b114998ae55550c",
+    "positive-ranked-discrepancy-events.json": "e5dc5c99fae6dcd216c7d2d411dc63b5b046008e043796c3c47f2cc9713f376c",
+    "exploratory-negative-discrepancy-events.json": "06ed896ffcc7c3a2be49139a5a3747963001a2ca1f244e5d0521d3647841fde4",
+    "plot_boundaries.py": "498b80d372576232678802af8cabec7481ba71c0f2afca2a35800eb3ec088ade",
+    "figure-data.json": "08a4666d9781bc1f5d5d430032f92c611ea8ed123995c73954ab28b0c6877b5a",
+    "small-reference-paired-boundaries.png": "ef5ff66294f3d8559b23d1ae2064073293ce671aa0948391a63ef11ea4b02c56",
+    "small-reference-paired-boundaries.pdf": "26d40fe2618c4797dd1ad214530a37e4dcdb2cb79cfc1cabfca88704ae665454",
+    "small-reference-paired-boundaries.svg": "0640e053732d68675d984545fdbe48d7a7a5c77eb11b7f5c96e0213e9ea6b5f5"
+  }
+}

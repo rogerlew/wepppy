@@ -1,0 +1,914 @@
+{
+  "script_sha256": "498b80d372576232678802af8cabec7481ba71c0f2afca2a35800eb3ec088ade",
+  "case_summary_sha256": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+  "points": [
+    {
+      "case_id": "charleston-1718465-outunrut-paved-none",
+      "climate": "charleston",
+      "material": "1718465",
+      "surface": "paved",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 2.637501222758009,
+          "modern_kg_yr": 5.89194604103347
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.7947526667146194,
+          "modern_kg_yr": 4.48563793247404
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-high",
+      "climate": "denver",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 57.297626154869526,
+          "modern_kg_yr": 26.53126868408668
+        },
+        "fill": {
+          "legacy_kg_yr": 83.9501282965907,
+          "modern_kg_yr": 38.964433283706896
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 4.588012852254226
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-low",
+      "climate": "denver",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 28.09383324915272,
+          "modern_kg_yr": 15.15148812746786
+        },
+        "fill": {
+          "legacy_kg_yr": 57.329955076905414,
+          "modern_kg_yr": 27.616981649123947
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 4.542213546036773
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-none",
+      "climate": "denver",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 32.04604396803524,
+          "modern_kg_yr": 25.46980241057631
+        },
+        "fill": {
+          "legacy_kg_yr": 24.22513891219613,
+          "modern_kg_yr": 28.928997068412116
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 3.785177955030645
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-high",
+      "climate": "denver",
+      "material": "1718465",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 80.39933502631996,
+          "modern_kg_yr": 46.55634180845877
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 7.163550307776857
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-low",
+      "climate": "denver",
+      "material": "1718465",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 80.39933502631996,
+          "modern_kg_yr": 46.55634180845877
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 7.163550307776857
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-high",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 96.6580887335156,
+          "modern_kg_yr": 19.882287052047086
+        },
+        "fill": {
+          "legacy_kg_yr": 119.8864192162731,
+          "modern_kg_yr": 75.89483855599163
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 8.15227650670657
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-low",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 32.50942518388239,
+          "modern_kg_yr": 8.532141340627796
+        },
+        "fill": {
+          "legacy_kg_yr": 63.84962102080162,
+          "modern_kg_yr": 64.56085730559028
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 7.564967756388648
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-none",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.93309934912102,
+          "modern_kg_yr": 14.472580764715033
+        },
+        "fill": {
+          "legacy_kg_yr": 30.432291943079115,
+          "modern_kg_yr": 24.340984216157906
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 2.3707876159622545
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-high",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 90.5236757772133
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 19.91461597408294
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-low",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 90.5236757772133
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 19.91461597408294
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-none",
+      "climate": "denver",
+      "material": "1718494",
+      "surface": "paved",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 3.270609279293383,
+          "modern_kg_yr": 10.434159587070244
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.42835821697499826,
+          "modern_kg_yr": 2.403116537998103
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-high",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 99.5946324851052,
+          "modern_kg_yr": 24.556510363063573
+        },
+        "fill": {
+          "legacy_kg_yr": 106.43758764936001,
+          "modern_kg_yr": 39.10452527919558
+        },
+        "buffer": {
+          "legacy_kg_yr": 2.5162677651235748,
+          "modern_kg_yr": 7.5380269880254405
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-low",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 24.90943442862157,
+          "modern_kg_yr": 8.669539259280157
+        },
+        "fill": {
+          "legacy_kg_yr": 41.46723066464887,
+          "modern_kg_yr": 23.290294249992815
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.8270815887504683,
+          "modern_kg_yr": 6.261034567609409
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-none",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 28.303971242385703,
+          "modern_kg_yr": 15.186511126340033
+        },
+        "fill": {
+          "legacy_kg_yr": 25.86044355184282,
+          "modern_kg_yr": 26.679442910084315
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.0426077356561279,
+          "modern_kg_yr": 4.0707500996806445
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-high",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 44.89140232361256,
+          "modern_kg_yr": 60.350015210420956
+        },
+        "buffer": {
+          "legacy_kg_yr": 2.9176852137353655,
+          "modern_kg_yr": 7.732000520240534
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-low",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 44.89140232361256,
+          "modern_kg_yr": 60.350015210420956
+        },
+        "buffer": {
+          "legacy_kg_yr": 2.9176852137353655,
+          "modern_kg_yr": 7.732000520240534
+        }
+      }
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-none",
+      "climate": "denver",
+      "material": "1718510",
+      "surface": "paved",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 4.294358477095266,
+          "modern_kg_yr": 16.067474251816915
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.34753591188537597,
+          "modern_kg_yr": 1.3389561876514096
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-high",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 96.6580887335156,
+          "modern_kg_yr": 28.99096083564752
+        },
+        "fill": {
+          "legacy_kg_yr": 119.8864192162731,
+          "modern_kg_yr": 41.327138669160206
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 7.090810233196198
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-low",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 32.50942518388239,
+          "modern_kg_yr": 12.60289144030844
+        },
+        "fill": {
+          "legacy_kg_yr": 63.84962102080162,
+          "modern_kg_yr": 24.974092272693294
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 6.0401202670311065
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-none",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.93309934912102,
+          "modern_kg_yr": 21.99713736855886
+        },
+        "fill": {
+          "legacy_kg_yr": 30.432291943079115,
+          "modern_kg_yr": 30.653206243657397
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 4.957101378830169
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-high",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 42.00335195507672
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 7.290171919083932
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-low",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 42.00335195507672
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 7.290171919083932
+        }
+      }
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-none",
+      "climate": "denver",
+      "material": "1856573",
+      "surface": "paved",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 3.270609279293383,
+          "modern_kg_yr": 7.511086219662233
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.42835821697499826,
+          "modern_kg_yr": 1.0291373514745241
+        }
+      }
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-high",
+      "climate": "denver",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 96.6580887335156,
+          "modern_kg_yr": 33.042852397473915
+        },
+        "fill": {
+          "legacy_kg_yr": 119.8864192162731,
+          "modern_kg_yr": 43.40157783312718
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 2.7102412973386683
+        }
+      }
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-low",
+      "climate": "denver",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 32.50942518388239,
+          "modern_kg_yr": 11.63032970239665
+        },
+        "fill": {
+          "legacy_kg_yr": 63.84962102080162,
+          "modern_kg_yr": 22.03485444426736
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 2.7102412973386683
+        }
+      }
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-none",
+      "climate": "denver",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.93309934912102,
+          "modern_kg_yr": 19.67214905881407
+        },
+        "fill": {
+          "legacy_kg_yr": 30.432291943079115,
+          "modern_kg_yr": 28.282418627695147
+        },
+        "buffer": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 2.273800849854708
+        }
+      }
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-high",
+      "climate": "denver",
+      "material": "53949",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 44.554642719072454
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 6.077837342739597
+        }
+      }
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-low",
+      "climate": "denver",
+      "material": "53949",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 61.25791910426105,
+          "modern_kg_yr": 44.554642719072454
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.462883722122164,
+          "modern_kg_yr": 6.077837342739597
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-high",
+      "climate": "flagstaff",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 67.47584844248931,
+          "modern_kg_yr": 34.65391034559372
+        },
+        "fill": {
+          "legacy_kg_yr": 56.90698501360306,
+          "modern_kg_yr": 35.359758476709764
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.5265465787438535,
+          "modern_kg_yr": 13.650887329637209
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-low",
+      "climate": "flagstaff",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 30.860650160054117,
+          "modern_kg_yr": 18.756162934465024
+        },
+        "fill": {
+          "legacy_kg_yr": 26.85994605811782,
+          "modern_kg_yr": 19.548221524343322
+        },
+        "buffer": {
+          "legacy_kg_yr": 2.176814083747161,
+          "modern_kg_yr": 9.698676610754678
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-none",
+      "climate": "flagstaff",
+      "material": "1718465",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 32.865043326276755,
+          "modern_kg_yr": 31.1974097645942
+        },
+        "fill": {
+          "legacy_kg_yr": 28.088445095480076,
+          "modern_kg_yr": 32.627964564680504
+        },
+        "buffer": {
+          "legacy_kg_yr": 2.6105604543948004,
+          "modern_kg_yr": 13.866413476542867
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-high",
+      "climate": "flagstaff",
+      "material": "1718465",
+      "surface": "paved",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 2.3061297718905567,
+          "modern_kg_yr": 3.0146719798429125
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.0884070418735805,
+          "modern_kg_yr": 1.3847554938688622
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-low",
+      "climate": "flagstaff",
+      "material": "1718465",
+      "surface": "paved",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 0.0,
+          "modern_kg_yr": 0.0
+        },
+        "fill": {
+          "legacy_kg_yr": 2.3061297718905567,
+          "modern_kg_yr": 3.0146719798429125
+        },
+        "buffer": {
+          "legacy_kg_yr": 1.0884070418735805,
+          "modern_kg_yr": 1.3847554938688622
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-high",
+      "climate": "flagstaff",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 105.21178268883396,
+          "modern_kg_yr": 29.564799201783853
+        },
+        "fill": {
+          "legacy_kg_yr": 87.244984267411,
+          "modern_kg_yr": 32.3423924200305
+        },
+        "buffer": {
+          "legacy_kg_yr": 7.5326388343528,
+          "modern_kg_yr": 18.18771272200134
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-low",
+      "climate": "flagstaff",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 34.287515895854085,
+          "modern_kg_yr": 12.969285890048061
+        },
+        "fill": {
+          "legacy_kg_yr": 29.050230526046583,
+          "modern_kg_yr": 16.3665167806485
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.3137145086745146,
+          "modern_kg_yr": 10.932563801789579
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-none",
+      "climate": "flagstaff",
+      "material": "1718494",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.67177389599793,
+          "modern_kg_yr": 20.846766559449915
+        },
+        "fill": {
+          "legacy_kg_yr": 32.280428652795145,
+          "modern_kg_yr": 23.074768103087152
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.5130761945622497,
+          "modern_kg_yr": 14.8578337523089
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-high",
+      "climate": "flagstaff",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 105.21178268883396,
+          "modern_kg_yr": 38.697719676911156
+        },
+        "fill": {
+          "legacy_kg_yr": 87.244984267411,
+          "modern_kg_yr": 40.54316230979087
+        },
+        "buffer": {
+          "legacy_kg_yr": 7.5326388343528,
+          "modern_kg_yr": 19.20607376613058
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-low",
+      "climate": "flagstaff",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 34.287515895854085,
+          "modern_kg_yr": 16.70327638518861
+        },
+        "fill": {
+          "legacy_kg_yr": 29.050230526046583,
+          "modern_kg_yr": 18.624153169485297
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.3137145086745146,
+          "modern_kg_yr": 11.021468337388162
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-none",
+      "climate": "flagstaff",
+      "material": "1856573",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.67177389599793,
+          "modern_kg_yr": 28.656895307943746
+        },
+        "fill": {
+          "legacy_kg_yr": 32.280428652795145,
+          "modern_kg_yr": 31.2755379928475
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.5130761945622497,
+          "modern_kg_yr": 16.37459901115748
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-high",
+      "climate": "flagstaff",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "high",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 105.21178268883396,
+          "modern_kg_yr": 45.58916822421962
+        },
+        "fill": {
+          "legacy_kg_yr": 87.244984267411,
+          "modern_kg_yr": 46.37583866042527
+        },
+        "buffer": {
+          "legacy_kg_yr": 7.5326388343528,
+          "modern_kg_yr": 16.590125158063138
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-low",
+      "climate": "flagstaff",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "low",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 34.287515895854085,
+          "modern_kg_yr": 16.083638712834844
+        },
+        "fill": {
+          "legacy_kg_yr": 29.050230526046583,
+          "modern_kg_yr": 16.945743300457472
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.3137145086745146,
+          "modern_kg_yr": 7.2120436908306305
+        }
+      }
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-none",
+      "climate": "flagstaff",
+      "material": "53949",
+      "surface": "gravel",
+      "traffic": "none",
+      "values": {
+        "road": {
+          "legacy_kg_yr": 36.67177389599793,
+          "modern_kg_yr": 26.356153689725836
+        },
+        "fill": {
+          "legacy_kg_yr": 32.280428652795145,
+          "modern_kg_yr": 29.750690503489952
+        },
+        "buffer": {
+          "legacy_kg_yr": 3.5130761945622497,
+          "modern_kg_yr": 11.387862787127782
+        }
+      }
+    }
+  ],
+  "files": {
+    "png": "ef5ff66294f3d8559b23d1ae2064073293ce671aa0948391a63ef11ea4b02c56",
+    "svg": "0640e053732d68675d984545fdbe48d7a7a5c77eb11b7f5c96e0213e9ea6b5f5",
+    "pdf": "26d40fe2618c4797dd1ad214530a37e4dcdb2cb79cfc1cabfca88704ae665454"
+  }
+}

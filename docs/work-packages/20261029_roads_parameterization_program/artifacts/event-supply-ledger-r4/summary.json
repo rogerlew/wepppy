@@ -1,0 +1,2868 @@
+{
+  "status": "Paired observational accounting only; no parameter acceptance.",
+  "dimensions": {
+    "ofe_days": 2033712,
+    "case_days": 677904,
+    "cases": 116
+  },
+  "source_records_rehashed": 232,
+  "output_artifacts_rehashed": 1624,
+  "annual_accepted_audits_replayed_exactly": 232,
+  "annual_reported_difference_decompositions_reconciled": 116,
+  "particle_events": 10718,
+  "strict_particle_flags": [
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low"
+      },
+      "lane": "modern",
+      "flag": {
+        "year": 2003,
+        "julian": 29,
+        "causes": [
+          "fraction_sum"
+        ],
+        "fraction_sum": "1.000005010000286038",
+        "fraction_bound": "0.0000050050000000015",
+        "class_mass_kg": "3.124909087608893863656E-7",
+        "bulk_mass_kg": "0E-18",
+        "mass_bound_kg": "0.02155261470825554057500518752",
+        "pass_tokens": [
+          "EVENT",
+          "2003",
+          "29",
+          "0.46080E+05",
+          "0.94687E-01",
+          "0.73975E-02",
+          "0.14610E-01",
+          "0.18312E+01",
+          "0.15248E-01",
+          "0.26040E+02",
+          "0.00000E+00",
+          "0.00000E+00",
+          "0.39739E-04",
+          "0.84944E-05",
+          "-.81819E-05",
+          "0.17062E-06",
+          "0.28159E-10",
+          "0.16271E-19",
+          "0.16271E-19",
+          "0.16271E-19",
+          "0.99984E+00",
+          "0.16501E-03",
+          "0.95346E-13",
+          "0.95346E-13",
+          "0.95346E-13",
+          "0.49495E+00",
+          "0.00000E+00"
+        ],
+        "element_tokens": [
+          "3",
+          "29",
+          "1",
+          "4",
+          "44.700",
+          "0.853",
+          "0.000",
+          "0.067",
+          "12.800",
+          "3.865",
+          "40.000",
+          "*******",
+          "5.000",
+          "6.000",
+          "99.900",
+          "55.609",
+          "55.609",
+          "19.998",
+          "0.162",
+          "0.081",
+          "0.019",
+          "3.000",
+          "0.150",
+          "0.000",
+          "0.853",
+          "0.000"
+        ]
+      }
+    }
+  ],
+  "unavailable_element_diagnostics": 2131,
+  "unavailable_by_field": {
+    "Sm": 2131
+  },
+  "undefined_or_unobserved_flux_days": 0,
+  "groups": {
+    "meaningful_high": {
+      "cases": 5,
+      "modern_report_kg_yr": {
+        "n": 5,
+        "missing": 0,
+        "median": 198.4133708413503,
+        "min": 26.811452675064064,
+        "max": 378.85186103076853
+      },
+      "legacy_report_kg_yr": {
+        "n": 5,
+        "missing": 0,
+        "median": 58.75242764648283,
+        "min": 12.02635899733581,
+        "max": 149.01477797057308
+      },
+      "modern_lower_fill_supply": 3,
+      "modern_higher_outlet": 5,
+      "modern_lower_fill_higher_outlet": 3,
+      "median_paired_sediment_change_kg_yr": {
+        "road": {
+          "n": 5,
+          "missing": 0,
+          "median": 0.0,
+          "min": -83.48944115757968,
+          "max": 0.0
+        },
+        "fill": {
+          "n": 5,
+          "missing": 0,
+          "median": -4.291664400258945,
+          "min": -97.63334454826376,
+          "max": 13.144400884408864
+        },
+        "buffer": {
+          "n": 5,
+          "missing": 0,
+          "median": 53.485507431475725,
+          "min": 14.782399600891928,
+          "max": 320.1236800758122
+        }
+      },
+      "median_paired_surface_volume_change_m3_yr": {
+        "road": {
+          "n": 5,
+          "missing": 0,
+          "median": -74.1314281602869,
+          "min": -128.83601608531703,
+          "max": -56.34534296193482
+        },
+        "fill": {
+          "n": 5,
+          "missing": 0,
+          "median": -116.93152311531071,
+          "min": -202.82626463955074,
+          "max": -1.0186898203091488
+        },
+        "buffer": {
+          "n": 5,
+          "missing": 0,
+          "median": 177.78652081318512,
+          "min": 38.67292913413513,
+          "max": 217.9620915569397
+        }
+      },
+      "cases_with_lower_inflow_higher_outflow_events": 5,
+      "lower_inflow_higher_outflow_events": 320,
+      "printing_separated_lower_inflow_higher_outflow_events": 247,
+      "printing_separated_excess_kg": 3050.77260944961,
+      "lower_inflow_higher_outflow_excess_kg": 4864.123399055066,
+      "matched_element_difference_kg": 11759.106575172778,
+      "modern_only_reported_sediment_kg": 0.0,
+      "legacy_only_reported_sediment_kg": 0.0,
+      "terminal_clay_mass_fraction": {
+        "modern": {
+          "n": 5,
+          "missing": 0,
+          "median": 0.045645485526205336,
+          "min": 0.04522740443233057,
+          "max": 0.06890005327995215
+        },
+        "legacy": {
+          "n": 5,
+          "missing": 0,
+          "median": 0.05200002143933803,
+          "min": 0.013744781281653688,
+          "max": 0.05300012389233318
+        }
+      }
+    },
+    "meaningful_low": {
+      "cases": 48,
+      "modern_report_kg_yr": {
+        "n": 48,
+        "missing": 0,
+        "median": 0.8078399999999999,
+        "min": 0.0,
+        "max": 45.144
+      },
+      "legacy_report_kg_yr": {
+        "n": 48,
+        "missing": 0,
+        "median": 34.499520000000004,
+        "min": 1.0776307345282985,
+        "max": 518.7006
+      },
+      "modern_lower_fill_supply": 44,
+      "modern_higher_outlet": 0,
+      "modern_lower_fill_higher_outlet": 0,
+      "median_paired_sediment_change_kg_yr": {
+        "road": {
+          "n": 48,
+          "missing": 0,
+          "median": -25.390406250000005,
+          "min": -448.1650698756282,
+          "max": 0.0
+        },
+        "fill": {
+          "n": 48,
+          "missing": 0,
+          "median": -84.03364467851662,
+          "min": -616.2287175000012,
+          "max": 19.42968214354516
+        },
+        "buffer": {
+          "n": 48,
+          "missing": 0,
+          "median": -33.766425,
+          "min": -473.55263999999966,
+          "max": -1.0560781198377316
+        }
+      },
+      "median_paired_surface_volume_change_m3_yr": {
+        "road": {
+          "n": 48,
+          "missing": 0,
+          "median": -43.592322470790066,
+          "min": -237.58620541010703,
+          "max": -9.414344819025512
+        },
+        "fill": {
+          "n": 48,
+          "missing": 0,
+          "median": -6.121434779274933,
+          "min": -241.83466071335602,
+          "max": 105.74211101814592
+        },
+        "buffer": {
+          "n": 48,
+          "missing": 0,
+          "median": -8.60982157390176,
+          "min": -692.0364710450835,
+          "max": -0.93511980896301
+        }
+      },
+      "cases_with_lower_inflow_higher_outflow_events": 0,
+      "lower_inflow_higher_outflow_events": 0,
+      "printing_separated_lower_inflow_higher_outflow_events": 0,
+      "printing_separated_excess_kg": 0.0,
+      "lower_inflow_higher_outflow_excess_kg": 0.0,
+      "matched_element_difference_kg": -74484.48319272963,
+      "modern_only_reported_sediment_kg": 0.0,
+      "legacy_only_reported_sediment_kg": 40.777546994550775,
+      "terminal_clay_mass_fraction": {
+        "modern": {
+          "n": 39,
+          "missing": 9,
+          "median": 0.06363423605174137,
+          "min": 0.03977909162632588,
+          "max": 0.7196749345021466
+        },
+        "legacy": {
+          "n": 48,
+          "missing": 0,
+          "median": 0.05199998895845545,
+          "min": 0.03899985382652491,
+          "max": 0.053414882096013847
+        }
+      }
+    },
+    "meaningful_pass": {
+      "cases": 18,
+      "modern_report_kg_yr": {
+        "n": 18,
+        "missing": 0,
+        "median": 155.71115999999998,
+        "min": 12.18492,
+        "max": 1318.36716
+      },
+      "legacy_report_kg_yr": {
+        "n": 18,
+        "missing": 0,
+        "median": 90.87407999999999,
+        "min": 16.5924,
+        "max": 666.37296
+      },
+      "modern_lower_fill_supply": 16,
+      "modern_higher_outlet": 15,
+      "modern_lower_fill_higher_outlet": 13,
+      "median_paired_sediment_change_kg_yr": {
+        "road": {
+          "n": 18,
+          "missing": 0,
+          "median": -18.673132499999845,
+          "min": -148.985143125374,
+          "max": 702.1792800000001
+        },
+        "fill": {
+          "n": 18,
+          "missing": 0,
+          "median": -52.66812375000001,
+          "min": -551.6688078502343,
+          "max": 653.1354225000007
+        },
+        "buffer": {
+          "n": 18,
+          "missing": 0,
+          "median": 20.413881697249476,
+          "min": -115.42607999999956,
+          "max": 651.9951899999996
+        }
+      },
+      "median_paired_surface_volume_change_m3_yr": {
+        "road": {
+          "n": 18,
+          "missing": 0,
+          "median": 5.012139849525419,
+          "min": -128.57331388985463,
+          "max": 148.84581163393096
+        },
+        "fill": {
+          "n": 18,
+          "missing": 0,
+          "median": 10.126574667331123,
+          "min": -110.22368353877607,
+          "max": 79.65019353011843
+        },
+        "buffer": {
+          "n": 18,
+          "missing": 0,
+          "median": 5.024412383943789,
+          "min": 0.14812371704791227,
+          "max": 217.9620915569397
+        }
+      },
+      "cases_with_lower_inflow_higher_outflow_events": 18,
+      "lower_inflow_higher_outflow_events": 938,
+      "printing_separated_lower_inflow_higher_outflow_events": 922,
+      "printing_separated_excess_kg": 10036.725304758089,
+      "lower_inflow_higher_outflow_excess_kg": 10062.973793763054,
+      "matched_element_difference_kg": 23523.046490400902,
+      "modern_only_reported_sediment_kg": 0.0,
+      "legacy_only_reported_sediment_kg": 0.0,
+      "terminal_clay_mass_fraction": {
+        "modern": {
+          "n": 18,
+          "missing": 0,
+          "median": 0.048175770196226764,
+          "min": 0.045036329181764916,
+          "max": 0.05328695511100546
+        },
+        "legacy": {
+          "n": 18,
+          "missing": 0,
+          "median": 0.014099478125117838,
+          "min": 0.012999959919741328,
+          "max": 0.019943734541566397
+        }
+      }
+    },
+    "small_exceedance": {
+      "cases": 43,
+      "modern_report_kg_yr": {
+        "n": 43,
+        "missing": 0,
+        "median": 7.155468077267901,
+        "min": 1.0345255051471665,
+        "max": 19.914615974082956
+      },
+      "legacy_report_kg_yr": {
+        "n": 43,
+        "missing": 0,
+        "median": 1.0776307345282985,
+        "min": 0.0,
+        "max": 7.543415141698088
+      },
+      "modern_lower_fill_supply": 28,
+      "modern_higher_outlet": 43,
+      "modern_lower_fill_higher_outlet": 28,
+      "median_paired_sediment_change_kg_yr": {
+        "road": {
+          "n": 43,
+          "missing": 0,
+          "median": -12.942345121684859,
+          "min": -76.77580168146851,
+          "max": 0.0
+        },
+        "fill": {
+          "n": 43,
+          "missing": 0,
+          "median": -10.426077356561287,
+          "min": -78.55928054711289,
+          "max": 29.26575667295225
+        },
+        "buffer": {
+          "n": 43,
+          "missing": 0,
+          "median": 5.43395297885894,
+          "min": 0.2963484519952817,
+          "max": 18.451732251960774
+        }
+      },
+      "median_paired_surface_volume_change_m3_yr": {
+        "road": {
+          "n": 43,
+          "missing": 0,
+          "median": -14.179155147370405,
+          "min": -46.624117719731316,
+          "max": -5.551172521716257
+        },
+        "fill": {
+          "n": 43,
+          "missing": 0,
+          "median": 12.388791385821435,
+          "min": -0.7461803870708099,
+          "max": 74.59979023997735
+        },
+        "buffer": {
+          "n": 43,
+          "missing": 0,
+          "median": 1.9748781528646349,
+          "min": -1.41383663345511,
+          "max": 17.86068824102788
+        }
+      },
+      "cases_with_lower_inflow_higher_outflow_events": 37,
+      "lower_inflow_higher_outflow_events": 118,
+      "printing_separated_lower_inflow_higher_outflow_events": 115,
+      "printing_separated_excess_kg": 2613.125215542978,
+      "lower_inflow_higher_outflow_excess_kg": 2613.2545312311213,
+      "matched_element_difference_kg": 4343.3260176722315,
+      "modern_only_reported_sediment_kg": 0.0,
+      "legacy_only_reported_sediment_kg": 0.0,
+      "terminal_clay_mass_fraction": {
+        "modern": {
+          "n": 43,
+          "missing": 0,
+          "median": 0.05601795549450654,
+          "min": 0.04452475509233016,
+          "max": 0.11548238429841567
+        },
+        "legacy": {
+          "n": 29,
+          "missing": 14,
+          "median": 0.05200098709122935,
+          "min": 0.012999804156819051,
+          "max": 0.10271663061457585
+        }
+      }
+    },
+    "small_pass": {
+      "cases": 2,
+      "modern_report_kg_yr": {
+        "n": 2,
+        "missing": 0,
+        "median": 0.8836572023132047,
+        "min": 0.7758941288603748,
+        "max": 0.9914202757660345
+      },
+      "legacy_report_kg_yr": {
+        "n": 2,
+        "missing": 0,
+        "median": 0.34484183504905547,
+        "min": 0.0,
+        "max": 0.6896836700981109
+      },
+      "modern_lower_fill_supply": 0,
+      "modern_higher_outlet": 2,
+      "modern_lower_fill_higher_outlet": 0,
+      "median_paired_sediment_change_kg_yr": {
+        "road": {
+          "n": 2,
+          "missing": 0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "fill": {
+          "n": 2,
+          "missing": 0,
+          "median": 1.831972248698106,
+          "min": 0.7193185152976388,
+          "max": 2.9446259820985734
+        },
+        "buffer": {
+          "n": 2,
+          "missing": 0,
+          "median": 0.54285648251863,
+          "min": 0.2909602983226405,
+          "max": 0.7947526667146194
+        }
+      },
+      "median_paired_surface_volume_change_m3_yr": {
+        "road": {
+          "n": 2,
+          "missing": 0,
+          "median": -23.799923848080944,
+          "min": -27.667466315750602,
+          "max": -19.932381380411286
+        },
+        "fill": {
+          "n": 2,
+          "missing": 0,
+          "median": 42.55814389160085,
+          "min": 39.50187304716997,
+          "max": 45.61441473603172
+        },
+        "buffer": {
+          "n": 2,
+          "missing": 0,
+          "median": 1.4612468520459312,
+          "min": 1.0451034687093421,
+          "max": 1.87739023538252
+        }
+      },
+      "cases_with_lower_inflow_higher_outflow_events": 2,
+      "lower_inflow_higher_outflow_events": 2,
+      "printing_separated_lower_inflow_higher_outflow_events": 2,
+      "printing_separated_excess_kg": 0.3879470644301871,
+      "lower_inflow_higher_outflow_excess_kg": 0.3879470644301871,
+      "matched_element_difference_kg": 17.371407440596155,
+      "modern_only_reported_sediment_kg": 0.0,
+      "legacy_only_reported_sediment_kg": 0.0,
+      "terminal_clay_mass_fraction": {
+        "modern": {
+          "n": 2,
+          "missing": 0,
+          "median": 0.044524169599777286,
+          "min": 0.04452287199296544,
+          "max": 0.04452546720658914
+        },
+        "legacy": {
+          "n": 1,
+          "missing": 1,
+          "median": 0.01299986954086057,
+          "min": 0.01299986954086057,
+          "max": 0.01299986954086057
+        }
+      }
+    }
+  },
+  "strata": {
+    "climate": {
+      "birmingham": {
+        "cases": 8,
+        "modern_report_kg_yr": {
+          "n": 8,
+          "missing": 0,
+          "median": 240.66290805383701,
+          "min": 11.250464868475435,
+          "max": 705.56508
+        },
+        "legacy_report_kg_yr": {
+          "n": 8,
+          "missing": 0,
+          "median": 478.7774701646521,
+          "min": 348.1178324820215,
+          "max": 654.9681599999999
+        },
+        "modern_lower_fill_supply": 8,
+        "modern_higher_outlet": 3,
+        "modern_lower_fill_higher_outlet": 3,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 8,
+            "missing": 0,
+            "median": -8.348669999999856,
+            "min": -196.90738188984653,
+            "max": 89.27671500000042
+          },
+          "fill": {
+            "n": 8,
+            "missing": 0,
+            "median": -380.9359762978869,
+            "min": -616.2287175000012,
+            "max": -263.3098049999994
+          },
+          "buffer": {
+            "n": 8,
+            "missing": 0,
+            "median": -226.13460046100926,
+            "min": -473.55263999999966,
+            "max": 72.6565581987341
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 8,
+            "missing": 0,
+            "median": -52.04350971710347,
+            "min": -96.6118376601616,
+            "max": 10.937390669770224
+          },
+          "fill": {
+            "n": 8,
+            "missing": 0,
+            "median": 13.053940160650882,
+            "min": -60.31584636659652,
+            "max": 94.39350237147048
+          },
+          "buffer": {
+            "n": 8,
+            "missing": 0,
+            "median": -11.577997238456293,
+            "min": -137.99525780294493,
+            "max": 30.079215437819123
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 4,
+        "lower_inflow_higher_outflow_events": 437,
+        "printing_separated_lower_inflow_higher_outflow_events": 436,
+        "printing_separated_excess_kg": 5831.467006593712,
+        "lower_inflow_higher_outflow_excess_kg": 5831.589766593712,
+        "matched_element_difference_kg": -24814.659099652938,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 8,
+            "missing": 0,
+            "median": 0.04660394853770888,
+            "min": 0.03977984271102306,
+            "max": 0.06363532803123241
+          },
+          "legacy": {
+            "n": 8,
+            "missing": 0,
+            "median": 0.02740769425950081,
+            "min": 0.013083658358028874,
+            "max": 0.05280628635480833
+          }
+        }
+      },
+      "charleston": {
+        "cases": 19,
+        "modern_report_kg_yr": {
+          "n": 19,
+          "missing": 0,
+          "median": 4.482943855637721,
+          "min": 0.0,
+          "max": 156.64175999999998
+        },
+        "legacy_report_kg_yr": {
+          "n": 19,
+          "missing": 0,
+          "median": 42.889703234226275,
+          "min": 0.7758941288603748,
+          "max": 145.03896
+        },
+        "modern_lower_fill_supply": 18,
+        "modern_higher_outlet": 6,
+        "modern_lower_fill_higher_outlet": 5,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 19,
+            "missing": 0,
+            "median": 0.0,
+            "min": -276.7544311647209,
+            "max": 27.89176500000042
+          },
+          "fill": {
+            "n": 19,
+            "missing": 0,
+            "median": -81.69875999999971,
+            "min": -303.8864399999998,
+            "max": 3.254444818275461
+          },
+          "buffer": {
+            "n": 19,
+            "missing": 0,
+            "median": -18.276617257599924,
+            "min": -135.9024975,
+            "max": 65.64615750000013
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 19,
+            "missing": 0,
+            "median": -46.94437844057696,
+            "min": -101.94243177649334,
+            "max": 10.426930685886482
+          },
+          "fill": {
+            "n": 19,
+            "missing": 0,
+            "median": 14.496393572960258,
+            "min": -31.68203199745925,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 19,
+            "missing": 0,
+            "median": -8.775932061768067,
+            "min": -26.703299085033276,
+            "max": 38.67292913413513
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 6,
+        "lower_inflow_higher_outflow_events": 219,
+        "printing_separated_lower_inflow_higher_outflow_events": 216,
+        "printing_separated_excess_kg": 2240.7548987269106,
+        "lower_inflow_higher_outflow_excess_kg": 2240.884214415054,
+        "matched_element_difference_kg": -7082.050445310704,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 15,
+            "missing": 4,
+            "median": 0.04951362050018003,
+            "min": 0.03977909162632588,
+            "max": 0.06363577735279481
+          },
+          "legacy": {
+            "n": 19,
+            "missing": 0,
+            "median": 0.05199999734535464,
+            "min": 0.012999959919741328,
+            "max": 0.05300012389233318
+          }
+        }
+      },
+      "denver": {
+        "cases": 51,
+        "modern_report_kg_yr": {
+          "n": 51,
+          "missing": 0,
+          "median": 2.7156294510113117,
+          "min": 0.01584,
+          "max": 19.914615974082956
+        },
+        "legacy_report_kg_yr": {
+          "n": 51,
+          "missing": 0,
+          "median": 1.465577798958486,
+          "min": 0.0,
+          "max": 37.790279999999996
+        },
+        "modern_lower_fill_supply": 39,
+        "modern_higher_outlet": 30,
+        "modern_lower_fill_higher_outlet": 18,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 51,
+            "missing": 0,
+            "median": -22.46051858440599,
+            "min": -105.8396625,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 51,
+            "missing": 0,
+            "median": -31.37854500000001,
+            "min": -134.729595,
+            "max": 29.26575667295225
+          },
+          "buffer": {
+            "n": 51,
+            "missing": 0,
+            "median": 1.974758321023105,
+            "min": -37.704645,
+            "max": 18.451732251960774
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 51,
+            "missing": 0,
+            "median": -10.928353023059106,
+            "min": -32.515491751675555,
+            "max": -4.607911152349418
+          },
+          "fill": {
+            "n": 51,
+            "missing": 0,
+            "median": 4.096132235472726,
+            "min": -19.810688298096608,
+            "max": 52.308254523441
+          },
+          "buffer": {
+            "n": 51,
+            "missing": 0,
+            "median": 0.4108486452478765,
+            "min": -3.3107234669256593,
+            "max": 5.11141545701748
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 30,
+        "lower_inflow_higher_outflow_events": 94,
+        "printing_separated_lower_inflow_higher_outflow_events": 93,
+        "printing_separated_excess_kg": 1396.3061290346589,
+        "lower_inflow_higher_outflow_excess_kg": 1396.34923426404,
+        "matched_element_difference_kg": -3974.82162580158,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 48,
+            "missing": 3,
+            "median": 0.08059876784516297,
+            "min": 0.03978029529193703,
+            "max": 0.7196749345021466
+          },
+          "legacy": {
+            "n": 36,
+            "missing": 15,
+            "median": 0.0520000899710887,
+            "min": 0.016540399429447173,
+            "max": 0.10271663061457585
+          }
+        }
+      },
+      "flagstaff": {
+        "cases": 21,
+        "modern_report_kg_yr": {
+          "n": 21,
+          "missing": 0,
+          "median": 11.379780556618831,
+          "min": 0.0,
+          "max": 29.60496
+        },
+        "legacy_report_kg_yr": {
+          "n": 21,
+          "missing": 0,
+          "median": 3.5346288092528186,
+          "min": 0.6896836700981109,
+          "max": 25.27272
+        },
+        "modern_lower_fill_supply": 15,
+        "modern_higher_outlet": 18,
+        "modern_lower_fill_higher_outlet": 14,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 21,
+            "missing": 0,
+            "median": -17.584239510665476,
+            "min": -75.64698348705011,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 21,
+            "missing": 0,
+            "median": -10.426077356561287,
+            "min": -54.9025918473805,
+            "max": 4.539519469200428
+          },
+          "buffer": {
+            "n": 21,
+            "missing": 0,
+            "median": 7.521862527007517,
+            "min": -13.357079999999998,
+            "max": 12.86152281659523
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 21,
+            "missing": 0,
+            "median": -14.179155147370405,
+            "min": -46.33637741182865,
+            "max": -0.3667774406581312
+          },
+          "fill": {
+            "n": 21,
+            "missing": 0,
+            "median": 7.151081133772715,
+            "min": -9.249373756128474,
+            "max": 64.24072579946304
+          },
+          "buffer": {
+            "n": 21,
+            "missing": 0,
+            "median": 1.8816222115028853,
+            "min": -8.60982157390176,
+            "max": 17.86068824102788
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 14,
+        "lower_inflow_higher_outflow_events": 90,
+        "printing_separated_lower_inflow_higher_outflow_events": 88,
+        "printing_separated_excess_kg": 1478.2349184259645,
+        "lower_inflow_higher_outflow_excess_kg": 1478.3211288847267,
+        "matched_element_difference_kg": 1694.8143468274493,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 19,
+            "missing": 2,
+            "median": 0.05125570074758875,
+            "min": 0.04452475509233016,
+            "max": 0.07447329619838193
+          },
+          "legacy": {
+            "n": 21,
+            "missing": 0,
+            "median": 0.05199972155436919,
+            "min": 0.012999804156819051,
+            "max": 0.05200098709122935
+          }
+        }
+      },
+      "site": {
+        "cases": 17,
+        "modern_report_kg_yr": {
+          "n": 17,
+          "missing": 0,
+          "median": 5.732995507690547,
+          "min": 0.8189993582415067,
+          "max": 1318.36716
+        },
+        "legacy_report_kg_yr": {
+          "n": 17,
+          "missing": 0,
+          "median": 175.13654697553903,
+          "min": 58.75242764648283,
+          "max": 666.37296
+        },
+        "modern_lower_fill_supply": 11,
+        "modern_higher_outlet": 8,
+        "modern_lower_fill_higher_outlet": 4,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 17,
+            "missing": 0,
+            "median": 0.0,
+            "min": -448.1650698756282,
+            "max": 702.1792800000001
+          },
+          "fill": {
+            "n": 17,
+            "missing": 0,
+            "median": -84.03364467851662,
+            "min": -450.4765878011913,
+            "max": 653.1354225000007
+          },
+          "buffer": {
+            "n": 17,
+            "missing": 0,
+            "median": -57.38114253679551,
+            "min": -436.73140778228327,
+            "max": 651.9951899999996
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 17,
+            "missing": 0,
+            "median": -128.57331388985463,
+            "min": -237.58620541010703,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 17,
+            "missing": 0,
+            "median": -120.57632599107967,
+            "min": -241.83466071335602,
+            "max": 79.65019353011843
+          },
+          "buffer": {
+            "n": 17,
+            "missing": 0,
+            "median": -585.4768812093057,
+            "min": -692.0364710450835,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 8,
+        "lower_inflow_higher_outflow_events": 538,
+        "printing_separated_lower_inflow_higher_outflow_events": 453,
+        "printing_separated_excess_kg": 4754.248124033861,
+        "lower_inflow_higher_outflow_excess_kg": 6593.5953269561405,
+        "matched_element_difference_kg": -664.9158781053526,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 40.777546994550775,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 17,
+            "missing": 0,
+            "median": 0.045820022397880245,
+            "min": 0.039779802171776,
+            "max": 0.06890005327995215
+          },
+          "legacy": {
+            "n": 17,
+            "missing": 0,
+            "median": 0.0397761980321757,
+            "min": 0.013352102233034544,
+            "max": 0.053414882096013847
+          }
+        }
+      }
+    },
+    "soil": {
+      "1718465": {
+        "cases": 33,
+        "modern_report_kg_yr": {
+          "n": 33,
+          "missing": 0,
+          "median": 19.3446,
+          "min": 0.7758941288603748,
+          "max": 1318.36716
+        },
+        "legacy_report_kg_yr": {
+          "n": 33,
+          "missing": 0,
+          "median": 18.95256,
+          "min": 0.0,
+          "max": 666.37296
+        },
+        "modern_lower_fill_supply": 24,
+        "modern_higher_outlet": 30,
+        "modern_lower_fill_higher_outlet": 21,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 33,
+            "missing": 0,
+            "median": -9.882427500000006,
+            "min": -148.985143125374,
+            "max": 702.1792800000001
+          },
+          "fill": {
+            "n": 33,
+            "missing": 0,
+            "median": -32.388191726248095,
+            "min": -551.6688078502343,
+            "max": 653.1354225000007
+          },
+          "buffer": {
+            "n": 33,
+            "missing": 0,
+            "median": 7.163550307776857,
+            "min": -115.42607999999956,
+            "max": 651.9951899999996
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 33,
+            "missing": 0,
+            "median": -5.551172521716257,
+            "min": -128.83601608531703,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 33,
+            "missing": 0,
+            "median": 15.860544791255661,
+            "min": -116.93152311531071,
+            "max": 79.65019353011843
+          },
+          "buffer": {
+            "n": 33,
+            "missing": 0,
+            "median": 2.1197934235354285,
+            "min": 0.14812371704791227,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 29,
+        "lower_inflow_higher_outflow_events": 1218,
+        "printing_separated_lower_inflow_higher_outflow_events": 1181,
+        "printing_separated_excess_kg": 13440.271111462882,
+        "lower_inflow_higher_outflow_excess_kg": 13518.41829664273,
+        "matched_element_difference_kg": 25785.8986119928,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 33,
+            "missing": 0,
+            "median": 0.04676519907488119,
+            "min": 0.04452287199296544,
+            "max": 0.06780335385892497
+          },
+          "legacy": {
+            "n": 27,
+            "missing": 6,
+            "median": 0.013629388698471705,
+            "min": 0.012999804156819051,
+            "max": 0.019943734541566397
+          }
+        }
+      },
+      "1718494": {
+        "cases": 10,
+        "modern_report_kg_yr": {
+          "n": 10,
+          "missing": 0,
+          "median": 12.910016199649014,
+          "min": 2.3707876159622563,
+          "max": 26.811452675064064
+        },
+        "legacy_report_kg_yr": {
+          "n": 10,
+          "missing": 0,
+          "median": 1.465577798958486,
+          "min": 0.0,
+          "max": 12.02635899733581
+        },
+        "modern_lower_fill_supply": 6,
+        "modern_higher_outlet": 10,
+        "modern_lower_fill_higher_outlet": 6,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 10,
+            "missing": 0,
+            "median": -18.57161867117702,
+            "min": -76.77580168146851,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 10,
+            "missing": 0,
+            "median": -5.191486063590077,
+            "min": -54.9025918473805,
+            "max": 29.26575667295225
+          },
+          "buffer": {
+            "n": 10,
+            "missing": 0,
+            "median": 9.403675197177556,
+            "min": 1.974758321023105,
+            "max": 18.451732251960774
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 10,
+            "missing": 0,
+            "median": -14.750871693387131,
+            "min": -74.1314281602869,
+            "max": -12.698351284077976
+          },
+          "fill": {
+            "n": 10,
+            "missing": 0,
+            "median": 6.840017827972441,
+            "min": -1.0186898203091488,
+            "max": 33.83748389470473
+          },
+          "buffer": {
+            "n": 10,
+            "missing": 0,
+            "median": 5.11141545701748,
+            "min": 2.952557076723574,
+            "max": 38.67292913413513
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 10,
+        "lower_inflow_higher_outflow_events": 43,
+        "printing_separated_lower_inflow_higher_outflow_events": 42,
+        "printing_separated_excess_kg": 921.8053303155057,
+        "lower_inflow_higher_outflow_excess_kg": 921.8484355448868,
+        "matched_element_difference_kg": 1621.8773606944687,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 10,
+            "missing": 0,
+            "median": 0.04842870618116463,
+            "min": 0.04550009336123936,
+            "max": 0.11548238429841567
+          },
+          "legacy": {
+            "n": 7,
+            "missing": 3,
+            "median": 0.05200147125102962,
+            "min": 0.05199972155436919,
+            "max": 0.10115486442895777
+          }
+        }
+      },
+      "1718510": {
+        "cases": 6,
+        "modern_report_kg_yr": {
+          "n": 6,
+          "missing": 0,
+          "median": 6.896836700981109,
+          "min": 1.33626211081509,
+          "max": 7.715836059222616
+        },
+        "legacy_report_kg_yr": {
+          "n": 6,
+          "missing": 0,
+          "median": 1.7673144046264095,
+          "min": 0.34484183504905547,
+          "max": 2.931155597916972
+        },
+        "modern_lower_fill_supply": 2,
+        "modern_higher_outlet": 6,
+        "modern_lower_fill_higher_outlet": 2,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 6,
+            "missing": 0,
+            "median": -6.558730058022835,
+            "min": -75.03812212204161,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 6,
+            "missing": 0,
+            "median": 6.296057566481572,
+            "min": -67.33306237016444,
+            "max": 15.458612886808396
+          },
+          "buffer": {
+            "n": 6,
+            "missing": 0,
+            "median": 4.8143153065051685,
+            "min": 0.9914202757660335,
+            "max": 5.43395297885894
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 6,
+            "missing": 0,
+            "median": -19.78840931869337,
+            "min": -28.471791798681394,
+            "max": -11.72897980826777
+          },
+          "fill": {
+            "n": 6,
+            "missing": 0,
+            "median": 13.741291542780086,
+            "min": 4.955324457365407,
+            "max": 29.78455024946524
+          },
+          "buffer": {
+            "n": 6,
+            "missing": 0,
+            "median": 1.3565427239308998,
+            "min": 0.9650657244914955,
+            "max": 1.7410633246614033
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 6,
+        "lower_inflow_higher_outflow_events": 8,
+        "printing_separated_lower_inflow_higher_outflow_events": 8,
+        "printing_separated_excess_kg": 178.67117578479173,
+        "lower_inflow_higher_outflow_excess_kg": 178.67117578479173,
+        "matched_element_difference_kg": 385.66248727298705,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 6,
+            "missing": 0,
+            "median": 0.08150377925542748,
+            "min": 0.08059876784516297,
+            "max": 0.0870921903305689
+          },
+          "legacy": {
+            "n": 6,
+            "missing": 0,
+            "median": 0.07799850029477966,
+            "min": 0.07799774464352836,
+            "max": 0.10271663061457585
+          }
+        }
+      },
+      "1856573": {
+        "cases": 11,
+        "modern_report_kg_yr": {
+          "n": 11,
+          "missing": 0,
+          "median": 7.284783765411297,
+          "min": 1.0345255051471665,
+          "max": 378.85186103076853
+        },
+        "legacy_report_kg_yr": {
+          "n": 11,
+          "missing": 0,
+          "median": 1.465577798958486,
+          "min": 0.0,
+          "max": 58.75242764648283
+        },
+        "modern_lower_fill_supply": 7,
+        "modern_higher_outlet": 11,
+        "modern_lower_fill_higher_outlet": 7,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 11,
+            "missing": 0,
+            "median": -8.014878588054184,
+            "min": -67.66712789786808,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 11,
+            "missing": 0,
+            "median": -10.426077356561287,
+            "min": -78.55928054711289,
+            "max": 13.144400884408864
+          },
+          "buffer": {
+            "n": 11,
+            "missing": 0,
+            "median": 7.090810233196198,
+            "min": 0.6007791344995259,
+            "max": 320.1236800758122
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 11,
+            "missing": 0,
+            "median": -13.310071520641563,
+            "min": -56.34534296193482,
+            "max": -10.928353023059106
+          },
+          "fill": {
+            "n": 11,
+            "missing": 0,
+            "median": 3.3439674037802973,
+            "min": -202.82626463955074,
+            "max": 23.383496300320154
+          },
+          "buffer": {
+            "n": 11,
+            "missing": 0,
+            "median": 2.442306666931273,
+            "min": 1.937084283240541,
+            "max": 177.78652081318512
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 9,
+        "lower_inflow_higher_outflow_events": 90,
+        "printing_separated_lower_inflow_higher_outflow_events": 38,
+        "printing_separated_excess_kg": 722.4005391983895,
+        "lower_inflow_higher_outflow_excess_kg": 2483.8526326289634,
+        "matched_element_difference_kg": 11245.335346179068,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 11,
+            "missing": 0,
+            "median": 0.07138955090377538,
+            "min": 0.06889883552112387,
+            "max": 0.07572789105213518
+          },
+          "legacy": {
+            "n": 8,
+            "missing": 3,
+            "median": 0.052000815332766084,
+            "min": 0.05199972155436919,
+            "max": 0.10115486442895777
+          }
+        }
+      },
+      "2711184": {
+        "cases": 32,
+        "modern_report_kg_yr": {
+          "n": 32,
+          "missing": 0,
+          "median": 0.08514,
+          "min": 0.0,
+          "max": 45.144
+        },
+        "legacy_report_kg_yr": {
+          "n": 32,
+          "missing": 0,
+          "median": 34.37874,
+          "min": 1.0776307345282985,
+          "max": 518.7006
+        },
+        "modern_lower_fill_supply": 28,
+        "modern_higher_outlet": 0,
+        "modern_lower_fill_higher_outlet": 0,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 32,
+            "missing": 0,
+            "median": -31.140697500000016,
+            "min": -448.1650698756282,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 32,
+            "missing": 0,
+            "median": -89.46732973207273,
+            "min": -616.2287175000012,
+            "max": 19.42968214354516
+          },
+          "buffer": {
+            "n": 32,
+            "missing": 0,
+            "median": -34.29854999999999,
+            "min": -473.55263999999966,
+            "max": -1.0560781198377316
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 32,
+            "missing": 0,
+            "median": -46.33637741182865,
+            "min": -237.58620541010703,
+            "max": -10.627197863247469
+          },
+          "fill": {
+            "n": 32,
+            "missing": 0,
+            "median": -6.3546862192233915,
+            "min": -241.83466071335602,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 32,
+            "missing": 0,
+            "median": -8.692876817834915,
+            "min": -692.0364710450835,
+            "max": -1.019056260397428
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 0,
+        "lower_inflow_higher_outflow_events": 0,
+        "printing_separated_lower_inflow_higher_outflow_events": 0,
+        "printing_separated_excess_kg": 0.0,
+        "lower_inflow_higher_outflow_excess_kg": 0.0,
+        "matched_element_difference_kg": -52828.86393555783,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 40.777546994550775,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 23,
+            "missing": 9,
+            "median": 0.05136994326871962,
+            "min": 0.03977909162632588,
+            "max": 0.7196749345021466
+          },
+          "legacy": {
+            "n": 32,
+            "missing": 0,
+            "median": 0.05200042917597965,
+            "min": 0.051999416954832456,
+            "max": 0.053414882096013847
+          }
+        }
+      },
+      "2711250": {
+        "cases": 16,
+        "modern_report_kg_yr": {
+          "n": 16,
+          "missing": 0,
+          "median": 0.8078399999999999,
+          "min": 0.0,
+          "max": 12.2849903736226
+        },
+        "legacy_report_kg_yr": {
+          "n": 16,
+          "missing": 0,
+          "median": 34.499520000000004,
+          "min": 8.8902,
+          "max": 438.8543403293042
+        },
+        "modern_lower_fill_supply": 16,
+        "modern_higher_outlet": 0,
+        "modern_lower_fill_higher_outlet": 0,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 16,
+            "missing": 0,
+            "median": -18.981517500000017,
+            "min": -105.8396625,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 16,
+            "missing": 0,
+            "median": -84.03364467851662,
+            "min": -388.77684009577393,
+            "max": -19.61783999999999
+          },
+          "buffer": {
+            "n": 16,
+            "missing": 0,
+            "median": -33.685245,
+            "min": -426.55857364833594,
+            "max": -8.326394999999998
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 16,
+            "missing": 0,
+            "median": -9.535106364464136,
+            "min": -139.0051353061308,
+            "max": -9.414344819025512
+          },
+          "fill": {
+            "n": 16,
+            "missing": 0,
+            "median": -5.392125722553587,
+            "min": -153.7616821824265,
+            "max": 83.20905188307863
+          },
+          "buffer": {
+            "n": 16,
+            "missing": 0,
+            "median": -0.9429624202724551,
+            "min": -595.1791829478574,
+            "max": -0.93511980896301
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 0,
+        "lower_inflow_higher_outflow_events": 0,
+        "printing_separated_lower_inflow_higher_outflow_events": 0,
+        "printing_separated_excess_kg": 0.0,
+        "lower_inflow_higher_outflow_excess_kg": 0.0,
+        "matched_element_difference_kg": -21655.619257171806,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 16,
+            "missing": 0,
+            "median": 0.1670998595599028,
+            "min": 0.06363383297250255,
+            "max": 0.23449898129750088
+          },
+          "legacy": {
+            "n": 16,
+            "missing": 0,
+            "median": 0.03905871201669698,
+            "min": 0.03899985382652491,
+            "max": 0.040802680532929916
+          }
+        }
+      },
+      "53949": {
+        "cases": 8,
+        "modern_report_kg_yr": {
+          "n": 8,
+          "missing": 0,
+          "median": 6.077837342739602,
+          "min": 2.2845771571999927,
+          "max": 16.595513311735797
+        },
+        "legacy_report_kg_yr": {
+          "n": 8,
+          "missing": 0,
+          "median": 1.465577798958486,
+          "min": 0.0,
+          "max": 7.543415141698088
+        },
+        "modern_lower_fill_supply": 8,
+        "modern_higher_outlet": 8,
+        "modern_lower_fill_higher_outlet": 8,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 8,
+            "missing": 0,
+            "median": -17.732413736663098,
+            "min": -63.61523633604168,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 8,
+            "missing": 0,
+            "median": -16.703276385188595,
+            "min": -76.48484138314592,
+            "max": -2.1498733153839673
+          },
+          "buffer": {
+            "n": 8,
+            "missing": 0,
+            "median": 4.256641401386775,
+            "min": 2.273800849854708,
+            "max": 9.05748632371034
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 8,
+            "missing": 0,
+            "median": -14.179155147370405,
+            "min": -24.38442664449365,
+            "max": -11.616779451537816
+          },
+          "fill": {
+            "n": 8,
+            "missing": 0,
+            "median": 6.759948639278888,
+            "min": 3.4656174041802217,
+            "max": 33.832968686224945
+          },
+          "buffer": {
+            "n": 8,
+            "missing": 0,
+            "median": 0.3868037830613732,
+            "min": -1.41383663345511,
+            "max": 0.9340486951275678
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 8,
+        "lower_inflow_higher_outflow_events": 19,
+        "printing_separated_lower_inflow_higher_outflow_events": 17,
+        "printing_separated_excess_kg": 437.86292005353783,
+        "lower_inflow_higher_outflow_excess_kg": 437.9491305123001,
+        "matched_element_difference_kg": 604.0766845471824,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 8,
+            "missing": 0,
+            "median": 0.052801132187145224,
+            "min": 0.0519993371055186,
+            "max": 0.09885550570736577
+          },
+          "legacy": {
+            "n": 5,
+            "missing": 3,
+            "median": 0.05200098709122935,
+            "min": 0.05199972155436919,
+            "max": 0.10115486442895777
+          }
+        }
+      }
+    },
+    "design": {
+      "inbare": {
+        "cases": 12,
+        "modern_report_kg_yr": {
+          "n": 12,
+          "missing": 0,
+          "median": 3.72438,
+          "min": 0.01584,
+          "max": 1318.36716
+        },
+        "legacy_report_kg_yr": {
+          "n": 12,
+          "missing": 0,
+          "median": 31.44636,
+          "min": 10.565280000000001,
+          "max": 666.37296
+        },
+        "modern_lower_fill_supply": 11,
+        "modern_higher_outlet": 4,
+        "modern_lower_fill_higher_outlet": 3,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 12,
+            "missing": 0,
+            "median": -29.05674750000002,
+            "min": -105.8396625,
+            "max": 702.1792800000001
+          },
+          "fill": {
+            "n": 12,
+            "missing": 0,
+            "median": -57.17237625,
+            "min": -263.3098049999994,
+            "max": 653.1354225000007
+          },
+          "buffer": {
+            "n": 12,
+            "missing": 0,
+            "median": -11.197766249999999,
+            "min": -85.61074500000002,
+            "max": 651.9951899999996
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 12,
+            "missing": 0,
+            "median": -9.414344819025512,
+            "min": -40.77503136549983,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 12,
+            "missing": 0,
+            "median": -5.38876945906242,
+            "min": -31.627008006214133,
+            "max": 79.65019353011843
+          },
+          "buffer": {
+            "n": 12,
+            "missing": 0,
+            "median": -0.93511980896301,
+            "min": -8.775932061768067,
+            "max": 140.42171895650262
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 5,
+        "lower_inflow_higher_outflow_events": 250,
+        "printing_separated_lower_inflow_higher_outflow_events": 249,
+        "printing_separated_excess_kg": 2532.69324,
+        "lower_inflow_higher_outflow_excess_kg": 2532.6972,
+        "matched_element_difference_kg": 8790.217920000008,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 11,
+            "missing": 1,
+            "median": 0.05328695511100546,
+            "min": 0.04550379203203033,
+            "max": 0.7196749345021466
+          },
+          "legacy": {
+            "n": 12,
+            "missing": 0,
+            "median": 0.03900004221658029,
+            "min": 0.013357613862413624,
+            "max": 0.05205281080182028
+          }
+        }
+      },
+      "inveg": {
+        "cases": 15,
+        "modern_report_kg_yr": {
+          "n": 15,
+          "missing": 0,
+          "median": 4.71636,
+          "min": 0.01584,
+          "max": 441.25092
+        },
+        "legacy_report_kg_yr": {
+          "n": 15,
+          "missing": 0,
+          "median": 31.06224,
+          "min": 8.8902,
+          "max": 556.6809599999999
+        },
+        "modern_lower_fill_supply": 15,
+        "modern_higher_outlet": 3,
+        "modern_lower_fill_higher_outlet": 3,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 15,
+            "missing": 0,
+            "median": -23.399640000000016,
+            "min": -215.69748749999997,
+            "max": 37.591785000000016
+          },
+          "fill": {
+            "n": 15,
+            "missing": 0,
+            "median": -54.446039999999996,
+            "min": -616.2287175000012,
+            "max": -12.474000000000274
+          },
+          "buffer": {
+            "n": 15,
+            "missing": 0,
+            "median": -16.753275000000002,
+            "min": -473.55263999999966,
+            "max": 35.23929750000036
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 15,
+            "missing": 0,
+            "median": -9.535106364464136,
+            "min": -70.04757131168685,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 15,
+            "missing": 0,
+            "median": -5.392125722553587,
+            "min": -60.31584636659652,
+            "max": 79.65019353011843
+          },
+          "buffer": {
+            "n": 15,
+            "missing": 0,
+            "median": -0.9429624202724551,
+            "min": -37.05043514308543,
+            "max": 140.42171895650262
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 5,
+        "lower_inflow_higher_outflow_events": 229,
+        "printing_separated_lower_inflow_higher_outflow_events": 228,
+        "printing_separated_excess_kg": 1482.1963199999998,
+        "lower_inflow_higher_outflow_excess_kg": 1482.3190799999998,
+        "matched_element_difference_kg": -14076.726839999996,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 14,
+            "missing": 1,
+            "median": 0.05206833117552801,
+            "min": 0.045820022397880245,
+            "max": 0.5902282380580463
+          },
+          "legacy": {
+            "n": 15,
+            "missing": 0,
+            "median": 0.03938600416886922,
+            "min": 0.013004752520810695,
+            "max": 0.052500143573919425
+          }
+        }
+      },
+      "outrut": {
+        "cases": 13,
+        "modern_report_kg_yr": {
+          "n": 13,
+          "missing": 0,
+          "median": 1.01772,
+          "min": 0.01584,
+          "max": 1186.80012
+        },
+        "legacy_report_kg_yr": {
+          "n": 13,
+          "missing": 0,
+          "median": 25.09452,
+          "min": 9.8208,
+          "max": 643.7178
+        },
+        "modern_lower_fill_supply": 12,
+        "modern_higher_outlet": 5,
+        "modern_lower_fill_higher_outlet": 4,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 13,
+            "missing": 0,
+            "median": -26.43176250000001,
+            "min": -98.66439,
+            "max": 614.4697349999993
+          },
+          "fill": {
+            "n": 13,
+            "missing": 0,
+            "median": -53.615677499999975,
+            "min": -274.4366624999982,
+            "max": 564.5680424999998
+          },
+          "buffer": {
+            "n": 13,
+            "missing": 0,
+            "median": -10.000732499999998,
+            "min": -84.47595750000002,
+            "max": 567.1858500000003
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 13,
+            "missing": 0,
+            "median": -9.437557496003361,
+            "min": -40.848267529751475,
+            "max": 148.82761397501127
+          },
+          "fill": {
+            "n": 13,
+            "missing": 0,
+            "median": -5.4094921626273536,
+            "min": -31.68203199745925,
+            "max": 79.64029146462124
+          },
+          "buffer": {
+            "n": 13,
+            "missing": 0,
+            "median": -0.9372767064608474,
+            "min": -8.788518217676511,
+            "max": 140.41923154418308
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 5,
+        "lower_inflow_higher_outflow_events": 244,
+        "printing_separated_lower_inflow_higher_outflow_events": 244,
+        "printing_separated_excess_kg": 2146.97736,
+        "lower_inflow_higher_outflow_excess_kg": 2146.97736,
+        "matched_element_difference_kg": 6928.926839999993,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 12,
+            "missing": 1,
+            "median": 0.05066047402786204,
+            "min": 0.03978029529193703,
+            "max": 0.5724878340699321
+          },
+          "legacy": {
+            "n": 13,
+            "missing": 0,
+            "median": 0.03900005532865451,
+            "min": 0.013352102233034544,
+            "max": 0.052059641763067536
+          }
+        }
+      },
+      "outunrut": {
+        "cases": 76,
+        "modern_report_kg_yr": {
+          "n": 76,
+          "missing": 0,
+          "median": 6.056284728049036,
+          "min": 0.0,
+          "max": 436.181816107674
+        },
+        "legacy_report_kg_yr": {
+          "n": 76,
+          "missing": 0,
+          "median": 3.319102662347159,
+          "min": 0.0,
+          "max": 442.4751795973193
+        },
+        "modern_lower_fill_supply": 53,
+        "modern_higher_outlet": 53,
+        "modern_lower_fill_higher_outlet": 34,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 76,
+            "missing": 0,
+            "median": -4.121937559570743,
+            "min": -448.1650698756282,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 76,
+            "missing": 0,
+            "median": -19.254567149184332,
+            "min": -551.6688078502343,
+            "max": 29.26575667295225
+          },
+          "buffer": {
+            "n": 76,
+            "missing": 0,
+            "median": 4.220271364096445,
+            "min": -436.73140778228327,
+            "max": 320.1236800758122
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 76,
+            "missing": 0,
+            "median": -26.679523617115343,
+            "min": -237.58620541010703,
+            "max": -5.551172521716257
+          },
+          "fill": {
+            "n": 76,
+            "missing": 0,
+            "median": 9.849347074610748,
+            "min": -241.83466071335602,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 76,
+            "missing": 0,
+            "median": 1.0970720768490874,
+            "min": -692.0364710450835,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 47,
+        "lower_inflow_higher_outflow_events": 655,
+        "printing_separated_lower_inflow_higher_outflow_events": 565,
+        "printing_separated_excess_kg": 9539.144156815108,
+        "lower_inflow_higher_outflow_excess_kg": 11378.746031113673,
+        "matched_element_difference_kg": -36484.05062204313,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 40.777546994550775,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 70,
+            "missing": 6,
+            "median": 0.052801132187145224,
+            "min": 0.03977909162632588,
+            "max": 0.11548238429841567
+          },
+          "legacy": {
+            "n": 61,
+            "missing": 15,
+            "median": 0.0520001384071974,
+            "min": 0.012999804156819051,
+            "max": 0.10271663061457585
+          }
+        }
+      }
+    },
+    "surface": {
+      "gravel": {
+        "cases": 78,
+        "modern_report_kg_yr": {
+          "n": 78,
+          "missing": 0,
+          "median": 6.985541423943385,
+          "min": 0.0,
+          "max": 1318.36716
+        },
+        "legacy_report_kg_yr": {
+          "n": 78,
+          "missing": 0,
+          "median": 18.6021,
+          "min": 0.0,
+          "max": 666.37296
+        },
+        "modern_lower_fill_supply": 71,
+        "modern_higher_outlet": 44,
+        "modern_lower_fill_higher_outlet": 37,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 78,
+            "missing": 0,
+            "median": -27.376717500000012,
+            "min": -448.1650698756282,
+            "max": 702.1792800000001
+          },
+          "fill": {
+            "n": 78,
+            "missing": 0,
+            "median": -47.03109222881006,
+            "min": -616.2287175000012,
+            "max": 653.1354225000007
+          },
+          "buffer": {
+            "n": 78,
+            "missing": 0,
+            "median": 2.7102412973386683,
+            "min": -473.55263999999966,
+            "max": 651.9951899999996
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 78,
+            "missing": 0,
+            "median": -10.848690940394295,
+            "min": -237.58620541010703,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 78,
+            "missing": 0,
+            "median": 2.6116549323684417,
+            "min": -241.83466071335602,
+            "max": 79.65019353011843
+          },
+          "buffer": {
+            "n": 78,
+            "missing": 0,
+            "median": 0.40696334364442854,
+            "min": -644.2893783242345,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 44,
+        "lower_inflow_higher_outflow_events": 1266,
+        "printing_separated_lower_inflow_higher_outflow_events": 1226,
+        "printing_separated_excess_kg": 14927.961893093889,
+        "lower_inflow_higher_outflow_excess_kg": 15006.23839396188,
+        "matched_element_difference_kg": -16139.938201904019,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 40.777546994550775,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 72,
+            "missing": 6,
+            "median": 0.053083958357236366,
+            "min": 0.045036329181764916,
+            "max": 0.7196749345021466
+          },
+          "legacy": {
+            "n": 66,
+            "missing": 12,
+            "median": 0.051999511029113585,
+            "min": 0.012999804156819051,
+            "max": 0.10271663061457585
+          }
+        }
+      },
+      "paved": {
+        "cases": 38,
+        "modern_report_kg_yr": {
+          "n": 38,
+          "missing": 0,
+          "median": 2.9311555979169714,
+          "min": 0.0,
+          "max": 378.85186103076853
+        },
+        "legacy_report_kg_yr": {
+          "n": 38,
+          "missing": 0,
+          "median": 2.931155597916972,
+          "min": 0.0,
+          "max": 438.8543403293042
+        },
+        "modern_lower_fill_supply": 20,
+        "modern_higher_outlet": 21,
+        "modern_lower_fill_higher_outlet": 7,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 38,
+            "missing": 0,
+            "median": 0.0,
+            "min": -0.0012374999999999999,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 38,
+            "missing": 0,
+            "median": -8.526753186955153,
+            "min": -388.77684009577393,
+            "max": 29.26575667295225
+          },
+          "buffer": {
+            "n": 38,
+            "missing": 0,
+            "median": 0.2963484519952817,
+            "min": -426.55857364833594,
+            "max": 320.1236800758122
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 38,
+            "missing": 0,
+            "median": -46.33637741182865,
+            "min": -139.0051353061308,
+            "max": -19.024984824215508
+          },
+          "fill": {
+            "n": 38,
+            "missing": 0,
+            "median": 32.49254611536896,
+            "min": -202.82626463955074,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 38,
+            "missing": 0,
+            "median": 0.9495572098095317,
+            "min": -692.0364710450835,
+            "max": 177.78652081318512
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 18,
+        "lower_inflow_higher_outflow_events": 112,
+        "printing_separated_lower_inflow_higher_outflow_events": 60,
+        "printing_separated_excess_kg": 773.0491837212194,
+        "lower_inflow_higher_outflow_excess_kg": 2534.501277151793,
+        "matched_element_difference_kg": -18701.694500139107,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 0.0,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 35,
+            "missing": 3,
+            "median": 0.048428713014183354,
+            "min": 0.03977909162632588,
+            "max": 0.08059987104020634
+          },
+          "legacy": {
+            "n": 35,
+            "missing": 3,
+            "median": 0.0520001384071974,
+            "min": 0.01299986954086057,
+            "max": 0.10115486442895777
+          }
+        }
+      }
+    },
+    "traffic": {
+      "high": {
+        "cases": 48,
+        "modern_report_kg_yr": {
+          "n": 48,
+          "missing": 0,
+          "median": 10.662299999999998,
+          "min": 0.0,
+          "max": 1318.36716
+        },
+        "legacy_report_kg_yr": {
+          "n": 48,
+          "missing": 0,
+          "median": 28.167479999999998,
+          "min": 0.0,
+          "max": 666.37296
+        },
+        "modern_lower_fill_supply": 40,
+        "modern_higher_outlet": 31,
+        "modern_lower_fill_higher_outlet": 25,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 48,
+            "missing": 0,
+            "median": -23.787719999999986,
+            "min": -448.1650698756282,
+            "max": 702.1792800000001
+          },
+          "fill": {
+            "n": 48,
+            "missing": 0,
+            "median": -51.483808342089475,
+            "min": -551.6688078502343,
+            "max": 653.1354225000007
+          },
+          "buffer": {
+            "n": 48,
+            "missing": 0,
+            "median": 4.601483236435829,
+            "min": -436.73140778228327,
+            "max": 651.9951899999996
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 48,
+            "missing": 0,
+            "median": -11.272566237298461,
+            "min": -237.41874030418813,
+            "max": 148.84581163393096
+          },
+          "fill": {
+            "n": 48,
+            "missing": 0,
+            "median": 7.230491948586387,
+            "min": -228.73597681875012,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 48,
+            "missing": 0,
+            "median": 1.1888074080255286,
+            "min": -686.8008475248821,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 33,
+        "lower_inflow_higher_outflow_events": 1020,
+        "printing_separated_lower_inflow_higher_outflow_events": 977,
+        "printing_separated_excess_kg": 11420.489378351185,
+        "lower_inflow_higher_outflow_excess_kg": 12327.50701930082,
+        "matched_element_difference_kg": 12907.401937471057,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 11.681517162286745,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 46,
+            "missing": 2,
+            "median": 0.05162751892655368,
+            "min": 0.03977909162632588,
+            "max": 0.7196749345021466
+          },
+          "legacy": {
+            "n": 43,
+            "missing": 5,
+            "median": 0.0391172708294846,
+            "min": 0.012999959919741328,
+            "max": 0.10271663061457585
+          }
+        }
+      },
+      "low": {
+        "cases": 35,
+        "modern_report_kg_yr": {
+          "n": 35,
+          "missing": 0,
+          "median": 4.71636,
+          "min": 0.0,
+          "max": 378.85186103076853
+        },
+        "legacy_report_kg_yr": {
+          "n": 35,
+          "missing": 0,
+          "median": 17.5626,
+          "min": 0.0,
+          "max": 518.7006
+        },
+        "modern_lower_fill_supply": 28,
+        "modern_higher_outlet": 17,
+        "modern_lower_fill_higher_outlet": 12,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 35,
+            "missing": 0,
+            "median": -19.479240000000015,
+            "min": -188.12004750000023,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 35,
+            "missing": 0,
+            "median": -38.87552874810832,
+            "min": -616.2287175000012,
+            "max": 29.26575667295225
+          },
+          "buffer": {
+            "n": 35,
+            "missing": 0,
+            "median": -1.0560781198377316,
+            "min": -473.55263999999966,
+            "max": 320.1236800758122
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 35,
+            "missing": 0,
+            "median": -23.69359184976212,
+            "min": -237.41874030418813,
+            "max": -5.551172521716257
+          },
+          "fill": {
+            "n": 35,
+            "missing": 0,
+            "median": 3.4609730929284144,
+            "min": -228.73597681875012,
+            "max": 105.74211101814592
+          },
+          "buffer": {
+            "n": 35,
+            "missing": 0,
+            "median": -0.93511980896301,
+            "min": -686.8008475248821,
+            "max": 217.9620915569397
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 16,
+        "lower_inflow_higher_outflow_events": 206,
+        "printing_separated_lower_inflow_higher_outflow_events": 169,
+        "printing_separated_excess_kg": 2547.0017936723216,
+        "lower_inflow_higher_outflow_excess_kg": 3453.720293704431,
+        "matched_element_difference_kg": -15070.476334009954,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 4.439838626256586,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 33,
+            "missing": 2,
+            "median": 0.057463615832884056,
+            "min": 0.0397799511955024,
+            "max": 0.6220390369516187
+          },
+          "legacy": {
+            "n": 30,
+            "missing": 5,
+            "median": 0.05199995326343647,
+            "min": 0.012999923109875987,
+            "max": 0.10115486442895777
+          }
+        }
+      },
+      "none": {
+        "cases": 33,
+        "modern_report_kg_yr": {
+          "n": 33,
+          "missing": 0,
+          "median": 2.3707876159622563,
+          "min": 0.0,
+          "max": 198.4133708413503
+        },
+        "legacy_report_kg_yr": {
+          "n": 33,
+          "missing": 0,
+          "median": 9.8208,
+          "min": 0.0,
+          "max": 438.8543403293042
+        },
+        "modern_lower_fill_supply": 23,
+        "modern_higher_outlet": 17,
+        "modern_lower_fill_higher_outlet": 7,
+        "median_paired_sediment_change_kg_yr": {
+          "road": {
+            "n": 33,
+            "missing": 0,
+            "median": -8.014878588054184,
+            "min": -196.90738188984653,
+            "max": 0.0
+          },
+          "fill": {
+            "n": 33,
+            "missing": 0,
+            "median": -12.76184197365136,
+            "min": -436.35962517887043,
+            "max": 11.77311577472165
+          },
+          "buffer": {
+            "n": 33,
+            "missing": 0,
+            "median": 0.2909602983226405,
+            "min": -426.55857364833594,
+            "max": 53.485507431475725
+          }
+        },
+        "median_paired_surface_volume_change_m3_yr": {
+          "road": {
+            "n": 33,
+            "missing": 0,
+            "median": -24.52843147752254,
+            "min": -237.58620541010703,
+            "max": -5.705961690029963
+          },
+          "fill": {
+            "n": 33,
+            "missing": 0,
+            "median": 3.075968970215798,
+            "min": -241.83466071335602,
+            "max": 94.39350237147048
+          },
+          "buffer": {
+            "n": 33,
+            "missing": 0,
+            "median": -0.9429624202724551,
+            "min": -692.0364710450835,
+            "max": 216.72523015619032
+          }
+        },
+        "cases_with_lower_inflow_higher_outflow_events": 13,
+        "lower_inflow_higher_outflow_events": 152,
+        "printing_separated_lower_inflow_higher_outflow_events": 140,
+        "printing_separated_excess_kg": 1733.5199047916003,
+        "lower_inflow_higher_outflow_excess_kg": 1759.5123581084229,
+        "matched_element_difference_kg": -32678.558305504226,
+        "modern_only_reported_sediment_kg": 0.0,
+        "legacy_only_reported_sediment_kg": 24.656191206007446,
+        "terminal_clay_mass_fraction": {
+          "modern": {
+            "n": 28,
+            "missing": 5,
+            "median": 0.05895283458719649,
+            "min": 0.03977984271102306,
+            "max": 0.1783735053042408
+          },
+          "legacy": {
+            "n": 28,
+            "missing": 5,
+            "median": 0.05200064357430282,
+            "min": 0.012999804156819051,
+            "max": 0.07799881171946517
+          }
+        }
+      }
+    }
+  },
+  "observation_support": [
+    {
+      "original_group": "meaningful_high",
+      "role": "buffer",
+      "sediment_observation_support": "both",
+      "days": 7356,
+      "reported_sediment_difference_kg": 11759.106575172778
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "buffer",
+      "sediment_observation_support": "legacy_only",
+      "days": 1828,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "buffer",
+      "sediment_observation_support": "modern_only",
+      "days": 248,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "buffer",
+      "sediment_observation_support": "neither",
+      "days": 19788,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "fill",
+      "sediment_observation_support": "both",
+      "days": 7356,
+      "reported_sediment_difference_kg": -1743.261686631739
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "fill",
+      "sediment_observation_support": "legacy_only",
+      "days": 1828,
+      "reported_sediment_difference_kg": -0.3879470644301871
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "fill",
+      "sediment_observation_support": "modern_only",
+      "days": 248,
+      "reported_sediment_difference_kg": 15.259251200920694
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "fill",
+      "sediment_observation_support": "neither",
+      "days": 19788,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "road",
+      "sediment_observation_support": "both",
+      "days": 7356,
+      "reported_sediment_difference_kg": -2525.8371260461854
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "road",
+      "sediment_observation_support": "legacy_only",
+      "days": 1828,
+      "reported_sediment_difference_kg": -5.129522296354697
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "road",
+      "sediment_observation_support": "modern_only",
+      "days": 248,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_high",
+      "role": "road",
+      "sediment_observation_support": "neither",
+      "days": 19788,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "buffer",
+      "sediment_observation_support": "both",
+      "days": 44350,
+      "reported_sediment_difference_kg": -74484.48319272957
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "buffer",
+      "sediment_observation_support": "legacy_only",
+      "days": 12828,
+      "reported_sediment_difference_kg": -40.777546994550775
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "buffer",
+      "sediment_observation_support": "modern_only",
+      "days": 3167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "buffer",
+      "sediment_observation_support": "neither",
+      "days": 220167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "fill",
+      "sediment_observation_support": "both",
+      "days": 44350,
+      "reported_sediment_difference_kg": -100640.49712320216
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "fill",
+      "sediment_observation_support": "legacy_only",
+      "days": 12828,
+      "reported_sediment_difference_kg": -93.48499271067132
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "fill",
+      "sediment_observation_support": "modern_only",
+      "days": 3167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "fill",
+      "sediment_observation_support": "neither",
+      "days": 220167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "road",
+      "sediment_observation_support": "both",
+      "days": 44350,
+      "reported_sediment_difference_kg": -47694.63525291253
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "road",
+      "sediment_observation_support": "legacy_only",
+      "days": 12828,
+      "reported_sediment_difference_kg": -144.8038708057429
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "road",
+      "sediment_observation_support": "modern_only",
+      "days": 3167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_low",
+      "role": "road",
+      "sediment_observation_support": "neither",
+      "days": 220167,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "buffer",
+      "sediment_observation_support": "both",
+      "days": 14501,
+      "reported_sediment_difference_kg": 23523.046490400913
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "buffer",
+      "sediment_observation_support": "legacy_only",
+      "days": 233,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "buffer",
+      "sediment_observation_support": "modern_only",
+      "days": 4868,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "buffer",
+      "sediment_observation_support": "neither",
+      "days": 85590,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "fill",
+      "sediment_observation_support": "both",
+      "days": 14501,
+      "reported_sediment_difference_kg": -15019.406077404883
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "fill",
+      "sediment_observation_support": "legacy_only",
+      "days": 233,
+      "reported_sediment_difference_kg": -0.3448418350490552
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "fill",
+      "sediment_observation_support": "modern_only",
+      "days": 4868,
+      "reported_sediment_difference_kg": 200.12652
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "fill",
+      "sediment_observation_support": "neither",
+      "days": 85590,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "road",
+      "sediment_observation_support": "both",
+      "days": 14501,
+      "reported_sediment_difference_kg": 15921.934366180223
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "road",
+      "sediment_observation_support": "legacy_only",
+      "days": 233,
+      "reported_sediment_difference_kg": -3.210496515441497
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "road",
+      "sediment_observation_support": "modern_only",
+      "days": 4868,
+      "reported_sediment_difference_kg": 211.94315999999998
+    },
+    {
+      "original_group": "meaningful_pass",
+      "role": "road",
+      "sediment_observation_support": "neither",
+      "days": 85590,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "buffer",
+      "sediment_observation_support": "both",
+      "days": 27967,
+      "reported_sediment_difference_kg": 4343.3260176722315
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "buffer",
+      "sediment_observation_support": "legacy_only",
+      "days": 6725,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "buffer",
+      "sediment_observation_support": "modern_only",
+      "days": 1697,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "buffer",
+      "sediment_observation_support": "neither",
+      "days": 214903,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "fill",
+      "sediment_observation_support": "both",
+      "days": 27967,
+      "reported_sediment_difference_kg": -10875.880425153415
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "fill",
+      "sediment_observation_support": "legacy_only",
+      "days": 6725,
+      "reported_sediment_difference_kg": -8.707256334988642
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "fill",
+      "sediment_observation_support": "modern_only",
+      "days": 1697,
+      "reported_sediment_difference_kg": 24.225138912196122
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "fill",
+      "sediment_observation_support": "neither",
+      "days": 214903,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "road",
+      "sediment_observation_support": "both",
+      "days": 27967,
+      "reported_sediment_difference_kg": -12920.964927911782
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "road",
+      "sediment_observation_support": "legacy_only",
+      "days": 6725,
+      "reported_sediment_difference_kg": -227.8111372792822
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "road",
+      "sediment_observation_support": "modern_only",
+      "days": 1697,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_exceedance",
+      "role": "road",
+      "sediment_observation_support": "neither",
+      "days": 214903,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "buffer",
+      "sediment_observation_support": "both",
+      "days": 1869,
+      "reported_sediment_difference_kg": 17.371407440596155
+    },
+    {
+      "original_group": "small_pass",
+      "role": "buffer",
+      "sediment_observation_support": "legacy_only",
+      "days": 633,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "buffer",
+      "sediment_observation_support": "neither",
+      "days": 9186,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "fill",
+      "sediment_observation_support": "both",
+      "days": 1869,
+      "reported_sediment_difference_kg": 58.6231119583394
+    },
+    {
+      "original_group": "small_pass",
+      "role": "fill",
+      "sediment_observation_support": "legacy_only",
+      "days": 633,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "fill",
+      "sediment_observation_support": "neither",
+      "days": 9186,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "road",
+      "sediment_observation_support": "both",
+      "days": 1869,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "road",
+      "sediment_observation_support": "legacy_only",
+      "days": 633,
+      "reported_sediment_difference_kg": 0.0
+    },
+    {
+      "original_group": "small_pass",
+      "role": "road",
+      "sediment_observation_support": "neither",
+      "days": 9186,
+      "reported_sediment_difference_kg": 0.0
+    }
+  ],
+  "script_sha256": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+  "declaration_sha256": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+  "results_sha256": "64de0dec346f53f6d60f9f06a485358dfdaeffa94348be76a3f9ed471d2a8078",
+  "case_summary_sha256": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+  "top_events_sha256": "362d820382634d44fd081c9ac92e8f21c40035e453a933dc4b114998ae55550c",
+  "external_corrected_particle_receipt_sha256": "8f91e3d46876340a9ca85863d06ff1a4627e8760abcb96d357e2e6da9c81ef43",
+  "limitations": [
+    "Different complete profiles and format-specific state; no single-parameter causal attribution.",
+    "Net exchange is not tagged origin or gross erosion/deposition.",
+    "Missing ELEMENT observations are NULL; reported-row differences use explicit bookkeeping zeros only.",
+    "Terminal class fractions do not identify upstream class delivery or per-OFE particle provenance.",
+    "21 distinct legacy decks recur across116cases; no independent-material inference.",
+    "No WEPP2010 event data, withheld materials or new native executions."
+  ]
+}

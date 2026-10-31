@@ -1,0 +1,159 @@
+{
+  "reviewer": "Independent Codex AI implementation/publication reviewer",
+  "reviewed_utc": "2026-10-31T22:51:03.174975+00:00",
+  "accepted": true,
+  "scope": "Bounded implementation, reproducibility and private-native-source disclosure review of the completed event ledger v3 packet. Numerical scientific acceptance remains separately bound.",
+  "blocking_findings": [],
+  "closed_findings": [
+    {
+      "issue": "Frozen declaration called top-three rows positive although SQL ranked signed daily differences over the full calendar",
+      "resolution": "Frozen bytes preserved; public findings and fresh-root helper explicitly qualify 196 positive and 152 zero rows and no implied PASS EVENT classification. Positive-only list verified."
+    },
+    {
+      "issue": "First figure legend overlapped the middle panel title",
+      "resolution": "Layout-only derivative visually inspected; all 43 points and case-summary hash unchanged. Original source/output bytes retained in figure-layout-draft."
+    },
+    {
+      "issue": "Initial reproduction commands could continue after mkdir failed for an existing root",
+      "resolution": "Generation and independent verification now run in a fail-fast subshell. Independent execution against an existing temporary destination exits before copying and leaves its sentinel unchanged."
+    }
+  ],
+  "implementation_checks": [
+    "Source reads native inputs/outputs and writes its separate analysis root; it does not build or execute WEPP.",
+    "Complete calendars and duplicate keys are validated. Missing physical ELEMENT data retain NULL; reported-sum contribution zeros are explicitly separate.",
+    "Area bases, emitted/metadata width bridge, positive-denominator ratios and EVENT-only class support are explicit. Independent science review owns complete numerical/algebra acceptance.",
+    "Public Python source contains original analysis SQL/Python and provenance paths/hashes without private native implementation fragments.",
+    "Reproduction stages ROOT-dependent scripts under their original names in a fresh sibling root. Fresh analysis declaration binds staged summary, declaration and actual preflight hashes.",
+    "Public findings label ranked rows as signed daily differences and distinguish original generated benchmark groups from legacy-anchor error directions."
+  ],
+  "dependency_hashes_reverified": 541,
+  "staging_probe": {
+    "passed": true,
+    "check": "Fresh sibling-root staging and import-only reproduction probe",
+    "staged_names": [
+      "ledger.py",
+      "summarize.py",
+      "plot_boundaries.py"
+    ],
+    "ledger_ROOT_and_summary_ROOT_match_staging_directory": true,
+    "ledger_P_resolves_existing_source_panel_parent": true,
+    "summary_imports_staged_ledger": true,
+    "no_case_or_declaration_written": true,
+    "source_hashes": {
+      "ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+      "summarize.py": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+      "plot_boundaries.py": "9d0ad3c27d4fc10860f778c8e214c2c78c7b742a7ddef60853b519e73f2af05c"
+    }
+  },
+  "fresh_analysis_helper_probe": {
+    "passed": true,
+    "helper_sha256": "a0a2b832e87c46464a55bb02b0e8e5cef350813f5ba5537229277a4afb126ce1",
+    "checks": [
+      "fresh declaration/preflight/summary binding",
+      "explicit signed full-calendar ranking correction",
+      "overwrite rejected without mutation",
+      "mismatched preflight rejected without output"
+    ]
+  },
+  "documented_shell_existing_root_probe": {
+    "passed": true,
+    "exit_code": 1,
+    "existing_destination_unchanged": true
+  },
+  "ranking_readback": {
+    "rows": 348,
+    "cases": 116,
+    "sign_counts": {
+      "positive": 196,
+      "zero": 152
+    },
+    "nonpositive_cases": 56,
+    "positive_only_rows": 196
+  },
+  "figure": {
+    "points": 43,
+    "point_objects_exactly_unchanged": true,
+    "case_summary_hash_unchanged": true,
+    "original_plot_sha256": "9d0ad3c27d4fc10860f778c8e214c2c78c7b742a7ddef60853b519e73f2af05c",
+    "publication_plot_sha256": "498b80d372576232678802af8cabec7481ba71c0f2afca2a35800eb3ec088ade",
+    "visual_layout_accepted": true
+  },
+  "publication": {
+    "manifest": "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/manifest.json",
+    "manifest_sha256": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+    "files_verified": 24,
+    "native_source_disclosure_found": false,
+    "exact_frozen_copies_checked": [
+      "ledger.py",
+      "summarize.py",
+      "explore_hydrology.py",
+      "plot_boundaries.py",
+      "verify_final.py",
+      "declaration.json",
+      "analysis-declaration.json",
+      "schema.json",
+      "summary.json",
+      "case-summary.json",
+      "top-discrepancy-events.json",
+      "figure-data.json",
+      "small-reference-paired-boundaries.png",
+      "small-reference-paired-boundaries.svg",
+      "small-reference-paired-boundaries.pdf"
+    ],
+    "files": {
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/analysis-declaration.json": "dfc36bfdbf4523e205755b2ba68177131f6b50e73f83a4dc1fb687303f5ec641",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/case-summary.json": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/element-erodibility-metadata-finding.json": "7c037377a9f753a6260ec03eb75cef8d10090bde8b63757cebb14146f224415b",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/exploratory-hydrology.json": "a3c8c84a4840462256a31730b8dd03829910c8e3e6f687ea65afaae290a7076b",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/exploratory-negative-discrepancy-events.json": "06ed896ffcc7c3a2be49139a5a3747963001a2ca1f244e5d0521d3647841fde4",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/explore_hydrology.py": "93ae5ad7890bb3fe98efb3400950cc67caa30a5e268afd64e69ba994d5772552",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/figure-data.json": "08a4666d9781bc1f5d5d430032f92c611ea8ed123995c73954ab28b0c6877b5a",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/final-verification.json": "c0c23c265937f69db817464b336808908a68945fcfe9070f9c7f582ae2d26483",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/findings.md": "46f7c6e7c3acd61000183c209d608281563e2b875c949741d4b2697279227cd2",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/interpretation-metadata.json": "db1b918814babe67d1f591feb03dc0b420e142b1a0dae0fdef984ca72e376d6e",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/plot_boundaries.py": "498b80d372576232678802af8cabec7481ba71c0f2afca2a35800eb3ec088ade",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/positive-ranked-discrepancy-events.json": "e5dc5c99fae6dcd216c7d2d411dc63b5b046008e043796c3c47f2cc9713f376c",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/prepare_analysis.py": "a0a2b832e87c46464a55bb02b0e8e5cef350813f5ba5537229277a4afb126ce1",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/reproduction.md": "18a990a2c95ae8b3fcfadac9ccf47932794bf0f1d2060e29e0e4056fb4f6b900",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/schema.json": "376ca20a2c99d6c9e588374bc16b3dd97a0714d36450adff375e9e891e2a9444",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/small-reference-paired-boundaries.pdf": "26d40fe2618c4797dd1ad214530a37e4dcdb2cb79cfc1cabfca88704ae665454",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/small-reference-paired-boundaries.png": "ef5ff66294f3d8559b23d1ae2064073293ce671aa0948391a63ef11ea4b02c56",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/small-reference-paired-boundaries.svg": "0640e053732d68675d984545fdbe48d7a7a5c77eb11b7f5c96e0213e9ea6b5f5",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/summarize.py": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/summary.json": "1167e05f9eb1276196e063c5700b4a97dd86dcefae7940f1e16acbb5f8e17370",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/top-discrepancy-events.json": "362d820382634d44fd081c9ac92e8f21c40035e453a933dc4b114998ae55550c",
+      "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4/verify_final.py": "db73e0731a1e256ca9050d3de911f4fcfcad48183e9632af5bac9eb96802953f"
+    },
+    "external_review_bindings": {
+      "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-acceptance.json": "d2208fabd8bb8f3de3a1b64f1f6f16ad9cf7bc7b25dc933514a059af6d29ad23",
+      "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-readback.json": "fb41d5503c95f06a89627f0629299fd4299aa54cbc5f035ddac3a5aed3beb067",
+      "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-projection-review.json": "8750584c6bed73236850d3519e3b1264610a71528744f54f5e4482e5495d9309",
+      "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-review.md": "906c6e96302e939f2ae2eeb068f5c2b995fff15b16db26069500c3349c03087f"
+    }
+  },
+  "residual_scope": [
+    "This review does not repeat the accepted full 116-case numerical study or perform fresh full ledger generation; staging/import, binding/error probes, hashes and source inspection support its narrower claim.",
+    "Reproduction requires retained source records, exact environment and declared provenance files; this public packet is not a self-contained portable dataset.",
+    "Whole-profile comparisons do not isolate one causal parameter. Exploratory associations and ranked rows do not automatically approve future observation case selections.",
+    "No native run, production deployment, parameter/default change or UI implementation is approved."
+  ],
+  "scope_clarification_delta_review": {
+    "reviewed_utc": "2026-10-31T22:52:14.655996+00:00",
+    "previous_review_sha256": "7c85512271d9cec09d11c013fbf5101b0434c03f08ec0742f2564ef5462bc7f5",
+    "previous_manifest_sha256": "7738874133c9c9c36b3fbde1b8879e571eefd452b2e856e3d3dcf50e5ee8bc20",
+    "new_manifest_sha256": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+    "only_changed_packet_file": "findings.md",
+    "old_findings_sha256": "c9e0156b77b0a709ed3b97097affe4e3a80976322198d0d4525d533397de14c1",
+    "new_findings_sha256": "46f7c6e7c3acd61000183c209d608281563e2b875c949741d4b2697279227cd2",
+    "accepted": true,
+    "change": "Explicitly identifies the generated lane as frozen U12 erosion_road_cap: configuration-matched road Ki/Kr/critical shear, disabled road conductivity adjustment, and upper-200mm road conductivity cap; fill/buffer generated profiles retained. It does not represent unmodified SSURGO or all production configurations.",
+    "referenced_public_transforms_checked": [
+      "screen.py",
+      "engineered_surface_screen.py"
+    ],
+    "numerical_data_or_script_changes": false,
+    "numerical_checks_repeated": false
+  }
+}

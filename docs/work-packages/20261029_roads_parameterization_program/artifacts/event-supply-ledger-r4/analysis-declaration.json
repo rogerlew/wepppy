@@ -1,0 +1,16 @@
+{
+  "purpose": "Summarize complete116 paired ledgers only after all annual audits and artifact verification; no tuning or acceptance.",
+  "summary_script_sha256": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+  "ledger_declaration_sha256": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+  "preflight_receipt_sha256": "5eb257f194900e9bf4b69b92431fdc3fe1a36f28fb20e7f8566eaa48c5b62a7a",
+  "predeclared_comparisons": [
+    "Paired annual road/fill/buffer sediment boundaries and surface volumes",
+    "Full-calendar reported contribution decomposition with missing observation support retained",
+    "Positive buffer export difference despite no larger paired incoming sediment on observed dates",
+    "Separate terminal particle mixture diagnostics, not upstream class attribution",
+    "Original group and all five material/climate/configuration strata"
+  ],
+  "printing_separated_event_diagnostic": "Both difference signs exceed .001kg/m times common emitted width, the sum of the two unchanged half-F9.3 reporting intervals. Also retain original raw sign counts. This is interpretation support, not a changed audit criterion.",
+  "maximum_events_reported_per_case": 3,
+  "selection_rule": "Largest positive modern-minus-legacy reported outlet sediment difference, then year/day. No parameter outcome conditioned choices."
+}

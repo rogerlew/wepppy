@@ -1,0 +1,11 @@
+{
+  "summary_script_sha256": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+  "terminal_clay_mass_fraction_scope": "EVENT-only sediment-mass-weighted terminal clay fraction: sum(EVENT runvol*sedcon_1) / sum(EVENT runvol*sum(sedcon_1..5)). Excludes SUBEVENT/no-event class data. It is not all-annual export composition, incoming sediment composition, or per-OFE particle-source attribution.",
+  "reported_delta_scope": "Zero contribution assigned to an absent row only when decomposing sums of reported outputs; physical missing sediment remains NULL.",
+  "unavailable_diagnostics_scope": "Canonical Rust unavailable diagnostic values, including native Sm stars, remain NULL. Required accounting fields must be available.",
+  "geometry_scope": "New ledger mass/volume uses emitted geometry; original accepted sediment/particle audit replay uses original metadata width. The recorded token interval and width ratio bridge are explicit; no physical/audit tolerance changes.",
+  "ranked_daily_candidates_scope": "Frozen top-discrepancy-events.json contains the three largest reported daily outlet differences per case from the full daily terminal ledger, including zero differences. The declaration incorrectly said largest positive. Actual rows:196 positive,152 zero,0 negative. The filename does not imply PASS EVENT classification. Positive observation selection must filter nonpositive rows explicitly.",
+  "paved_source_scope": "37 of38 paved cases have zero reported road export in both lanes. Denver2711184/outrut/paved/none is not a literal zero-source control: legacy0.001485 and generated0.0002475kg/year.",
+  "comparison_scope": "Complete profiles at fixed revision4:21 legacy templates versus seven generated materials. Same non-soil inputs do not isolate hydraulic conductivity, texture, layer depth, soil-water retention, initial states, or erodibility. FSWEPP2010 is an annual benchmark only; its event contract is not assumed.",
+  "publication_derivative_scope": "Figure-layout draft preserved in figure-layout-draft; final figure changes layout only and retains all43 case points. Exploratory hydraulic cross-tabs are separate from frozen execution and summary source."
+}

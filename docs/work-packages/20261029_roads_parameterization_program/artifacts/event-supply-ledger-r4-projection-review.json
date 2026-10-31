@@ -1,0 +1,800 @@
+{
+  "annual_projection_exact": true,
+  "values_checked": 11832,
+  "annualized_fields": [
+    "deep_percolation_m3",
+    "et_m3",
+    "lateral_in_m3",
+    "lateral_out_m3",
+    "negative_net_kg",
+    "net_sediment_kg",
+    "positive_net_kg",
+    "precipitation_m3",
+    "rain_melt_m3",
+    "sediment_out_kg",
+    "surface_in_m3",
+    "surface_out_m3"
+  ],
+  "paved_cases": [
+    {
+      "case_id": "birmingham-2711184-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "birmingham-2711250-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-1718465-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-1718494-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-2711184-outrut-paved-none",
+      "legacy_road_kg_yr": 0.001485,
+      "modern_road_kg_yr": 0.0002475
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "flagstaff-2711184-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "flagstaff-2711184-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-1856573-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-1856573-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-high",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-low",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-none",
+      "legacy_road_kg_yr": 0.0,
+      "modern_road_kg_yr": 0.0
+    }
+  ],
+  "paved_road_exports_all_exactly_zero": false,
+  "original_legacy_soils_byte_exact": 116,
+  "distinct_legacy_soils": 21,
+  "legacy_soil_formats": [
+    "98.4"
+  ],
+  "original_soil_provenance": [
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "eb63855528701ef1746b0433080f9cfa50ceee406d660d6b8081bd41c642cc8e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "87a2b646fb46849dd4f18a938bf69e88f7d3fa9e1761dfa3b21b7788180c9fe5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718494-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718494-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "1bcc4821dcc04caca002dcaea9300e696f924184a8d7c691f93ed9c22e439f5e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711250-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711250-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "562c14ee8f6cdb2ef5b4409c79ee0ebf860147acc0acee9bddd99fdde8b156da"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711250-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711250-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "eb63855528701ef1746b0433080f9cfa50ceee406d660d6b8081bd41c642cc8e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "eb63855528701ef1746b0433080f9cfa50ceee406d660d6b8081bd41c642cc8e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0b5faea35076b9d9a0fbbed0957ef9c99bc4df1d61e3327831ceed1de5d09238"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "87a2b646fb46849dd4f18a938bf69e88f7d3fa9e1761dfa3b21b7788180c9fe5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718494-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "dea86ce012786625e3e6b1d9ef0c93ed2bb347239dcae676932f699f1e5c500b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "81755db553f9c599792246a96caa41550962b9bdb2b47a4e3a9ff47f0a85c169"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "81755db553f9c599792246a96caa41550962b9bdb2b47a4e3a9ff47f0a85c169"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "1832625eacc5ba0081839606534f4e2bb5c77246f800963fca720dca2eab3b00"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "d179cfd37af1bd18ad4b8632e514438ec25ae3ba9638b502f2c4f1a0c6d36fb4"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718510-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718510-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "d179cfd37af1bd18ad4b8632e514438ec25ae3ba9638b502f2c4f1a0c6d36fb4"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1856573-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1856573-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inbare-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inbare-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "1bcc4821dcc04caca002dcaea9300e696f924184a8d7c691f93ed9c22e439f5e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-inveg-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-inveg-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-outrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711184-outrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6fce36cb534dce6f00a4bea899f9b3e626aef2602f66a0caa3a6b9ec9e945654"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inbare-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inbare-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inbare-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "229e4c58c247761295b468e0bd9ef54c804ef4b180c6db8fc81679acfd5ff6fb"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c0104364af97fc34326ff2e5f7b6129e698d8ec0320d4c7545d7bdcfd9f710a4"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-inveg-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-inveg-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c0104364af97fc34326ff2e5f7b6129e698d8ec0320d4c7545d7bdcfd9f710a4"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6fce36cb534dce6f00a4bea899f9b3e626aef2602f66a0caa3a6b9ec9e945654"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-outrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711250-outrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-2711250-outrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "42ce9bc595a5e48d02bdb2ee73afe321a824829d94dd31823f555ab7604e1d34"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-53949-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-53949-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-53949-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-53949-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-53949-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-53949-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0b5faea35076b9d9a0fbbed0957ef9c99bc4df1d61e3327831ceed1de5d09238"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "87a2b646fb46849dd4f18a938bf69e88f7d3fa9e1761dfa3b21b7788180c9fe5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1856573-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1856573-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1856573-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1856573-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1856573-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-2711184-inveg-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ef91f38a07cab483ddf5bc5329e489b89b200cd683ed5703e708373e74cefe1e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-53949-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-53949-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-53949-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-53949-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-53949-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "ba6fdc10f9a3eb03c758781cb48835d0b5cbd2ddfefbed1e7713badf1b78b04b"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1856573-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "00f24b95df6d590d2c1ca96820208019a9953b1470415f274e2cf970d7b3a1f5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-gravel-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-gravel-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "0f33b85ed4cfd6e7b957c7fab135cc905eefcc80fedc5cc2f5138e93793b3530"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "b79e9c1558aaf08aef51164169ba8c13b8dbeb83579ff8e967f694d4ee7eccbe"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711184-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "6f6a6a646c74b5314f929ed4034835c8a91b606026f20480c67ac9dd6c8151b2"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711250-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711250-outunrut-paved-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "562c14ee8f6cdb2ef5b4409c79ee0ebf860147acc0acee9bddd99fdde8b156da"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711250-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711250-outunrut-paved-low-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "eb63855528701ef1746b0433080f9cfa50ceee406d660d6b8081bd41c642cc8e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-2711250-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "eb63855528701ef1746b0433080f9cfa50ceee406d660d6b8081bd41c642cc8e"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/birmingham-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/charleston-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/denver-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "87a2b646fb46849dd4f18a938bf69e88f7d3fa9e1761dfa3b21b7788180c9fe5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/flagstaff-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "87a2b646fb46849dd4f18a938bf69e88f7d3fa9e1761dfa3b21b7788180c9fe5"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-inbare-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-inveg-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "c06f59a5872264110523375fe65b4e28de8b92375fa6a3e44c95029efd66dc8d"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-outrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    },
+    {
+      "current": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "original": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-r3/matrix-v1/site-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.sol",
+      "sha256": "13c9af2a3132bf08836d1e98625e4fa9fdd9def36955c4ec241a2c87922dda17"
+    }
+  ],
+  "case_summary_sha256": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+  "script_sha256": "2664bf3c1df9a6332f4ead7a713c01d70eeaae6a77dbddb2c5734499731777a6"
+}

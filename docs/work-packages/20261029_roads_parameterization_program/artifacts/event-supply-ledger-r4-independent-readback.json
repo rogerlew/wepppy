@@ -1,0 +1,3775 @@
+{
+  "passed": true,
+  "scope": "Full116 exact-R4 observational ledger; no parameter recommendation",
+  "cases": 116,
+  "lanes": 232,
+  "full_calendar_ofe_rows_checked": 4067424,
+  "original_input_files_rehashed": 2900,
+  "original_output_files_rehashed": 1624,
+  "independent_annual_flux_comparisons": 8352,
+  "group_counts": {
+    "meaningful_low": 48,
+    "small_exceedance": 43,
+    "meaningful_high": 5,
+    "meaningful_pass": 18,
+    "small_pass": 2
+  },
+  "units_checked": [
+    "cumulative Q area",
+    "local surface/lateral depths",
+    "stock depth",
+    "SedLeave kg/m times emitted width",
+    "Ki \u00d71e6",
+    "Kr /1e3"
+  ],
+  "undefined_ratios_remain_null": true,
+  "missing_element_not_physical_zero": true,
+  "terminal_clay_scope": "EVENT-only mass-weighted terminal fraction; not all annual export or upstream class attribution",
+  "annualized_fields": [
+    "deep_percolation_m3",
+    "et_m3",
+    "lateral_in_m3",
+    "lateral_out_m3",
+    "negative_net_kg",
+    "net_sediment_kg",
+    "positive_net_kg",
+    "precipitation_m3",
+    "rain_melt_m3",
+    "sediment_out_kg",
+    "surface_in_m3",
+    "surface_out_m3"
+  ],
+  "not_annualized_fields": [
+    "calendar_rows",
+    "element_rows",
+    "missing_element_with_surface_flow",
+    "positive_sediment_zero_surface_water",
+    "OFE"
+  ],
+  "historical_sediment_geometry_bridge": "historical per-year value \u00d7 emitted_width / recorded_width",
+  "comparison_tolerance": "IEEE accumulated reassociation bound only; no native scientific threshold changed",
+  "script_sha256": "d6632066a6d641618cd2f0d1fd7b277b57b6c6048da6bfc2bfd141eddf234a59",
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/summarize.py": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/results.json": "64de0dec346f53f6d60f9f06a485358dfdaeffa94348be76a3f9ed471d2a8078",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/summary.json": "1167e05f9eb1276196e063c5700b4a97dd86dcefae7940f1e16acbb5f8e17370",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/analysis-declaration.json": "dfc36bfdbf4523e205755b2ba68177131f6b50e73f83a4dc1fb687303f5ec641",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/case-summary.json": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81"
+  },
+  "rows": [
+    {
+      "case_id": "birmingham-2711184-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.864464138634503e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 129,
+          "EVENT_sediment_mass_kg": 7917.110737311501,
+          "clay_fraction": 0.05246913221669331
+        },
+        "modern": {
+          "EVENT_count": 36,
+          "EVENT_sediment_mass_kg": 663.3263385086,
+          "clay_fraction": 0.048142076167816725
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "birmingham-2711184-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 6.548361852765083e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.944489096989855e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 42,
+          "EVENT_sediment_mass_kg": 5710.541063457881,
+          "clay_fraction": 0.05273859951540847
+        },
+        "modern": {
+          "EVENT_count": 8,
+          "EVENT_sediment_mass_kg": 274.39170003099997,
+          "clay_fraction": 0.05136994326871962
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "birmingham-2711184-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.546585164964199e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 4.3655745685100555e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 53,
+          "EVENT_sediment_mass_kg": 5329.3610729619995,
+          "clay_fraction": 0.05280628635480835
+        },
+        "modern": {
+          "EVENT_count": 11,
+          "EVENT_sediment_mass_kg": 143.6911889694578,
+          "clay_fraction": 0.03977984271102306
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "birmingham-2711250-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.0550138540565968e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 5.3660187404602766e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 67,
+          "EVENT_sediment_mass_kg": 7016.058274227302,
+          "clay_fraction": 0.039933646638443385
+        },
+        "modern": {
+          "EVENT_count": 19,
+          "EVENT_sediment_mass_kg": 193.31778800012341,
+          "clay_fraction": 0.06363532803123241
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-1718465-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.510205376893282e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 12.607167860199999,
+          "clay_fraction": 0.012999960341402167
+        },
+        "modern": {
+          "EVENT_count": 9,
+          "EVENT_sediment_mass_kg": 58.4988782922,
+          "clay_fraction": 0.045368154222435265
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "charleston-1718494-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 16,
+          "EVENT_sediment_mass_kg": 162.08305748927998,
+          "clay_fraction": 0.05300012389233318
+        },
+        "modern": {
+          "EVENT_count": 40,
+          "EVENT_sediment_mass_kg": 426.36997720073884,
+          "clay_fraction": 0.04560623484918487
+        }
+      },
+      "printing_separated_events": 15
+    },
+    {
+      "case_id": "charleston-2711184-inbare-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 41,
+          "EVENT_sediment_mass_kg": 1386.779689437552,
+          "clay_fraction": 0.052052810801820296
+        },
+        "modern": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 64.53447104199999,
+          "clay_fraction": 0.04626410728704831
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 41,
+          "EVENT_sediment_mass_kg": 2229.271042596552,
+          "clay_fraction": 0.05250014357391942
+        },
+        "modern": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 97.79750044600002,
+          "clay_fraction": 0.05288096160346727
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 41,
+          "EVENT_sediment_mass_kg": 1191.331031995952,
+          "clay_fraction": 0.05206139149795164
+        },
+        "modern": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 41.262578283,
+          "clay_fraction": 0.04992236841992688
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 41,
+          "EVENT_sediment_mass_kg": 1369.6113027593499,
+          "clay_fraction": 0.05205964176306754
+        },
+        "modern": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 66.90690959599999,
+          "clay_fraction": 0.04605059009008843
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 674.2724420120048,
+          "clay_fraction": 0.0527727493442054
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 340.6554746390048,
+          "clay_fraction": 0.05200006083500219
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 204.84337294996,
+          "clay_fraction": 0.052486815932221736
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 14,
+          "EVENT_sediment_mass_kg": 285.91699524957147,
+          "clay_fraction": 0.05199999734535463
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 6.645737577000001e-05,
+          "clay_fraction": 0.03977909162632588
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 14,
+          "EVENT_sediment_mass_kg": 285.91651885378167,
+          "clay_fraction": 0.05199998057155627
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.6614527347000002e-05,
+          "clay_fraction": 0.0397799511955024
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711184-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 16,
+          "EVENT_sediment_mass_kg": 162.08305748927998,
+          "clay_fraction": 0.05300012389233318
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 21,
+          "EVENT_sediment_mass_kg": 707.0421683652,
+          "clay_fraction": 0.038999864121198005
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 0.00013368104475,
+          "clay_fraction": 0.06363577735279481
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 21,
+          "EVENT_sediment_mass_kg": 707.0415401372,
+          "clay_fraction": 0.038999898773768256
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 3.3420477152999995e-05,
+          "clay_fraction": 0.06363481407712625
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "charleston-2711250-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 23,
+          "EVENT_sediment_mass_kg": 258.9198113973,
+          "clay_fraction": 0.03918601343421881
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 4.24409272e-05,
+          "clay_fraction": 0.06363527326518918
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.4920154828578234e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.765308065339923e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 64.02064044800004,
+          "clay_fraction": 0.05265391030784832
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.4920154828578234e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.765308065339923e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 63.61209466900003,
+          "clay_fraction": 0.05253914236577893
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "denver-1718465-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.346496330574155e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 4.147295840084553e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 52.691300955900005,
+          "clay_fraction": 0.06780335385892497
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.2741809263825417e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 96.026894688,
+          "clay_fraction": 0.04452510817820188
+        }
+      },
+      "printing_separated_events": 4
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.2741809263825417e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 96.026748158,
+          "clay_fraction": 0.044525176120355774
+        }
+      },
+      "printing_separated_events": 4
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.6916601452976465e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 117.08883234826467,
+          "clay_fraction": 0.09173849382621498
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.6916601452976465e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 107.7179399819731,
+          "clay_fraction": 0.08168593416261528
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "denver-1718494-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.3101165425032377e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.9099388737231493e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 37.89046004032002,
+          "clay_fraction": 0.11548238429841567
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.6370904631912708e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420977008000133,
+          "clay_fraction": 0.10115363313796678
+        },
+        "modern": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 318.63780373426005,
+          "clay_fraction": 0.0484286993481459
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.6370904631912708e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420691920000134,
+          "clay_fraction": 0.10115486442895777
+        },
+        "modern": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 318.63771381826,
+          "clay_fraction": 0.048428713014183354
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718494-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.837179297581315e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.7826096154749393e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 6.8435989489999995,
+          "clay_fraction": 0.05200147125102962
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 31.10030872879726,
+          "clay_fraction": 0.04550009336123936
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.419255906715989e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.510205376893282e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 40.23905451600241,
+          "clay_fraction": 0.10271663061457585
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 77.18992809,
+          "clay_fraction": 0.08405437834370187
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.419255906715989e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.510205376893282e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 13.247526348000001,
+          "clay_fraction": 0.07799901376727572
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 61.443582576,
+          "clay_fraction": 0.08240768747064864
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718510-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.582964953035116e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.4920154828578234e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 16.690863326,
+          "clay_fraction": 0.07799881171946517
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 28.840686432,
+          "clay_fraction": 0.0870921903305689
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0554580260068178e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.9467628337442875e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 46.6960329,
+          "clay_fraction": 0.07799774464352836
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 96.48175409999999,
+          "clay_fraction": 0.08059876784516297
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0554580260068178e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.9467628337442875e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 46.69576694999999,
+          "clay_fraction": 0.07799818887009415
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 96.48175409999999,
+          "clay_fraction": 0.08059876784516297
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "denver-1718510-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.2009771782904863e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.9831426218152046e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 5.54646852,
+          "clay_fraction": 0.07799805469733379
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 15.536178704,
+          "clay_fraction": 0.08059987104020634
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.1645973902195692e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 60.94973459,
+          "clay_fraction": 0.07239931674327575
+        }
+      },
+      "printing_separated_events": 3
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.1645973902195692e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 50.56172387,
+          "clay_fraction": 0.07138955090377538
+        }
+      },
+      "printing_separated_events": 3
+    },
+    {
+      "case_id": "denver-1856573-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.3101165425032377e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 31.040947864,
+          "clay_fraction": 0.07572789105213518
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.1464074961841106e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420977008000133,
+          "clay_fraction": 0.10115363313796678
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 74.04280055999999,
+          "clay_fraction": 0.06890116042904038
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.1464074961841106e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420691920000134,
+          "clay_fraction": 0.10115486442895777
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 74.04239412,
+          "clay_fraction": 0.06890153864732973
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "denver-1856573-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.837179297581315e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.1464074961841106e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 6.8435989489999995,
+          "clay_fraction": 0.05200147125102962
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 6.526670046,
+          "clay_fraction": 0.06889883552112387
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 560.66613821,
+          "clay_fraction": 0.05200048287753004
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.034024182758001,
+          "clay_fraction": 0.7196749345021466
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inbare-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 309.765225543,
+          "clay_fraction": 0.05199960510339472
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.033997803662001,
+          "clay_fraction": 0.6220390369516187
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inbare-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 169.120094811,
+          "clay_fraction": 0.051999941537568255
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 455.54832346499995,
+          "clay_fraction": 0.05200023840460915
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.0340075866380012,
+          "clay_fraction": 0.5902282380580463
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 281.95164138499996,
+          "clay_fraction": 0.051999925955316675
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.033980377736001,
+          "clay_fraction": 0.569673516715801
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-inveg-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 140.140827467,
+          "clay_fraction": 0.05200032532786358
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 560.8409403,
+          "clay_fraction": 0.05199941695483246
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.098939594100001,
+          "clay_fraction": 0.5724878340699321
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-outrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 309.77264304000005,
+          "clay_fraction": 0.051999759571796686
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 1.098918963948001,
+          "clay_fraction": 0.5515120221627898
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-outrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 169.120094811,
+          "clay_fraction": 0.051999941537568255
+        },
+        "modern": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711184-outrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 13,
+          "EVENT_sediment_mass_kg": 148.0322640693575,
+          "clay_fraction": 0.052055355122470455
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 13.734560113,
+          "clay_fraction": 0.03978029529193703
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 601.569054126,
+          "clay_fraction": 0.04080268053292991
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 12.931184149379998,
+          "clay_fraction": 0.23449898129750088
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inbare-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 311.97093615999995,
+          "clay_fraction": 0.03900002910450606
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 12.93100866312,
+          "clay_fraction": 0.1775070437116371
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inbare-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 168.49368708900002,
+          "clay_fraction": 0.03900005532865451
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 9.039836702484,
+          "clay_fraction": 0.1783735053042408
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 505.660407479,
+          "clay_fraction": 0.03938600416886921
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 12.931133171189998,
+          "clay_fraction": 0.20385561459324236
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 280.605480495,
+          "clay_fraction": 0.03899994435495354
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 12.931259384850001,
+          "clay_fraction": 0.16774324877755603
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-inveg-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 141.70731864319998,
+          "clay_fraction": 0.039000153203909364
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 9.039836702484,
+          "clay_fraction": 0.1783735053042408
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 597.515853296,
+          "clay_fraction": 0.04021788373219196
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 13.083506322179998,
+          "clay_fraction": 0.20242209655299193
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-outrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 308.568343013,
+          "clay_fraction": 0.03899985382652491
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 13.08347254704,
+          "clay_fraction": 0.16645647034224956
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-2711250-outrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 168.49368708900002,
+          "clay_fraction": 0.03900005532865451
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 9.039836702484,
+          "clay_fraction": 0.1783735053042408
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.8194335754960775e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 36.92705020200007,
+          "clay_fraction": 0.09885550570736577
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.382876118645072e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.8194335754960775e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 36.926802290000346,
+          "clay_fraction": 0.0674868455283182
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "denver-53949-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.3101165425032377e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.5647750589996576e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 28.382257688000003,
+          "clay_fraction": 0.05601795549450654
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.582964953035116e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420977008000133,
+          "clay_fraction": 0.10115363313796678
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 75.35437599999999,
+          "clay_fraction": 0.0519993371055186
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "denver-53949-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.582964953035116e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 23.420691920000134,
+          "clay_fraction": 0.10115486442895777
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 75.35437599999999,
+          "clay_fraction": 0.0519993371055186
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.673470251262188e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.091837814077735e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 55.292590739999994,
+          "clay_fraction": 0.013000247056247811
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 134.17703848,
+          "clay_fraction": 0.04691947110561983
+        }
+      },
+      "printing_separated_events": 6
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.673470251262188e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.091837814077735e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 33.7026378,
+          "clay_fraction": 0.012999923109875987
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 99.59543615999999,
+          "clay_fraction": 0.04702692031465873
+        }
+      },
+      "printing_separated_events": 6
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.5643308870494366e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.255546860396862e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 40.662881196,
+          "clay_fraction": 0.012999804156819051
+        },
+        "modern": {
+          "EVENT_count": 5,
+          "EVENT_sediment_mass_kg": 173.03092605900002,
+          "clay_fraction": 0.0479154077588014
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.1459633242338896e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.9826984498649836e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 17.397361828,
+          "clay_fraction": 0.013000268674989128
+        },
+        "modern": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 19.89225547357328,
+          "clay_fraction": 0.044525031878944576
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.1459633242338896e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.9826984498649836e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 17.397295569500002,
+          "clay_fraction": 0.012999971955210046
+        },
+        "modern": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 19.891583216216304,
+          "clay_fraction": 0.04452475509233016
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.3642420526593924e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 117.13859526,
+          "clay_fraction": 0.05200098709122935
+        },
+        "modern": {
+          "EVENT_count": 18,
+          "EVENT_sediment_mass_kg": 290.97538169132076,
+          "clay_fraction": 0.049906976206099886
+        }
+      },
+      "printing_separated_events": 6
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.3642420526593924e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 49.639909808,
+          "clay_fraction": 0.05199972155436919
+        },
+        "modern": {
+          "EVENT_count": 18,
+          "EVENT_sediment_mass_kg": 174.96430914309158,
+          "clay_fraction": 0.04778034266572969
+        }
+      },
+      "printing_separated_events": 6
+    },
+    {
+      "case_id": "flagstaff-1718494-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8553691916167736e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.1641532182693481e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 52.861737722,
+          "clay_fraction": 0.05200064357430282
+        },
+        "modern": {
+          "EVENT_count": 17,
+          "EVENT_sediment_mass_kg": 237.71768166790346,
+          "clay_fraction": 0.0483293671227763
+        }
+      },
+      "printing_separated_events": 4
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8553691916167736e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 117.13859526,
+          "clay_fraction": 0.05200098709122935
+        },
+        "modern": {
+          "EVENT_count": 9,
+          "EVENT_sediment_mass_kg": 248.40038024799998,
+          "clay_fraction": 0.07447329619838193
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8553691916167736e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 49.639909808,
+          "clay_fraction": 0.05199972155436919
+        },
+        "modern": {
+          "EVENT_count": 9,
+          "EVENT_sediment_mass_kg": 138.60265737499998,
+          "clay_fraction": 0.07373760826495843
+        }
+      },
+      "printing_separated_events": 6
+    },
+    {
+      "case_id": "flagstaff-1856573-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8553691916167736e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.7644197214394808e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 52.861737722,
+          "clay_fraction": 0.05200064357430282
+        },
+        "modern": {
+          "EVENT_count": 9,
+          "EVENT_sediment_mass_kg": 209.070474337,
+          "clay_fraction": 0.07427029108840548
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-2711184-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.2732925824820995e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 14,
+          "EVENT_sediment_mass_kg": 201.768392464,
+          "clay_fraction": 0.05200037547442925
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 19.957838457300003,
+          "clay_fraction": 0.053793225884505004
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-2711184-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.0368239600211382e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 6.002665031701326e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 16.91299579260184,
+          "clay_fraction": 0.05200005637666301
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-2711184-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.0368239600211382e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 6.002665031701326e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 16.912680918555175,
+          "clay_fraction": 0.05199950794082729
+        },
+        "modern": {
+          "EVENT_count": 1,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.4370016288012266e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 117.13859526,
+          "clay_fraction": 0.05200098709122935
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 91.37279736,
+          "clay_fraction": 0.05282055994175814
+        }
+      },
+      "printing_separated_events": 4
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8735590856522322e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.4370016288012266e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 3,
+          "EVENT_sediment_mass_kg": 49.639909808,
+          "clay_fraction": 0.05199972155436919
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 38.92009446,
+          "clay_fraction": 0.052748173623009244
+        }
+      },
+      "printing_separated_events": 4
+    },
+    {
+      "case_id": "flagstaff-53949-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.8553691916167736e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.291482476517558e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 52.861737722,
+          "clay_fraction": 0.05200064357430282
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 56.92341829999999,
+          "clay_fraction": 0.05278170443253231
+        }
+      },
+      "printing_separated_events": 2
+    },
+    {
+      "case_id": "site-1718465-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 100,
+          "EVENT_sediment_mass_kg": 2384.287288156437,
+          "clay_fraction": 0.013744781281653679
+        },
+        "modern": {
+          "EVENT_count": 201,
+          "EVENT_sediment_mass_kg": 2803.566899877223,
+          "clay_fraction": 0.045227404432330566
+        }
+      },
+      "printing_separated_events": 116
+    },
+    {
+      "case_id": "site-1718465-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 100,
+          "EVENT_sediment_mass_kg": 2318.822508965833,
+          "clay_fraction": 0.01381158734009787
+        },
+        "modern": {
+          "EVENT_count": 201,
+          "EVENT_sediment_mass_kg": 3170.906808597747,
+          "clay_fraction": 0.045645485526205315
+        }
+      },
+      "printing_separated_events": 106
+    },
+    {
+      "case_id": "site-1856573-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 304,
+          "EVENT_sediment_mass_kg": 939.7597288808693,
+          "clay_fraction": 0.05200002143933803
+        },
+        "modern": {
+          "EVENT_count": 377,
+          "EVENT_sediment_mass_kg": 6058.554481504716,
+          "clay_fraction": 0.0689000378841043
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "site-1856573-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 304,
+          "EVENT_sediment_mass_kg": 939.7506472379407,
+          "clay_fraction": 0.05200013840719739
+        },
+        "modern": {
+          "EVENT_count": 377,
+          "EVENT_sediment_mass_kg": 6058.5434315924185,
+          "clay_fraction": 0.06890005327995226
+        }
+      },
+      "printing_separated_events": 5
+    },
+    {
+      "case_id": "site-2711184-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 277,
+          "EVENT_sediment_mass_kg": 7079.492495938762,
+          "clay_fraction": 0.05341488209601387
+        },
+        "modern": {
+          "EVENT_count": 32,
+          "EVENT_sediment_mass_kg": 91.45168800924,
+          "clay_fraction": 0.05954399287227824
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711184-outunrut-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 277,
+          "EVENT_sediment_mass_kg": 3928.976217695618,
+          "clay_fraction": 0.05264694415297392
+        },
+        "modern": {
+          "EVENT_count": 32,
+          "EVENT_sediment_mass_kg": 46.31266922864,
+          "clay_fraction": 0.05746361583288406
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711184-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 277,
+          "EVENT_sediment_mass_kg": 6065.950894584375,
+          "clay_fraction": 0.05292883424844478
+        },
+        "modern": {
+          "EVENT_count": 32,
+          "EVENT_sediment_mass_kg": 84.99133325504441,
+          "clay_fraction": 0.06188771367988645
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 304,
+          "EVENT_sediment_mass_kg": 939.7597288808693,
+          "clay_fraction": 0.05200002143933803
+        },
+        "modern": {
+          "EVENT_count": 48,
+          "EVENT_sediment_mass_kg": 21.802726514110965,
+          "clay_fraction": 0.03977980217177599
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 304,
+          "EVENT_sediment_mass_kg": 939.7506472379407,
+          "clay_fraction": 0.05200013840719739
+        },
+        "modern": {
+          "EVENT_count": 48,
+          "EVENT_sediment_mass_kg": 21.8006638764112,
+          "clay_fraction": 0.03978006234325162
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711184-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 305,
+          "EVENT_sediment_mass_kg": 3796.4863062889754,
+          "clay_fraction": 0.05271629942487011
+        },
+        "modern": {
+          "EVENT_count": 47,
+          "EVENT_sediment_mass_kg": 13.288641452407077,
+          "clay_fraction": 0.0397801797235535
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 381,
+          "EVENT_sediment_mass_kg": 2300.41972359986,
+          "clay_fraction": 0.039117270829484595
+        },
+        "modern": {
+          "EVENT_count": 163,
+          "EVENT_sediment_mass_kg": 67.74806027800246,
+          "clay_fraction": 0.06363383297250251
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 381,
+          "EVENT_sediment_mass_kg": 2300.4052491600364,
+          "clay_fraction": 0.03911739293494888
+        },
+        "modern": {
+          "EVENT_count": 163,
+          "EVENT_sediment_mass_kg": 67.7439681367086,
+          "clay_fraction": 0.06363397116353618
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "site-2711250-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 383,
+          "EVENT_sediment_mass_kg": 5504.937321762825,
+          "clay_fraction": 0.03977619803217571
+        },
+        "modern": {
+          "EVENT_count": 159,
+          "EVENT_sediment_mass_kg": 55.34858879670786,
+          "clay_fraction": 0.06363423605174134
+        }
+      },
+      "printing_separated_events": 0
+    },
+    {
+      "case_id": "birmingham-1718465-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 105,
+          "EVENT_sediment_mass_kg": 10268.2920992289,
+          "clay_fraction": 0.01488174188055824
+        },
+        "modern": {
+          "EVENT_count": 151,
+          "EVENT_sediment_mass_kg": 10896.3285675103,
+          "clay_fraction": 0.04644269800053656
+        }
+      },
+      "printing_separated_events": 124
+    },
+    {
+      "case_id": "birmingham-1718465-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 105,
+          "EVENT_sediment_mass_kg": 8700.3014827898,
+          "clay_fraction": 0.01425765523760034
+        },
+        "modern": {
+          "EVENT_count": 151,
+          "EVENT_sediment_mass_kg": 6710.0463319602995,
+          "clay_fraction": 0.046765199074881234
+        }
+      },
+      "printing_separated_events": 114
+    },
+    {
+      "case_id": "birmingham-1718465-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 105,
+          "EVENT_sediment_mass_kg": 10087.9985904865,
+          "clay_fraction": 0.014703346267056407
+        },
+        "modern": {
+          "EVENT_count": 151,
+          "EVENT_sediment_mass_kg": 10358.2053001943,
+          "clay_fraction": 0.04630729631299184
+        }
+      },
+      "printing_separated_events": 125
+    },
+    {
+      "case_id": "birmingham-1718465-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.4556356947869062e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.623448042664677e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 28,
+          "EVENT_sediment_mass_kg": 5681.905429102,
+          "clay_fraction": 0.01308365835802887
+        },
+        "modern": {
+          "EVENT_count": 54,
+          "EVENT_sediment_mass_kg": 6287.907836043,
+          "clay_fraction": 0.04554252081964543
+        }
+      },
+      "printing_separated_events": 73
+    },
+    {
+      "case_id": "charleston-1718465-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 19,
+          "EVENT_sediment_mass_kg": 1413.76808488,
+          "clay_fraction": 0.016318922004777234
+        },
+        "modern": {
+          "EVENT_count": 46,
+          "EVENT_sediment_mass_kg": 2360.84678353856,
+          "clay_fraction": 0.04957751634155901
+        }
+      },
+      "printing_separated_events": 60
+    },
+    {
+      "case_id": "charleston-1718465-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 19,
+          "EVENT_sediment_mass_kg": 1169.9373991266,
+          "clay_fraction": 0.014948047385830748
+        },
+        "modern": {
+          "EVENT_count": 46,
+          "EVENT_sediment_mass_kg": 1398.1215831499999,
+          "clay_fraction": 0.04951362050018004
+        }
+      },
+      "printing_separated_events": 64
+    },
+    {
+      "case_id": "charleston-1718465-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 19,
+          "EVENT_sediment_mass_kg": 1409.191854702,
+          "clay_fraction": 0.016168864299757342
+        },
+        "modern": {
+          "EVENT_count": 46,
+          "EVENT_sediment_mass_kg": 2334.8990740478002,
+          "clay_fraction": 0.04905696426956357
+        }
+      },
+      "printing_separated_events": 56
+    },
+    {
+      "case_id": "charleston-1718465-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.0736479200422764e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 310.20608178,
+          "clay_fraction": 0.012999959919741328
+        },
+        "modern": {
+          "EVENT_count": 9,
+          "EVENT_sediment_mass_kg": 603.832406021,
+          "clay_fraction": 0.050511494197512906
+        }
+      },
+      "printing_separated_events": 16
+    },
+    {
+      "case_id": "denver-1718465-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 286.0981577,
+          "clay_fraction": 0.019943734541566397
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 263.217967945,
+          "clay_fraction": 0.048612217197397674
+        }
+      },
+      "printing_separated_events": 11
+    },
+    {
+      "case_id": "denver-1718465-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 259.882378617,
+          "clay_fraction": 0.016540399429447173
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 171.310523217,
+          "clay_fraction": 0.04795140563311774
+        }
+      },
+      "printing_separated_events": 9
+    },
+    {
+      "case_id": "denver-1718465-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1141310096718371e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 286.816707313,
+          "clay_fraction": 0.01949940177960654
+        },
+        "modern": {
+          "EVENT_count": 4,
+          "EVENT_sediment_mass_kg": 267.78078553800003,
+          "clay_fraction": 0.04840013475933579
+        }
+      },
+      "printing_separated_events": 11
+    },
+    {
+      "case_id": "denver-1718465-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.2737367544323206e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5288394428789616e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 0,
+          "EVENT_sediment_mass_kg": 0.0,
+          "clay_fraction": null
+        },
+        "modern": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 3.68772702547,
+          "clay_fraction": 0.04452287199296544
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "flagstaff-1718465-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 7,
+          "EVENT_sediment_mass_kg": 391.957609236,
+          "clay_fraction": 0.01369907061242181
+        },
+        "modern": {
+          "EVENT_count": 12,
+          "EVENT_sediment_mass_kg": 460.10059532443404,
+          "clay_fraction": 0.053286955111005445
+        }
+      },
+      "printing_separated_events": 12
+    },
+    {
+      "case_id": "flagstaff-1718465-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 7,
+          "EVENT_sediment_mass_kg": 291.069319231,
+          "clay_fraction": 0.013004752520810695
+        },
+        "modern": {
+          "EVENT_count": 12,
+          "EVENT_sediment_mass_kg": 295.939882662,
+          "clay_fraction": 0.05125570074758875
+        }
+      },
+      "printing_separated_events": 14
+    },
+    {
+      "case_id": "flagstaff-1718465-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.1368683772161603e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 7,
+          "EVENT_sediment_mass_kg": 389.171351287,
+          "clay_fraction": 0.013629388698471709
+        },
+        "modern": {
+          "EVENT_count": 12,
+          "EVENT_sediment_mass_kg": 454.79082200569,
+          "clay_fraction": 0.052263983786160526
+        }
+      },
+      "printing_separated_events": 12
+    },
+    {
+      "case_id": "flagstaff-1718465-outunrut-paved-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 1.3096723705530167e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.601154847070575e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 2,
+          "EVENT_sediment_mass_kg": 11.378138829400001,
+          "clay_fraction": 0.01299986954086057
+        },
+        "modern": {
+          "EVENT_count": 6,
+          "EVENT_sediment_mass_kg": 15.3964441635,
+          "clay_fraction": 0.044525467206589134
+        }
+      },
+      "printing_separated_events": 1
+    },
+    {
+      "case_id": "site-1718465-inbare-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 293,
+          "EVENT_sediment_mass_kg": 10625.38548803211,
+          "clay_fraction": 0.013357613862413626
+        },
+        "modern": {
+          "EVENT_count": 571,
+          "EVENT_sediment_mass_kg": 21062.8222430582,
+          "clay_fraction": 0.045503792032030296
+        }
+      },
+      "printing_separated_events": 42
+    },
+    {
+      "case_id": "site-1718465-inveg-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 293,
+          "EVENT_sediment_mass_kg": 6051.491082723237,
+          "clay_fraction": 0.013547264420720236
+        },
+        "modern": {
+          "EVENT_count": 571,
+          "EVENT_sediment_mass_kg": 6621.747928250132,
+          "clay_fraction": 0.04582002239788024
+        }
+      },
+      "printing_separated_events": 27
+    },
+    {
+      "case_id": "site-1718465-outrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 3.637978807091713e-11
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 293,
+          "EVENT_sediment_mass_kg": 9882.914629431029,
+          "clay_fraction": 0.01335210223303455
+        },
+        "modern": {
+          "EVENT_count": 571,
+          "EVENT_sediment_mass_kg": 18957.353249554115,
+          "clay_fraction": 0.04503632918176489
+        }
+      },
+      "printing_separated_events": 40
+    },
+    {
+      "case_id": "site-1718465-outunrut-gravel-high",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 3.5652192309498787e-10
+        }
+      },
+      "EVENT_only_terminal_clay_fractions": {
+        "legacy": {
+          "EVENT_count": 100,
+          "EVENT_sediment_mass_kg": 2802.4000848348473,
+          "clay_fraction": 0.013941301012635337
+        },
+        "modern": {
+          "EVENT_count": 201,
+          "EVENT_sediment_mass_kg": 2884.8992987471615,
+          "clay_fraction": 0.04531998491613597
+        }
+      },
+      "printing_separated_events": 112
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "version": 17,
+  "predecessor": {
+    "path": "candidate-ledger-v16.json",
+    "sha256": "b141827cf877aad9f4d8c4c1bfdfdee26bd812558ecee30530bd0ff13a18c671"
+  },
+  "engine": "wepp_261029 revision 4",
+  "wepppy_delivery_commit": "a5c40031a",
+  "status": "no_parameter_candidate_accepted",
+  "baseline_variant": "conditioned U12 erosion_road_cap; not unmodified generated soils",
+  "full_development_gate": {
+    "cases": 840,
+    "meaningful_within": 713,
+    "meaningful_cases": 766,
+    "small_within": 31,
+    "small_cases": 74,
+    "thresholds_unchanged": true
+  },
+  "paired_event_study": {
+    "cases": 116,
+    "lanes": 232,
+    "paired_case_days": 677904,
+    "paired_ofe_days": 2033712,
+    "independent_lane_ofe_rows": 4067424,
+    "annual_flux_comparisons": 8352,
+    "observational_accounting_accepted": true,
+    "small_reference_cases": 43,
+    "small_higher_generated_outlet": 43,
+    "small_lower_generated_fill_supply_and_higher_outlet": 28,
+    "meaningful_passing_controls_with_same_annual_pattern": 13,
+    "meaningful_passing_controls": 18,
+    "meaningful_underprediction_cases": 48,
+    "meaningful_underprediction_lower_generated_outlet": 48,
+    "meaningful_underprediction_lower_generated_fill": 44,
+    "printing_separated_small_case_days": 115,
+    "distinct_climate_dates": 19,
+    "exploratory_higher_generated_surface_outflow_days": 115,
+    "exploratory_zero_legacy_surface_outflow_days": 101,
+    "exploratory_lower_generated_surface_inflow_days": 42,
+    "whole_profile_treatment_not_single_parameter_causality": true
+  },
+  "legacy_anchor_limit": {
+    "within_original_benchmark": 99,
+    "cases": 116,
+    "not_acceptance_target": true
+  },
+  "next": "Predeclare bounded paired buffer hydrology/process source observations, including both discrepancy directions and passing controls; require full-period ordinary-output parity before interpretation.",
+  "withheld_materials_untouched": true,
+  "ui_specification_and_layout_human_gate_preserved": true,
+  "production_defaults_changed": false,
+  "evidence_sha256": {
+    "event-supply-ledger-r4/manifest.json": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+    "event-supply-ledger-r4-independent-acceptance.json": "d2208fabd8bb8f3de3a1b64f1f6f16ad9cf7bc7b25dc933514a059af6d29ad23",
+    "event-supply-ledger-r4-implementation-publication-review.json": "8c00db583d7924a9bf1a878fa4a664f69f2262a43b8a129e20cdbdf8dd2c0679",
+    "revision4-paired-event-ledger-retention.json": "ca953d7993688885dbcd49ecd598ffe0975551594ae05a9353298b0a817d5e1a",
+    "revision4-delivery-complete.json": "a4fcbac3ef0d88c85bd84ec960d33d7192c2b868f89e04ed624ec57b097d1648"
+  }
+}

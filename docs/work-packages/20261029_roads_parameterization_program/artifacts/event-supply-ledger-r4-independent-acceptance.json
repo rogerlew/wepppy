@@ -1,0 +1,52 @@
+{
+  "accepted": true,
+  "scope": "Complete116-case paired observational ledger only; not parameter promotion or causal coefficient attribution",
+  "reviewer": "Independent AI scientific review",
+  "cases": 116,
+  "lanes": 232,
+  "full_calendar_ofe_rows": 4067424,
+  "independent_annual_flux_comparisons": 8352,
+  "annual_projection_values_checked": 11832,
+  "original_input_files_rehashed": 2900,
+  "original_native_output_files_rehashed": 1624,
+  "legacy_soils_original_byte_exact": 116,
+  "distinct_legacy_soils": 21,
+  "findings": [
+    {
+      "severity": "interpretation",
+      "status": "qualified",
+      "finding": "Top-three artifact ranks signed differences,152/348nonpositive rows; future positive-discrepancy selections must exclude unsupported/zero rows."
+    },
+    {
+      "severity": "interpretation",
+      "status": "qualified",
+      "finding": "37/38paved cases are literalzero road-export controls; Denver2711184outrutpavednone has small positive exports in both lanes."
+    }
+  ],
+  "limitations": [
+    "Whole profile and format/state comparison, not isolated parameter experiment.",
+    "Net exchange is not tagged origin or gross local production/deposition.",
+    "EVENT-only terminal composition is not all-annual or upstream/per-OFE composition.",
+    "Existing strict fraction flag and unavailable Sm remain explicit.",
+    "No parameter tuning, native source change, new native runs or UI approval."
+  ],
+  "evidence_sha256": {
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-review.md": "906c6e96302e939f2ae2eeb068f5c2b995fff15b16db26069500c3349c03087f",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-readback.json": "fb41d5503c95f06a89627f0629299fd4299aa54cbc5f035ddac3a5aed3beb067",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-projection-review.json": "8750584c6bed73236850d3519e3b1264610a71528744f54f5e4482e5495d9309",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_event_supply_ledger_r4.py": "d6632066a6d641618cd2f0d1fd7b277b57b6c6048da6bfc2bfd141eddf234a59",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_event_supply_projection_r4.py": "2664bf3c1df9a6332f4ead7a713c01d70eeaae6a77dbddb2c5734499731777a6",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-plan.md": "3257325fc8e7870cb016fddf4a0797537025af88f65fca3452c00a69f5cf0206",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-retention-r4-ledger-scientific-contract.md": "78a81280dd4841cfa4814bb8b70dbe3591e34b57ddbd1758b0bbf16c7e1d2e24",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/summarize.py": "6ae6c26938d364a081bc51b39235d542ad83167d634fa44e9094160831f8a173",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/analysis-declaration.json": "dfc36bfdbf4523e205755b2ba68177131f6b50e73f83a4dc1fb687303f5ec641",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/schema.json": "376ca20a2c99d6c9e588374bc16b3dd97a0714d36450adff375e9e891e2a9444",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/results.json": "64de0dec346f53f6d60f9f06a485358dfdaeffa94348be76a3f9ed471d2a8078",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/summary.json": "1167e05f9eb1276196e063c5700b4a97dd86dcefae7940f1e16acbb5f8e17370",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/case-summary.json": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/top-discrepancy-events.json": "362d820382634d44fd081c9ac92e8f21c40035e453a933dc4b114998ae55550c",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/interpretation-metadata.json": "db1b918814babe67d1f591feb03dc0b420e142b1a0dae0fdef984ca72e376d6e"
+  }
+}

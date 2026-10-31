@@ -1,9 +1,10 @@
 # Roads parameterization program tracker
 
-## Current: U12 accepted; revision-4 delivery in progress
+## Current: paired event comparison accepted; buffer process observations next
 
-Current [candidate ledger v16](artifacts/candidate-ledger-v16.json) records the
-accepted native engine, rejected parameter factorial and exact-R4 legacy controls.
+Current [candidate ledger v17](artifacts/candidate-ledger-v17.json) records the
+completed paired event study and the next bounded source-observation question.
+Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
@@ -20,7 +21,8 @@ explanations, not changed tolerances or universal numerical guarantees. The
 [mixed-reconstruction clarification](artifacts/param-u12-mixed-reconstruction-clarification.md)
 defines the local error equation precisely without changing frozen evidence.
 
-The authorized same-name `wepp_261029` revision-4 delivery is in progress:
+The authorized same-name `wepp_261029` revision-4 repository delivery is complete
+in pushed WEPPpy commit `a5c40031a`; see the [delivery receipt](artifacts/revision4-delivery-complete.json). Native release commit is `1959d8f61`, with
 source `b01a739957bef5aacf35b4a89bc13eddc9d94804`, watershed hash
 `2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`,
 hillslope hash `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.
@@ -47,7 +49,22 @@ bounds (5,887 EVENT records per generation). See the
 the corrected v2 auditor now covers all 2,348 overlapping panel records,
 with zero mass flags and unchanged strict fraction findings. The third factorial
 fraction flag has a new exact-state arithmetic certificate; its strict predicate
-remains failed. Paired event supply/retention analysis is next.
+remains failed. The paired event ledger is complete and independently accepted for observational
+use: 116 cases, 232 lanes, 4,067,424 independently checked lane/OFE-day rows and
+8,352 annual flux comparisons. All 43 small-reference misses export more with
+the conditioned generated profile; 28 have less incoming sediment at the buffer.
+On 115 printing-separated case-days, generated buffer surface outflow is higher;
+legacy surface outflow is zero on 101. These are 19 distinct climate/date pairs.
+The same annual pattern occurs in 13/18 meaningful passing controls, while all
+48 meaningful underpredictions have lower generated export. No uniform parameter
+correction is justified. See [findings](artifacts/event-supply-ledger-r4/findings.md).
+
+Next, predeclare paired source observations of buffer infiltration, layerwise
+storage, actual inflow/routing rates and sediment exchange. Include both error
+directions and passing controls; require full-period ordinary-output byte parity.
+The core design is outsloped/unrutted, with a separate non-outunrut supply control;
+this does not claim all four design mechanisms are covered. Failed ledger v1/v2
+attempts and the successful v3 are archived with all members verified.
 
 Application coverage is complete: 12,533 passed and 422 skipped across all
 12,955 unique test IDs. Retained failures identify a preexisting Redis test-order

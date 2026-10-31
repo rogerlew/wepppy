@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "scope": "Two-case preflight only; no full-panel acceptance",
+  "cases": 2,
+  "lanes": 4,
+  "full_calendar_ofe_rows_checked": 70128,
+  "original_input_files_rehashed": 50,
+  "original_output_files_rehashed": 28,
+  "independent_annual_flux_comparisons": 144,
+  "group_counts": {
+    "meaningful_low": 2
+  },
+  "units_checked": [
+    "cumulative Q area",
+    "local surface/lateral depths",
+    "stock depth",
+    "SedLeave kg/m times emitted width",
+    "Ki \u00d71e6",
+    "Kr /1e3"
+  ],
+  "undefined_ratios_remain_null": true,
+  "missing_element_not_physical_zero": true,
+  "annualized_fields": [
+    "deep_percolation_m3",
+    "et_m3",
+    "lateral_in_m3",
+    "lateral_out_m3",
+    "negative_net_kg",
+    "net_sediment_kg",
+    "positive_net_kg",
+    "precipitation_m3",
+    "rain_melt_m3",
+    "sediment_out_kg",
+    "surface_in_m3",
+    "surface_out_m3"
+  ],
+  "not_annualized_fields": [
+    "calendar_rows",
+    "element_rows",
+    "missing_element_with_surface_flow",
+    "positive_sediment_zero_surface_water",
+    "OFE"
+  ],
+  "historical_sediment_geometry_bridge": "historical per-year value \u00d7 emitted_width / recorded_width",
+  "comparison_tolerance": "IEEE accumulated reassociation bound only; no native scientific threshold changed",
+  "script_sha256": "ed919b39d4e3988174a361e42a9d4ed467d56780954e229f569c73b47d7dbb30",
+  "evidence_sha256": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/ledger.py": "0d8ba065056401b21336a85cfcc15ad96a3cdf5ef6f2f1c46d904ef39d87c738",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/summarize.py": "536c6399a068ae9c35fa81063da7989361bf9e96291c2391e02e05fb8dc9ad2c",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/preflight.json": "5eb257f194900e9bf4b69b92431fdc3fe1a36f28fb20e7f8566eaa48c5b62a7a"
+  },
+  "rows": [
+    {
+      "case_id": "birmingham-2711184-inveg-gravel-low",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.8189894035458565e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "3.96",
+          "metadata_width": 3.96,
+          "width_ratio": 1.0,
+          "max_annual_reassociation_error": 1.864464138634503e-11
+        }
+      }
+    },
+    {
+      "case_id": "birmingham-2711184-outunrut-gravel-none",
+      "lanes": {
+        "legacy": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 6.548361852765083e-11
+        },
+        "modern": {
+          "rows": 17532,
+          "width_token": "43.1052293811319",
+          "metadata_width": 43.105229381131934,
+          "width_ratio": 0.9999999999999992,
+          "max_annual_reassociation_error": 2.944489096989855e-11
+        }
+      }
+    }
+  ]
+}

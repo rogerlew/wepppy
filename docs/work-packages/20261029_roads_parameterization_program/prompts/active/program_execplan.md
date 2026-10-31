@@ -5,10 +5,11 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: U12 accepted; revision-4 delivery in progress
+## Current: paired event comparison accepted; buffer process observations next
 
-Current [candidate ledger v16](../../artifacts/candidate-ledger-v16.json) records the
-accepted native engine, rejected parameter factorial and exact-R4 legacy controls.
+Current [candidate ledger v17](../../artifacts/candidate-ledger-v17.json) records the
+completed paired event study and the next bounded source-observation question.
+Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](../../artifacts/param-u12-scientific-acceptance.json) binds the
@@ -25,7 +26,8 @@ explanations, not changed tolerances or universal numerical guarantees. The
 [mixed-reconstruction clarification](../../artifacts/param-u12-mixed-reconstruction-clarification.md)
 defines the local error equation precisely without changing frozen evidence.
 
-The authorized same-name `wepp_261029` revision-4 delivery is in progress:
+The authorized same-name `wepp_261029` revision-4 repository delivery is complete
+in pushed WEPPpy commit `a5c40031a`; see the [delivery receipt](../../artifacts/revision4-delivery-complete.json). Native release commit is `1959d8f61`, with
 source `b01a739957bef5aacf35b4a89bc13eddc9d94804`, watershed hash
 `2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48`,
 hillslope hash `9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010`.
@@ -34,8 +36,9 @@ commit; promotion preserves the exact tested bytes. Report approval and
 application delivery are separate gates. No production deployment is implied.
 
 Roads parameterization remains unaccepted: 713/766 meaningful references and
-31/74 small references pass, unchanged from revision 3. Next, finish delivery
-and resume combined generated-soil hydraulic experiments on the frozen engine.
+31/74 small references pass, unchanged from revision 3. The hydraulic factorial
+is complete and rejected; paired event supply/retention analysis now tests which
+physical process needs the next controlled experiment.
 The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
@@ -49,7 +52,22 @@ bounds (5,887 EVENT records per generation). See the
 the corrected v2 auditor now covers all 2,348 overlapping panel records,
 with zero mass flags and unchanged strict fraction findings. The third factorial
 fraction flag has a new exact-state arithmetic certificate; its strict predicate
-remains failed. Paired event supply/retention analysis is next.
+remains failed. The paired event ledger is complete and independently accepted for observational
+use: 116 cases, 232 lanes, 4,067,424 independently checked lane/OFE-day rows and
+8,352 annual flux comparisons. All 43 small-reference misses export more with
+the conditioned generated profile; 28 have less incoming sediment at the buffer.
+On 115 printing-separated case-days, generated buffer surface outflow is higher;
+legacy surface outflow is zero on 101. These are 19 distinct climate/date pairs.
+The same annual pattern occurs in 13/18 meaningful passing controls, while all
+48 meaningful underpredictions have lower generated export. No uniform parameter
+correction is justified. See [findings](../../artifacts/event-supply-ledger-r4/findings.md).
+
+Next, predeclare paired source observations of buffer infiltration, layerwise
+storage, actual inflow/routing rates and sediment exchange. Include both error
+directions and passing controls; require full-period ordinary-output byte parity.
+The core design is outsloped/unrutted, with a separate non-outunrut supply control;
+this does not claim all four design mechanisms are covered. Failed ledger v1/v2
+attempts and the successful v3 are archived with all members verified.
 
 Application coverage is complete: 12,533 passed and 422 skipped across all
 12,955 unique test IDs. Retained failures identify a preexisting Redis test-order
@@ -71,12 +89,13 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
 - [x] Complete independent revision-4 PDF/manifest approval, exact-byte delivery, host/container smokes and actual selected hill/PASS/watershed/reader checks.
 - [x] Complete all 12,955 unique application test IDs through declared shards/replays; retain original failures and baseline test-order defect.
-- [ ] Commit/push reviewed WEPPpy revision-4 delivery; no production deployment.
+- [x] Commit/push reviewed WEPPpy revision-4 delivery as a5c40031a; no production deployment.
 - [x] Predeclare and independently verify the 928-cell hydraulic factorial, all 11,136 inputs, 3,248 reused native outputs and 70 effective dependencies.
 - [x] Complete all 928 factorial cells and fresh log/runtime/accounting verification; independent paired contrast review rejects parameter promotion.
 - [x] Complete versioned particle audit repair, 20 regression controls and 2,348-case readback; preserve all frozen evidence and unavailable diagnostic values.
 - [x] Complete 116 exact-R4 legacy-soil anchors; diagnose 91 false particle flags as fixed-width audit parsing.
-- [ ] Complete paired event supply/retention diagnosis (scaffolded; fresh preflight pending after a receipt-serialization correction).
+- [x] Complete and independently review all 116 paired event ledgers; archive v1/v2 failures and verified v3.
+- [ ] Review and execute bounded paired buffer-process observations; exact output parity before interpreting traces.
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
 - [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.
@@ -241,6 +260,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Exact-R4 paired outputs shift the next question toward buffer runoff support: all 115 printing-separated lower-incoming-sediment/higher-export case-days have higher generated surface outflow, including 101 with zero legacy outflow. Higher printed Keff does not isolate layerwise infiltration or storage; whole profiles differ. The modern lane is the conditioned U12 erosion_road_cap candidate, not raw SSURGO output.
+
 - The legacy anchors expose an audit parser defect: adjacent F7.3/F6.3 ELEMENT fields can merge under whitespace splitting. This aliases QRain as SedLeave. Source-defined fixed widths clear all 91 false mass flags in both engine generations; production interchange already uses fixed widths.
 
 
@@ -328,6 +349,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Accept the 116-case ledger for observational accounting only. Before further tuning, observe actual storm-time buffer hydrology and sediment processes in paired profiles, with passing controls and both discrepancy directions. The pattern also occurs in passing controls and meaningful underpredictions move oppositely, so a blanket buffer correction is unsupported. Preserve the original FSWEPP2/WEPP2010 criteria; same-engine legacy controls are diagnostic anchors, not replacement targets.
+
 - Preserve the frozen v1 particle audit and its acceptance/dependency hashes. Introduce a versioned corrected audit with an adjacent-field regression and append verification; do not rewrite historical evidence or patch the native engine for an audit defect.
 
 
@@ -412,7 +435,9 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+- WEPPpy revision-4 delivery is pushed as a5c40031a. The 116-case ledger has independent scientific and implementation acceptance, complete raw retention and a source-free reproduction packet. No model/parameter change follows from this observational result; the next bounded source study is predeclared separately.
+
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy repository delivery is complete as a5c40031a; no production deployment.
 
 
 U12 scientific investigation is complete. Two retained fraction flags and terminal-capacity precision have source-derived explanations; no threshold was relaxed. Revision-4 application/report delivery is active, followed by combined physical parameter experiments. The magnitude classifications remain unchanged.
@@ -878,7 +903,7 @@ The normative next scope and rationale are in
 
 ### Outcomes & Retrospective
 
-- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy repository delivery is complete as a5c40031a; no production deployment.
 
 
 This checkpoint adds 308 native executions with persisted declarations and
@@ -952,7 +977,7 @@ non-production scope are durable in ADR-0120. The next normative scope is
 
 ### Outcomes & Retrospective
 
-- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy repository delivery is complete as a5c40031a; no production deployment.
 
 
 369 native executions: 348 treatment runs and 21 observation replays. No binary,
@@ -1038,7 +1063,7 @@ The same-format experimental rationale/disposition is durable in ADR-0120.
 
 ### Outcomes & Retrospective
 
-- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy commit/push remains pending.
+- The completed hydraulic factorial does not support parameter promotion. Exact-R4 legacy anchors remove the engine confound; event boundary accounting will guide the next physical hypothesis. Complete segmented application coverage supports scoped native release handoff; WEPPpy repository delivery is complete as a5c40031a; no production deployment.
 
 
 Completed seven bridge runs and 348 downstream runs (347 physical passes), plus

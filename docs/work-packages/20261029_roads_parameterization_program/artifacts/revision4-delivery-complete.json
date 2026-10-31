@@ -1,0 +1,25 @@
+{
+  "status": "reviewed_revision4_repository_delivery_complete",
+  "wepppy_commit": "a5c40031ab29ebad479c6e086968adeaef294359",
+  "origin_master_verified": "a5c40031ab29ebad479c6e086968adeaef294359",
+  "native_release_commit": "1959d8f619068dbbbc8e0043fc1d37f83ddf0129",
+  "native_source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "production_deployed": false,
+  "parameter_defaults_changed": false,
+  "ui_implemented": false,
+  "application_coverage": {
+    "unique_passed": 12533,
+    "unique_skipped": 422,
+    "clean_uninterrupted_suite": false,
+    "baseline_test_order_defect_remains_open": true
+  },
+  "evidence_sha256": {
+    "revision4-application-disposition.json": "0e21eadccb06668950b8499d058393549754af988c66da53330b26f5e02f561d",
+    "revision4-staged-byte-verification.json": "346078bf377166ea38f1575cae62a99ee6ba773c6223812a7ada15aa51d8f1e5",
+    "revision4-vendoring.json": "2a629c371884acebb18d823e1d5d6e9ff309b556a1b2d4144b6d4bb15baa69d4",
+    "revision4-report-download-check.json": "e39868867646928e35cfc11aa65052eba33b1482937171f3f663ebff58f992bd",
+    "revision4-application-delivery-retention.json": "625f8d15d77764af544ba6137ab70d859483b05a072b6abbda2b2e80e19dafe1"
+  },
+  "native_origin_branch_verified": "wepp_260430_negmeltfix_comparator",
+  "native_origin_commit_verified": "1959d8f619068dbbbc8e0043fc1d37f83ddf0129"
+}
