@@ -1,0 +1,14 @@
+{
+  "status": "Selected existing ledger evidence only; no observer implementation or native execution.",
+  "plan_sha256": "08f60383ae444dec91a7e29cdb8dff436506015c9c20bc1a07e88cc7eb6d00f5",
+  "files": {
+    "select_seeds.py": "015f2864b66334cd70687e8a56da6c5db97ddc4e4d2c352567e018f67e3db359",
+    "seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525"
+  },
+  "failed_selector_attempt": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/failed-selection-1",
+  "selection_correction": "Removed unused nonexistent pass_status projection before successful selection; no selection predicate or scientific threshold changed.",
+  "prior_eight_pair_selection": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/selection-v1-eight-pairs",
+  "amendment": "Added distinct largest negative meaningful-low daily difference outside outunrut before instrumentation; first eight complete selected objects unchanged.",
+  "legacy_packet_manifest_sha256": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+  "current_packet_manifest_sha256": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9"
+}

@@ -59,8 +59,11 @@ The same annual pattern occurs in 13/18 meaningful passing controls, while all
 48 meaningful underpredictions have lower generated export. No uniform parameter
 correction is justified. See [findings](artifacts/event-supply-ledger-r4/findings.md).
 
-Next, predeclare paired source observations of buffer infiltration, layerwise
-storage, actual inflow/routing rates and sediment exchange. Include both error
+The [nine-pair source observation design](artifacts/buffer-process-observation-r4-plan.md)
+is independently accepted for preparation: 18 full-period runs with bounded
+target/prior-day traces. Compilation and execution remain gated on the actual
+variable/unit/valid-state map, private observer patch and implementation review.
+Observe buffer infiltration, layerwise storage, actual inflow/routing rates and sediment exchange. Include both error
 directions and passing controls; require full-period ordinary-output byte parity.
 The core design is outsloped/unrutted, with a separate non-outunrut supply control;
 this does not claim all four design mechanisms are covered. Failed ledger v1/v2

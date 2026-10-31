@@ -1,0 +1,159 @@
+{
+  "passed": true,
+  "reviewer": "Independent AI scientific review",
+  "method": "Recomputed eligibility and ordering from complete paired ledger; no selector import or stored selection SQL execution.",
+  "pairs": 9,
+  "full_period_runs": 18,
+  "actual_zero_road_cases_in_panel": 4,
+  "checks": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "case_id": "denver-1718465-outunrut-paved-high",
+      "year": 16,
+      "julian": 127,
+      "eligible_distinct_case_days": 31,
+      "difference_kg": 54.18327333208279,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 1256.9999999999998,
+      "zero_road_checks": [
+        {
+          "lane": "legacy",
+          "observed_rows": 1185,
+          "all_observed_road_exports_zero": true
+        },
+        {
+          "lane": "modern",
+          "observed_rows": 845,
+          "all_observed_road_exports_zero": true
+        }
+      ]
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "case_id": "flagstaff-1718494-outunrut-gravel-high",
+      "year": 5,
+      "julian": 320,
+      "eligible_distinct_case_days": 36,
+      "difference_kg": 79.96020050199968,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 1855.0000000000002,
+      "zero_road_checks": []
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "case_id": "denver-1718494-outunrut-gravel-high",
+      "year": 16,
+      "julian": 127,
+      "eligible_distinct_case_days": 65,
+      "difference_kg": 94.52976803282226,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 2193.0,
+      "zero_road_checks": []
+    },
+    {
+      "stratum": "passing_same_signature",
+      "case_id": "site-1718465-outunrut-gravel-high",
+      "year": 2015,
+      "julian": 351,
+      "eligible_distinct_case_days": 1094,
+      "difference_kg": 121.3412207078863,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 2815.0,
+      "zero_road_checks": []
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "case_id": "site-2711184-outunrut-gravel-high",
+      "year": 2012,
+      "julian": 324,
+      "eligible_distinct_case_days": 2476,
+      "difference_kg": -389.5850631466701,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 9038.0,
+      "zero_road_checks": []
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "case_id": "site-2711184-outunrut-paved-high",
+      "year": 2012,
+      "julian": 324,
+      "eligible_distinct_case_days": 60,
+      "difference_kg": -139.5747327361051,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 3238.0,
+      "zero_road_checks": [
+        {
+          "lane": "legacy",
+          "observed_rows": 2440,
+          "all_observed_road_exports_zero": true
+        },
+        {
+          "lane": "modern",
+          "observed_rows": 1693,
+          "all_observed_road_exports_zero": true
+        }
+      ]
+    },
+    {
+      "stratum": "small_passing_control",
+      "case_id": "denver-1718465-outunrut-paved-none",
+      "year": 4,
+      "julian": 233,
+      "eligible_distinct_case_days": 11,
+      "difference_kg": 8.060677894271665,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 187.0,
+      "zero_road_checks": [
+        {
+          "lane": "legacy",
+          "observed_rows": 1195,
+          "all_observed_road_exports_zero": true
+        },
+        {
+          "lane": "modern",
+          "observed_rows": 840,
+          "all_observed_road_exports_zero": true
+        }
+      ]
+    },
+    {
+      "stratum": "meaningful_high",
+      "case_id": "site-1856573-outunrut-paved-high",
+      "year": 2012,
+      "julian": 324,
+      "eligible_distinct_case_days": 580,
+      "difference_kg": 178.11080780283703,
+      "combined_print_interval_kg": 0.0431052293811319,
+      "absolute_difference_in_print_intervals": 4132.000000000001,
+      "zero_road_checks": [
+        {
+          "lane": "legacy",
+          "observed_rows": 2440,
+          "all_observed_road_exports_zero": true
+        },
+        {
+          "lane": "modern",
+          "observed_rows": 1997,
+          "all_observed_road_exports_zero": true
+        }
+      ]
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "case_id": "denver-2711184-outrut-gravel-high",
+      "year": 16,
+      "julian": 127,
+      "eligible_distinct_case_days": 564,
+      "difference_kg": -195.82596,
+      "combined_print_interval_kg": 0.00396,
+      "absolute_difference_in_print_intervals": 49451.0,
+      "zero_road_checks": []
+    }
+  ],
+  "evidence_sha256": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/case-summary.json": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/event-supply-retention-r4-v3/declaration.json": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observation_selection_r4.py": "68d066827f9dcf26d8f30850d5b6c3ceb94f8f988a051cebcbc05773f487b27d"
+  }
+}

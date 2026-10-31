@@ -1,0 +1,34 @@
+{
+  "accepted_for_preparation": true,
+  "accepted_for_native_execution": false,
+  "reviewer": "Independent AI scientific review; not institutional peer review",
+  "scope": "Nine paired full-period R4 observation runs with bounded target/prior-day detailed traces; no model or parameter change",
+  "pairs": 9,
+  "planned_native_runs": 18,
+  "required_before_compilation": [
+    "Freeze actual source/variable/unit/time-support/normalization map and valid-state guards",
+    "Freeze observation-only patch and exact source/object/compiler/binary/input provenance",
+    "Independent implementation review of map and patch"
+  ],
+  "required_before_interpretation": [
+    "Full-period ordinary-output byte parity for each lane against its original R4 outputs",
+    "Coverage including unconditional dry owning markers and explicit valid branch absence",
+    "Post-run source/input/output rehash and unchanged strict particle audit"
+  ],
+  "limitations": [
+    "Selected extremes, not population estimates",
+    "Core eight outunrut cases and one outrut control do not cover all road designs",
+    "Whole-profile comparison does not isolate one soil coefficient",
+    "Class loads are not tagged provenance; net exchange is not gross source/deposition"
+  ],
+  "evidence_sha256": {
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-plan.md": "08f60383ae444dec91a7e29cdb8dff436506015c9c20bc1a07e88cc7eb6d00f5",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/select_seeds.py": "015f2864b66334cd70687e8a56da6c5db97ddc4e4d2c352567e018f67e3db359",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/selection-receipt.json": "8d8ae7257a95d0c4c0a394b896f23aa95fa968e55e77aa15af0c0388fc1178c9",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-independent-selection.json": "8260e5b03709cba40a4664235abbf31fa7202bf1608ba718a105829ac2d6910d",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4-independent-review.md": "df139a16271577c7d6a42650fbfd9516ee75f7799fe56e58850327b1ff1b6cdf",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observation_selection_r4.py": "68d066827f9dcf26d8f30850d5b6c3ceb94f8f988a051cebcbc05773f487b27d",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/event-supply-ledger-r4-independent-acceptance.json": "d2208fabd8bb8f3de3a1b64f1f6f16ad9cf7bc7b25dc933514a059af6d29ad23"
+  }
+}

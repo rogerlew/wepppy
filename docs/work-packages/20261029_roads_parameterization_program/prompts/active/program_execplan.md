@@ -62,8 +62,11 @@ The same annual pattern occurs in 13/18 meaningful passing controls, while all
 48 meaningful underpredictions have lower generated export. No uniform parameter
 correction is justified. See [findings](../../artifacts/event-supply-ledger-r4/findings.md).
 
-Next, predeclare paired source observations of buffer infiltration, layerwise
-storage, actual inflow/routing rates and sediment exchange. Include both error
+The [nine-pair source observation design](../../artifacts/buffer-process-observation-r4-plan.md)
+is independently accepted for preparation: 18 full-period runs with bounded
+target/prior-day traces. Compilation and execution remain gated on the actual
+variable/unit/valid-state map, private observer patch and implementation review.
+Observe buffer infiltration, layerwise storage, actual inflow/routing rates and sediment exchange. Include both error
 directions and passing controls; require full-period ordinary-output byte parity.
 The core design is outsloped/unrutted, with a separate non-outunrut supply control;
 this does not claim all four design mechanisms are covered. Failed ledger v1/v2
@@ -95,7 +98,9 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Complete versioned particle audit repair, 20 regression controls and 2,348-case readback; preserve all frozen evidence and unavailable diagnostic values.
 - [x] Complete 116 exact-R4 legacy-soil anchors; diagnose 91 false particle flags as fixed-width audit parsing.
 - [x] Complete and independently review all 116 paired event ledgers; archive v1/v2 failures and verified v3.
-- [ ] Review and execute bounded paired buffer-process observations; exact output parity before interpreting traces.
+- [x] Predeclare nine paired buffer-process cases and independently reproduce seed eligibility/selection.
+- [ ] Freeze/review actual variable-unit map and private observer patch before compiling.
+- [ ] Execute 18 full-period observer runs; require exact ordinary-output parity and valid trace coverage before interpretation.
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
 - [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.

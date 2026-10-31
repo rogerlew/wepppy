@@ -1,0 +1,2334 @@
+{
+  "scope": "Predeclared source-observation seeds from completed ledger; no native/source observation executed.",
+  "script_sha256": "015f2864b66334cd70687e8a56da6c5db97ddc4e4d2c352567e018f67e3db359",
+  "ledger_manifest_sha256": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+  "ledger_case_summary_sha256": "4e98219b167149113b095ce6ea4cf7e3cd45c06967283488dfab7ae893ba5a81",
+  "ledger_declaration_sha256": "e008a481bd83d5ef6731c036f9108d47d6d3d8b59954b39cc9e2aa7f5bd3ec7e",
+  "rules": "First eligible distinct case per ordered stratum; largest signed positive or most negative daily outlet difference as specified, then case id/year/day. Both ELEMENT observations required, positive/negative export difference beyond unchanged combined native print interval. No outcome-based replacement after tracing.",
+  "selected_pairs": 9,
+  "planned_full_period_native_runs": 18,
+  "seeds": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='small_exceedance' AND case_id IN ('birmingham-2711184-outunrut-paved-none','birmingham-2711250-outunrut-paved-none','charleston-1718465-outunrut-paved-none','charleston-1718494-outunrut-paved-none','charleston-2711184-outunrut-paved-high','charleston-2711184-outunrut-paved-low','charleston-2711184-outunrut-paved-none','charleston-2711250-outunrut-paved-high','charleston-2711250-outunrut-paved-low','charleston-2711250-outunrut-paved-none','denver-1718465-outunrut-paved-high','denver-1718465-outunrut-paved-low','denver-1718494-outunrut-paved-high','denver-1718494-outunrut-paved-low','denver-1718494-outunrut-paved-none','denver-1718510-outunrut-paved-high','denver-1718510-outunrut-paved-low','denver-1718510-outunrut-paved-none','denver-1856573-outunrut-paved-high','denver-1856573-outunrut-paved-low','denver-1856573-outunrut-paved-none','denver-53949-outunrut-paved-high','denver-53949-outunrut-paved-low','flagstaff-1718465-outunrut-paved-high','flagstaff-1718465-outunrut-paved-low','flagstaff-2711184-outunrut-paved-high','flagstaff-2711184-outunrut-paved-low','site-1856573-outunrut-paved-high','site-1856573-outunrut-paved-low','site-2711184-outunrut-paved-high','site-2711184-outunrut-paved-low','site-2711184-outunrut-paved-none','site-2711250-outunrut-paved-high','site-2711250-outunrut-paved-low','site-2711250-outunrut-paved-none','denver-1718465-outunrut-paved-none','flagstaff-1718465-outunrut-paved-none') AND legacy_surface_out_m3=0 AND legacy_sediment_in_kg-modern_sediment_in_kg>.001*width_m AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Actual zero-road paved contrast with legacy dry buffer outlet.",
+      "event": {
+        "case_id": "denver-1718465-outunrut-paved-high",
+        "original_group": "small_exceedance",
+        "year": 16,
+        "julian": 127,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 54.18327333208279,
+        "legacy_sediment_in_kg": 198.06852900630108,
+        "legacy_sediment_out_kg": 0.0,
+        "legacy_surface_in_m3": 17.799456912055184,
+        "legacy_surface_out_m3": 0.0,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 0.955,
+        "legacy_element_peak_runoff_mm_h": 0.0,
+        "legacy_soil_stock_m3": 183.6257943024095,
+        "legacy_porosity_capacity_mm": 326.06,
+        "legacy_profile_depth_mm": 600.0,
+        "legacy_keff_mm_h": 30.0,
+        "legacy_critical_shear_pa": 4.0,
+        "modern_sediment_in_kg": 54.18327333208279,
+        "modern_sediment_out_kg": 54.18327333208279,
+        "modern_surface_in_m3": 33.68290025800292,
+        "modern_surface_out_m3": 14.652853869622465,
+        "modern_lateral_in_m3": 0.0,
+        "modern_lateral_out_m3": 4.7477651428636385,
+        "modern_effective_duration_h": 3.56,
+        "modern_element_peak_runoff_mm_h": 1.918,
+        "modern_soil_stock_m3": 247.5327625203798,
+        "modern_porosity_capacity_mm": 271.84,
+        "modern_profile_depth_mm": 600.0,
+        "modern_keff_mm_h": 60.0,
+        "modern_critical_shear_pa": 3.414,
+        "legacy_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 35.96688270097418,
+          "porosity_capacity_mm": 326.06,
+          "profile_depth_mm": 600.0
+        },
+        "modern_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 103.37490075450938,
+          "porosity_capacity_mm": 271.84,
+          "profile_depth_mm": 600.0
+        }
+      },
+      "native_year_index": 16,
+      "calendar_first_year": 1,
+      "calendar_last_year": 16,
+      "case_summary": {
+        "case_id": "denver-1718465-outunrut-paved-high",
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "group": "small_exceedance",
+        "years": 16,
+        "reference_kg_yr": 0.0,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 0.0,
+            "report_delta_kg_yr": 0.0,
+            "report_bound_kg_yr": 1.617793140210608,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 70.26836123529388,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 11.55289115781347,
+                "deep_percolation_m3": 10.627746572009219,
+                "calendar_rows": 5844,
+                "element_rows": 1185,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 80.39933502631996,
+                "net_sediment_kg": 80.39933502631996,
+                "positive_net_kg": 80.39933502631996,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 10.878044336341112,
+                "surface_in_m3": 70.26835833282998,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.81958059719975,
+                "et_m3": 106.1324169039487,
+                "deep_percolation_m3": 28.94078740750442,
+                "calendar_rows": 5844,
+                "element_rows": 1185,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": -80.39933502631996,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -80.39933502631996,
+                "surface_out_m3": 0.0,
+                "surface_in_m3": 10.878045837004569,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 676.6429917107022,
+                "deep_percolation_m3": 1.9567624629339477,
+                "calendar_rows": 5844,
+                "element_rows": 1185,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 7.155468077267901,
+            "report_delta_kg_yr": 0.008082230508962063,
+            "report_bound_kg_yr": 1.1598072335041583,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 51.24337641107837,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 17.66275568598317,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 21.198656099502667,
+                "deep_percolation_m3": 3.259081064672645,
+                "calendar_rows": 5844,
+                "element_rows": 845,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 46.55634180845877,
+                "net_sediment_kg": 46.55634180845877,
+                "positive_net_kg": 46.55634180845877,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 63.18629885978211,
+                "surface_in_m3": 51.24337244175758,
+                "lateral_out_m3": 13.984506987624565,
+                "lateral_in_m3": 17.670206694289558,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.83410867594725,
+                "et_m3": 65.34865251887518,
+                "deep_percolation_m3": 2.5883561717009584,
+                "calendar_rows": 5844,
+                "element_rows": 845,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 7.163550307776857,
+                "net_sediment_kg": -39.392791500681916,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -39.392791500681916,
+                "surface_out_m3": 1.1490406849888326,
+                "surface_in_m3": 63.186301102184515,
+                "lateral_out_m3": 10.183998927172205,
+                "lateral_in_m3": 13.963638399042843,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 727.3633838101988,
+                "deep_percolation_m3": 1.0259139015602203,
+                "calendar_rows": 5844,
+                "element_rows": 845,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "denver-1718465-outunrut-paved-high",
+          "calendar_days": 5844,
+          "legacy_events": 0,
+          "modern_events": 2,
+          "legacy_surface_flow_days": 0,
+          "modern_surface_flow_days": 5,
+          "modern_only_surface_flow_days": 5,
+          "legacy_only_surface_flow_days": 0,
+          "lower_inflow_higher_outflow_days": 4,
+          "lower_inflow_higher_outflow_excess_kg": 114.61680492442972,
+          "printing_separated_lower_inflow_higher_outflow_days": 4,
+          "printing_separated_excess_kg": 114.61680492442972,
+          "reported_outlet_difference_kg": 114.61680492442972,
+          "matched_element_difference_kg": 114.61680492442972,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.04452510817820188,
+          "legacy_terminal_clay_mass_fraction": null
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": 0.0,
+            "fill": -33.84299321786119,
+            "buffer": 7.163550307776857
+          },
+          "net_sediment_kg": {
+            "road": 0.0,
+            "fill": -33.84299321786119,
+            "buffer": 41.006543525638044
+          },
+          "surface_out_m3": {
+            "road": -19.024984824215508,
+            "fill": 52.308254523441,
+            "buffer": 1.1490406849888326
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -19.024985891072397,
+            "buffer": 52.308255265179945
+          },
+          "deep_percolation_m3": {
+            "road": -7.368665507336574,
+            "fill": -26.35243123580346,
+            "buffer": -0.9308485613737274
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "c7fa594491c9a59c0e9f3f8d6f676a97ffcba70cb65469fef19ebfd4741c6cc5"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "c4d5e74ddb6398452ada1744d8a248bad409eeb71cf70ef3ec2830d96bdcaf99"
+        }
+      },
+      "paired_terminal_sha256": "7f0c1a9b692c88685c8771438d5e01ad3d6afff3fa729b62813b5bb5fc8e4a20"
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='small_exceedance' AND surface='gravel' AND modern_surface_in_m3<legacy_surface_in_m3 AND legacy_sediment_in_kg-modern_sediment_in_kg>.001*width_m AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high') ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Larger generated outlet export despite less incoming water and sediment.",
+      "event": {
+        "case_id": "flagstaff-1718494-outunrut-gravel-high",
+        "original_group": "small_exceedance",
+        "year": 5,
+        "julian": 320,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 79.96020050199968,
+        "legacy_sediment_in_kg": 147.76472631852016,
+        "legacy_sediment_out_kg": 3.3622078917282883,
+        "legacy_surface_in_m3": 10.68039655897967,
+        "legacy_surface_out_m3": 0.26506072048135737,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 0.945,
+        "legacy_element_peak_runoff_mm_h": 0.131,
+        "legacy_soil_stock_m3": 190.30340642780405,
+        "legacy_porosity_capacity_mm": 228.89,
+        "legacy_profile_depth_mm": 400.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 3.645,
+        "modern_sediment_in_kg": 73.27888994792423,
+        "modern_sediment_out_kg": 83.32240839372797,
+        "modern_surface_in_m3": 10.385857505886564,
+        "modern_surface_out_m3": 15.620309252574481,
+        "modern_lateral_in_m3": 0.0,
+        "modern_lateral_out_m3": 3.654754462492154,
+        "modern_effective_duration_h": 0.17,
+        "modern_element_peak_runoff_mm_h": 42.901,
+        "modern_soil_stock_m3": 391.451528199919,
+        "modern_porosity_capacity_mm": 761.01,
+        "modern_profile_depth_mm": 1800.0,
+        "modern_keff_mm_h": 50.0,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 5,
+          "julian": 319,
+          "soil_stock_m3": 89.66103237422341,
+          "porosity_capacity_mm": 228.89,
+          "profile_depth_mm": 400.0
+        },
+        "modern_previous_day": {
+          "year": 5,
+          "julian": 319,
+          "soil_stock_m3": 310.10762397164734,
+          "porosity_capacity_mm": 761.01,
+          "profile_depth_mm": 1800.0
+        }
+      },
+      "native_year_index": 5,
+      "calendar_first_year": 1,
+      "calendar_last_year": 16,
+      "case_summary": {
+        "case_id": "flagstaff-1718494-outunrut-gravel-high",
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "group": "small_exceedance",
+        "years": 16,
+        "reference_kg_yr": 0.5603679819547152,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 7.543415141698088,
+            "report_delta_kg_yr": -0.010776307345283342,
+            "report_bound_kg_yr": 0.7893720564571204,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 105.21178268883396,
+                "net_sediment_kg": 105.21178268883396,
+                "positive_net_kg": 105.21178268883396,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 19.12191400165029,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 142.31859611236078,
+                "rain_melt_m3": 140.75409181197264,
+                "et_m3": 65.38209813575962,
+                "deep_percolation_m3": 55.14897746706838,
+                "calendar_rows": 5844,
+                "element_rows": 570,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 87.244984267411,
+                "net_sediment_kg": -17.96679842142304,
+                "positive_net_kg": 0.5037923683919777,
+                "negative_net_kg": -18.47059078981502,
+                "surface_out_m3": 12.114354465032724,
+                "surface_in_m3": 19.121913630990033,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 116.14214004169435,
+                "rain_melt_m3": 114.86600837882757,
+                "et_m3": 109.03852513070332,
+                "deep_percolation_m3": 12.485240003607839,
+                "calendar_rows": 5844,
+                "element_rows": 570,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 7.5326388343528,
+                "net_sediment_kg": -79.71234543305819,
+                "positive_net_kg": 0.2586313762867922,
+                "negative_net_kg": -79.97097680934499,
+                "surface_out_m3": 3.8959395316432825,
+                "surface_in_m3": 12.11435430985171,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 1006.9040674949505,
+                "rain_melt_m3": 995.2363919606335,
+                "et_m3": 979.8136269990165,
+                "deep_percolation_m3": 28.23507063595291,
+                "calendar_rows": 5844,
+                "element_rows": 570,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 18.190406798837675,
+            "report_delta_kg_yr": -0.002694076836316839,
+            "report_bound_kg_yr": 0.83518200966623,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 29.564799201783853,
+                "net_sediment_kg": 29.564799201783853,
+                "positive_net_kg": 29.564799201783853,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 4.396107099876215,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 52.679137905442836,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 142.31859611236078,
+                "rain_melt_m3": 140.75409181197264,
+                "et_m3": 65.93487959734321,
+                "deep_percolation_m3": 20.858010897337618,
+                "calendar_rows": 5844,
+                "element_rows": 604,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 32.3423924200305,
+                "net_sediment_kg": 2.7775932182466896,
+                "positive_net_kg": 3.208645512058009,
+                "negative_net_kg": -0.4310522938113191,
+                "surface_out_m3": 19.424257228432783,
+                "surface_in_m3": 4.396106710048682,
+                "lateral_out_m3": 30.12052394231119,
+                "lateral_in_m3": 52.679675373771666,
+                "precipitation_m3": 116.14214004169435,
+                "rain_melt_m3": 114.86600837882756,
+                "et_m3": 117.44412675996021,
+                "deep_percolation_m3": 7.839085479803743,
+                "calendar_rows": 5844,
+                "element_rows": 604,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 18.18771272200134,
+                "net_sediment_kg": -14.154679698029177,
+                "positive_net_kg": 2.1229325470207474,
+                "negative_net_kg": -16.27761224504992,
+                "surface_out_m3": 21.756627772671163,
+                "surface_in_m3": 19.424258000940466,
+                "lateral_out_m3": 46.33554065910759,
+                "lateral_in_m3": 30.13251123719447,
+                "precipitation_m3": 1006.9040674949505,
+                "rain_melt_m3": 995.2363919606335,
+                "et_m3": 1011.7532349958516,
+                "deep_percolation_m3": 4.888742851628819,
+                "calendar_rows": 5844,
+                "element_rows": 604,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "flagstaff-1718494-outunrut-gravel-high",
+          "calendar_days": 5844,
+          "legacy_events": 3,
+          "modern_events": 18,
+          "legacy_surface_flow_days": 4,
+          "modern_surface_flow_days": 18,
+          "modern_only_surface_flow_days": 14,
+          "legacy_only_surface_flow_days": 0,
+          "lower_inflow_higher_outflow_days": 6,
+          "lower_inflow_higher_outflow_excess_kg": 198.67200221763696,
+          "printing_separated_lower_inflow_higher_outflow_days": 6,
+          "printing_separated_excess_kg": 198.67200221763696,
+          "reported_outlet_difference_kg": 170.4811822023767,
+          "matched_element_difference_kg": 170.4811822023767,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.04990697620609987,
+          "legacy_terminal_clay_mass_fraction": 0.05200098709122935
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": -75.64698348705011,
+            "fill": -54.9025918473805,
+            "buffer": 10.655073887648541
+          },
+          "net_sediment_kg": {
+            "road": -75.64698348705011,
+            "fill": 20.74439163966973,
+            "buffer": 65.55766573502902
+          },
+          "surface_out_m3": {
+            "road": -14.725806901774074,
+            "fill": 7.309902763400059,
+            "buffer": 17.86068824102788
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -14.725806920941352,
+            "buffer": 7.309903691088756
+          },
+          "deep_percolation_m3": {
+            "road": -34.290966569730756,
+            "fill": -4.646154523804095,
+            "buffer": -23.34632778432409
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "5ac4c030a137b3a7be014c6b14857a5525b8f090b7662ae37361f3eb6a6565b7"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "ba5ee442cf822b68fb2e09c6d50c2fc239a2d1be8c640165c0bf740e3f51d8b1"
+        }
+      },
+      "paired_terminal_sha256": "6a55d8e2b0a94d40866e0656a21dedd97b168043ee5f7e83fdb598d12ef379d9"
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='small_exceedance' AND surface='gravel' AND legacy_surface_out_m3=0 AND legacy_sediment_in_kg-modern_sediment_in_kg>.001*width_m AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','flagstaff-1718494-outunrut-gravel-high') ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Gravel counterpart to the absent legacy outlet-flow support.",
+      "event": {
+        "case_id": "denver-1718494-outunrut-gravel-high",
+        "original_group": "small_exceedance",
+        "year": 16,
+        "julian": 127,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 94.52976803282226,
+        "legacy_sediment_in_kg": 172.7226541301955,
+        "legacy_sediment_out_kg": 0.0,
+        "legacy_surface_in_m3": 14.823935150758823,
+        "legacy_surface_out_m3": 0.0,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 0.777,
+        "legacy_element_peak_runoff_mm_h": 0.0,
+        "legacy_soil_stock_m3": 215.18647769813614,
+        "legacy_porosity_capacity_mm": 228.89,
+        "legacy_profile_depth_mm": 400.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 3.645,
+        "modern_sediment_in_kg": 94.52976803282226,
+        "modern_sediment_out_kg": 94.52976803282226,
+        "modern_surface_in_m3": 16.310967642258287,
+        "modern_surface_out_m3": 39.03422585718667,
+        "modern_lateral_in_m3": 0.0,
+        "modern_lateral_out_m3": 5.704149488188689,
+        "modern_effective_duration_h": 3.56,
+        "modern_element_peak_runoff_mm_h": 5.109,
+        "modern_soil_stock_m3": 384.44942852878916,
+        "modern_porosity_capacity_mm": 760.99,
+        "modern_profile_depth_mm": 1800.0,
+        "modern_keff_mm_h": 50.0,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 70.44795400831838,
+          "porosity_capacity_mm": 228.89,
+          "profile_depth_mm": 400.0
+        },
+        "modern_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 283.00437475681065,
+          "porosity_capacity_mm": 760.99,
+          "profile_depth_mm": 1800.0
+        }
+      },
+      "native_year_index": 16,
+      "calendar_first_year": 1,
+      "calendar_last_year": 16,
+      "case_summary": {
+        "case_id": "denver-1718494-outunrut-gravel-high",
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "group": "small_exceedance",
+        "years": 16,
+        "reference_kg_yr": 0.0,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 0.0,
+            "report_delta_kg_yr": 0.0,
+            "report_bound_kg_yr": 0.7678118983514126,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 96.6580887335156,
+                "net_sediment_kg": 96.6580887335156,
+                "positive_net_kg": 96.6580887335156,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 15.450634726806559,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 39.84809048601979,
+                "deep_percolation_m3": 36.8997662638676,
+                "calendar_rows": 5844,
+                "element_rows": 554,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 119.8864192162731,
+                "net_sediment_kg": 23.228330482757446,
+                "positive_net_kg": 35.08496263940504,
+                "negative_net_kg": -11.856632156647592,
+                "surface_out_m3": 10.775667524201744,
+                "surface_in_m3": 15.4506334581329,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.81884188133122,
+                "et_m3": 76.4958749748293,
+                "deep_percolation_m3": 4.2994213095674105,
+                "calendar_rows": 5844,
+                "element_rows": 554,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": -119.8864192162731,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -119.8864192162731,
+                "surface_out_m3": 0.0,
+                "surface_in_m3": 10.775667840230481,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 672.7907694983363,
+                "deep_percolation_m3": 0.0,
+                "calendar_rows": 5844,
+                "element_rows": 554,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 8.146888353033935,
+            "report_delta_kg_yr": 0.005388153672642559,
+            "report_bound_kg_yr": 0.8190075051298598,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 19.882287052047086,
+                "net_sediment_kg": 19.882287052047086,
+                "positive_net_kg": 19.882287052047086,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 2.7522834427285834,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 27.732007953727503,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 45.456468775569554,
+                "deep_percolation_m3": 20.46250406842278,
+                "calendar_rows": 5844,
+                "element_rows": 592,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 75.89483855599163,
+                "net_sediment_kg": 56.012551503944565,
+                "positive_net_kg": 56.012551503944565,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 17.145800416746567,
+                "surface_in_m3": 2.752283445264518,
+                "lateral_out_m3": 14.78687554014778,
+                "lateral_in_m3": 27.72745388624338,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.82462848896793,
+                "et_m3": 70.62665428013317,
+                "deep_percolation_m3": 6.683805096005924,
+                "calendar_rows": 5844,
+                "element_rows": 592,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 8.15227650670657,
+                "net_sediment_kg": -67.74256204928508,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -67.74256204928508,
+                "surface_out_m3": 3.208650937001991,
+                "surface_in_m3": 17.145800792282945,
+                "lateral_out_m3": 26.371017450447198,
+                "lateral_in_m3": 14.77912683635125,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 695.9425289292561,
+                "deep_percolation_m3": 4.03309401532776,
+                "calendar_rows": 5844,
+                "element_rows": 592,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "denver-1718494-outunrut-gravel-high",
+          "calendar_days": 5844,
+          "legacy_events": 0,
+          "modern_events": 4,
+          "legacy_surface_flow_days": 0,
+          "modern_surface_flow_days": 5,
+          "modern_only_surface_flow_days": 5,
+          "legacy_only_surface_flow_days": 0,
+          "lower_inflow_higher_outflow_days": 5,
+          "lower_inflow_higher_outflow_excess_kg": 130.43642410730513,
+          "printing_separated_lower_inflow_higher_outflow_days": 5,
+          "printing_separated_excess_kg": 130.43642410730513,
+          "reported_outlet_difference_kg": 130.43642410730513,
+          "matched_element_difference_kg": 130.43642410730513,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.09173849382621498,
+          "legacy_terminal_clay_mass_fraction": null
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": -76.77580168146851,
+            "fill": -43.99158066028147,
+            "buffer": 8.15227650670657
+          },
+          "net_sediment_kg": {
+            "road": -76.77580168146851,
+            "fill": 32.78422102118712,
+            "buffer": 52.14385716698801
+          },
+          "surface_out_m3": {
+            "road": -12.698351284077976,
+            "fill": 6.370132892544824,
+            "buffer": 3.208650937001991
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -12.698350012868381,
+            "buffer": 6.370132952052463
+          },
+          "deep_percolation_m3": {
+            "road": -16.437262195444816,
+            "fill": 2.384383786438513,
+            "buffer": 4.03309401532776
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "1415f33d1caeb9009ece33f0287892f2f623aade96c9e3db00c51c7403182300"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "cc91bfbdb4e8583171c4c7c2384f29938a2118f4b6c3ba7a107bac278b9ffc32"
+        }
+      },
+      "paired_terminal_sha256": "0d5ddbee6b71c0d95ef8cabaf6b775841a8d086b667656a2b5a6c6c241088c1e"
+    },
+    {
+      "stratum": "passing_same_signature",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='meaningful_pass' AND case_id IN ('birmingham-1718465-inbare-gravel-high','birmingham-1718465-outrut-gravel-high','birmingham-1718465-outunrut-gravel-high','charleston-1718465-inbare-gravel-high','charleston-1718465-inveg-gravel-high','charleston-1718465-outrut-gravel-high','charleston-1718465-outunrut-gravel-high','denver-1718465-outrut-gravel-high','flagstaff-1718465-inbare-gravel-high','flagstaff-1718465-inveg-gravel-high','flagstaff-1718465-outrut-gravel-high','site-1718465-inveg-gravel-high','site-1718465-outunrut-gravel-high') AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high') ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Passing control with the same annual lower-fill/higher-outlet signature.",
+      "event": {
+        "case_id": "site-1718465-outunrut-gravel-high",
+        "original_group": "meaningful_pass",
+        "year": 2015,
+        "julian": 351,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 121.3412207078863,
+        "legacy_sediment_in_kg": 40.69133653578851,
+        "legacy_sediment_out_kg": 40.69133653578851,
+        "legacy_surface_in_m3": 35.79299153304383,
+        "legacy_surface_out_m3": 91.63047750156774,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 10.3,
+        "legacy_element_peak_runoff_mm_h": 4.145,
+        "legacy_soil_stock_m3": 351.5907949501214,
+        "legacy_porosity_capacity_mm": 240.79,
+        "legacy_profile_depth_mm": 400.0,
+        "legacy_keff_mm_h": 30.0,
+        "legacy_critical_shear_pa": 3.621,
+        "modern_sediment_in_kg": 27.93218863897347,
+        "modern_sediment_out_kg": 162.0325572436748,
+        "modern_surface_in_m3": 19.98875730483927,
+        "modern_surface_out_m3": 143.0254957610636,
+        "modern_lateral_in_m3": 8.897790069899122,
+        "modern_lateral_out_m3": 40.66341296819541,
+        "modern_effective_duration_h": 2.081,
+        "modern_element_peak_runoff_mm_h": 32.031,
+        "modern_soil_stock_m3": 464.22212990402676,
+        "modern_porosity_capacity_mm": 271.83,
+        "modern_profile_depth_mm": 600.0,
+        "modern_keff_mm_h": 60.0,
+        "modern_critical_shear_pa": 3.414,
+        "legacy_previous_day": {
+          "year": 2015,
+          "julian": 350,
+          "soil_stock_m3": 282.3383213734592,
+          "porosity_capacity_mm": 240.79,
+          "profile_depth_mm": 400.0
+        },
+        "modern_previous_day": {
+          "year": 2015,
+          "julian": 350,
+          "soil_stock_m3": 452.5918131331989,
+          "porosity_capacity_mm": 271.83,
+          "profile_depth_mm": 600.0
+        }
+      },
+      "native_year_index": 16,
+      "calendar_first_year": 2000,
+      "calendar_last_year": 2015,
+      "case_summary": {
+        "case_id": "site-1718465-outunrut-gravel-high",
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "group": "meaningful_pass",
+        "years": 16,
+        "reference_kg_yr": 20.216352579750875,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 175.13654697553903,
+            "report_delta_kg_yr": 0.01616446101792235,
+            "report_bound_kg_yr": 1.5465752405950839,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 220.4482252856175,
+                "net_sediment_kg": 220.4482252856175,
+                "positive_net_kg": 220.4482252856175,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 196.7865656901647,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 86.64079981979043,
+                "deep_percolation_m3": 226.3162044114542,
+                "calendar_rows": 5844,
+                "element_rows": 1132,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 231.7768183823463,
+                "net_sediment_kg": 11.32859309672873,
+                "positive_net_kg": 21.97019660019566,
+                "negative_net_kg": -10.641603503466932,
+                "surface_out_m3": 225.86043555182746,
+                "surface_in_m3": 196.78655297920372,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.72877978286596,
+                "et_m3": 79.00713956986029,
+                "deep_percolation_m3": 304.9436290436879,
+                "calendar_rows": 5844,
+                "element_rows": 1132,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 175.1527114365568,
+                "net_sediment_kg": -56.62410694578938,
+                "positive_net_kg": 78.3814714759157,
+                "negative_net_kg": -135.00557842170514,
+                "surface_out_m3": 266.8548850231694,
+                "surface_in_m3": 225.86044378217687,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 848.5744256477356,
+                "deep_percolation_m3": 2693.7959484366183,
+                "calendar_rows": 5844,
+                "element_rows": 1132,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 180.52470064818053,
+            "report_delta_kg_yr": 0.029634845199495885,
+            "report_bound_kg_yr": 1.4886579767678603,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 76.88087067808505,
+                "net_sediment_kg": 76.88087067808505,
+                "positive_net_kg": 76.88087067808505,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 68.21325180031008,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 365.74927221886156,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 72.19078464265631,
+                "deep_percolation_m3": 3.259081064672645,
+                "calendar_rows": 5844,
+                "element_rows": 1089,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 78.25754394144494,
+                "net_sediment_kg": 1.3766732633598993,
+                "positive_net_kg": 3.1709284363495147,
+                "negative_net_kg": -1.7942551729896157,
+                "surface_out_m3": 115.63675201305139,
+                "surface_in_m3": 68.21324663736586,
+                "lateral_out_m3": 646.0972734752635,
+                "lateral_in_m3": 365.7507846735953,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7257018000803,
+                "et_m3": 82.95619148365198,
+                "deep_percolation_m3": 2.6596429402770987,
+                "calendar_rows": 5844,
+                "element_rows": 1089,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 180.55433549337988,
+                "net_sediment_kg": 102.29679155193493,
+                "positive_net_kg": 121.83962492260561,
+                "negative_net_kg": -19.54283337067066,
+                "surface_out_m3": 484.8169765801091,
+                "surface_in_m3": 115.63675567161785,
+                "lateral_out_m3": 3018.4109026539254,
+                "lateral_in_m3": 646.0931297156743,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 816.8109375359212,
+                "deep_percolation_m3": 15.994804229757424,
+                "calendar_rows": 5844,
+                "element_rows": 1089,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "site-1718465-outunrut-gravel-high",
+          "calendar_days": 5844,
+          "legacy_events": 100,
+          "modern_events": 201,
+          "legacy_surface_flow_days": 100,
+          "modern_surface_flow_days": 212,
+          "modern_only_surface_flow_days": 114,
+          "legacy_only_surface_flow_days": 2,
+          "lower_inflow_higher_outflow_days": 123,
+          "lower_inflow_higher_outflow_excess_kg": 1457.258489687926,
+          "printing_separated_lower_inflow_higher_outflow_days": 112,
+          "printing_separated_excess_kg": 1431.2660363711034,
+          "reported_outlet_difference_kg": 86.42598490916961,
+          "matched_element_difference_kg": 86.42598490916961,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.04531998491613598,
+          "legacy_terminal_clay_mass_fraction": 0.013941301012635337
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": -143.56735460753245,
+            "fill": -153.51927444090137,
+            "buffer": 5.401624056823067
+          },
+          "net_sediment_kg": {
+            "road": -143.56735460753245,
+            "fill": -9.95191983336883,
+            "buffer": 158.9208984977243
+          },
+          "surface_out_m3": {
+            "road": -128.57331388985463,
+            "fill": -110.22368353877607,
+            "buffer": 217.9620915569397
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -128.57330634183785,
+            "buffer": -110.22368811055902
+          },
+          "deep_percolation_m3": {
+            "road": -223.05712334678157,
+            "fill": -302.2839861034108,
+            "buffer": -2677.801144206861
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "d0491a4ae34b8f2bbdb27a53fd1679c2a61f0870c3a8dc52a2509353834df3ad"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "8870a396d39c18dbeeaf880adfaabff411e21c5d51dea78ab043791744df83a2"
+        }
+      },
+      "paired_terminal_sha256": "55cca53105041924fa3254ccd4f364aefe878485c7cdd6065ec9e706cd4fa6f3"
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='meaningful_low' AND legacy_sediment_in_kg-modern_sediment_in_kg>.001*width_m AND legacy_sediment_out_kg-modern_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high','site-1718465-outunrut-gravel-high') ORDER BY delta_reported_sediment_out_kg ASC,case_id,year,julian LIMIT 1",
+      "rationale": "Opposite direction with lower incoming generated sediment supply.",
+      "event": {
+        "case_id": "site-2711184-outunrut-gravel-high",
+        "original_group": "meaningful_low",
+        "year": 2012,
+        "julian": 324,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": -389.5850631466701,
+        "legacy_sediment_in_kg": 119.78943245016555,
+        "legacy_sediment_out_kg": 396.95605737084367,
+        "legacy_surface_in_m3": 68.04131527305918,
+        "legacy_surface_out_m3": 312.1946975800825,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 3.282,
+        "legacy_element_peak_runoff_mm_h": 44.321,
+        "legacy_soil_stock_m3": 353.366937305725,
+        "legacy_porosity_capacity_mm": 228.89,
+        "legacy_profile_depth_mm": 400.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 3.645,
+        "modern_sediment_in_kg": 7.370994224173555,
+        "modern_sediment_out_kg": 7.370994224173555,
+        "modern_surface_in_m3": 32.410260103629135,
+        "modern_surface_out_m3": 167.56448107240698,
+        "modern_lateral_in_m3": 4.559903932174789,
+        "modern_lateral_out_m3": 19.366782992832253,
+        "modern_effective_duration_h": 23.999,
+        "modern_element_peak_runoff_mm_h": 3.253,
+        "modern_soil_stock_m3": 1299.8287950480274,
+        "modern_porosity_capacity_mm": 1066.47,
+        "modern_profile_depth_mm": 1800.0,
+        "modern_keff_mm_h": 50.0,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 340.6094532707641,
+          "porosity_capacity_mm": 228.89,
+          "profile_depth_mm": 400.0
+        },
+        "modern_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 1166.1570044969708,
+          "porosity_capacity_mm": 1066.47,
+          "profile_depth_mm": 1800.0
+        }
+      },
+      "native_year_index": 13,
+      "calendar_first_year": 2000,
+      "calendar_last_year": 2015,
+      "case_summary": {
+        "case_id": "site-2711184-outunrut-gravel-high",
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "group": "meaningful_low",
+        "years": 16,
+        "reference_kg_yr": 115.22027813576567,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 442.4751795973193,
+            "report_delta_kg_yr": -0.021552614690449445,
+            "report_bound_kg_yr": 1.8458851080593084,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 457.5162105744975,
+                "net_sediment_kg": 457.5162105744975,
+                "positive_net_kg": 457.5162105744975,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 256.394830435578,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 87.1691406163149,
+                "deep_percolation_m3": 165.87297347864092,
+                "calendar_rows": 5844,
+                "element_rows": 1354,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 462.63495656350676,
+                "net_sediment_kg": 5.118745989009415,
+                "positive_net_kg": 17.568075049647565,
+                "negative_net_kg": -12.449329060638151,
+                "surface_out_m3": 351.54738296629404,
+                "surface_in_m3": 256.39481668353363,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7286566635545,
+                "et_m3": 80.82117950432067,
+                "deep_percolation_m3": 236.64899899539975,
+                "calendar_rows": 5844,
+                "element_rows": 1354,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 442.4536269826285,
+                "net_sediment_kg": -20.181329580878625,
+                "positive_net_kg": 121.03948410221837,
+                "negative_net_kg": -141.22081368309722,
+                "surface_out_m3": 723.2864114617416,
+                "surface_in_m3": 351.54739560269246,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 857.9311948119288,
+                "deep_percolation_m3": 2349.7440750471724,
+                "calendar_rows": 5844,
+                "element_rows": 1354,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 5.732995507690547,
+            "report_delta_kg_yr": -0.010776307345282454,
+            "report_bound_kg_yr": 1.5922051432610684,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 9.351140698869303,
+                "net_sediment_kg": 9.351140698869303,
+                "positive_net_kg": 9.351140698869303,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 18.976090131389874,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 385.3651689533319,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 82.67522647979973,
+                "deep_percolation_m3": 21.242501069224026,
+                "calendar_rows": 5844,
+                "element_rows": 1166,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 12.158368762315513,
+                "net_sediment_kg": 2.807228063446215,
+                "positive_net_kg": 2.8153102939551773,
+                "negative_net_kg": -0.008082230508962231,
+                "surface_out_m3": 122.81140614754392,
+                "surface_in_m3": 18.976088386896194,
+                "lateral_out_m3": 594.1769980143295,
+                "lateral_in_m3": 385.3592586875669,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7284104249316,
+                "et_m3": 87.94449350513908,
+                "deep_percolation_m3": 15.762620181526419,
+                "calendar_rows": 5844,
+                "element_rows": 1166,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 5.72221920034526,
+                "net_sediment_kg": -6.436149561970256,
+                "positive_net_kg": 0.42566414013867737,
+                "negative_net_kg": -6.861813702108933,
+                "surface_out_m3": 81.49754590572817,
+                "surface_in_m3": 122.81141103468461,
+                "lateral_out_m3": 2932.0064870627257,
+                "lateral_in_m3": 594.2018072290954,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 1147.718853625155,
+                "deep_percolation_m3": 113.9384423214784,
+                "calendar_rows": 5844,
+                "element_rows": 1166,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "site-2711184-outunrut-gravel-high",
+          "calendar_days": 5844,
+          "legacy_events": 277,
+          "modern_events": 32,
+          "legacy_surface_flow_days": 277,
+          "modern_surface_flow_days": 32,
+          "modern_only_surface_flow_days": 0,
+          "legacy_only_surface_flow_days": 245,
+          "lower_inflow_higher_outflow_days": 0,
+          "lower_inflow_higher_outflow_excess_kg": 0.0,
+          "printing_separated_lower_inflow_higher_outflow_days": 0,
+          "printing_separated_excess_kg": 0.0,
+          "reported_outlet_difference_kg": -6987.7025245165305,
+          "matched_element_difference_kg": -6976.021007354244,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 11.681517162286745,
+          "modern_terminal_clay_mass_fraction": 0.05954399287227825,
+          "legacy_terminal_clay_mass_fraction": 0.053414882096013847
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": -448.1650698756282,
+            "fill": -450.4765878011913,
+            "buffer": -436.73140778228327
+          },
+          "net_sediment_kg": {
+            "road": -448.1650698756282,
+            "fill": -2.3115179255632006,
+            "buffer": 13.74518001890837
+          },
+          "surface_out_m3": {
+            "road": -237.41874030418813,
+            "fill": -228.73597681875012,
+            "buffer": -641.7888655560134
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -237.41872829663743,
+            "buffer": -228.73598456800784
+          },
+          "deep_percolation_m3": {
+            "road": -144.63047240941688,
+            "fill": -220.88637881387334,
+            "buffer": -2235.805632725694
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "d6d08509fd77c02ffd9a210543797234ed868e9b900cdecf1acb296a3e78ae05"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "4f6d14866c4785d38ea7c9c73563d92fd4e79520033d2acca820f9ee834613f4"
+        }
+      },
+      "paired_terminal_sha256": "b74bde625f2871f5ac00edec45824fa7199c42f1fafe211a0966ad6a0170b812"
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='meaningful_low' AND modern_sediment_in_kg>=legacy_sediment_in_kg AND legacy_sediment_out_kg-modern_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high','site-1718465-outunrut-gravel-high','site-2711184-outunrut-gravel-high') ORDER BY delta_reported_sediment_out_kg ASC,case_id,year,julian LIMIT 1",
+      "rationale": "Opposite direction without lower incoming generated sediment on the selected day.",
+      "event": {
+        "case_id": "site-2711184-outunrut-paved-high",
+        "original_group": "meaningful_low",
+        "year": 2012,
+        "julian": 324,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": -139.5747327361051,
+        "legacy_sediment_in_kg": 0.0,
+        "legacy_sediment_out_kg": 139.5747327361051,
+        "legacy_surface_in_m3": 68.93848918043348,
+        "legacy_surface_out_m3": 314.6177679598134,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 3.218,
+        "legacy_element_peak_runoff_mm_h": 45.552,
+        "legacy_soil_stock_m3": 470.7631156943748,
+        "legacy_porosity_capacity_mm": 317.63,
+        "legacy_profile_depth_mm": 600.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 4.0,
+        "modern_sediment_in_kg": 0.0,
+        "modern_sediment_out_kg": 0.0,
+        "modern_surface_in_m3": 53.686942634075514,
+        "modern_surface_out_m3": 189.1908671086139,
+        "modern_lateral_in_m3": 2.6471352415246905,
+        "modern_lateral_out_m3": 20.049914668064435,
+        "modern_effective_duration_h": 23.999,
+        "modern_element_peak_runoff_mm_h": 3.673,
+        "modern_soil_stock_m3": 1312.0910086184447,
+        "modern_porosity_capacity_mm": 1066.47,
+        "modern_profile_depth_mm": 1800.0,
+        "modern_keff_mm_h": 50.0,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 449.97883447543586,
+          "porosity_capacity_mm": 317.63,
+          "profile_depth_mm": 600.0
+        },
+        "modern_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 1181.3566842708867,
+          "porosity_capacity_mm": 1066.47,
+          "profile_depth_mm": 1800.0
+        }
+      },
+      "native_year_index": 13,
+      "calendar_first_year": 2000,
+      "calendar_last_year": 2015,
+      "case_summary": {
+        "case_id": "site-2711184-outunrut-paved-high",
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "group": "meaningful_low",
+        "years": 16,
+        "reference_kg_yr": 37.28602341467912,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 58.75242764648283,
+            "report_delta_kg_yr": -0.010776307345302882,
+            "report_bound_kg_yr": 3.3083851074295225,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 439.81081155996463,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 35.11384314309039,
+                "deep_percolation_m3": 34.69605283392292,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 28.029175405081016,
+                "net_sediment_kg": 28.029175405081016,
+                "positive_net_kg": 28.029175405081016,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 424.087967031823,
+                "surface_in_m3": 439.81078638685756,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7286566635545,
+                "et_m3": 89.02892840012557,
+                "deep_percolation_m3": 338.9337685931691,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 58.74165133913748,
+                "net_sediment_kg": 30.712475934056474,
+                "positive_net_kg": 55.018437151342226,
+                "negative_net_kg": -24.305961217285752,
+                "surface_out_m3": 803.7847406639627,
+                "surface_in_m3": 424.0879762399477,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 914.1753469416312,
+                "deep_percolation_m3": 2281.7853987356048,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 1.3793673401962219,
+            "report_delta_kg_yr": -0.018858537854245183,
+            "report_bound_kg_yr": 2.3020900360034178,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 320.8102806182574,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 104.24200123821765,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 68.43929342438705,
+                "deep_percolation_m3": 20.063934052450783,
+                "calendar_rows": 5844,
+                "element_rows": 1693,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 47.45885754862618,
+                "net_sediment_kg": 47.45885754862618,
+                "positive_net_kg": 47.45885754862618,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 342.0294311287242,
+                "surface_in_m3": 320.8102689358649,
+                "lateral_out_m3": 408.07046246863126,
+                "lateral_in_m3": 104.25016887096189,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.72828730562014,
+                "et_m3": 76.36893896475557,
+                "deep_percolation_m3": 15.152197223287482,
+                "calendar_rows": 5844,
+                "element_rows": 1693,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 1.3605088023419756,
+                "net_sediment_kg": -46.09834874628421,
+                "positive_net_kg": 0.7758941288603741,
+                "negative_net_kg": -46.87424287514458,
+                "surface_out_m3": 116.98389313908058,
+                "surface_in_m3": 342.02944024920765,
+                "lateral_out_m3": 2935.9985377898633,
+                "lateral_in_m3": 408.0836497053336,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 1142.2602045827498,
+                "deep_percolation_m3": 114.06495097059835,
+                "calendar_rows": 5844,
+                "element_rows": 1693,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "site-2711184-outunrut-paved-high",
+          "calendar_days": 5844,
+          "legacy_events": 304,
+          "modern_events": 48,
+          "legacy_surface_flow_days": 307,
+          "modern_surface_flow_days": 49,
+          "modern_only_surface_flow_days": 0,
+          "legacy_only_surface_flow_days": 258,
+          "lower_inflow_higher_outflow_days": 0,
+          "lower_inflow_higher_outflow_excess_kg": 0.0,
+          "printing_separated_lower_inflow_higher_outflow_days": 0,
+          "printing_separated_excess_kg": 0.0,
+          "reported_outlet_difference_kg": -918.0982805887281,
+          "matched_element_difference_kg": -918.0982805887281,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.039779802171776,
+          "legacy_terminal_clay_mass_fraction": 0.05200002143933803
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": 0.0,
+            "fill": 19.42968214354516,
+            "buffer": -57.38114253679551
+          },
+          "net_sediment_kg": {
+            "road": 0.0,
+            "fill": 19.42968214354516,
+            "buffer": -76.81082468034069
+          },
+          "surface_out_m3": {
+            "road": -119.00053094170721,
+            "fill": -82.0585359030988,
+            "buffer": -686.8008475248821
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -119.00051745099267,
+            "buffer": -82.05853599074004
+          },
+          "deep_percolation_m3": {
+            "road": -14.632118781472137,
+            "fill": -323.7815713698816,
+            "buffer": -2167.7204477650066
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "8ed133e3242c38a27714837c264819803882fb30f9552e6ba824ef5842248eff"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "b05b9af414eecd114876fe70cebd6f39158128c4452f36cc13ecf2205431a9c8"
+        }
+      },
+      "paired_terminal_sha256": "18ffb1055cbd07af0461d29f84588703441c29672f28b8b6fbca43bdf15b557d"
+    },
+    {
+      "stratum": "small_passing_control",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='small_pass' AND case_id IN ('birmingham-2711184-outunrut-paved-none','birmingham-2711250-outunrut-paved-none','charleston-1718465-outunrut-paved-none','charleston-1718494-outunrut-paved-none','charleston-2711184-outunrut-paved-high','charleston-2711184-outunrut-paved-low','charleston-2711184-outunrut-paved-none','charleston-2711250-outunrut-paved-high','charleston-2711250-outunrut-paved-low','charleston-2711250-outunrut-paved-none','denver-1718465-outunrut-paved-high','denver-1718465-outunrut-paved-low','denver-1718494-outunrut-paved-high','denver-1718494-outunrut-paved-low','denver-1718494-outunrut-paved-none','denver-1718510-outunrut-paved-high','denver-1718510-outunrut-paved-low','denver-1718510-outunrut-paved-none','denver-1856573-outunrut-paved-high','denver-1856573-outunrut-paved-low','denver-1856573-outunrut-paved-none','denver-53949-outunrut-paved-high','denver-53949-outunrut-paved-low','flagstaff-1718465-outunrut-paved-high','flagstaff-1718465-outunrut-paved-low','flagstaff-2711184-outunrut-paved-high','flagstaff-2711184-outunrut-paved-low','site-1856573-outunrut-paved-high','site-1856573-outunrut-paved-low','site-2711184-outunrut-paved-high','site-2711184-outunrut-paved-low','site-2711184-outunrut-paved-none','site-2711250-outunrut-paved-high','site-2711250-outunrut-paved-low','site-2711250-outunrut-paved-none','denver-1718465-outunrut-paved-none','flagstaff-1718465-outunrut-paved-none') AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high','site-1718465-outunrut-gravel-high','site-2711184-outunrut-gravel-high','site-2711184-outunrut-paved-high') ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Passing small-reference zero-road control.",
+      "event": {
+        "case_id": "denver-1718465-outunrut-paved-none",
+        "original_group": "small_pass",
+        "year": 4,
+        "julian": 233,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 8.060677894271665,
+        "legacy_sediment_in_kg": 1.1207359639094294,
+        "legacy_sediment_out_kg": 0.0,
+        "legacy_surface_in_m3": 8.981401971289165,
+        "legacy_surface_out_m3": 0.0,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 0.26,
+        "legacy_element_peak_runoff_mm_h": 0.0,
+        "legacy_soil_stock_m3": 132.97158058394348,
+        "legacy_porosity_capacity_mm": 326.06,
+        "legacy_profile_depth_mm": 600.0,
+        "legacy_keff_mm_h": 30.0,
+        "legacy_critical_shear_pa": 4.0,
+        "modern_sediment_in_kg": 4.094996791207531,
+        "modern_sediment_out_kg": 8.060677894271665,
+        "modern_surface_in_m3": 17.824237513574232,
+        "modern_surface_out_m3": 0.2493023927965599,
+        "modern_lateral_in_m3": 0.0,
+        "modern_lateral_out_m3": 0.0,
+        "modern_effective_duration_h": 0.049,
+        "modern_element_peak_runoff_mm_h": 2.382,
+        "modern_soil_stock_m3": 199.40613600027285,
+        "modern_porosity_capacity_mm": 271.87,
+        "modern_profile_depth_mm": 600.0,
+        "modern_keff_mm_h": 60.0,
+        "modern_critical_shear_pa": 3.414,
+        "legacy_previous_day": {
+          "year": 4,
+          "julian": 232,
+          "soil_stock_m3": 52.959783122374624,
+          "porosity_capacity_mm": 326.06,
+          "profile_depth_mm": 600.0
+        },
+        "modern_previous_day": {
+          "year": 4,
+          "julian": 232,
+          "soil_stock_m3": 112.98997908340228,
+          "porosity_capacity_mm": 271.87,
+          "profile_depth_mm": 600.0
+        }
+      },
+      "native_year_index": 4,
+      "calendar_first_year": 1,
+      "calendar_last_year": 16,
+      "case_summary": {
+        "case_id": "denver-1718465-outunrut-paved-none",
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "group": "small_pass",
+        "years": 16,
+        "reference_kg_yr": 0.0,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 0.0,
+            "report_delta_kg_yr": 0.0,
+            "report_bound_kg_yr": 1.6312635243922118,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 70.56451044965999,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 11.495712071039401,
+                "deep_percolation_m3": 10.388770966992452,
+                "calendar_rows": 5844,
+                "element_rows": 1195,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 0.6573547480622615,
+                "net_sediment_kg": 0.6573547480622615,
+                "positive_net_kg": 0.6573547480622615,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 7.672308498845799,
+                "surface_in_m3": 70.56450656965588,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.81674885303707,
+                "et_m3": 138.30669408005488,
+                "deep_percolation_m3": 1.0344940474866893,
+                "calendar_rows": 5844,
+                "element_rows": 1195,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": -0.6573547480622615,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -0.6573547480622615,
+                "surface_out_m3": 0.0,
+                "surface_in_m3": 7.672308379976337,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 673.4130597587438,
+                "deep_percolation_m3": 1.9587484441271044,
+                "calendar_rows": 5844,
+                "element_rows": 1195,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 0.7758941288603748,
+            "report_delta_kg_yr": 0.018858537854245294,
+            "report_bound_kg_yr": 1.1530656618394082,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 50.632129069248705,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 17.879251700549865,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.37993603907995,
+                "rain_melt_m3": 93.28971679398525,
+                "et_m3": 21.595137999350296,
+                "deep_percolation_m3": 3.259081064672645,
+                "calendar_rows": 5844,
+                "element_rows": 840,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 3.6019807301608346,
+                "net_sediment_kg": 3.6019807301608346,
+                "positive_net_kg": 3.6019807301608346,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 47.174181546015774,
+                "surface_in_m3": 50.632126582299556,
+                "lateral_out_m3": 0.8074164442914288,
+                "lateral_in_m3": 17.885049892717216,
+                "precipitation_m3": 76.20469780332105,
+                "rain_melt_m3": 75.81674885303707,
+                "et_m3": 96.8601784416082,
+                "deep_percolation_m3": 0.07752619435240783,
+                "calendar_rows": 5844,
+                "element_rows": 840,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 0.7947526667146194,
+                "net_sediment_kg": -2.8072280634462157,
+                "positive_net_kg": 0.24785506894150838,
+                "negative_net_kg": -3.055083132387724,
+                "surface_out_m3": 1.0451034687093421,
+                "surface_in_m3": 47.17418328043068,
+                "lateral_out_m3": 9.259636379123673,
+                "lateral_in_m3": 0.8080166846105605,
+                "precipitation_m3": 660.6630474764929,
+                "rain_melt_m3": 657.2996913692168,
+                "et_m3": 699.229032723057,
+                "deep_percolation_m3": 0.9394480020154816,
+                "calendar_rows": 5844,
+                "element_rows": 840,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "denver-1718465-outunrut-paved-none",
+          "calendar_days": 5844,
+          "legacy_events": 0,
+          "modern_events": 2,
+          "legacy_surface_flow_days": 0,
+          "modern_surface_flow_days": 5,
+          "modern_only_surface_flow_days": 5,
+          "legacy_only_surface_flow_days": 0,
+          "lower_inflow_higher_outflow_days": 1,
+          "lower_inflow_higher_outflow_excess_kg": 0.2155261469056595,
+          "printing_separated_lower_inflow_higher_outflow_days": 1,
+          "printing_separated_excess_kg": 0.2155261469056595,
+          "reported_outlet_difference_kg": 12.71604266743391,
+          "matched_element_difference_kg": 12.71604266743391,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.04452287199296544,
+          "legacy_terminal_clay_mass_fraction": null
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": 0.0,
+            "fill": 2.9446259820985734,
+            "buffer": 0.7947526667146194
+          },
+          "net_sediment_kg": {
+            "road": 0.0,
+            "fill": 2.9446259820985734,
+            "buffer": -2.149873315383954
+          },
+          "surface_out_m3": {
+            "road": -19.932381380411286,
+            "fill": 39.50187304716997,
+            "buffer": 1.0451034687093421
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -19.93237998735632,
+            "buffer": 39.50187490045435
+          },
+          "deep_percolation_m3": {
+            "road": -7.129689902319806,
+            "fill": -0.9569678531342815,
+            "buffer": -1.0193004421116227
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+          "sha256": "9e8aa8e4da8e079eb80f94519b2dab7e2f60302fc28719c74acc717a8ed07f7b"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+          "sha256": "2d309153794133504688894b0f17243316e0abb714e61633280bfb3b77d248a2"
+        }
+      },
+      "paired_terminal_sha256": "4a8a724b3ac2b230a3a768366b525741e573e06a79d5b1766f498f4817acdb87"
+    },
+    {
+      "stratum": "meaningful_high",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='meaningful_high' AND modern_sediment_out_kg-legacy_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718465-outunrut-paved-none','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high','site-1718465-outunrut-gravel-high','site-2711184-outunrut-gravel-high','site-2711184-outunrut-paved-high') ORDER BY delta_reported_sediment_out_kg DESC,case_id,year,julian LIMIT 1",
+      "rationale": "Meaningful overprediction contrast beyond the small-reference group.",
+      "event": {
+        "case_id": "site-1856573-outunrut-paved-high",
+        "original_group": "meaningful_high",
+        "year": 2012,
+        "julian": 324,
+        "width_m": 43.1052293811319,
+        "local_area_m2": 1707.8291880804456,
+        "cumulative_area_m2": 2146.209370886557,
+        "delta_reported_sediment_out_kg": 178.11080780283703,
+        "legacy_sediment_in_kg": 0.0,
+        "legacy_sediment_out_kg": 139.5747327361051,
+        "legacy_surface_in_m3": 68.93848918043348,
+        "legacy_surface_out_m3": 314.6177679598134,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 3.218,
+        "legacy_element_peak_runoff_mm_h": 45.552,
+        "legacy_soil_stock_m3": 470.7631156943748,
+        "legacy_porosity_capacity_mm": 317.63,
+        "legacy_profile_depth_mm": 600.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 4.0,
+        "modern_sediment_in_kg": 10.948728262807503,
+        "modern_sediment_out_kg": 317.6855405389421,
+        "modern_surface_in_m3": 60.95262866209367,
+        "modern_surface_out_m3": 320.48550437981726,
+        "modern_lateral_in_m3": 6.745925292917761,
+        "modern_lateral_out_m3": 31.270352433752954,
+        "modern_effective_duration_h": 4.843,
+        "modern_element_peak_runoff_mm_h": 30.83,
+        "modern_soil_stock_m3": 805.0023660935989,
+        "modern_porosity_capacity_mm": 471.36,
+        "modern_profile_depth_mm": 1000.0,
+        "modern_keff_mm_h": 9.72,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 449.97883447543586,
+          "porosity_capacity_mm": 317.63,
+          "profile_depth_mm": 600.0
+        },
+        "modern_previous_day": {
+          "year": 2012,
+          "julian": 323,
+          "soil_stock_m3": 805.0023660935989,
+          "porosity_capacity_mm": 471.36,
+          "profile_depth_mm": 1000.0
+        }
+      },
+      "native_year_index": 13,
+      "calendar_first_year": 2000,
+      "calendar_last_year": 2015,
+      "case_summary": {
+        "case_id": "site-1856573-outunrut-paved-high",
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "group": "meaningful_high",
+        "years": 16,
+        "reference_kg_yr": 37.28602341467912,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 58.75242764648283,
+            "report_delta_kg_yr": -0.010776307345302882,
+            "report_bound_kg_yr": 3.3083851074295225,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 439.81081155996463,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 35.11384314309039,
+                "deep_percolation_m3": 34.69605283392292,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 28.029175405081016,
+                "net_sediment_kg": 28.029175405081016,
+                "positive_net_kg": 28.029175405081016,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 424.087967031823,
+                "surface_in_m3": 439.81078638685756,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7286566635545,
+                "et_m3": 89.02892840012557,
+                "deep_percolation_m3": 338.9337685931691,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 58.74165133913748,
+                "net_sediment_kg": 30.712475934056474,
+                "positive_net_kg": 55.018437151342226,
+                "negative_net_kg": -24.305961217285752,
+                "surface_out_m3": 803.7847406639627,
+                "surface_in_m3": 424.0879762399477,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 914.1753469416312,
+                "deep_percolation_m3": 2281.7853987356048,
+                "calendar_rows": 5844,
+                "element_rows": 2440,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 378.85186103076853,
+            "report_delta_kg_yr": 0.013470384181687223,
+            "report_bound_kg_yr": 2.7119671876178613,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 0.0,
+                "net_sediment_kg": 0.0,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 383.4654685980298,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 65.43218641229896,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 510.98490696651385,
+                "rain_melt_m3": 510.9846052299086,
+                "et_m3": 59.7379640584384,
+                "deep_percolation_m3": 0.27885760556778366,
+                "calendar_rows": 5844,
+                "element_rows": 1997,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 41.17357628948988,
+                "net_sediment_kg": 41.17357628948988,
+                "positive_net_kg": 41.17357628948988,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 221.26170239227224,
+                "surface_in_m3": 383.46544981082747,
+                "lateral_out_m3": 553.5018248619294,
+                "lateral_in_m3": 65.32107379311725,
+                "precipitation_m3": 417.00018300660315,
+                "rain_melt_m3": 413.7330889587656,
+                "et_m3": 85.8951725665557,
+                "deep_percolation_m3": 0.22874969947946827,
+                "calendar_rows": 5844,
+                "element_rows": 1997,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 378.8653314149497,
+                "net_sediment_kg": 337.69175512546,
+                "positive_net_kg": 359.9125008714334,
+                "negative_net_kg": -22.220745745973485,
+                "surface_out_m3": 981.5712614771478,
+                "surface_in_m3": 221.26172117840528,
+                "lateral_out_m3": 2305.038909467048,
+                "lateral_in_m3": 553.5853595635713,
+                "precipitation_m3": 3615.2182167880696,
+                "rain_melt_m3": 3586.889600130785,
+                "et_m3": 1053.9408855144102,
+                "deep_percolation_m3": 1.45262995893369,
+                "calendar_rows": 5844,
+                "element_rows": 1997,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "site-1856573-outunrut-paved-high",
+          "calendar_days": 5844,
+          "legacy_events": 304,
+          "modern_events": 377,
+          "legacy_surface_flow_days": 307,
+          "modern_surface_flow_days": 394,
+          "modern_only_surface_flow_days": 93,
+          "legacy_only_surface_flow_days": 6,
+          "lower_inflow_higher_outflow_days": 31,
+          "lower_inflow_higher_outflow_excess_kg": 918.4000171943961,
+          "printing_separated_lower_inflow_higher_outflow_days": 5,
+          "printing_separated_excess_kg": 37.673970479109286,
+          "reported_outlet_difference_kg": 5121.978881212996,
+          "matched_element_difference_kg": 5121.978881212996,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.06890003788410431,
+          "legacy_terminal_clay_mass_fraction": 0.05200002143933803
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": 0.0,
+            "fill": 13.144400884408864,
+            "buffer": 320.1236800758122
+          },
+          "net_sediment_kg": {
+            "road": 0.0,
+            "fill": 13.144400884408864,
+            "buffer": 306.9792791914035
+          },
+          "surface_out_m3": {
+            "road": -56.34534296193482,
+            "fill": -202.82626463955074,
+            "buffer": 177.78652081318512
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -56.34533657603009,
+            "buffer": -202.8262550615424
+          },
+          "deep_percolation_m3": {
+            "road": -34.41719522835513,
+            "fill": -338.7050188936896,
+            "buffer": -2280.332768776671
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "70e02990922cd91a6cdec4ca5d2519d90ac16cc5dadd517e96d4aa24d48ac0e8"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+          "sha256": "fb542910bd466191a90e12bd3c2f28b044de5d25794b5d33da0ac0b9d3014933"
+        }
+      },
+      "paired_terminal_sha256": "4a9d84482e485516c4e78a1930e381c4b4c099b069754f31f4ef84924e98f6ea"
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "status": "selected",
+      "selection_sql": "SELECT case_id,original_group,year,julian,width_m,local_area_m2,cumulative_area_m2,delta_reported_sediment_out_kg,legacy_sediment_in_kg,legacy_sediment_out_kg,legacy_surface_in_m3,legacy_surface_out_m3,legacy_lateral_in_m3,legacy_lateral_out_m3,legacy_effective_duration_h,legacy_element_peak_runoff_mm_h,legacy_soil_stock_m3,legacy_porosity_capacity_mm,legacy_profile_depth_mm,legacy_keff_mm_h,legacy_critical_shear_pa,modern_sediment_in_kg,modern_sediment_out_kg,modern_surface_in_m3,modern_surface_out_m3,modern_lateral_in_m3,modern_lateral_out_m3,modern_effective_duration_h,modern_element_peak_runoff_mm_h,modern_soil_stock_m3,modern_porosity_capacity_mm,modern_profile_depth_mm,modern_keff_mm_h,modern_critical_shear_pa FROM t WHERE legacy_element_present AND modern_element_present AND original_group='meaningful_low' AND design!='outunrut' AND legacy_sediment_out_kg-modern_sediment_out_kg>.001*width_m AND case_id NOT IN ('denver-1718465-outunrut-paved-high','denver-1718465-outunrut-paved-none','denver-1718494-outunrut-gravel-high','flagstaff-1718494-outunrut-gravel-high','site-1718465-outunrut-gravel-high','site-1856573-outunrut-paved-high','site-2711184-outunrut-gravel-high','site-2711184-outunrut-paved-high') ORDER BY delta_reported_sediment_out_kg ASC,case_id,year,julian LIMIT 1",
+      "rationale": "Largest opposite-direction discrepancy outside outsloped unrutted geometry; protects transfer interpretation.",
+      "event": {
+        "case_id": "denver-2711184-outrut-gravel-high",
+        "original_group": "meaningful_low",
+        "year": 16,
+        "julian": 127,
+        "width_m": 3.96,
+        "local_area_m2": 156.8952,
+        "cumulative_area_m2": 416.394,
+        "delta_reported_sediment_out_kg": -195.82596,
+        "legacy_sediment_in_kg": 178.8336,
+        "legacy_sediment_out_kg": 196.92684,
+        "legacy_surface_in_m3": 12.287098537559997,
+        "legacy_surface_out_m3": 8.75425080024,
+        "legacy_lateral_in_m3": 0.0,
+        "legacy_lateral_out_m3": 0.0,
+        "legacy_effective_duration_h": 0.656,
+        "legacy_element_peak_runoff_mm_h": 32.031,
+        "legacy_soil_stock_m3": 21.952776383999996,
+        "legacy_porosity_capacity_mm": 228.89,
+        "legacy_profile_depth_mm": 400.0,
+        "legacy_keff_mm_h": 26.0,
+        "legacy_critical_shear_pa": 3.645,
+        "modern_sediment_in_kg": 24.40548,
+        "modern_sediment_out_kg": 1.10088,
+        "modern_surface_in_m3": 7.448668653887999,
+        "modern_surface_out_m3": 0.4504450357440001,
+        "modern_lateral_in_m3": 0.0,
+        "modern_lateral_out_m3": 0.22122223199999996,
+        "modern_effective_duration_h": 3.56,
+        "modern_element_peak_runoff_mm_h": 0.304,
+        "modern_soil_stock_m3": 46.163274696,
+        "modern_porosity_capacity_mm": 1066.47,
+        "modern_profile_depth_mm": 1800.0,
+        "modern_keff_mm_h": 50.0,
+        "modern_critical_shear_pa": 2.0,
+        "legacy_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 6.492323376,
+          "porosity_capacity_mm": 228.89,
+          "profile_depth_mm": 400.0
+        },
+        "modern_previous_day": {
+          "year": 16,
+          "julian": 126,
+          "soil_stock_m3": 27.453522095999997,
+          "porosity_capacity_mm": 1066.47,
+          "profile_depth_mm": 1800.0
+        }
+      },
+      "native_year_index": 16,
+      "calendar_first_year": 1,
+      "calendar_last_year": 16,
+      "case_summary": {
+        "case_id": "denver-2711184-outrut-gravel-high",
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "group": "meaningful_low",
+        "years": 16,
+        "reference_kg_yr": 36.186479999999996,
+        "lanes": {
+          "legacy": {
+            "report_kg_yr": 37.790279999999996,
+            "report_delta_kg_yr": -0.00024749999999329475,
+            "report_bound_kg_yr": 0.06909029028000001,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 108.46439999999998,
+                "net_sediment_kg": 108.46439999999998,
+                "positive_net_kg": 108.46439999999998,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 12.413074943426215,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.3847001999993,
+                "rain_melt_m3": 93.29432547599943,
+                "et_m3": 41.742862919999865,
+                "deep_percolation_m3": 38.04806486662211,
+                "calendar_rows": 5844,
+                "element_rows": 542,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 142.7364675,
+                "net_sediment_kg": 34.272067500000006,
+                "positive_net_kg": 34.71459750000001,
+                "negative_net_kg": -0.44253000000000003,
+                "surface_out_m3": 9.844235048063938,
+                "surface_in_m3": 12.41307459151575,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 7.00078871250001,
+                "rain_melt_m3": 6.965352132750004,
+                "et_m3": 8.290576156499982,
+                "deep_percolation_m3": 1.2265473242095837,
+                "calendar_rows": 5844,
+                "element_rows": 542,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 37.7900325,
+                "net_sediment_kg": -104.946435,
+                "positive_net_kg": 1.7216099999999983,
+                "negative_net_kg": -106.66804499999999,
+                "surface_out_m3": 1.0499782986659216,
+                "surface_in_m3": 9.844234789778575,
+                "lateral_out_m3": 0.0,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 60.69392752499966,
+                "rain_melt_m3": 60.38494204049969,
+                "et_m3": 69.3456191504997,
+                "deep_percolation_m3": 0.2682883462489808,
+                "calendar_rows": 5844,
+                "element_rows": 542,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          },
+          "modern": {
+            "report_kg_yr": 0.08711999999999999,
+            "report_delta_kg_yr": -0.001732499999999984,
+            "report_bound_kg_yr": 0.08353133712000001,
+            "ofes": [
+              {
+                "OFE": 1,
+                "sediment_out_kg": 12.015630000000002,
+                "net_sediment_kg": 12.015630000000002,
+                "positive_net_kg": 12.015630000000002,
+                "negative_net_kg": 0.0,
+                "surface_out_m3": 1.7658682289442613,
+                "surface_in_m3": 0.0,
+                "lateral_out_m3": 26.93709928800033,
+                "lateral_in_m3": 0.0,
+                "precipitation_m3": 93.3847001999993,
+                "rain_melt_m3": 93.29432547599943,
+                "et_m3": 46.0152186119997,
+                "deep_percolation_m3": 21.584419003573274,
+                "calendar_rows": 5844,
+                "element_rows": 659,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 2,
+                "sediment_out_kg": 15.040080000000003,
+                "net_sediment_kg": 3.02445,
+                "positive_net_kg": 3.0410324999999996,
+                "negative_net_kg": -0.016582500000000003,
+                "surface_out_m3": 3.4759244927837747,
+                "surface_in_m3": 1.7658680313132293,
+                "lateral_out_m3": 13.81343440949998,
+                "lateral_in_m3": 26.921994189749853,
+                "precipitation_m3": 7.00078871250001,
+                "rain_melt_m3": 6.9669808807500075,
+                "et_m3": 17.099512674749946,
+                "deep_percolation_m3": 1.5661671267818293,
+                "calendar_rows": 5844,
+                "element_rows": 659,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              },
+              {
+                "OFE": 3,
+                "sediment_out_kg": 0.0853875,
+                "net_sediment_kg": -14.954692500000002,
+                "positive_net_kg": 0.0,
+                "negative_net_kg": -14.954692500000002,
+                "surface_out_m3": 0.028491203303763753,
+                "surface_in_m3": 3.4759247451037276,
+                "lateral_out_m3": 3.5726998229999976,
+                "lateral_in_m3": 13.813151467500207,
+                "precipitation_m3": 60.69392752499966,
+                "rain_melt_m3": 60.38494204049969,
+                "et_m3": 78.49751228549982,
+                "deep_percolation_m3": 0.4392894348889215,
+                "calendar_rows": 5844,
+                "element_rows": 659,
+                "missing_element_with_surface_flow": 0,
+                "positive_sediment_zero_surface_water": 0
+              }
+            ]
+          }
+        },
+        "events": {
+          "case_id": "denver-2711184-outrut-gravel-high",
+          "calendar_days": 5844,
+          "legacy_events": 4,
+          "modern_events": 1,
+          "legacy_surface_flow_days": 12,
+          "modern_surface_flow_days": 2,
+          "modern_only_surface_flow_days": 0,
+          "legacy_only_surface_flow_days": 10,
+          "lower_inflow_higher_outflow_days": 0,
+          "lower_inflow_higher_outflow_excess_kg": 0.0,
+          "printing_separated_lower_inflow_higher_outflow_days": 0,
+          "printing_separated_excess_kg": 0.0,
+          "reported_outlet_difference_kg": -603.2743200000001,
+          "matched_element_difference_kg": -603.2743200000001,
+          "modern_only_reported_sediment_kg": 0.0,
+          "legacy_only_reported_sediment_kg": 0.0,
+          "modern_terminal_clay_mass_fraction": 0.5724878340699321,
+          "legacy_terminal_clay_mass_fraction": 0.051999416954832456
+        },
+        "paired_annual": {
+          "sediment_out_kg": {
+            "road": -96.44876999999998,
+            "fill": -127.6963875,
+            "buffer": -37.704645
+          },
+          "net_sediment_kg": {
+            "road": -96.44876999999998,
+            "fill": -31.247617500000004,
+            "buffer": 89.99174249999999
+          },
+          "surface_out_m3": {
+            "road": -10.647206714481953,
+            "fill": -6.368310555280163,
+            "buffer": -1.021487095362158
+          },
+          "surface_in_m3": {
+            "road": 0.0,
+            "fill": -10.647206560202521,
+            "buffer": -6.368310044674848
+          },
+          "deep_percolation_m3": {
+            "road": -16.46364586304884,
+            "fill": 0.33961980257224567,
+            "buffer": 0.17100108863994073
+          }
+        }
+      },
+      "input_records": {
+        "legacy": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "8c312eef2984f518f54e433bbacb2b5fee4241719e87d4a1addb54ba6720c2f7"
+        },
+        "modern": {
+          "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+          "sha256": "e446486c9fc4d91194cb8404210a8d5a7abd66e8d6ea1249b268f954df753d1c"
+        }
+      },
+      "paired_terminal_sha256": "72e28d3f3771b503420dd291b7fc3cbc88b60383eb104e478ddcbc6addc72fdb"
+    }
+  ]
+}
