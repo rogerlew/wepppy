@@ -1,0 +1,9 @@
+{
+  "actual_build_script_sha256": "ce70c26c318800db35221062942044d1e59bb49f15ab8b6ff1b055efc8dc5b88",
+  "later_canonical_script_sha256": "555cdd7ae93cadc1238962e9f663e8ed3c478cd4c82d5db3f130cc004f05320b",
+  "actual_build_source_commit": "2b4cd9fb52510d7ff9fbd79e657050efe06baed1",
+  "later_tooling_only_commit": "391e7327f",
+  "actual_wrapper_sha256": "02ed028db281849f94d67465e234c44fdea2b88f6d4b78be7f582a4196449fb3",
+  "actual_build_log_sha256": "ad30406efa880267c9f95838de9984eb7b4ef4d20ab8f4b631b40c1a9dadb584",
+  "note": "Actual wrapper set /usr/bin:/bin first before original canonical script; subsequent canonical fix makes the same choice intrinsic. No rebuild or source identity remint."
+}

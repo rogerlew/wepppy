@@ -1,0 +1,20 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.ubuntu.com>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+Stopped due to shared library event (no libraries added or removed)
+add symbol table from file "/workdir/wepppy/wepp_runner/bin/wepp_261029" at
+	.text_addr = 0x402300
+Breakpoint 1 at 0x4b5df2: file watbal_hourly.for, line 349.
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+
+Breakpoint 1, watbal_hourly (lunp=0, luns=1, lunw=1, nowcrp=1, elevm=289) at watbal_hourly.for:349
+349	     1  wmelt(iplane) + irdept(iplane) + iraplo(iplane) 
+Breakpoint 2 at 0x4b6172: file watbal_hourly.for, line 511.
+
+Breakpoint 2, watbal_hourly (lunp=0, luns=1, lunw=1, nowcrp=1, elevm=289) at watbal_hourly.for:511
+511	          hrfin = xfin
+TRACE_JSON {"fin": -0.3466191589832306, "returnrouted": 0.0691947003298024, "returnbase": -0.2774244586534282, "returnarea": 13.339167788764277, "ui_HUrunf": 0.00011086020822403952, "ui_Hcrunf": 0.02509823441505432, "ui_LFtstp": 24.0, "wmelt(iplane)": 0.013933333568274975, "rain(iplane)": 0.0, "stock": [0.017977455630898476, 0.01837940141558647, 0.034929003566503525, 0.04679332673549652], "frozen": [0.0, 0.0, 0.0, 0.0], "ui_SUrunf": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.00027300044894218445, 0.001638110727071762, 0.001638110727071762, 0.001638110727071762, 0.0], "ui_LfUrf": [8.845962292980403e-05, 8.867750148056075e-05, 8.889938908396289e-05, 8.912445628084242e-05, 8.93536489456892e-05, 8.958804392023012e-05, 8.982887811725959e-05, 9.010245412355289e-05, 9.072868851944804e-05, 9.11807146621868e-05, 9.163261711364612e-05, 9.208440314978361e-05, 9.253608004655689e-05, 9.298761142417789e-05, 9.343902638647705e-05, 9.389033220941201e-05, 9.43414997891523e-05, 9.479254367761314e-05, 9.524346387479454e-05, 9.559284808347002e-05, 9.559284808347002e-05, 9.559284808347002e-05, 9.559284808347002e-05, 9.54708011704497e-05]}
+[Inferior 1 (process 2216350) exited with code 01]

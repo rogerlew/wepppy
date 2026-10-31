@@ -1,0 +1,58 @@
+{
+  "status": "rejected_for_promotion",
+  "engine": "wepp_261029",
+  "native_study_cases": 1444,
+  "builder_readback_cases": 294,
+  "treatments": {
+    "roles": {
+      "numerical": 80,
+      "physical": 80,
+      "cases": 96
+    },
+    "erosion": {
+      "numerical": 77,
+      "physical": 80,
+      "cases": 96
+    },
+    "erosion_road_cap_rebaseline": {
+      "numerical": 96,
+      "physical": 96,
+      "cases": 96
+    },
+    "normalized_legacy": {
+      "numerical": 96,
+      "physical": 96,
+      "cases": 96
+    },
+    "exact_legacy": {
+      "numerical": 96,
+      "physical": 96,
+      "cases": 96
+    },
+    "cap_only": {
+      "numerical": 92,
+      "physical": 96,
+      "cases": 96,
+      "reject_reason": "loam20/24 below90% group gate"
+    },
+    "expanded_cap_pilot": {
+      "numerical": 28,
+      "physical": 28,
+      "cases": 28
+    },
+    "expanded_cap_matrix": {
+      "numerical": 740,
+      "physical": 822,
+      "cases": 840
+    }
+  },
+  "withheld_native_outcomes_inspected": false,
+  "production_changes": false,
+  "blockers": [
+    "Unfunded daily water request in9candidatecases",
+    "Sediment accounting mismatch in9completedcases",
+    "Magnitude gate fails overall and multiplegroups"
+  ],
+  "next_scope": "Separate native daily runoff producer and sediment event-output ablation before further parameter tuning",
+  "ui_gate": "Explicit human approval of specification and layout before production implementation; proposal not ready because science gate failed"
+}

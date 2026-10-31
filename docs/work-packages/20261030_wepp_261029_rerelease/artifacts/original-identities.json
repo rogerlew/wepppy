@@ -1,0 +1,18 @@
+{
+  "wepp_261029": {
+    "sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "bytes": 2705664
+  },
+  "wepp_261029_hill": {
+    "sha256": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+    "bytes": 2649560
+  },
+  "wepp_261029.json": {
+    "sha256": "c0d0c62da8f36bbe73b6b3c91bd2b0e84a864dbfb2a21bb3a631f414d55647c9",
+    "bytes": 4915
+  },
+  "wepp_261029_hill.json": {
+    "sha256": "636b8ff505b515d8080291552b6d6e600c60942f91c28ce00008d1242e026cd1",
+    "bytes": 4865
+  }
+}

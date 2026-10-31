@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec -T --workdir /workdir/wepppy/out/261029-r2-isolated weppcloud env PYTHONPATH=/workdir/wepppy/out/261029-r2-isolated MYPY_CACHE_DIR=/tmp/mypy_cache_261029_r2 /opt/venv/bin/python -c 'import pathlib,subprocess,wepp_runner,wepppy; r=pathlib.Path.cwd(); assert str(r)=="/workdir/wepppy/out/261029-r2-isolated"; assert pathlib.Path(wepppy.__file__).is_relative_to(r); assert pathlib.Path(wepp_runner.__file__).is_relative_to(r); print(subprocess.check_output(["git","rev-parse","--show-toplevel"],text=True).strip()); print(wepppy.__file__); print(wepp_runner.__file__)'
+/workdir/wepppy/out/261029-r2-isolated
+/workdir/wepppy/out/261029-r2-isolated/wepppy/__init__.py
+/workdir/wepppy/out/261029-r2-isolated/wepp_runner/__init__.py

@@ -1,0 +1,9 @@
+{
+  "initial_command": "python3 /workdir/wepp-forest-release-20261009/tools/check_ablation_artifact_policy.py",
+  "initial_cwd": "/home/workdir/wepppy",
+  "initial_scope": "WEPPpy artifact policy (tool defaults to cwd)",
+  "corrected_command": "python3 tools/check_ablation_artifact_policy.py",
+  "corrected_cwd": "/workdir/wepp-forest-release-20261009",
+  "corrected_result": "native artifact policy OK, 1 existing exemption",
+  "note": "Earlier independently retained U10 native policy remains valid; this final delivery check now explicitly verifies the native root."
+}

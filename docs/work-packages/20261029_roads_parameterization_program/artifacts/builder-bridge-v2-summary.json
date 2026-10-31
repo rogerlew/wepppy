@@ -1,0 +1,10 @@
+{
+  "cases": 294,
+  "materials": 7,
+  "arrangements": 7,
+  "surfaces": 2,
+  "traffic_levels": 3,
+  "all_readback_pass": true,
+  "production_changes": false,
+  "native_validation": false
+}

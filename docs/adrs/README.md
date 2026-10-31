@@ -122,11 +122,13 @@ Each ADR should normally include:
 
 - [ADR-0112: Native signed water balance retains local inputs](ADR-0112-native-negative-balance-local-inputs.md) (Accepted, 2026-10-30; local inputs, proportional return timing and updated-stock ET; explicit matched Linux release selection).
 
-- [ADR-0113: Native accepted-boundary accounting ablation](ADR-0113-native-roads-boundary-accounting-ablation.md) (Proposed, research only; no release or Roads default change).
+- [ADR-0113: Native accepted-boundary accounting ablation](ADR-0113-native-roads-boundary-accounting-ablation.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
 
-- [ADR-0114: Native equivalent-plane melt support and storage](ADR-0114-native-equivalent-melt-support-and-storage.md) (Proposed; C5a native validation, no release/default change).
+- [ADR-0114: Native equivalent-plane melt support and storage](ADR-0114-native-equivalent-melt-support-and-storage.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
 
-- [ADR-0115: Native boundary-anchored deposition](ADR-0115-native-boundary-anchored-deposition.md) (Proposed; numerical cancellation repair under native validation).
+- [ADR-0115: Native boundary-anchored deposition](ADR-0115-native-boundary-anchored-deposition.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
 
-- [ADR-0116: Native channel sediment source accounting](ADR-0116-native-channel-sediment-source-accounting.md) (Proposed; isolated source-mass repair and separate hydraulic assessment).
-- [ADR-0117: Native constant-discharge channel support](ADR-0117-native-constant-discharge-channel-support.md) (Proposed; all-top guard and deposition-boundary correction).
+- [ADR-0116: Native channel sediment source accounting](ADR-0116-native-channel-sediment-source-accounting.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
+- [ADR-0117: Native constant-discharge channel support](ADR-0117-native-constant-discharge-channel-support.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
+
+- [ADR-0118: Stable Yalin transport capacity](ADR-0118-stable-yalin-transport-capacity.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).

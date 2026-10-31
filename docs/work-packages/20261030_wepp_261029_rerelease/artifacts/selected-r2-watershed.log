@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20261030_wepp_261029_rerelease/verify_selected_watershed.py /workdir/wepppy/out/roads-channel-accounting-20261030/selected-r2-watershed
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261030_wepp_261029_rerelease/verify_selected_watershed.py", line 86, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20261030_wepp_261029_rerelease/verify_selected_watershed.py", line 52, in main
+    assert len(values) == 3 + len(MEASUREMENT_COLUMNS)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

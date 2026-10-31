@@ -1,0 +1,30 @@
+{
+  "roles": {
+    "returncode": 1,
+    "expected_stop": true,
+    "all_outputs_equal": true,
+    "outputs": {
+      "H1.loss.dat": "01a6cbdf42baf3d677f80d390aa918a41c1b1c1ecf3e3096894dd7d056412523",
+      "H1.soil.dat": "dc8e172d8bccd42ac49b09f940643a46f9849224599c5cb5d117a29985c08da0",
+      "H1.pass.dat": "fda97af4a0c2d368062001bc0337529bf18cdffd29fcdbb31906a21de89d648b",
+      "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+      "H1.wat.dat": "f61817c6531701b6672f1650ec2e90d1814534fd7b121ff1734b001a1819609d",
+      "H1.element.dat": "560f4c5f0510b12fea1f57d16c8d0c737ac5b1adfe6f77939603eb4fb80d9152",
+      "H1.ebe.dat": "14200cb9e4eae6b27671faf9474e41b3141dc3729db6598f2a67b7726ce66fb8"
+    }
+  },
+  "erosion_road_cap": {
+    "returncode": 0,
+    "expected_stop": true,
+    "all_outputs_equal": true,
+    "outputs": {
+      "H1.loss.dat": "64b519ef9568a9f6e2331421b975d4e9a2379626f680f05882db4897dbe17719",
+      "H1.soil.dat": "35e47b5fa769b77ffc557c961fa43070fec1ffb8c3d8bf92577c73ad5a608745",
+      "H1.pass.dat": "9701c135d409cc15626c5ff2fcd6baf5e82221ffecefc8bf1bd117683d502963",
+      "H1.plot.dat": "15b1683d2b56440ef6343895e5d527033bc13533ec3361820dea1661c3239a0b",
+      "H1.wat.dat": "6940c06e4696897a4fa25b08a861ecc32c9120e090d8ebde0e8576f2e8864d23",
+      "H1.element.dat": "f1e918f1375d9b3b59207a62d26de863f1a7fc53b9c516efd7264389d3fbcc4d",
+      "H1.ebe.dat": "0d713c056682eface596109aa3795ec0a43b208dd70830ad6ba21023efb2b7d8"
+    }
+  }
+}

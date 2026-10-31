@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose exec -T weppcloud python /workdir/wepppy/docs/work-packages/20261030_wepp_261029_release/verify_selected_release.py /workdir/wepppy/out/roads-channel-accounting-20261030/selected-r2-hill-inputs.zip /workdir/wepppy/out/roads-channel-accounting-20261030/selected-r2-hill
+{
+  "release": "wepp_261029",
+  "binary_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "fixture_source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "fixture_sha256": "64eb68c9a408b36abd5658aea68a039014620f7340236b0aa518b9e4a72677fc",
+  "native_output_sha256": {
+    "H1.loss.dat": "141d4ab3dfa3eec7eee33e18baf0107f3c025be82c9b80fd0a9087758062405b",
+    "H1.soil.dat": "f14a7eb072c466275fbe58711073a22278f6856845244166871b520b0ed0c97b",
+    "H1.pass.dat": "bb068fe183acf40dc1734364f273b71334ba7bf43261a1cb996e085c0501d99f",
+    "H1.plot.dat": "252834e81ea4a4256dc8348cb59b926041a434ed64efede0821bfa1a51428a4e",
+    "H1.wat.dat": "d7b75a6738e67c14ea0f1426cd0e6da630ab279ac85c2ac17ae6e77581319e2a",
+    "H1.element.dat": "4d46da35ebb1d5f0e0c4c3912c9d51573ea4bf9386bb042ac580a2da05a971b4",
+    "H1.ebe.dat": "1fbe2eed5b60b7521298c7ceaf3e9aec02dc54aa466cc66e1c90af03b03229e8"
+  },
+  "complete_water_rows": 17532,
+  "parquet_rows": {
+    "H.element.parquet": 3237,
+    "H.wat.parquet": 17532
+  },
+  "absent_optional_water_columns": [
+    "InterceptionStorage"
+  ],
+  "runner_log_sha256": "dbd73bc3a4de105b2f8d99a7d1b50ea015f1b726a6539f0398c208e8b6a48bad"
+}

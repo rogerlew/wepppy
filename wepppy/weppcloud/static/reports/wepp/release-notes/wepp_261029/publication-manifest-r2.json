@@ -1,0 +1,72 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261029",
+  "artifact_revision": 2,
+  "document_revision": "2",
+  "document_date": "2026-10-30",
+  "publication_status": "approved for publication",
+  "approved_on": "2026-10-30",
+  "approval_record": "Owner authorized same-name reissue of the undeployed artifact and updated release notes; independent AI scientific and final implementation/disclosure reviews accept the exact revision-2 PDF and matched pair",
+  "pdf_filename": "wepp_261029_release-notes-r2.pdf",
+  "pdf_sha256": "c94db60e60ccd561a96dcdda89bad8bed209c32a783d3e699beb0e72485ddf44",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r2.pdf",
+  "pages": 14,
+  "figures": 6,
+  "model_source_identity": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "source_comparison_baseline": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "retained_original_source_comparison_baseline": "b73e93b19a724d1991d341d38a18d11e742231bd",
+  "binary_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "replacement_scope": "Explicit same-name replacement authorized because original pair was not deployed; revision-1 identities preserved",
+  "superseded_artifact": {
+    "document_revision": "1",
+    "pdf_filename": "wepp_261029_release-notes-r1.pdf",
+    "pdf_sha256": "be19fc81a89c1df957e13240a62fe9e0affdaf2238c40d23061f29c761e3d42b",
+    "model_source_identity": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+    "binary_sha256": {
+      "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+      "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4"
+    },
+    "preserve_issued_pdf": true
+  },
+  "review_scope": "Independent AI scientific and final issue-time implementation/disclosure reviews completed; authoring and review roles disclosed; no institutional or human peer-review claim",
+  "completed_actual_byte_gates": {
+    "native_tests": 1059,
+    "roads_physical_cases": 840,
+    "disturbed_tests": 99,
+    "hillslope_watchlist": 18,
+    "paired_smokes": 2
+  },
+  "pending_gates": [
+    "Copy and HTTP download hash validation"
+  ],
+  "known_limitations": [
+    "Source-time and equivalent-melt fits are approximations, not travel-time solvers",
+    "Channel average-width, linear-capacity, cohort and onset approximations remain",
+    "Roads meaningful magnitude 719/766 and small-reference 30/74 fail separate frozen acceptance gates; no field calibration or withheld-soil acceptance",
+    "Daily negative soil exchange remains unallocated; wider soil/channel closure is not universally established",
+    "No new Windows release; project defaults unchanged"
+  ],
+  "production_deployment": false,
+  "sidecar_sha256": {
+    "wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f"
+  },
+  "final_cedar": {
+    "hillslopes": 864,
+    "years": 24,
+    "outlet_sediment_kg": 517815.77,
+    "change_from_original_percent": 187.456,
+    "negative_or_nonfinite_intermediate_class_records": 0,
+    "observed_standard_outputs_exact": 9,
+    "detail_dates": 16,
+    "channel_events": 5936,
+    "source_class_records": 29680,
+    "measured_sediment_calibration": false,
+    "global_sediment_budget_closure_claim": false
+  },
+  "scientific_review_sha256": "7a239ac7ed5f50f848296b0219bd218f61bcd1a263d136842909c2b81767359b",
+  "independent_artifact_review_sha256": "322f4d0b3bc53f322595191c3b1581474f82a59bb1dbd3e09982fb023c577673"
+}

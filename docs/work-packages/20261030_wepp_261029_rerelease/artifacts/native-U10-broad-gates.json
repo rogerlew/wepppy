@@ -1,0 +1,37 @@
+{
+  "review": "Independent AI retained-output verification; no simulation rerun",
+  "binary_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+  "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "roads_cases": 840,
+  "roads_completed": 840,
+  "roads_physical_pass": 840,
+  "roads_inputs_verified": 10080,
+  "roads_outputs_verified": 5880,
+  "roads_magnitude_within": 749,
+  "roads_magnitude_groups": {
+    "meaningful": {
+      "cases": 766,
+      "within": 719
+    },
+    "small": {
+      "cases": 74,
+      "within": 30
+    }
+  },
+  "roads_parameterization_accepted": false,
+  "disturbed_tests_passed": 99,
+  "disturbed_simulations": 96,
+  "disturbed_outputs_retained": 768,
+  "disturbed_manifest_sha256": "5121c3ac0e4b3f83c19a80311cd44f1e64ec12ebcd21dafc3fc56d6a724b3c57",
+  "evidence_sha256": {
+    "U10-matrix840.log": "b1ad12ec2c132f69a916291d014ca5d1e52d07bd19ed6c68ecaf36f820d1e1e2",
+    "disturbed-U10.log": "995f8f599d68c87a069066b74e53d8df6d724a71b07afb43719f8bfb4fd0f38e",
+    "U10-magnitude-summary.json": "d96d153e624e40132bd5ebe7030bffb0bd1e9d1a9d10819406bb35e8792ba650",
+    "U10-matrix840/declaration.json": "5980fd04319b591ddb6e6f9bc97621b23ce087fe980e313a39c851e10c1420ad",
+    "U10-matrix840/results.json": "94dd0bd883928dac8da6f0eeea666db3210c3e50e76095470f6343753406a056",
+    "U10-matrix840/summary.json": "8395354eb868e07f23ef5d217b4dce465aec70d9a2cb87135d3ed84cb7e96cba",
+    "U10-matrix840/magnitude-scores.json": "8e3626e1ec3d6bfea1b7efba638e2bf545ba3ac797d1c294d9b4485aa3cde8ba"
+  },
+  "verifier_sha256": "21ae403253aa3f04fdcd444d884349264d0ed589d81dfd384d8b2a873f0321d7",
+  "scope": "U10 actual dated bytes; full Cedar sign/scientific review remains separate."
+}

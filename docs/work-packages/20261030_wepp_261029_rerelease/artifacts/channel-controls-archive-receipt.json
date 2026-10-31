@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261030/native-accounting-channel-controls-v1.tar.gz",
+  "sha256": "fc42866233e4c5da0ea99244048f4fa9b150b6fbf1028bfb8faa0bda7f3401de",
+  "bytes": 8756361897,
+  "files": 83882,
+  "uncompressed_bytes": 51787764792,
+  "all_members_verified": true,
+  "excluded_files": 4,
+  "member_manifest_sha256": "edc0de6d0e9e39f9bb0f2d1244a5490d1b73267b83340f8a9f760a2fb34d13a8",
+  "scope": "Completed U7/U9 diagnostic Cedar and final U9a bounded/full native, Roads matrix, Disturbed/watchlist evidence; final Cedar and active channel observation excluded pending completion."
+}

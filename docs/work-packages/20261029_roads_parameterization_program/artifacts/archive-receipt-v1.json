@@ -1,0 +1,8 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261030/forest-local-evidence-v1.tar.gz",
+  "size_bytes": 1768001535,
+  "sha256": "38d7158ef8e64ef41f2393c7e8708f77b9d020f93dbbd48d3b79cab794989940",
+  "verified_native_input_output_files": 17784,
+  "case_count": 936,
+  "method": "Streamed tar and independently hashed every declared native input/output for all840development and96exactlegacycases; compared to retained case records. Local raw trees remain available; archive is network-storage copy."
+}

@@ -1,0 +1,61 @@
+{
+  "binary": "wepp_261029",
+  "binary_sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+  "archive_sha256": "446abd38009e61050b40a2cd7a81e57c7d347d0dfa4641a31f201b3bb8eb5c99",
+  "cases": {
+    "roles": {
+      "expected_exit_code": 1,
+      "inputs": {
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "p1.sol": "551325c6b904588165e9ebabbb33bd11de2707017c93f684d861c430862cf352",
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71"
+      },
+      "outputs": {
+        "H1.element.dat": "560f4c5f0510b12fea1f57d16c8d0c737ac5b1adfe6f77939603eb4fb80d9152",
+        "H1.soil.dat": "dc8e172d8bccd42ac49b09f940643a46f9849224599c5cb5d117a29985c08da0",
+        "H1.wat.dat": "f61817c6531701b6672f1650ec2e90d1814534fd7b121ff1734b001a1819609d",
+        "H1.loss.dat": "01a6cbdf42baf3d677f80d390aa918a41c1b1c1ecf3e3096894dd7d056412523",
+        "H1.pass.dat": "fda97af4a0c2d368062001bc0337529bf18cdffd29fcdbb31906a21de89d648b",
+        "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+        "H1.ebe.dat": "14200cb9e4eae6b27671faf9474e41b3141dc3729db6598f2a67b7726ce66fb8"
+      }
+    },
+    "erosion_road_cap": {
+      "expected_exit_code": 0,
+      "inputs": {
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.cli": "bdc6e56a99e49220b2a582d85a2d492a677ad66e6bfe2c8de6ad7e50e53f6275",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "p1.sol": "83924248a717db4a107cb76c8ae646477137eda69d6175f36d6b5a60352d8b6e",
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outputs": {
+        "H1.element.dat": "f1e918f1375d9b3b59207a62d26de863f1a7fc53b9c516efd7264389d3fbcc4d",
+        "H1.pass.dat": "9701c135d409cc15626c5ff2fcd6baf5e82221ffecefc8bf1bd117683d502963",
+        "H1.loss.dat": "64b519ef9568a9f6e2331421b975d4e9a2379626f680f05882db4897dbe17719",
+        "H1.plot.dat": "15b1683d2b56440ef6343895e5d527033bc13533ec3361820dea1661c3239a0b",
+        "H1.ebe.dat": "0d713c056682eface596109aa3795ec0a43b208dd70830ad6ba21023efb2b7d8",
+        "H1.soil.dat": "35e47b5fa769b77ffc557c961fa43070fec1ffb8c3d8bf92577c73ad5a608745",
+        "H1.wat.dat": "6940c06e4696897a4fa25b08a861ecc32c9120e090d8ebde0e8576f2e8864d23"
+      }
+    }
+  },
+  "purpose": "Reproduce existing uncapped daily coupling stop and matched passing control; expected failure is not accepted model behavior.",
+  "provenance": "Frozen Birmingham climate and FSWEPP management/slope; WEPPcloud generated material1718465; project runtime sidecars; preserved200mm boundary."
+}

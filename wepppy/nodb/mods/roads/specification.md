@@ -1095,3 +1095,18 @@ semantics. TotalWatSed uses original weighted profiles directly, retaining its
 Q/QOFE diagnostics and optional support-area weighting. Baseline behavior and
 public report columns/units remain unchanged. Historical results without corrected
 accounting provenance are not certified by this amendment.
+
+
+## Modern generated-soil parameterization: implementation gate
+
+The 2026-10-30 operator direction authorizes isolated scientific validation using
+the reviewed261029 release and preparation of a configuration specification and
+layout. The modern parameter set is not yet a production default. Existing legacy
+template behavior and project selections remain authoritative.
+
+Human approval of both the proposed UI configuration specification and layout is
+required before implementing the editor or its production persistence/application
+wiring. Independent scientific/technical review does not substitute for that
+approval. Before approval, permitted work includes disposable generated-input
+experiments and static specification/layout proposals. Preserve existing project
+behavior, explicit version adoption and the standard contract-first checkpoint.

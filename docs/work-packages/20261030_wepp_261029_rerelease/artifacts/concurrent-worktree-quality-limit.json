@@ -1,0 +1,9 @@
+{
+  "repository_broad_exception_check": "failed",
+  "base_ref": "origin/master",
+  "scope": "75 concurrently modified production Python files outside release ownership",
+  "reported_net_delta": 40,
+  "release_production_python_edits": false,
+  "action": "Retain finding; do not modify unrelated request-admission work. Release changes are native binaries, metadata, documentation and validation harnesses.",
+  "log_sha256": "edeb400a59d6fc28c222f08ce9d768debecdf2198d1015ebb55087ab97a5c972"
+}

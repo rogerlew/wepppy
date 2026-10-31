@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/workdir/wepppy/out/roads-channel-accounting-20261030/archive_completed_diagnostics.py", line 14, in <module>
+    if parts[0].startswith('disturbed-') and parts[1]!='disturbed_matrix0':
+                                             ~~~~~^^^
+IndexError: tuple index out of range

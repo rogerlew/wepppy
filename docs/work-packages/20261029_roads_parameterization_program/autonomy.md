@@ -46,3 +46,27 @@ Cedar Creek semantic analysis and illustrated release notes. This supersedes the
 earlier exact-261026 freeze for candidate investigation and validated adoption.
 Keep 261026 as a historical control. Scientific gates, withheld sampling, existing
 project defaults and the separate deployment boundary remain unchanged.
+
+
+## Human gate for configuration specification and layout
+
+Operator instruction, 2026-10-30: continue the recommended scientific program
+with broad authority to use forest, up to a human review of the UI configuration
+specification and layout. Prepare concrete fields, units, ranges, applicability,
+version/adoption/reset behavior and a static layout proposal. Human approval of
+both specification and layout is required before implementing the configuration
+view or its production persistence/application wiring. Scientific experiments,
+disposable builder/full-project validation and reviewable design documents remain
+authorized. Do not treat silence, scientific acceptance or AI review as UI approval.
+
+
+## Native accounting ablation authorization — 2026-10-30
+
+The operator authorized proceeding with the native accounting ablation addressing
+the two continuation failures. The active native package is
+`/workdir/wepp-forest-release-20261009/docs/work-packages/20261030-roads-native-accounting/`,
+with `prompts/active/implementation_execplan.md`. This authorizes isolated native
+source/fixture/behavioral ablation work and validation; installed `wepp_261029`
+remains the comparator. Do not silently vendor probes, retune Roads, consume
+withheld data or implement the UI. Human approval of UI specification/layout
+remains required. The previous native-scope blocker is now cleared for ablation.

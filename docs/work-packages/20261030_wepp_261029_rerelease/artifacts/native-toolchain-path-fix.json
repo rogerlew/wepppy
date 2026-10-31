@@ -1,0 +1,12 @@
+{
+  "script_sha256": "555cdd7ae93cadc1238962e9f663e8ed3c478cd4c82d5db3f130cc004f05320b",
+  "shell_syntax": "bash -n passed",
+  "hostile_path_readback": [
+    "/usr/bin/as",
+    "/usr/bin/ld"
+  ],
+  "compiler_and_flags_overrides": "unchanged",
+  "actual_dated_build_source_commit": "2b4cd9fb52510d7ff9fbd79e657050efe06baed1",
+  "rebuild_required": false,
+  "rationale": "Actual dated build already ran with the same /usr/bin:/bin prefix; only canonical script enforcement was missing."
+}

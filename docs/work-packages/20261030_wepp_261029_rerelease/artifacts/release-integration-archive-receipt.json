@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261030/native-accounting-release-integration-v1.tar.gz",
+  "sha256": "770c5e8d0ccc88315034d1cff1c00761fdeec71d052bf12aa6e61a5b7a434f0b",
+  "bytes": 24747316,
+  "files": 387,
+  "uncompressed_bytes": 116431884,
+  "all_members_verified": true,
+  "already_retained_files": 0,
+  "member_manifest_sha256": "ec7b79d0ad76de3f5f6d700562eac773c91e12c9daa3d8c69d6f9335e46752a6",
+  "scope": "Completed selected runtime/input/output/readback probes, final full-suite and operational logs, draft report review snapshots, archive manifests/receipts and retained failed helper/probe logs. Scientific raw lanes retained in separate verified archives."
+}

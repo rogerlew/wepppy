@@ -1,0 +1,160 @@
+{
+  "binary": "wepp_261029",
+  "binary_sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+  "archive_layout": "per_case",
+  "archive_sha256": "3e1f4ee5f9cb3505d02dba6ad0fdec5d7d764b5181d02e6aca4fe50a9d10d1aa",
+  "cases": {
+    "charleston_cap": {
+      "expected_exit_code": 1,
+      "inputs": {
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d2507c3fd4b436c94f40d277335251951c3d96a87574ccd59ae02ce484734125",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "p1.cli": "2fed724429539f9ab6ce66878e066633f0d983580652df86ca701cabc325dadb",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "outputs": {
+        "H1.loss.dat": "c09b345e56b8fa46c43d5085628c2564e2b99af136db31092774ed11f89c2878",
+        "H1.soil.dat": "04a3f2b97c7a6ca3e3876dc03549450cac83b872d50e2ac1bc0d64ec85d6d49a",
+        "H1.pass.dat": "fdadaed81efac41098a48418a6def50f1cb0b1f9d5c889c02930b4ff3d04ef60",
+        "H1.plot.dat": "77526fd7aa97207ce8686bb353e8dfc7fad5f8d75c4bc6c61c500babe1a64d23",
+        "H1.wat.dat": "62f270b0560234607219267785cc7a024eabcb47f88809d8b49aac1ea677b975",
+        "H1.element.dat": "ca1bdbeedd4df2101e43b128375a0bd1b51ac83405a18a82105610b2ecf21573",
+        "H1.ebe.dat": "354801a2e153351c93aa876f5e6b5dc16e9ff0059abe7deb5fe67a2b8bd369ea"
+      },
+      "known_failure": "HOURLY_WATER_UNMET year16 day54 OFE2 hour11",
+      "audit": null
+    },
+    "site_cap": {
+      "expected_exit_code": 0,
+      "inputs": {
+        "p1.slp": "2f2d67271f33d6d70eb660b33ca264e1f952c1b27faa38aea3c7b55eef7411b2",
+        "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+        "p1.sol": "d2507c3fd4b436c94f40d277335251951c3d96a87574ccd59ae02ce484734125",
+        "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+        "p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+        "p1.cli": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+        "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+        "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+      },
+      "outputs": {
+        "H1.loss.dat": "c2bba462f9391bbabec8d14e56fb559b114fbf51800212c61c46553b20979a1b",
+        "H1.soil.dat": "9e3a99dd6be1ee0e46a4dfc82912ca4232fd659f8630b4f925e6473f1b7ff303",
+        "H1.pass.dat": "e93eebc29363b22f8946f800996841b17af5909378ff8eddccdf63f6e67726d6",
+        "H1.plot.dat": "adcd46721610060d92d98b39faa12fad02fc584b60d45ba0790004bd05c5e322",
+        "H1.wat.dat": "b1bb7c70f6518c900113626756c5e18488a81c0683d9b1c700290d91f00ea844",
+        "H1.element.dat": "02cf847d66758e7336e97cd397477e461d078d5cb086a47a06b46eac82fa3458",
+        "H1.ebe.dat": "73ee6951e40ed94cb956d737ea4d5f4f56fd6cf8732ea1053ec2bcc8d20ee0ec"
+      },
+      "known_failure": "ELEMENT/EBE sediment mismatch2005-01-19; annualELEMENT/report mismatch",
+      "audit": {
+        "sediment": {
+          "ofes": [
+            {
+              "boundary_kg_yr": 798.1582950000001,
+              "net_kg_yr": 798.1582950000001,
+              "positive_daily_net_kg_yr": 798.1582950000001,
+              "negative_daily_net_kg_yr": 0.0
+            },
+            {
+              "boundary_kg_yr": 836.1604350000003,
+              "net_kg_yr": 38.00214000000001,
+              "positive_daily_net_kg_yr": 39.98486250000002,
+              "negative_daily_net_kg_yr": -1.9827225
+            },
+            {
+              "boundary_kg_yr": 730.5237225,
+              "net_kg_yr": -105.63671250000004,
+              "positive_daily_net_kg_yr": 58.16893499999999,
+              "negative_daily_net_kg_yr": -163.80564749999985
+            }
+          ],
+          "dates": 1406,
+          "report_delta_kg_yr": 0.9254025000000183,
+          "report_bound_kg_yr": 0.17670209832,
+          "report_reconciled": false,
+          "negative_fluxes": [],
+          "physical_budget_valid": true
+        },
+        "ebe": {
+          "dates": 1095,
+          "max_delta_kg_m": 3.734,
+          "mismatches": [
+            {
+              "date": [
+                2005,
+                19
+              ],
+              "ebe_kg_m": 0.0,
+              "element_kg_m": 3.734,
+              "delta_kg_m": 3.734
+            }
+          ]
+        },
+        "water": {
+          "ofes": [
+            {
+              "surface_out_m3_yr": 268.2887964887756,
+              "surface_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 147.32392633200246,
+              "lateral_in_m3_yr": 0.0,
+              "precipitation_m3_yr": 511.01097695999783,
+              "rain_melt_m3_yr": 511.01082608399776,
+              "et_m3_yr": 86.19636405599987,
+              "deep_percolation_m3_yr": 7.079699343697646,
+              "apparent_soil_residual_m3": 0.5910077288549765,
+              "first_reported_stock_m3": 43.254338688000004,
+              "last_reported_stock_m3": 71.77593772799999
+            },
+            {
+              "surface_out_m3_yr": 186.48323903118933,
+              "surface_in_m3_yr": 268.28878279610757,
+              "lateral_out_m3_yr": 251.5056107850011,
+              "lateral_in_m3_yr": 147.35876970374898,
+              "precipitation_m3_yr": 38.30905782000001,
+              "rain_melt_m3_yr": 38.008497260250024,
+              "et_m3_yr": 15.107757464249985,
+              "deep_percolation_m3_yr": 0.5307451771767345,
+              "apparent_soil_residual_m3": 0.003474668966915227,
+              "first_reported_stock_m3": 3.242475324,
+              "last_reported_stock_m3": 3.335494932
+            },
+            {
+              "surface_out_m3_yr": 199.2952532468685,
+              "surface_in_m3_yr": 186.4832371033102,
+              "lateral_out_m3_yr": 464.4354835889982,
+              "lateral_in_m3_yr": 251.50594738499916,
+              "precipitation_m3_yr": 332.123604119999,
+              "rain_melt_m3_yr": 329.5211049899988,
+              "et_m3_yr": 99.65973298049977,
+              "deep_percolation_m3_yr": 3.3462884050301667,
+              "apparent_soil_residual_m3": 0.331701772990672,
+              "first_reported_stock_m3": 28.109344031999996,
+              "last_reported_stock_m3": 37.011577679999995
+            }
+          ],
+          "days": 5844,
+          "max_surface_transfer_delta_m3": 1.549548001378298e-05,
+          "max_lateral_transfer_delta_m3": 0.0012822480000000414,
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        },
+        "invalid_water_rows": [],
+        "physical_pass": false
+      }
+    }
+  },
+  "purpose": "Retain two independent broad-development failure classes; native completion and expected reproduction are not physical acceptance.",
+  "provenance": "Development material53949, gravel/high, inbare; frozen FSWEPP matched geometry/management and site runtime bundle."
+}

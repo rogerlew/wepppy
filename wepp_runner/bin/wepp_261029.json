@@ -1,8 +1,40 @@
 {
-  "artifact_revision": 1,
+  "artifact_revision": 2,
   "binary_name": "wepp_261029",
   "binary_role": "watershed",
-  "built_utc": "2026-10-30T15:50:21Z",
+  "build": {
+    "build_log_sha256": "1ab513ff5bccc507a257c02150117a76fe58ac63726c7a3d9f3f5588d6a7651a",
+    "build_script_sha256": "555cdd7ae93cadc1238962e9f663e8ed3c478cd4c82d5db3f130cc004f05320b",
+    "fixture_first_commit": "a8780759b",
+    "independent_test_commit": "2934a24b8",
+    "native_provenance_sha256": "193a8e11d1499898ebe4745d416d124ea0166ad705f919bf28699f589e029999",
+    "path_prefix": "/usr/bin:/bin",
+    "source_manifest_files": 506,
+    "source_manifest_sha256": "a57a9d4a4ac1e31d6ae73f8bc42aa9d0a36c547139ae27b5e4b426aa8a4000af",
+    "toolchain": {
+      "as": {
+        "path": "/usr/bin/as",
+        "version": "GNU assembler (GNU Binutils for Ubuntu) 2.42"
+      },
+      "gcc": {
+        "path": "/usr/bin/gcc",
+        "version": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+      },
+      "gfortran": {
+        "path": "/usr/bin/gfortran",
+        "version": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+      },
+      "ld": {
+        "path": "/usr/bin/ld",
+        "version": "GNU ld (GNU Binutils for Ubuntu) 2.42"
+      },
+      "make": {
+        "path": "/usr/bin/make",
+        "version": "GNU Make 4.3"
+      }
+    }
+  },
+  "built_utc": "2026-10-30T23:13:45Z",
   "capacity": {
     "channels": 15000,
     "elements": 60000,
@@ -30,19 +62,26 @@
     "single_user_defined_inputs_supported": true
   },
   "known_limitations": [
-    "Signed soil/routing withdrawal acceptance and raw negative-discharge clipping remain open",
-    "Muskingum-Cunge storage authority unchanged; no universal physical closure claim",
-    "Late return-only SRC3 uses midnight effective support; actual hourly occurrence and physical hillslope peak are not reconstructed",
-    "Late-source eligibility excludes mixed sources, contours and daily water balance",
-    "New shared-math Linux baseline intentionally changes historical outputs; regenerate the matched hillslope/watershed pair",
-    "Hourly return partition is proportional source-time attribution, not a travel-time solver or universal variable-width geometry validation",
-    "Daily negative FIN remains unallocated; wider signed soil/channel coupling remains open",
-    "Roads development panel is not field calibration or withheld-soil acceptance"
+    "Scientific acceptance is bounded by the retained mathematical and native controls, full-period class sign/finiteness audit, and sixteen-date local source/bed audit; it does not establish whole-watershed sediment closure or measured-sediment calibration.",
+    "Signed soil/channel withdrawal acceptance, negative-discharge clipping and Muskingum-Cunge storage authority remain separate open limitations.",
+    "Hourly source-time return partition and late-source support are not a travel-time solver or independently reconstructed physical hydrograph.",
+    "Connected melt repair retains mixed-rain precedence, zero-local-melt and absolute-clock limitations; channel indices are excluded from that melt repair.",
+    "Storage subtotal repair preserves the existing contributing set and does not redefine channel processing-order membership or upstream state freshness.",
+    "Channel transport retains segment-average width, linear capacity, onset/cohort handoff, hydraulic limiting guard and historical unit-conversion approximations.",
+    "The stable Yalin factor applies to hillslope and channel capacities; correcting one negative class can change allocation for all classes. Fresh outputs were validated; complete output parity with the preceding candidate is not claimed.",
+    "Cedar outlet sediment is 517815.77 kg versus original revision 1 180137.20 kg (+187.456%); annual changes range from -0.303% to +1286.54%. These material changes require release-note disclosure and are not calibration evidence.",
+    "Fresh U10 Roads magnitude acceptance fails in both separate groups: meaningful-reference cases 719/766 (93.864%) and small-reference cases 30/74 (40.541%); each requires 95% overall and 90% per declared major stratum. The 749/840 aggregate is descriptive only. No field calibration, parameterization acceptance or withheld-soil acceptance is claimed.",
+    "Regenerate all contributing hillslope/PASS/watershed outputs with the exact matched replacement pair, not the shared tag alone.",
+    "No new Windows release, project default switch or production deployment is claimed."
   ],
+  "matched_pair_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
   "math_runtime": {
     "architecture": "x86_64",
     "contract": "SC-MATH-001#INV-MATH-001",
-    "native_double_calls": "unchanged",
+    "native_double_calls": "unwrapped system libm; stable deposition and Yalin factors use double intermediates",
     "other_float_functions": "double evaluation followed by one real32 conversion",
     "policy": "portable-real32-v1",
     "sine_cosine": "deterministic Fortran kernel; 1e-4 absolute error budget",
@@ -54,34 +93,51 @@
     "sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
     "source_commit": "c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307"
   },
+  "release_status": "revision 2 native repair accepted; downstream integration, publication and deployment are tracked separately",
   "release_tag": "261029",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+  "sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
   "source_branch": "wepp_260430_negmeltfix_comparator",
-  "source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
   "source_repo": "wepp-in-the-woods/wepp-forest",
+  "supersedes": {
+    "artifact_revision": 1,
+    "sha256": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "sidecar_sha256": "c0d0c62da8f36bbe73b6b3c91bd2b0e84a864dbfb2a21bb3a631f414d55647c9",
+    "source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504"
+  },
   "validation": {
-    "ablation_artifact_policy": "pass",
-    "container_smoke": "both dated release profiles passed in WEPPpy runtime using scratch paths",
-    "disturbed_matrix": "99 passed; 96 configurations",
-    "downstream_vendoring": "matched pair vendored to WEPPpy; defaults unchanged",
+    "artifact_policy": "pass; native ablation size and retention policy",
+    "binary_provenance": "pass; actual U10 system loader and runtime libraries",
+    "channel_source_bed_audit": "pass within declared sixteen dates: 5936 channel-events, 29680 source-class records; source relative residual at most 1.8392e-7, local closure relative scale at most 3.5307e-8, exact segment joins",
+    "disturbed_matrix": "99 tests pass, covering 96 actual U10 hillslope simulations; 768 native output hashes retained",
+    "downstream_vendoring": "Separate integration evidence is maintained in WEPPpy docs/work-packages/20261030_wepp_261029_rerelease; not included in native validation counts",
     "elf_interpreter": "/lib64/ld-linux-x86-64.so.2",
-    "hillslope_watchlist": "13 passed; zero failures",
-    "host_smoke": "both dated release profiles passed",
-    "independent_implementation_review": "accepted; 125 focused tests plus 48 additional compiled scheduling cases independently passed; AI implementation-review.md, 2026-10-30",
-    "independent_scientific_review": "accepted with documented approximation and scope limits; independent AI scientific-review.md, 2026-10-30",
-    "post_vendor_container_smoke": "both profiles pass",
-    "post_vendor_host_smoke": "both profiles pass",
-    "post_vendor_provenance": "pass",
-    "post_vendor_tests": "69 passed, 2 warnings; runner/capabilities/old-project save-reload and Builder snapshot",
-    "production_deployment": "not performed",
-    "pytest": "663 passed, 2 warnings in 519.04s; PATH=/usr/bin:/bin first",
-    "release_candidate_equivalence": "both complete binary SHA256 values exactly identical; no normalization required",
-    "release_report": "10 pages,4 figures; owner accepted; independent AI science/implementation/disclosure and final PDF/manifest checks pass; actual HTTP type/hash verified",
-    "report_pdf_sha256": "be19fc81a89c1df957e13240a62fe9e0affdaf2238c40d23061f29c761e3d42b",
-    "roads_development_panel": "96/96 frozen magnitude and physical/accounting gates passed; not field calibration or holdout acceptance",
-    "same_build_watershed_replay": "864 independently generated hillslopes and full 1980-2003 Cedar watershed; exact binary SHA256 identity transfers candidate evidence",
-    "selected_release_runtime": "runner selects hill pair; all17532 WAT rows complete finite nonnegative; Rust imports3237 ELEMENT and17532 WAT rows; optional absent InterceptionStorage remains null"
+    "focused_capacity_controls": "80 checks pass at O0/O2, including 1152 frozen consumer inputs and exact unequal-class Cedar state",
+    "hillslope_watchlist": "18/18 pass on actual U10 dated hillslope binary",
+    "host_smoke": "pass; both actual U10 dated profiles complete the three-year host fixture",
+    "independent_implementation_review": "pass; independent AI source/math, actual-byte local gates and frozen-input broad-evidence verification",
+    "independent_scientific_review": "accepted by independent AI review for the exact matched pair within documented scope; material sediment changes must be disclosed; not institutional peer review or measured calibration",
+    "production_deployment": "No deployment is certified by this native metadata",
+    "pytest": "1059 passed, 2 existing tarfile deprecation warnings in 615.74 seconds on actual U10 source/pair",
+    "release_report": "Revision 2 scientific report and publication evidence are tracked separately in docs/release-notes/wepp_261029/publication-manifest-r2.json",
+    "roads_development_panel": "840/840 native completion and physical/accounting audit pass on U10; separate magnitude gates remain unmet: 719/766 meaningful-reference cases and 30/74 small-reference cases; 749/840 aggregate is descriptive only",
+    "same_build_watershed_replay": "pass; 864 freshly generated hillslopes and 24-year U10 Cedar watershed, all PASS/WAT conversion and physical/particle checks, nine-output observation parity, zero full-period negative/nonfinite intermediate class transfers",
+    "selected_release_runtime": "Recorded separately by the WEPPpy re-release integration workflow"
+  },
+  "validation_evidence": {
+    "broad_gate_receipt_sha256": "952c92b6b579b329e87992f2463493900f609b1cad4b96b83f32c35766375e2a",
+    "native_gate_logs_sha256": {
+      "U10-artifact-policy.log": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352",
+      "U10-binary-provenance.log": "13339b409a92de763a64df271a8c7ad41c0a5c3b153df40466393a11d5bd7eb5",
+      "U10-native-tests.log": "301c3a557ef8511de50c913a2456089556ddcc654fa1ca6d354be0fc9e0abb27",
+      "U10-smokes.log": "744201712d497787c25ddc33b86bc75bf98fb396a20a6d4609d17a052994fbea",
+      "U10-watchlist.log": "4c2f72301247dbf8dd698a371e8466dc928ae4dd0a9dea6f170d24d604495764"
+    },
+    "scientific_acceptance_path": "docs/ablation/20261030_roads_daily_coupling_and_event_state/artifacts/repro/review-U10-final-scientific-acceptance.json",
+    "scientific_acceptance_sha256": "63b310b177220128cc18df988e2bea521af11dbc1be79724579b54050edea89c",
+    "scientific_review_path": "docs/work-packages/20261030-roads-native-accounting/artifacts/U10-Yalin-independent-scientific-review.md",
+    "scientific_review_sha256": "7a239ac7ed5f50f848296b0219bd218f61bcd1a263d136842909c2b81767359b"
   },
   "wepp_banner_version": "2020.500"
 }

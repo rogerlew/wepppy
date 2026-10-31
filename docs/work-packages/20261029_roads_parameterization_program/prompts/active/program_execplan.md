@@ -1,369 +1,325 @@
-# Establish modern Roads parameterization and an editable configuration view
+# Validate modern Roads parameters and prepare a human-reviewed configuration design
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
+This living plan follows docs/prompt_templates/codex_exec_plans.md. The current
+turn is authorized through scientific acceptance and a concrete UI specification
+and static layout proposal. Human approval is required before product implementation.
 
 ## Purpose / Big Picture
 
-
-Deliver a WEPPcloud-generated-soil Roads parameterization that is within an order
-of magnitude of FSWEPP2 Roads over a declared, representative matrix, then let users
-adjust its supported parameters through a Roads configuration view. The operator
-has authorized autonomous experiment selection, replacing repeated requests to run
-one more experiment. No CSV editing is required. Success is a scientifically accepted
-parameter set plus a working browser-to-native-output workflow.
+Produce a physically defensible generated-soil Roads parameterization within an
+order of magnitude of FSWEPP2 Roads/WEPP2010, using the released 261029 engine.
+Then present the exact supported configuration fields and layout for human review.
+The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
+This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
-
-- [x] (2026-10-30 UTC) Record autonomous program authority and configuration-view clarification.
-- [x] Inspect prior evidence, canonical Roads design/surface/traffic behavior and Disturbed editor precedent.
-- [x] Snapshot acceptance rules and distinct seven-development/six-withheld soil split; full case panel pending.
-- [x] Reproduce two distinct negative-flux inputs with current/source drainage and UI mode off/on (eight native runs).
-- [x] Declare and launch 576 development runs separating road erosion, surface rock and upper-200mm hydraulic effects; seven new scope tests pass (14 with runtime checks).
-- [x] Audit all 576 surface-screen-v4 cases; reject all six UI-only treatments, retaining native failures in every gate.
-- [x] Complete 20 runtime diagnostic cases and explain one report discrepancy with clean exact-binary trace and seven-file byte parity.
-- [x] Complete and verify all 288 project-runtime-screen-v2 cases; reject all three treatments.
-- [x] Complete 18-case fill/buffer boundary diagnostic; resolve one failure class only, retaining remaining failures.
-- [x] Complete 30-case role-flag diagnostic and 384-case engineered-surface screen; road-only cap policy passes numerical gates but remains physically rejected.
-- [x] Explain all four nonnegative accounting cases using exact-binary traces; retain negative-flux cases as rejected.
-- [x] Complete 18 combined-boundary and 18 initial-state cases; remaining native stop persists.
-- [x] Prove negative-FIN loss of 38.576 mm net local rainfall; prepare minimal proposed patch and portable, byte-verified reproducer.
-- [x] Operator authorized native fix and release wepp_261029, Disturbed matrix, Cedar semantic analysis and illustrated release notes; native implementation now active in WEPP-forest.
-- [x] Full Python sanity suite completed: 12,209 passed, 298 skipped, 5,830 warnings in 3454.64 seconds; `/tmp/roads-program-full-pytest.log` (session 23368 terminal).
-- [ ] Freeze numerical criteria, physical gates, independent sampling and benchmark manifest.
-- [ ] Establish runtime- and configuration-faithful modern/legacy baselines; diagnose negative flux.
-- [ ] Search supported parameter families and freeze a successful candidate.
-- [ ] Pass independent validation and document the accepted physical/model limits.
-- [ ] Prepare canonical contracts, ADR, required reviews and standalone ancestor checkpoint.
-- [ ] Implement the user-facing view and Roads-specific parameter application.
-- [ ] Validate actual project/browser/native/report workflow, regression coverage and closeout.
-
-## Surprises & Discoveries
-
-
-The preceding broad study had 960 labeled profiles but only 210 distinct material
-and input configurations per treatment. Surface and traffic distinctions were lost
-in its generic bare/bare/forest preparation. The actual Roads contract applies
-surface rock/cover and traffic-dependent erodibility; restoring these distinctions
-is a baseline task, not parameter fitting.
-
-Those simplified studies also omitted `wepp_ui.txt`, which changes native water
-balance behavior. Real Roads copies project runtime files. Prior loam/holdout soils
-duplicate material; they are not independent validation. Six Flagstaff/new-lithic/
-no-traffic source-drainage cases emit negative sediment fluxes. These facts prohibit
-promoting the earlier source-drainage alternative as a default.
-
-The new eight-run mode diagnostic reproduced all four mode-off controls exactly.
-With `wepp_ui.txt`, both source-drainage inputs stopped emitting negative sediment;
-all four UI-mode runs reconciled reports and had zero EBE mismatch events. This
-isolates a runtime dependency for those inputs, not a general source-drainage remedy.
-Retained results: `artifacts/mode-diagnostic.json` in this package.
-
-Surface-screen preflight exposed two representational differences: historical
-WEPP2010 references predate the shared fill/buffer 200 mm normalization, and the
-9002 parser stores conductivity-adjustment metadata as strings. The v3 driver
-requires exact reference equality after canonical normalization and exact treatment
-readback using native parser types. Earlier failed roots are retained. Physical
-context and limits are in `artifacts/surface-screen-rationale.md`.
-
-V3 stopped on two paved/loam/site `compact3` native water-balance failures after
-128 other cases completed. V4 records failed cases explicitly and reuses only
-hash-verified completed cases. The panel and parameter hypotheses are unchanged;
-the failed treatment is disqualified, regardless of sediment ratios.
-
-The completed UI-only screen has native failures even in the generic roles baseline.
-A 20-case sidecar diagnostic resolves some failures but not all. V7 debugger evidence
-proves one report/ELEMENT discrepancy is the explicit `qout` export gate; all seven
-native outputs match exactly using container runtime libraries. Host-library traces
-have rounding drift and are not parity evidence. Details and rejection counts are
-in `artifacts/surface-screen-results.md`. No blanket reconciliation rule is accepted.
-
-The full-runtime screen also fails. Fill-boundary changes resolve Birmingham/sand
-but leave Birmingham/clay and Flagstaff failures. Pinned `infpar.for` confirms that
-9002 applies a forest saturation-dependent conductivity relation when `ksatadj=1`;
-the generic bare soil preparation carries that flag into road/fill. The separate
-9001 `ksatfac/ksatrec` formula is not active. This provides the next role-specific
-mechanism to test without replacing generated material or weakening acceptance.
-
-The road-only saturation adjustment removal plus surface cap reaches 93/96
-magnitude passes with no negative flux. Two native stops remain; four accounting
-differences are now individually source-explained with seven-file byte parity.
-An exact failure trace observes FIN changing from -22.576984 to -61.1533709 mm,
-dropping net local rainfall of 38.57638615 mm. This is a native accounting defect,
-not evidence to adjust soil parameters further around the failing case. See
-`artifacts/native-water-accounting-decision.md`; proposed fix is unbuilt.
-
-## Decision Log
-
-
-2026-10-30 UTC, operator/Codex: use one program with delegated experimental choices.
-The terminal product is accepted parameterization and an editable Roads configuration
-view. Storage is an implementation detail; no CSV-facing requirement.
-
-2026-10-30 UTC, Codex working assumption after optional steering request: use 95%
-overall and 90% per major group factor-ten gates with a declared small-load rule.
-These are practical engineering acceptance targets, not field-calibration claims.
-Freeze them before selecting candidates. Do not revise them silently using results.
-
-Preserve exact `wepp_261026`, generated-soil lineage and the 200 mm normalization.
-Parameter changes remain Roads-scoped. Existing projects require explicit adoption
-of a new version; shared non-Roads defaults remain unchanged. Deployment is separate.
-
-2026-10-30 UTC: explicit native scope decision requested after exact-binary defect
-proof. The requested 261026 identity remains authoritative until the operator
-responds. Proposed action is an isolated fix/control investigation and a new native
-identity only if validated; preserve all physical gates, old controls and withheld
-sampling. Silence is not approval. Source proposal and reproducer are reviewable;
-no shared native source, executable or production parameterization has changed.
-
-## Outcomes & Retrospective
-
-
-2026-10-29 local: the operator resolved the native-pin decision by directing a
-WEPP-forest fix and wepp_261029 release. Execute the native package at
-`/workdir/wepp-forest-release-20261009/docs/work-packages/20261029-negative-fin-water-accounting/`.
-Retain 261026 as control; no acceptance thresholds or withheld soils change.
-The following blocked status is historical and superseded by that authorization.
-
-Program blocked awaiting the explicit native-pin decision after repeated goal turns
-with the same unresolved authority boundary. No new parameter set accepted and no
-production view implemented. The full sanity process remains live (session 23368,
-host pytest PID 2947211); latest observation reached the Disturbed soil-artifact
-tests at 21% without a reported failure. This is not a full-suite pass or a stopped
-process. On resumption, poll the existing handle/log before starting any replacement.
-Completed new evidence includes 576 surface-screen cases, 20 runtime diagnostic
-cases, 288 full-runtime cases, 18 boundary diagnostic cases and one parity-verified
-source-level trace. All candidate families evaluated so far fail; generated material
-and withheld sampling remain intact. Combined focused tests: 21 passed.
-
-Subsequent work adds 450 development cases, four complete accounting traces and
-an exact native failure trace. Best candidate meets numerical criteria but still
-fails physical acceptance. Combined focused tests now pass 30; full suite running.
-Native pin decision pending, independent validation and user view still incomplete.
-The preceding studies are development evidence only. This package cannot close on
-an isolated favorable panel, a plan, or an unwired editor scaffold.
+- [x] Reconcile native release: source 631aed1d1, matched 261029 pair reviewed and pushed.
+- [x] Existing road-cap candidate passes 96/96 development cases with physical audits.
+- [x] Record human UI specification/layout gate and unchanged scientific criteria.
+- [x] Freeze continuation manifests and verify seven-development/six-withheld split.
+- [x] Rebaseline generated-role, erosion and road-cap treatments on 261029 (384 cases).
+- [x] Complete minimal-rule ablation (cap-only fails loam group) and 294 production-builder readbacks.
+- [x] Execute the 840-case five-climate development matrix; reject candidate (740 magnitude, 822 physical passes).
+- [x] Retain and independently replay fixtures for daily-water and sediment-output failures.
+- [x] Operator authorized native accounting ablation; released engine remains the comparator.
+- [x] Complete bounded native remediation and independent scientific acceptance (U10).
+- [ ] Finish revision 2 release integration before further tuning.
+- [ ] Complete additional native geometry/routing stress validation after accounting repairs;
+  core five-climate/four-design/surface/traffic/seven-material research panel is complete.
+- [ ] Freeze successful rules, then execute six-material withheld validation.
+- [ ] Complete disposable full-project native/output validation and scientific review.
+- [ ] Draft parameterization ADR, configuration specification and static layout.
+- [ ] Present concrete specification/layout for human approval; do not implement.
 
 ## Context and Orientation
 
+Work in /workdir/wepppy on the existing master branch. Large native artifacts
+belong under /wc1/runs/ro/roads-parameterization-program-20261030; new batch roots
+must not overwrite earlier studies. Canonical native checkout is
+/workdir/wepp-forest-release-20261009. Final native repair source is `ba9f2ad91b5165d5cd2954bd64b5df608798541e`;
+independent acceptance is retained in the native accounting package. The owner
+explicitly authorized replacing undeployed 261029 with artifact revision 2.
+Installed watershed SHA256 is `819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715`;
+hill SHA256 is `21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed`.
+Original identities remain in the reissue package. Regenerate matched outputs;
+the shared release filename is not evidence of byte compatibility.
+Legacy 2010 SHA256 is a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8.
+Keep historical 261026 results as controls; do not relabel them as current.
 
-`wepppy/nodb/mods/roads/specification.md` defines actual road configurations and
-builders in `roads.py`. Insloped bare/rocked ditches differ; paved/gravel and high/
-low/no traffic have explicit parameter rules. Routed outputs may include road,
-fill and buffer overland-flow elements (OFE: one modeled surface segment). Their
-outlets differ from direct road delivery, so comparisons must align geometry and
-contributing area before evaluating sediment.
+Original declared materials are artifacts/design-v1.json: seven development and
+six withheld profiles, distinguished by semantic material hashes. Withheld IDs
+are 1718472,53975,1718476,665770,2711196,658566. Do not inspect their native outcomes
+before freezing final candidate rules. Prior five climates are development data:
+site, Birmingham, Denver, Flagstaff and Charleston.
 
-`tests/roads/roads_matrix.py` exercises production builders and copies canonical
-shared runtime files. `tests/roads/roads_project.py` covers full-project workflows.
-`/workdir/fswepp2` supplies the reference API, soil/management assets and validation
-infrastructure. Previous frozen references and generated specimens remain under
-`/wc1/runs/ro/roads-soil-benchmark-20261029` and related Roads study roots.
+Existing experiments are under /wc1/runs/ro/roads-parameterization-program-20261029.
+project-runtime-screen-v2 contains roles/erosion/rock decks;
+engineered-surface-screen-v1 contains the road-cap deck. The native timing package
+retains the successful 261029 96-case replay. These are three-OFE research profiles,
+not proof of production builder or full-project parity. Production builders remain
+legacy-template based; no generated-soil default has been implemented.
 
-Exact modern binary is `wepp_runner/bin/wepp_261026`, SHA256
-`a6351d371030f702be5eb0d727d8e7181eeb9d60e9ddf6ce05d9616e5d759d48`.
-Its source identity is `b73e93b19a724d1991d341d38a18d11e742231bd` in the host
-`/workdir/wepp-forest` checkout. Legacy WEPP2010 reference binary SHA256 is
-`a12976166deb2b2d7c9adc0e0f23bac24d54057031a5072b4bb0a176c7c730b8`.
-No native rebuild is part of the current authority.
+Use tests/roads/roads_matrix.py production builders and tests/roads/roads_project.py
+full-project precedent. The source specification is
+wepppy/nodb/mods/roads/specification.md. FSWEPP2 source/reference resources are in
+/workdir/fswepp2 and the earlier frozen benchmark; inspect hashes before reuse.
+The old program plan and experiment history remain in Git at af33b72b8 and the
+immutable experiment artifacts. This plan supersedes its obsolete blocked status.
 
-The existing Disturbed user editor is in
-`wepppy/weppcloud/routes/nodb_api/disturbed_bp.py`; its model lives in
-`wepppy/nodb/mods/disturbed`. Use its save/reload/reset interaction as precedent,
-not its CSV representation as a product requirement. Read nearest AGENTS before
-editing any production subsystem. All durable UX, persistence and parameter rules
-must be promoted into current canonical contracts outside this work package.
+## Milestone 1: frozen continuation and repaired-engine rebaseline
 
-## Milestone 1: acceptance and faithful baselines
+Write a new design version preserving old manifests. Hash rules, engine, source
+soils, runtime settings and script. Record existing no-UI/default behavior as
+controls, never as candidates. Reexecute the 96 known configurations on 261029
+with generated roles only, road erosion coefficients only, road-cap candidate
+and matched legacy-soil control. This isolates whether the engine repair removes
+the need for some parameter changes. Compare to hash-verified 2010 reference
+outputs and inspect every failure; do not repeat the entire earlier search.
 
+## Milestone 2: production preparation and development confirmation
 
-Freeze `acceptance.md`, `autonomy.md` and a machine-readable panel manifest in a new
-scratch root, `/wc1/runs/ro/roads-parameterization-program-20261029/`. Preserve previous
-roots. Inventory source soils by semantic material, texture and restriction class.
-Select new, distinct specimens and withheld combinations without inspecting their
-native outputs. Existing five climates and all previously tested cases are known
-development evidence; a withheld panel needs genuinely unused combinations/profiles.
+Build real road/direct/buffer/rutted/unrutted configurations through existing
+production methods in disposable contexts. Experimental generated-soil replacement
+may happen only in the isolated study adapter, with strict before/after readback.
+Preserve road/fill/buffer ordering, surface/traffic/ditch distinctions, management,
+area and outlet identity. Generated material, deeper horizons, restriction provenance
+and 200 mm normalization remain intact. Reuse generated bare/forest role preparation
+with explicit erosion/cap transformations; do not silently copy legacy soils.
 
-Create an audit mapping user configuration to actual management, slope, soil and
-runtime files. Exercise production Roads builders in disposable contexts, preserving
-surface/traffic/ditch distinctions and outlet semantics. Establish legacy2010,
-modern-binary legacy-soil, current project and generated-soil baselines with matched
-geometry. Run UI/non-UI negative-flux reproduction for the known Flagstaff case;
-retain invalid outputs rather than clipping them. This milestone is exploratory
-scaffolding, not a production implementation or closeable deliverable.
+Use small paired checks before expanding to five climates, all four road designs,
+both surfaces, all three traffic levels and seven development profiles. Declare
+geometry stress cases before running them. FSWEPP-matched geometry and production
+geometry are separate evidence layers; unequal outlets/areas are not numerical
+comparison failures to fit away. Verify runtime sidecars and climate settings; a
+fixed site PMET bundle across climates is only a controlled sensitivity experiment,
+not climate-specific calibration. Resolve configuration-sensitive material issues
+before the full panel. Keep failed cases in denominators and retain raw artifacts.
 
-## Milestone 2: autonomous parameter search
+## Milestone 3: independent validation and physical acceptance
 
+Freeze the simplest successful rule set and exact candidate before using the six
+withheld materials or withheld geometry combinations. Apply acceptance.md unchanged:
+95% overall and 90% per major group within 0.1–10 for references above 1 kg/year;
+small loads use max(1kg/year,10*reference) without a lower ratio bound. Declare
+area-aware small-load thresholds before changing geometric scale. Weight material
+groups equally and report all intersections, bias and worst cases. No native stop,
+negative sediment, nonfinite/incomplete output or unexplained accounting mismatch
+is acceptable. If holdout outcomes guide revision, consume that holdout and choose
+new reserved material before independent retest. No per-climate/case correction.
 
-Use a persistent candidate ledger and bounded batches. Start with faithful Roads
-role/surface/traffic composition on generated soils; do not carry forward the generic
-bare/bare/forest surrogate as if it already represented all configurations. Explore
-physically justified road erosion, critical shear, surface rock/cover and compacted
-layer hydraulics, then fill/buffer behavior and source-informed lower boundaries
-where evidence warrants. Declare parameter meanings/ranges before each batch.
+Audit rainfall/runoff, saturation and deep/lateral flow partitions, annual/event
+sediment and output definitions. Successful numerical agreement is not field
+calibration or universal watershed closure. Complete a disposable real-project
+preparation/run/report case and independent scientific review of concrete evidence.
 
-Prefer screening panels and sensitivity analysis that eliminate failing mechanisms
-before a broad confirmation sweep. The agent may choose the next experiment without
-operator approval. Every batch names its hypothesis, changed inputs, expected
-interpretation and rejection criteria. No climate-, specimen- or case-specific output
-multipliers. Do not replace generated soil material with legacy templates as the
-candidate; legacy templates remain controls. No new optimizer dependency is needed.
+## Milestone 4: reviewable configuration design and human gate
 
-Reject candidates with invalid physics/artifacts before ranking fit. Rank valid
-candidates by group coverage, worst departures, bias, hydrologic plausibility and
-simplicity. Keep all failures in the ledger, including zero-reference behavior.
-When a candidate passes development confirmation, freeze its complete rule set and
-inputs before running withheld validation. If that validation drives a revision,
-reclassify it as development data and select a new withheld panel.
+Only after scientific acceptance, draft an ADR and exact configuration specification:
+fields, units, applicability by role/design/surface/traffic, allowed ranges, defaults,
+overrides, version adoption, save/reload/reset, readonly/authorization/CSRF, stale
+results and provenance. Prepare a static layout using familiar WEPPcloud controls.
+Label custom values separately from validated defaults. Document migration/rollback
+and proposed contracts without implementing production behavior. Preserve existing
+projects until explicit adoption. Obtain technical reviews where authorized, then
+present specification and layout to the human owner. Stop dependent implementation
+until explicit approval; this is an owner-required gate, not inferred caution.
 
-## Milestone 3: accepted model and product contract
+## Concrete Steps and Validation
 
+Use wctl exec weppcloud python for native study drivers and wctl run-pytest for
+focused checks. Drivers must refuse existing roots or verify complete hashes before
+resuming. Retain executed source, inputs, binary identities and physical readback.
+Add each actual command/result to tracker.md. Test transformations for nonmutation,
+role/deeper-layer preservation and configuration semantics. Run appropriate broad
+regressions when substantive executable/harness changes are complete, not after
+every unchanged batch. Use wctl doc-lint for changed documentation.
 
-Only a model meeting `acceptance.md` may become the proposed default. Prepare a
-parameterization ADR with exact old/new rules, evidence, rationale, alternatives,
-uncertainty, decision provenance, migration and rollback. Define the exact fields
-that users can edit, their units/ranges/applicability and parameter-set versioning.
+## Surprises & Discoveries
 
-Prepare a contract-decision checkpoint under this package. Amend applicable canonical
-Roads, UI, API/persistence and artifact contracts with implementation pending.
-Enumerate absent, empty, populated, legacy, readonly and malformed states. Preserve
-existing projects until explicit adoption; store overrides additively and carry them
-through reload/fork/restore. Use current run authorization and CSRF rules. Obtain the
-two independent read-only reviews required by the contract-first standard and retain
-dispositions. Commit the complete reviewed checkpoint as a standalone ancestor before
-production edits; resolve commit authority then if it has not already been granted.
-Scientific study work can continue independently of that future gate.
+2026-10-30 continuation: 16 uncapped cases per lane stop at the water inventory
+guard. Exact replay establishes a 5.035662 mm full-day deficit before other sinks
+in the Birmingham sand fill OFE, so retiming alone cannot repair it. Cap and
+legacy controls pass 96/96; expanded cap pilot passes 28/28. At that checkpoint the independent
+scientific reviewer required a daily-coupling explanation before acceptance;
+the subsequent native ablation identified and repaired equivalent-melt support. See
+artifacts/continuation-findings.md and artifacts/unmet-budget-v1.json.
 
-## Milestone 4: configuration view and model wiring
+The prior best treatment was blocked by native local-input/timing/ET defects, now
+repaired. Passing 96 insloped cases does not cover outslopes, low traffic, all five
+climates or independent material. Earlier labeled holdouts duplicated material;
+only the reserved six distinct material hashes are withheld. Several active docs
+still described 261026 and a pending native decision; the explicit release amendment
+and this continuation supersede those statements without altering old evidence.
 
+## Decision Log
 
-Build a Roads parameterization view organized around road configurations. Show
-relevant fields, units, defaults/overrides and concise meaning; validate/save/reset
-without requiring native-file or CSV editing. Avoid exposing every WEPP field or
-creating a generic optimization dashboard. Custom configurations must be labeled
-custom rather than automatically benchmark-validated.
+2026-10-30, owner: reissue the undeployed 261029 identity with the accepted native
+repairs. Preserve original identities, report revision 1, project defaults and
+the human UI gate. Final native acceptance does not relax magnitude criteria.
 
-Wire saved choices through the actual Roads preparation path, including routed and
-direct branches. Mark affected results stale after edits; saving does not claim to
-have rerun WEPP. Produce versioned provenance with generated inputs and reports.
-The internal persistence format is selected for the simplest compatible implementation.
-Do not change general soil writers, uploaded topology, Disturbed defaults or execution
-identity. Complete both implemented and wired behavior before declaring success.
+2026-10-30, operator: continue recommended validation, with broad forest authority
+through a human-gated UI specification/layout. No product implementation before
+that review. Existing acceptance thresholds, generated-soil normalization and
+deployment boundary remain unchanged.
+2026-10-30, Codex: rebaseline on repaired engine before broad tuning to avoid
+retaining unnecessary parameter adjustments; keep withheld materials untouched
+until final rules are frozen.
 
-## Milestone 5: end-to-end acceptance
+2026-10-30, continuation disposition: do not promote the candidate or consume
+withheld data after broad failures. Retain the strict inventory guard and pinned
+release. A separate native daily-runoff and event-output ablation is the next
+scientific scope decision; no posterior material/climate exclusions or tolerance
+changes. Independent implementation review closed the normalized-legacy control
+confound with 96 exact-deck controls and corrected attribution.
 
+## Outcomes & Retrospective
 
-On disposable representative projects, use the browser/API to edit, save, reload,
-reset and run Roads. Parse resulting prepared soils/managements, execute the pinned
-native binary under real runtime settings and regenerate reports. Demonstrate that
-changed values reach the relevant configurations and leave unrelated configurations
-and non-Roads state unchanged. Validate fork/restore and explicit version adoption.
-Exercise authorization, readonly, invalid-input atomicity and stale-result behavior
-through actual persistence/filesystem boundaries, not only mocks.
+The bounded native accounting defects are repaired and independently accepted in
+261029 artifact revision 2. The final U10 development panel passes all 840 physical
+cases. Magnitude acceptance remains unmet: 719/766 meaningful-reference cases and
+30/74 small-reference cases pass. Neither withheld evaluation nor a production
+parameter default is accepted. The next justified study separates road production
+from fill/buffer delivery for the retained high, low and small-reference misses.
+The release pair and reviewed report are integrated; final operational suite and
+retention checks belong to the companion reissue package.
 
-Run focused tests through `wctl`, then full appropriate Python/frontend/stub/docs
-checks. Required independent contract and implementation reviews are part of product
-acceptance. No production deployment is implied. Update package, tracker and canonical
-user/developer documentation with exact evidence and remaining physical limits.
+The earlier 740/840 magnitude and 822/840 physical screen was a failed diagnostic
+checkpoint. It led to committed native reproductions, not parameter changes that
+concealed failures. All 294 builder readbacks remain limited preparation evidence.
+Scientific model repair is not equivalent to completing this parameterization
+program. The configuration specification/layout still requires human approval
+before product implementation.
 
-## Concrete Steps
+## Historical experimental checkpoints
 
+The following records describe execution-time decisions. Current source selection,
+acceptance and next steps are governed by the Progress, Context and Outcomes
+sections above; old holds and unreleased-candidate labels are retained as history.
 
-From `/workdir/wepppy`, discovery begins with `tests/roads/roads_matrix.py`,
-`wepppy/nodb/mods/roads/specification.md` and `/workdir/fswepp2` validation entry points.
-Use `wctl exec weppcloud python ...` for model/tool execution and
-`wctl run-pytest tests/roads ...` for focused validation. Native-source Git reads may
-use the host checkout; do not rebuild it. Record actual new driver commands here
-when their bounded interfaces are defined. This plan does not invent a CLI before
-inspecting the existing infrastructure.
+### Native ablation disposition — 2026-10-30
 
-For docs use `wctl doc-lint --path docs/work-packages/20261029_roads_parameterization_program`.
-Current screen command: `wctl exec weppcloud python docs/work-packages/20261029_roads_parameterization_program/artifacts/screen.py`.
-It refuses an existing batch root. Inspect `/tmp/roads-surface-screen-v4.log` and
-scratch `surface-screen-v4/partial-results.json` before any recovery action.
-Read canonical contract-first and parameterization ADR standards before production
-work. Keep one tracker and candidate ledger rather than opening an approval cycle
-for each experiment.
+Canonical native package: `/workdir/wepp-forest-release-20261009/docs/work-packages/20261030-roads-native-accounting/`.
+The separate U2c stale-event repair is retained for validation. C3 water changes
+are rejected and rolled back despite 840/840 output-accounting passes: independent
+controls demonstrate lost connected hydraulic support, inconsistent peak-area
+normalization and skipped deposition when runon fully infiltrates. Cedar peak
++42.64% and sediment +35.05% with water +0.00212% require this hold.
+C3 magnitude is 719/840, while literal-legacy attribution is 96/96. Neither is a
+Roads default acceptance. Frozen inputs, candidates, review probes and Cedar figures
+are retained in the native package. The water mechanism remains unresolved;
+C4 diagnostic controls define the next geometry/accounting contract before another
+behavioral patch. Keep wepp_261029 pinned, withheld materials unused, and parameter
+tuning paused. The human gate on configuration specification/layout still applies.
 
-## Validation and Acceptance
+Native C4 diagnostic finished: 56 full simulations confirm C3 introduces
+homogeneous-hill subdivision sensitivity (first-storm runoff 52.254→66.440 mm,
+peak about 221→512–517 mm/h for 2/4 OFEs). Water changes are rolled back; the
+separate event repair remains experimental. See native findings and C4 review.
 
+Final native handoff: clean retained U2c build passes 669 native tests, both
+host smokes and 13 watchlist cases. C3 water changes are rolled back; water repair
+and Roads acceptance remain open. Archive receipts are retained in
+artifacts/native-accounting-archive-receipts.json. No release/default/UI change.
 
-`acceptance.md` defines all scientific and product gates. Working numerical targets
-are 95% overall and 90% per major group within factor ten for reference exports above
-1 kg/year. Smaller loads require candidate no greater than `max(1 kg/year, 10*reference)`
-and are reported separately. These rules are explicit engineering criteria and must
-be frozen before fitting. Every accepted case must have valid executable artifacts,
-complete finite calendars and no negative sediment flux or unexplained accounting
-failure. Require both development and withheld confirmation and actual production
-builder/full-project evidence.
+2026-10-30: operator renewed broad authority to continue native ablation and
+remediate. Canonical native active plan resumes with observation and isolated
+forcing/storage attribution; production release and human UI gate unchanged.
 
-No completion claim is permitted while only experiments, an ADR or a UI scaffold
-exist. Acceptance of the user view requires real generated-output propagation and
-fresh Roads reports as well as regression tests and reviews.
+### Native remediation continuation — U5c validation
 
-## Idempotence and Recovery
+Direct native tracing refuted the broad upstream-soil snapshot hypothesis on
+the original failures. Two narrower defects were proved: equivalent daily melt
+was fitted to the receiving OFE's shorter hourly support, and GRNA counted
+nearer upstream storage repeatedly across three or more elements. The combined
+C5a candidate completes 840/840 development cases, passes 837 accounting audits,
+685 native tests and 99 Disturbed tests. Three remaining negative-sediment cases
+expose cancellation in the legacy deposition equation near PHI=-2.
 
+U5c carries the boundary derivative through the same analytic sediment equation,
+with stable PHI=-1/-2 limits and a proved terminal root-search limit. Original
+full-period inputs and independent producer/endpoint controls were committed
+before candidate acceptance. The exact negative event becomes positive while
+water output remains byte-identical in the isolated replay. Final U5c native,
+840-case, Disturbed and fresh matched Cedar validation is underway.
 
-Use new scratch batch directories and immutable manifests. Resume only completed
-cases whose declarations, actual inputs, mode, output hashes and audit results verify.
-Retain failed batches, source snapshots and provenance. Never overwrite production
-projects or closed studies. Existing working-tree changes belong to earlier work;
-preserve them. Ignore generated docs-index drift. Keep the current git branch.
+See ADR-0114 and ADR-0115 and native package
+`/workdir/wepp-forest-release-20261009/docs/work-packages/20261030-roads-native-accounting/`.
+U3/C5a magnitude scoring is 749/840 under the frozen reference criterion; it is
+diagnostic, below the program acceptance gate, and does not authorize changing
+Roads defaults. Installed `wepp_261029` is unchanged. Configuration specification
+and layout still require explicit human approval before UI implementation.
 
-## Artifacts and Notes
+### Native U6 validation milestone (2026-10-30)
 
+The native continuation now passes all 840 development accounting cases,
+824 native tests, 99 Disturbed tests, 18 permanent hillslope watchlist cases and
+both executable smoke checks. Stable bulk deposition and ENRICH particle sorting
+repair confirmed cancellation/singularities without sediment parameter tuning.
+All 840 water/soil output pairs match C5a; annual Roads sediment matches U5c.
 
-Retain acceptance snapshots, split manifests, candidate ledger, per-case metrics,
-physical diagnostics, source/binary hashes, runtime sidecars, review artifacts and
-validation logs. Portable summaries live in this package; large native outputs remain
-under its declared scratch root and are indexed by manifests. Explain unresolved
-failure classes rather than replacing negative results with a favorable aggregate.
+Fresh U6 Cedar regenerates 864 hillslopes and all 24 watershed years. Converted
+WAT fields and all 7,573,824 PASS particle records pass finite/nonnegative audits.
+Outlet water changes +0.00002475%, sediment +2.749%; individual days change more.
+R4 restoration of legacy channel storage is null for all 8,766 daily records.
+R2 restoration of released event lifecycle remains in progress to distinguish
+late-event timing from equivalent-melt duration effects before final disposition.
 
-## Interfaces and Dependencies
+The magnitude gate is still unmet: 749/840 (89.17%), versus required 95% overall
+and 90% per major stratum. No withholding split, acceptance threshold, Roads
+parameter/default, installed binary or UI gate changed. Native source decisions
+are recorded in ADR-0114 and ADR-0115; final evidence lives in the native
+20261030-roads-native-accounting package. Finish scientific attribution and
+archive verification before choosing the Roads continuation candidate.
 
+### Native channel continuation: U9a validation
 
-Use existing Roads builders, `WeppSoilUtil`, the shared horizon-boundary helper,
-`make_hillslope_run`/native execution and Rust-backed WEPP interchange. Reference
-FSWEPP2 artifacts and prior audited accounting are evidence; never silently relax
-those validators. Use existing NoDb locking, API/error/CSRF contracts and frontend
-patterns for the product. No new external dependency or service is authorized.
+Independent Cedar attribution found a preexisting channel source amplification
+and constant-discharge deposition defect after U6 passed the Roads physical
+audits. The native package implements bounded U7/U8/U9a repairs with committed
+red fixtures and 155 focused green tests. U9a completes 840/840 physical cases,
+99 Disturbed tests and 18 watchlist cases; all seven Roads outputs, inputs,
+metrics, soils and audits exactly match U6 across the 840 cases. Magnitude
+therefore remains 749/840 (89.17%), below the unchanged acceptance thresholds.
 
-Initial revision: 2026-10-30 UTC; one autonomous model-to-product program with explicit
-working gates and configuration-view clarification. Production work remains behind
-its reviewed canonical-contract ancestor checkpoint.
+Cedar scientific acceptance remains open: U7 source-only reduces outlet sediment
+3.217%; diagnostic U9 increases it 179.765% relative to U6 while water remains
+identical. Final U9a and independent channel attribution must distinguish
+recovered sediment transport from any remaining defect before acceptance.
+See native `20261030-roads-native-accounting/prompts/active/implementation_execplan.md`
+and ADR-0116/0117. Preserve installed wepp_261029, withheld cases, Roads defaults
+and the human gate on UI configuration specification/layout.
 
-### Native timing ablation results (2026-10-30)
+### Authorized release integration
 
-The explicitly authorized child package implements source-timed upstream return
-partitioning and adds a permanent 16-year fixture. Exact tracing exposed shared
-ET duplicate-input and root-integral defects; separate ablation lanes correct
-them. Fixed-width overflow formatting preserves Rust ELEMENT interchange.
+The owner confirms261029 is undeployed and requests reissuing that identity with
+updated release notes. Execute the active
+[261029 revision2 package](../../../20261030_wepp_261029_rerelease/package.md)
+for vendoring/publication only after native scientific acceptance. This scope
+amendment supersedes the earlier no-release boundary; Roads parameter defaults,
+withheld-panel rules and the human UI configuration/layout gate remain unchanged.
 
-The unchanged 96-case Roads development panel now passes 96/96 magnitude
-criteria and all negative-water/sediment and report-accounting checks. Native
-validation: 663 tests, 13 watchlist cases, both smokes; Disturbed: 99 tests, with
-maximum full-record changes of 0.7603% runoff and 2.2523% sediment versus 261026.
-Cedar completes 864 freshly regenerated hillslopes and all 24 watershed years.
-All 16,690,464 audited water records are finite and nonnegative.
+### Revision 2 checkpoint and continuation
 
-Cedar total published volume changes -0.41035%, sediment +0.13751%, and maximum
-reported peak -0.13860% versus 261026. Event-level changes are larger (screened
-peak changes -10.68% to +4.25%), retained for scientific review. Portability-only
-control separates inherited changes; do not attribute its +0.66654% sediment
-change to the accounting repair. The native child review packet and evidence
-reside in `20261030-hourly-return-flow-timing/`. Independent scientific review
-remains required by the native physical-water contract before promotion.
+The native accounting investigation accepts the bounded repairs in `wepp_261029`
+artifact revision 2, source `ba9f2ad91`. The frozen U10 panel passes all 840
+physical/accounting cases. Parameterization acceptance remains unmet: 719/766
+meaningful-reference cases (93.864%) and 30/74 small-reference cases (40.541%)
+pass; 749/840 is only a descriptive combined score. Annual exports match U9a at
+reported precision. Six withheld materials remain unused; no Roads defaults or UI
+have changed. See [U10 scoring](../../artifacts/U10-magnitude-summary.json) and the
+[release integration](../../../20261030_wepp_261029_rerelease/package.md).
 
-No production Roads defaults, editor, binary selection or withheld-soil results
-are changed by this study. Continue the parent broader validation/editor work
-after accepting and releasing the reviewed native pair.
+Next: with revision-2 release integration complete, investigate outunrut low-reference and
+routing behavior using the frozen development panel and physically justified
+controls. Preserve the separate small-load criterion. Do not fit around native
+defects, consume withheld materials early or treat accounting success as magnitude
+acceptance. UI specification/layout remains human-gated before implementation.
 
-
-2026-10-30 UTC release promotion: independent AI scientific, implementation and
-publication reviews accepted the bounded261029 release; owner read and accepted
-the illustrated report. The matched Linux pair is vendored and passes actual
-selected-runner/production-reader and host/container checks. The shared native
-blocker is repaired; the Roads development treatment passes96/96 frozen cases.
-This does not accept Roads defaults or the user-facing editor: withheld-soil and
-broader-geometry validation, parameterization contract and UI work remain in
-this program. Release work and final repository gates are tracked in
-../20261030_wepp_261029_release/package.md.
+The next attribution study is specified in
+[the U10 continuation recommendation](../../artifacts/U10-continuation-recommendation.md):
+separate road production from fill/buffer delivery for high, low and small-reference
+misses. The retained case inventory contains 41 meaningful underpredictions, six
+meaningful overpredictions and 44 small-reference exceedances; a global multiplier
+would move the opposing failures in incompatible directions. No new parameter
+candidate or acceptance threshold is introduced by this assessment.

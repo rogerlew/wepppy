@@ -1,0 +1,12 @@
+INFO:wctl2:docker compose exec -T --workdir /workdir/wepppy/out/261029-r2-isolated weppcloud env PYTHONPATH=/workdir/wepppy/out/261029-r2-isolated /opt/venv/bin/python tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
+Broad exception handler changed-file enforcement
+
+Repo root: /workdir/wepppy/out/261029-r2-isolated
+Base ref: origin/master
+Merge base: e35d7a3e69497ddfd9709736af50107f56963584
+Path filter: wepppy, services
+Allowlist source: /workdir/wepppy/out/261029-r2-isolated/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 0
+
+Net delta (all changed files): +0
+Result: PASS

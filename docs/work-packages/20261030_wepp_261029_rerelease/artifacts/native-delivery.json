@@ -1,0 +1,8 @@
+{
+  "native_delivery_commit": "0df4c9227f0aa45c7049b8cde59a4884a909c7d9",
+  "remote_branch": "origin/wepp_260430_negmeltfix_comparator",
+  "compiled_source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "native_worktree_clean": true,
+  "push_log_sha256": "4e338a55b65f1f4675575a3bad770eb1e4c814c8385d8eed0159192fe289f41f",
+  "note": "Later evidence/tooling/report commits do not change the frozen compiled source or four vendored files. No production deployment."
+}

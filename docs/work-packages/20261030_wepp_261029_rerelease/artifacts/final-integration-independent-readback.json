@@ -1,0 +1,44 @@
+{
+  "review": "Independent AI retained-artifact/source readback; no native or integration reruns",
+  "evidence_sha256": {
+    "vendor-revision2.json": "cd31c57bfefc6a452d09233b86b8f83c620537c4d81d767cbf916b66fd37c843",
+    "integration-gates.json": "5094e22294f13a38ae99d286d697ab563f2c67714f2d8612f64526d424d5d22e",
+    "selected-hill.json": "fcb8f3bc62e617eb92cfc24a36b637e02cf9b5b16ebb1365721448b9f188848e",
+    "selected-watershed.json": "d9828fb1b6c5d8ccb98610ddee3c1f0a589f4037cd7b3abfc26a36cf8deeb4d8",
+    "report-download-check.json": "bf65bc66e63dbb1dbfd8a4162b7f3034569a4e9a8da417a5af44d8060a58ff13"
+  },
+  "watershed_harness_sha256": "abdaa67038747d05f3d5ab11b868250700161a09131275d91b13c684a0cf90f5",
+  "download_harness_sha256": "e20b9cfd70e2c0a22002929e35197d7ca492d26e142fe733c3682bacf5a7fa83",
+  "installed_release_sha256": {
+    "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_261029.json": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+    "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+    "wepp_261029_hill.json": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f"
+  },
+  "selected_watershed": {
+    "generator_commit_verified": true,
+    "all_input_hashes_still_match": true,
+    "raw_channel_rows": 731,
+    "raw_channel_fields": 27,
+    "all_raw_channel_values_finite": true,
+    "all_raw_channel_measurements_nonnegative": true,
+    "exact_projected_channel_fields": 22,
+    "event_native_parquet_rows": 731,
+    "event_measurements_exact": true,
+    "event_calendar_matches_channel": true
+  },
+  "selected_hill": {
+    "native_outputs_verified": 7,
+    "complete_water_rows": 17532,
+    "event_rows": 3237,
+    "optional_interception_storage": "null retained"
+  },
+  "download": {
+    "pdf_sha256": "c94db60e60ccd561a96dcdda89bad8bed209c32a783d3e699beb0e72485ddf44",
+    "manifest_sha256": "28c3efb859ae339bfcf3d598b36f2a885486d219f62ddd7a9387d3310a93baf8",
+    "environment": "Local development Caddy; no production deployment claim"
+  },
+  "disposition": "No blocker in reviewed release integration; full WEPPpy suite result and unrelated workspace checks remain separately owned.",
+  "evidence_snapshot_directory": "integration-review-inputs",
+  "snapshot_reason": "Preserve the reviewed checkpoint while the orchestrator later updates the full-suite gate status."
+}

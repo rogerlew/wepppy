@@ -1,0 +1,35 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.ubuntu.com>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+Stopped due to shared library event (no libraries added or removed)
+add symbol table from file "/workdir/wepppy/wepp_runner/bin/wepp_261029" at
+	.text_addr = 0x402300
+Breakpoint 1 at 0x4b5df2: file watbal_hourly.for, line 349.
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+
+Breakpoint 1, watbal_hourly (lunp=0, luns=1, lunw=1, nowcrp=1, elevm=185) at watbal_hourly.for:349
+349	     1  wmelt(iplane) + irdept(iplane) + iraplo(iplane) 
+#2  0x000000000045fe3b in irs (nowcrp=..., wmelt=..., ibrkpt=0, runmax=0, pkrmax=0, pkefdn=0, effdrr=...) at irs.for:552
+552	              call watbal(lunp,luns,lunw,nowcrp(iplane),elev)
+year 7
+sdate 6
+iplane 2
+iuprun(1:3) (0, 1, 1)
+wmelt(1:3) (0.05067138, 0.012304822, 0)
+slplen(1:3) (60.9599991, 4.57000017, 39.6199989)
+efflen(1:3) (60.9599991, 65.5299988, 0)
+ks(1:3) (2.77777804e-06, 7.48714513e-07, 1.66666687e-05)
+aveks(1:3) (2.77777804e-06, 2.63627294e-06, 1.66666687e-05)
+wmlvar 0.0479957312
+wmllen <optimized out>
+p 0.0479957312
+runoff(1:3) (0.00546567142, 0.00641340157, 0)
+runtmp(1:3) (0.00546567142, 0.00641340157, 0)
+xmxint(iplane) 3.15116608e-06
+aveksm 1.05697779e-08
+jumpfg <optimized out>
+jmpfg2 <optimized out>
+[Inferior 1 (process 1875289) exited normally]

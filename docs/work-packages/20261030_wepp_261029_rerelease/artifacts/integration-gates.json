@@ -1,0 +1,26 @@
+{
+  "gates": {
+    "provenance": "pass",
+    "host_smokes": 2,
+    "container_smokes": 2,
+    "targeted_tests": 69,
+    "selected_hill": "pass",
+    "selected_watershed": "pass",
+    "full_suite": "complete segmented isolated coverage; failed shared and first isolated attempts retained",
+    "isolated_broad_exceptions": "pass; zero changed production Python files"
+  },
+  "log_sha256": {
+    "wepppy-provenance.log": "1b472567cee4ef65ecea5653727a28197b59ef83909c1204bc4e4279901720e5",
+    "wepppy-host-watershed-smoke.log": "507600ae16a7d49db47e81c5f062a254ea80fed895bb6ddf6f49d7c848aa5213",
+    "wepppy-host-hill-smoke.log": "610ad0964d30b25417c10f3a68db7f01835b53ec3c4a3407eb87fa31b16e5155",
+    "wepppy-container-watershed-smoke.log": "07d281cc0b3782b066bb4a67f59c831a261ba386d63fba810a5efedfaacca655",
+    "wepppy-container-hill-smoke.log": "5c6917eea52ef0b56263200daf144b9559893f8ff5517827a8f40900420bc28a",
+    "wepppy-targeted.log": "7f315ba69cd2505cf0bbbf5b45cb09483241db72aa2c3d49149627c43c2259bc",
+    "selected-r2-hill.log": "ddadde4603ee9f4419b331b8c844018db01ce471c9af7b6ada77fe3b7d73ad83",
+    "selected-r2-watershed.log": "5a4d69b0d42f4361e69c75cb33068c76a165fc9b2fe50714e30f31803e7deb31",
+    "selected-r2-watershed-v2.log": "d52d758d69b68532e375732a9a1f4c717bf2b11805dd0fcb3db498e78f555976",
+    "usersum-contract-validation.log": "895918a9b56d2bce8e38f870020e4b6d7835c2c515aa1bab1e041928c4d82a38"
+  },
+  "harness_correction": "Initial watershed harness wrongly expected22nativefields; existing currentproducer emits27 and Rust deliberately projects22. Corrected harness requires27, validates allfinite/nonnegative, compares22projected values exactly; fresh replaypasses731calendar days and731events. Native/reader implementation unchanged. Initial failure retained.",
+  "full_suite_disposition": "full-suite-disposition.json"
+}

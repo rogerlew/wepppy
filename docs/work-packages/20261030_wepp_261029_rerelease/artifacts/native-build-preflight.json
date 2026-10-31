@@ -1,0 +1,22 @@
+{
+  "source_commit": "2b4cd9fb52510d7ff9fbd79e657050efe06baed1",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "remote_default": "refs/remotes/origin/wepp_260430_negmeltfix_comparator",
+  "source_files_verified": 506,
+  "candidate_manifest_sha256": "f193cea9d71d7e0e3bdb4f4ebf84bf9f04c33df3cc44cd37b0cadf3038e972d9",
+  "original_native_directory": "/workdir/wepppy/out/roads-channel-accounting-20261030/original-native-261029-pair",
+  "original_native_sha256": {
+    "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+    "wepp_261029.json": "c0d0c62da8f36bbe73b6b3c91bd2b0e84a864dbfb2a21bb3a631f414d55647c9",
+    "wepp_261029_hill.json": "636b8ff505b515d8080291552b6d6e600c60942f91c28ce00008d1242e026cd1"
+  },
+  "installed_sha256": {
+    "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+    "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4",
+    "wepp_261029.json": "c0d0c62da8f36bbe73b6b3c91bd2b0e84a864dbfb2a21bb3a631f414d55647c9",
+    "wepp_261029_hill.json": "636b8ff505b515d8080291552b6d6e600c60942f91c28ce00008d1242e026cd1"
+  },
+  "command": "TARGET_TAG=261029 COMPILER=/usr/bin/gfortran SOURCE_COMMIT=2b4cd9fb52510d7ff9fbd79e657050efe06baed1 tools/build_wepp_dated_release.sh",
+  "science_status": "pending; native staging only"
+}

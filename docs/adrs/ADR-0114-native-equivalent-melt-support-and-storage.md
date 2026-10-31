@@ -1,6 +1,6 @@
 # ADR-0114: Preserve equivalent-plane melt support and count storage once
 
-- Status: Proposed; C5a implemented for native validation, not released.
+- Status: Accepted for the bounded equivalent-melt and storage repairs in 261029 artifact revision 2.
 - Date: 2026-10-30.
 - Decision venue: WEPPcloud Roads development conversation, America/Los_Angeles.
 - Participants: project owner and Codex, with independent implementation/scientific agents.
@@ -80,7 +80,29 @@ parity. These limits require explicit non-target assessment, not hidden fallback
 
 ## Release and rollback
 
-No installed binary, existing project selection, Roads default or UI is changed.
+The owner-authorized revision 2 replaces the undeployed installed binary pair.
+Existing project selections, Roads defaults and UI remain unchanged.
 A failed scientific gate requires rollback of that candidate while retaining
 its evidence. Release promotion is separate; the Roads configuration specification
 and layout remain human-gated before implementation.
+
+## Revision 2 acceptance
+
+The final matched source `ba9f2ad91b5165d5cd2954bd64b5df608798541e` is
+scientifically accepted for the bounded repairs above and vendored under the
+owner-authorized undeployed `wepp_261029` identity, artifact revision 2.
+Validation includes 1,059 native tests, 840 Roads physical cases, 99 Disturbed
+tests, 18 watchlist cases and fresh matched Cedar outputs. The full 24-year
+channel audit has zero negative/nonfinite class transfers, with all nine
+standard outputs unchanged by observation. Operational release evidence and
+the preserved original identities are in the
+[reissue package](../work-packages/20261030_wepp_261029_rerelease/package.md).
+
+Cedar outlet sediment is 517,815.77 kg, about 187.456% above the original
+release, principally from recovered channel transport. This is not field
+calibration or complete physical budget closure. Regenerate all contributing
+hillslope, PASS and watershed outputs with the exact matched pair. Roads
+magnitude acceptance remains unmet (719/766 meaningful-reference and 30/74
+small-reference cases); defaults and the human UI specification/layout gate
+remain unchanged. Earlier experimental dispositions above are retained as
+history and do not authorize the rejected C3 formulation.

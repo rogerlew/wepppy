@@ -1,10 +1,10 @@
 # ADR-0113: Native accepted-boundary water and current-event sediment accounting
 
-- Status: Proposed; C3 water formulation rejected after validation; U2c event repair retained experimentally. No released binary or Roads default change.
+- Status: Accepted for U2c current-event repair in 261029 artifact revision 2; C3 water formulation rejected.
 - Date: 2026-10-30
 - Decision venue: WEPPcloud Roads agent session, America/Los_Angeles.
 - Participants: project owner and Codex; independent implementation/scientific agents review evidence.
-- Decision owner: project owner authorizes ablation; scientific acceptance remains pending.
+- Decision owner: project owner authorizes ablation and the undeployed 261029 reissue.
 - Implementer: Codex.
 
 ## Context
@@ -21,10 +21,10 @@ was skipped, reusing prior-event coefficients and duration.
 
 ## Decision for this ablation
 
-Retain the independently tested U2c current-event repair experimentally. Reject
+Retain the independently tested U2c current-event repair in revision 2. Reject
 and roll back C3 water processing: output accounting passed, but connected
 hydraulic support, peak-area frames and incoming-sediment deposition did not.
-No new release or Roads parameter default is accepted. Define separate local
+No Roads parameter default is accepted. Define separate local
 water and connected hydraulic geometry contracts before another water mutation.
 
 ### Evaluated C3 water proposal (rejected)
@@ -88,7 +88,7 @@ accepted source. Release promotion and UI implementation are separate decisions;
 the UI specification/layout remains human-gated.
 
 
-## Native ablation disposition — 2026-10-30
+## Initial C3 ablation disposition — 2026-10-30 (historical)
 
 Canonical native package: `/workdir/wepp-forest-release-20261009/docs/work-packages/20261030-roads-native-accounting/`.
 The separate U2c stale-event repair is retained for validation. C3 water changes
@@ -102,3 +102,24 @@ are retained in the native package. The water mechanism remains unresolved;
 C4 diagnostic controls define the next geometry/accounting contract before another
 behavioral patch. Keep wepp_261029 pinned, withheld materials unused, and parameter
 tuning paused. The human gate on configuration specification/layout still applies.
+
+## Revision 2 acceptance
+
+The final matched source `ba9f2ad91b5165d5cd2954bd64b5df608798541e` is
+scientifically accepted for the bounded repairs above and vendored under the
+owner-authorized undeployed `wepp_261029` identity, artifact revision 2.
+Validation includes 1,059 native tests, 840 Roads physical cases, 99 Disturbed
+tests, 18 watchlist cases and fresh matched Cedar outputs. The full 24-year
+channel audit has zero negative/nonfinite class transfers, with all nine
+standard outputs unchanged by observation. Operational release evidence and
+the preserved original identities are in the
+[reissue package](../work-packages/20261030_wepp_261029_rerelease/package.md).
+
+Cedar outlet sediment is 517,815.77 kg, about 187.456% above the original
+release, principally from recovered channel transport. This is not field
+calibration or complete physical budget closure. Regenerate all contributing
+hillslope, PASS and watershed outputs with the exact matched pair. Roads
+magnitude acceptance remains unmet (719/766 meaningful-reference and 30/74
+small-reference cases); defaults and the human UI specification/layout gate
+remain unchanged. Earlier experimental dispositions above are retained as
+history and do not authorize the rejected C3 formulation.

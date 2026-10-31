@@ -1,0 +1,31 @@
+{
+  "fixture_source_commit": "391e7327ffa5db4965447b9bef2abb808121dd73",
+  "generator": "tools/physical_water_case.py",
+  "generator_sha256": "f06a76dca51ae0ca11d1c9694c759f6b629e7cb0ccc547fd15bab95c107e5066",
+  "fixture_manifest_sha256": "f7bf0d27a14fb8d3040506e6227116a4065eb0bdf9ebaa0c3c439695c66bca93",
+  "layout": "single",
+  "mode": "hourly",
+  "years": 2,
+  "inputs": {
+    "pw0.chn": "c0e7dd11f6c943c02359cec26f430667c5ffa7f42281ea3a1953c2439228de5f",
+    "p1.slp": "7c8975d633e0a0cc31729b5059cc6eb7afe7edd713e0e6c699b4909cdd29b70d",
+    "pmetpara.txt": "f3a1c4b33c0854b8fb0b4ecf4a9d11691d2b1e63633828f8c4c20c92c5b0e69d",
+    "pw0.cli": "6c8d513cd2fe50bb4726985a763c936f712b33401b19eff7bd94f010dac5ffb8",
+    "pw0.slp": "00a41a52a1c456c6b43adc422be00d3a9f9ae9503586ca1e32aeca6d63aedff0",
+    "pw0.imp": "d501d52f5d4468b1550051a0eef1de31272ba9ffe843d6c4cc3db9c7df15d9ce",
+    "p1.sol": "12cae8452d0dba99d6c34c186e783440402c9c452491b55fd41b88d35e9d8e01",
+    "pw0.str": "637ebdd5df65de9b95b1fe2136b836f9f7b83a60c463e275ec4c330bbdef01ca",
+    "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+    "pw0.run": "051500e8533ae3331983a5aaea0a49076934f2c0d275b6be1e0826123aec110e",
+    "p1.man": "9c5aa949cc05f081c1dcb5083b4a5be895422e0ae20cf315cc2138326ff93848",
+    "p1.cli": "6c8d513cd2fe50bb4726985a763c936f712b33401b19eff7bd94f010dac5ffb8",
+    "chntyp.txt": "06acfc308b8308a3cfe717de49b9e80e7287ba52df00198fafdeb7153e724ec4",
+    "p1.run": "de7fa14fafdae1ebfcc543204f8b0b5476a3e75f8b5d2a513d22dab760f2f6c7",
+    "pw0.man": "5ee0b38e7fc59801c252ec87608969ae4512379e2b0850dd46ad088e650cd9a8",
+    "pw0.sol": "225321e4c2a038ca1ae9d49b94e06cfb522dec13aa1f1229f52786fcbe71bf65",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "f969814b32f6397c65166dc0c9bf932a2268ef52fe225f46f1683c4429ce51e7"
+  }
+}

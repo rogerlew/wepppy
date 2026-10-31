@@ -1,0 +1,25 @@
+{
+  "source": "/workdir/wepp-forest-release-20261009/change-log.md",
+  "target": "/workdir/wepppy/wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md",
+  "sha256": "098686e52c2f9a274ce54f9e4e8ade4554597fa64c0c4018a8a40ec184803dbf",
+  "actions": [
+    [
+      "copy",
+      "/home/workdir/wepp-forest-release-20261009/change-log.md -> /home/workdir/wepppy/wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md"
+    ],
+    [
+      "vendor",
+      "wepp-forest: 1 file(s)"
+    ]
+  ],
+  "historical_files_preserved": true,
+  "disposition": "Diagnostic exact sync subsequently reverted with config/spec changes; unsafe broader clean-sync scope. Published release/model/lifecycle docs updated separately.",
+  "missing_existing_on_clean_sync": [
+    "docs/20260504-stakeholder-watbalance.md",
+    "release/wepp_260514_release_notes.md",
+    "release/wepp_260723_release_notes.md",
+    "release/wepp_260726_release_notes.md",
+    "release/wepp_260727_release_notes.md",
+    "release/wepp_261026_validation.md"
+  ]
+}

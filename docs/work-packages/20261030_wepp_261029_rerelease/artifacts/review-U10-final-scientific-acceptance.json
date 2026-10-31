@@ -1,0 +1,32 @@
+{
+  "disposition": "ACCEPT final U10 native scientific repair within documented scope",
+  "review_type": "Independent AI review; not institutional peer review or measured-sediment calibration",
+  "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "frozen_and_current_source_hashes_match": true,
+  "pair": {
+    "wepp": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+    "wepp_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+  },
+  "evidence_sha256": {
+    "/home/workdir/wepp-forest-release-20261009/docs/ablation/20261030_roads_daily_coupling_and_event_state/artifacts/repro/review_u10_final_acceptance.py": "9103a7842ad2a6ca00ba4a944a10e85437e6c2761848edb52fe1cb9844fbde7d",
+    "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261030-roads-native-accounting/artifacts/U10-Yalin-independent-scientific-review.md": "7a239ac7ed5f50f848296b0219bd218f61bcd1a263d136842909c2b81767359b",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-build/declaration.json": "f009b674788959323a32cc803920c58164e35eb5546f047c36a94c268e43e919",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/review-channel-U10-v1/U10/output-parity.json": "02adac6865c5120bed6ba356ce656a48ae30214858de04a72fb56148901800b7",
+    "/home/workdir/wepp-forest-release-20261009/docs/ablation/20261030_roads_daily_coupling_and_event_state/artifacts/repro/review-U10-Cedar-channel-audit.json": "4ecbe7922b3ac21fa79b4de9a4785973e55d03cc626bd425ca4ad480a86fa7fc",
+    "/home/workdir/wepp-forest-release-20261009/docs/ablation/20261030_roads_daily_coupling_and_event_state/artifacts/repro/review-U10-Cedar-semantics.json": "19b2ddda4a916eaadd1001d8ced41ab92e2d43493e558fee3646451dbcdfa991",
+    "/home/workdir/wepp-forest-release-20261009/docs/ablation/20261030_roads_daily_coupling_and_event_state/artifacts/repro/review-U9a-Cedar-negative-causality.json": "af860490fb27961615c395558b01fb7058c51169aa26283e363162112eb129d1",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-particle-audit.log": "ad9f06eeece59e31685e9cbeaf158d91a0cbad9f972bf6f9c913e36e0554538c",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-conversion.log": "acfbe8a07843eeb5b2d8ad42cacec26b64405bf5d39677e64b8d1561b142d904",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/cedar-U10/candidate/yield-optimized/water-audit.json": "5ee0e9993b62e072405ce52d3b457cc148dc724d2c8d2753404f582dd05eff2e",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/cedar-U10/candidate/off/outputs.json": "8451e920ed738a2245f4f2e090d32d621098d11e5d480f323f03b9123a513fb8",
+    "/workdir/wepppy/out/roads-channel-accounting-20261030/cedar-U10/candidate/off/pass-provenance.json": "385e5cc3b25ab7dad3a63a3e2830b9383ac388ca7853d297b9c18882a0b9d8ab"
+  },
+  "scope_limits": [
+    "No whole-watershed sediment closure claim",
+    "Local source/bed closure covers declared sixteen dates; class sign/finiteness covers full24years",
+    "Original-release sediment increases materially; publication must disclose this",
+    "Roads magnitude/calibration objectives remain separate and unmet",
+    "Operational release gates remain required"
+  ]
+}

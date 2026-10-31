@@ -1,6 +1,6 @@
 # ADR-0117: Preserve all-top channel support and its deposition boundary
 
-- Status: Proposed; native U8/consumer ablation, no release or default change.
+- Status: Accepted for the bounded all-top guard and constant-discharge transport repair in 261029 artifact revision 2.
 - Date: 2026-10-30.
 - Decision venue: WEPPcloud Roads development conversation, America/Los_Angeles.
 - Participants: project owner and Codex, with independent scientific and implementation reviewers.
@@ -23,7 +23,7 @@ settling produces zero load. Independent constant-discharge equations preserve
 the incoming load in that limit. Merely adding a source-response correction
 would preserve this confirmed no-source defect.
 
-## Proposed guard decision (U8)
+## Accepted guard decision (U8)
 
 Only within the existing large-top-flow guard, keep physical-only geometry and
 mark the local effective lateral hydraulic operand zero. CHNRT then uses its
@@ -38,7 +38,7 @@ The approximation cannot delete actual lateral sediment; ADR-0116 assigns that
 mass independently. Correct zero-lateral-water deposition consumers before
 accepting the combined guard/source change.
 
-## Proposed deposition equation and scope
+## Accepted deposition equation and scope
 
 For a constant-discharge segment, use class load G and total-width capacity T
 in lb/s, distributed source S in lb/s/ft, and
@@ -63,7 +63,7 @@ from deposition-rate signs so zero-settling capacity crossings remain visible.
 For initially overloaded flow and C>0, the deposition-end distance is
 `log1p(lambda*(G0-T0)/C)/lambda`, continuously extended to `(G0-T0)/C` at zero.
 
-The proposed correction is limited to zero-lateral-hydraulic-flow deposition.
+The correction is limited to zero-lateral-hydraulic-flow deposition.
 Positive-lateral-flow equations remain separate. CASE12 endpoint loads, rates
 and deposition-end transitions and CASE34 deposition beginning at XDBEG must be
 consistent. Preserve the existing detachment-capacity machinery; mixed-class
@@ -109,3 +109,24 @@ Retain isolated U7 and U8 evidence, then execute the final combined native,
 Roads, Disturbed, watchlist and matched Cedar studies. Preserve U6 source and
 the installed release as comparators. Revert a disproved experimental formulation;
 never tune Roads coefficients to conceal a native source or support defect.
+
+## Revision 2 acceptance
+
+The final matched source `ba9f2ad91b5165d5cd2954bd64b5df608798541e` is
+scientifically accepted for the bounded repairs above and vendored under the
+owner-authorized undeployed `wepp_261029` identity, artifact revision 2.
+Validation includes 1,059 native tests, 840 Roads physical cases, 99 Disturbed
+tests, 18 watchlist cases and fresh matched Cedar outputs. The full 24-year
+channel audit has zero negative/nonfinite class transfers, with all nine
+standard outputs unchanged by observation. Operational release evidence and
+the preserved original identities are in the
+[reissue package](../work-packages/20261030_wepp_261029_rerelease/package.md).
+
+Cedar outlet sediment is 517,815.77 kg, about 187.456% above the original
+release, principally from recovered channel transport. This is not field
+calibration or complete physical budget closure. Regenerate all contributing
+hillslope, PASS and watershed outputs with the exact matched pair. Roads
+magnitude acceptance remains unmet (719/766 meaningful-reference and 30/74
+small-reference cases); defaults and the human UI specification/layout gate
+remain unchanged. Earlier experimental dispositions above are retained as
+history and do not authorize the rejected C3 formulation.
