@@ -1,0 +1,172 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb --ignore=tests/nodb/mods --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1736 items
+
+tests/nodb/test_base_boundary_characterization.py ...................... [  1%]
+................................................                         [  4%]
+tests/nodb/test_base_file_handler_cleanup.py ............                [  4%]
+tests/nodb/test_base_misc.py ........................................... [  7%]
+                                                                         [  7%]
+tests/nodb/test_base_unit.py ....................                        [  8%]
+tests/nodb/test_batch_climate_rap_contention.py ........................ [  9%]
+................                                                         [ 10%]
+tests/nodb/test_batch_daymet_multiple_contention.py .................... [ 11%]
+...............                                                          [ 12%]
+tests/nodb/test_batch_receipt_transaction.py ......                      [ 13%]
+tests/nodb/test_batch_runner.py ....                                     [ 13%]
+tests/nodb/test_batch_runner_grouped_updates.py .....                    [ 13%]
+tests/nodb/test_batch_runner_watar.py ...........                        [ 14%]
+tests/nodb/test_build_climate_race_conditions.py .......                 [ 14%]
+tests/nodb/test_catalog_producer_refresh.py ...                          [ 14%]
+tests/nodb/test_cli_parquet_lineage.py .........................         [ 16%]
+tests/nodb/test_climate_artifact_export_service.py ............          [ 16%]
+tests/nodb/test_climate_build_helpers.py ............................... [ 18%]
+.........                                                                [ 19%]
+tests/nodb/test_climate_build_router_services.py ...........             [ 19%]
+tests/nodb/test_climate_catalog.py ..................................... [ 21%]
+........................                                                 [ 23%]
+tests/nodb/test_climate_edde_build.py .....................              [ 24%]
+tests/nodb/test_climate_facade_collaborators.py ................         [ 25%]
+tests/nodb/test_climate_gridmet_multiple_build_service.py ............   [ 26%]
+tests/nodb/test_climate_input_parser_service.py ........................ [ 27%]
+................                                                         [ 28%]
+tests/nodb/test_climate_multiple_build.py ......                         [ 28%]
+tests/nodb/test_climate_observed_year_bounds.py .....                    [ 29%]
+tests/nodb/test_climate_prism_build.py ......                            [ 29%]
+tests/nodb/test_climate_scaling_service.py ..........                    [ 30%]
+tests/nodb/test_climate_station_catalog_service.py .......               [ 30%]
+tests/nodb/test_climate_type_hints.py ....                               [ 30%]
+tests/nodb/test_climate_user_defined_station_meta_service.py ...         [ 30%]
+tests/nodb/test_config_sanitization.py ................                  [ 31%]
+tests/nodb/test_defaults_cfg_compatibility.py ...........                [ 32%]
+tests/nodb/test_derived_file_signature.py ........                       [ 32%]
+tests/nodb/test_disturbed_management_overrides.py .........              [ 33%]
+tests/nodb/test_failed_mutation_consumers.py ......                      [ 33%]
+tests/nodb/test_failed_mutation_matrix.py ...................s..s....... [ 35%]
+......                                                                   [ 35%]
+tests/nodb/test_failed_mutation_state.py .....                           [ 36%]
+tests/nodb/test_failed_prelock_state.py ..........                       [ 36%]
+tests/nodb/test_geojson_crs_inference.py ...                             [ 36%]
+tests/nodb/test_hydration_snapshot.py ......                             [ 37%]
+tests/nodb/test_initial_read_retry.py ..................                 [ 38%]
+tests/nodb/test_iter_nodb_mods_subclasses.py .                           [ 38%]
+tests/nodb/test_kslast_map.py ................................           [ 40%]
+tests/nodb/test_landuse_build_event_contracts.py ....                    [ 40%]
+tests/nodb/test_landuse_catalog.py .....                                 [ 40%]
+tests/nodb/test_landuse_coverage_area_source.py ........                 [ 41%]
+tests/nodb/test_landuse_custom_mapping.py ..........                     [ 41%]
+tests/nodb/test_landuse_grouped_updates.py ...........                   [ 42%]
+tests/nodb/test_landuse_modify.py ......                                 [ 42%]
+tests/nodb/test_landuse_modify_mapping.py .                              [ 42%]
+tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py .....            [ 42%]
+tests/nodb/test_landuse_mofe_freshness.py .......                        [ 43%]
+tests/nodb/test_landuse_mofe_process_pool.py .......                     [ 43%]
+tests/nodb/test_landuse_mofe_value_types.py .                            [ 43%]
+tests/nodb/test_landuse_raster_wait.py ..                                [ 43%]
+tests/nodb/test_locale_capability_authority.py ......................... [ 45%]
+......................................................                   [ 48%]
+tests/nodb/test_lock_race_conditions.py ......F
+
+=================================== FAILURES ===================================
+________ TestTTLExpirationRace.test_concurrent_access_after_ttl_expiry _________
+
+self = <test_lock_race_conditions.TestTTLExpirationRace object at 0x79febf2407a0>
+temp_wd = '/tmp/pytest-of-unknown/pytest-221/test_concurrent_access_after_t0/test_run'
+mock_controller_class = <class 'test_lock_race_conditions.MockNoDbController'>
+
+    def test_concurrent_access_after_ttl_expiry(self, temp_wd, mock_controller_class):
+        """Test that another process can acquire lock after TTL expires."""
+
+        # Use very short TTL
+        with patch('wepppy.nodb.base.LOCK_DEFAULT_TTL', 1):
+            controller1 = mock_controller_class.getInstance(temp_wd)
+
+            # Start long operation in background thread
+            operation_started = threading.Event()
+            operation_results = []
+
+            def long_operation():
+                try:
+                    with controller1.locked():
+                        operation_started.set()
+                        controller1.heavy_operation(3.0)  # 3 seconds > 1 second TTL
+                        operation_results.append("completed")
+                except Exception as e:
+                    operation_results.append(f"failed: {e}")
+
+            bg_thread = threading.Thread(target=long_operation)
+            bg_thread.start()
+
+            # Wait for operation to start
+            operation_started.wait(timeout=2)
+
+            # Wait for TTL to expire
+            time.sleep(1.5)
+
+            # Try to acquire lock with second instance (should succeed after TTL expiry)
+            controller2 = mock_controller_class.getInstance(temp_wd)
+            try:
+                with controller2.locked():
+                    controller2.heavy_operation(0.1)
+                    second_operation_success = True
+            except NoDbAlreadyLockedError:
+                second_operation_success = False
+
+            bg_thread.join(timeout=5)
+
+            # The second operation should succeed because TTL expired
+>           assert second_operation_success, "Second operation should succeed after TTL expiry"
+E           AssertionError: Second operation should succeed after TTL expiry
+E           assert False
+
+tests/nodb/test_lock_race_conditions.py:352: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/nodb/test_batch_daymet_multiple_contention.py: 365 warnings
+tests/nodb/test_climate_edde_build.py: 3294 warnings
+tests/nodb/test_climate_prism_build.py: 1464 warnings
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_unknown_commit_recovery_records_remain_visible_and_archivable
+tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_lock_race_conditions.py::TestTTLExpirationRace::test_concurrent_access_after_ttl_expiry
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+===== 1 failed, 846 passed, 2 skipped, 5136 warnings in 183.56s (0:03:03) ======

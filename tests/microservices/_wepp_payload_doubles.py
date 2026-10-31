@@ -24,6 +24,13 @@ class GroupedSoilsDummy:
         self.dump_calls: list[dict[str, object | None]] = []
         self._locked = False
 
+    def mutation_state(self):
+        from contextlib import nullcontext
+        return nullcontext()
+
+    def _assert_lock_owned_for_dump(self) -> None:
+        return None
+
     def lock(self) -> None:
         if self._locked:
             raise RuntimeError("already locked")
@@ -148,6 +155,13 @@ class GroupedWatershedDummy:
         self.grouped_update_calls: list[dict[str, object | None]] = []
         self.dump_calls: list[dict[str, object | None]] = []
         self._locked = False
+
+    def mutation_state(self):
+        from contextlib import nullcontext
+        return nullcontext()
+
+    def _assert_lock_owned_for_dump(self) -> None:
+        return None
 
     def lock(self) -> None:
         if self._locked:

@@ -62,31 +62,34 @@ def test_remove_receipt_and_empty_key(runner):
     assert hydrate(runner)._rq_job_ids == {}
 
 
-def test_failed_dump_forces_singleton_refresh(runner, monkeypatch):
+def test_failed_dump_repairs_held_singleton(runner, monkeypatch):
     ReceiptRunner._instances[os.path.abspath(runner.wd)] = runner
-    def fail(_self):
+    def fail(*_args):
         raise OSError('injected dump failure')
     with monkeypatch.context() as scoped:
-        scoped.setattr(ReceiptRunner, 'dump', fail)
+        scoped.setattr(base.os, 'replace', fail)
         with pytest.raises(OSError, match='injected dump failure'):
             runner.set_rq_job_id_fresh('root', 'uncommitted')
-    assert runner._nodb_mtime is None
+    assert runner._rq_job_ids == {}
+    assert runner._nodb_mtime == os.stat(runner._nodb).st_mtime
     current = ReceiptRunner.getInstance(runner.wd)
+    assert current is runner
     assert current._rq_job_ids == {}
     assert not current.islocked()
 
 
 def test_lost_lock_cannot_publish_or_unlock_new_owner(runner, monkeypatch):
-    original = ReceiptRunner._hydrate_instance
-    def expire(*args, **kwargs):
-        fresh = original(*args, **kwargs)
-        base.redis_lock_client.set(runner._distributed_lock_key, 'another-owner')
+    original = ReceiptRunner.recover_mutation_state
+    lock_key = runner._distributed_lock_key
+    def expire(self):
+        fresh = original(self)
+        base.redis_lock_client.set(lock_key, 'another-owner')
         return fresh
-    monkeypatch.setattr(ReceiptRunner, '_hydrate_instance', expire)
+    monkeypatch.setattr(ReceiptRunner, 'recover_mutation_state', expire)
     with pytest.raises(RuntimeError):
         runner.set_rq_job_id_fresh('root', 'uncommitted')
-    assert base.redis_lock_client.get(runner._distributed_lock_key) == 'another-owner'
-    durable = original(runner.wd, False, False, False, use_redis_cache=False)
+    assert base.redis_lock_client.get(lock_key) == 'another-owner'
+    durable = ReceiptRunner.load_detached(object.__getattribute__(runner, 'wd'))
     assert durable._rq_job_ids == {}
 
 

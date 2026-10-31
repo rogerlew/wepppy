@@ -142,6 +142,15 @@ initial-read scope. Ctime alone is not a rejection: unlinking an old inode can
 change ctime without changing its open bytes. See the canonical contract's
 "Coherent disk-read versions" section.
 
+## Failed Mutation State
+
+Follow the canonical persistence contract's NFMS-01 section. Acquired failures
+must recover held controller state from authoritative disk or block reuse; cache
+eviction/signature invalidation alone is insufficient. Preserve direct `dump()`
+precommit retry semantics, commit-aware recovery and existing bounded grouped
+compensation. Stage prelock option/map flags locally, and reacquire nested aliases
+after failure. New manual producers need the shared acquired recovery boundary.
+
 ## Persistence Semantics (Atomic Write Path)
 
 * `NoDbBase.dump()` persists via temp-file write + `os.replace()` in the same

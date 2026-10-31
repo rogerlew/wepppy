@@ -481,8 +481,10 @@ def test_unknown_commit_keeps_recovery_copies(controllers, monkeypatch):
     monkeypatch.setattr(base, "write_version", fail_version)
     monkeypatch.setattr(Path, "read_text", unreadable)
     monkeypatch.setattr(rap_module, "identify_median_single_raster_key", lambda **_: {"1": 75.0})
-    with pytest.raises(RuntimeError, match="outcome unknown"):
+    with pytest.raises(RuntimeError, match="outcome unknown") as failure:
         rap.analyze()
+    assert isinstance(failure.value.__cause__, OSError)
+    assert "postcommit metadata failure" in str(failure.value.__cause__)
     backups = list(Path(rap.rap_dir).glob("derived-backup-*/rap_ts.parquet"))
     assert len(backups) == 1
     assert backups[0].read_bytes() == previous

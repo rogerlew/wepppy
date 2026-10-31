@@ -64,17 +64,8 @@ def require_output_directory(path: str | Path, wd: str) -> None:
 def finalize(controller) -> Iterator[ExitStack]:
     """Hold the lock across fresh disk hydration, publication, and one dump."""
     controller.lock()
-    committed = False
-    try:
-        lock_key = controller._distributed_lock_key
-        fresh = type(controller)._hydrate_instance(
-            os.path.abspath(controller.wd), False, False, False, use_redis_cache=False
-        )
-        if fresh._distributed_lock_key != lock_key:
-            raise RuntimeError("derived build superseded by changed controller identity")
-        # This is durable hydration, not a merge of collected controller state.
-        controller.__dict__.clear()
-        controller.__dict__.update(fresh.__dict__)
+    with controller.mutation_state(release_lock=True):
+        controller.recover_mutation_state()
         with ExitStack() as publications:
             yield publications
             # Capture the intended *fresh final transaction*, solely to identify
@@ -83,7 +74,7 @@ def finalize(controller) -> Iterator[ExitStack]:
             intended_payload = jsonpickle.encode(controller)
             try:
                 controller.dump()
-            except Exception as commit_error:  # broad-except: classify commit outcome before artifact cleanup
+            except BaseException as commit_error:  # broad-except: classify commit before unwinding publication, including cancellation.
                 # Commit boundary: dump can fail after replacing the NoDb file.
                 # Never roll artifacts back beneath possibly committed metadata.
                 try:
@@ -91,19 +82,19 @@ def finalize(controller) -> Iterator[ExitStack]:
                 except OSError:
                     # Unknown commit outcome: restoring files could corrupt an
                     # already committed controller. Keep the failure explicit.
-                    raise _CommitOutcomeUnknown(
+                    if isinstance(commit_error, Exception):
+                        raise _CommitOutcomeUnknown(
+                            "Derived build commit outcome unknown; artifacts and recovery copies retained"
+                        ) from commit_error
+                    commit_error.add_note(
                         "Derived build commit outcome unknown; artifacts and recovery copies retained"
-                    ) from commit_error
+                    )
+                    commit_error._nodb_commit_outcome_unknown = True
+                    raise commit_error
                 if own_commit:
                     controller.logger.error("Derived build commit interrupted after possible NoDb commit; retaining artifacts")
                     publications.close()
                 raise
-            committed = True
-    finally:
-        if not committed:
-            # Force the next singleton read to discard any uncommitted fields.
-            controller._nodb_mtime = None
-        controller.unlock()
 
 
 @contextmanager
@@ -154,8 +145,12 @@ def publish_files(staged: str | Path, destination: str | Path, controller, *, re
                 published.append((target, previous, existed, identity))
             try:
                 yield
-            except _CommitOutcomeUnknown:
-                unknown_commit = True
+            except BaseException as publication_error:  # broad-except: retain recovery artifacts for unknown commits, then propagate.
+                # Cleanup boundary: cancellation must propagate, but unknown
+                # durable commit outcomes must retain both artifact generations.
+                unknown_commit = isinstance(publication_error, _CommitOutcomeUnknown) or getattr(
+                    publication_error, "_nodb_commit_outcome_unknown", False
+                )
                 raise
             completed = True
         finally:

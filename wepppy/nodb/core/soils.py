@@ -631,10 +631,9 @@ class Soils(NoDbBase):
         soils_dir = self.soils_dir
         _clear_directory_preserving_symlink_mount(soils_dir)
         os.makedirs(soils_dir, exist_ok=True)
-        self._soils_is_vrt = False
-        if not self.islocked():
-            with self.locked():
-                self._soils_is_vrt = False
+        mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
+        with mutation:
+            self._soils_is_vrt = False
 
     def symlink_soils_map(
         self,
@@ -656,8 +655,9 @@ class Soils(NoDbBase):
             if crop_window is None:
                 raise ValueError("Crop window cannot be identified for as_cropped_vrt=True")
 
-        self._soils_is_vrt = use_vrt
-        dest = self.ssurgo_fn
+        # Select the proposed path without publishing its state before preparation.
+        ext = "vrt" if use_vrt else "tif"
+        dest = _join(self.soils_dir, f"ssurgo.{ext}")
 
         if use_vrt:
             build_windowed_vrt_from_window(
@@ -712,9 +712,9 @@ class Soils(NoDbBase):
                 soils_src,
             )
 
-        if not self.islocked():
-            with self.locked():
-                self._soils_is_vrt = use_vrt
+        mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
+        with mutation:
+            self._soils_is_vrt = use_vrt
 
     @property
     def ssurgo_db(self) -> Optional[str]:
@@ -1101,8 +1101,7 @@ class Soils(NoDbBase):
 
         _map = self.ron_instance.map
 
-        self._soils_is_vrt = False
-        ssurgo_fn = self.ssurgo_fn
+        ssurgo_fn = _join(self.soils_dir, "ssurgo.tif")
         soils_dir = self.soils_dir
 
         with self.timed('  Retrieving ssurgo data'):
@@ -1118,6 +1117,7 @@ class Soils(NoDbBase):
         self.logger.info(f"ssurgo mukeys: {mukeys}")
 
         with self.locked():
+            self._soils_is_vrt = False
             ssurgo_cache_db_path = self._prepare_project_surgo_cache(use_statsgo=False)
             surgo_c = SurgoSoilCollection(mukeys, cache_db_path=ssurgo_cache_db_path)
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)

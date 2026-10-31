@@ -1,0 +1,47 @@
+{
+  "checkpoint": "2b998e08d",
+  "scope": "NFMS code and test sources for final gates",
+  "sha256": {
+    "tests/microservices/_wepp_payload_doubles.py": "4089c1700222959d620c39a31ac5591b11f1d751499aa80685db09459c5935f4",
+    "tests/microservices/test_rq_engine_bootstrap_routes.py": "2ce166fa514975a85ebec177a766852d3a09b8af88d86fef37f3784b2315f734",
+    "tests/microservices/test_rq_engine_wepp_routes.py": "80dbef0289b81beb8c68b9c36ea1b18e76f180997f31e1e2ef58a546ef051644",
+    "tests/nodb/mods/test_postfire_debris_flow_observability.py": "46a185d6786cdbc2d82fe95cd5e976560f1d7a550e5d0a943f28cde34c5940db",
+    "tests/nodb/test_base_boundary_characterization.py": "3bbcbc9afc9c10895d65113c2a8bd5f3025dbae67768b87eabefd892e4246823",
+    "tests/nodb/test_base_unit.py": "de5c446ab1ed30fb0708f091aef5509c4bc47d7386188575ff869090871b9189",
+    "tests/nodb/test_batch_receipt_transaction.py": "fbdd846834fd81913872ef9eeddabb264ff254b07326eb49e59107a58577ff35",
+    "tests/nodb/test_failed_mutation_consumers.py": "bac4161cf6724eb5e042d90be0bc9cefa4dd8bda3d4ff50555985ab82e595eb6",
+    "tests/nodb/test_failed_mutation_matrix.py": "435415d33a101d5994cda1134382f0c890682175219192a28877b5379710a8ed",
+    "tests/nodb/test_failed_mutation_state.py": "09517de7b59293a21ebc3815a1a170edf9733fb093df6b4bbd0301d747cd49e1",
+    "tests/nodb/test_failed_prelock_state.py": "f35371d3b81b3682d14bda1edeb02cee0a3049c6e606981484f4eb120f6b5eda",
+    "tests/nodb/test_manual_mutation_state.py": "4348dd6f860d7351bf51e40a9bb2b0e3218f02d8e93a1b133bbf44640c42ee74",
+    "tests/nodb/test_single_input_sources.py": "426df2162df6c9dabe465d37849c41662da184068b910b94a96a879f49bc25aa",
+    "tests/nodb/test_watershed_runtime_contract.py": "5998954af77df5ded826f3548c75d741cbe13c8848b5bb037633637d54d44c4e",
+    "tests/nodb/test_wepp_grouped_mutation_recovery.py": "38d3a630bdc4e8e79a68c1fc970de926be941abf569a9f93e50919099ac9be9c",
+    "tests/nodb/test_wepp_run_payload_grouped_updates.py": "079e9aaf8742ad95b8d3550b9b1eb5162a257c2fa40cbd35107f8c10fea3af85",
+    "wepppy/microservices/rq_engine/wepp_run_payload.py": "f873192d53d11378ba7f047d8742f2711aa903292ae279491219a762fbff716b",
+    "wepppy/nodb/_derived_build.py": "3117bbf53517f3dddf5b592dad4f86515c2e7e1a63b873aeee3efe4f71487598",
+    "wepppy/nodb/base.py": "1afc0ca4c99eeb0705713a408a3b504f55f0546092b182ad0c3264292a5abb8e",
+    "wepppy/nodb/base.pyi": "553b9bebb700b3ece314b64acfe2dd3468017e4076110a21b4dc4996887234bf",
+    "wepppy/nodb/batch_runner.py": "3d33fa84ba2888ededb8206816373125fd9b82c16cbdcfffd34ae90670ffdddb",
+    "wepppy/nodb/core/landuse.py": "be886fd308235c4af60397436ff35abce1acf100d23c518061c1efddae26366a",
+    "wepppy/nodb/core/ron.py": "db07263b8f905334f554e7efc5c92f440702c1e8a297de8b78c1dacb44bcc8d3",
+    "wepppy/nodb/core/soils.py": "8e5ae897aa8c62be3d77eee775906d5706a30a94590b165701ae045965170b8a",
+    "wepppy/nodb/core/watershed_mixins.py": "8c6b2552b9593f20ba417fc86804ba52d21347b8620d07a67783031a0ad8ac27",
+    "wepppy/nodb/core/wepp.py": "8ed2289c16fdcec49238b69b8cc5bcc6118b1babddcb431857c6870d557b5cee",
+    "wepppy/nodb/mods/postfire_debris_flow/migration.py": "6777e65cbe2c6be139880a7ba2c1f7b0013793ea1d3939d4b0bdc3ee1b8020f9",
+    "wepppy/nodb/single_input_sources.py": "dda6df04ebb732370b3646a7d812d4f39c46742282fc8c726b91dfd1948ba13a",
+    "tests/nodb/test_batch_climate_rap_contention.py": "bf43e98c72ddb2ad8b9b5be96ca6c78616afb774724fcd320c631d0424144144",
+    "tests/nodb/test_lock_race_conditions.py": "0362a6a270a18636bb990bf6303f565531b522e7e426598ce5fb6e9d3f5fb976",
+    "tests/nodb/test_root_dir_materialization.py": "a3b92876f3af24e1d3cae003d2fc924a42d4bc656872aeb28316714f34ea6972"
+  },
+  "compatibility_followup": {
+    "reason": "Restore existing ordinary unknown-commit error class; preserve cancellation",
+    "files": [
+      "wepppy/nodb/_derived_build.py",
+      "tests/nodb/test_batch_climate_rap_contention.py"
+    ],
+    "focused_result": "51 passed"
+  },
+  "ttl_test_followup": "Use distinct detached controller for simulated separate TTL writer; 17 passed; no production change.",
+  "filesystem_fixture_followup": "Five filesystem-only __new__ doubles use existing nullcontext pattern for locked; QA approved, 17 passed with real ownership regressions."
+}

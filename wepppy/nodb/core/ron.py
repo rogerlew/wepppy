@@ -867,7 +867,6 @@ class Ron(NoDbBase):
             if dem_src.lower().endswith('.vrt'):
                 raise ValueError("Cannot create cropped VRT from source DEM that is already a VRT.")
 
-        self._dem_is_vrt = use_vrt
         if use_vrt:
             # Use .vrt extension so WhiteboxTools recognizes the format
             dest = _join(self.dem_dir, "dem.vrt")
@@ -913,6 +912,7 @@ class Ron(NoDbBase):
         zoom = int(zoom) if isinstance(zoom, int) else 11
 
         with self.locked():
+            self._dem_is_vrt = use_vrt
             self._cellsize = cellsize
             self._map = Map(extent, center, zoom, cellsize)
             self._w3w = None

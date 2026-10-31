@@ -241,3 +241,79 @@ def test_validate_outlet_location_wraps_topaz_map_typeerror(
 
     with pytest.raises(ValueError, match=OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE):
         watershed.validate_outlet_location(-117.5, 46.9)
+
+
+@pytest.mark.unit
+def test_require_centroid_busy_owner_does_not_mutate_live_state(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """A different owner's global lock must not authorize centroid mutation."""
+    import wepppy.nodb.base as base
+    from tests.nodb.test_base_boundary_characterization import _RedisStub
+
+    monkeypatch.setattr(base, "redis_lock_client", _RedisStub())
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    watershed = Watershed(str(tmp_path), "0.cfg")
+    with watershed.locked():
+        watershed._centroid = None
+        watershed._sub_area = 1.0
+    other = Watershed.load_detached(str(tmp_path))
+    other.lock()
+    try:
+        monkeypatch.setattr(
+            watershed_mixins_module, "post_abstract_watershed",
+            lambda _wd: (12.5, 2.5, (-116.2, 43.6), [10, 11], [20]),
+        )
+        before = Path(watershed._nodb).read_bytes()
+        with pytest.raises((base.NoDbAlreadyLockedError, WatershedCentroidStateError)):
+            watershed.require_centroid()
+        assert watershed._centroid is None
+        assert watershed._sub_area == 1.0
+        assert Path(watershed._nodb).read_bytes() == before
+        other._assert_lock_owned_for_dump()
+    finally:
+        other.unlock()
+        Watershed.cleanup_run_instances(str(tmp_path))
+
+
+@pytest.mark.unit
+def test_require_centroid_failed_replace_discards_repair(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """Real serialization failure cannot leave a usable rejected centroid."""
+    import wepppy.nodb.base as base
+    from tests.nodb.test_base_boundary_characterization import _RedisStub
+
+    monkeypatch.setattr(base, "redis_lock_client", _RedisStub())
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    watershed = Watershed(str(tmp_path), "0.cfg")
+    with watershed.locked():
+        watershed._centroid = None
+        watershed._sub_area = 1.0
+    held = Watershed.getInstance(str(tmp_path))
+    monkeypatch.setattr(
+        watershed_mixins_module, "post_abstract_watershed",
+        lambda _wd: (12.5, 2.5, (-116.2, 43.6), [10, 11], [20]),
+    )
+    original_replace = base.os.replace
+
+    def reject_replace(source, destination):
+        if str(destination) == str(tmp_path / "watershed.nodb"):
+            raise OSError("centroid replace failed")
+        return original_replace(source, destination)
+
+    monkeypatch.setattr(base.os, "replace", reject_replace)
+    try:
+        with pytest.raises(WatershedCentroidStateError):
+            held.require_centroid()
+        assert held._centroid is None
+        assert held._sub_area == 1.0
+        assert Watershed.getInstance(str(tmp_path)) is held
+        monkeypatch.setattr(base.os, "replace", original_replace)
+        with held.locked():
+            held._chn_area = 2.0
+        durable = Watershed.load_detached(str(tmp_path))
+        assert durable._centroid is None
+        assert durable._sub_area == 1.0
+    finally:
+        Watershed.cleanup_run_instances(str(tmp_path))

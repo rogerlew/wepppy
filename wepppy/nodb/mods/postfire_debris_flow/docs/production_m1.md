@@ -694,3 +694,14 @@ source preparation and pre/locked publication. All other source identities,
 owner/selection checks, SQLite coherence and result-artifact guards stay strict.
 This permits ordinary concurrent WEPP hard-link preparation without accepting
 changed climate bytes or inventing a hash for legacy records.
+
+### Failed migration mutation state
+
+Migration's manual NoDb mutation scope follows the shared
+[failed-mutation contract](../../../../../docs/schemas/nodb-persistence-concurrency-contract.md#failed-high-level-mutation-state-nfms-01-specified-implementation-pending).
+On failure, held controller state must reflect the actual durable generation or
+refuse reuse until recovery. An explicit intermediate NoDb commit remains committed
+if later receipt/publication work fails. Migration evidence, admission leases,
+explicit resume, retained originals and artifact publication rules above remain
+unchanged. This prevents a later unrelated save from publishing failed migration
+state; it does not roll back migrated files.

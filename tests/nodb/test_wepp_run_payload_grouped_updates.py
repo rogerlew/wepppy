@@ -196,6 +196,13 @@ class _AtomicSoilsDummy:
     def clip_soils_minimum_depth(self) -> float:
         return self._clip_soils_minimum_depth
 
+    def mutation_state(self):
+        from contextlib import nullcontext
+        return nullcontext()
+
+    def _assert_lock_owned_for_dump(self) -> None:
+        return None
+
     def lock(self) -> None:
         if self._fail_on_lock is not None:
             raise self._fail_on_lock
@@ -329,6 +336,13 @@ class _AtomicWatershedDummy:
     @property
     def clip_hillslope_length(self) -> float:
         return self._clip_hillslope_length
+
+    def mutation_state(self):
+        from contextlib import nullcontext
+        return nullcontext()
+
+    def _assert_lock_owned_for_dump(self) -> None:
+        return None
 
     def lock(self) -> None:
         if self._locked:
@@ -882,3 +896,22 @@ def test_watershed_post_finalize_grouped_updates_runs_validate_then_post_hook(
     watershed.post_finalize_grouped_wepp_run_payload_updates()
 
     assert call_order == ["validate:/tmp/unit", "post"]
+
+
+def test_grouped_lock_acquisition_cancellation_releases_previous_lock() -> None:
+    class Cancelled(BaseException):
+        pass
+
+    events: list[tuple[str, str]] = []
+    soils = _AtomicSoilsDummy(events)
+    watershed = _AtomicWatershedDummy(events)
+
+    def cancel_lock():
+        raise Cancelled("cancel lock acquisition")
+
+    watershed.lock = cancel_lock
+    with pytest.raises(Cancelled, match="cancel lock acquisition"):
+        wepp_run_payload_module._acquire_grouped_update_locks(
+            lock_order=[("soils", soils), ("watershed", watershed)],
+        )
+    assert events == [("lock", "soils"), ("unlock", "soils")]

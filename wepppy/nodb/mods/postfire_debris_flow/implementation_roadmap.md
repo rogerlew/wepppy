@@ -355,3 +355,11 @@ Worker admission, source preparation and publication accept only settled active
 CLI ctime drift verified against admission bytes. Contract checkpoint `567eacf7d`;
 [delivery evidence](../../../../docs/work-packages/20260917_postfire_active_cli_identity/package.md).
 Other source and artifact guards retain their existing semantics.
+
+## NFMS-01 failed migration mutation consistency
+
+The 2026-10-30 NFMS-01 package adds the shared failed-state scope to manual
+migration mutation. This is bounded persistence consistency work, with no model,
+receipt, publication or migration-resume contract change. Real serialization
+failure/resume tests must assert held-reference state as well as durable bytes;
+manual repair of the controller in the test is not recovery evidence.

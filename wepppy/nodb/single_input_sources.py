@@ -138,54 +138,63 @@ def _accept_source(controller, kind: str, raw: bytes, filename: str):
         _remove_interrupted_staging(directory_fd)
         canonical = _canonical_text(directory_fd, raw, kind)
         created = False
-        committed = False
         controller.lock()
-        try:
-            controller = type(controller).getInstance(controller.wd)
-            require_single_input_policy(controller, require_enabled=True)
-            previous = source_metadata(controller)
-            if not _valid_metadata(previous, kind):
-                previous = None
-            staging = f".source-{uuid.uuid4().hex}"
-            fd = os.open(staging, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o666, dir_fd=directory_fd)
+        with controller.mutation_state(release_lock=True):
             try:
-                with os.fdopen(fd, "wb") as stream:
-                    stream.write(raw)
-                    stream.flush()
-                    os.fsync(stream.fileno())
+                controller.recover_mutation_state()
+                require_single_input_policy(controller, require_enabled=True)
+                previous = source_metadata(controller)
+                if not _valid_metadata(previous, kind):
+                    previous = None
+                staging = f".source-{uuid.uuid4().hex}"
+                fd = os.open(staging, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o666, dir_fd=directory_fd)
                 try:
-                    os.link(staging, name, src_dir_fd=directory_fd, dst_dir_fd=directory_fd, follow_symlinks=False)
-                    created = True
-                    os.fsync(directory_fd)
-                except FileExistsError:
-                    if _read_regular(directory_fd, name) != raw:
-                        raise SingleInputError("The stored source identity conflicts with this upload.", code="single_input_unavailable", status_code=409)
-            finally:
-                os.unlink(staging, dir_fd=directory_fd)
-            metadata = {"filename": filename, "sha256": digest, "size_bytes": len(raw),
-                        "version": "98.4" if kind == "landuse" else f"{float(canonical.splitlines()[0]):g}",
-                        "relative_path": f"{_DIRECTORY}/{name}"}
-            if previous and previous.get("relative_path") != metadata["relative_path"]:
-                metadata["previous_relative_path"] = previous["relative_path"]
-            elif previous and "previous_relative_path" in previous:
-                previous_name = str(previous["previous_relative_path"]).removeprefix(_DIRECTORY + "/")
-                if _SOURCE_NAME.fullmatch(previous_name):
-                    metadata["previous_relative_path"] = _DIRECTORY + "/" + previous_name
-            controller._single_user_defined_source = metadata
-            controller.dump()
-            committed = True
-        finally:
-            try:
-                if not committed:
-                    # Inspect durable state before removing a candidate: dump may
-                    # have replaced the NoDb file before raising an I/O error.
-                    durable = type(controller).load_detached(controller.wd)
-                    selected = source_metadata(durable)
-                    controller._single_user_defined_source = selected
-                    if created and (not isinstance(selected, dict) or selected.get("relative_path") != f"{_DIRECTORY}/{name}"):
-                        os.unlink(name, dir_fd=directory_fd)
-            finally:
-                controller.unlock()
+                    with os.fdopen(fd, "wb") as stream:
+                        stream.write(raw)
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                    try:
+                        os.link(staging, name, src_dir_fd=directory_fd, dst_dir_fd=directory_fd, follow_symlinks=False)
+                        created = True
+                        os.fsync(directory_fd)
+                    except FileExistsError:
+                        if _read_regular(directory_fd, name) != raw:
+                            raise SingleInputError("The stored source identity conflicts with this upload.", code="single_input_unavailable", status_code=409)
+                finally:
+                    os.unlink(staging, dir_fd=directory_fd)
+                metadata = {"filename": filename, "sha256": digest, "size_bytes": len(raw),
+                            "version": "98.4" if kind == "landuse" else f"{float(canonical.splitlines()[0]):g}",
+                            "relative_path": f"{_DIRECTORY}/{name}"}
+                if previous and previous.get("relative_path") != metadata["relative_path"]:
+                    metadata["previous_relative_path"] = previous["relative_path"]
+                elif previous and "previous_relative_path" in previous:
+                    previous_name = str(previous["previous_relative_path"]).removeprefix(_DIRECTORY + "/")
+                    if _SOURCE_NAME.fullmatch(previous_name):
+                        metadata["previous_relative_path"] = _DIRECTORY + "/" + previous_name
+                controller._single_user_defined_source = metadata
+                controller.dump()
+            except BaseException as operation_error:  # broad-except: owned source cleanup must also run for cancellation.
+                # Cleanup boundary: classify durable selection before deleting a
+                # candidate, while this transaction still owns its mutation lock.
+                if created:
+                    try:
+                        controller.recover_mutation_state()
+                        controller._assert_lock_owned_for_dump()
+                        selected = source_metadata(controller)
+                        if not isinstance(selected, dict) or selected.get("relative_path") != f"{_DIRECTORY}/{name}":
+                            os.unlink(name, dir_fd=directory_fd)
+                    except BaseException as cleanup_error:  # broad-except: preserve cancellation and retain uncertain source bytes.
+                        if not isinstance(cleanup_error, Exception):
+                            cleanup_error.add_note(f"Source publication failed before cleanup: {operation_error!r}")
+                            raise cleanup_error from operation_error
+                        operation_error.add_note(
+                            f"Single-input candidate retained because cleanup failed: {cleanup_error!r}"
+                        )
+                        logging.getLogger(__name__).warning(
+                            "Single-input candidate cleanup failed after publication error",
+                            exc_info=True,
+                        )
+                raise
         # Only idle, unreferenced immutable generations are removed.
         retained = {Path(metadata[key]).name for key in ("relative_path", "previous_relative_path") if key in metadata}
         for entry in os.listdir(directory_fd):

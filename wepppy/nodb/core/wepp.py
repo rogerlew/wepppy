@@ -1889,8 +1889,8 @@ class Wepp(NoDbBase):
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
 
-        # get references to PhosphorusOpts
-        phos_opts = self.phosphorus_opts
+        # Stage map-derived options: a later raster failure must not mutate live state.
+        phos_opts = deepcopy(self.phosphorus_opts)
 
         # check to see if p maps are available
         p_surf_runoff_map = getattr(self, 'p_surf_runoff_map', None)
@@ -1960,7 +1960,8 @@ class Wepp(NoDbBase):
             os.remove(fn)
 
     def _check_and_set_baseflow_map(self) -> None:
-        baseflow_opts = self.baseflow_opts
+        # Stage map-derived options until every raster read succeeds.
+        baseflow_opts = deepcopy(self.baseflow_opts)
 
         gwstorage_map = getattr(self, 'baseflow_gwstorage_map', None)
         bfcoeff_map = getattr(self, 'baseflow_bfcoeff_map', None)

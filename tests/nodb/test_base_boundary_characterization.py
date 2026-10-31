@@ -109,7 +109,9 @@ def test_locked_releases_lock_and_does_not_persist_on_exception(
             raise ValueError("boom")
 
     assert not nodb.islocked()
-    assert not (tmp_path / nodb.filename).exists()
+    assert not (tmp_path / type(nodb).filename).exists()
+    with pytest.raises(RuntimeError, match="unavailable after a failed mutation"):
+        _ = nodb.value
 
 
 def test_locked_persists_state_and_unlocks_on_success(

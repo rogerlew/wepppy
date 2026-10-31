@@ -1,23 +1,24 @@
 # Failed NoDb mutation state repair (NFMS-01)
 
-Status: discovery and contract checkpoint; implementation pending.
+Status: implemented, independently reviewed and locally validated; implementation commit and push authorized.
 Started: 2026-10-31 UTC. Owner: operator with Codex implementation/review agents.
 
 ## Outcome and scope
 
-Failed mutations currently leave rejected values in a reusable controller. An
-unrelated later save can publish those values and preparation can consume them.
-Repair shared high-level boundaries and confirmed manual/aliased consumers;
+Previously, failed mutations left rejected values in a reusable controller;
+unrelated later saves and preparation could consume them. Shared high-level
+boundaries and confirmed manual/aliased consumers now recover or fence state;
 preserve disk authority, singleton identity, owner tokens and explicit low-level
 retry semantics. Broken assumption: disk non-persistence and lock release do not
 imply that a shared mutable object reverted its failed changes.
 
 The durable decision is in `docs/schemas/nodb-persistence-concurrency-contract.md`,
-“Failed high-level mutation state (NFMS-01; specified, implementation pending)”.
+“Failed high-level mutation state (NFMS-01)”.
 This is a normative extension, not solely conformance to the prior cache contract.
 The operator authorized the bounded outcome by requesting execution of
 `/tmp/nodb-failed-mutation-state-repair-prompt.md`; retained copy is
-`prompts/active/operator_prompt.md`. No commit authority was granted.
+`prompts/active/operator_prompt.md`. The operator subsequently authorized the standalone checkpoint commit, `2b998e08d`;
+the operator subsequently authorized the implementation commit and push.
 
 ## Boundaries and complexity budget
 
@@ -50,8 +51,8 @@ manual and decorator/context paths, two real controllers and generated input
 readback. Use real `prep_soil` and parse `wepp/runs/p101.sol`; add option-map
 preparation evidence if that consumer is repaired. Full model execution and fresh
 reports are not required because the target boundary is executable-input
-preparation. This is currently diagnosed only; no generated-output correction
-has been established.
+preparation. Focused generated-input correction is established; final broad results and limits
+are recorded in `artifacts/validation.md`.
 
 ## Signals and closure
 

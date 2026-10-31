@@ -1,0 +1,218 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb --ignore=tests/nodb/mods --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1736 items
+
+tests/nodb/test_base_boundary_characterization.py ...................... [  1%]
+................................................                         [  4%]
+tests/nodb/test_base_file_handler_cleanup.py ............                [  4%]
+tests/nodb/test_base_misc.py ........................................... [  7%]
+                                                                         [  7%]
+tests/nodb/test_base_unit.py ....................                        [  8%]
+tests/nodb/test_batch_climate_rap_contention.py ........................ [  9%]
+................                                                         [ 10%]
+tests/nodb/test_batch_daymet_multiple_contention.py .................... [ 11%]
+...............                                                          [ 12%]
+tests/nodb/test_batch_receipt_transaction.py ......                      [ 13%]
+tests/nodb/test_batch_runner.py ....                                     [ 13%]
+tests/nodb/test_batch_runner_grouped_updates.py .....                    [ 13%]
+tests/nodb/test_batch_runner_watar.py ...........                        [ 14%]
+tests/nodb/test_build_climate_race_conditions.py .......                 [ 14%]
+tests/nodb/test_catalog_producer_refresh.py ...                          [ 14%]
+tests/nodb/test_cli_parquet_lineage.py .........................         [ 16%]
+tests/nodb/test_climate_artifact_export_service.py ............          [ 16%]
+tests/nodb/test_climate_build_helpers.py ............................... [ 18%]
+.........                                                                [ 19%]
+tests/nodb/test_climate_build_router_services.py ...........             [ 19%]
+tests/nodb/test_climate_catalog.py ..................................... [ 21%]
+........................                                                 [ 23%]
+tests/nodb/test_climate_edde_build.py .....................              [ 24%]
+tests/nodb/test_climate_facade_collaborators.py ................         [ 25%]
+tests/nodb/test_climate_gridmet_multiple_build_service.py ............   [ 26%]
+tests/nodb/test_climate_input_parser_service.py ........................ [ 27%]
+................                                                         [ 28%]
+tests/nodb/test_climate_multiple_build.py ......                         [ 28%]
+tests/nodb/test_climate_observed_year_bounds.py .....                    [ 29%]
+tests/nodb/test_climate_prism_build.py ......                            [ 29%]
+tests/nodb/test_climate_scaling_service.py ..........                    [ 30%]
+tests/nodb/test_climate_station_catalog_service.py .......               [ 30%]
+tests/nodb/test_climate_type_hints.py ....                               [ 30%]
+tests/nodb/test_climate_user_defined_station_meta_service.py ...         [ 30%]
+tests/nodb/test_config_sanitization.py ................                  [ 31%]
+tests/nodb/test_defaults_cfg_compatibility.py ...........                [ 32%]
+tests/nodb/test_derived_file_signature.py ........                       [ 32%]
+tests/nodb/test_disturbed_management_overrides.py .........              [ 33%]
+tests/nodb/test_failed_mutation_consumers.py ......                      [ 33%]
+tests/nodb/test_failed_mutation_matrix.py ...................s..s....... [ 35%]
+......                                                                   [ 35%]
+tests/nodb/test_failed_mutation_state.py .....                           [ 36%]
+tests/nodb/test_failed_prelock_state.py ..........                       [ 36%]
+tests/nodb/test_geojson_crs_inference.py ...                             [ 36%]
+tests/nodb/test_hydration_snapshot.py ......                             [ 37%]
+tests/nodb/test_initial_read_retry.py ..................                 [ 38%]
+tests/nodb/test_iter_nodb_mods_subclasses.py .                           [ 38%]
+tests/nodb/test_kslast_map.py ................................           [ 40%]
+tests/nodb/test_landuse_build_event_contracts.py ....                    [ 40%]
+tests/nodb/test_landuse_catalog.py .....                                 [ 40%]
+tests/nodb/test_landuse_coverage_area_source.py ........                 [ 41%]
+tests/nodb/test_landuse_custom_mapping.py ..........                     [ 41%]
+tests/nodb/test_landuse_grouped_updates.py ...........                   [ 42%]
+tests/nodb/test_landuse_modify.py ......                                 [ 42%]
+tests/nodb/test_landuse_modify_mapping.py .                              [ 42%]
+tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py .....            [ 42%]
+tests/nodb/test_landuse_mofe_freshness.py .......                        [ 43%]
+tests/nodb/test_landuse_mofe_process_pool.py .......                     [ 43%]
+tests/nodb/test_landuse_mofe_value_types.py .                            [ 43%]
+tests/nodb/test_landuse_raster_wait.py ..                                [ 43%]
+tests/nodb/test_locale_capability_authority.py ......................... [ 45%]
+......................................................                   [ 48%]
+tests/nodb/test_lock_race_conditions.py .................                [ 49%]
+tests/nodb/test_locked.py ......                                         [ 49%]
+tests/nodb/test_manual_mutation_state.py ...........                     [ 50%]
+tests/nodb/test_mofe_scenario_artifacts.py ............................. [ 52%]
+.............................................................            [ 55%]
+tests/nodb/test_persistence_events.py ...........                        [ 56%]
+tests/nodb/test_prism_temperature_artifact_retention.py ..               [ 56%]
+tests/nodb/test_project_config_builder_snapshot.py ..................... [ 57%]
+.....                                                                    [ 57%]
+tests/nodb/test_project_config_capabilities.py ......................... [ 59%]
+..............                                                           [ 60%]
+tests/nodb/test_project_config_preset_snapshot.py ..................     [ 61%]
+tests/nodb/test_project_config_reader_foundation.py .................... [ 62%]
+.........................                                                [ 63%]
+tests/nodb/test_project_config_registry_serializer.py .................. [ 64%]
+........................................                                 [ 67%]
+tests/nodb/test_project_config_serialization.py .......................  [ 68%]
+tests/nodb/test_project_config_update.py ............................... [ 70%]
+...............................................                          [ 72%]
+tests/nodb/test_project_developer_mode.py ..........                     [ 73%]
+tests/nodb/test_rap_report.py .                                          [ 73%]
+tests/nodb/test_ron_fetch_dem_copernicus.py ......                       [ 73%]
+tests/nodb/test_ron_fetch_dem_rate_limit.py ......                       [ 74%]
+tests/nodb/test_ron_map.py ...ss.........s                               [ 75%]
+tests/nodb/test_root_dir_materialization.py ..F
+
+=================================== FAILURES ===================================
+_________ test_soils_clean_preserves_managed_projection_symlink_mount __________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-223/test_soils_clean_preserves_man0')
+
+    def test_soils_clean_preserves_managed_projection_symlink_mount(tmp_path: Path) -> None:
+        wd = tmp_path / "run"
+        wd.mkdir(parents=True, exist_ok=True)
+
+        mount_target = wd / ".nodir" / "upper" / "soils" / "token" / "data"
+        mount_target.mkdir(parents=True, exist_ok=True)
+        (mount_target / "old.sol").write_text("legacy", encoding="utf-8")
+
+        soils_root = wd / "soils"
+        soils_root.symlink_to(mount_target, target_is_directory=True)
+        sidecar = wd / "soils.parquet"
+        sidecar.write_text("stale", encoding="utf-8")
+
+        soils = Soils.__new__(Soils)
+        soils.config_get_str = lambda section, option, default=None: default
+        soils.wd = str(wd)
+        soils._soils_is_vrt = True
+        soils.islocked = lambda: True
+
+>       soils.clean()
+
+tests/nodb/test_root_dir_materialization.py:89:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+wepppy/nodb/core/soils.py:635: in clean
+    with mutation:
+         ^^^^^^^^
+/usr/local/lib/python3.12/contextlib.py:144: in __exit__
+    next(self.gen)
+wepppy/nodb/base.py:1905: in locked
+    self.dump_and_unlock(validate=validate_on_success)
+wepppy/nodb/base.py:1930: in dump_and_unlock
+    self = type(self)._post_dump_and_unlock(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/core/soils.py:2348: in _post_dump_and_unlock
+    self.dump_soils_parquet()
+wepppy/nodb/core/soils.py:2269: in dump_soils_parquet
+    self.logger.info(f'{self.class_name}.{func_name}()')
+    ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <wepppy.nodb.core.soils.Soils object at 0x7f94f8105af0>, name = 'logger'
+
+    def __getattribute__(self, name: str) -> Any:
+        # A failed recovery must fence held references, not only loader/cache reads.
+        state = object.__getattribute__(self, '__dict__')
+        if state.get('_nodb_failed_mutation') and name not in _FAILED_STATE_ACCESS:
+            if id(self) not in getattr(_RECOVERY_ACCESS, 'instances', ()):
+                raise RuntimeError(
+                    'NoDb state is unavailable after a failed mutation; '
+                    'call recover_mutation_state() after correcting the recovery failure'
+                )
+>       return object.__getattribute__(self, name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'Soils' object has no attribute 'logger'
+
+wepppy/nodb/base.py:1689: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/nodb/test_batch_daymet_multiple_contention.py: 365 warnings
+tests/nodb/test_climate_edde_build.py: 3294 warnings
+tests/nodb/test_climate_prism_build.py: 1464 warnings
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_unknown_commit_recovery_records_remain_visible_and_archivable
+tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+tests/nodb/test_prism_temperature_artifact_retention.py::test_revision_records_browse_archive_restore[False]
+tests/nodb/test_prism_temperature_artifact_retention.py::test_revision_records_browse_archive_restore[True]
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+tests/nodb/test_mofe_scenario_artifacts.py::test_real_sbs_classification_reaches_management_files
+  /workdir/wepppy/tests/nodb/test_mofe_scenario_artifacts.py:302: DeprecationWarning: Call to deprecated method build_lcgrid. (Use wepppyo3 instead)
+    assert sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)['101'] == {
+
+tests/nodb/test_mofe_scenario_artifacts.py::test_real_sbs_classification_reaches_management_files
+  /workdir/wepppy/wepppy/nodb/core/landuse.py:1528: DeprecationWarning: Call to deprecated method build_lcgrid. (Use wepppyo3 instead)
+    sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
+
+tests/nodb/test_mofe_scenario_artifacts.py::test_global_mapping_writes_files_before_completion[True]
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_root_dir_materialization.py::test_soils_clean_preserves_managed_projection_symlink_mount
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+===== 1 failed, 1301 passed, 5 skipped, 5141 warnings in 279.95s (0:04:39) =====

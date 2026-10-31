@@ -1,0 +1,89 @@
+Partition files: ['tests/nodb/test_root_dir_materialization.py', 'tests/nodb/test_single_input_artifacts.py', 'tests/nodb/test_single_input_policy.py', 'tests/nodb/test_single_input_sources.py', 'tests/nodb/test_soil_anisotropy.py', 'tests/nodb/test_soils_gridded_root_creation.py', 'tests/nodb/test_soils_parquet_area_fallback.py', 'tests/nodb/test_soils_report.py', 'tests/nodb/test_soils_ssurgo_cache.py', 'tests/nodb/test_tenerife_climate_catalog_service.py', 'tests/nodb/test_type_hints.py', 'tests/nodb/test_unitizer_conversions.py', 'tests/nodb/test_unitizer_numeric_apis.py', 'tests/nodb/test_unitizer_preferences.py', 'tests/nodb/test_user_defined_cli_parquet.py', 'tests/nodb/test_watershed_grouped_updates.py', 'tests/nodb/test_watershed_lookup_loaders.py', 'tests/nodb/test_watershed_mofe_map.py', 'tests/nodb/test_watershed_runtime_contract.py', 'tests/nodb/test_watershed_skip_flowpaths.py', 'tests/nodb/test_watershed_topaz_conditioning_contract.py', 'tests/nodb/test_wbt_boundary_touch_behavior.py', 'tests/nodb/test_wepp_binary_policy.py', 'tests/nodb/test_wepp_bootstrap_tokens.py', 'tests/nodb/test_wepp_clean.py', 'tests/nodb/test_wepp_grouped_mutation_recovery.py', 'tests/nodb/test_wepp_has_run_interchange.py', 'tests/nodb/test_wepp_input_parser.py', 'tests/nodb/test_wepp_job_hint_grouped_updates.py', 'tests/nodb/test_wepp_multi_ofe_management_propagation.py', 'tests/nodb/test_wepp_multi_ofe_years.py', 'tests/nodb/test_wepp_nodb_post_utils.py', 'tests/nodb/test_wepp_prep_service.py', 'tests/nodb/test_wepp_run_payload_grouped_updates.py', 'tests/nodb/test_wepp_run_service.py']
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_root_dir_materialization.py tests/nodb/test_single_input_artifacts.py tests/nodb/test_single_input_policy.py tests/nodb/test_single_input_sources.py tests/nodb/test_soil_anisotropy.py tests/nodb/test_soils_gridded_root_creation.py tests/nodb/test_soils_parquet_area_fallback.py tests/nodb/test_soils_report.py tests/nodb/test_soils_ssurgo_cache.py tests/nodb/test_tenerife_climate_catalog_service.py tests/nodb/test_type_hints.py tests/nodb/test_unitizer_conversions.py tests/nodb/test_unitizer_numeric_apis.py tests/nodb/test_unitizer_preferences.py tests/nodb/test_user_defined_cli_parquet.py tests/nodb/test_watershed_grouped_updates.py tests/nodb/test_watershed_lookup_loaders.py tests/nodb/test_watershed_mofe_map.py tests/nodb/test_watershed_runtime_contract.py tests/nodb/test_watershed_skip_flowpaths.py tests/nodb/test_watershed_topaz_conditioning_contract.py tests/nodb/test_wbt_boundary_touch_behavior.py tests/nodb/test_wepp_binary_policy.py tests/nodb/test_wepp_bootstrap_tokens.py tests/nodb/test_wepp_clean.py tests/nodb/test_wepp_grouped_mutation_recovery.py tests/nodb/test_wepp_has_run_interchange.py tests/nodb/test_wepp_input_parser.py tests/nodb/test_wepp_job_hint_grouped_updates.py tests/nodb/test_wepp_multi_ofe_management_propagation.py tests/nodb/test_wepp_multi_ofe_years.py tests/nodb/test_wepp_nodb_post_utils.py tests/nodb/test_wepp_prep_service.py tests/nodb/test_wepp_run_payload_grouped_updates.py tests/nodb/test_wepp_run_service.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 432 items
+
+tests/nodb/test_root_dir_materialization.py .......                      [  1%]
+tests/nodb/test_single_input_artifacts.py .............................. [  8%]
+..                                                                       [  9%]
+tests/nodb/test_single_input_policy.py .........................         [ 14%]
+tests/nodb/test_single_input_sources.py .................                [ 18%]
+tests/nodb/test_soil_anisotropy.py ..................................... [ 27%]
+..                                                                       [ 27%]
+tests/nodb/test_soils_gridded_root_creation.py ......................... [ 33%]
+                                                                         [ 33%]
+tests/nodb/test_soils_parquet_area_fallback.py ..                        [ 34%]
+tests/nodb/test_soils_report.py .                                        [ 34%]
+tests/nodb/test_soils_ssurgo_cache.py .....                              [ 35%]
+tests/nodb/test_tenerife_climate_catalog_service.py ...                  [ 36%]
+tests/nodb/test_type_hints.py .....                                      [ 37%]
+tests/nodb/test_unitizer_conversions.py .........                        [ 39%]
+tests/nodb/test_unitizer_numeric_apis.py .............................   [ 46%]
+tests/nodb/test_unitizer_preferences.py ....                             [ 46%]
+tests/nodb/test_user_defined_cli_parquet.py ...                          [ 47%]
+tests/nodb/test_watershed_grouped_updates.py ....                        [ 48%]
+tests/nodb/test_watershed_lookup_loaders.py .......                      [ 50%]
+tests/nodb/test_watershed_mofe_map.py .......                            [ 51%]
+tests/nodb/test_watershed_runtime_contract.py ............               [ 54%]
+tests/nodb/test_watershed_skip_flowpaths.py .                            [ 54%]
+tests/nodb/test_watershed_topaz_conditioning_contract.py ........        [ 56%]
+tests/nodb/test_wbt_boundary_touch_behavior.py ........                  [ 58%]
+tests/nodb/test_wepp_binary_policy.py ...............                    [ 62%]
+tests/nodb/test_wepp_bootstrap_tokens.py .....                           [ 63%]
+tests/nodb/test_wepp_clean.py .............                              [ 66%]
+tests/nodb/test_wepp_grouped_mutation_recovery.py ...........            [ 68%]
+tests/nodb/test_wepp_has_run_interchange.py ..                           [ 69%]
+tests/nodb/test_wepp_input_parser.py ................................... [ 77%]
+................................................                         [ 88%]
+tests/nodb/test_wepp_job_hint_grouped_updates.py .....                   [ 89%]
+tests/nodb/test_wepp_multi_ofe_management_propagation.py ....            [ 90%]
+tests/nodb/test_wepp_multi_ofe_years.py ..                               [ 90%]
+tests/nodb/test_wepp_nodb_post_utils.py ......                           [ 92%]
+tests/nodb/test_wepp_prep_service.py ...                                 [ 93%]
+tests/nodb/test_wepp_run_payload_grouped_updates.py .................... [ 97%]
+...                                                                      [ 98%]
+tests/nodb/test_wepp_run_service.py .......                              [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/nodb/test_watershed_lookup_loaders.py::test_hillslope_width_falls_back_when_lookup_missing_topaz_id
+  /workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:1349: DeprecationWarning: Call to deprecated method _deprecated_width_of.
+    return self._deprecated_width_of(topaz_id_str)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 432 passed, 15 warnings in 76.57s (0:01:16) ==================

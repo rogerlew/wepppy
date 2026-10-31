@@ -108,6 +108,47 @@ then validate captured inputs against fresh durable state under the lock.
 Unrelated edits survive; changed inputs produce an explicit superseded error.
 See [Climate/RAP finalization and recovery](../../docs/dev-notes/batch-climate-rap-finalization.md)
 for the implemented boundaries, rollback behavior, and regression evidence.
+
+### Failed edits and recovery
+
+A failed high-level edit must leave its held controller at the current durable
+state, or make that instance refuse reuse until authoritative recovery succeeds.
+An unchanged file and a released lock do not prove that memory is clean. See
+[the NFMS-01 contract](../../docs/schemas/nodb-persistence-concurrency-contract.md#failed-high-level-mutation-state-nfms-01)
+for the required commit and reference rules. Candidate implementation validation
+is tracked separately; this is not a production deployment claim.
+
+For users, an error after saving begins does not always mean nothing was saved:
+atomic replacement may have committed before later work failed. Inspect the
+current accepted settings/source before retrying. A later successful edit must
+not carry values rejected by the failed edit into prepared WEPP inputs. NoDb
+recovery does not roll back previously published artifacts or submitted jobs.
+
+For developers, use `locked()` for automatic persistence and release. Manual
+producers need an acquired mutation recovery boundary around field changes,
+explicit persistence and completion work. Direct low-level `dump()` intentionally
+retains its payload after a precommit I/O error for an explicit owned retry;
+stale-write errors still require reloading and reapplying from fresh state.
+Stage nested option edits before publication when computing them outside the
+lock. After failure, reacquire nested options from the recovered controller;
+previously obtained mutable aliases are no longer a valid mutation base. Map/DEM
+preparation computes candidate paths locally and publishes `*_is_vrt` flags only
+at the owned commit. Nested mutation code must establish current-thread ownership;
+a global `islocked()` result does not grant mutation authority.
+
+For operators, retain the original operation error and its recovery/cleanup
+context. Restore unavailable storage or Redis coordination before explicit
+recovery; do not force-unlock another owner, clear global caches, or overwrite
+durable files with an entry snapshot. A failed first initialization has no durable
+record to restore: retry initialization with a fresh object. Optional absent
+features remain valid and must not be “repaired” by inventing empty files.
+
+Health signals are clean held-reference reads, accepted-only follow-up saves and
+accepted values in the exact prepared files. Danger signals are rejected values
+reappearing, unusable-instance errors after storage has recovered, owner-token
+interference, or growing logging resources. A recurrence requires a new incident
+record and reinspection of manual/prelock producers as well as the shared context.
+
 ## WEPP Hillslope Timeout Policy
 
 Continuous hillslope runs through `WeppRunService` use a 120-second per-attempt timeout for single-OFE projects (see [ADR-0072](../../docs/adrs/ADR-0072-continuous-hillslope-timeout.md)). MOFE projects use a 300-second timeout because each WEPP invocation can route many OFEs for one hillslope. The timeout appears in the service log line as `Running Hillslopes with max_workers=..., timeout=...s` and is passed unchanged to the runner so timeout errors continue to report the command, run file, error file, attempts, and last observed WEPP output.

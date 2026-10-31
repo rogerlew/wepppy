@@ -1003,10 +1003,9 @@ class Landuse(NoDbBase):
             preserve_names={"user-defined", "landuse_user_defined_mapping.json", "single-user-defined"},
         )
         os.makedirs(lc_dir, exist_ok=True)
-        self._landuse_is_vrt = False
-        if not self.islocked():
-            with self.locked():
-                self._landuse_is_vrt = False
+        mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
+        with mutation:
+            self._landuse_is_vrt = False
 
     def validate_landuse_mode_for_mofe(self, mode: Optional[Any] = None) -> None:
         if mode is None:
@@ -1044,8 +1043,9 @@ class Landuse(NoDbBase):
             if crop_window is None:
                 raise ValueError("Crop window cannot be identified for as_cropped_vrt=True")
 
-        self._landuse_is_vrt = use_vrt
-        dest = self.lc_fn
+        # Select the proposed path without publishing its state before preparation.
+        ext = "vrt" if use_vrt else "tif"
+        dest = _join(self.lc_dir, f"nlcd.{ext}")
 
         if use_vrt:
             build_windowed_vrt_from_window(
@@ -1100,9 +1100,9 @@ class Landuse(NoDbBase):
                 landuse_src,
             )
 
-        if not self.islocked():
-            with self.locked():
-                self._landuse_is_vrt = use_vrt
+        mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
+        with mutation:
+            self._landuse_is_vrt = use_vrt
 
     def _build_ESDAC(self) -> None:
         from wepppy.eu.soils.esdac import ESDAC
@@ -1224,8 +1224,7 @@ class Landuse(NoDbBase):
         _map = self.ron_instance.map
 
         # Get NLCD 2011 from wmesque webservice
-        self._landuse_is_vrt = False
-        lc_fn = self.lc_fn
+        lc_fn = _join(self.lc_dir, "nlcd.tif")
 
         wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
                          v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)

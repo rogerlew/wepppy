@@ -325,6 +325,31 @@ def _default_lock_ttl() -> int:
 LOCK_KEY_PREFIX = 'nodb-lock'
 LOCK_DEFAULT_TTL = max(1, _default_lock_ttl())
 _ACTIVE_LOCK_TOKENS: WeakKeyDictionary['NoDbBase', str] = WeakKeyDictionary()
+_LOCK_OWNER_THREADS: WeakKeyDictionary['NoDbBase', int] = WeakKeyDictionary()
+_MUTATION_SCOPES: WeakKeyDictionary['NoDbBase', tuple[str, int, dict[str, Any]]] = WeakKeyDictionary()
+_LOCK_IDENTITIES: WeakKeyDictionary['NoDbBase', dict[str, Any]] = WeakKeyDictionary()
+_FAILED_IDENTITIES: WeakKeyDictionary['NoDbBase', dict[str, Any]] = WeakKeyDictionary()
+_RECOVERING_THREADS: WeakKeyDictionary['NoDbBase', int] = WeakKeyDictionary()
+_RECOVERY_ACCESS = threading.local()
+_LOGGING_STATE = (
+    'runid_logger', 'logger', '_queue_handler', '_log_queue', '_queue_listener',
+    '_redis_handler', '_run_file_handler', '_console_handler',
+)
+_FAILED_STATE_ACCESS = frozenset((
+    '__dict__', '__class__', 'recover_mutation_state', '_abort_mutation',
+    '_safe_stop_queue_listener', 'islocked', 'unlock',
+)) | frozenset(_LOGGING_STATE)
+
+
+@contextmanager
+def _failed_state_access(instance):
+    previous = getattr(_RECOVERY_ACCESS, 'instances', ())
+    _RECOVERY_ACCESS.instances = (*previous, id(instance))
+    try:
+        yield
+    finally:
+        _RECOVERY_ACCESS.instances = previous
+
 
 
 def _normalize_lock_relpath(relpath: str) -> str:
@@ -392,6 +417,7 @@ def _set_local_lock_token(instance: 'NoDbBase', token: Optional[str]) -> None:
 
     if token is None:
         _ACTIVE_LOCK_TOKENS.pop(instance, None)
+        _LOCK_OWNER_THREADS.pop(instance, None)
     else:
         _ACTIVE_LOCK_TOKENS[instance] = token
 
@@ -1083,6 +1109,7 @@ class NoDbBase(object):
         """Remove non-serializable logger attributes before pickling."""
 
         state = self.__dict__.copy()
+        state.pop('_nodb_failed_mutation', None)
         for attr in (
             'runid_logger',
             'logger',
@@ -1394,6 +1421,8 @@ class NoDbBase(object):
             cached = cls._instances.get(abs_wd)
 
         if cached is not None and not ignore_lock:
+            if object.__getattribute__(cached, '__dict__').get('_nodb_failed_mutation'):
+                cached.recover_mutation_state()
             refresh_needed = False
             if not readonly or _read_retry.read_retry_active():
                 file_mtime = None
@@ -1416,6 +1445,8 @@ class NoDbBase(object):
             if not refresh_needed:
                 cached._init_logging()
                 return cached
+            if (cached in _MUTATION_SCOPES or cached in _LOCK_OWNER_THREADS or _get_local_lock_token(cached) is not None) and not cached._owns_mutation_scope():
+                raise NoDbAlreadyLockedError('Cannot refresh a controller during an active mutation')
             stale_cached_instance = cached
 
         instance = cls._hydrate_instance(
@@ -1435,8 +1466,11 @@ class NoDbBase(object):
             cached = cls._instances.get(abs_wd)
             if cached is not None:
                 if stale_cached_instance is cached:
-                    cached.__dict__.clear()
-                    cached.__dict__.update(instance.__dict__)
+                    if object.__getattribute__(cached, '__dict__').get('_nodb_failed_mutation'):
+                        raise RuntimeError('Cannot install previously hydrated state over a failed mutation')
+                    if (cached in _MUTATION_SCOPES or cached in _LOCK_OWNER_THREADS or _get_local_lock_token(cached) is not None) and not cached._owns_mutation_scope():
+                        raise NoDbAlreadyLockedError('Cannot install refreshed state during an active mutation')
+                    object.__setattr__(cached, '__dict__', instance.__dict__)
                     cached._init_logging()
                     return cached
                 cached._init_logging()
@@ -1643,63 +1677,240 @@ class NoDbBase(object):
             get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock
         )
 
+    def __getattribute__(self, name: str) -> Any:
+        # A failed recovery must fence held references, not only loader/cache reads.
+        state = object.__getattribute__(self, '__dict__')
+        if state.get('_nodb_failed_mutation') and name not in _FAILED_STATE_ACCESS:
+            if id(self) not in getattr(_RECOVERY_ACCESS, 'instances', ()):
+                raise RuntimeError(
+                    'NoDb state is unavailable after a failed mutation; '
+                    'call recover_mutation_state() after correcting the recovery failure'
+                )
+        return object.__getattribute__(self, name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        state = object.__getattribute__(self, '__dict__')
+        if state.get('_nodb_failed_mutation') and name not in _LOGGING_STATE:
+            if id(self) not in getattr(_RECOVERY_ACCESS, 'instances', ()):
+                raise RuntimeError('Cannot mutate NoDb state until recover_mutation_state() succeeds')
+        object.__setattr__(self, name, value)
+
+    def __delattr__(self, name: str) -> None:
+        state = object.__getattribute__(self, '__dict__')
+        if state.get('_nodb_failed_mutation') and id(self) not in getattr(_RECOVERY_ACCESS, 'instances', ()):
+            raise RuntimeError('Cannot mutate NoDb state until recover_mutation_state() succeeds')
+        object.__delattr__(self, name)
+
+    def _owns_mutation_scope(self) -> bool:
+        """Whether this thread owns this object's acquired mutation lock."""
+        return (
+            _get_local_lock_token(self) is not None
+            and _LOCK_OWNER_THREADS.get(self) == threading.get_ident()
+        )
+
     @contextmanager
-    def locked(self, validate_on_success: bool = True) -> Generator[None, None, None]:
-        """
-        A context manager to handle the lock -> modify -> dump/unlock pattern.
+    def mutation_state(self, release_lock: bool = False) -> Generator[None, None, None]:
+        """Guard an already-acquired manual mutation; do not implicitly dump.
 
-        Usage:
-            with self.locked():
-                # modify attributes here
-                self.foo = 'bar'
-        
-        On successful exit from the 'with' block, it calls dump_and_unlock().
-        If an exception occurs, it calls unlock() and re-raises the exception.
+        On failure restore authoritative disk state before releasing ownership.
+        Callers using ``release_lock=True`` delegate token-safe cleanup here.
         """
-        if self.readonly:
-            raise Exception('Cannot use locked context on a readonly project.')
-
-        self.lock()
+        token = _get_local_lock_token(self)
+        if token is None:
+            raise RuntimeError('mutation_state requires an acquired NoDb lock')
+        if not self._owns_mutation_scope():
+            raise RuntimeError('mutation_state requires this thread to own the NoDb lock')
+        previous_scope = _MUTATION_SCOPES.get(self)
+        scope = (token, threading.get_ident(), _LOCK_IDENTITIES[self])
+        _MUTATION_SCOPES[self] = scope
+        primary = None
         try:
             yield
-        except Exception:
-            # Lock boundary: always release the lock before surfacing the caller exception.
-            getattr(self, "logger", logging.getLogger(__name__)).debug(
-                "NoDbBase.locked: exception inside locked context; unlocking",
-                extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
-                exc_info=True,
-            )
-            try:
-                self.unlock()
-            except RuntimeError:
-                getattr(self, "logger", logging.getLogger(__name__)).warning(
-                    "NoDbBase.locked: lock ownership changed while handling exception; leaving lock untouched",
-                    extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
-                    exc_info=True,
-                )
+        except BaseException as exc:  # broad-except: owned mutation cleanup must include cancellation
+            # Deliberate mutation cleanup boundary: cancellation must also discard
+            # rejected state, while the original failure always propagates.
+            primary = exc
+            self._abort_mutation(exc, token)
             raise
+        finally:
+            try:
+                if release_lock:
+                    with _failed_state_access(self):
+                        current = _get_local_lock_token(self)
+                        if current is not None and current == token:
+                            try:
+                                self.unlock()
+                            except BaseException as cleanup:  # broad-except: token cleanup preserves primary errors and cancellation
+                                # Cleanup boundary: preserve primary cancellation/error.
+                                if primary is not None:
+                                    if not isinstance(cleanup, Exception):
+                                        raise cleanup from primary
+                                    primary.add_note(f'NoDb lock cleanup failed: {cleanup!r}')
+                                    logging.getLogger(__name__).warning(
+                                        'NoDb mutation lock cleanup failed', exc_info=True
+                                    )
+                                else:
+                                    self._abort_mutation(cleanup, token)
+                                    raise
+            finally:
+                if previous_scope is None:
+                    _MUTATION_SCOPES.pop(self, None)
+                else:
+                    _MUTATION_SCOPES[self] = previous_scope
+
+    def _abort_mutation(self, primary: BaseException, token: str) -> None:
+        with _failed_state_access(self):
+            # A different local token belongs to a different transaction. The
+            # scope fence normally prevents this, but never alter its object.
+            local_token = _get_local_lock_token(self)
+            if local_token is not None and local_token != token:
+                primary.add_note('NoDb recovery deferred: local lock ownership changed')
+                return
+            scope = _MUTATION_SCOPES.get(self)
+            identity = scope[2] if scope else _LOCK_IDENTITIES.get(self)
+            if identity is not None:
+                _FAILED_IDENTITIES[self] = identity
+            self.__dict__['_nodb_failed_mutation'] = True
+            try:
+                self.recover_mutation_state()
+            except BaseException as recovery:  # broad-except: quarantine on failed recovery while preserving primary errors
+                # Minimal recovery boundary: retain primary errors/cancellation
+                # and leave the instance fenced until explicit recovery succeeds.
+                if not isinstance(recovery, Exception):
+                    raise recovery from primary
+                primary.add_note(f'NoDb state recovery failed: {recovery!r}')
+                logging.getLogger(__name__).warning(
+                    'NoDb mutation recovery failed for %s',
+                    self.__dict__.get('wd'), exc_info=True,
+                )
+
+    def recover_mutation_state(self) -> None:
+        """Refresh this object from disk under ownership, preserving identity.
+
+        This is also the explicit retry after a failed recovery. It does not
+        retry the rejected mutation or depend on Redis payload cache contents.
+        """
+        with type(self)._instances_lock:
+            if self in _RECOVERING_THREADS:
+                raise NoDbAlreadyLockedError('NoDb state recovery is already in progress')
+            _RECOVERING_THREADS[self] = threading.get_ident()
         try:
-            self.dump_and_unlock(validate=validate_on_success)
-        except Exception:
-            # Lock boundary: if persistence fails after a successful critical section,
-            # force lock cleanup before propagating the persistence error.
-            getattr(self, "logger", logging.getLogger(__name__)).debug(
-                "NoDbBase.locked: dump_and_unlock failed; unlocking",
-                extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
-                exc_info=True,
-            )
+            with _failed_state_access(self):
+                self._recover_mutation_state()
+        finally:
+            with type(self)._instances_lock:
+                _RECOVERING_THREADS.pop(self, None)
+
+    def _recover_mutation_state(self) -> None:
+        with _failed_state_access(self):
+            state = self.__dict__
+            was_failed = bool(state.get('_nodb_failed_mutation'))
+            owner_thread = _LOCK_OWNER_THREADS.get(self)
+            scope = _MUTATION_SCOPES.get(self)
+            if ((owner_thread is not None and owner_thread != threading.get_ident() and not was_failed)
+                    or (scope is not None and scope[1] != threading.get_ident())):
+                raise RuntimeError('cannot recover another thread\'s NoDb mutation')
+            release_aborted_lock = was_failed and self not in _MUTATION_SCOPES
+            identity = _FAILED_IDENTITIES.get(self) or _LOCK_IDENTITIES.get(self)
+            state['_nodb_failed_mutation'] = True
+            if identity is not None:
+                for key in ('wd', '_parent_wd', '_run_group', '_group_name'):
+                    if key in identity['attrs']:
+                        state[key] = identity['attrs'][key]
+                    else:
+                        state.pop(key, None)
+            acquired_here = False
+            recovery_token = None
+            recovery_error = None
             try:
-                self.unlock()
-            except RuntimeError:
-                getattr(self, "logger", logging.getLogger(__name__)).warning(
-                    "NoDbBase.locked: dump_and_unlock failed and lock ownership changed; leaving lock untouched",
-                    extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
-                    exc_info=True,
-                )
-            raise
+                local_token = _get_local_lock_token(self)
+                payload = _ensure_redis_lock_client().get(self._distributed_lock_key)
+                if local_token is None or _extract_token(payload) != local_token:
+                    self.lock()
+                    acquired_here = True
+                    if identity is None:
+                        identity = _LOCK_IDENTITIES[self]
+                else:
+                    # A failed scope may leave its token after a Redis outage;
+                    # with no live scope, explicit recovery can adopt cleanup.
+                    _LOCK_OWNER_THREADS[self] = threading.get_ident()
+                recovery_token = _get_local_lock_token(self)
+                cls = type(self)
+                snapshot = _read_retry.read_text_snapshot(self._nodb, allow_missing=False)
+                json_text, stat_result = snapshot
+                json_text = cls._preprocess_json_for_decode(json_text)
+                cls._ensure_legacy_module_imports(json_text)
+                restored = cls._decode_jsonpickle(json_text)
+                if not isinstance(restored, cls):
+                    decoded_type = type(restored)
+                    if decoded_type.__module__ == cls.__module__ and decoded_type.__name__ == cls.__name__:
+                        try:
+                            restored.__class__ = cls
+                        except TypeError:
+                            pass
+                    if not isinstance(restored, cls):
+                        raise TypeError('Recovered NoDb payload has an unexpected controller type')
+                restored = cls._post_instance_loaded(restored)
+                restored.wd = self.wd
+                if identity is not None and (
+                    restored._nodb != identity['path']
+                    or restored._distributed_lock_key != identity['key']
+                ):
+                    raise RuntimeError('Recovered NoDb payload changes the acquired controller identity')
+                restored._nodb_mtime = stat_result.st_mtime
+                restored._nodb_size = stat_result.st_size
+                # Verify ownership again after decoding; never install state if
+                # TTL expiry transferred the mutation lock during the disk read.
+                self._assert_lock_owned_for_dump()
+                resources = {key: state[key] for key in _LOGGING_STATE if key in state}
+                restored_state = restored.__dict__.copy()
+                restored_state.update(resources)
+                restored_state.pop('_nodb_failed_mutation', None)
+                # Install the complete generation in one pointer assignment so
+                # other readers never observe an empty or partly replaced dict.
+                object.__setattr__(self, '__dict__', restored_state)
+                _FAILED_IDENTITIES.pop(self, None)
+            except BaseException as exc:  # broad-except: quarantine incomplete recovery including cancellation
+                # State installation/recovery boundary, including cancellation.
+                recovery_error = exc
+                state['_nodb_failed_mutation'] = True
+                raise
+            finally:
+                if acquired_here or release_aborted_lock:
+                    try:
+                        if _get_local_lock_token(self) == recovery_token:
+                            self.unlock()
+                        else:
+                            raise RuntimeError('NoDb recovery lock ownership changed before cleanup')
+                    except BaseException as cleanup:  # broad-except: recovery cleanup preserves active failure and cancellation
+                        # Recovery cleanup boundary: do not mask read/decode errors
+                        # or cancellation with an ordinary lock-service failure.
+                        if recovery_error is None:
+                            raise
+                        if not isinstance(cleanup, Exception):
+                            raise cleanup from recovery_error
+                        recovery_error.add_note(f'NoDb recovery unlock failed: {cleanup!r}')
+                        logging.getLogger(__name__).warning(
+                            'NoDb recovery unlock failed', exc_info=True
+                        )
+
+    @contextmanager
+    def locked(self, validate_on_success: bool = True) -> Generator[None, None, None]:
+        """Acquire, mutate and persist; failed mutations recover durable state."""
+        if self.readonly:
+            raise Exception('Cannot use locked context on a readonly project.')
+        self.lock()
+        with self.mutation_state(release_lock=True):
+            yield
+            self.dump_and_unlock(validate=validate_on_success)
 
     def dump_and_unlock(self, validate: bool = True) -> None:
         """Persist the controller and release its lock."""
+
+        if self not in _MUTATION_SCOPES:
+            with self.mutation_state(release_lock=True):
+                self.dump_and_unlock(validate=validate)
+            return
 
         self.dump()
         self.unlock()
@@ -1710,7 +1921,11 @@ class NoDbBase(object):
             # Rely on getInstance() to sanity-check serialization while preserving
             # the cached singleton. This avoids an unnecessary full rehydrate on
             # every setter while still surfacing decode errors when they occur.
-            nodb.getInstance(self.wd)
+            cached = nodb._instances.get(os.path.abspath(self.wd))
+            if cached is not None and cached is not self and cached in _MUTATION_SCOPES:
+                nodb.load_detached(self.wd)
+            else:
+                nodb.getInstance(self.wd)
 
         self = type(self)._post_dump_and_unlock(self)
                 
@@ -1722,6 +1937,14 @@ class NoDbBase(object):
     def _assert_lock_owned_for_dump(self) -> None:
         """Fail when this instance no longer owns the distributed lock."""
 
+        owner_thread = _LOCK_OWNER_THREADS.get(self)
+        if owner_thread is not None and owner_thread != threading.get_ident():
+            raise RuntimeError('cannot dump another thread\'s NoDb mutation')
+        identity = _LOCK_IDENTITIES.get(self)
+        if identity is not None and (
+            self._nodb != identity['path'] or self._distributed_lock_key != identity['key']
+        ):
+            raise RuntimeError('cannot dump after changing acquired NoDb controller identity')
         lock_client = _ensure_redis_lock_client()
         lock_key = self._distributed_lock_key
         stored_payload = lock_client.get(lock_key)
@@ -2217,9 +2440,11 @@ class NoDbBase(object):
         if len(attrs) == 0:
             return
 
-        if self.islocked():
-            for k, v in attrs.items():
-                setattr(self, k, v)
+        if self._owns_mutation_scope():
+            self._assert_lock_owned_for_dump()
+            with self.mutation_state():
+                for k, v in attrs.items():
+                    setattr(self, k, v)
         else:
             with self.locked():
                 for k, v in attrs.items():
@@ -2265,6 +2490,10 @@ class NoDbBase(object):
         return obj
 
     def islocked(self):
+        with _failed_state_access(self):
+            return self._islocked()
+
+    def _islocked(self):
         lock_client = _ensure_redis_lock_client()
 
         lock_key = self._distributed_lock_key
@@ -2282,6 +2511,28 @@ class NoDbBase(object):
         return False
 
     def lock(self, ttl: Optional[int] = None):
+        recovery = id(self) in getattr(_RECOVERY_ACCESS, 'instances', ())
+        with type(self)._instances_lock:
+            if not recovery and (self in _MUTATION_SCOPES or self in _LOCK_OWNER_THREADS
+                                 or self in _RECOVERING_THREADS
+                                 or _get_local_lock_token(self) is not None):
+                raise NoDbAlreadyLockedError('lock() called during an active local mutation')
+            prior_thread = _LOCK_OWNER_THREADS.get(self)
+            _LOCK_OWNER_THREADS[self] = threading.get_ident()
+        try:
+            return self._acquire_lock(ttl)
+        except BaseException:  # broad-except: clear local acquisition bookkeeping on cancellation
+            # Acquisition boundary: an unsuccessful attempt owns no new state.
+            with type(self)._instances_lock:
+                if prior_thread is None and _get_local_lock_token(self) is None:
+                    _LOCK_OWNER_THREADS.pop(self, None)
+                elif prior_thread is None:
+                    _LOCK_OWNER_THREADS[self] = threading.get_ident()
+                else:
+                    _LOCK_OWNER_THREADS[self] = prior_thread
+            raise
+
+    def _acquire_lock(self, ttl: Optional[int] = None):
         if self.readonly:
             raise Exception('lock() called on readonly project')
 
@@ -2294,6 +2545,12 @@ class NoDbBase(object):
         ttl_seconds = LOCK_DEFAULT_TTL if ttl is None else max(1, int(ttl))
         lock_key = self._distributed_lock_key
 
+        identity = {
+            'path': self._nodb, 'key': lock_key, 'runid': self.runid,
+            'file_key': self._file_lock_key,
+            'attrs': {key: self.__dict__[key] for key in ('wd', '_parent_wd', '_run_group', '_group_name')
+                      if key in self.__dict__},
+        }
         token = uuid.uuid4().hex
         payload = _serialize_lock_payload(token, ttl_seconds)
         acquired = lock_client.set(lock_key, payload, nx=True, ex=ttl_seconds)
@@ -2310,33 +2567,52 @@ class NoDbBase(object):
                     message += f' (token={existing_token})'
             raise NoDbAlreadyLockedError(message)
 
-        # Close the check/acquire race with run replacement: a replacement
-        # either sees this NoDb lock or this mutation backs out before writing.
-        if lock_client.get(replacement_key) is not None:
-            lock_client.eval(
-                "if redis.call('get', KEYS[1]) == ARGV[1] then "
-                "return redis.call('del', KEYS[1]) else return 0 end",
-                1,
-                lock_key,
-                payload,
-            )
-            raise NoDbRunReplacingError('Run replacement is in progress.')
-
-        lock_client.hset(self.runid, self._file_lock_key, 'true')
-        _set_local_lock_token(self, token)
+        with type(self)._instances_lock:
+            _set_local_lock_token(self, token)
+            _LOCK_OWNER_THREADS[self] = threading.get_ident()
+            _LOCK_IDENTITIES[self] = identity
+        try:
+            # A replacement either sees this lock or acquisition backs out
+            # before exposing a mutation scope to the caller.
+            if lock_client.get(replacement_key) is not None:
+                raise NoDbRunReplacingError('Run replacement is in progress.')
+            lock_client.hset(self.runid, self._file_lock_key, 'true')
+        except BaseException as primary:  # broad-except: release only this acquired token before returning acquisition failure
+            try:
+                lock_client.eval(
+                    "if redis.call('get', KEYS[1]) == ARGV[1] then "
+                    "return redis.call('del', KEYS[1]) else return 0 end",
+                    1, lock_key, payload,
+                )
+                _set_local_lock_token(self, None)
+            except BaseException as cleanup:  # broad-except: preserve acquisition errors and propagate cancellation during cleanup
+                if not isinstance(cleanup, Exception):
+                    raise cleanup from primary
+                primary.add_note(f'NoDb acquisition cleanup failed: {cleanup!r}')
+                logging.getLogger(__name__).warning('NoDb acquisition cleanup failed', exc_info=True)
+            raise
 
     def unlock(self, flag=None):
-        lock_client = _ensure_redis_lock_client()
+        with _failed_state_access(self):
+            return self._unlock_owned(flag)
 
-        lock_key = self._distributed_lock_key
+    def _unlock_owned(self, flag=None):
+        lock_client = _ensure_redis_lock_client()
+        identity = _LOCK_IDENTITIES.get(self)
+        lock_key = identity['key'] if identity is not None else self._distributed_lock_key
+        runid = identity['runid'] if identity is not None else self.runid
+        file_key = identity['file_key'] if identity is not None else self._file_lock_key
         stored_payload = lock_client.get(lock_key)
         stored_token = _extract_token(stored_payload)
         local_token = _get_local_lock_token(self)
 
         force = flag in ('-f', '--force')
+        owner_thread = _LOCK_OWNER_THREADS.get(self)
+        if not force and owner_thread is not None and owner_thread != threading.get_ident():
+            raise RuntimeError('cannot unlock another thread\'s NoDb mutation')
 
         if stored_payload is None:
-            lock_client.hset(self.runid, self._file_lock_key, 'false')
+            lock_client.hset(runid, file_key, 'false')
             _set_local_lock_token(self, None)
             return
 
@@ -2358,7 +2634,7 @@ class NoDbBase(object):
             )
             if not removed:
                 raise RuntimeError('unlock() lost ownership before release')
-        lock_client.hset(self.runid, self._file_lock_key, 'false')
+        lock_client.hset(runid, file_key, 'false')
         _set_local_lock_token(self, None)
 
     @property

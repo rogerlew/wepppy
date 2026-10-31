@@ -1,0 +1,29 @@
+[
+  {
+    "fixture": "test_soils_domain_failure_cann0",
+    "path": "wepp/runs/p101.sol",
+    "sha256": "09138121ed3b8d9be117cbf7eb300943fe3c43f93c968c81a46ec7041f47cbcd",
+    "kslast": 0.02,
+    "saturations": [
+      0.2
+    ]
+  },
+  {
+    "fixture": "test_valid_wepp_replace_failur0",
+    "path": "wepp/runs/p101.sol",
+    "sha256": "09138121ed3b8d9be117cbf7eb300943fe3c43f93c968c81a46ec7041f47cbcd",
+    "kslast": 0.02,
+    "saturations": [
+      0.2
+    ]
+  },
+  {
+    "fixture": "test_valid_wepp_replace_failur1",
+    "path": "wepp/runs/p101.sol",
+    "sha256": "09138121ed3b8d9be117cbf7eb300943fe3c43f93c968c81a46ec7041f47cbcd",
+    "kslast": 0.02,
+    "saturations": [
+      0.2
+    ]
+  }
+]

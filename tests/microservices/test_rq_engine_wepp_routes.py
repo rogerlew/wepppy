@@ -1826,6 +1826,13 @@ def test_run_wepp_setup_failure_returns_canonical_error_payload(
         clip_soils_minimum = False
         clip_soils_minimum_depth = 0.0
 
+        def mutation_state(self):
+            from contextlib import nullcontext
+            return nullcontext()
+
+        def _assert_lock_owned_for_dump(self) -> None:
+            return None
+
         def lock(self) -> None:
             return None
 

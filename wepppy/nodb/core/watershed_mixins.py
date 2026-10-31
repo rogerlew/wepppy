@@ -444,10 +444,6 @@ class WatershedOperationsMixin:
                 _ensure_symlink(chnjnt_src, _join(self.wbt_wd, "chnjnt.tif"))
 
         channels_are_vrt = bool(as_cropped_vrt)
-        self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
-        wbt = getattr(self, "_wbt", None)
-        if wbt is not None:
-            wbt.flovec_netful_relief_are_vrt = channels_are_vrt
 
         netful_geojson = self.netful_utm_shp
         netful_wgs_geojson = self.netful_shp
@@ -455,7 +451,8 @@ class WatershedOperationsMixin:
             if path and _exists(path):
                 os.remove(path)
 
-        polygonize_netful(self.netful, netful_geojson)
+        netful_ext = "vrt" if channels_are_vrt else "tif"
+        polygonize_netful(_join(self.wbt_wd, f"netful.{netful_ext}"), netful_geojson)
         json_to_wgs(netful_geojson)
 
         try:
@@ -464,9 +461,12 @@ class WatershedOperationsMixin:
         except FileNotFoundError:
             pass
 
-        if not self.islocked():
-            with self.locked():
-                self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
+        mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
+        with mutation:
+            self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
+            wbt = getattr(self, "_wbt", None)
+            if wbt is not None:
+                wbt.flovec_netful_relief_are_vrt = channels_are_vrt
 
     @property
     def target_watershed_path(self) -> str:
@@ -1018,12 +1018,10 @@ class WatershedLookupMixin:
         )
 
         try:
-            if self.islocked():
+            # A globally held lock is not evidence that this caller owns it.
+            # Repair is a high-level mutation, including failure recovery.
+            with self.locked():
                 self._repair_centroid_from_artifacts_locked()
-                self.dump()
-            else:
-                with self.locked():
-                    self._repair_centroid_from_artifacts_locked()
         except (FileNotFoundError, KeyError, OSError, RuntimeError, TypeError, ValueError) as exc:
             raise self._centroid_state_error(
                 "centroid missing and repair from watershed abstraction artifacts failed"

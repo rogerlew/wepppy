@@ -84,7 +84,7 @@ def test_soils_clean_preserves_managed_projection_symlink_mount(tmp_path: Path) 
     soils.config_get_str = lambda section, option, default=None: default
     soils.wd = str(wd)
     soils._soils_is_vrt = True
-    soils.islocked = lambda: True
+    soils.locked = lambda: nullcontext()
 
     soils.clean()
 
@@ -112,7 +112,7 @@ def test_soils_clean_unlinks_unmanaged_symlink_without_deleting_target(tmp_path:
     soils.config_get_str = lambda section, option, default=None: default
     soils.wd = str(wd)
     soils._soils_is_vrt = True
-    soils.islocked = lambda: True
+    soils.locked = lambda: nullcontext()
 
     soils.clean()
 
@@ -138,7 +138,7 @@ def test_landuse_clean_preserves_managed_projection_symlink_mount(tmp_path: Path
     landuse = Landuse.__new__(Landuse)
     landuse.wd = str(wd)
     landuse._landuse_is_vrt = True
-    landuse.islocked = lambda: True
+    landuse.locked = lambda: nullcontext()
 
     landuse.clean()
 
@@ -173,7 +173,7 @@ def test_landuse_clean_preserves_user_defined_catalog_and_override(tmp_path: Pat
     landuse = Landuse.__new__(Landuse)
     landuse.wd = str(wd)
     landuse._landuse_is_vrt = True
-    landuse.islocked = lambda: True
+    landuse.locked = lambda: nullcontext()
 
     landuse.clean()
 
@@ -200,7 +200,7 @@ def test_landuse_clean_unlinks_unmanaged_symlink_without_deleting_target(tmp_pat
     landuse = Landuse.__new__(Landuse)
     landuse.wd = str(wd)
     landuse._landuse_is_vrt = True
-    landuse.islocked = lambda: True
+    landuse.locked = lambda: nullcontext()
 
     landuse.clean()
 

@@ -229,9 +229,9 @@ staging is identifiable for normal bounded cleanup. A precommit metadata disk
 failure preserves the previous active source. Once metadata atomic replacement
 commits, a later exception does not undo acceptance: retain the source referenced
 by authoritative metadata and recover held controller state under
-[the NFMS-01 failed mutation contract](nodb-persistence-concurrency-contract.md#failed-high-level-mutation-state-nfms-01-specified-implementation-pending).
+[the NFMS-01 failed mutation contract](nodb-persistence-concurrency-contract.md#failed-high-level-mutation-state-nfms-01).
 Do not delete a candidate referenced by committed metadata. This commit-aware
-clarification is specified; implementation conformance is pending. Enqueue failure after acceptance leaves the accepted source
+clarification is implemented locally; production deployment is separate. Enqueue failure after acceptance leaves the accepted source
 visible/reusable and returns an explicit submission error; retry does not require
 re-upload. Build failure retains source and normal job diagnostics, and cannot
 claim completed outputs. No queue topology changes are introduced.

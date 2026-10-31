@@ -789,3 +789,10 @@ governs M1/M3 admission, source preparation and publication. WEPP link creation
 or removal may change only CLI ctime without invalidating identical admitted
 bytes; uncached coherent verification and all other identity checks remain
 required. Contract checkpoint: `567eacf7d`.
+
+### Failed migration mutation consistency
+
+The manual migration boundary participates in shared NoDb failed-state recovery.
+See [production M1 failed migration mutation state](docs/production_m1.md#failed-migration-mutation-state).
+Recovery preserves committed metadata and existing explicit migration resume;
+it never treats a later exception as permission to reverse published files.

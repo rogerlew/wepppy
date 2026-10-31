@@ -47,3 +47,33 @@ artifact repair evidence exists yet. No class-wide closure is claimed.
 Same-object token replacement requires explicit regression: `_ACTIVE_LOCK_TOKENS`
 is keyed by controller identity, so replacement acquisition may overwrite the
 old context's token. Cleanup must use transaction-specific ownership.
+
+## Candidate implementation dispositions
+
+The discovery table above is retained as provenance. The following supersedes its
+pending labels for the current implementation; broad suite/review status is tracked
+in `validation.md`. This is scoped to confirmed NoDbBase consumers, not every
+independent persistence class or arbitrary external mutable alias.
+
+| Discovered boundary | Candidate correction | Executed direct evidence |
+| --- | --- | --- |
+| locked/decorator/getInstance/high-level completion | Owned abort recovery or enforced unusability; atomic state install; delayed hydration/ownership fences | test_failed_mutation_state.py, test_failed_mutation_matrix.py; scalar/nested/options/new/deleted state, cancellation, pre/postcommit and recovery faults |
+| Direct dump | Retains intentional precommit retry and stale-write rejection | Existing base characterization and new intentional retry case |
+| Wepp parser / Soils gridded domain error | Shared recovery | test_failed_mutation_consumers.py: rejected 0.9 never reaches later p101.sol; accepted kslast 0.02 and saturation 0.2 parsed |
+| WEPP option maps and writers | Local small option copies; publish only after all reads succeed | Same module parses phosphorus.txt/gwcoeff.txt after failure and corrected retry; old aliases unchanged on failure |
+| Batch receipts | Resource-preserving fresh hydration and shared abort recovery | test_batch_receipt_transaction.py real files and held reference checks |
+| Derived finalization / intermediate commit | Acquired guard; retain committed artifact generation and unknown-outcome backups | test_manual_mutation_state.py body/replace/postcommit and cancellation with real generated artifact bytes |
+| Source acceptance | Recover metadata and classify candidate under owned lock; retain uncertain bytes; preserve signals | test_manual_mutation_state.py source selection/source bytes and failed-recovery cases; source compatibility tests |
+| Grouped Soils/Watershed | Existing bounded compensation ownership/generation checked; final memory reflects actual disk | test_wepp_grouped_mutation_recovery.py: 11 real cases including failed compensation/new writer and cleanup signals |
+| Postfire migration | Acquired guard and explicit fresh hydration; keep receipts/resume workflow | test_postfire_debris_flow_observability.py failure/reuse, stale held admission and resume |
+| Watershed centroid / map and clean flags | Acquire ownership before mutation; stage proposed flags/paths locally | test_watershed_runtime_contract.py, test_failed_prelock_state.py; culvert success compatibility |
+| Logging/transient state | Preserve existing logger resources; reconstruct nonpersistent caches through load hooks | 12 real-controller failures preserve listeners/handlers and bounded FDs; matrix transient hook case |
+| Initial/optional/legacy/detached/readonly | Original initialization failure retained, failed instance fenced; fresh initialization and optional absence work | Matrix state-specific real-file tests; base legacy/read tests |
+| RQ guards / read-only manual wrappers | No change to existing guard placement or read-only semantics | Remaining boundary audit; RQ regression gate in full suite |
+
+See `remaining_boundary_audit.md` for additional Ron/Soils/Landuse/Watershed prelock
+consumers and searched indirect callers. `RedisPrep` and independent `RunStatistics`
+do not inherit NoDbBase. RunStatistics' separate persistence/caller-reuse boundary
+remains unresolved and outside the claimed repair; no architecture change was made.
+Production deployment and affected-run repair are not in scope. Arbitrary external
+nested references and already-published artifact rollback remain excluded.

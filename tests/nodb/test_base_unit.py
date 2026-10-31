@@ -402,14 +402,18 @@ def test_locked_context_preserves_foreign_lock_when_dump_fails(
 ) -> None:
     """Never force-unlocks a distributed lock owned by another token."""
     foreign_payload = base._serialize_lock_payload("foreign-token", ttl=60)
+    lock_key = controller._distributed_lock_key
+    runid, file_lock_key = controller.runid, controller._file_lock_key
 
     with pytest.raises(RuntimeError, match="non-matching lock token"):
         with controller.locked():
             controller.values["answer"] = 42
             redis_env.lock.set(controller._distributed_lock_key, foreign_payload)
 
-    assert redis_env.lock.get(controller._distributed_lock_key) == foreign_payload
-    assert redis_env.lock.hget(controller.runid, controller._file_lock_key) == "true"
+    assert redis_env.lock.get(lock_key) == foreign_payload
+    assert redis_env.lock.hget(runid, file_lock_key) == "true"
+    with pytest.raises(RuntimeError, match="unavailable after a failed mutation"):
+        _ = controller.values
 
 
 def test_clear_locks_resets_state(controller: DummyController, redis_env: SimpleNamespace) -> None:

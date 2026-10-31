@@ -1024,6 +1024,13 @@ def test_bootstrap_wepp_noprep_validation_failure_skips_grouped_dumps(
             self.dump_calls: list[dict[str, object]] = []
             self._locked = False
 
+        def mutation_state(self):
+            from contextlib import nullcontext
+            return nullcontext()
+
+        def _assert_lock_owned_for_dump(self) -> None:
+            return None
+
         def lock(self) -> None:
             self._locked = True
 
@@ -1064,6 +1071,13 @@ def test_bootstrap_wepp_noprep_validation_failure_skips_grouped_dumps(
         def __init__(self) -> None:
             self.dump_calls: list[dict[str, object]] = []
             self._locked = False
+
+        def mutation_state(self):
+            from contextlib import nullcontext
+            return nullcontext()
+
+        def _assert_lock_owned_for_dump(self) -> None:
+            return None
 
         def lock(self) -> None:
             self._locked = True

@@ -1,4 +1,5 @@
 """Accepted generations survive replacement, cleanup and publication failures."""
+from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 
@@ -39,6 +40,22 @@ class SourceController:
         self.durable = deepcopy(self._single_user_defined_source)
         if self.failure == 'after':
             raise OSError('injected postcommit failure')
+    def recover_mutation_state(self):
+        self._single_user_defined_source = deepcopy(self.durable)
+    def _assert_lock_owned_for_dump(self):
+        assert self.locked
+    @contextmanager
+    def mutation_state(self, *, release_lock=False):
+        # Filesystem/source tests use an in-memory persistence seam. Real NoDb
+        # abort and commit recovery is covered in test_manual_mutation_state.py.
+        try:
+            yield
+        except BaseException:
+            self._single_user_defined_source = deepcopy(self.durable)
+            raise
+        finally:
+            if release_lock:
+                self.unlock()
     @classmethod
     def getInstance(cls, _wd):
         return cls.instance

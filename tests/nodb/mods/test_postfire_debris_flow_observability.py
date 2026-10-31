@@ -21,10 +21,8 @@ def legacy(tmp_path, monkeypatch):
     @contextmanager
     def admission(obj):
         obj.lock()
-        try:
+        with obj.mutation_state(release_lock=True):
             yield SimpleNamespace(checkpoint=lambda: None)
-        finally:
-            obj.unlock()
     monkeypatch.setattr(m, '_admission', admission)  # Redis boundary only; real NoDb/filesystem.
     root = tmp_path/'postfire_debris_flow'
     attempt = root/'.staging'/('a'*32)
@@ -110,8 +108,8 @@ def test_interrupted_migration_can_resume(legacy, monkeypatch, failure):
         with pytest.raises(OSError, match='stopped'):
             m.migrate_attempts(controller.wd)
     audit = next((root/'migrations').iterdir())
-    # Reload persisted state after an interrupted dump, as a real new process does.
-    controller._state = PostfireDebrisFlow.load_detached(controller.wd).state
+    # Held references are already restored to the actual committed generation.
+    assert controller.state == PostfireDebrisFlow.load_detached(controller.wd).state
     assert m.migrate_attempts(controller.wd,resume=audit.name)['status'] == 'complete'
 
 
@@ -287,3 +285,35 @@ def test_preselector_migration_resume_after_state_dump(legacy, monkeypatch):
     controller._state = PostfireDebrisFlow.load_detached(controller.wd).state
     assert controller.state['model'] == 'M1'
     assert m.migrate_attempts(controller.wd, resume=audit.name)['status'] == 'complete'
+
+
+@pytest.mark.parametrize('newer_generation', [False, True])
+def test_manual_admission_failure_repairs_held_controller(tmp_path, monkeypatch, newer_generation):
+    from contextlib import nullcontext
+    import redis
+    import wepppy.nodb.base as base
+    from wepppy.rq import submission_recovery
+    from tests.nodb.test_base_boundary_characterization import _RedisStub
+    monkeypatch.setattr(base, 'redis_lock_client', _RedisStub())
+    monkeypatch.setattr(base, 'redis_nodb_cache_client', None)
+    controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    if newer_generation:
+        writer = PostfireDebrisFlow.load_detached(str(tmp_path))
+        with writer.locked(validate_on_success=False):
+            writer._state['model'] = 'M3'
+    baseline = PostfireDebrisFlow.load_detached(str(tmp_path)).state
+    # Isolate the external RQ admission service, preserving the actual manual
+    # NoDb acquisition, state scope, serialization, and recovery boundary.
+    monkeypatch.setattr(redis, 'Redis', lambda **_: nullcontext(object()))
+    monkeypatch.setattr(submission_recovery, 'rq_submission_lock',
+                        lambda *_, **__: nullcontext(SimpleNamespace(checkpoint=lambda: None)))
+    monkeypatch.setattr(m, '_jobs_idle', lambda *_: None)
+    with pytest.raises(ValueError, match='migration interrupted'):
+        with m._admission(controller):
+            controller._state['frequency_source'] = 'noaa'
+            raise ValueError('migration interrupted')
+    assert controller.state == baseline
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state == baseline
+    with controller.locked():
+        controller._state['model'] = 'M3'
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['frequency_source'] == 'cli'

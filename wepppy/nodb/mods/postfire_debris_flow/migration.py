@@ -113,12 +113,10 @@ def _admission(controller):
         with rq_submission_lock(connection, f'{controller.runid}:postfire-admission',
                                 lifecycle_key=controller.runid) as lease:
             controller.lock()
-            try:
-                PostfireDebrisFlow.getInstance(controller.wd)
+            with controller.mutation_state(release_lock=True):
+                controller.recover_mutation_state()
                 _jobs_idle(controller.state, controller.runid, connection)
                 yield lease
-            finally:
-                controller.unlock()
 
 
 def _validate_accepted(wd, state):

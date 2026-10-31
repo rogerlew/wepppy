@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import ExitStack
+
 import logging
 import math
 from wepppy.request_payload import RequestPayloadError
@@ -252,7 +254,8 @@ def _acquire_grouped_update_locks(
         for label, controller in lock_order:
             controller.lock()
             locked_controllers.append((label, controller))
-    except Exception:
+    except BaseException:  # broad-except: release acquired locks on cancellation, then re-raise
+        # Acquisition cleanup must also release earlier locks on cancellation.
         for label, controller in reversed(locked_controllers):
             try:
                 controller.unlock()
@@ -311,90 +314,106 @@ def _apply_grouped_soils_watershed_updates(
     if not lock_order:
         return
 
-    locked_controllers: list[tuple[str, Any]] = []
-    committed_controllers: list[tuple[str, Any]] = []
-    snapshots_by_label: dict[str, dict[str, Any]] = {}
-    staged_by_label: dict[str, bool] = {}
-    primary_exception: BaseException | None = None
-    unlock_failure: BaseException | None = None
+    # Recovery runs after compensation, unlock and post-commit hooks so held
+    # references reflect the actual final durable generation on every abort.
+    with ExitStack() as recovery:
+        locked_controllers: list[tuple[str, Any]] = []
+        committed_controllers: list[tuple[str, Any]] = []
+        snapshots_by_label: dict[str, dict[str, Any]] = {}
+        staged_by_label: dict[str, bool] = {}
+        restored_labels: set[str] = set()
+        primary_exception: BaseException | None = None
+        unlock_failure: BaseException | None = None
 
-    try:
-        if locks_already_held:
-            locked_controllers.extend(lock_order)
-        else:
+        try:
+            if locks_already_held:
+                locked_controllers.extend(lock_order)
+            else:
+                for label, controller in lock_order:
+                    controller.lock()
+                    locked_controllers.append((label, controller))
+
             for label, controller in lock_order:
-                controller.lock()
-                locked_controllers.append((label, controller))
+                recovery.enter_context(controller.mutation_state())
+                snapshots_by_label[label] = controller.snapshot_wepp_run_payload_updates()
 
-        for label, controller in lock_order:
-            snapshots_by_label[label] = controller.snapshot_wepp_run_payload_updates()
-
-        if has_soils_updates:
-            staged_by_label["soils"] = soils.stage_wepp_run_payload_updates(
-                clip_soils=clip_soils,
-                clip_soils_depth=clip_soils_depth,
-                clip_soils_minimum=clip_soils_minimum,
-                clip_soils_minimum_depth=clip_soils_minimum_depth,
-                rosetta_wc_fc_from_disturbed_bd_override=rosetta_wc_fc_from_disturbed_bd_override,
-                initial_sat=initial_sat,
-            )
-        if has_watershed_updates:
-            staged_by_label["watershed"] = watershed.stage_wepp_run_payload_updates(
-                clip_hillslopes=clip_hillslopes,
-                clip_hillslope_length=clip_hillslope_length,
-            )
-
-        for label, controller in lock_order:
-            should_commit = staged_by_label.get(label, False)
-            if not should_commit:
-                continue
-            committed_controllers.append((label, controller))
-            _finalize_grouped_wepp_run_payload_controller(controller)
-    except Exception as exc:
-        primary_exception = exc
-        for label, controller in lock_order:
-            snapshot = snapshots_by_label.get(label)
-            if snapshot is None:
-                continue
-            try:
-                controller.restore_wepp_run_payload_updates(snapshot)
-            except Exception:
-                logger.exception(
-                    "WEPP grouped payload restore failed for %s controller",
-                    label,
+            if has_soils_updates:
+                staged_by_label["soils"] = soils.stage_wepp_run_payload_updates(
+                    clip_soils=clip_soils,
+                    clip_soils_depth=clip_soils_depth,
+                    clip_soils_minimum=clip_soils_minimum,
+                    clip_soils_minimum_depth=clip_soils_minimum_depth,
+                    rosetta_wc_fc_from_disturbed_bd_override=rosetta_wc_fc_from_disturbed_bd_override,
+                    initial_sat=initial_sat,
+                )
+            if has_watershed_updates:
+                staged_by_label["watershed"] = watershed.stage_wepp_run_payload_updates(
+                    clip_hillslopes=clip_hillslopes,
+                    clip_hillslope_length=clip_hillslope_length,
                 )
 
-        for label, controller in reversed(committed_controllers):
-            try:
+            for label, controller in lock_order:
+                should_commit = staged_by_label.get(label, False)
+                if not should_commit:
+                    continue
+                committed_controllers.append((label, controller))
                 _finalize_grouped_wepp_run_payload_controller(controller)
-            except Exception:
-                # Rollback boundary: keep original failure and emit context.
-                logger.exception(
-                    "WEPP grouped payload rollback failed for %s controller",
-                    label,
-                )
-        raise
-    finally:
-        for label, controller in reversed(locked_controllers):
-            try:
-                controller.unlock()
-            except Exception as exc:
-                # Unlock boundary: preserve prior failures, but surface success-path unlock errors.
-                logger.exception(
-                    "WEPP grouped payload unlock failed for %s controller",
-                    label,
-                )
-                if primary_exception is None and unlock_failure is None:
-                    unlock_failure = exc
+        except BaseException as exc:
+            # Composite abort boundary also cleans state during cancellation.
+            primary_exception = exc
+            for label, controller in lock_order:
+                snapshot = snapshots_by_label.get(label)
+                if snapshot is None:
+                    continue
+                try:
+                    controller._assert_lock_owned_for_dump()
+                    controller.restore_wepp_run_payload_updates(snapshot)
+                    restored_labels.add(label)
+                except Exception:
+                    # Abort cleanup: retain the primary failure while attempting
+                    # independent controller compensation and authoritative recovery.
+                    logger.exception(
+                        "WEPP grouped payload restore failed for %s controller",
+                        label,
+                    )
 
-    if primary_exception is None and unlock_failure is not None:
-        raise unlock_failure
+            for label, controller in reversed(committed_controllers):
+                if label not in restored_labels:
+                    continue
+                try:
+                    _finalize_grouped_wepp_run_payload_controller(controller)
+                except Exception:
+                    # Rollback boundary: keep original failure and emit context.
+                    logger.exception(
+                        "WEPP grouped payload rollback failed for %s controller",
+                        label,
+                    )
+            raise
+        finally:
+            for label, controller in reversed(locked_controllers):
+                try:
+                    controller.unlock()
+                except BaseException as exc:
+                    # Unlock boundary: preserve prior failures, but surface success-path unlock errors.
+                    logger.exception(
+                        "WEPP grouped payload unlock failed for %s controller",
+                        label,
+                    )
+                    if unlock_failure is None or not isinstance(exc, Exception):
+                        unlock_failure = exc
+            if unlock_failure is not None and not isinstance(unlock_failure, Exception):
+                # A cancellation during cleanup must propagate, with the original
+                # operation failure retained in its exception context.
+                raise unlock_failure
 
-    for label, controller in committed_controllers:
-        _post_finalize_grouped_wepp_run_payload_controller(
-            label=label,
-            controller=controller,
-        )
+        if primary_exception is None and unlock_failure is not None:
+            raise unlock_failure
+
+        for label, controller in committed_controllers:
+            _post_finalize_grouped_wepp_run_payload_controller(
+                label=label,
+                controller=controller,
+            )
 
 
 def apply_wepp_run_payload(

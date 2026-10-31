@@ -294,7 +294,9 @@ over scientific project files.
 - `wepppy/nodb/AGENTS.md`
 - `tests/nodb/test_base_boundary_characterization.py`
 
-## Failed high-level mutation state (NFMS-01; specified, implementation pending)
+## Failed high-level mutation state (NFMS-01)
+
+Implementation status: implemented locally; production deployment is separate.
 
 A failed high-level mutation MUST NOT leave rejected or uncommitted state
 available through the affected controller to later reads, unrelated successful
@@ -453,7 +455,7 @@ acquisition must not modify an existing owner's mutation signature. After an
 acquired transaction fails, the NFMS-01 failed high-level mutation state section
 requires immediate held-reference safety as well as safe next-read hydration.
 Signature-only invalidation is insufficient. Never clear global caches. This
-extension is specified; implementation conformance is pending.
+extension is implemented locally; production deployment is separate.
 
 Save root finalizer linkage and release a ready deferred finalizer before the
 compatibility receipt, so a receipt failure cannot skip RQ bookkeeping.

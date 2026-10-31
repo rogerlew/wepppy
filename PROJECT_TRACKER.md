@@ -15,7 +15,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-Active checkpoint: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — contamination reproduced; contract and consumer audit prepared; implementation awaits reviewed standalone checkpoint commit authority.
+Active repair: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — checkpoint `2b998e08d` committed; implementation and independent reviews complete; split validation 12533 passed/371 skipped. Implementation commit and push authorized; no deployment.
 
 Completed locally: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — both frameworks and confirmed consumers repaired; independent correctness/security/QA approved. 4,017 route tests and 71 real persistence tests pass. Split broad coverage: 12,451 passed / 368 executed skips plus one collection skip; plain full command hit an unrelated active test lock. Docs checkpoints and implementation committed; no deployment.
 

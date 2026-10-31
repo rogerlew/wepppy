@@ -324,7 +324,7 @@ class TestTTLExpirationRace:
                     with controller1.locked():
                         operation_started.set()
                         controller1.heavy_operation(3.0)  # 3 seconds > 1 second TTL
-                        operation_results.append("completed")
+                    operation_results.append("completed")
                 except Exception as e:
                     operation_results.append(f"failed: {e}")
                     
@@ -337,8 +337,10 @@ class TestTTLExpirationRace:
             # Wait for TTL to expire
             time.sleep(1.5)
             
-            # Try to acquire lock with second instance (should succeed after TTL expiry)
-            controller2 = mock_controller_class.getInstance(temp_wd)
+            # A separate process has a separate object. Reusing the same singleton
+            # must remain fenced while its first mutation is still active (NFMS-01).
+            controller2 = mock_controller_class.load_detached(temp_wd)
+            assert controller2 is not controller1
             try:
                 with controller2.locked():
                     controller2.heavy_operation(0.1)
@@ -347,9 +349,13 @@ class TestTTLExpirationRace:
                 second_operation_success = False
                 
             bg_thread.join(timeout=5)
+            assert not bg_thread.is_alive()
             
             # The second operation should succeed because TTL expired
             assert second_operation_success, "Second operation should succeed after TTL expiry"
+            assert any(result.startswith("failed:") for result in operation_results)
+            assert controller1.operation_count == 1
+            assert mock_controller_class.load_detached(temp_wd).operation_count == 1
 
 
 @pytest.mark.nodb

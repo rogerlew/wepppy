@@ -2,11 +2,10 @@
 
 ## Status
 
-2026-10-31 UTC: discovery and contract checkpoint preparation. Implementation is
-blocked until reviewed checkpoint receives standalone ancestor commit authority.
-Active plan: `prompts/active/implementation_execplan.md`.
-Checkpoint accepted by both independent reviewers; awaiting operator commit authority.
-Ancestor revision: not yet created. No production implementation files edited.
+2026-10-31 UTC: implementation, independent reviews and split broad
+validation complete: 12533 passed, 371 skipped. Active plan: `prompts/active/implementation_execplan.md`.
+Operator authorized the standalone checkpoint commit `2b998e08d` before edits.
+Operator authorized the implementation commit and push after local validation. No deployment or production jobs.
 
 ## Evidence and decisions
 
@@ -23,16 +22,15 @@ Ancestor revision: not yet created. No production implementation files edited.
 
 ## Remaining work and ownership
 
-Codex: independent contract reviews and scoped docs lint completed; disposition
-in `artifacts/20261031_review_disposition.md`.
-Operator: authorize only the prepared checkpoint commit when review is accepted.
-Codex after that commit: implement, reproduce real consumer faults, validate
-prepared inputs/resources/performance, complete independent correctness/security/QA
-reviews and required gates. Preserve unresolved consumer rows until demonstrated.
+Checkpoint authority was granted and ancestor `2b998e08d` committed before edits.
+Implementation and focused validation are complete, including actual Redis matrix
+and prepared-input readback. Independent correctness/security/QA approve local
+code scope. Authorized local work and evidence closeout are complete. Disposable Redis
+shutdown and directory removal are complete. No additional operator approval is needed for these tasks.
 
 No deployed repair, affected-run recovery or post-change signal exists yet.
 
-## Final checkpoint evidence (2026-10-31 02:23 UTC)
+## Historical checkpoint evidence (2026-10-31 02:23 UTC)
 
 Extended discovery probe: 2 passed, 4 warnings, 9.34 seconds; process exited 0.
 Real Soils `_build_gridded` with missing SSURGO rejects after `_initial_sat=0.9`;
@@ -46,3 +44,12 @@ inventory fixes. Production code and conformance tests remain untouched. No
 performance/resource benchmark or prepared-input fix evidence yet. Scoped docs
 lint and git diff whitespace checks pass. Concurrent roads artifacts appeared
 during work and remain untouched.
+
+## Implementation evidence
+
+See `artifacts/validation.md` for exact executed counts, overlap and interrupted
+runs; `artifacts/performance.md` for measured cost; `artifacts/consumer_matrix.md`
+for current implementation dispositions. Independent final review artifacts are
+`correctness_review.md`, `security_review.md` and `qa_review.md`. No unresolved
+medium/high review findings. NoDb and repository coverage totals 12533 passed/371 skipped across documented
+non-overlapping partitions; no uninterrupted full pass is claimed.

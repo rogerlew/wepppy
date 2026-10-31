@@ -18,10 +18,11 @@ useful after recovery; when safe recovery fails they must explicitly refuse use.
 - [x] (2026-10-31 UTC) Reproduce held/cache contamination and later persistence with real serialization.
 - [x] (2026-10-31 UTC) Draft canonical contract amendment, compatibility plan and consumer matrix.
 - [x] (2026-10-31 02:23 UTC) Two independent contract reviews approved after medium findings resolved.
-- [ ] Obtain missing commit authority and create standalone checkpoint ancestor.
-- [ ] Implement shared recovery and confirmed consumer repairs after ancestor exists.
-- [ ] Complete fault-stage/state/concurrency/generated-input/resource/performance coverage.
-- [ ] Run focused, NoDb, WAM/MRS and full gates; independent final reviews; update all living docs.
+- [x] (2026-10-31 UTC) Operator authorized checkpoint commit; ancestor `2b998e08d` created before implementation edits.
+- [x] (2026-10-31 UTC) Implemented shared recovery, manual/grouped and prelock producer repairs after ancestor.
+- [x] (2026-10-31 UTC) Final 36-case actual-Redis matrix, real prepared inputs, resources and performance observations complete.
+- [x] (2026-10-31 UTC) Focused/WAM/MRS/API gates and independent correctness/security/QA reviews pass.
+- [x] (2026-10-31 UTC) Split broad gates complete: 12533 passed/371 skipped; disposable server removed and closeout documented.
 
 ## Surprises & Discoveries
 
@@ -31,6 +32,12 @@ contamination. WEPP option-map helpers mutate aliases before acquiring a lock;
 shared context recovery alone cannot close the class. Derived and Batch helpers
 invalidate signatures, leaving held references unsafe. Atomic replace precedes
 metadata and notification work, so an exception is not a no-commit signal.
+
+Broad sweeps exposed the existing unknown-commit exception-class contract and two
+outdated test doubles (separate TTL writer and filesystem-only cleanup). Restore
+the exception wrapper for ordinary failures; preserve cancellation. Use detached
+writer and explicit no-op fixture contexts respectively. Independent reviewers
+approved these bounded compatibility fixes.
 
 ## Decision Log
 
@@ -43,9 +50,13 @@ No schema, auth, scientific or deployment changes.
 
 ## Outcomes & Retrospective
 
-Diagnosed only. Baseline tests and probe complete; implementation, downstream
-artifact correction, performance/resource evidence and final reviews remain.
-The checkpoint must be independently accepted and committed before implementation.
+Implemented and focused locally validated; accepted prepared-file values, resource
+lifecycle and performance tradeoffs demonstrated. Independent local code reviews
+approve. Split broad coverage completed: 12533 passed/371 skipped, with compatibility
+followups independently reviewed and affected paths rerun; no uninterrupted full
+pass claimed. Closeout evidence and source hashes are retained. The checkpoint
+was accepted and committed before implementation. No deployment or affected-run
+recovery is authorized.
 
 ## Context and Orientation
 
@@ -172,3 +183,7 @@ actual consumers require a reviewed public interface. No dependency additions.
 
 Revision note (2026-10-31 UTC): initial plan records diagnosed defect, required
 checkpoint authority, confirmed prelock aliases and unfinished implementation.
+
+Revision note (2026-10-31 UTC): implementation and focused evidence complete after
+ancestor 2b998e08d; review-found ownership, identity, delayed hydration and secondary
+cancellation defects were corrected with retained regressions. Final broad coverage is partitioned into NoDb and its complement; earlier pre-final-source attempts were interrupted and are not passes.
