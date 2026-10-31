@@ -1,0 +1,371 @@
+{
+  "overall": {
+    "cases": 840,
+    "passing": 744,
+    "fraction": 0.8857142857142857
+  },
+  "groups": {
+    "climate": {
+      "birmingham": {
+        "cases": 168,
+        "passing": 164,
+        "fraction": 0.9761904761904762
+      },
+      "charleston": {
+        "cases": 168,
+        "passing": 153,
+        "fraction": 0.9107142857142857
+      },
+      "denver": {
+        "cases": 168,
+        "passing": 121,
+        "fraction": 0.7202380952380952
+      },
+      "flagstaff": {
+        "cases": 168,
+        "passing": 151,
+        "fraction": 0.8988095238095238
+      },
+      "site": {
+        "cases": 168,
+        "passing": 155,
+        "fraction": 0.9226190476190477
+      }
+    },
+    "soil": {
+      "1718465": {
+        "cases": 120,
+        "passing": 107,
+        "fraction": 0.8916666666666667
+      },
+      "1718494": {
+        "cases": 120,
+        "passing": 110,
+        "fraction": 0.9166666666666666
+      },
+      "1718510": {
+        "cases": 120,
+        "passing": 114,
+        "fraction": 0.95
+      },
+      "1856573": {
+        "cases": 120,
+        "passing": 109,
+        "fraction": 0.9083333333333333
+      },
+      "2711184": {
+        "cases": 120,
+        "passing": 88,
+        "fraction": 0.7333333333333333
+      },
+      "2711250": {
+        "cases": 120,
+        "passing": 104,
+        "fraction": 0.8666666666666667
+      },
+      "53949": {
+        "cases": 120,
+        "passing": 112,
+        "fraction": 0.9333333333333333
+      }
+    },
+    "design": {
+      "inbare": {
+        "cases": 210,
+        "passing": 203,
+        "fraction": 0.9666666666666667
+      },
+      "inveg": {
+        "cases": 210,
+        "passing": 200,
+        "fraction": 0.9523809523809523
+      },
+      "outrut": {
+        "cases": 210,
+        "passing": 202,
+        "fraction": 0.9619047619047619
+      },
+      "outunrut": {
+        "cases": 210,
+        "passing": 139,
+        "fraction": 0.6619047619047619
+      }
+    },
+    "surface": {
+      "gravel": {
+        "cases": 420,
+        "passing": 360,
+        "fraction": 0.8571428571428571
+      },
+      "paved": {
+        "cases": 420,
+        "passing": 384,
+        "fraction": 0.9142857142857143
+      }
+    },
+    "traffic": {
+      "high": {
+        "cases": 280,
+        "passing": 250,
+        "fraction": 0.8928571428571429
+      },
+      "low": {
+        "cases": 280,
+        "passing": 245,
+        "fraction": 0.875
+      },
+      "none": {
+        "cases": 280,
+        "passing": 249,
+        "fraction": 0.8892857142857142
+      }
+    }
+  },
+  "load_strata": {
+    "small": {
+      "overall": {
+        "cases": 74,
+        "passing": 31,
+        "fraction": 0.4189189189189189
+      },
+      "groups": {
+        "climate": {
+          "charleston": {
+            "cases": 1,
+            "passing": 0,
+            "fraction": 0.0
+          },
+          "denver": {
+            "cases": 42,
+            "passing": 14,
+            "fraction": 0.3333333333333333
+          },
+          "flagstaff": {
+            "cases": 31,
+            "passing": 17,
+            "fraction": 0.5483870967741935
+          }
+        },
+        "soil": {
+          "1718465": {
+            "cases": 13,
+            "passing": 2,
+            "fraction": 0.15384615384615385
+          },
+          "1718494": {
+            "cases": 10,
+            "passing": 1,
+            "fraction": 0.1
+          },
+          "1718510": {
+            "cases": 9,
+            "passing": 3,
+            "fraction": 0.3333333333333333
+          },
+          "1856573": {
+            "cases": 10,
+            "passing": 1,
+            "fraction": 0.1
+          },
+          "2711184": {
+            "cases": 10,
+            "passing": 10,
+            "fraction": 1.0
+          },
+          "2711250": {
+            "cases": 12,
+            "passing": 12,
+            "fraction": 1.0
+          },
+          "53949": {
+            "cases": 10,
+            "passing": 2,
+            "fraction": 0.2
+          }
+        },
+        "design": {
+          "outunrut": {
+            "cases": 74,
+            "passing": 31,
+            "fraction": 0.4189189189189189
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 39,
+            "passing": 12,
+            "fraction": 0.3076923076923077
+          },
+          "paved": {
+            "cases": 35,
+            "passing": 19,
+            "fraction": 0.5428571428571428
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 23,
+            "passing": 8,
+            "fraction": 0.34782608695652173
+          },
+          "low": {
+            "cases": 23,
+            "passing": 8,
+            "fraction": 0.34782608695652173
+          },
+          "none": {
+            "cases": 28,
+            "passing": 15,
+            "fraction": 0.5357142857142857
+          }
+        }
+      }
+    },
+    "meaningful": {
+      "overall": {
+        "cases": 766,
+        "passing": 713,
+        "fraction": 0.9308093994778068
+      },
+      "groups": {
+        "climate": {
+          "birmingham": {
+            "cases": 168,
+            "passing": 164,
+            "fraction": 0.9761904761904762
+          },
+          "charleston": {
+            "cases": 167,
+            "passing": 153,
+            "fraction": 0.9161676646706587
+          },
+          "denver": {
+            "cases": 126,
+            "passing": 107,
+            "fraction": 0.8492063492063492
+          },
+          "flagstaff": {
+            "cases": 137,
+            "passing": 134,
+            "fraction": 0.9781021897810219
+          },
+          "site": {
+            "cases": 168,
+            "passing": 155,
+            "fraction": 0.9226190476190477
+          }
+        },
+        "soil": {
+          "1718465": {
+            "cases": 107,
+            "passing": 105,
+            "fraction": 0.9813084112149533
+          },
+          "1718494": {
+            "cases": 110,
+            "passing": 109,
+            "fraction": 0.990909090909091
+          },
+          "1718510": {
+            "cases": 111,
+            "passing": 111,
+            "fraction": 1.0
+          },
+          "1856573": {
+            "cases": 110,
+            "passing": 108,
+            "fraction": 0.9818181818181818
+          },
+          "2711184": {
+            "cases": 110,
+            "passing": 78,
+            "fraction": 0.7090909090909091
+          },
+          "2711250": {
+            "cases": 108,
+            "passing": 92,
+            "fraction": 0.8518518518518519
+          },
+          "53949": {
+            "cases": 110,
+            "passing": 110,
+            "fraction": 1.0
+          }
+        },
+        "design": {
+          "inbare": {
+            "cases": 210,
+            "passing": 203,
+            "fraction": 0.9666666666666667
+          },
+          "inveg": {
+            "cases": 210,
+            "passing": 200,
+            "fraction": 0.9523809523809523
+          },
+          "outrut": {
+            "cases": 210,
+            "passing": 202,
+            "fraction": 0.9619047619047619
+          },
+          "outunrut": {
+            "cases": 136,
+            "passing": 108,
+            "fraction": 0.7941176470588235
+          }
+        },
+        "surface": {
+          "gravel": {
+            "cases": 381,
+            "passing": 348,
+            "fraction": 0.9133858267716536
+          },
+          "paved": {
+            "cases": 385,
+            "passing": 365,
+            "fraction": 0.948051948051948
+          }
+        },
+        "traffic": {
+          "high": {
+            "cases": 257,
+            "passing": 242,
+            "fraction": 0.9416342412451362
+          },
+          "low": {
+            "cases": 257,
+            "passing": 237,
+            "fraction": 0.9221789883268483
+          },
+          "none": {
+            "cases": 252,
+            "passing": 234,
+            "fraction": 0.9285714285714286
+          }
+        }
+      }
+    }
+  },
+  "small_load": {
+    "cases": 74,
+    "passing": 31,
+    "fraction": 0.4189189189189189
+  },
+  "meaningful_load": {
+    "cases": 766,
+    "passing": 713,
+    "fraction": 0.9308093994778068
+  },
+  "native_failures": [],
+  "physical_failures": [],
+  "numerical_gate": false,
+  "physical_gate": true,
+  "screen_gate": false,
+  "acceptance": false,
+  "limitation": "Development screen only; withheld, routing and project-runtime validation pending",
+  "binary_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+  "results_sha256": "e9bd1ab8f91a26cd1b1522e595cbbd241fcfb09b342d9128d703a1f833afdbd4",
+  "recovered": 2,
+  "regressed": 7,
+  "final_acceptance": false
+}

@@ -1,0 +1,10 @@
+{
+  "hill_native_hashes": 7,
+  "watershed_native_hashes": 13,
+  "hill_water_rows": 17532,
+  "hill_optional_interception_all_null": true,
+  "hill_event_rows": 3240,
+  "watershed_channel_rows": 731,
+  "watershed_event_rows": 731,
+  "watershed_event_measurements_dates_and_ids_exact_native": true
+}

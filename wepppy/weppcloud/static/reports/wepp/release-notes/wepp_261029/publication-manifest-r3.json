@@ -1,0 +1,90 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261029",
+  "artifact_revision": 3,
+  "document_revision": "3",
+  "document_date": "2026-10-31",
+  "publication_status": "approved for publication",
+  "approved_on": "2026-10-31",
+  "approval_record": "Owner explicitly authorized another same-name replacement of undeployed wepp_261029 and updated notes; independent AI scientific and final implementation/disclosure reviews approve the exact revision-3 PDF and matched pair",
+  "pdf_filename": "wepp_261029_release-notes-r3.pdf",
+  "pdf_sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r3.pdf",
+  "pages": 20,
+  "figures": 8,
+  "model_source_identity": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "source_comparison_baseline": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+  "fixture_source_identity": "986ffe6e4d23ea7116ccb9309474ddbc799107e7",
+  "binary_sha256": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "superseded_artifact": {
+    "artifact_revision": 2,
+    "document_revision": "2",
+    "pdf_filename": "wepp_261029_release-notes-r2.pdf",
+    "pdf_sha256": "c94db60e60ccd561a96dcdda89bad8bed209c32a783d3e699beb0e72485ddf44",
+    "model_source_identity": "ba9f2ad91b5165d5cd2954bd64b5df608798541e",
+    "binary_sha256": {
+      "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+      "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+    }
+  },
+  "earlier_artifact": {
+    "document_revision": "1",
+    "pdf_filename": "wepp_261029_release-notes-r1.pdf",
+    "pdf_sha256": "be19fc81a89c1df957e13240a62fe9e0affdaf2238c40d23061f29c761e3d42b",
+    "model_source_identity": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+    "binary_sha256": {
+      "wepp_261029": "53628775e0e97d03f3f8c12e0d99b0f25842efa429d3ce869bf37ee382974461",
+      "wepp_261029_hill": "080adc9b7b4065f5cba2c2b290369121ea76c042693b74b616ff651117457cd4"
+    },
+    "preserve_issued_pdf": true
+  },
+  "preserve_issued_earlier_pdfs": true,
+  "review_scope": "Independent AI scientific and implementation/disclosure reviews completed for exact final artifacts; no institutional endorsement or human peer-review claim",
+  "scientific_acceptance_sha256": "c57c39d392680fda2a2f5a72ae76b40b616a6bb5ee216ffb686c6b0a26bf8247",
+  "completed_actual_byte_gates": {
+    "native_tests": 1095,
+    "hillslope_watchlist": 28,
+    "disturbed_tests": 99,
+    "roads_physical_cases": 840,
+    "clean_full_period_comparisons": 12,
+    "host_smokes": 2,
+    "Cedar_output_parity": 6057
+  },
+  "final_cedar": {
+    "hillslopes": 864,
+    "years": 24,
+    "outlet_sediment_kg": 517670.63,
+    "revision2_outlet_sediment_kg": 517815.77,
+    "sediment_change_percent": -0.0280293,
+    "published_water_change_m3": -26.61,
+    "observed_standard_outputs_exact": 9,
+    "negative_or_nonfinite_intermediate_class_transfers": 0,
+    "detail_dates": 34,
+    "channel_events": 12614,
+    "source_class_records": 63070,
+    "local_source_bed_checks_not_global_budget": true
+  },
+  "known_limitations": [
+    "Roads magnitude objectives remain unmet: 713/766 meaningful and 31/74 small; two recoveries and seven regressions; no parameter defaults or UI acceptance",
+    "EPLANE is an interface correction; QINF transition is supported in the constant-forcing uniform-plane scalar domain, not a universal heterogeneous ownership or soil-capacity ordering proof",
+    "413 negative incremental recession differences remain; 93 negative total FIN states are supported by explicit surface return outside linked QINF",
+    "29 of 481 single-OFE WAT outputs change; contour caller scope has no dedicated complete-event empirical fixture",
+    "Small-event sediment can change materially in percentage terms; no measured-sediment calibration or global water/sediment budget closure",
+    "Disturbed outputs are exact but 96 soil decks differ in Build Date comments; input byte identity is not claimed",
+    "Retained source-time, hydraulic, cohort and width approximations remain; no new Windows release or default switch"
+  ],
+  "pending_gates": [
+    "Exact public copy and HTTP download validation"
+  ],
+  "production_deployment": false,
+  "sidecar_sha256": {
+    "wepp_261029.json": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+    "wepp_261029_hill.json": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  },
+  "scientific_report_acceptance_sha256": "2e57a390c2ff0ab33a64cae143edbff2a6cc3ef1bc829307a025d65be35a77ac",
+  "implementation_disclosure_acceptance_sha256": "0961183ee33c4186b1ea8d5da10b555ce43f9ea4f728133c189f18ada44e55fc",
+  "implementation_disclosure_review_sha256": "a7d39a7bd534257e25ad2822b3131733a27b8c32ca53ac04c66ccf1d9a780903"
+}

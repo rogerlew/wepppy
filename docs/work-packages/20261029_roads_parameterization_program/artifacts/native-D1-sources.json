@@ -1,0 +1,16 @@
+[
+  {
+    "file": "chap4.pdf",
+    "url": "https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/chap4.pdf",
+    "title": "WEPP 1995 Chapter 4, sections 4.4.3, 4.5, 4.6; Figure 4.4.5",
+    "sha256": "33d6a8725d40f86e115ff81da8d3da250aa7dd0c216a4056d69a3d52b3d3cce5",
+    "bytes": 107210
+  },
+  {
+    "file": "stone-1993.pdf",
+    "url": "https://www.tucson.ars.ag.gov/unit/Publications/PDFfiles/944.pdf",
+    "title": "Stone, Shirley and Lane (1993), doi:10.13031/2013.28470",
+    "sha256": "4390310889d84a5de7956d5ee08d541aa1fa54e1315d187cff1ee9b2cac35afb",
+    "bytes": 1405638
+  }
+]

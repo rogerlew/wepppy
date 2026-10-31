@@ -1,0 +1,227 @@
+{
+  "native_delivery_commit": "0df4c9227f0aa45c7049b8cde59a4884a909c7d9",
+  "sources": {
+    "main.for": {
+      "sha256": "44d0502204e3d0ecefb379a64d42165d6178b26133e080c8214277ff440f20c0",
+      "lines": [
+        162,
+        171
+      ],
+      "excerpt": "c \n      ui_run = 0\n      open(unit=22,file='wepp_ui.txt',status='old',err=401)\n      ui_run = 1\n      write(6,4001)\n      close(22)\n      goto 402\n 401  ui_run = 0     \n 402  continue\n "
+    },
+    "input.for": {
+      "sha256": "362a328510298eb86f682b248256ae43c8b36ca15b6cf2d6dd1887999ae275df",
+      "lines": [
+        648,
+        677
+      ],
+      "excerpt": "        if ((solwpv.ge.2006).and.(solwpv.ne.7778)\n     1   .and.(solwpv.ne.9001).and.(solwpv.ne.9002)\n     1   .and.(solwpv.ne.9003)) then\n           read (11,*) slflag(iplane),anisrt(iplane),kslast(iplane)\n             kslast(iplane) = kslast(iplane)/3.6e6\n           if (slflag(iplane).eq.0) then \n              anisrt(iplane) = 1\n              kslast(iplane) = 0\n           else\n              if (anisrt(iplane).lt.0.0) anisrt(iplane) = 25\n           end if\n         else\n           slflag(iplane) = 0\n           anisrt(iplane) = 1\n           kslast(iplane) = 0\n         end if\n         \n         if (solwpv.ge.7778) then\n             ui_bdrkth(iplane) = 0\n             kslast(iplane) = 0\n             read (11,*) slflag(iplane),ui_bdrkth(iplane),kslast(iplane)\n             kslast(iplane) = kslast(iplane)/3.6e6\n             if (slflag(iplane).eq.0) then \n               ui_bdrkth(iplane) = 0\n               kslast(iplane) = 0\n             end if\n             ui_bdrkth(iplane) = ui_bdrkth(iplane)/1000.\n             if(ui_bdrkth(iplane) .lt. 0.01) ui_bdrkth(iplane) = 0.01\n           if(ui_bdrkth(iplane) .gt. 100.) ui_bdrkth(iplane) = 100.\n           end if"
+    },
+    "watbal.for": {
+      "sha256": "ebe0921be87752bd446f7784a530b433edeae56d56fdb48578a20280b331a928",
+      "lines": [
+        247,
+        256
+      ],
+      "excerpt": "c     This is the check for the alternate version of watbal that has an hourly step.\nc     The code is mostly the same as this version, but it is kept in a \nc     separate routine to isolate any bugs.\nc     Feburary 15, 2011 jrf\nc\n      if (ui_run.eq.1) then\n         call watbal_hourly(lunp,luns,lunw,nowcrp,elevm)\n         return\n      endif\n      "
+    },
+    "perc.for": {
+      "sha256": "0e75a4f4c2c40ba82dcd0bb8be7d6b10984181e52c9f324ca808d6f390064c25",
+      "lines": [
+        163,
+        217
+      ],
+      "excerpt": "      if (ui_run.eq.1) then\n\t  if (k1 .eq. nsl(iplane)) then\n\t\t  meblfc = 1\n\t  elseif (stu.ge.0.95) then\n\t\t  meblfc = 1\n\t  else\n\t\t  meblfc = 0\n\t  endif\n\t  \n\t\ncd\tabvfc = fc(k1) + ((1-coca(k1,iplane))*dg(k1,iplane))\ncd\tif ((st(k1,iplane).gt.abvfc).and. (meblfc.eq.1)) then\ncd\t\tfx = 1\ncd\tendif\n\t  if(meblfc.eq.1) fx = 1\n\tendif\ncd\tEnd adding      \nc\ncx    Added by Arthur. Incorperated by S. Dun Dec. 03, 2003\ncx     Modificaitons are made to simulate the bottom rock layer. \ncx     A specific K value is assigned to the bottom layer here.\ncx     Arthur C.Xu Dec 12, 2000\ncd    S. Dun changed K1 to K1+1\n      if (k1.eq.nsl(iplane))then\n        ssc(k1+1,iplane)= ssc(k1,iplane)\n        if (slflag(iplane).eq.1)  ssc(k1+1,iplane)= kslast(iplane)\n      end if\ncx     END OF ADDING\ncx               \nc     *** L0 IF ***     \n      if (stu.lt.1.0) then\nc       Correct for lower level saturation.  (Chapter 7, eq. 7.4.5)\n                cr = sqrt(1.-stu)\nc       Travel time of water (days) through the layer\ncd    Modified by DSH 09/19/2002\n        if(k1.eq.nsl(iplane)) then\n           if(slflag(iplane).eq.0) ssc(k1+1,iplane)=ssc(k1,iplane)\n           if (ui_run.ne.1) then\n             sscz = ssc(k1,iplane)*2/(ssc(k1,iplane)+ssc(k1+1,iplane))\n     1         *ssc(k1+1,iplane)\n           else\ncd    Modified by S. Dun for Erin's request July 22, 2008\n            if ((ssc(k1,iplane).le.0.0).or.\n     1          (ssc(k1+1,iplane).le.0.0)) then\n              sscz = 0.0\n              call wepp_observe('WFR_G_PSSZ',year,sdate,iplane,0,k1,\n     1          ssc(k1,iplane),ssc(k1+1,iplane))\n            else\n              sscz =(dg(k1,iplane)+ ui_bdrkth(iplane))/\n     1              (dg(k1,iplane)/ssc(k1,iplane)\n     1              + ui_bdrkth(iplane)/ssc(k1+1,iplane))\n            endif\nc\n           endif\n        else"
+    }
+  },
+  "generated_materials_role_order": [
+    "road",
+    "fill",
+    "buffer"
+  ],
+  "generated_materials": {
+    "2711184": [
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      }
+    ],
+    "2711250": [
+      {
+        "profile_depth_mm": 2600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 2600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 2600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      }
+    ],
+    "1718465": [
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00151
+        }
+      }
+    ],
+    "1718494": [
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      },
+      {
+        "profile_depth_mm": 1600.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.01
+        }
+      }
+    ],
+    "1718510": [
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      }
+    ],
+    "1856573": [
+      {
+        "profile_depth_mm": 800.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00013
+        }
+      },
+      {
+        "profile_depth_mm": 800.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00013
+        }
+      },
+      {
+        "profile_depth_mm": 800.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00013
+        }
+      }
+    ],
+    "53949": [
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      },
+      {
+        "profile_depth_mm": 400.0,
+        "restriction": {
+          "slflag": 1,
+          "ui_bdrkth": 10000.0,
+          "kslast": 0.00328
+        }
+      }
+    ]
+  },
+  "interpretation": "All seven generated profiles emit slflag=1 and ui_bdrkth=10000 mm (10 m after native conversion). Native hourly and daily branches use different bottom-conductivity combination formulas. This supports investigating lower-boundary/profile interaction; it does not establish an erroneous restriction or authorize removing it. Trace source restriction classes before any candidate change."
+}

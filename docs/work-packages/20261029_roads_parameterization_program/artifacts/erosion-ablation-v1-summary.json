@@ -1,0 +1,89 @@
+{
+  "cases": 333,
+  "completed": 333,
+  "physical_pass": 333,
+  "results_sha256": "85ba50570ed61e5b5d42aefcd051089e0e3d9d10a792e87b90591eca3ddaf39f",
+  "lanes": {
+    "both": {
+      "meaningful_high": {
+        "cases": 6,
+        "within": 3,
+        "physical_pass": 6
+      },
+      "meaningful_low": {
+        "cases": 41,
+        "within": 6,
+        "physical_pass": 41
+      },
+      "meaningful_pass": {
+        "cases": 19,
+        "within": 19,
+        "physical_pass": 19
+      },
+      "small_exceedance": {
+        "cases": 44,
+        "within": 1,
+        "physical_pass": 44
+      },
+      "small_pass": {
+        "cases": 1,
+        "within": 0,
+        "physical_pass": 1
+      }
+    },
+    "buffer": {
+      "meaningful_high": {
+        "cases": 6,
+        "within": 3,
+        "physical_pass": 6
+      },
+      "meaningful_low": {
+        "cases": 41,
+        "within": 5,
+        "physical_pass": 41
+      },
+      "meaningful_pass": {
+        "cases": 19,
+        "within": 19,
+        "physical_pass": 19
+      },
+      "small_exceedance": {
+        "cases": 44,
+        "within": 0,
+        "physical_pass": 44
+      },
+      "small_pass": {
+        "cases": 1,
+        "within": 0,
+        "physical_pass": 1
+      }
+    },
+    "fill": {
+      "meaningful_high": {
+        "cases": 6,
+        "within": 2,
+        "physical_pass": 6
+      },
+      "meaningful_low": {
+        "cases": 41,
+        "within": 3,
+        "physical_pass": 41
+      },
+      "meaningful_pass": {
+        "cases": 19,
+        "within": 19,
+        "physical_pass": 19
+      },
+      "small_exceedance": {
+        "cases": 44,
+        "within": 1,
+        "physical_pass": 44
+      },
+      "small_pass": {
+        "cases": 1,
+        "within": 0,
+        "physical_pass": 1
+      }
+    }
+  }
+}

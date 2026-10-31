@@ -1,0 +1,41 @@
+[
+  {
+    "case": "delayed_return",
+    "year": 1,
+    "day": 9,
+    "ofe": 2,
+    "area_m2": 18.097200854110724,
+    "local_net_m3": 0.6981246213933348,
+    "actual_in_m3": 1.410935472948472,
+    "actual_out_m3": 2.136466062780062,
+    "actual_fin_m3": -0.02740595234038777,
+    "start_available_m3": 0.9090176827309775,
+    "return_m3": 0.0,
+    "lateral_m3": 0.03335809785733477,
+    "daily_funding_margin_m3": 0.9149698282479245,
+    "grna_local_storage_m": 0.0581885427236557,
+    "grna_aggregate_storage_m": 0.06377244740724564,
+    "grna_aggregate_k_m_s": 2.7000000955013093e-06,
+    "grna_final_storage_m": 0.07874128967523575,
+    "grna_precip_depth_m": 0.038576383143663406,
+    "grna_infiltration_depth_m": 0.028874456882476807,
+    "upstream_snapshots": {
+      "1": [
+        0.007700510323047638,
+        0.03357642516493797
+      ]
+    },
+    "chain_root": 1,
+    "raw_storm_exchange_m3": 0.3309226088426396,
+    "incremental_recession_m3": -0.35832857728089473,
+    "recession_m3": 0.3811723787170702,
+    "prior_recession_m3": 0.739500955997965,
+    "raw_storm_funding_margin_m3": 1.2732983894309517,
+    "partition_error_m3": -1.609786738632213e-08,
+    "qi_rate_m_s": 4.3494574128999375e-06,
+    "qi_duration_s": 1224.0,
+    "qi_ealpha": 1.519314169883728,
+    "qi_exponent": 1.5,
+    "qi_k_m_s": 2.6150669327762444e-06
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "scope": "Documentation finalization after independent scientific acceptance; no runtime, report or sidecar changes; no commit",
+  "incident_status": "resolved-and-hardened",
+  "watchlist_rows_updated": 10,
+  "checks": {
+    "incident_finalize": {
+      "passed": true,
+      "manifest_rows": 504,
+      "checksummed_files": 509
+    },
+    "artifact_policy": {
+      "passed": true
+    },
+    "watchlist_contract": {
+      "passed": 4,
+      "failed": 0
+    },
+    "markdown_lint": {
+      "files": 6,
+      "errors": 0,
+      "warnings": 0
+    },
+    "spelling_preview": {
+      "files": 6,
+      "unchanged": true
+    },
+    "git_diff_check": {
+      "passed": true
+    },
+    "scientific_acceptance_evidence_hashes": {
+      "verified": 18
+    }
+  },
+  "preserved_limits": [
+    "Roads magnitude 713/766 meaningful and31/74 small remains unmet",
+    "No dedicated complete CONRUN event coverage; scalar controls are not empirical contour validation",
+    "Historical rejected lanes and capacity-order observations unchanged",
+    "No universal heterogeneous ownership or whole-watershed closure claim"
+  ],
+  "sha256": {
+    "docs/work-packages/20261031-roads-open-boundary-funding/package.md": "89d6308b10a59308add8c85c19822ba26f144acc4cf2045b248669ce6611935f",
+    "docs/work-packages/20261031-roads-open-boundary-funding/tracker.md": "19baabef445f4c428a764be74ad0b2c2468f29eeffc273b19459d97b39515d43",
+    "docs/work-packages/20261031-roads-open-boundary-funding/prompts/active/implementation_execplan.md": "f1438f9eb275f9db9c9bedb39f70e854c5464b0e16e54c2332844409a57e4d60",
+    "docs/ablation/20261031_roads_open_boundary_funding/incident.md": "1b24448841d8c7cfacbdf740ab683564d7052759d99ef774f1d0d1a20fcc99b8",
+    "docs/ablation/20261031_roads_open_boundary_funding/artifacts/manifest.csv": "209a78810dfa531d510d4a5fd7315d9bed0b6b1898b50e90bf3339d6a1f0bad8",
+    "docs/ablation/20261031_roads_open_boundary_funding/artifacts/checksums.sha256": "21f8bb497b7b161e7ec76e7ebbc57ddb497287dd32d74ac60dad28eacaca4404",
+    "docs/ablation/hillslope_watchlist.csv": "f6c04ec7efc366445ea209031ed6ae9a751bd090bd46d526412fc7b951e292eb",
+    "docs/contracts/hillslope-recession-geometry-contract.md": "925923dff545d0f509b834e3aed3b574c885578da68746f7166b2478d306b33f",
+    "change-log.md": "f06fcdd60716134250d9657ee377b6b087725c558e9ad4627771fcfb7912b524"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "cases": 52,
+  "completed": 47,
+  "physical_pass": 47,
+  "groups": {
+    "meaningful_high": {
+      "cases": 1,
+      "within": 0
+    },
+    "meaningful_low": {
+      "cases": 41,
+      "within": 0
+    },
+    "meaningful_pass": {
+      "cases": 1,
+      "within": 1
+    },
+    "small_exceedance": {
+      "cases": 9,
+      "within": 0
+    }
+  },
+  "recovered": 0,
+  "regressions": 0,
+  "results_sha256": "55e970ff329d495bdae6c82275736923f8e58ac48587aa38f870f25428a44668"
+}

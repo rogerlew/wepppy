@@ -1,0 +1,13 @@
+{
+  "source_baseline": "/home/workdir/wepppy/out/roads-channel-accounting-20261030/cedar-U10/candidate",
+  "input_manifest_sha256": "4d6506fe88b3689006551b700a6170b0a7832f4e6c0a67b34c0f45fc2d7c43e0",
+  "input_files": 5201,
+  "no_PASS_reuse": true,
+  "method_hashes": {
+    "analyze_cedar.py": "ea3aae2508a30793f05948922d5d00ba91d7ba91b189fcd19c7b76928f2e1f8b",
+    "audit_pass_sediment.py": "2d1de6b29a6477c2622658a8ea26376faa8f28c8fa778a5eb9826b6d7665b716",
+    "runner.py": "10665f683f9f975bc520b3fe46bc11f340aacbb6998cce7ede8f1b452ff4eb1b",
+    "convert_cedar.py": "d5c6acd6d833aa7fc1e7d198ec2c5343417d96555f1c2b390bf6eab8bdec1e32"
+  },
+  "scope": "Fresh 864 hillslopes plus full 24-year watershed; existing semantic and particle audits; unchanged criteria."
+}

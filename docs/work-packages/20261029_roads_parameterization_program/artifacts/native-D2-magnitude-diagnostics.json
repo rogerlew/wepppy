@@ -1,0 +1,243 @@
+{
+  "cases": 840,
+  "misses": 96,
+  "directions": {
+    "meaningful_low": 48,
+    "small_excess": 43,
+    "meaningful_high": 5
+  },
+  "misses_by_dimension": {
+    "soil": {
+      "2711184": 32,
+      "2711250": 16,
+      "1718465": 13,
+      "1718494": 10,
+      "1718510": 6,
+      "1856573": 11,
+      "53949": 8
+    },
+    "design": {
+      "inveg": 10,
+      "outunrut": 71,
+      "inbare": 7,
+      "outrut": 8
+    },
+    "climate": {
+      "birmingham": 4,
+      "charleston": 15,
+      "denver": 47,
+      "flagstaff": 17,
+      "site": 13
+    },
+    "surface": {
+      "gravel": 60,
+      "paved": 36
+    },
+    "traffic": {
+      "low": 35,
+      "none": 31,
+      "high": 30
+    }
+  },
+  "changed_acceptance": [
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 485.72568,
+      "reference_record_sha256": "e09b5e01fe795a30aa46de8b319f59e17e155836395116bd401ca7ec12b42d5b",
+      "export_kg_yr": 45.144,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 2.931155597916972,
+      "reference_record_sha256": "6927b1b6bde3084a248ce2115d5dbd8cb2143984cdf1451184dc600a79107da3",
+      "export_kg_yr": 28.621872309071605,
+      "meaningful": true,
+      "within": true,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": false
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 78.17832,
+      "reference_record_sha256": "0713c9e40107b514f321f7539f7d74603a073013ab0df18830676ade37832f71",
+      "export_kg_yr": 6.64092,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 119.8494,
+      "reference_record_sha256": "dda25d8e3d3588a958c454b7dc9990e1113d6082b9b80c106234597779cdfb0d",
+      "export_kg_yr": 9.139679999999998,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 77.6358,
+      "reference_record_sha256": "c61d8db0546f7ebae8ca4c0a2466b7b6eef99dee6dc44f45fa6a946fd2bf8b4f",
+      "export_kg_yr": 6.85872,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 10.276200000000001,
+      "reference_record_sha256": "409292a928128877fe8d557957d97ff9dcb68de45c69026fdc8a0db1127539a5",
+      "export_kg_yr": 1.01772,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 8.64468,
+      "reference_record_sha256": "4261298c53d51d72e1d393027792113ae3f5f31e055232003a3cba2b71213b70",
+      "export_kg_yr": 0.5662799999999999,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 0.0,
+      "reference_record_sha256": "2a7f55f0126aba7eb26476c4b5abc38245dc697a154979f57f088f0ebd76cd7e",
+      "export_kg_yr": 0.9914202757660345,
+      "meaningful": false,
+      "within": true,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": false
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "status": "completed",
+      "reference_kg_yr": 13.92336,
+      "reference_record_sha256": "3464fe93287f6500462d60b2f7063a2d90f17d37eea1d5d506e095a22c3a1194",
+      "export_kg_yr": 1.2474,
+      "meaningful": true,
+      "within": false,
+      "physical_pass": true,
+      "negative_fluxes": [],
+      "report_reconciled": true,
+      "ebe_mismatch_events": 0,
+      "previous_within": true
+    }
+  ],
+  "scores_sha256": "df58380fc09a5d71c8e2419cc59512b122d396f170856d4927a75f9bb3e88df1"
+}

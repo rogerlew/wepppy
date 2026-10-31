@@ -1,0 +1,89 @@
+{
+  "disposition": "Rejected alternate configurations; no incomplete run counted as physical/magnitude success. Preserve exact guard diagnostics, without clipping or tolerance changes.",
+  "failures": [
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "100",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:          113           3           1  -2.42531928E-12   0.0000000000000000"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:          329           3           1  -4.85063855E-12   0.0000000000000000"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "100",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           2           1  -9.70127711E-12   0.0000000000000000"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           2           1  -9.70127711E-12   0.0000000000000000"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           3           1  -9.70127711E-12   0.0000000000000000"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "lane": "101",
+      "returncode": 1,
+      "terminal_output": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:           71           3           1  -9.70127711E-12   0.0000000000000000"
+    }
+  ]
+}

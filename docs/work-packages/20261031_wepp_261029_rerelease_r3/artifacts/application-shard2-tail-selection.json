@@ -1,0 +1,15 @@
+{
+  "collected_files": 761,
+  "shard": 2,
+  "files": [
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/test_run_catalog_reader.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/test_session_cookie_migration.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/test_user_preferences.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/test_user_preferences_postgres.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/test_watershed_sub_intersection.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/utils/test_assets_controllers_gl_build_id.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/utils/test_run_ttl.py",
+    "/workdir/wepppy/out/261029-r3-isolated/tests/weppcloud/utils/test_runid.py"
+  ],
+  "reason": "Repeat failed browser module and all remaining shard-2 modules with canonical installed Playwright browser path restored; /ms-playwright did not exist. Seven prior passes in repeated module counted once."
+}

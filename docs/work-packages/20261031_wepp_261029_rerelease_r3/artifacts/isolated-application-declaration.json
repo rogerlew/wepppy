@@ -1,0 +1,16 @@
+{
+  "base_commit": "ea95e1298cb7b3c3e669724434e9a9677460de22",
+  "detached": true,
+  "scope": "Committed application base plus final matched native pair and provisional identity/capability sidecars only. Unrelated working-tree changes excluded; final sidecars/publication tested separately.",
+  "identities": {
+    "wepp_261029": {
+      "binary_sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+      "sidecar_sha256": "db79b74f5e2a874074fbfed07bf470cdfbb6ea2943d79d5407f7041107f2549c"
+    },
+    "wepp_261029_hill": {
+      "binary_sha256": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
+      "sidecar_sha256": "5b298a1585e5a1bf183d74c39694be192ca7d6fcd940e4fc9e69c3fa8175f4df"
+    }
+  },
+  "setup1": "Interrupted and excluded: initial staging incorrectly expected generator capacity field; executable/sidecar mismatch correctly rejected by registry. No accepted application count from that attempt."
+}

@@ -1,0 +1,4117 @@
+{
+  "source": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-control-v2/results.json",
+  "results_sha256": "f73d411cb83a7d269a69e6544da96be9eb76636778ab2a5b1c306e3e5fee0231",
+  "unique_input_sets": 90,
+  "remaining_failures": 15,
+  "remaining_unique_inputs": 9,
+  "original_misses_within": 76,
+  "rows": [
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 255.9157468357803,
+      "generated_kg_yr": 24.613085976626333,
+      "same_engine_legacy_kg_yr": 391.740324615727,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 270.36138683213187,
+          "net_kg_yr": 270.36138683213187,
+          "positive_daily_net_kg_yr": 270.36138683213187,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 528.7206613584556,
+          "net_kg_yr": 258.35927452632365,
+          "positive_daily_net_kg_yr": 271.96166847290687,
+          "negative_daily_net_kg_yr": -13.60239394658344
+        },
+        {
+          "boundary_kg_yr": 391.740324615727,
+          "net_kg_yr": -136.98033674272818,
+          "positive_daily_net_kg_yr": 150.6608589175651,
+          "negative_daily_net_kg_yr": -287.6411956602936
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 177.29180844459566,
+      "generated_kg_yr": 11.81083285043015,
+      "same_engine_legacy_kg_yr": 352.0835135850856,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 313.59862597824383,
+          "net_kg_yr": 313.59862597824383,
+          "positive_daily_net_kg_yr": 313.59862597824383,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 352.0754313545767,
+          "net_kg_yr": 38.47680537633291,
+          "positive_daily_net_kg_yr": 125.63557918498167,
+          "negative_daily_net_kg_yr": -87.1587738086487
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 214.4916214005125,
+      "generated_kg_yr": 12.457411291147128,
+      "same_engine_legacy_kg_yr": 439.8888658344514,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 409.3568930484287,
+          "net_kg_yr": 409.3568930484287,
+          "positive_daily_net_kg_yr": 409.3568930484287,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 439.902336218633,
+          "net_kg_yr": 30.545443170204642,
+          "positive_daily_net_kg_yr": 143.67242360414903,
+          "negative_daily_net_kg_yr": -113.1269804339444
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 2.931155597916972,
+      "generated_kg_yr": 32.9323952471848,
+      "same_engine_legacy_kg_yr": 6.89683670098111,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 99.07198157885892,
+          "net_kg_yr": 99.07198157885892,
+          "positive_daily_net_kg_yr": 99.07198157885892,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 80.63910786475256,
+          "net_kg_yr": -18.432873714106517,
+          "positive_daily_net_kg_yr": 0.5495916746094316,
+          "negative_daily_net_kg_yr": -18.982465388715944
+        },
+        {
+          "boundary_kg_yr": 6.904918931490071,
+          "net_kg_yr": -73.73418893326249,
+          "positive_daily_net_kg_yr": 0.11045715028915026,
+          "negative_daily_net_kg_yr": -73.84464608355164
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.08621045876226387,
+      "generated_kg_yr": 5.646785048928284,
+      "same_engine_legacy_kg_yr": 0.9483150463849025,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.572843378686313,
+          "net_kg_yr": 2.572843378686313,
+          "positive_daily_net_kg_yr": 2.572843378686313,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.942926892712261,
+          "net_kg_yr": -1.629916485974052,
+          "positive_daily_net_kg_yr": 0.14817422599764105,
+          "negative_daily_net_kg_yr": -1.778090711971693
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 1.982840551532069,
+      "generated_kg_yr": 26.98387359258859,
+      "same_engine_legacy_kg_yr": 12.974674043720713,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.494837481341918,
+          "net_kg_yr": 18.494837481341918,
+          "positive_daily_net_kg_yr": 18.494837481341918,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 12.96659181321175,
+          "net_kg_yr": -5.528245668130169,
+          "positive_daily_net_kg_yr": 1.1773115774721656,
+          "negative_daily_net_kg_yr": -6.705557245602335
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 71.35128,
+      "generated_kg_yr": 6.031079999999999,
+      "same_engine_legacy_kg_yr": 92.50956000000001,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 92.69889750000003,
+          "net_kg_yr": 92.69889750000003,
+          "positive_daily_net_kg_yr": 92.69889750000003,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 211.91048999999998,
+          "net_kg_yr": 119.21159250000001,
+          "positive_daily_net_kg_yr": 119.41776000000003,
+          "negative_daily_net_kg_yr": -0.20616750000000003
+        },
+        {
+          "boundary_kg_yr": 92.51104500000001,
+          "net_kg_yr": -119.39944500000014,
+          "positive_daily_net_kg_yr": 12.194325,
+          "negative_daily_net_kg_yr": -131.59377000000018
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 28.621872309071605,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 44.657017638852686,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 316.5594164213605,
+          "net_kg_yr": 316.5594164213605,
+          "positive_daily_net_kg_yr": 316.5594164213605,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 359.56496495954843,
+          "net_kg_yr": 43.005548538188094,
+          "positive_daily_net_kg_yr": 69.07882416010018,
+          "negative_daily_net_kg_yr": -26.07327562191218
+        },
+        {
+          "boundary_kg_yr": 44.66240579252532,
+          "net_kg_yr": -314.9025591670232,
+          "positive_daily_net_kg_yr": 1.6972684068820687,
+          "negative_daily_net_kg_yr": -316.59982757390526
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 18.4921434045056,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 22.975087260143322,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 108.91613833877491,
+          "net_kg_yr": 108.91613833877491,
+          "positive_daily_net_kg_yr": 108.91613833877491,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 169.3712225458125,
+          "net_kg_yr": 60.455084207037636,
+          "positive_daily_net_kg_yr": 69.58531060532853,
+          "negative_daily_net_kg_yr": -9.130226398291006
+        },
+        {
+          "boundary_kg_yr": 22.977781336979646,
+          "net_kg_yr": -146.3934412088328,
+          "positive_daily_net_kg_yr": 1.7376795594268817,
+          "negative_daily_net_kg_yr": -148.13112076825968
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 8.01757266489054,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 17.15588129369051,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 112.2998988451937,
+          "net_kg_yr": 112.2998988451937,
+          "positive_daily_net_kg_yr": 112.2998988451937,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 104.1341519543058,
+          "net_kg_yr": -8.16574689088818,
+          "positive_daily_net_kg_yr": 13.093213424518828,
+          "negative_daily_net_kg_yr": -21.258960315407
+        },
+        {
+          "boundary_kg_yr": 17.169351677872115,
+          "net_kg_yr": -86.96480027643366,
+          "positive_daily_net_kg_yr": 1.6864920995367867,
+          "negative_daily_net_kg_yr": -88.65129237597046
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 13.750568172581087,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 18.4921434045056,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 167.4045464552985,
+          "net_kg_yr": 167.4045464552985,
+          "positive_daily_net_kg_yr": 167.4045464552985,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.475978943487675,
+          "net_kg_yr": -148.92856751181083,
+          "positive_daily_net_kg_yr": 1.2015582689990523,
+          "negative_daily_net_kg_yr": -150.13012578080986
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 13.750568172581087,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 18.4921434045056,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 167.4045464552985,
+          "net_kg_yr": 167.4045464552985,
+          "positive_daily_net_kg_yr": 167.4045464552985,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.475978943487675,
+          "net_kg_yr": -148.92856751181083,
+          "positive_daily_net_kg_yr": 1.2015582689990523,
+          "negative_daily_net_kg_yr": -150.13012578080986
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 1.982840551532069,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 12.974674043720713,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 18.494837481341918,
+          "net_kg_yr": 18.494837481341918,
+          "positive_daily_net_kg_yr": 18.494837481341918,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 12.96659181321175,
+          "net_kg_yr": -5.528245668130169,
+          "positive_daily_net_kg_yr": 1.1773115774721656,
+          "negative_daily_net_kg_yr": -6.705557245602335
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 12.888463584958448,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 52.15732755116964,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 226.15966817861755,
+          "net_kg_yr": 226.15966817861755,
+          "positive_daily_net_kg_yr": 226.15966817861755,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 52.14116309015173,
+          "net_kg_yr": -174.01850508846587,
+          "positive_daily_net_kg_yr": 1.8211959413528223,
+          "negative_daily_net_kg_yr": -175.8397010298187
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 12.888463584958448,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 52.15732755116964,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 226.15966817861755,
+          "net_kg_yr": 226.15966817861755,
+          "positive_daily_net_kg_yr": 226.15966817861755,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 52.14116309015173,
+          "net_kg_yr": -174.01850508846587,
+          "positive_daily_net_kg_yr": 1.8211959413528223,
+          "negative_daily_net_kg_yr": -175.8397010298187
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 1.1638411932905621,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 16.164461017924474,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 21.504121307512193,
+          "net_kg_yr": 21.504121307512193,
+          "positive_daily_net_kg_yr": 21.504121307512193,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 16.167155094760798,
+          "net_kg_yr": -5.336966212751396,
+          "positive_daily_net_kg_yr": 2.2253074668009365,
+          "negative_daily_net_kg_yr": -7.562273679552334
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 4.870890920067909,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 59.83544653468377,
+          "net_kg_yr": 59.83544653468377,
+          "positive_daily_net_kg_yr": 59.83544653468377,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 87.05639888886854,
+          "net_kg_yr": 27.22095235418482,
+          "positive_daily_net_kg_yr": 32.80846771271404,
+          "negative_daily_net_kg_yr": -5.58751535852923
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -87.05639888886854,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -87.05639888886854
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 4.784680461305645,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 29.273838903461208,
+          "net_kg_yr": 29.273838903461208,
+          "positive_daily_net_kg_yr": 29.273838903461208,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 59.320877858946496,
+          "net_kg_yr": 30.0470389554853,
+          "positive_daily_net_kg_yr": 33.15061547092678,
+          "negative_daily_net_kg_yr": -3.1035765154414987
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -59.320877858946496,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -59.320877858946496
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 3.965681103064138,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 33.45774023026735,
+          "net_kg_yr": 33.45774023026735,
+          "positive_daily_net_kg_yr": 33.45774023026735,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 24.944457427493784,
+          "net_kg_yr": -8.51328280277356,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -8.51328280277356
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -24.944457427493784,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -24.944457427493784
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.198573306649034,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 81.02436085234642,
+          "net_kg_yr": 81.02436085234642,
+          "positive_daily_net_kg_yr": 81.02436085234642,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -81.02436085234642,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -81.02436085234642
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.198573306649034,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 81.02436085234642,
+          "net_kg_yr": 81.02436085234642,
+          "positive_daily_net_kg_yr": 81.02436085234642,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -81.02436085234642,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -81.02436085234642
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 9.052098170037706,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 100.04454331677086,
+          "net_kg_yr": 100.04454331677086,
+          "positive_daily_net_kg_yr": 100.04454331677086,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 123.61502155774112,
+          "net_kg_yr": 23.570478240970207,
+          "positive_daily_net_kg_yr": 36.34040244513053,
+          "negative_daily_net_kg_yr": -12.769924204160334
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -123.61502155774112,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -123.61502155774112
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 8.44862495870186,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 33.61130260993759,
+          "net_kg_yr": 33.61130260993759,
+          "positive_daily_net_kg_yr": 33.61130260993759,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 65.8162971113158,
+          "net_kg_yr": 32.20499450137823,
+          "positive_daily_net_kg_yr": 36.51282336265507,
+          "negative_daily_net_kg_yr": -4.307828861276873
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -65.8162971113158,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -65.8162971113158
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 2.5001033041056524,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 38.22625623055501,
+          "net_kg_yr": 38.22625623055501,
+          "positive_daily_net_kg_yr": 38.22625623055501,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 31.641932442587162,
+          "net_kg_yr": -6.584323787967904,
+          "positive_daily_net_kg_yr": 2.9257674442443298,
+          "negative_daily_net_kg_yr": -9.510091232212238
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -31.641932442587162,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -31.641932442587162
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 19.871510744701823,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 19.871510744701823,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 2.5001033041056524,
+      "same_engine_legacy_kg_yr": 0.4310522938113194,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 3.214033665730651,
+          "net_kg_yr": 3.214033665730651,
+          "positive_daily_net_kg_yr": 3.214033665730651,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.4283582169749986,
+          "net_kg_yr": -2.7856754487556525,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -2.7856754487556525
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 8.66415110560752,
+      "same_engine_legacy_kg_yr": 2.67252422163018,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 102.87871214858025,
+          "net_kg_yr": 102.87871214858025,
+          "positive_daily_net_kg_yr": 102.87871214858025,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 109.57349308683736,
+          "net_kg_yr": 6.694780938257051,
+          "positive_daily_net_kg_yr": 20.194799965060305,
+          "negative_daily_net_kg_yr": -13.500019026803267
+        },
+        {
+          "boundary_kg_yr": 2.6752182984665005,
+          "net_kg_yr": -106.89827478837086,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -106.89827478837086
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 6.293363489645262,
+      "same_engine_legacy_kg_yr": 0.8189993582415067,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 25.736516017372058,
+          "net_kg_yr": 25.736516017372058,
+          "positive_daily_net_kg_yr": 25.736516017372058,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 42.940890694116355,
+          "net_kg_yr": 17.204374676744298,
+          "positive_daily_net_kg_yr": 20.337586037385307,
+          "negative_daily_net_kg_yr": -3.1332113606410297
+        },
+        {
+          "boundary_kg_yr": 0.8324697424231104,
+          "net_kg_yr": -42.10842095169325,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -42.10842095169325
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 4.181207249969797,
+      "same_engine_legacy_kg_yr": 1.0345255051471665,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 29.314250056006014,
+          "net_kg_yr": 29.314250056006014,
+          "positive_daily_net_kg_yr": 29.314250056006014,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 26.819534905573025,
+          "net_kg_yr": -2.49471515043301,
+          "positive_daily_net_kg_yr": 4.420980088402344,
+          "negative_daily_net_kg_yr": -6.915695238835358
+        },
+        {
+          "boundary_kg_yr": 1.050689966165091,
+          "net_kg_yr": -25.768844939407934,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -25.768844939407934
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.629625600460352,
+      "same_engine_legacy_kg_yr": 2.931155597916972,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.34131315527814,
+          "net_kg_yr": 45.34131315527814,
+          "positive_daily_net_kg_yr": 45.34131315527814,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.9284615210806506,
+          "net_kg_yr": -42.41285163419749,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -42.41285163419749
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.629625600460352,
+      "same_engine_legacy_kg_yr": 2.931155597916972,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 45.34131315527814,
+          "net_kg_yr": 45.34131315527814,
+          "positive_daily_net_kg_yr": 45.34131315527814,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.9284615210806506,
+          "net_kg_yr": -42.41285163419749,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -42.41285163419749
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718510",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 1.3793673401962219,
+      "same_engine_legacy_kg_yr": 0.34484183504905547,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 4.26202955505942,
+          "net_kg_yr": 4.26202955505942,
+          "positive_daily_net_kg_yr": 4.26202955505942,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.34753591188537625,
+          "net_kg_yr": -3.914493643174044,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -3.914493643174044
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 8.01757266489054,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 100.04454331677086,
+          "net_kg_yr": 100.04454331677086,
+          "positive_daily_net_kg_yr": 100.04454331677086,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 123.61502155774112,
+          "net_kg_yr": 23.570478240970207,
+          "positive_daily_net_kg_yr": 36.34040244513053,
+          "negative_daily_net_kg_yr": -12.769924204160334
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -123.61502155774112,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -123.61502155774112
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 6.120942572120734,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 33.61130260993759,
+          "net_kg_yr": 33.61130260993759,
+          "positive_daily_net_kg_yr": 33.61130260993759,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 65.8162971113158,
+          "net_kg_yr": 32.20499450137823,
+          "positive_daily_net_kg_yr": 36.51282336265507,
+          "negative_daily_net_kg_yr": -4.307828861276873
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -65.8162971113158,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -65.8162971113158
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 5.086417066973568,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 38.22625623055501,
+          "net_kg_yr": 38.22625623055501,
+          "positive_daily_net_kg_yr": 38.22625623055501,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 31.641932442587162,
+          "net_kg_yr": -6.584323787967904,
+          "positive_daily_net_kg_yr": 2.9257674442443298,
+          "negative_daily_net_kg_yr": -9.510091232212238
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -31.641932442587162,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -31.641932442587162
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.284783765411297,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 7.284783765411297,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 1.0776307345282985,
+      "same_engine_legacy_kg_yr": 0.4310522938113194,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 3.214033665730651,
+          "net_kg_yr": 3.214033665730651,
+          "positive_daily_net_kg_yr": 3.214033665730651,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.4283582169749986,
+          "net_kg_yr": -2.7856754487556525,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -2.7856754487556525
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 36.04392,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 42.90264,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 140.4814949999999,
+          "net_kg_yr": 140.4814949999999,
+          "positive_daily_net_kg_yr": 140.4814949999999,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 182.00135250000002,
+          "net_kg_yr": 41.51985749999998,
+          "positive_daily_net_kg_yr": 42.034409999999994,
+          "negative_daily_net_kg_yr": -0.5145525
+        },
+        {
+          "boundary_kg_yr": 42.90412499999999,
+          "net_kg_yr": -139.0972275,
+          "positive_daily_net_kg_yr": 2.3633775000000004,
+          "negative_daily_net_kg_yr": -141.460605
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 22.4532,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 24.81336,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 42.66330749999998,
+          "net_kg_yr": 42.66330749999998,
+          "positive_daily_net_kg_yr": 42.66330749999998,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 85.13851500000006,
+          "net_kg_yr": 42.4752075,
+          "positive_daily_net_kg_yr": 42.58509750000001,
+          "negative_daily_net_kg_yr": -0.10989
+        },
+        {
+          "boundary_kg_yr": 24.814102499999997,
+          "net_kg_yr": -60.3244125,
+          "positive_daily_net_kg_yr": 2.6895824999999984,
+          "negative_daily_net_kg_yr": -63.013995
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 14.1372,
+      "generated_kg_yr": 0.11484000000000001,
+      "same_engine_legacy_kg_yr": 14.85,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 40.26033,
+          "net_kg_yr": 40.26033,
+          "positive_daily_net_kg_yr": 40.26033,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 43.54416,
+          "net_kg_yr": 3.2838299999999996,
+          "positive_daily_net_kg_yr": 4.449307500000001,
+          "negative_daily_net_kg_yr": -1.1654774999999995
+        },
+        {
+          "boundary_kg_yr": 14.850495,
+          "net_kg_yr": -28.69366500000002,
+          "positive_daily_net_kg_yr": 2.74131,
+          "negative_daily_net_kg_yr": -31.434975000000016
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 30.75336,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 35.64396,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 85.90997250000005,
+          "net_kg_yr": 85.90997250000005,
+          "positive_daily_net_kg_yr": 85.90997250000005,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 127.93398749999997,
+          "net_kg_yr": 42.024014999999984,
+          "positive_daily_net_kg_yr": 42.37101,
+          "negative_daily_net_kg_yr": -0.346995
+        },
+        {
+          "boundary_kg_yr": 35.645197499999995,
+          "net_kg_yr": -92.28878999999998,
+          "positive_daily_net_kg_yr": 2.5094024999999984,
+          "negative_daily_net_kg_yr": -94.79819249999998
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 21.05136,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 22.58784,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 28.376370000000023,
+          "net_kg_yr": 28.376370000000023,
+          "positive_daily_net_kg_yr": 28.376370000000023,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 70.93448999999998,
+          "net_kg_yr": 42.55812000000002,
+          "positive_daily_net_kg_yr": 42.65934750000001,
+          "negative_daily_net_kg_yr": -0.1012275
+        },
+        {
+          "boundary_kg_yr": 22.5880875,
+          "net_kg_yr": -48.34640249999997,
+          "positive_daily_net_kg_yr": 2.7383399999999996,
+          "negative_daily_net_kg_yr": -51.08474249999996
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 12.375,
+      "generated_kg_yr": 0.11484000000000001,
+      "same_engine_legacy_kg_yr": 12.22848,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 30.960765000000006,
+          "net_kg_yr": 30.960765000000006,
+          "positive_daily_net_kg_yr": 30.960765000000006,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 34.28716500000001,
+          "net_kg_yr": 3.3264,
+          "positive_daily_net_kg_yr": 4.473067500000001,
+          "negative_daily_net_kg_yr": -1.1466674999999995
+        },
+        {
+          "boundary_kg_yr": 12.226747500000002,
+          "net_kg_yr": -22.06041749999999,
+          "positive_daily_net_kg_yr": 2.793284999999999,
+          "negative_daily_net_kg_yr": -24.853702499999994
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 36.186479999999996,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 43.021440000000005,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 132.79117499999998,
+          "net_kg_yr": 132.79117499999998,
+          "positive_daily_net_kg_yr": 132.79117499999998,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 174.79662749999994,
+          "net_kg_yr": 42.005452499999976,
+          "positive_daily_net_kg_yr": 42.41258999999999,
+          "negative_daily_net_kg_yr": -0.40713750000000004
+        },
+        {
+          "boundary_kg_yr": 43.0231725,
+          "net_kg_yr": -131.77345499999998,
+          "positive_daily_net_kg_yr": 2.3623874999999996,
+          "negative_daily_net_kg_yr": -134.13584250000002
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 22.48488,
+      "generated_kg_yr": 0.297,
+      "same_engine_legacy_kg_yr": 24.85296,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 40.66028999999998,
+          "net_kg_yr": 40.66028999999998,
+          "positive_daily_net_kg_yr": 40.66028999999998,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 83.44363499999994,
+          "net_kg_yr": 42.78334500000002,
+          "positive_daily_net_kg_yr": 42.891255000000015,
+          "negative_daily_net_kg_yr": -0.10790999999999998
+        },
+        {
+          "boundary_kg_yr": 24.851227499999997,
+          "net_kg_yr": -58.59240749999996,
+          "positive_daily_net_kg_yr": 2.691067500000001,
+          "negative_daily_net_kg_yr": -61.28347499999996
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 14.1372,
+      "generated_kg_yr": 0.11484000000000001,
+      "same_engine_legacy_kg_yr": 14.85,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 40.26033,
+          "net_kg_yr": 40.26033,
+          "positive_daily_net_kg_yr": 40.26033,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 43.54416,
+          "net_kg_yr": 3.2838299999999996,
+          "positive_daily_net_kg_yr": 4.449307500000001,
+          "negative_daily_net_kg_yr": -1.1654774999999995
+        },
+        {
+          "boundary_kg_yr": 14.850495,
+          "net_kg_yr": -28.69366500000002,
+          "positive_daily_net_kg_yr": 2.74131,
+          "negative_daily_net_kg_yr": -31.434975000000016
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 25.09452,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 41.96808,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 142.58549249999993,
+          "net_kg_yr": 142.58549249999993,
+          "positive_daily_net_kg_yr": 142.58549249999993,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 176.25539249999994,
+          "net_kg_yr": 33.669900000000005,
+          "positive_daily_net_kg_yr": 35.08535249999999,
+          "negative_daily_net_kg_yr": -1.4154524999999998
+        },
+        {
+          "boundary_kg_yr": 41.9673375,
+          "net_kg_yr": -134.28805499999999,
+          "positive_daily_net_kg_yr": 2.3151150000000014,
+          "negative_daily_net_kg_yr": -136.60316999999998
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 17.332919999999998,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 20.83356,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 39.839085,
+          "net_kg_yr": 39.839085,
+          "positive_daily_net_kg_yr": 39.839085,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 75.17391749999997,
+          "net_kg_yr": 35.33483249999999,
+          "positive_daily_net_kg_yr": 35.5590675,
+          "negative_daily_net_kg_yr": -0.22423500000000002
+        },
+        {
+          "boundary_kg_yr": 20.833065,
+          "net_kg_yr": -54.3408525,
+          "positive_daily_net_kg_yr": 2.6346374999999997,
+          "negative_daily_net_kg_yr": -56.97549
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 9.7218,
+      "generated_kg_yr": 0.95832,
+      "same_engine_legacy_kg_yr": 12.01464,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.90363500000002,
+          "net_kg_yr": 37.90363500000002,
+          "positive_daily_net_kg_yr": 37.90363500000002,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 39.66534000000002,
+          "net_kg_yr": 1.7617049999999992,
+          "positive_daily_net_kg_yr": 3.236804999999999,
+          "negative_daily_net_kg_yr": -1.4750999999999999
+        },
+        {
+          "boundary_kg_yr": 12.0163725,
+          "net_kg_yr": -27.648967499999998,
+          "positive_daily_net_kg_yr": 2.6905724999999996,
+          "negative_daily_net_kg_yr": -30.33954
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 22.3542,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 34.50744,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 95.39021250000003,
+          "net_kg_yr": 95.39021250000003,
+          "positive_daily_net_kg_yr": 95.39021250000003,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 129.80731499999987,
+          "net_kg_yr": 34.41710249999998,
+          "positive_daily_net_kg_yr": 35.305874999999986,
+          "negative_daily_net_kg_yr": -0.8887725
+        },
+        {
+          "boundary_kg_yr": 34.506945,
+          "net_kg_yr": -95.30036999999996,
+          "positive_daily_net_kg_yr": 2.426242500000001,
+          "negative_daily_net_kg_yr": -97.72661249999994
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 16.311239999999998,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 18.857519999999997,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 27.456907499999996,
+          "net_kg_yr": 27.456907499999996,
+          "positive_daily_net_kg_yr": 27.456907499999996,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.92539000000003,
+          "net_kg_yr": 35.468482500000015,
+          "positive_daily_net_kg_yr": 35.65163250000001,
+          "negative_daily_net_kg_yr": -0.18315
+        },
+        {
+          "boundary_kg_yr": 18.859005,
+          "net_kg_yr": -44.06638500000002,
+          "positive_daily_net_kg_yr": 2.6638424999999994,
+          "negative_daily_net_kg_yr": -46.73022750000002
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 25.13016,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 41.52852,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 134.54025750000002,
+          "net_kg_yr": 134.54025750000002,
+          "positive_daily_net_kg_yr": 134.54025750000002,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 168.52448250000003,
+          "net_kg_yr": 33.984225,
+          "positive_daily_net_kg_yr": 35.164057500000006,
+          "negative_daily_net_kg_yr": -1.1798325000000003
+        },
+        {
+          "boundary_kg_yr": 41.528025,
+          "net_kg_yr": -126.99645749999999,
+          "positive_daily_net_kg_yr": 2.314619999999997,
+          "negative_daily_net_kg_yr": -129.3110775
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 17.33688,
+      "generated_kg_yr": 1.1523599999999998,
+      "same_engine_legacy_kg_yr": 20.71872,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.7390475,
+          "net_kg_yr": 37.7390475,
+          "positive_daily_net_kg_yr": 37.7390475,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 73.14961500000001,
+          "net_kg_yr": 35.41056750000001,
+          "positive_daily_net_kg_yr": 35.62069500000001,
+          "negative_daily_net_kg_yr": -0.21012749999999997
+        },
+        {
+          "boundary_kg_yr": 20.719215000000002,
+          "net_kg_yr": -52.43040000000001,
+          "positive_daily_net_kg_yr": 2.6348849999999997,
+          "negative_daily_net_kg_yr": -55.06528500000001
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 9.7218,
+      "generated_kg_yr": 0.95832,
+      "same_engine_legacy_kg_yr": 12.01464,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.90363500000002,
+          "net_kg_yr": 37.90363500000002,
+          "positive_daily_net_kg_yr": 37.90363500000002,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 39.66534000000002,
+          "net_kg_yr": 1.7617049999999992,
+          "positive_daily_net_kg_yr": 3.236804999999999,
+          "negative_daily_net_kg_yr": -1.4750999999999999
+        },
+        {
+          "boundary_kg_yr": 12.0163725,
+          "net_kg_yr": -27.648967499999998,
+          "positive_daily_net_kg_yr": 2.6905724999999996,
+          "negative_daily_net_kg_yr": -30.33954
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 3.060471286060367,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 100.04454331677086,
+          "net_kg_yr": 100.04454331677086,
+          "positive_daily_net_kg_yr": 100.04454331677086,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 123.61502155774112,
+          "net_kg_yr": 23.570478240970207,
+          "positive_daily_net_kg_yr": 36.34040244513053,
+          "negative_daily_net_kg_yr": -12.769924204160334
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -123.61502155774112,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -123.61502155774112
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 3.060471286060367,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 33.61130260993759,
+          "net_kg_yr": 33.61130260993759,
+          "positive_daily_net_kg_yr": 33.61130260993759,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 65.8162971113158,
+          "net_kg_yr": 32.20499450137823,
+          "positive_daily_net_kg_yr": 36.51282336265507,
+          "negative_daily_net_kg_yr": -4.307828861276873
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -65.8162971113158,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -65.8162971113158
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 2.5001033041056524,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 38.22625623055501,
+          "net_kg_yr": 38.22625623055501,
+          "positive_daily_net_kg_yr": 38.22625623055501,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 31.641932442587162,
+          "net_kg_yr": -6.584323787967904,
+          "positive_daily_net_kg_yr": 2.9257674442443298,
+          "negative_daily_net_kg_yr": -9.510091232212238
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -31.641932442587162,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -31.641932442587162
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 6.422679177788658,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 6.422679177788658,
+      "same_engine_legacy_kg_yr": 1.465577798958486,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.04458954046679,
+          "net_kg_yr": 62.04458954046679,
+          "positive_daily_net_kg_yr": 62.04458954046679,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.4763541063037688,
+          "net_kg_yr": -60.56823543416302,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -60.56823543416302
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.4310522938113194,
+      "generated_kg_yr": 14.612672760203727,
+      "same_engine_legacy_kg_yr": 4.00878633244527,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 70.05407997484834,
+          "net_kg_yr": 70.05407997484834,
+          "positive_daily_net_kg_yr": 70.05407997484834,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 58.69046387924743,
+          "net_kg_yr": -11.3636160956009,
+          "positive_daily_net_kg_yr": 0.2370787615962251,
+          "negative_daily_net_kg_yr": -11.600694857197123
+        },
+        {
+          "boundary_kg_yr": 4.0114804092815906,
+          "net_kg_yr": -54.67898346996584,
+          "positive_daily_net_kg_yr": 0.026940768363207468,
+          "negative_daily_net_kg_yr": -54.70592423832905
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.4310522938113194,
+      "generated_kg_yr": 10.517675968996192,
+      "same_engine_legacy_kg_yr": 2.543208533486784,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 31.95444535560036,
+          "net_kg_yr": 31.95444535560036,
+          "positive_daily_net_kg_yr": 31.95444535560036,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.781320336139533,
+          "net_kg_yr": -4.173125019460838,
+          "positive_daily_net_kg_yr": 0.2451609921051876,
+          "negative_daily_net_kg_yr": -4.418286011566026
+        },
+        {
+          "boundary_kg_yr": 2.532432226141501,
+          "net_kg_yr": -25.24888810999804,
+          "positive_daily_net_kg_yr": 0.026940768363207468,
+          "negative_daily_net_kg_yr": -25.275828878361246
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.3879470644301874,
+      "generated_kg_yr": 14.741988448347122,
+      "same_engine_legacy_kg_yr": 2.3707876159622563,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 34.007331904876764,
+          "net_kg_yr": 34.007331904876764,
+          "positive_daily_net_kg_yr": 34.007331904876764,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 28.535661850309353,
+          "net_kg_yr": -5.4716700545674355,
+          "positive_daily_net_kg_yr": 0.06465784407169739,
+          "negative_daily_net_kg_yr": -5.536327898639134
+        },
+        {
+          "boundary_kg_yr": 2.3546231549443317,
+          "net_kg_yr": -26.181038695365018,
+          "positive_daily_net_kg_yr": 0.029634845199528304,
+          "negative_daily_net_kg_yr": -26.210673540564546
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.04310522938113193,
+      "generated_kg_yr": 2.112156239675465,
+      "same_engine_legacy_kg_yr": 0.7758941288603748,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.2953534645452756,
+          "net_kg_yr": 2.2953534645452756,
+          "positive_daily_net_kg_yr": 2.2953534645452756,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.7758941288603748,
+          "net_kg_yr": -1.5194593356849009,
+          "positive_daily_net_kg_yr": 0.0511874598900941,
+          "negative_daily_net_kg_yr": -1.570646795574995
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.04310522938113193,
+      "generated_kg_yr": 2.112156239675465,
+      "same_engine_legacy_kg_yr": 0.7758941288603748,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 2.2953534645452756,
+          "net_kg_yr": 2.2953534645452756,
+          "positive_daily_net_kg_yr": 2.2953534645452756,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.7758941288603748,
+          "net_kg_yr": -1.5194593356849009,
+          "positive_daily_net_kg_yr": 0.0511874598900941,
+          "negative_daily_net_kg_yr": -1.570646795574995
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 1.7242091752452775,
+      "same_engine_legacy_kg_yr": 0.3879470644301874,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.573838366136319,
+          "net_kg_yr": 0.573838366136319,
+          "positive_daily_net_kg_yr": 0.573838366136319,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.3960292949391496,
+          "net_kg_yr": -0.17780907119716927,
+          "positive_daily_net_kg_yr": 0.06735192090801861,
+          "negative_daily_net_kg_yr": -0.2451609921051879
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 18.70766955141126,
+      "same_engine_legacy_kg_yr": 7.629625600460352,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 108.35307627998402,
+          "net_kg_yr": 108.35307627998402,
+          "positive_daily_net_kg_yr": 108.35307627998402,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 88.79677252513179,
+          "net_kg_yr": -19.556303754852294,
+          "positive_daily_net_kg_yr": 0.5091805220646198,
+          "negative_daily_net_kg_yr": -20.065484276916916
+        },
+        {
+          "boundary_kg_yr": 7.616155216278749,
+          "net_kg_yr": -81.18061730885304,
+          "positive_daily_net_kg_yr": 0.27748991414103763,
+          "negative_daily_net_kg_yr": -81.45810722299407
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 11.207359639094303,
+      "same_engine_legacy_kg_yr": 3.362207891728291,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 35.3004887863107,
+          "net_kg_yr": 35.3004887863107,
+          "positive_daily_net_kg_yr": 35.3004887863107,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 29.589045893310743,
+          "net_kg_yr": -5.711442892999985,
+          "positive_daily_net_kg_yr": 0.5253449830825457,
+          "negative_daily_net_kg_yr": -6.2367878760825315
+        },
+        {
+          "boundary_kg_yr": 3.372984199073574,
+          "net_kg_yr": -26.216061694237172,
+          "positive_daily_net_kg_yr": 0.29365437515896087,
+          "negative_daily_net_kg_yr": -26.509716069396138
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5172627525735832,
+      "generated_kg_yr": 15.302356430301836,
+      "same_engine_legacy_kg_yr": 3.319102662347159,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.79520393674371,
+          "net_kg_yr": 37.79520393674371,
+          "positive_daily_net_kg_yr": 37.79520393674371,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 32.78422102118715,
+          "net_kg_yr": -5.010982915556589,
+          "positive_daily_net_kg_yr": 2.6509716069396143,
+          "negative_daily_net_kg_yr": -7.6619545224962025
+        },
+        {
+          "boundary_kg_yr": 3.3325730465287626,
+          "net_kg_yr": -29.451647974658396,
+          "positive_daily_net_kg_yr": 0.04310522938113204,
+          "negative_daily_net_kg_yr": -29.49475320403953
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 20.130142120988616,
+      "same_engine_legacy_kg_yr": 7.629625600460352,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 108.35307627998402,
+          "net_kg_yr": 108.35307627998402,
+          "positive_daily_net_kg_yr": 108.35307627998402,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 88.79677252513179,
+          "net_kg_yr": -19.556303754852294,
+          "positive_daily_net_kg_yr": 0.5091805220646198,
+          "negative_daily_net_kg_yr": -20.065484276916916
+        },
+        {
+          "boundary_kg_yr": 7.616155216278749,
+          "net_kg_yr": -81.18061730885304,
+          "positive_daily_net_kg_yr": 0.27748991414103763,
+          "negative_daily_net_kg_yr": -81.45810722299407
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 11.465991015381094,
+      "same_engine_legacy_kg_yr": 3.362207891728291,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 35.3004887863107,
+          "net_kg_yr": 35.3004887863107,
+          "positive_daily_net_kg_yr": 35.3004887863107,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 29.589045893310743,
+          "net_kg_yr": -5.711442892999985,
+          "positive_daily_net_kg_yr": 0.5253449830825457,
+          "negative_daily_net_kg_yr": -6.2367878760825315
+        },
+        {
+          "boundary_kg_yr": 3.372984199073574,
+          "net_kg_yr": -26.216061694237172,
+          "positive_daily_net_kg_yr": 0.29365437515896087,
+          "negative_daily_net_kg_yr": -26.509716069396138
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5172627525735832,
+      "generated_kg_yr": 17.32830221121504,
+      "same_engine_legacy_kg_yr": 3.319102662347159,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.79520393674371,
+          "net_kg_yr": 37.79520393674371,
+          "positive_daily_net_kg_yr": 37.79520393674371,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 32.78422102118715,
+          "net_kg_yr": -5.010982915556589,
+          "positive_daily_net_kg_yr": 2.6509716069396143,
+          "negative_daily_net_kg_yr": -7.6619545224962025
+        },
+        {
+          "boundary_kg_yr": 3.3325730465287626,
+          "net_kg_yr": -29.451647974658396,
+          "positive_daily_net_kg_yr": 0.04310522938113204,
+          "negative_daily_net_kg_yr": -29.49475320403953
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 1.1207359639094303,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 0.732788899479243,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.848136709716032,
+          "net_kg_yr": 1.848136709716032,
+          "positive_daily_net_kg_yr": 1.848136709716032,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.7274007458066014,
+          "net_kg_yr": -1.1207359639094303,
+          "positive_daily_net_kg_yr": 0.0700459977443394,
+          "negative_daily_net_kg_yr": -1.1907819616537698
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 1.1207359639094303,
+      "generated_kg_yr": 0.0,
+      "same_engine_legacy_kg_yr": 0.732788899479243,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.848136709716032,
+          "net_kg_yr": 1.848136709716032,
+          "positive_daily_net_kg_yr": 1.848136709716032,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.7274007458066014,
+          "net_kg_yr": -1.1207359639094303,
+          "positive_daily_net_kg_yr": 0.0700459977443394,
+          "negative_daily_net_kg_yr": -1.1907819616537698
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 16.94035514678485,
+      "same_engine_legacy_kg_yr": 7.629625600460352,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 108.35307627998402,
+          "net_kg_yr": 108.35307627998402,
+          "positive_daily_net_kg_yr": 108.35307627998402,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 88.79677252513179,
+          "net_kg_yr": -19.556303754852294,
+          "positive_daily_net_kg_yr": 0.5091805220646198,
+          "negative_daily_net_kg_yr": -20.065484276916916
+        },
+        {
+          "boundary_kg_yr": 7.616155216278749,
+          "net_kg_yr": -81.18061730885304,
+          "positive_daily_net_kg_yr": 0.27748991414103763,
+          "negative_daily_net_kg_yr": -81.45810722299407
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5603679819547152,
+      "generated_kg_yr": 7.3278889947924295,
+      "same_engine_legacy_kg_yr": 3.362207891728291,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 35.3004887863107,
+          "net_kg_yr": 35.3004887863107,
+          "positive_daily_net_kg_yr": 35.3004887863107,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 29.589045893310743,
+          "net_kg_yr": -5.711442892999985,
+          "positive_daily_net_kg_yr": 0.5253449830825457,
+          "negative_daily_net_kg_yr": -6.2367878760825315
+        },
+        {
+          "boundary_kg_yr": 3.372984199073574,
+          "net_kg_yr": -26.216061694237172,
+          "positive_daily_net_kg_yr": 0.29365437515896087,
+          "negative_daily_net_kg_yr": -26.509716069396138
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "53949",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_exceedance",
+      "reference_kg_yr": 0.5172627525735832,
+      "generated_kg_yr": 11.853938079811282,
+      "same_engine_legacy_kg_yr": 3.319102662347159,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 37.79520393674371,
+          "net_kg_yr": 37.79520393674371,
+          "positive_daily_net_kg_yr": 37.79520393674371,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 32.78422102118715,
+          "net_kg_yr": -5.010982915556589,
+          "positive_daily_net_kg_yr": 2.6509716069396143,
+          "negative_daily_net_kg_yr": -7.6619545224962025
+        },
+        {
+          "boundary_kg_yr": 3.3325730465287626,
+          "net_kg_yr": -29.451647974658396,
+          "positive_daily_net_kg_yr": 0.04310522938113204,
+          "negative_daily_net_kg_yr": -29.49475320403953
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 15.560987806588628,
+      "generated_kg_yr": 175.82623064563714,
+      "same_engine_legacy_kg_yr": 147.4198844834712,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 152.643699469097,
+          "net_kg_yr": 152.643699469097,
+          "positive_daily_net_kg_yr": 152.643699469097,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 168.080759741215,
+          "net_kg_yr": 15.437060272117872,
+          "positive_daily_net_kg_yr": 21.921703217141907,
+          "negative_daily_net_kg_yr": -6.484642945024037
+        },
+        {
+          "boundary_kg_yr": 147.42527263714382,
+          "net_kg_yr": -20.655487104071128,
+          "positive_daily_net_kg_yr": 77.20685397527993,
+          "negative_daily_net_kg_yr": -97.86234107935103
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 14.00919954886788,
+      "generated_kg_yr": 203.75841928461068,
+      "same_engine_legacy_kg_yr": 143.45420338040708,
+      "control_within": false,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 153.47078105784752,
+          "net_kg_yr": 153.47078105784752,
+          "positive_daily_net_kg_yr": 153.47078105784752,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 146.61166143257498,
+          "net_kg_yr": -6.859119625272622,
+          "positive_daily_net_kg_yr": 2.702159066829708,
+          "negative_daily_net_kg_yr": -9.561278692102327
+        },
+        {
+          "boundary_kg_yr": 143.44612114989806,
+          "net_kg_yr": -3.165540282676818,
+          "positive_daily_net_kg_yr": 77.40621566116766,
+          "negative_daily_net_kg_yr": -80.57175594384448
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 37.28602341467912,
+      "generated_kg_yr": 378.37770350757614,
+      "same_engine_legacy_kg_yr": 57.20063938876208,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.34218581181925,
+          "net_kg_yr": 27.34218581181925,
+          "positive_daily_net_kg_yr": 27.34218581181925,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 57.19255715825312,
+          "net_kg_yr": 29.850371346433878,
+          "positive_daily_net_kg_yr": 53.55824750605644,
+          "negative_daily_net_kg_yr": -23.707876159622565
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_high",
+      "reference_kg_yr": 37.28602341467912,
+      "generated_kg_yr": 378.37770350757614,
+      "same_engine_legacy_kg_yr": 57.20063938876208,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.34218581181925,
+          "net_kg_yr": 27.34218581181925,
+          "positive_daily_net_kg_yr": 27.34218581181925,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 57.19255715825312,
+          "net_kg_yr": 29.850371346433878,
+          "positive_daily_net_kg_yr": 53.55824750605644,
+          "negative_daily_net_kg_yr": -23.707876159622565
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 115.22027813576567,
+      "generated_kg_yr": 5.77610073707168,
+      "same_engine_legacy_kg_yr": 439.5440239994023,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 458.83092007062237,
+          "net_kg_yr": 458.83092007062237,
+          "positive_daily_net_kg_yr": 458.83092007062237,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 463.43509738389463,
+          "net_kg_yr": 4.604177313272151,
+          "positive_daily_net_kg_yr": 17.762048581862675,
+          "negative_daily_net_kg_yr": -13.157871268590533
+        },
+        {
+          "boundary_kg_yr": 439.51708323103924,
+          "net_kg_yr": -23.918014152855527,
+          "positive_daily_net_kg_yr": 118.31577242069818,
+          "negative_daily_net_kg_yr": -142.23378657355389
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 59.83005838101112,
+      "generated_kg_yr": 2.931155597916972,
+      "same_engine_legacy_kg_yr": 242.6824414157728,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 171.29748748378174,
+          "net_kg_yr": 171.29748748378174,
+          "positive_daily_net_kg_yr": 171.29748748378174,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 184.5819803636795,
+          "net_kg_yr": 13.284492879897599,
+          "positive_daily_net_kg_yr": 17.77551896604428,
+          "negative_daily_net_kg_yr": -4.491026086146683
+        },
+        {
+          "boundary_kg_yr": 242.68513549260913,
+          "net_kg_yr": 58.10315512892954,
+          "positive_daily_net_kg_yr": 118.63367348738404,
+          "negative_daily_net_kg_yr": -60.53051835845447
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 88.9260882132752,
+      "generated_kg_yr": 5.34504844326036,
+      "same_engine_legacy_kg_yr": 376.394862956044,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 172.1057105346779,
+          "net_kg_yr": 172.1057105346779,
+          "positive_daily_net_kg_yr": 172.1057105346779,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 337.79951819891284,
+          "net_kg_yr": 165.69380766423492,
+          "positive_daily_net_kg_yr": 171.62616485781314,
+          "negative_daily_net_kg_yr": -5.93235719357828
+        },
+        {
+          "boundary_kg_yr": 376.40025110971646,
+          "net_kg_yr": 38.60073291080365,
+          "positive_daily_net_kg_yr": 117.83622674383308,
+          "negative_daily_net_kg_yr": -79.23549383302948
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 37.28602341467912,
+      "generated_kg_yr": 1.3793673401962219,
+      "same_engine_legacy_kg_yr": 57.20063938876208,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.34218581181925,
+          "net_kg_yr": 27.34218581181925,
+          "positive_daily_net_kg_yr": 27.34218581181925,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 57.19255715825312,
+          "net_kg_yr": 29.850371346433878,
+          "positive_daily_net_kg_yr": 53.55824750605644,
+          "negative_daily_net_kg_yr": -23.707876159622565
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 37.28602341467912,
+      "generated_kg_yr": 1.3793673401962219,
+      "same_engine_legacy_kg_yr": 57.20063938876208,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 27.34218581181925,
+          "net_kg_yr": 27.34218581181925,
+          "positive_daily_net_kg_yr": 27.34218581181925,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 57.19255715825312,
+          "net_kg_yr": 29.850371346433878,
+          "positive_daily_net_kg_yr": 53.55824750605644,
+          "negative_daily_net_kg_yr": -23.707876159622565
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 122.24643052489016,
+      "generated_kg_yr": 0.8621045876226388,
+      "same_engine_legacy_kg_yr": 236.00113086169733,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 221.77909924276005,
+          "net_kg_yr": 221.77909924276005,
+          "positive_daily_net_kg_yr": 221.77909924276005,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 235.9957427080247,
+          "net_kg_yr": 14.21664346526458,
+          "positive_daily_net_kg_yr": 52.8793401433036,
+          "negative_daily_net_kg_yr": -38.66269667803903
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 92.2020856462412,
+      "generated_kg_yr": 4.2674177087320615,
+      "same_engine_legacy_kg_yr": 141.9886255814486,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 107.27005739178311,
+          "net_kg_yr": 107.27005739178311,
+          "positive_daily_net_kg_yr": 107.27005739178311,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 141.97784927410325,
+          "net_kg_yr": 34.70779188232017,
+          "positive_daily_net_kg_yr": 71.83486476365637,
+          "negative_daily_net_kg_yr": -37.12707288133618
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 92.2020856462412,
+      "generated_kg_yr": 4.2674177087320615,
+      "same_engine_legacy_kg_yr": 141.9886255814486,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 107.27005739178311,
+          "net_kg_yr": 107.27005739178311,
+          "positive_daily_net_kg_yr": 107.27005739178311,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 141.97784927410325,
+          "net_kg_yr": 34.70779188232017,
+          "positive_daily_net_kg_yr": 71.83486476365637,
+          "negative_daily_net_kg_yr": -37.12707288133618
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_low",
+      "reference_kg_yr": 192.16311258108618,
+      "generated_kg_yr": 3.448418350490555,
+      "same_engine_legacy_kg_yr": 342.47104743309325,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 306.4054408252674,
+          "net_kg_yr": 306.4054408252674,
+          "positive_daily_net_kg_yr": 306.4054408252674,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 342.47104743309313,
+          "net_kg_yr": 36.06560660782582,
+          "positive_daily_net_kg_yr": 70.87038525625356,
+          "negative_daily_net_kg_yr": -34.80477864842772
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 635.88888,
+      "generated_kg_yr": 773.65728,
+      "same_engine_legacy_kg_yr": 759.3696,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 765.8392500000006,
+          "net_kg_yr": 765.8392500000006,
+          "positive_daily_net_kg_yr": 765.8392500000006,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1304.0680949999994,
+          "net_kg_yr": 538.2288449999996,
+          "positive_daily_net_kg_yr": 538.3961549999998,
+          "negative_daily_net_kg_yr": -0.16731000000000001
+        },
+        {
+          "boundary_kg_yr": 759.3718274999999,
+          "net_kg_yr": -544.6962675000002,
+          "positive_daily_net_kg_yr": 82.98872999999999,
+          "negative_daily_net_kg_yr": -627.6849975000001
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 545.05836,
+      "generated_kg_yr": 491.49144,
+      "same_engine_legacy_kg_yr": 647.7174,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 434.78424000000075,
+          "net_kg_yr": 434.78424000000075,
+          "positive_daily_net_kg_yr": 434.78424000000075,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 980.2165725000017,
+          "net_kg_yr": 545.4323325000001,
+          "positive_daily_net_kg_yr": 545.4969300000002,
+          "negative_daily_net_kg_yr": -0.0645975
+        },
+        {
+          "boundary_kg_yr": 647.7161625000001,
+          "net_kg_yr": -332.5004099999998,
+          "positive_daily_net_kg_yr": 94.33363500000003,
+          "negative_daily_net_kg_yr": -426.8340449999999
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 620.2666800000001,
+      "generated_kg_yr": 733.30488,
+      "same_engine_legacy_kg_yr": 748.45584,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 701.2249200000002,
+          "net_kg_yr": 701.2249200000002,
+          "positive_daily_net_kg_yr": 701.2249200000002,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1240.994205,
+          "net_kg_yr": 539.7692849999997,
+          "positive_daily_net_kg_yr": 539.9029349999998,
+          "negative_daily_net_kg_yr": -0.13365
+        },
+        {
+          "boundary_kg_yr": 748.456335,
+          "net_kg_yr": -492.53786999999994,
+          "positive_daily_net_kg_yr": 84.31087500000001,
+          "negative_daily_net_kg_yr": -576.8487450000003
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 345.5315187191536,
+      "generated_kg_yr": 490.408194669138,
+      "same_engine_legacy_kg_yr": 383.24859442764404,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 424.12851634197534,
+          "net_kg_yr": 424.12851634197534,
+          "positive_daily_net_kg_yr": 424.12851634197534,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1065.114053546753,
+          "net_kg_yr": 640.9855372047762,
+          "positive_daily_net_kg_yr": 649.7116520776198,
+          "negative_daily_net_kg_yr": -8.7261148728429
+        },
+        {
+          "boundary_kg_yr": 383.2512885044804,
+          "net_kg_yr": -681.8627650422717,
+          "positive_daily_net_kg_yr": 96.72813473126004,
+          "negative_daily_net_kg_yr": -778.5908997735319
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 84.81924000000001,
+      "generated_kg_yr": 175.26168,
+      "same_engine_legacy_kg_yr": 114.33312,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 308.12908500000015,
+          "net_kg_yr": 308.12908500000015,
+          "positive_daily_net_kg_yr": 308.12908500000015,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 420.02705249999997,
+          "net_kg_yr": 111.89796749999995,
+          "positive_daily_net_kg_yr": 112.4563275,
+          "negative_daily_net_kg_yr": -0.5583600000000002
+        },
+        {
+          "boundary_kg_yr": 114.33163499999998,
+          "net_kg_yr": -305.6954174999999,
+          "positive_daily_net_kg_yr": 1.462725000000002,
+          "negative_daily_net_kg_yr": -307.1581424999999
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 74.01635999999999,
+      "generated_kg_yr": 110.2464,
+      "same_engine_legacy_kg_yr": 99.00792,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 166.21926750000006,
+          "net_kg_yr": 166.21926750000006,
+          "positive_daily_net_kg_yr": 166.21926750000006,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 280.83973500000025,
+          "net_kg_yr": 114.62046749999992,
+          "positive_daily_net_kg_yr": 115.0332975,
+          "negative_daily_net_kg_yr": -0.4128300000000001
+        },
+        {
+          "boundary_kg_yr": 99.00890999999999,
+          "net_kg_yr": -181.83082500000012,
+          "positive_daily_net_kg_yr": 2.3346675000000014,
+          "negative_daily_net_kg_yr": -184.16549250000014
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 85.09248,
+      "generated_kg_yr": 174.00636,
+      "same_engine_legacy_kg_yr": 112.88772,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 281.12064750000013,
+          "net_kg_yr": 281.12064750000013,
+          "positive_daily_net_kg_yr": 281.12064750000013,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 393.3594225000001,
+          "net_kg_yr": 112.23877499999992,
+          "positive_daily_net_kg_yr": 112.76223749999998,
+          "negative_daily_net_kg_yr": -0.5234625
+        },
+        {
+          "boundary_kg_yr": 112.88846249999999,
+          "net_kg_yr": -280.47096,
+          "positive_daily_net_kg_yr": 1.5127200000000012,
+          "negative_daily_net_kg_yr": -281.98368
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 13.233305420007504,
+      "generated_kg_yr": 48.364067365630035,
+      "same_engine_legacy_kg_yr": 22.630245425094266,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 183.8626618483817,
+          "net_kg_yr": 183.8626618483817,
+          "positive_daily_net_kg_yr": 183.8626618483817,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 251.05024406938506,
+          "net_kg_yr": 67.18758222100324,
+          "positive_daily_net_kg_yr": 80.95700893143845,
+          "negative_daily_net_kg_yr": -13.769426710435337
+        },
+        {
+          "boundary_kg_yr": 22.616775040912664,
+          "net_kg_yr": -228.43346902847244,
+          "positive_daily_net_kg_yr": 0.11045715028914982,
+          "negative_daily_net_kg_yr": -228.54392617876158
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 22.837320000000002,
+      "generated_kg_yr": 22.50072,
+      "same_engine_legacy_kg_yr": 23.21352,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 90.38031749999998,
+          "net_kg_yr": 90.38031749999998,
+          "positive_daily_net_kg_yr": 90.38031749999998,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 128.14139250000002,
+          "net_kg_yr": 37.76107499999999,
+          "positive_daily_net_kg_yr": 38.16202500000001,
+          "negative_daily_net_kg_yr": -0.4009499999999998
+        },
+        {
+          "boundary_kg_yr": 23.212035,
+          "net_kg_yr": -104.92935749999998,
+          "positive_daily_net_kg_yr": 0.10667250000000017,
+          "negative_daily_net_kg_yr": -105.03602999999998
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 20.34648,
+      "generated_kg_yr": 16.129080000000002,
+      "same_engine_legacy_kg_yr": 20.67912,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 51.81338250000004,
+          "net_kg_yr": 51.81338250000004,
+          "positive_daily_net_kg_yr": 51.81338250000004,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 90.56049750000003,
+          "net_kg_yr": 38.747114999999994,
+          "positive_daily_net_kg_yr": 38.96739,
+          "negative_daily_net_kg_yr": -0.22027499999999994
+        },
+        {
+          "boundary_kg_yr": 20.680605,
+          "net_kg_yr": -69.87989250000003,
+          "positive_daily_net_kg_yr": 0.4667849999999998,
+          "negative_daily_net_kg_yr": -70.34667750000003
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 22.738319999999998,
+      "generated_kg_yr": 23.007599999999996,
+      "same_engine_legacy_kg_yr": 22.9284,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 84.728655,
+          "net_kg_yr": 84.728655,
+          "positive_daily_net_kg_yr": 84.728655,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 122.79316500000002,
+          "net_kg_yr": 38.064509999999984,
+          "positive_daily_net_kg_yr": 38.38972499999999,
+          "negative_daily_net_kg_yr": -0.325215
+        },
+        {
+          "boundary_kg_yr": 22.927162499999998,
+          "net_kg_yr": -99.86600250000001,
+          "positive_daily_net_kg_yr": 0.12176999999999971,
+          "negative_daily_net_kg_yr": -99.98777250000002
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "small_pass",
+      "reference_kg_yr": 0.0,
+      "generated_kg_yr": 0.8189993582415067,
+      "same_engine_legacy_kg_yr": 0.0,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.5172627525735832,
+          "net_kg_yr": 0.5172627525735832,
+          "positive_daily_net_kg_yr": 0.5172627525735832,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": -0.5172627525735832,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": -0.5172627525735832
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 24.453,
+      "generated_kg_yr": 32.689800000000005,
+      "same_engine_legacy_kg_yr": 28.20708,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 103.59409499999995,
+          "net_kg_yr": 103.59409499999995,
+          "positive_daily_net_kg_yr": 103.59409499999995,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 101.87347499999998,
+          "net_kg_yr": -1.7206199999999998,
+          "positive_daily_net_kg_yr": 3.741457499999999,
+          "negative_daily_net_kg_yr": -5.462077500000002
+        },
+        {
+          "boundary_kg_yr": 28.20708,
+          "net_kg_yr": -73.666395,
+          "positive_daily_net_kg_yr": 0.8494199999999985,
+          "negative_daily_net_kg_yr": -74.515815
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 19.21392,
+      "generated_kg_yr": 22.91652,
+      "same_engine_legacy_kg_yr": 22.22748,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 60.65705249999999,
+          "net_kg_yr": 60.65705249999999,
+          "positive_daily_net_kg_yr": 60.65705249999999,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 62.1351225,
+          "net_kg_yr": 1.4780699999999996,
+          "positive_daily_net_kg_yr": 4.171859999999999,
+          "negative_daily_net_kg_yr": -2.6937899999999995
+        },
+        {
+          "boundary_kg_yr": 22.225995000000005,
+          "net_kg_yr": -39.9091275,
+          "positive_daily_net_kg_yr": 1.11177,
+          "negative_daily_net_kg_yr": -41.02089750000001
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 24.48072,
+      "generated_kg_yr": 32.48388,
+      "same_engine_legacy_kg_yr": 27.71604,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 95.885955,
+          "net_kg_yr": 95.885955,
+          "positive_daily_net_kg_yr": 95.885955,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 96.03074250000002,
+          "net_kg_yr": 0.14478749999999946,
+          "positive_daily_net_kg_yr": 3.745417499999999,
+          "negative_daily_net_kg_yr": -3.6006299999999993
+        },
+        {
+          "boundary_kg_yr": 27.718020000000003,
+          "net_kg_yr": -68.31272249999996,
+          "positive_daily_net_kg_yr": 0.8741700000000008,
+          "negative_daily_net_kg_yr": -69.18689249999997
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 1.1207359639094303,
+      "generated_kg_yr": 5.043311837592436,
+      "same_engine_legacy_kg_yr": 0.732788899479243,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 1.848136709716032,
+          "net_kg_yr": 1.848136709716032,
+          "positive_daily_net_kg_yr": 1.848136709716032,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 0.7274007458066014,
+          "net_kg_yr": -1.1207359639094303,
+          "positive_daily_net_kg_yr": 0.0700459977443394,
+          "negative_daily_net_kg_yr": -1.1907819616537698
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 204.11028,
+      "generated_kg_yr": 1320.43824,
+      "same_engine_legacy_kg_yr": 663.70788,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 636.2665650000001,
+          "net_kg_yr": 636.2665650000001,
+          "positive_daily_net_kg_yr": 636.2665650000001,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 742.1705775000001,
+          "net_kg_yr": 105.90401249999992,
+          "positive_daily_net_kg_yr": 106.77050999999997,
+          "negative_daily_net_kg_yr": -0.8664975
+        },
+        {
+          "boundary_kg_yr": 663.7093649999998,
+          "net_kg_yr": -78.46121249999992,
+          "positive_daily_net_kg_yr": 100.02366,
+          "negative_daily_net_kg_yr": -178.48487249999997
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 121.44132,
+      "generated_kg_yr": 407.72556,
+      "same_engine_legacy_kg_yr": 373.8438,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 231.83696249999997,
+          "net_kg_yr": 231.83696249999997,
+          "positive_daily_net_kg_yr": 231.83696249999997,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 342.30512250000004,
+          "net_kg_yr": 110.4681599999999,
+          "positive_daily_net_kg_yr": 111.00300749999992,
+          "negative_daily_net_kg_yr": -0.5348475
+        },
+        {
+          "boundary_kg_yr": 373.84182,
+          "net_kg_yr": 31.536697500000002,
+          "positive_daily_net_kg_yr": 113.64903000000005,
+          "negative_daily_net_kg_yr": -82.11233250000001
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 195.58044,
+      "generated_kg_yr": 1181.63232,
+      "same_engine_legacy_kg_yr": 615.51468,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 543.9522825000001,
+          "net_kg_yr": 543.9522825000001,
+          "positive_daily_net_kg_yr": 543.9522825000001,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 652.3592625000002,
+          "net_kg_yr": 108.40697999999993,
+          "positive_daily_net_kg_yr": 109.08240749999997,
+          "negative_daily_net_kg_yr": -0.6754274999999997
+        },
+        {
+          "boundary_kg_yr": 615.51567,
+          "net_kg_yr": -36.84359250000001,
+          "positive_daily_net_kg_yr": 102.57934499999999,
+          "negative_daily_net_kg_yr": -139.42293750000002
+        }
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "original_group": "meaningful_pass",
+      "reference_kg_yr": 20.216352579750875,
+      "generated_kg_yr": 185.26627588010507,
+      "same_engine_legacy_kg_yr": 173.54165348843716,
+      "control_within": true,
+      "physical_pass": true,
+      "control_ofe_budgets": [
+        {
+          "boundary_kg_yr": 221.38576402465722,
+          "net_kg_yr": 221.38576402465722,
+          "positive_daily_net_kg_yr": 221.38576402465722,
+          "negative_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": 232.25905813604788,
+          "net_kg_yr": 10.873294111390523,
+          "positive_daily_net_kg_yr": 21.857045373070214,
+          "negative_daily_net_kg_yr": -10.983751261679686
+        },
+        {
+          "boundary_kg_yr": 173.5335712579282,
+          "net_kg_yr": -58.72548687811961,
+          "positive_daily_net_kg_yr": 76.95361075266578,
+          "negative_daily_net_kg_yr": -135.6790976307854
+        }
+      ]
+    }
+  ]
+}

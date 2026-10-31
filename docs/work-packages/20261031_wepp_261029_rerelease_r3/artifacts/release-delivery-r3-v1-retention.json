@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/roads-native-funding-20261031/release-delivery-r3-v1.tar.gz",
+  "sha256": "7aa18724ad0ef72a3388d28c0e0d69496299846a7abb841e7f4cfb7dec07582d",
+  "bytes": 17102476,
+  "files": 984,
+  "uncompressed_bytes": 61193784,
+  "all_members_verified": true,
+  "manifest_sha256": "91a47b590874a7866299be3d3fe7fafa7675d5c9ade415d806877e68776ea69d",
+  "omitted_aliases": {}
+}

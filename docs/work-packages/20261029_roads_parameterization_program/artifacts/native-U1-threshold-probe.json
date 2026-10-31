@@ -1,0 +1,85 @@
+{
+  "source_sha256": "cb0f5f67ada54bc1336a203e510669da01bf39fb3991ff9f4acc9584d8af912a",
+  "driver_sha256": "b4707d190f1e856048fd3df318482f8ba47cc3af3450d175d0a184f2f3f418a1",
+  "binary_sha256": "29e002b323f6808b4d00ece28340731606bbd79a3245bfb98f6874da784fb5eb",
+  "commands": [
+    [
+      "/usr/bin/gfortran",
+      "-c",
+      "-fno-align-commons",
+      "-mcmodel=medium",
+      "-O2",
+      "-ffixed-form",
+      "-ffixed-line-length-72",
+      "-ffpe-trap=invalid,zero,overflow",
+      "-finit-local-zero",
+      "-I/home/workdir/wepp-forest-release-20261009/src",
+      "/workdir/wepppy/out/roads-native-funding-20261031/U1/src/qinf.for",
+      "-o",
+      "/workdir/wepppy/out/roads-native-funding-20261031/U1-threshold-probe/qinf.o"
+    ],
+    [
+      "/usr/bin/gfortran",
+      "-fno-align-commons",
+      "-mcmodel=medium",
+      "-O2",
+      "-ffpe-trap=invalid,zero,overflow",
+      "-finit-local-zero",
+      "/workdir/wepppy/out/roads-native-funding-20261031/U1-threshold-probe/driver.f90",
+      "/workdir/wepppy/out/roads-native-funding-20261031/U1-threshold-probe/qinf.o",
+      "-o",
+      "/workdir/wepppy/out/roads-native-funding-20261031/U1-threshold-probe/probe"
+    ]
+  ],
+  "rows": [
+    {
+      "target_tstar": 0.8999999761581421,
+      "duration_s": 798.8297119140625,
+      "input_depth_m": 0.007988297380506992,
+      "output_depth_m": 0.005270848982036114,
+      "retained_fraction": 0.6598213315010071
+    },
+    {
+      "target_tstar": 0.9990000128746033,
+      "duration_s": 719.6663818359375,
+      "input_depth_m": 0.007196663413196802,
+      "output_depth_m": 0.004479215014725924,
+      "retained_fraction": 0.6224016547203064
+    },
+    {
+      "target_tstar": 0.9998999834060669,
+      "duration_s": 719.0186157226562,
+      "input_depth_m": 0.007190186064690351,
+      "output_depth_m": 0.004472737666219473,
+      "retained_fraction": 0.6220614910125732
+    },
+    {
+      "target_tstar": 1.0,
+      "duration_s": 718.9467163085938,
+      "input_depth_m": 0.007189467083662748,
+      "output_depth_m": 0.004472019150853157,
+      "retained_fraction": 0.6220237612724304
+    },
+    {
+      "target_tstar": 1.000100016593933,
+      "duration_s": 718.8748168945312,
+      "input_depth_m": 0.007188748102635145,
+      "output_depth_m": 0.004471300169825554,
+      "retained_fraction": 0.621985912322998
+    },
+    {
+      "target_tstar": 1.001000046730042,
+      "duration_s": 718.2284545898438,
+      "input_depth_m": 0.007182284258306026,
+      "output_depth_m": 0.004464835859835148,
+      "retained_fraction": 0.6216456890106201
+    },
+    {
+      "target_tstar": 1.100000023841858,
+      "duration_s": 653.587890625,
+      "input_depth_m": 0.006535878870636225,
+      "output_depth_m": 0.003818430472165346,
+      "retained_fraction": 0.5842260122299194
+    }
+  ]
+}

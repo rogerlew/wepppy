@@ -1,0 +1,63 @@
+{
+  "version": 3,
+  "predecessor": {
+    "path": "candidate-ledger-v2.json",
+    "sha256": "5b6843eaedcc49dddf9e3b53d4ad5db76b0cac139b190d52ecdf1f941446795b"
+  },
+  "engine": "wepp_261029 revision 2",
+  "binary_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+  "status": "no_candidate_accepted",
+  "full_development_gate": {
+    "cases": 840,
+    "physical_pass": 840,
+    "meaningful_within": 719,
+    "meaningful_cases": 766,
+    "small_within": 30,
+    "small_cases": 74
+  },
+  "diagnostics": [
+    {
+      "name": "same-engine whole legacy soil",
+      "new_runs": 111,
+      "physical_pass": 111,
+      "recovered_original_misses": 76,
+      "original_misses": 91,
+      "disposition": "diagnostic_only_not_generated_soil_candidate",
+      "evidence": "legacy-soil-control-r2-summary.json"
+    },
+    {
+      "name": "fill/buffer erosion anchors",
+      "new_runs": 333,
+      "physical_pass": 333,
+      "best_recovered_original_misses": 10,
+      "original_misses": 91,
+      "passing_control_regressions": 1,
+      "disposition": "reject_standalone_candidate",
+      "evidence": "erosion-ablation-v1-summary.json"
+    },
+    {
+      "name": "legacy soil runtime factorial",
+      "new_runs": 98,
+      "physical_pass": 92,
+      "native_failures": 6,
+      "disposition": "hourly_effect_on_legacy_residuals; reject_failed_hourly_Penman_configurations; no_default_change",
+      "evidence": "runtime-ablation-v1-summary.json"
+    },
+    {
+      "name": "soil by hourly interaction",
+      "new_runs": 208,
+      "reused_cells": 236,
+      "cells": 444,
+      "new_run_physical_pass": 208,
+      "generated_recovered_original_misses": 21,
+      "original_misses": 91,
+      "generated_passing_control_regressions": 1,
+      "disposition": "reject_hourly_off_as_standalone_generated_candidate; all_444_cells_reaudited; trace_lower_boundary_provenance_next",
+      "evidence": "soil-hourly-interaction-v1-analysis.json",
+      "all_cells_physical_pass": 444
+    }
+  ],
+  "withheld_native_outcomes_inspected": false,
+  "production_changes": false,
+  "ui_gate": "Human approval of configuration specification and layout before implementation"
+}

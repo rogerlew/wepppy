@@ -1,0 +1,76 @@
+{
+  "input.for": {
+    "source": "/workdir/wepp-forest-release-20261009/src/input.for",
+    "sha256": "362a328510298eb86f682b248256ae43c8b36ca15b6cf2d6dd1887999ae275df"
+  },
+  "perc.for": {
+    "source": "/workdir/wepp-forest-release-20261009/src/perc.for",
+    "sha256": "0e75a4f4c2c40ba82dcd0bb8be7d6b10984181e52c9f324ca808d6f390064c25"
+  },
+  "1718465.sol": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718465.sol",
+    "sha256": "21f5fa480ce15c3003106b0fd1b15e72df1e388711e937fcbe79efa662bfd0c1"
+  },
+  "1718465.log": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718465.log",
+    "sha256": "74d85f4329c8579c993de3919150eb2e7f77ad436503e335d4897e75613a8542"
+  },
+  "2711184.sol": {
+    "source": "/wc1/runs/cl/clogging-starch/soils/2711184.sol",
+    "sha256": "be583a9f9b43fe23800cdd0d7fbff9d5b29095ed8314b0d6178a77f41baf7cdd"
+  },
+  "2711184.log": {
+    "source": "/wc1/runs/cl/clogging-starch/soils/2711184.log",
+    "sha256": "cc155fae2db4717469b00b6e2408b404b34ba2945d02dcd6c272359beb7c58e0"
+  },
+  "2711250.sol": {
+    "source": "/wc1/runs/cl/clogging-starch/soils/2711250.sol",
+    "sha256": "3c6c5e85882e416d7fee4636a37597be93aadeb2f87c3dc72a4fdea3c39b0a7c"
+  },
+  "2711250.log": {
+    "source": "/wc1/runs/cl/clogging-starch/soils/2711250.log",
+    "sha256": "0775067f9972fa1eaa4084b463f587818d2937c8ab08e4541ccf652eb472f2fb"
+  },
+  "1718510.sol": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718510.sol",
+    "sha256": "67da754d1986d189723c0eecde4629375f80ffd9c22b1d6e6c361d3c8d401785"
+  },
+  "1718510.log": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718510.log",
+    "sha256": "386ca19e29f82d955c44ddd9cc4a54795eacf7dfdcf3ba0dc6f353c9a7e3d09c"
+  },
+  "1856573.sol": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1856573.sol",
+    "sha256": "4eef6111cc326d3b8fddd2ab3e8c34763227c7c56d94f5d5e6723907c60f7671"
+  },
+  "1856573.log": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1856573.log",
+    "sha256": "e568b049ce5ac0ed9d92615f0efd0ad6d03c62bef50d923a48f98c176124be7b"
+  },
+  "53949.sol": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/53949.sol",
+    "sha256": "2403ed68f74634e5a0da61155ff451ee2b66b8e22f6d3d8d38a43406ca530263"
+  },
+  "53949.log": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/53949.log",
+    "sha256": "fea7223fa9c8fade0a41a59ced2e968dcc96c7d059e89cc4796218bb75e22f74"
+  },
+  "1718494.sol": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718494.sol",
+    "sha256": "2b5190487b248ed97e97e3483d3cb14a9752de41b563edd5bb192b518331392d"
+  },
+  "1718494.log": {
+    "source": "/wc1/runs/ad/addicted-reservist/soils/1718494.log",
+    "sha256": "603e1ef494d1ff7da6a9ce3f4ad4409b6de03e703a574e46776e2fda1a173b74"
+  },
+  "ssurgo.py": {
+    "source": "/workdir/wepppy/wepppy/soils/ssurgo/ssurgo.py",
+    "sha256": "02d3b1da89195077d32df279790314d89d19183518450ca30b9231f32390bb27",
+    "note": "Source snapshot used by provenance audit; Markdown before clarification."
+  },
+  "ssurgo.md": {
+    "source": "/workdir/wepppy/wepppy/soils/ssurgo/ssurgo.md",
+    "sha256": "af609191b24c1caa74a7b0e7d7a74fb1f5625ab5108fc3439d677d07ccb23540",
+    "note": "Source snapshot used by provenance audit; Markdown before clarification."
+  }
+}

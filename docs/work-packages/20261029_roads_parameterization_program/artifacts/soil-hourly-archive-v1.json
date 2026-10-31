@@ -1,0 +1,9 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/soil-hourly-interaction-v1.tar.gz",
+  "sha256": "099177a2b37f8a15ca6bca70122d049d4369197b51cbc440f7dd06ac4d0c2dff",
+  "bytes": 329490602,
+  "files": 5224,
+  "uncompressed_bytes": 1758887902,
+  "all_members_verified": true,
+  "manifest_sha256": "8ae00b52cbcf8b2fa15a0d098ca2f9e232c937fa0979ac640aa07a805c611861"
+}

@@ -1,0 +1,46 @@
+{
+  "accepted": true,
+  "reviewer": "Independent AI scientific report reviewer; not institutional or human peer review",
+  "scope": "Scientific accuracy and bounded disclosure of the frozen revision-3 report; publication and deployment checks remain separate",
+  "pdf_sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+  "pages": 20,
+  "figures": 8,
+  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "matched_pair_sha256": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "findings": [
+    {
+      "severity": "editorial",
+      "status": "resolved",
+      "finding": "Opening stated the revision adds defects; corrected to repairs before final PDF freeze."
+    }
+  ],
+  "unresolved_scientific_disclosure_findings": [],
+  "review_methods": [
+    "TeX scientific-claim audit against retained native source/scientific receipts",
+    "Rendered new figures and equation inspection on pages14\u201315",
+    "Final PDF text extraction, page count and correction verification",
+    "Source-freeze full file/authoring-evidence hash verification",
+    "Manifest source/pair/native-scientific-acceptance identity verification"
+  ],
+  "limitations": [
+    "This report acceptance does not approve Roads magnitude calibration or parameter defaults/UI.",
+    "Full contour-event empirical coverage remains absent.",
+    "No universal heterogeneous ownership, soil-capacity ordering or whole-watershed closure claim is accepted.",
+    "Manifest approval/publication fields and immutable sidecar attachments may change separately; PDF/scientific content/model identities require renewed review if changed."
+  ],
+  "evidence_sha256": {
+    "docs/release-notes/wepp_261029/build/r3/main-r3.pdf": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+    "docs/release-notes/wepp_261029/main-r3.tex": "2408d882f40b1d5ace2caa6922e9973f9f979b7a2b65c7cd994f01e1356d012b",
+    "docs/release-notes/wepp_261029/release-identities-r3.tex": "295c7cd1bea1ca215916d857f32aabb52d9a9e1a3ee33b1014c0eab97f4dc035",
+    "docs/release-notes/wepp_261029/evidence/source-freeze-r3.json": "879bf6d4e9f8c536f53e41ab1727255714b9ee85d912c619196924e9de4083e3",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-report-manifest-reviewed.json": "fd5feb9e627d978dce87f52ae04d38dcd5c6759cfa7e485728bc72f3f7ce1153",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-report-review.md": "fbb35c4e24a28e9af1d7af1c3cec811dd0436334fe5e4a36328075231912da03",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-final-scientific-acceptance.json": "c57c39d392680fda2a2f5a72ae76b40b616a6bb5ee216ffb686c6b0a26bf8247",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-source-audit.json": "c812f794c5e798a7e3542b375fbc0862284f43120402c2827b49147d1c72570e",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-semantic-audit.json": "b8f7624d17ff540fb0c2b19d3d49f937e03b5f86a78acbd19441e4c15b3c00ec",
+    "docs/work-packages/20261031-roads-open-boundary-funding/artifacts/D2-scientific-channel-audit.json": "465e2f096e873355451585db3aedf55a57e82c01ced3d805c4cd6d02af7e3cb1"
+  }
+}

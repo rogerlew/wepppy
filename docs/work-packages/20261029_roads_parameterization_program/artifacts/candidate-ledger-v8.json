@@ -1,0 +1,132 @@
+{
+  "version": 8,
+  "predecessor": {
+    "path": "candidate-ledger-v7.json",
+    "sha256": "13ac0158f95a997d07049626558bb8715fdcdadea80f5e1dd59348076b1046c6"
+  },
+  "engine": "wepp_261029 revision 2",
+  "binary_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+  "status": "no_candidate_accepted",
+  "full_development_gate": {
+    "cases": 840,
+    "physical_pass": 840,
+    "meaningful_within": 719,
+    "meaningful_cases": 766,
+    "small_within": 30,
+    "small_cases": 74
+  },
+  "diagnostics": [
+    {
+      "name": "same-engine whole legacy soil",
+      "new_runs": 111,
+      "physical_pass": 111,
+      "recovered_original_misses": 76,
+      "original_misses": 91,
+      "disposition": "diagnostic_only_not_generated_soil_candidate",
+      "evidence": "legacy-soil-control-r2-summary.json"
+    },
+    {
+      "name": "fill/buffer erosion anchors",
+      "new_runs": 333,
+      "physical_pass": 333,
+      "best_recovered_original_misses": 10,
+      "original_misses": 91,
+      "passing_control_regressions": 1,
+      "disposition": "reject_standalone_candidate",
+      "evidence": "erosion-ablation-v1-summary.json"
+    },
+    {
+      "name": "legacy soil runtime factorial",
+      "new_runs": 98,
+      "physical_pass": 92,
+      "native_failures": 6,
+      "disposition": "hourly_effect_on_legacy_residuals; reject_failed_hourly_Penman_configurations; no_default_change",
+      "evidence": "runtime-ablation-v1-summary.json"
+    },
+    {
+      "name": "soil by hourly interaction",
+      "new_runs": 208,
+      "reused_cells": 236,
+      "cells": 444,
+      "new_run_physical_pass": 208,
+      "generated_recovered_original_misses": 21,
+      "original_misses": 91,
+      "generated_passing_control_regressions": 1,
+      "disposition": "reject_hourly_off_as_standalone_generated_candidate; all_444_cells_reaudited; trace_lower_boundary_provenance_next",
+      "evidence": "soil-hourly-interaction-v1-analysis.json",
+      "all_cells_physical_pass": 444
+    },
+    {
+      "name": "no-detected restriction flag control",
+      "cases": 52,
+      "physical_pass": 47,
+      "native_failures": 5,
+      "original_misses": 51,
+      "recovered_original_misses": 0,
+      "passing_controls": 1,
+      "passing_control_regressions": 0,
+      "disposition": "reject_boundary_flag_candidate; native funding trace before further hydraulic tuning",
+      "evidence": "no-detected-boundary-v1-analysis.json"
+    },
+    {
+      "name": "native open-boundary funding observation",
+      "fixtures": 10,
+      "executions": 70,
+      "expected_status_matches": 70,
+      "complete_raw_output_matches": 70,
+      "expected_native_failures": 35,
+      "disposition": "Daily request exceeds starting stock before hourly spending; producer/recession ownership shadow ledger next. No native behavior change.",
+      "evidence": "native-funding-observation-v1.json"
+    },
+    {
+      "name": "native O4 frozen-state shadow ownership",
+      "new_runs": 26,
+      "exact_status_output_matches": 26,
+      "completed_native_runs": 16,
+      "expected_native_failures": 10,
+      "observed_states": 185824,
+      "negative_shadow_outflows": 179,
+      "stock_ledger_reconciled": false,
+      "disposition": "reject_monotone_recession_rule; reconcile_observation_boundaries_then_joint_GRNA_QINF_ownership",
+      "evidence": "native-shadow-ledger-summary.json"
+    },
+    {
+      "name": "O5 matching-boundary ledger",
+      "executions": 24,
+      "exact_status_output_matches": 24,
+      "completed_native_runs": 14,
+      "expected_native_failures": 10,
+      "completed_states": 185819,
+      "max_abs_stock_residual_m": 3.120367182418704e-07,
+      "disposition": "observation_bookkeeping_reconciled; native_funding_defect_open",
+      "evidence": "native-stage-ledger-summary.json"
+    },
+    {
+      "name": "O6 ownership attribution",
+      "executions": 24,
+      "exact_status_output_matches": 24,
+      "linked_qinf_states": 4310,
+      "storm_unfunded": 0,
+      "recession_induced_unfunded": 5,
+      "disposition": "QINF_tstar_discontinuity_confirmed; same_day_stold_matches",
+      "evidence": "native-O6-attribution-summary.json"
+    },
+    {
+      "name": "U1 continuous recession isolated trial",
+      "executions": 12,
+      "full_period_completions": 12,
+      "completed_states": 210384,
+      "linked_qinf_states": 4673,
+      "observed_unfunded": 0,
+      "negative_linked_fin": 1,
+      "disposition": "experimental_candidate_only; physical_domain_and_remaining_exchange_review_required",
+      "evidence": "native-U1-attribution-summary.json",
+      "matching_stage_max_residual_mm": 0.0003035675035789609
+    }
+  ],
+  "withheld_native_outcomes_inspected": false,
+  "production_changes": false,
+  "ui_gate": "Human approval of configuration specification and layout before implementation",
+  "next_scope": "Resolve remaining U1 signed exchange and formula domain; scientific/nonregression gates before candidate adoption.",
+  "experimental_candidate": "U1 continuous recession; isolated binary only; no promotion"
+}

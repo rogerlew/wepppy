@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/roads-native-funding-20261031/geometry-cedar-v1.tar.gz",
+  "sha256": "6ab91add68e08d19d2131adae6525636160e50e0535a29a0332635e5b9c075da",
+  "bytes": 2852121171,
+  "files": 26432,
+  "uncompressed_bytes": 16686741948,
+  "all_members_verified": true,
+  "manifest_sha256": "cf6c21bd0803e1abd0d32f125d523b42e755474c56eb346d48064045e9e8eddf",
+  "omitted_aliases": {}
+}

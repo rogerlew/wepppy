@@ -1,0 +1,11 @@
+{
+  "verified_cases": {
+    "erosion": 333,
+    "runtime": 98
+  },
+  "legacy_anchor_results_sha256": "f73d411cb83a7d269a69e6544da96be9eb76636778ab2a5b1c306e3e5fee0231",
+  "exact_soil_changes": true,
+  "all_recorded_input_output_hashes_verified": true,
+  "erosion_water_byte_parity": 333,
+  "verifier_sha256": "556a8f4e4995b3e364bdaf71103bed99c71cb0795dda07bda5319a6262243b5e"
+}

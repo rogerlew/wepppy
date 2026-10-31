@@ -1,0 +1,51 @@
+{
+  "acceptance": "Native implementation/scientific acceptance complete; application/publication/deployment tracked separately",
+  "artifact_revision": 3,
+  "binary_sha256": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "fixture_commit": "986ffe6e4d23ea7116ccb9309474ddbc799107e7",
+  "generated_native_sidecars_sha256": {
+    "wepp_261029.json": "04e4b2d3f70b719e295740703858b80d61b6abcfd76ea643c660ccee3e0565b9",
+    "wepp_261029_hill.json": "ccd96f5aba60660dbcee123a7d71dba4a56a81a3eb562a919b56d8f7a5bbc14a"
+  },
+  "generator_sha256": "aa0d4c6dbac5dc5a53f0df444164be81093fcd17c0a6f8b6a50c937da778e90a",
+  "implementation_review_sha256": "bd57c3d0505d8b4141e127a10dea1d4ae65a78406fe323d2715c9908e0984cbb",
+  "installed_revision2_unchanged": true,
+  "noncompiled_working_tree_delta": {
+    "src/AGENTS.md": {
+      "committed": "d64b3f10519c1e8476e7f2e5999e755b32809da98ef1d3fc7c963019538e8d5a",
+      "current": "d1a346e83e9b8fa8a7cc519d870ea610ca834808271705aad17aa2c5f0916e5d"
+    }
+  },
+  "original_revision2": {
+    "wepp_261029": {
+      "artifact_revision": 2,
+      "matched_pair_sha256": {
+        "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+        "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+      },
+      "sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+      "sidecar_sha256": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+      "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e"
+    },
+    "wepp_261029_hill": {
+      "artifact_revision": 2,
+      "matched_pair_sha256": {
+        "wepp_261029": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+        "wepp_261029_hill": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed"
+      },
+      "sha256": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+      "sidecar_sha256": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
+      "source_commit": "ba9f2ad91b5165d5cd2954bd64b5df608798541e"
+    }
+  },
+  "scientific_acceptance_sha256": "c57c39d392680fda2a2f5a72ae76b40b616a6bb5ee216ffb686c6b0a26bf8247",
+  "sidecar_sha256": {
+    "wepp_261029.json": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+    "wepp_261029_hill.json": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  },
+  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "source_manifest_sha256": "d8d9cd041663ace3183558954df56cf7c64c1a719d25fee1978e1769a0b5f13c"
+}

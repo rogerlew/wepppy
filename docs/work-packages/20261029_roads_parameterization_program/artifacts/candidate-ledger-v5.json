@@ -1,0 +1,86 @@
+{
+  "version": 5,
+  "predecessor": {
+    "path": "candidate-ledger-v4.json",
+    "sha256": "cadaaeb90014adf9d211c156a7dd016864c2df4e3e3230b5cc90e4b9a2d28ee8"
+  },
+  "engine": "wepp_261029 revision 2",
+  "binary_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+  "status": "no_candidate_accepted",
+  "full_development_gate": {
+    "cases": 840,
+    "physical_pass": 840,
+    "meaningful_within": 719,
+    "meaningful_cases": 766,
+    "small_within": 30,
+    "small_cases": 74
+  },
+  "diagnostics": [
+    {
+      "name": "same-engine whole legacy soil",
+      "new_runs": 111,
+      "physical_pass": 111,
+      "recovered_original_misses": 76,
+      "original_misses": 91,
+      "disposition": "diagnostic_only_not_generated_soil_candidate",
+      "evidence": "legacy-soil-control-r2-summary.json"
+    },
+    {
+      "name": "fill/buffer erosion anchors",
+      "new_runs": 333,
+      "physical_pass": 333,
+      "best_recovered_original_misses": 10,
+      "original_misses": 91,
+      "passing_control_regressions": 1,
+      "disposition": "reject_standalone_candidate",
+      "evidence": "erosion-ablation-v1-summary.json"
+    },
+    {
+      "name": "legacy soil runtime factorial",
+      "new_runs": 98,
+      "physical_pass": 92,
+      "native_failures": 6,
+      "disposition": "hourly_effect_on_legacy_residuals; reject_failed_hourly_Penman_configurations; no_default_change",
+      "evidence": "runtime-ablation-v1-summary.json"
+    },
+    {
+      "name": "soil by hourly interaction",
+      "new_runs": 208,
+      "reused_cells": 236,
+      "cells": 444,
+      "new_run_physical_pass": 208,
+      "generated_recovered_original_misses": 21,
+      "original_misses": 91,
+      "generated_passing_control_regressions": 1,
+      "disposition": "reject_hourly_off_as_standalone_generated_candidate; all_444_cells_reaudited; trace_lower_boundary_provenance_next",
+      "evidence": "soil-hourly-interaction-v1-analysis.json",
+      "all_cells_physical_pass": 444
+    },
+    {
+      "name": "no-detected restriction flag control",
+      "cases": 52,
+      "physical_pass": 47,
+      "native_failures": 5,
+      "original_misses": 51,
+      "recovered_original_misses": 0,
+      "passing_controls": 1,
+      "passing_control_regressions": 0,
+      "disposition": "reject_boundary_flag_candidate; native funding trace before further hydraulic tuning",
+      "evidence": "no-detected-boundary-v1-analysis.json"
+    },
+    {
+      "name": "native open-boundary funding observation",
+      "fixtures": 10,
+      "executions": 70,
+      "expected_status_matches": 70,
+      "complete_raw_output_matches": 70,
+      "expected_native_failures": 35,
+      "disposition": "Daily request exceeds starting stock before hourly spending; producer/recession ownership shadow ledger next. No native behavior change.",
+      "evidence": "native-funding-observation-v1.json"
+    }
+  ],
+  "withheld_native_outcomes_inspected": false,
+  "production_changes": false,
+  "ui_gate": "Human approval of configuration specification and layout before implementation",
+  "next_scope": "Native shadow GRNA/QINF water-ownership ledger with geometry/event controls before a behavioral science contract."
+}

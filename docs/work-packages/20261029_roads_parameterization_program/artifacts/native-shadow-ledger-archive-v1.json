@@ -1,0 +1,9 @@
+{
+  "archive": "/wc1/runs/ro/roads-native-funding-20261031/shadow-ledger-v1.tar.gz",
+  "sha256": "739e15e7e0a71d2b6d468cc03bfeeb1be4023c72472ddde84495b7496195f5ef",
+  "bytes": 74173399,
+  "files": 695,
+  "uncompressed_bytes": 551332999,
+  "all_members_verified": true,
+  "manifest_sha256": "9651fd5b523d1fe4936364bcdd0d95cf42abee5026350e9603ea8dd045765bf9"
+}

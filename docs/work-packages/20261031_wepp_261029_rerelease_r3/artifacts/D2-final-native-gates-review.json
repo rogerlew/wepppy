@@ -1,0 +1,63 @@
+{
+  "reviewer": "independent AI implementation review",
+  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "fixture_commit": "986ffe6e4d23ea7116ccb9309474ddbc799107e7",
+  "pair_sha256": {
+    "wepp": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "source_sha256": {
+    "eplane.for": "e1ac43ce8707ab8194adcf1a9833bbd3ce3907b70294b3192b17e536470068ab",
+    "qinf.for": "67693b0e27c73fa97adae1ea4b11c668c4e4264a24a95bb9141c47ae2ad81744",
+    "pmxelm.inc": "6bb79ace71b125757622c805288d81966815c6f663eec287325d01ddc8e67245",
+    "pmxhil.inc": "23ccc0606ae74be34b6e64c7370aaaccebd0b20aee21b8456d1c7a2479ff480c",
+    "pmxpln.inc": "bce6ada0bd2f45e4840245329d241a9b98fb8f702bde1dbe2b6f122f63af3cbb",
+    "pntype.inc": "64cf4b0de48f14cc5c2c3ff701603179a8368fa0f2ec5500ece937c8ac78be0e"
+  },
+  "completed_gates": {
+    "native": 1095,
+    "watchlist": 28,
+    "disturbed_tests": 99,
+    "roads_physical": 840,
+    "clean_full_period_parity": 12,
+    "host_smokes": 2
+  },
+  "parity": {
+    "roads_outputs": 5880,
+    "roads_inputs": 10080,
+    "disturbed_outputs": 768,
+    "disturbed_timestamp_only_inputs": 96
+  },
+  "excluded_attempts": {
+    "disturbed": "First strict input-hash equality failed on generated timestamp comments; originals preserved. Recheck proves exactly one same-position comment line per changed deck; no numeric normalization.",
+    "application": "First isolated setup expected a nonexistent generator capacity field and left a partial pair. Registry rejected it. Attempt stopped/excluded; corrected staging prepares all four files before isolated consumption."
+  },
+  "pending": [
+    "Cedar actual-pair output parity and scientific disposition",
+    "full isolated application suite",
+    "final sidecars/vendoring/operational consumers/publication"
+  ],
+  "method": "Reviewed gate logs and parity verifier; independently checked source/pair identities, unique denominators, all 96 raw timestamp differences, and all 12 clean-pair bindings. Broader output rehashes are supplied by the retained verifier receipts.",
+  "log_sha256": {
+    "roads-native-funding-r3-isolated-preflight-v2.log": "28d4344ac6a5a7039ed227b15ef8c5eea8357ed0f2d1c6598581d42a939169c6",
+    "roads-native-funding-r3-dated-build.log": "d2b42ed8f6f00b3373765c06a582075b821458c5122ed5e7319370874396f9b1",
+    "roads-native-funding-r3-final-watchlist.log": "672c1e332301b9c2006db9cfe8928db356e56cb4aea9588be1e7aea42fda5c98",
+    "roads-native-funding-r3-disturbed.log": "4cdf59cd515a9711e534c776e541a5e7b57b874b555553a2c1c53abe74ddc2cd",
+    "roads-native-funding-r3-disturbed-parity.log": "3a0a41fa25471c21373a20f084d897bbfa23da42b489bd812ab7961988526b34",
+    "roads-native-funding-r3-disturbed-parity-v2.log": "331e8a6905b35cca1c8451da00f47acf5d08889210590441c945889c1fc21994",
+    "roads-native-funding-r3-smoke.log": "6228ee0be9c0fae6f4fbdc4cf2f820c6a50d9cdc2c3cc6a077410862dec52c26",
+    "roads-native-funding-r3-full-tests.log": "f06468570aad76e85997591a82ff195652a3855095405a999f3866abfcfddc74",
+    "roads-native-funding-r3-clean-parity.log": "147db0db1b749c22d54c94ebb77c87d1e826edd851c7389fcccc3c339c3730e4",
+    "roads-native-funding-r3-matrix840.log": "ff01790cbaf684a4afab6855f27b51eea450dd446b8e328ceec224d3089f43ba",
+    "roads-native-funding-r3-provenance.log": "be6caa1f35146c37044f57e750728054a4ba695f06ab96a32d2762bb5302df6e",
+    "roads-native-funding-r3-isolated-setup.log": "1c291667c2c4e2b7c8d364c83a77b37f7b10eab3cf3e2c766ff55a5dcc1f1ae5"
+  },
+  "receipts_sha256": {
+    "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/final-roads-parity.json": "de507e69459c2c330fc4cfe3c3f775a4df310b68d2b08a7c16440c7aa9e2490b",
+    "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/final-disturbed-parity.json": "c1e49b187d183cd2a6378efcfe858e4abe378c73ab27bf5aa2a6c9492b1ade8a",
+    "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/isolated-application-declaration.json": "0d0bc3d97da3a90c8d21faf28af87abd97597cb9ad78c727a1eedf19a776b784",
+    "/workdir/wepppy/docs/work-packages/20261031_wepp_261029_rerelease_r3/artifacts/verify_output_parity.py": "c91a687952e113647e73b14579f485d592c6551a9c38d7d2ed2dd8178b9156bc",
+    "/home/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/artifacts/r3-clean-parity.json": "dbd95d19d445e5318351c07af67c117c55c6bc45b6f28266fe0407ff291f48fe"
+  },
+  "generator_sha256": "e88d546ea6a30bc43d9f2956c8f7fdd86cadae2e8d0c38171731e31c89767723"
+}

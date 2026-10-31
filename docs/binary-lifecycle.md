@@ -16,6 +16,9 @@ and the Linux CLIGEN 5.3.2 executable in
 ## Canonical Build Environment
 
 - Canonical build host compiler: `/usr/bin/gfortran`
+- Pin `PATH=/usr/bin:/bin:$PATH` for research and release builds as well as `FC`;
+  the compiler locates assembler/linker tools through PATH. The native dated
+  release builder already enforces this. Build watershed and hill targets sequentially.
 - Disallowed toolchains for vendored builds: Homebrew, Conda, or user-local compiler/runtime stacks
 - Required ELF interpreter: `/lib64/ld-linux-x86-64.so.2`
 - Required `libgfortran` source: system package libraries (`/lib*` or `/usr/lib*`), not vendored runtime blobs

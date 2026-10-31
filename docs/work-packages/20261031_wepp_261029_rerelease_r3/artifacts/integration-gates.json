@@ -1,0 +1,31 @@
+{
+  "gates": {
+    "provenance": "pass",
+    "host_smokes": 2,
+    "container_smokes": 2,
+    "targeted_tests_passed": 142,
+    "selected_hill_reader": "pass",
+    "selected_watershed_reader": "pass",
+    "application_suite": "pass; complete segmented isolated coverage; see application-disposition.json",
+    "publication_http": "pass; exact approved PDF/manifest hash, MIME/status200 and rendered existing navigation"
+  },
+  "log_sha256": {
+    "provenance.log": "3b3b5cc8625b3dd17147ec3b40ea1812e10dd6ff95ce485b1429d7f014ca3cd2",
+    "selected-hill.log": "a7cef05c976b729f1c4492e7e05dfdc1639a3b146f6528457ec9dc18a75f4ad9",
+    "container-wepp_261029.log": "5a39a56fc1cc59046ae19fd7abcdbd2d505cbcd26447617ce35b2519af50c314",
+    "targeted.log": "6d5f292c6cdba8c7d2f8accac787f555e9a51a21eb0bf5b037cdc90ed86ed49e",
+    "host-wepp_261029_hill.log": "d93eda2f9dadda76791df990b1a25e95cc5055c058ede26e2a8e402d9bec3b3e",
+    "container-wepp_261029_hill.log": "417be2f06939f1af79f0be8eeec0cf4d4b58240874dce0b27b25feb84757d94b",
+    "host-wepp_261029.log": "c40ccac8a9865e350ccf53126830be29c65b8a2b58db9606d3b878c2b1a6da54",
+    "selected-watershed.log": "b991b0314d0ccf2db630c900b14a10a1938dcc67c26c9a6cd96253b7d5f4a280"
+  },
+  "selected_hill_receipt_sha256": "dc9b262dec070ec064eed7822daa61c7d722ba4559ee7f440910378bc6e628e1",
+  "selected_watershed_receipt_sha256": "cb6da6e5e5b1b73035a45c7590086a747f55bbd66286ce285768212e28b4e786",
+  "vendor_receipt_sha256": "8761517fe486b10412708c59a44b1e96c00af13a03a7e223016373db8f6f1144",
+  "application_counts": {
+    "passed": 12536,
+    "skipped": 367,
+    "failed": 0,
+    "errors": 0
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "reviewer": "Independent AI integration review",
+  "completed_operational_gates_accepted": true,
+  "full_application_coverage_pending": true,
+  "production_deployment": false,
+  "installed_files": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029.json": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
+    "wepp_261029_hill.json": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  },
+  "review_sha256": "e701a00ea8cedcc9645d90c0829674d295efbc4101e3b37b451a804d98d9f2ae",
+  "snapshot_sha256": {
+    "finalize_application.py": "22a165dee12359568fb7447d52a3b236b24e15bb1f5682117fe493ac767a7fa3",
+    "selected-independent-readback.json": "83a5f91b54edd0fef3c6e7a56dccf584893d01a079ab6289f52d36e86804725f",
+    "replay_application_shard3.py": "5855b63a423614fc2d166b29a05209384fbfd5620b7eaeb27274d0a5cee1b99d",
+    "verify_selected_watershed.py": "70a75880ff8f3d42d08ed30636c3bff8778aa9d74465dac5a74f4c10d6a0beb6",
+    "verify_report_download.py": "6c72441a2d05c2e490d4dfea5d40cb6271bcaed2343a65f0e00a4401de9dcf09",
+    "integration-gates.json": "1593b2f316345f9393dd539a73ddc548eace6c88e1b29840644a8a8478a5447c",
+    "report-download-check.json": "611dcc607ce8b74fdab1848d11f19915bfdd6b6f4794b00e2d5d72ca01c02e52",
+    "selected-watershed.json": "cb6da6e5e5b1b73035a45c7590086a747f55bbd66286ce285768212e28b4e786",
+    "vendor-revision3.json": "8761517fe486b10412708c59a44b1e96c00af13a03a7e223016373db8f6f1144",
+    "selected-hill.json": "dc9b262dec070ec064eed7822daa61c7d722ba4559ee7f440910378bc6e628e1",
+    "isolated-application-declaration.json": "0d0bc3d97da3a90c8d21faf28af87abd97597cb9ad78c727a1eedf19a776b784",
+    "application-shard3-selection.json": "7c61b4e050c26beaadca2acec23479b8c95fb6fb42565a419777583fec155b8c"
+  },
+  "log_sha256": {
+    "provenance.log": "3b3b5cc8625b3dd17147ec3b40ea1812e10dd6ff95ce485b1429d7f014ca3cd2",
+    "selected-hill.log": "a7cef05c976b729f1c4492e7e05dfdc1639a3b146f6528457ec9dc18a75f4ad9",
+    "container-wepp_261029.log": "5a39a56fc1cc59046ae19fd7abcdbd2d505cbcd26447617ce35b2519af50c314",
+    "targeted.log": "6d5f292c6cdba8c7d2f8accac787f555e9a51a21eb0bf5b037cdc90ed86ed49e",
+    "host-wepp_261029_hill.log": "d93eda2f9dadda76791df990b1a25e95cc5055c058ede26e2a8e402d9bec3b3e",
+    "container-wepp_261029_hill.log": "417be2f06939f1af79f0be8eeec0cf4d4b58240874dce0b27b25feb84757d94b",
+    "host-wepp_261029.log": "c40ccac8a9865e350ccf53126830be29c65b8a2b58db9606d3b878c2b1a6da54",
+    "selected-watershed.log": "b991b0314d0ccf2db630c900b14a10a1938dcc67c26c9a6cd96253b7d5f4a280"
+  },
+  "selected_native_readback": {
+    "hill_native_hashes": 7,
+    "watershed_native_hashes": 13,
+    "hill_water_rows": 17532,
+    "hill_optional_interception_all_null": true,
+    "hill_event_rows": 3240,
+    "watershed_channel_rows": 731,
+    "watershed_event_rows": 731,
+    "watershed_event_measurements_dates_and_ids_exact_native": true
+  },
+  "final_pdf_sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+  "final_manifest_sha256": "2279758fc094fd0b41d52b6276afe82e4abf8adfc24d0c5308f6c0023fbaf22c",
+  "manifest_approval_only_delta": [
+    "approval_record",
+    "approved_on",
+    "implementation_disclosure_acceptance_sha256",
+    "implementation_disclosure_review_sha256",
+    "pending_gates",
+    "publication_status",
+    "review_scope"
+  ],
+  "native_metadata_staging_sha256": "345ea39c3b8518b841711e91781146ae11c4ed4be081947e79d80ab19888dfab"
+}

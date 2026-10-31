@@ -1,0 +1,21 @@
+{
+  "pdf": {
+    "status": 200,
+    "content_type": "application/pdf",
+    "size": 442155,
+    "sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4"
+  },
+  "manifest": {
+    "status": 200,
+    "content_type": "application/json",
+    "size": 4983,
+    "sha256": "2279758fc094fd0b41d52b6276afe82e4abf8adfc24d0c5308f6c0023fbaf22c"
+  },
+  "model": {
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size": 62152,
+    "sha256": "ab3a47f5d46610037360081aceeb0767e569f12568beea419d2435bb5cd15191"
+  },
+  "environment": "Local development Caddy host route with forwarded HTTPS; no production deployment"
+}

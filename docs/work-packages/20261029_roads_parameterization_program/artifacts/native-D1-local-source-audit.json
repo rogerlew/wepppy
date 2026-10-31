@@ -1,0 +1,28 @@
+{
+  "case": "delayed_return",
+  "year": 1,
+  "day": 9,
+  "ofe": 2,
+  "local_net_m3": 0.6981246213933348,
+  "accepted_upstream_hortonian_m3": 1.410935472948472,
+  "outgoing_hortonian_m3": 2.136466062780062,
+  "unsupported_surface_excess_m3": 0.027405968438255268,
+  "unsupported_surface_excess_mm": 1.5143760993308577,
+  "upstream_surface_return_m3": 0.0,
+  "local_surface_return_m3": 0.0,
+  "upstream_lateral_to_soil_m3": 0.03335809785733477,
+  "starting_liquid_stock_m3": 0.9090176827309775,
+  "liquid_end_m3": 0.882808185688797,
+  "released_fin_mm": -22.576984018087387,
+  "U1_fin_mm": -1.5143752098083496,
+  "source_gate": "fail_unsupported_hortonian_source",
+  "standalone_U1_accepted": false,
+  "classification": "same_day_cumulative_proposal_ownership_defect_not_insufficient_soil_stock",
+  "fixture": {
+    "path": "tests/fixtures/hourly_return_timing/inputs.zip",
+    "sha256": "64eb68c9a408b36abd5658aea68a039014620f7340236b0aa518b9e4a72677fc"
+  },
+  "trace_sha256": "9d20acd8fc39ce72f3e77a351e642f23f22f00b4e621d6a2b15292ba4fcb3511",
+  "excerpt_sha256": "d8207ddc62873b8eac1d3fc83d710bce1beba58b8ab16c9b422bced60a9948b9",
+  "script_sha256": "d57d3f89bc6075624b994cc1cd965f83d58bcee4c1ecc7d192eb7fdc965d0bd6"
+}

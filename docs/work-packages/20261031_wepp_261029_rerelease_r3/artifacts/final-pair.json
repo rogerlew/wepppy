@@ -1,0 +1,10 @@
+{
+  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "fixture_commit": "986ffe6e4d23ea7116ccb9309474ddbc799107e7",
+  "pair": {
+    "wepp": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "status": "native_scientific_accepted; application and publication delivery gates separate",
+  "toolchain": "System GNU Fortran13.3.0 and binutils2.42; canonical dated builder pins /usr/bin:/bin"
+}

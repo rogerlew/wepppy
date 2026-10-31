@@ -4,6 +4,52 @@ Active: [ExecPlan](prompts/active/program_execplan.md).
 
 ## Current checkpoint
 
+Current [ledger v10](artifacts/candidate-ledger-v10.json): D2 confirms the
+EPLANE array-origin defect. Both twelve-case factorial lanes and clean-output
+parity pass. Combined source candidate implemented; broader gates underway.
+See [findings](artifacts/native-D2-geometry-findings.md) and proposed ADR-0119.
+
+Earlier ledger v9 rejected standalone U1 because scalar continuity alone left
+an unsupported local surface source; that rejected control remains retained.
+
+
+Earlier [ledger v8](artifacts/candidate-ledger-v8.json): O6 identifies the QINF
+regime discontinuity. Isolated U1 completes 12/12 full periods with no observed
+unfunded demands; one negative local exchange remains unresolved. Scientific
+acceptance and broad gates are pending. See
+[findings](artifacts/native-ownership-findings.md).
+
+
+Earlier [ledger v7](artifacts/candidate-ledger-v7.json): O5 reconciles matching-
+boundary stock accounting (24 exact-parity replays; maximum residual 0.000312 mm).
+Original funding failures remain. Next is O6 storm/recession ownership
+attribution; see [findings](artifacts/native-stage-ledger-findings.md) and
+[experiment specification](artifacts/native-joint-ownership-experiment.md).
+
+
+Earlier [candidate ledger v6](artifacts/candidate-ledger-v6.json) includes the rejected O4 shadow rule.
+
+O4 adds 26 exact-parity executions and analyzes 185,824 states; monotone
+recession ownership creates 179 negative outflows. Reconcile stock/sink
+observation boundaries, then define joint GRNA/QINF local ownership before any
+behavior lane. See [shadow findings](artifacts/native-shadow-ledger-findings.md).
+
+
+Earlier native observation: ten self-contained fixtures and 70 exact status/output
+comparisons locate an unfunded daily request before hourly losses. Next is a
+shadow water-ownership ledger, not a guard or parameter change. See
+[native observation findings](artifacts/native-funding-observation-findings.md).
+
+
+Earlier continuation (2026-10-31): restriction provenance and the 52-case
+no-detected boundary-flag control are complete. Zero misses recovered; five
+substantive native funding failures retained. Next is an isolated native funding
+trace, not parameter promotion. See [latest findings](artifacts/restriction-provenance-findings.md)
+and [historical ledger v4](artifacts/candidate-ledger-v4.json). The U10 acceptance
+counts below remain the unchanged baseline; later experimental failures are not
+covered by that baseline pass statement.
+
+
 The native accounting investigation accepts the bounded repairs in `wepp_261029`
 artifact revision 2, source `ba9f2ad91`. The frozen U10 panel passes all 840
 physical/accounting cases. Parameterization acceptance remains unmet: 719/766
@@ -18,6 +64,17 @@ routing behavior using the frozen development panel and physically justified
 controls. Preserve the separate small-load criterion. Do not fit around native
 defects, consume withheld materials early or treat accounting success as magnitude
 acceptance. UI specification/layout remains human-gated before implementation.
+
+## Resumed diagnostic
+
+2026-10-31 UTC: revision-2 release integration is complete. Completed the 840
+paired boundary readback and 111-run same-engine legacy-soil control. All physical
+checks pass; 76/91 original misses meet magnitude criteria with legacy control
+soils. Remaining failures map to nine distinct inputs. See
+[role attribution](artifacts/role-attribution-findings.md) for the next experiments. Reference and candidate differ in both
+engine and soil/runtime treatment, so this first pass identifies where outlet
+differences occur without claiming parameter causality. Withheld outcomes and
+production defaults remain untouched.
 
 ## Chronological evidence
 
@@ -331,3 +388,131 @@ updated release notes. Execute the active
 for vendoring/publication only after native scientific acceptance. This scope
 amendment supersedes the earlier no-release boundary; Roads parameter defaults,
 withheld-panel rules and the human UI configuration/layout gate remain unchanged.
+
+### Resumption execution evidence
+
+Executed via `wctl exec -T weppcloud /opt/venv/bin/python`:
+`artifacts/role_boundary_assessment.py` (840 paired cases; hashes/budgets pass),
+then `artifacts/legacy_soil_control_r2.py --declare` and the same helper without
+`--declare` (111 completed/physical passes). These paths are relative to this
+package; invocation uses the repository-relative package prefix.
+`artifacts/summarize_role_control.py` verifies the raw result hash and records
+76/91 recovered comparisons, 15 residual failures / nine distinct inputs.
+`artifacts/retain_role_study.py` verifies all 3,346 archive members.
+`wctl doc-lint --path docs/work-packages/20261029_roads_parameterization_program`
+passes with no warnings or errors. Native/runtime/product code was unchanged.
+
+## Active role/runtime ablations
+
+2026-10-31 UTC: user authorized proceeding. Frozen erosion study: 333 runs
+(fill, buffer, both; same 111 cases), preserving all generated hydraulics and
+requiring WAT byte parity. Runtime study: 98 runs, full hourly/PMET/snow factorial
+minus retained baselines over nine residual inputs plus five passing controls.
+Runtime absence changes solver/ET/snow choices; it is not proposed deployment
+configuration. Declarations and executed helper hashes are retained before runs.
+
+## Role/runtime results and continuation
+
+Completed 333 erosion-anchor and 98 runtime-factor runs; see
+[findings](artifacts/role-runtime-ablation-findings.md). Erosion-only substitution
+recovers at most 10/91 misses and loses one passing control; reject promotion.
+Hourly-off with PMET/snow fixed recovers 8/9 legacy residual input sets. Six
+alternate hourly/Penman cases fail the native water guard and remain rejected.
+All 431 recorded input/output inventories and soil changes independently verified;
+raw evidence has a verified archive receipt. Next: generated/legacy soil crossed
+with hourly on/off, keeping PMET/snow present, before hydraulic parameter choice.
+No defaults or acceptance changes; withheld outcomes and human UI gate untouched.
+
+## Declared soil-by-hourly interaction — 2026-10-31 UTC
+
+Execute `artifacts/soil_hourly_interaction.py`: complete all four cells for the
+111 existing diagnostic cases, holding PMET/snow present. Correct the previous
+run estimate: only 14 legacy hourly-off cases exist, so 208 new runs are required
+(111 generated, 97 legacy), with 236 verified cells reused. Removing only
+`wepp_ui.txt` preserves all soil files and other inputs. Freeze declaration and
+helper hashes before execution; retain failures and unchanged physical criteria.
+Report grouped magnitude recovery/regression and paired signed sediment/water
+interactions. No default change, new material selection or withheld inspection.
+This is a selected diagnostic panel, not the full acceptance matrix.
+
+## Completed soil/hourly interaction
+
+[Findings and figure](artifacts/soil-hourly-interaction-findings.md): 208 new runs
+and 236 reused cells complete the 111-case factorial; all 444 physical audits
+reproduce. Generated hourly-off recovers 21/91 misses but loses a passing control;
+legacy-off passes 108/111, with three labels aliasing one remaining failing input.
+Reject runtime-only promotion. Next: trace generated lower-boundary provenance
+and native drainage semantics before declaring hydraulic changes. Current
+[candidate ledger](artifacts/candidate-ledger-v3.json) supersedes historical v2.
+No defaults, withheld outcomes or UI implementation changed.
+
+## Lower-boundary provenance and no-detected-restriction control
+
+2026-10-31: trace only seven development materials through frozen source headers,
+SSURGO writer and native input/drainage code. Separate lithic metadata, low-Ksat
+mineral truncation and no detected horizon. Preserve source hashes and explicitly
+label header provenance as generated source evidence, not independent field data.
+The documented /1000 bedrock proxy is a historical heuristic, not an inferred
+unit bug. Keep existing 200 mm horizon normalization.
+
+Declare a bounded 52-case diagnostic for the three no-detected materials
+2711184, 2711250 and 1718494 already present in the 111-case panel. Change only
+`res_lyr.slflag` from 1 to 0 in all three OFEs, leaving the stored thickness and
+conductivity fields, all horizons/erosion properties, hourly/PMET/snow and native
+binary exact. Native initialization ignores/zeros boundary inputs when flag=0.
+This tests the imposed lower-boundary endmember, not proof of unrestricted
+geology or a new default. Never apply it to mineral or lithic classes. Compare
+paired water/sediment and unchanged physical criteria; retain all failures.
+Prior boundary studies varied conductivity and encountered now-repaired native
+failures; this is an explicit no-detected-class flag contrast, not a new fitted
+conductivity multiplier. No withheld outcomes or production changes.
+
+## Restriction audit and boundary-flag control completed
+
+[Findings](artifacts/restriction-provenance-findings.md): seven source materials
+classified by retained generation evidence; 52 no-detected flag-off runs yielded
+47 physical passes, zero recovered misses and five native funding stops. Exact
+paired files and completed native audits verified. Reject promotion; investigate
+0.131–0.180 mm hourly funding deficits on the retained PMET-on failing decks
+before more tuning. [Ledger v4](artifacts/candidate-ledger-v4.json) is current.
+No parameter/binary changes, withheld outcomes or UI implementation.
+
+## Active native funding trace — 2026-10-31
+
+Executing native package
+`/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/`
+and its `prompts/active/implementation_execplan.md`. Five failing plus five
+passing self-contained fixtures reproduce all released output hashes. Isolated
+O1/O2 observer builds preserve all outputs with observation off/on; daily
+withdrawal exceeds start-of-day storage before percolation/lateral losses. O3
+uses existing IRS markers to trace producer/runoff-basis differences. No native
+behavior, released binary, parameters, withheld outcomes or UI changes.
+
+## D2 equivalent-plane correction — 2026-10-31
+
+[Findings](artifacts/native-D2-geometry-findings.md) and [ledger v10](artifacts/candidate-ledger-v10.json)
+are current. Confirmed native array-origin defect; origin-only and combined
+candidates each pass twelve full-period physical checks. Clean candidate outputs
+match the combined observer exactly. Source candidate implemented with 13 new
+regression tests; 75 existing focused tests pass. [ADR-0119](../../adrs/ADR-0119-native-recession-and-equivalent-plane-geometry.md)
+is proposed. Finish native gates, then Disturbed, Cedar Creek and Roads magnitude
+rebaselining. Released binaries/defaults unchanged; withheld outcomes untouched;
+UI specification/layout remains human-gated.
+
+### Broader D2 checkpoint
+
+Native gates: 1073 tests and 18 watchlist cases pass; Disturbed 99 pass. Roads physical gate 840/840; magnitude 713/766 meaningful and 31/74 small, two recoveries and seven regressions. All 864 Cedar hillslopes complete; watershed and semantic/particle audit pending. No release or parameter adoption.
+
+## Final dated revision 3 scientific acceptance — 2026-10-31
+
+The user authorized replacing undeployed `wepp_261029` under the same name.
+Delivery is tracked in [revision-3 release package](../20261031_wepp_261029_rerelease_r3/package.md).
+Final source `6112b68bce0e21a77f510bde5c24af067a47a647` passes 1,095 native
+tests, 28 watchlist cases, 99 Disturbed tests and 840 Roads physical cases.
+All 6,057 fresh Cedar outputs match the independently accepted candidate.
+ADR-0119 is accepted. Magnitude remains 744/840; no parameterization candidate
+is accepted. Complete release delivery before resuming parameter exploration.
+Withheld materials remain untouched and UI specification/layout remains human-gated.
+
+Current engine ledger: [v11](artifacts/candidate-ledger-v11.json), revision 3
+vendored with final scientific acceptance; release integration tracked separately.

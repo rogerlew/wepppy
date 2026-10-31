@@ -1,0 +1,9 @@
+{
+  "archive": "/wc1/runs/ro/roads-native-funding-20261031/stage-ledger-v1.tar.gz",
+  "sha256": "bdb4a19f600fc89166d353ce52c61014daef9c26f0186ec8763f2b95c0df9542",
+  "bytes": 87871760,
+  "files": 670,
+  "uncompressed_bytes": 677875856,
+  "all_members_verified": true,
+  "manifest_sha256": "4c732407544c725097bad0a1e4ae47d6954166aa76235205ceef1eeed32f0c46"
+}

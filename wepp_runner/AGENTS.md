@@ -30,8 +30,10 @@ Before copying any new binary into `wepp_runner/bin`, manual tests in `/workdir/
 
 From `/workdir/wepp-forest/src`:
 ```bash
+export PATH="/usr/bin:/bin:$PATH"
 make clean
-make all
+make wepp
+make wepp_hill
 ```
 
 From `/workdir/wepp-forest`:

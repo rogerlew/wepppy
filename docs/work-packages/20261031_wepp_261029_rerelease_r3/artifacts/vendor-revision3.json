@@ -1,0 +1,27 @@
+{
+  "artifact_revision": 3,
+  "files": {
+    "wepp_261029": {
+      "previous_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+      "sha256": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+      "size": 2724768
+    },
+    "wepp_261029.json": {
+      "previous_sha256": "a04cb9b67751682634c7067442677768b62d44fc292205ea29783360095d8311",
+      "sha256": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+      "size": 14490
+    },
+    "wepp_261029_hill": {
+      "previous_sha256": "21d8480041d2efed942abb8471271ce1a11c5f72190d45c0c42dbe0028c019ed",
+      "sha256": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
+      "size": 2665080
+    },
+    "wepp_261029_hill.json": {
+      "previous_sha256": "53742416b34fe0ece9c27eeee745f9b35761c7da6a5a982c9b4b55dda1c3366f",
+      "sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99",
+      "size": 14440
+    }
+  },
+  "deployment": false,
+  "defaults_changed": false
+}

@@ -1,0 +1,27 @@
+{
+  "release": "wepp_261029",
+  "binary_sha256": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "fixture_source_commit": "631aed1d1c89ed8fa76c5dc3f2e4258a8f199504",
+  "fixture_sha256": "64eb68c9a408b36abd5658aea68a039014620f7340236b0aa518b9e4a72677fc",
+  "native_output_sha256": {
+    "H1.loss.dat": "604e8058a3ef4ab07ed421cde1226cbd9a6f66bb87ea958abbc1e946b0cd8521",
+    "H1.soil.dat": "0c193facbdd44e2c17708f1f76b36c5e76bbdc567e484d84103133f60188d088",
+    "H1.pass.dat": "fe858204d6b5b6cf4d5a1a2fe0ac9c197277a375e68140166c64ddaf4b014f08",
+    "H1.plot.dat": "b1d5814702ca16be74fd0b777a9a481fd0ad97133d6a6bc71e4c74ad89eae6b4",
+    "H1.wat.dat": "0ccec8b1eef22014cb27eec09297b61901d08539ad1ab38eae6c3495d1d11785",
+    "H1.element.dat": "4eae0adb5b1162a04ba4e0152101312a81e8130815059b54bf8a1e6ff5c85d4f",
+    "H1.ebe.dat": "cf0ba95bb54150c34cb61022b0a280a7ffdbdb8e8d4b76c598dffb309c5e3d7a"
+  },
+  "complete_water_rows": 17532,
+  "parquet_rows": {
+    "H.element.parquet": 3240,
+    "H.wat.parquet": 17532
+  },
+  "absent_optional_water_columns": [
+    "InterceptionStorage"
+  ],
+  "runner_log_sha256": "c30a9324d21da6b83601fc6f4e19a7e76f55b25650704c2198f0c3d521ee745f"
+}

@@ -1,0 +1,74 @@
+{
+  "scope": "Committed isolated application base plus final binary pair; provisional sidecars. Final enriched sidecars and public artifacts separately checked after vendoring.",
+  "original_shards": {
+    "3": {
+      "passed": 1918,
+      "skipped": 157,
+      "failed": 1,
+      "errors": 0
+    },
+    "4": {
+      "passed": 2881,
+      "skipped": 22,
+      "failed": 0,
+      "errors": 0
+    },
+    "1": {
+      "passed": 3487,
+      "skipped": 102,
+      "failed": 0,
+      "errors": 0
+    },
+    "2": {
+      "passed": 3490,
+      "skipped": 86,
+      "failed": 1,
+      "errors": 0
+    }
+  },
+  "original_collected": {
+    "4": 2903,
+    "2": 3663,
+    "3": 2748,
+    "1": 3589
+  },
+  "replayed_whole_shard3": {
+    "passed": 2591,
+    "skipped": 157,
+    "failed": 0,
+    "errors": 0
+  },
+  "replayed_shard2_tail": {
+    "passed": 94,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0
+  },
+  "completed_shard2": {
+    "passed": 3577,
+    "skipped": 86,
+    "failed": 0,
+    "errors": 0
+  },
+  "completed_segmented_coverage": {
+    "passed": 12536,
+    "skipped": 367,
+    "failed": 0,
+    "errors": 0
+  },
+  "logs_sha256": {
+    "roads-native-funding-r3-application-shard3-replay.log": "c0cf3154d942d0aa29dad7687ebad456817cd5104cfdce9b7c9448dc770b205a",
+    "roads-native-funding-r3-application-full.log": "3c52609aba182ab37c45fee2b9dce07e118011b9be202df54022dee965ad775b",
+    "roads-native-funding-r3-application-full-v2.log": "7928871422ac6358eef25e68d6f61afba2851d7213e06c8aeda714a50cc1f9b3",
+    "roads-native-funding-r3-isolated-preflight-v2.log": "28d4344ac6a5a7039ed227b15ef8c5eea8357ed0f2d1c6598581d42a939169c6",
+    "roads-native-funding-r3-application-shard3-replay-v2.log": "87dd0f8e45e5bee051419661fd12ddbcaa40125816960affcbf49aa777f3989c",
+    "roads-native-funding-r3-application-shard2-tail.log": "6126e639c5bd0d98b977a00568e1d17a78693f8678b7b6d401be7f6322156e4c"
+  },
+  "failed_attempts": [
+    "Initial partial staging rejected by binary registry; excluded.",
+    "Original shard3 mocked deployment renewal timeout124; excluded entire shard from accepted count.",
+    "Original shard2 browser executable absent from incorrectly configured /ms-playwright. Canonical existing browser path restored; failed module and complete tail replayed unchanged. Seven prior module passes counted once.",
+    "First full shard3 replay AF_UNIX path too long due evidence-directory basetemp; excluded. Second unchanged replay uses short /tmp/r3s3."
+  ],
+  "accounting": "Complete original shard1+4, shard2 passing prefix plus unchanged failed-module/tail replay minus seven duplicated passes, and complete unchanged shard3 replay; no waived assertions. Not one uninterrupted green suite."
+}

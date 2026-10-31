@@ -1,0 +1,34 @@
+{
+  "accepted": true,
+  "reviewer": "Independent AI implementation/disclosure review; not institutional peer review",
+  "pdf_sha256": "76e566ae95321a087f90742ec0570573749a452920f8629f6fcbcbcefbe165e4",
+  "source_freeze_sha256": "879bf6d4e9f8c536f53e41ab1727255714b9ee85d912c619196924e9de4083e3",
+  "preapproval_manifest_sha256": "d4b11e350fecff956b9159af1f2125777db9ee12ea218ceab6db80912b3edb77",
+  "review_sha256": "a7d39a7bd534257e25ad2822b3131733a27b8c32ca53ac04c66ccf1d9a780903",
+  "pages": 20,
+  "figures": 8,
+  "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647",
+  "binary_sha256": {
+    "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
+    "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+  },
+  "sidecar_sha256": {
+    "wepp_261029.json": "b4bc237240817d7ec90c335e8fdf2c0096c0d056a14fc0038680b920297d7c0f",
+    "wepp_261029_hill.json": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  },
+  "scientific_report_acceptance_sha256": "2e57a390c2ff0ab33a64cae143edbff2a6cc3ef1bc829307a025d65be35a77ac",
+  "evidence_sha256": {
+    "D2-final-report-git-clean-review.json": "d6cf8bc974f6762bb531d7ac8591231596f23bd8435bc9c785e6e608de79cc2b",
+    "D2-final-report-contact-sheet.png": "2e108cf8001b101cafae20302a6812212b4e6ab2717fa20818bb6726b0a07ef8"
+  },
+  "allowed_manifest_changes": "Publication status/date/approval/review fields and attaching review hashes only; substantive identity/scientific/content fields unchanged",
+  "remaining_gates": [
+    "Exact public copy and HTTP content/hash validation",
+    "Separate application integration completion",
+    "Deployment only if separately authorized"
+  ],
+  "limitations": [
+    "No accessibility certification; PDF is untagged",
+    "This report review is independent AI review, not institutional or human peer review"
+  ]
+}

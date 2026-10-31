@@ -1,0 +1,9 @@
+{
+  "archive": "/wc1/runs/ro/roads-native-funding-20261031/observation-v1.tar.gz",
+  "sha256": "1089c019555b5df9fb8bf389b49ba826e6bfe131f681c0ea7fb8930c6b2e3a2d",
+  "bytes": 97090339,
+  "files": 1669,
+  "uncompressed_bytes": 533680151,
+  "all_members_verified": true,
+  "manifest_sha256": "949484ff28f3540d8e762c84fd8143360e9ac4a01c6a0027c6297acf734beb77"
+}

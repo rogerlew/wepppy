@@ -14,6 +14,12 @@ This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
+- [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
+- [ ] Complete Cedar watershed semantic/particle/source review and candidate disposition.
+
+- [x] D2 confirms EPLANE array-origin defect; U2/U3 physical panels and clean-output parity pass. Native candidate implemented with 13 permanent tests and proposed ADR-0119.
+- [x] Complete native, Disturbed and Roads development gates; Cedar review remains separately tracked. No released binary or parameter adoption.
+
 - [x] Reconcile native release: source 631aed1d1, matched 261029 pair reviewed and pushed.
 - [x] Existing road-cap candidate passes 96/96 development cases with physical audits.
 - [x] Record human UI specification/layout gate and unchanged scientific criteria.
@@ -24,7 +30,18 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Retain and independently replay fixtures for daily-water and sediment-output failures.
 - [x] Operator authorized native accounting ablation; released engine remains the comparator.
 - [x] Complete bounded native remediation and independent scientific acceptance (U10).
-- [ ] Finish revision 2 release integration before further tuning.
+- [x] Finish revision 2 release integration: WEPPpy c28e30351, native 0df4c9227; exact pair frozen.
+- [x] Recompute all 840 paired boundary budgets through Rust; matched inputs/output hashes and net-exchange identities pass.
+- [x] Execute declared 111-case same-engine legacy-soil control: all physical checks pass; 76/91 original misses meet magnitude criteria with legacy control soil.
+- [x] Execute 333 fill/buffer erosion-anchor runs and 98 runtime factorial runs; verify all recorded hashes and soil changes independently.
+- [x] Complete 111-case soil/hourly factorial: 208 new runs, 236 reused cells; all 444 native audits reproduced. Reject hourly-off as a standalone candidate.
+- [x] Trace all seven source restrictions; execute 52 no-detected boundary-flag cases and independently verify paired artifacts. Reject: zero recovered misses, five native funding failures.
+- [x] Reproduce and instrument the five PMET-on no-boundary failures and controls: 70 exact status/output comparisons; daily requests already exceed initial stock.
+- [x] Execute O4 shadow ledger: 26 exact-parity replays, 185,824 states, reject 179 negative outflows.
+- [x] O5 reconciles matching-stage stocks; declare O6 attribution specification.
+- [x] O6 attribution isolates QINF discontinuity; predeclare and execute U1 continuity screen, 12/12 full-period completions.
+- [x] D1 supports scalar domain; local source audit rejects U1 as standalone multi-OFE repair.
+- [x] D2 narrowed to confirmed EPLANE origin correction; U2/U3 controls and broad development gates executed. Cascade redesign deferred.
 - [ ] Complete additional native geometry/routing stress validation after accounting repairs;
   core five-climate/four-design/surface/traffic/seven-material research panel is complete.
 - [ ] Freeze successful rules, then execute six-material withheld validation.
@@ -137,6 +154,55 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+D2: EPLANE received a zero-based length array as one-based, shifting lengths relative to coefficients. Homogeneous probes hid the error. Corrected integral probes pass 8/8 versus released 2/8.
+
+D1 confirms uniform-plane continuous formula independently but finds 0.027406 m³
+unsupported Hortonian source in U1. Soil funding alone cannot justify that flux.
+
+O6 rules out stale stold in 4,145 comparisons and locates five failures in
+recession differences. U1 continuity trial completes all twelve cases but retains
+one funded negative exchange; completion alone does not establish physicality.
+
+O5 identifies O4 bookkeeping error: potential plant use subtracted before SWU
+withdrawal. Matched stages reconcile to 0.000312 mm; original native stops remain.
+
+O4 rejects monotone recession ownership (179 negative outflows). The stock/sink
+diagnostic remains unreconciled, with maximum residual 2.400805 m³; this is not
+evidence of a new native defect. See `artifacts/native-shadow-ledger-findings.md`.
+
+Native observers prove the five failing daily requests exceed stock before
+hourly spending. Upstream recession reduces actual incoming runoff; connected
+equivalent-plane output does not receive the same reduction on these events.
+O0/O1/O2/O3 preserve exact native outputs and statuses across 70 replays.
+
+
+The seven materials separate into two lithic-metadata, two low-Ksat mineral and
+three no-detected classes. All emit an enabled 10 m boundary; /1000 is a documented
+heuristic. Disabling only the flag for the 52 no-detected cases recovers zero
+misses and triggers five native funding stops, with 0.131–0.180 mm deficits.
+These are materially larger than the earlier Penman roundoff-scale failures.
+
+
+The complete soil/hourly factorial needs 208 new runs, correcting the earlier
+111-run estimate (only 14 legacy-off cells existed). Generated hourly-off recovers
+21/91 misses and loses one control; legacy-off passes 108/111 (three remaining
+labels alias one input). All 444 cell audits reproduce. Generated lateral-flow
+responses are much larger; all seven materials emit an enabled lower boundary
+with a 10 m thickness term. This is a hypothesis driver, not proof of bad geology.
+
+
+The completed role/runtime panel recovers only 10/91 misses using both-role
+erosion anchors, despite exact WAT parity in all 333 runs. Hourly-off recovers
+8/9 distinct legacy residuals with PMET/snow fixed. Six hourly-on/Penman runs
+stop at tiny negative `HOURLY_WATER_UNMET` demands; all remain failures.
+
+
+2026-10-31: three of six excessive meaningful-load cases have zero road export
+in both models; downstream exchange is the largest difference in all six. The
+same-engine full legacy-soil control brings 76/91 original misses within criteria,
+but leaves nine distinct failing inputs. Neither uniform road scaling nor a
+soil-only explanation covers the remaining evidence.
+
 2026-10-30 continuation: 16 uncapped cases per lane stop at the water inventory
 guard. Exact replay establishes a 5.035662 mm full-day deficit before other sinks
 in the Birmingham sand fill OFE, so retiming alone cannot repair it. Cap and
@@ -153,6 +219,50 @@ still described 261026 and a pending native decision; the explicit release amend
 and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
+
+D2, 2026-10-31: defer cascade redesign in favor of confirmed minimal array-origin repair plus independently supported scalar continuity. Advance U3 as an unreleased source candidate; retain origin-only control. See proposed ADR-0119.
+
+D1: reject standalone U1 promotion; retain supported scalar component and
+continue D2 local surface ownership before broad adoption gates.
+
+O6/U1: retain isolated U1 as experimental, with model gap/scientific review
+disposition. No source promotion, parameter adoption or released binary change.
+
+O5: retain released behavior. Proceed to O6 storm/recession attribution per
+`artifacts/native-joint-ownership-experiment.md`; accounting closure does not
+validate a new infiltration law.
+
+2026-10-31 O4: reject recession-only shadow correction. Reconcile observation
+boundaries before a joint GRNA/QINF behavior contract; no guard/default change.
+
+2026-10-31 native observation: retain the guard and released engine. Proceed to
+a shadow GRNA/QINF ownership ledger, preserving geometry and event support,
+before a single scientifically contracted behavior lane. Do not restore water
+already assigned to upstream infiltration. No parameter retuning around failures.
+
+
+2026-10-31 restriction audit: retain current soil and runtime defaults; reject
+the no-detected flag endmember. Prioritize an isolated native funding trace on
+the retained five-deck panel before further boundary tuning. No guard relaxation
+or automatic binary adoption. Current ledger: `artifacts/candidate-ledger-v4.json`.
+
+
+2026-10-31 soil/hourly completion: reject a global runtime switch. Trace source
+restriction classes, missing-information defaults and native bottom conductance
+before choosing hydraulic parameters. Preserve all restrictions pending evidence;
+do not fit them to sediment. Current ledger is `artifacts/candidate-ledger-v3.json`.
+
+
+2026-10-31: Reject legacy erosion anchors as a standalone candidate; retain
+current runtime defaults. Prioritize the generated-soil/hourly-mode interaction
+with PMET/snow fixed before hydraulic calibration. Preserve alternate-runtime
+failures for separate native guard investigation; do not relax physical gates.
+
+
+2026-10-31, diagnostic decision: retain the generated-soil goal and current engine.
+Prioritize downstream role-specific erosion/hydraulic separation, with runtime
+controls for residual legacy mismatches. Reject treating legacy substitution as
+a successful candidate; its purpose is causal separation of full soil treatment.
 
 2026-10-30, owner: reissue the undeployed 261029 identity with the accepted native
 repairs. Preserve original identities, report revision 1, project defaults and
@@ -174,6 +284,59 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Native gates: 1073 tests and 18 watchlist cases pass; Disturbed 99 pass. Roads physical gate 840/840; magnitude 713/766 meaningful and 31/74 small, two recoveries and seven regressions. All 864 Cedar hillslopes complete; watershed and semantic/particle audit pending. No release or parameter adoption.
+
+Current: ledger v10 and `artifacts/native-D2-geometry-findings.md`. Both twelve-case lanes complete with zero negative linked FIN and unfunded requests; clean candidate exactly matches all U3 outputs. Native full gates running; Disturbed/Cedar/Roads magnitude rebaselining remains. Earlier D1/U1 rejection remains historical evidence.
+
+Previous D1 checkpoint: ledger v9 and `artifacts/native-domain-review-findings.md`. D1 completes
+63 reference solves, 42 scalar calls, zero new full WEPP runs. No adoption.
+
+Current: ledger v8, O6/U1 findings in `artifacts/native-ownership-findings.md`.
+24 observation parity runs and 12 candidate full-period completions. Physical
+formula domain and one signed exchange remain unresolved before broader gates.
+
+Current: O5 complete, ledger v7; 24 additional exact-parity executions and
+185,819 completed states reconciled. See `artifacts/native-stage-ledger-findings.md`.
+No scientific candidate adopted; UI and withheld gates remain.
+
+O4 completed and rejected; current ledger is `artifacts/candidate-ledger-v6.json`.
+All 26 added native runs preserve expected statuses and outputs. Magnitude
+acceptance remains unmet, withheld materials unused, and UI implementation gated.
+
+Native observation milestone completed in the new 20261031 native package;
+self-contained ten-case fixture and raw archive retained. See
+`artifacts/native-funding-observation-findings.md`. No native remedy or release
+is established; prior C3 rejection remains relevant to the next lane.
+
+
+Restriction audit and bounded flag control complete: 47/52 native cases pass
+physical checks, 0/51 misses recover, one passing control remains passing. All
+52 paired artifact inventories and exact soil changes independently verified.
+See `artifacts/restriction-provenance-findings.md`; canonical provenance wording
+is clarified in `wepppy/soils/ssurgo/ssurgo.md`. No production parameter changed.
+
+
+The four-cell soil/hourly comparison is complete and independently re-audited.
+See `artifacts/soil-hourly-interaction-findings.md` for paired sediment/water
+results, figure, source context, corrected run count and continuation rationale.
+Acceptance remains unmet; no default or withheld/UI gate changed.
+
+
+Role/runtime diagnostic completed: 333/333 erosion runs and 92/98 runtime
+runs passed physical checks; all 431 input/output inventories and soil changes
+were independently verified. See `artifacts/role-runtime-ablation-findings.md`
+for contrasts, limitations, failure disposition and the next bounded study.
+No candidate accepted; full matrix, withheld and human UI gates remain open.
+
+
+Resumed after release: completed 840 paired native boundary readbacks and 111
+declared legacy-soil controls (90 distinct input sets). All 111 physical audits
+pass; 76/91 original misses meet magnitude limits only in the diagnostic control.
+Full generated-soil acceptance remains unmet. Retained 3,346 verified artifacts;
+see `artifacts/role-attribution-findings.md` and the archive receipt. The next
+experiments isolate downstream coefficients/hydraulics and nine residual runtime
+comparisons. Withheld materials and product implementation remain untouched.
 
 The bounded native accounting defects are repaired and independently accepted in
 261029 artifact revision 2. The final U10 development panel passes all 840 physical
@@ -323,3 +486,149 @@ misses. The retained case inventory contains 41 meaningful underpredictions, six
 meaningful overpredictions and 44 small-reference exceedances; a global multiplier
 would move the opposing failures in incompatible directions. No new parameter
 candidate or acceptance threshold is introduced by this assessment.
+
+## Resumption after release — 2026-10-31 UTC
+
+Execute this active program plan after completed revision-2 delivery. First use
+`artifacts/role_boundary_assessment.py` to read the frozen 840 development cases
+and their FSWEPP2/WEPP2010 references through the canonical Rust ELEMENT reader.
+Verify native output hashes and matching climate, management and slope inputs.
+Separate road-boundary export from fill and buffer net boundary exchange; group
+by meaningful low/high, small-load exceedance and passing controls. This is
+bookkeeping attribution, not tagged sediment provenance or a causal parameter
+experiment. Do not change defaults, criteria, material split or native binary.
+
+The next ablation must distinguish road production, fill contribution and buffer
+retention, including same-modern-engine legacy-soil controls to separate engine
+and soil effects. Keep the existing fixed-site sidecar limitation explicit;
+regional climate runtime and broader geometry validation remain required. This
+update closes the stale release prerequisite and resumes the scientific program
+without implying magnitude acceptance or human approval of UI implementation.
+
+The completed boundary readback places the largest net-exchange difference
+downstream in all six meaningful high cases and 43/44 small-load exceedances.
+Median defined road-boundary ratios are 0.899 (3 cases) and 0.584 (27 cases),
+respectively; the other cases have zero road export in both models. This does not support
+a uniform road-erosion reduction. Declare `legacy-soil-control-r2-declaration-v2.json`
+before executing `legacy_soil_control_r2.py`: every development miss plus one
+passing control per climate/design, replacing only the whole soil deck while
+retaining exact modern engine/runtime inputs. Legacy soils are diagnostic controls,
+not a proposed modern-soil default. No withheld data or threshold change.
+
+### Completed resumption outcome
+
+The 840-case role readback and 111-run same-engine control are complete; see
+`artifacts/role-attribution-findings.md`. The control has 90 distinct consumed
+input sets and all 111 physical checks pass. It brings 76/91 original misses
+within their unchanged criteria; 15 failures map to nine distinct inputs. This
+is diagnostic evidence for soil-role and runtime investigation, not acceptance
+of legacy soils or a new generated parameter set. All 3,346 raw artifacts are
+archived with verified member hashes. Updated decision: prioritize downstream
+role-specific erosion/hydraulic separation, with explicit runtime controls for
+the residual legacy comparisons; retain all existing broad/withheld/UI gates.
+
+## Declared role and runtime ablations — 2026-10-31 UTC
+
+Execute `artifacts/role_runtime_ablation.py` under this active plan. The erosion
+study declares 333 runs: all 111 previous diagnostic cases with fill-only,
+buffer-only and both-role legacy erosion anchors (ki, kr, critical shear).
+Generated hydraulic properties, horizons, 200 mm normalization, restrictions and
+road settings remain exact. Require unchanged native WAT hashes as a negative
+control, alongside physical and magnitude readback. Anchors are diagnostic, not
+new validated defaults; their actual role-wise bounds are frozen in the declaration.
+
+The runtime study declares 98 runs: nine distinct residual legacy-soil inputs
+plus one passing control per climate, crossed with seven nonbaseline combinations
+of hourly mode, PMET and snow sidecar presence. Existing all-present baselines
+complete the factorial. Source `infile.for` confirms absent PMET selects original
+Penman, not merely a different coefficient; absent snow uses a 0 C threshold
+rather than the fixture -2 C. Preserve soil and all other inputs. This separates
+three mechanisms and interactions; absence is a controlled diagnostic, not a
+climate-specific or production recommendation. No withheld material is consumed.
+
+### Completed role/runtime outcome
+
+The declared 431-run panel is complete and retained with verified archive member
+hashes (`artifacts/role-runtime-archive-v1.json`). This revision records failed
+alternate runtimes as failures and rejects coefficient-only promotion; see
+`artifacts/role-runtime-ablation-findings.md` for the evidence and continuation.
+
+## Declared soil-by-hourly interaction — 2026-10-31 UTC
+
+Execute `artifacts/soil_hourly_interaction.py`: complete all four cells for the
+111 existing diagnostic cases, holding PMET/snow present. Correct the previous
+run estimate: only 14 legacy hourly-off cases exist, so 208 new runs are required
+(111 generated, 97 legacy), with 236 verified cells reused. Removing only
+`wepp_ui.txt` preserves all soil files and other inputs. Freeze declaration and
+helper hashes before execution; retain failures and unchanged physical criteria.
+Report grouped magnitude recovery/regression and paired signed sediment/water
+interactions. No default change, new material selection or withheld inspection.
+This is a selected diagnostic panel, not the full acceptance matrix.
+
+### Soil/hourly completion
+
+208/208 new runs completed and passed physical checks; 444/444 paired cells
+independently reproduced from native outputs. Archive receipt:
+`artifacts/soil-hourly-archive-v1.json`. This update records the rejected runtime
+candidate and moves investigation to source-supported lower-boundary semantics.
+
+## Lower-boundary provenance and no-detected-restriction control
+
+2026-10-31: trace only seven development materials through frozen source headers,
+SSURGO writer and native input/drainage code. Separate lithic metadata, low-Ksat
+mineral truncation and no detected horizon. Preserve source hashes and explicitly
+label header provenance as generated source evidence, not independent field data.
+The documented /1000 bedrock proxy is a historical heuristic, not an inferred
+unit bug. Keep existing 200 mm horizon normalization.
+
+Declare a bounded 52-case diagnostic for the three no-detected materials
+2711184, 2711250 and 1718494 already present in the 111-case panel. Change only
+`res_lyr.slflag` from 1 to 0 in all three OFEs, leaving the stored thickness and
+conductivity fields, all horizons/erosion properties, hourly/PMET/snow and native
+binary exact. Native initialization ignores/zeros boundary inputs when flag=0.
+This tests the imposed lower-boundary endmember, not proof of unrestricted
+geology or a new default. Never apply it to mineral or lithic classes. Compare
+paired water/sediment and unchanged physical criteria; retain all failures.
+Prior boundary studies varied conductivity and encountered now-repaired native
+failures; this is an explicit no-detected-class flag contrast, not a new fitted
+conductivity multiplier. No withheld outcomes or production changes.
+
+### Restriction audit completion
+
+Completed and archived the source audit, 52-case flag contrast and independent
+readback. This revision rejects another boundary-only remedy and records the
+new substantive native funding failure class rather than treating stopped runs
+as zero sediment. Receipt: `artifacts/restriction-boundary-archive-v1.json`.
+
+## Active native funding trace — 2026-10-31
+
+Executing native package
+`/workdir/wepp-forest-release-20261009/docs/work-packages/20261031-roads-open-boundary-funding/`
+and its `prompts/active/implementation_execplan.md`. Five failing plus five
+passing self-contained fixtures reproduce all released output hashes. Isolated
+O1/O2 observer builds preserve all outputs with observation off/on; daily
+withdrawal exceeds start-of-day storage before percolation/lateral losses. O3
+uses existing IRS markers to trace producer/runoff-basis differences. No native
+behavior, released binary, parameters, withheld outcomes or UI changes.
+
+Native observation handoff: `artifacts/candidate-ledger-v5.json` records the prior
+ledger; `artifacts/native-funding-observation-archive-v1.json` verifies 1,669
+retained files. Scientific milestone remains open; no repair/parameter adoption.
+
+## O4 shadow ledger handoff — 2026-10-31
+
+See `artifacts/native-shadow-ledger-findings.md` and v6 ledger. The next bounded
+experiment reconciles actual stock/sink observation stages before a joint
+GRNA/QINF local ownership contract. Shadow funding success is insufficient when
+outflow is negative. No native behavior or release artifacts changed.
+
+### 2026-10-31 final revision-3 scientific checkpoint
+
+The user explicitly authorizes the same-name undeployed 261029 re-release.
+[Delivery plan](../../../20261031_wepp_261029_rerelease_r3/prompts/active/rerelease_execplan.md)
+tracks final metadata, vendoring and reviewed publication. Native scientific
+acceptance binds the final dated pair: 1,095 native tests, 28 watchlist cases,
+99 Disturbed tests, 840 physical Roads cases and 6,057 exact Cedar outputs.
+Magnitude remains 744/840, so this acceptance does not promote a parameterization.
+Resume exploration only after release delivery; preserve the existing success
+criteria, withheld-material boundary and human UI specification/layout gate.

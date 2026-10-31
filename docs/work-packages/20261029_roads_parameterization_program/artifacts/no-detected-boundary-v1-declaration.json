@@ -1,0 +1,847 @@
+{
+  "tasks": [
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/birmingham-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "2cdab500be2848f7066881abf396ee2c5300df01f99a1634f74170f9621af2ca",
+      "reference_kg_yr": 255.9157468357803,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/birmingham-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "541e1f021c3105b3dbbf0000a58a667912781cf5ee0144924a3879f8d7ea4bec",
+      "reference_kg_yr": 177.29180844459566,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/birmingham-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "49db15348b17331e5ea98348a0d50b5312ee8e776aa1351b1bfca8c08b5003eb",
+      "reference_kg_yr": 214.4916214005125,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "d68d03ea16c89c8965aec873a8dc7d488bd014c0a21d9e8e9fd0d358e8d16022",
+      "reference_kg_yr": 1.982840551532069,
+      "baseline_within": false,
+      "group": "meaningful_high"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "94a9aa45bff35147da49c6d3d57a86931d44d8d972ff4b2d78809d2067ab2766",
+      "reference_kg_yr": 71.35128,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "746efa67217e0849c2bb84937bdce8978219da03608b67d2042c38e7440370e3",
+      "reference_kg_yr": 28.621872309071605,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "c146bb79cb454b36e485286ab8ebeb8ec866cfcbc45970ccb19d7bc34c216db1",
+      "reference_kg_yr": 18.4921434045056,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "c336a197fe0537929d373bc6d75e2ca075845bc2e75958bc57dc84b4a3a4ba3f",
+      "reference_kg_yr": 8.01757266489054,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "9a29fe0839e24d101c758892b875b2df0d2d655cb4e547afacd46e96e12680d0",
+      "reference_kg_yr": 13.750568172581087,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "238c7041c6af14fc1d7b293fc145f1f3d194846310c54f21d0977865d8ff5726",
+      "reference_kg_yr": 13.750568172581087,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "9c9ff27b61123c18538917104d318ba524c10ecea8bb356202823d2fcc561072",
+      "reference_kg_yr": 1.982840551532069,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "2773af2e3906b642d86e9e6703cdf969d5e26c2fd481dc476495ca3eb6bc8ad9",
+      "reference_kg_yr": 12.888463584958448,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "6c5a4df28cfeb6d2a100f6e8e54031d9d328ded37fdf3456bc93ed9eb4c6b536",
+      "reference_kg_yr": 12.888463584958448,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/charleston-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "3668c73a0f2fdd21343c1bb446180deb88b61f0bae0a2ea0275817d2576ffe84",
+      "reference_kg_yr": 1.1638411932905621,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "898176905d3464bf0fcf65cc1fe1d876421f40d30d3f9652da9bf073281efdac",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "6210899d11b582eb0a2d066e3558fe276a0872675a405ae06c22dde4f61342ac",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "9a47837dc3aa5653f8cf0428458b4a3ba0ec2aec6fc4ff71e2de00eeacb4bd0a",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "d565775cb5dc4fec3a6b8b8e51b9dd421bcf4df83be5508f5d51b0dfa7ed2d7e",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "516827bb97bf54f82a1283b161da8aadd088acf1420a9ca08ba242553f3237d2",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-1718494-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "e6e03b9bd9350d89f6994a5b1e3a7b461a23e0b753daed5f78e6c0aeb80541ea",
+      "reference_kg_yr": 0.0,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "2ec0b61d1aa25d8524cdbbdee63ec3edf13951ea54f926c61d864010d44a2cc3",
+      "reference_kg_yr": 36.04392,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inbare-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "b562b97773b08850bb8c754b640fafb806b9f8b9621ae62826653c8a666bf753",
+      "reference_kg_yr": 22.4532,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inbare-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "46bd6cb4806277e8ae8c4be943d8b1303d3ac7439dc8501e2d1d14a78ccbcccb",
+      "reference_kg_yr": 14.1372,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inveg-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "ac7064501cc99a5b59db46c768d7d0f1b87a8acd80d178fd65f0bb4100499cc9",
+      "reference_kg_yr": 30.75336,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inveg-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "fbdd646586eaa69f58fde1c85f35c1d31ff0b7a358927b55d903f8e4496ea7b6",
+      "reference_kg_yr": 21.05136,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-inveg-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "f1aa09b3486dd627022fda1648f8c2deab1b0990880cbe51cdff3475c5924a00",
+      "reference_kg_yr": 12.375,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-outrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "543e4053b26cdebcb2273dd7969837fc33a3500f5a6fa2141fa2fd5524e28b7c",
+      "reference_kg_yr": 36.186479999999996,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-outrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "8c09dd92325b8798532d370e3fe49679a8daa8f824fb3f916075f5dc48a909ac",
+      "reference_kg_yr": 22.48488,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711184-outrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "f2711819fb547599c873974f3f072bf54c685d86cbb5b7fe28c12d3cefce7456",
+      "reference_kg_yr": 14.1372,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-inbare-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "50bf41d54e8cc550618d37afc2b7d48f817296278647be4cbf1b301439c52f31",
+      "reference_kg_yr": 25.09452,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-inbare-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "059c137c04bd356d8e5a6e1c6b90fe50d12d7c5ac2fb40ad42088549e84f185c",
+      "reference_kg_yr": 17.332919999999998,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-inbare-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "1da6f72f1deed19f2ad5d64d71861c4e474d58b1d1268a41e4a4da981e8d0aef",
+      "reference_kg_yr": 9.7218,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-inveg-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "2e0cc89d86ec878262287ab9ea60d6e8eb915828e030f8eef382ecd3988c1252",
+      "reference_kg_yr": 22.3542,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-inveg-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "4f136081c3c2d46c1986685d0d766ae16e11260075a6b201ba4d77ed392a0c11",
+      "reference_kg_yr": 16.311239999999998,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-outrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "bd7af780014ceabdd90763e519713bd7bcb8d29edf901ec7f892de283db1c842",
+      "reference_kg_yr": 25.13016,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-outrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "c90b1deb60332af361bd8bc0dd8be474d1a21aab337b0715fba10eb0d7eb5da6",
+      "reference_kg_yr": 17.33688,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/denver-2711250-outrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "2bc6d909ee89cf7558133d132d45e8264ae9bf4aaeb2c17e6062fc3d0fb093a1",
+      "reference_kg_yr": 9.7218,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "aa36fb556b7588bae31fb6ebd77c185b915209189f120f7e49b1eb8499473aaa",
+      "reference_kg_yr": 0.5603679819547152,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-1718494-outunrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "a409ef793edc2818d1cfda4780cd5a736e1d26041aeae76b1a0b19ce4136e166",
+      "reference_kg_yr": 0.5603679819547152,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-1718494-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "d5969a76501a99643ce88fbe43c7031d806f05eac3f95ea9c1b99aea48a3de68",
+      "reference_kg_yr": 0.5172627525735832,
+      "baseline_within": false,
+      "group": "small_exceedance"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "6797f73561e589f694257caf6b73467aeee46092b086b928e48c677ad5880e1a",
+      "reference_kg_yr": 1.1207359639094303,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "757ab13ea648b7ec7ee30da8d07cfdabde308f5c7b0784a7dde35c4e637655b0",
+      "reference_kg_yr": 1.1207359639094303,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-gravel-high-erosion_road_cap-project",
+      "source_record_sha256": "e6707488541555df52cc64a7010014f32dd82a5be93ecc1dc5559d0f1e4ab218",
+      "reference_kg_yr": 115.22027813576567,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-gravel-low-erosion_road_cap-project",
+      "source_record_sha256": "4a331e4aec00c97a6c681c2c02d55ee09acef9978b01ba75b3a7930ed78dd802",
+      "reference_kg_yr": 59.83005838101112,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-gravel-none-erosion_road_cap-project",
+      "source_record_sha256": "ed2a310a009fbd24d548666e2974e0082d521300f45cb80deeb78a854f796807",
+      "reference_kg_yr": 88.9260882132752,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "970b6a61f35e68148a4e2f4931b33e08f95d77cc472fd944831281a1a0d5b974",
+      "reference_kg_yr": 37.28602341467912,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "0e6041b567ff5f18e8dfdf9a874fc2c17284f9d979129da19e4ee9e366842893",
+      "reference_kg_yr": 37.28602341467912,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711184-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "336a73f9c084b36e21dad759bc5fbe58d812d2dd3ef8b7b7ed1b791be8577120",
+      "reference_kg_yr": 122.24643052489016,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711250-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "eccc5402c907441163522833ae2dce9c742a935f5cee4a57b8fd83efc476c6f3",
+      "reference_kg_yr": 92.2020856462412,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711250-outunrut-paved-low-erosion_road_cap-project",
+      "source_record_sha256": "48aaa76aef039b05d39bbd48ade08f1b648d7923017124c22e5a5b4309bb0e9d",
+      "reference_kg_yr": 92.2020856462412,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/site-2711250-outunrut-paved-none-erosion_road_cap-project",
+      "source_record_sha256": "ced01757a31ff8c7afe84872b00f4c86ae0ed418362e7a11f6fa664903402697",
+      "reference_kg_yr": 192.16311258108618,
+      "baseline_within": false,
+      "group": "meaningful_low"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "source": "/workdir/wepppy/out/roads-channel-accounting-20261030/U10-matrix840/matrix-v1/flagstaff-1718494-outunrut-paved-high-erosion_road_cap-project",
+      "source_record_sha256": "e980f9a8c659906386bc7e225d703d2d1fd674aef49ca9361111b543b400a602",
+      "reference_kg_yr": 1.1207359639094303,
+      "baseline_within": true,
+      "group": "meaningful_pass"
+    }
+  ],
+  "cases": 52,
+  "script_sha256": "06b4e4932a23b92574cb5b1461496a630258af651ea386b3c7dde67f722f6b8e",
+  "dependencies": {
+    "role_runtime_ablation.py": "b51fb6c267105da28bb049e695308178b69b8e506ec1f61a7440d750edea32c4",
+    "continuation.py": "1ee0354ea0ad9f0e88ac598f422b058c25cd6d44c38d2313b8ae03ada9eeafd4",
+    "role_boundary_assessment.py": "19321ac0c7e44572faf200005f3ab23c62606f8126db7013c14cb2c65bead71f",
+    "restriction-provenance-v1.json": "cd9679d20d79cd7581c5859eee92c99873ddde0fdf14cb70381ed0822984425c"
+  },
+  "binary_sha256": "819b91721f67c4a86a5ecea14c5beb840e9a705025da2a2cedf2b97a5e067715",
+  "contract": "Only res_lyr.slflag 1->0 in all OFEs of no-detected source materials. Keep other fields exact, including inactive thickness/Ksat, all horizons/200 mm breaks and hourly/PMET/snow. No material geology inference, new default, fitted value or withheld outcomes.",
+  "rationale": "Class-specific endmember separates the imposed boundary from the generated material without changing conductivity magnitudes. Prior studies changed Ksat, not this flag contrast on the repaired engine."
+}

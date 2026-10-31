@@ -1,0 +1,29 @@
+{
+  "cases": 111,
+  "completed": 111,
+  "physical_pass": 111,
+  "groups": {
+    "meaningful_high": {
+      "cases": 6,
+      "within": 5
+    },
+    "meaningful_low": {
+      "cases": 41,
+      "within": 40
+    },
+    "meaningful_pass": {
+      "cases": 19,
+      "within": 19
+    },
+    "small_exceedance": {
+      "cases": 44,
+      "within": 31
+    },
+    "small_pass": {
+      "cases": 1,
+      "within": 1
+    }
+  },
+  "results_sha256": "f73d411cb83a7d269a69e6544da96be9eb76636778ab2a5b1c306e3e5fee0231",
+  "declaration_sha256": "92d2928e486463a0de213e8707adda9f6661ff7e804461abb3a65be0ab61c1d6"
+}

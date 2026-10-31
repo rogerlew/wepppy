@@ -1,0 +1,2286 @@
+{
+  "cases": 52,
+  "raw_pairs_verified": 52,
+  "physical_pass": 47,
+  "median_water_deltas": [
+    {
+      "surface_out_m3_yr": 0.14291994811537734,
+      "lateral_out_m3_yr": -45.85823106601682,
+      "deep_percolation_m3_yr": 43.52016563144086,
+      "et_m3_yr": 0.0004526279999907956
+    },
+    {
+      "surface_out_m3_yr": 1.7403526651013976,
+      "lateral_out_m3_yr": -27.91250221130743,
+      "deep_percolation_m3_yr": 5.467822639798724,
+      "et_m3_yr": -12.672417260249997
+    },
+    {
+      "surface_out_m3_yr": -0.002790449296717498,
+      "lateral_out_m3_yr": -53.31202289241622,
+      "deep_percolation_m3_yr": 47.76865831457367,
+      "et_m3_yr": -12.045432861000094
+    }
+  ],
+  "rows": [
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 255.9157468357803,
+      "source_record_sha256": "2cdab500be2848f7066881abf396ee2c5300df01f99a1634f74170f9621af2ca",
+      "record_sha256": "031d044652db9b2cb854154cbf9156907fba7ca0b955686ecd3f24ea9537f802",
+      "before_kg_yr": 24.613085976626333,
+      "after_kg_yr": 24.483770288482937,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.2408836967598873,
+          "lateral_out_m3_yr": -135.84197074000193,
+          "deep_percolation_m3_yr": 135.34298428536772,
+          "et_m3_yr": 0.6414920236501018
+        },
+        {
+          "surface_out_m3_yr": 9.048878131040652,
+          "lateral_out_m3_yr": -57.098673699253276,
+          "deep_percolation_m3_yr": -0.674086292612512,
+          "et_m3_yr": -85.45871460757124
+        },
+        {
+          "surface_out_m3_yr": 0.14350905417027704,
+          "lateral_out_m3_yr": -342.5521089722063,
+          "deep_percolation_m3_yr": 300.33832470732347,
+          "et_m3_yr": -6.158859009520711
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.38255891075753823,
+        0.2963484519952999,
+        -0.12662161130707972
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 177.29180844459566,
+      "source_record_sha256": "541e1f021c3105b3dbbf0000a58a667912781cf5ee0144924a3879f8d7ea4bec",
+      "record_sha256": "2fe5143b63c6b703ad1fc1fc5b452e2f71a531330acda1fa9755185fca1c34b8",
+      "before_kg_yr": 11.81083285043015,
+      "after_kg_yr": 12.50051652052826,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 3.042150556484387,
+          "lateral_out_m3_yr": -39.25940236836186,
+          "deep_percolation_m3_yr": 37.46330388612691,
+          "et_m3_yr": -1.2644272460513335
+        },
+        {
+          "surface_out_m3_yr": 14.103495972402243,
+          "lateral_out_m3_yr": -28.98499453308581,
+          "deep_percolation_m3_yr": 8.049906131426177,
+          "et_m3_yr": -28.679289282829842
+        },
+        {
+          "surface_out_m3_yr": 1.2775647309520721,
+          "lateral_out_m3_yr": -398.2743058062998,
+          "deep_percolation_m3_yr": 382.4757928346542,
+          "et_m3_yr": -0.5539770928776306
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        1.3416502644877184,
+        0.6923777469344312
+      ]
+    },
+    {
+      "case": {
+        "climate": "birmingham",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 214.4916214005125,
+      "source_record_sha256": "49db15348b17331e5ea98348a0d50b5312ee8e776aa1351b1bfca8c08b5003eb",
+      "record_sha256": "0dc31ff6b7e720bfc7ecc708c9c8093fa418bac9b35849e845463a4e3dde8b4d",
+      "before_kg_yr": 12.457411291147128,
+      "after_kg_yr": 13.233305420007504,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 3.735527543220172,
+          "lateral_out_m3_yr": -45.85823106601682,
+          "deep_percolation_m3_yr": 43.52016563144086,
+          "et_m3_yr": -1.1989504026213353
+        },
+        {
+          "surface_out_m3_yr": 15.901304672312818,
+          "lateral_out_m3_yr": -34.327880171462,
+          "deep_percolation_m3_yr": 9.439787555419416,
+          "et_m3_yr": -32.382841289651
+        },
+        {
+          "surface_out_m3_yr": 2.400797391783744,
+          "lateral_out_m3_yr": -377.8625448290078,
+          "deep_percolation_m3_yr": 389.4843326977556,
+          "et_m3_yr": -32.458361112708644
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.6142495186811487,
+        0.783976359369337
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_high",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 1.982840551532069,
+      "source_record_sha256": "d68d03ea16c89c8965aec873a8dc7d488bd014c0a21d9e8e9fd0d358e8d16022",
+      "record_sha256": "d66fcad39250728cbb177314d5a957eea7ff765a623955f072fad10ee3f5cba1",
+      "before_kg_yr": 26.98387359258859,
+      "after_kg_yr": 26.725242216301798,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 1.7918516408957998,
+          "lateral_out_m3_yr": -38.713409980406,
+          "deep_percolation_m3_yr": 37.210440479528366,
+          "et_m3_yr": -0.23610889393521006
+        },
+        {
+          "surface_out_m3_yr": 6.322820495413211,
+          "lateral_out_m3_yr": -74.27628002855192,
+          "deep_percolation_m3_yr": 40.078791571287546,
+          "et_m3_yr": -8.511114879143236
+        },
+        {
+          "surface_out_m3_yr": 1.8496344242763385,
+          "lateral_out_m3_yr": -194.08091111319095,
+          "deep_percolation_m3_yr": 138.31760687596585,
+          "et_m3_yr": -14.060771184115993
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        1.0937951955462264,
+        -0.23707876159622643
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 71.35128,
+      "source_record_sha256": "94a9aa45bff35147da49c6d3d57a86931d44d8d972ff4b2d78809d2067ab2766",
+      "record_sha256": "a056aa4eb8a709dc0dacb93eabdddc8e355f64fc2daa8bfec265f4f3151d55da",
+      "before_kg_yr": 6.031079999999999,
+      "after_kg_yr": 5.21532,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.04586015527493448,
+          "lateral_out_m3_yr": -109.46762917200098,
+          "deep_percolation_m3_yr": 116.73230805126595,
+          "et_m3_yr": 0.16762323599996876
+        },
+        {
+          "surface_out_m3_yr": 2.230403780065796,
+          "lateral_out_m3_yr": -101.02515325649982,
+          "deep_percolation_m3_yr": 2.150634552854755,
+          "et_m3_yr": -12.68508530024997
+        },
+        {
+          "surface_out_m3_yr": -0.11228130684699633,
+          "lateral_out_m3_yr": -87.72883361550011,
+          "deep_percolation_m3_yr": 8.796673870894999,
+          "et_m3_yr": -17.664732508499668
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.07944750000000411,
+        -1.1229074999999948,
+        -0.8147700000000011
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 28.621872309071605,
+      "source_record_sha256": "746efa67217e0849c2bb84937bdce8978219da03608b67d2042c38e7440370e3",
+      "record_sha256": "1a993c0a18a787f051a3a2c9263accfb8252e89ab550b99fe303478225b81a10",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.09513994966789774,
+          "lateral_out_m3_yr": -115.01067895789966,
+          "deep_percolation_m3_yr": 114.8838162665727,
+          "et_m3_yr": 0.23233718636430467
+        },
+        {
+          "surface_out_m3_yr": 6.444849743194325,
+          "lateral_out_m3_yr": -113.79240798324697,
+          "deep_percolation_m3_yr": 26.74778784544597,
+          "et_m3_yr": -34.02673033572876
+        },
+        {
+          "surface_out_m3_yr": 0.0,
+          "lateral_out_m3_yr": -201.0040236843727,
+          "deep_percolation_m3_yr": 136.06986387296206,
+          "et_m3_yr": -42.14602218209461
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.231690607923575,
+        -8.936252866075904,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 18.4921434045056,
+      "source_record_sha256": "c146bb79cb454b36e485286ab8ebeb8ec866cfcbc45970ccb19d7bc34c216db1",
+      "record_sha256": "8a621fed76092ffec826811e1a0d5abf3e600d5a54a9d94e326bc81fd5ad6108",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.09513994966789774,
+          "lateral_out_m3_yr": -115.01067895789966,
+          "deep_percolation_m3_yr": 114.8838162665727,
+          "et_m3_yr": 0.23233718636430467
+        },
+        {
+          "surface_out_m3_yr": 6.444849743194325,
+          "lateral_out_m3_yr": -113.79240798324697,
+          "deep_percolation_m3_yr": 26.74778784544597,
+          "et_m3_yr": -34.02673033572876
+        },
+        {
+          "surface_out_m3_yr": 0.0,
+          "lateral_out_m3_yr": -201.0040236843727,
+          "deep_percolation_m3_yr": 136.06986387296206,
+          "et_m3_yr": -42.14602218209461
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.08621045876227029,
+        -9.097897476255163,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 8.01757266489054,
+      "source_record_sha256": "c336a197fe0537929d373bc6d75e2ca075845bc2e75958bc57dc84b4a3a4ba3f",
+      "record_sha256": "460261cd27bb3df8f3d458d17035d6d16ffc03751f2018a0973b31ce67fe1887",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.09359529571359637,
+          "lateral_out_m3_yr": -114.9397708555677,
+          "deep_percolation_m3_yr": 114.81996083599299,
+          "et_m3_yr": 0.2287163470963094
+        },
+        {
+          "surface_out_m3_yr": 6.192082508324269,
+          "lateral_out_m3_yr": -64.63813097267114,
+          "deep_percolation_m3_yr": -0.3560976886649607,
+          "et_m3_yr": -54.52178651123492
+        },
+        {
+          "surface_out_m3_yr": 0.0,
+          "lateral_out_m3_yr": -174.9350785215666,
+          "deep_percolation_m3_yr": 131.14282857099485,
+          "et_m3_yr": -14.687331017494444
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.13739791865236484,
+        0.10776307345283342,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 13.750568172581087,
+      "source_record_sha256": "9a29fe0839e24d101c758892b875b2df0d2d655cb4e547afacd46e96e12680d0",
+      "record_sha256": "5e5476e45088eac99ad95f540c09ec9a9d0ecfa6c4f533be6dc715b6cb5bb33f",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 3.6024589790603727,
+          "lateral_out_m3_yr": -46.33165580030963,
+          "deep_percolation_m3_yr": 44.301375130798164,
+          "et_m3_yr": -1.585776731087762
+        },
+        {
+          "surface_out_m3_yr": 5.779406163094308,
+          "lateral_out_m3_yr": -81.56124968526525,
+          "deep_percolation_m3_yr": 44.91184952061484,
+          "et_m3_yr": -11.725760100315355
+        },
+        {
+          "surface_out_m3_yr": -0.03401366266215289,
+          "lateral_out_m3_yr": -239.21243219470261,
+          "deep_percolation_m3_yr": 184.85248341521762,
+          "et_m3_yr": -21.29983215508878
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -24.82861212353187,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 13.750568172581087,
+      "source_record_sha256": "238c7041c6af14fc1d7b293fc145f1f3d194846310c54f21d0977865d8ff5726",
+      "record_sha256": "ce3397354b0e08bcd9842f9b9948ea3d266ecb4c0fa4557946f5e71f1e7385ea",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 3.6024589790603727,
+          "lateral_out_m3_yr": -46.33165580030963,
+          "deep_percolation_m3_yr": 44.301375130798164,
+          "et_m3_yr": -1.585776731087762
+        },
+        {
+          "surface_out_m3_yr": 5.779406163094308,
+          "lateral_out_m3_yr": -81.56124968526525,
+          "deep_percolation_m3_yr": 44.91184952061484,
+          "et_m3_yr": -11.725760100315355
+        },
+        {
+          "surface_out_m3_yr": -0.03401366266215289,
+          "lateral_out_m3_yr": -239.21243219470261,
+          "deep_percolation_m3_yr": 184.85248341521762,
+          "et_m3_yr": -21.29983215508878
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -24.82861212353187,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 1.982840551532069,
+      "source_record_sha256": "9c9ff27b61123c18538917104d318ba524c10ecea8bb356202823d2fcc561072",
+      "record_sha256": "22c021cd7c006e122afa8e927646558a7bd890da4b0fc2e177afabf35a2cf376",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 3.554633735510322,
+          "lateral_out_m3_yr": -47.202618512570076,
+          "deep_percolation_m3_yr": 45.14552780186432,
+          "et_m3_yr": -1.5073252136141306
+        },
+        {
+          "surface_out_m3_yr": 7.786371234533036,
+          "lateral_out_m3_yr": -61.58489516877014,
+          "deep_percolation_m3_yr": 24.95041200139918,
+          "et_m3_yr": -14.109596208027881
+        },
+        {
+          "surface_out_m3_yr": 0.0,
+          "lateral_out_m3_yr": -197.96515512283162,
+          "deep_percolation_m3_yr": 154.77312821325305,
+          "et_m3_yr": -10.602417078251165
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.1212334576344345,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 12.888463584958448,
+      "source_record_sha256": "2773af2e3906b642d86e9e6703cdf969d5e26c2fd481dc476495ca3eb6bc8ad9",
+      "record_sha256": "80503ac37a7dcf51242cad123c5d926475ad7c9f5a2d4ec8f94c45d8d3f0af53",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.347686175462826,
+          "lateral_out_m3_yr": -53.153015244644365,
+          "deep_percolation_m3_yr": 50.51999407984438,
+          "et_m3_yr": -1.5178859948126018
+        },
+        {
+          "surface_out_m3_yr": 6.690641414156801,
+          "lateral_out_m3_yr": -88.74673893835104,
+          "deep_percolation_m3_yr": 48.05030080783901,
+          "et_m3_yr": -14.568215643065969
+        },
+        {
+          "surface_out_m3_yr": -0.09621644403004437,
+          "lateral_out_m3_yr": -237.38825714318355,
+          "deep_percolation_m3_yr": 200.93838906956955,
+          "et_m3_yr": -45.27241698952662
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -24.52148736419133,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 12.888463584958448,
+      "source_record_sha256": "6c5a4df28cfeb6d2a100f6e8e54031d9d328ded37fdf3456bc93ed9eb4c6b536",
+      "record_sha256": "d502277a2f12340920fae3090e08fc6417ea57913a7ae11856d795e2f35c93b4",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.347686175462826,
+          "lateral_out_m3_yr": -53.153015244644365,
+          "deep_percolation_m3_yr": 50.51999407984438,
+          "et_m3_yr": -1.5178859948126018
+        },
+        {
+          "surface_out_m3_yr": 6.690641414156801,
+          "lateral_out_m3_yr": -88.74673893835104,
+          "deep_percolation_m3_yr": 48.05030080783901,
+          "et_m3_yr": -14.568215643065969
+        },
+        {
+          "surface_out_m3_yr": -0.09621644403004437,
+          "lateral_out_m3_yr": -237.38825714318355,
+          "deep_percolation_m3_yr": 200.93838906956955,
+          "et_m3_yr": -45.27241698952662
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -24.52148736419133,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "charleston",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 1.1638411932905621,
+      "source_record_sha256": "3668c73a0f2fdd21343c1bb446180deb88b61f0bae0a2ea0275817d2576ffe84",
+      "record_sha256": "4205afea9bc2c649df86e93d226efbf536f5344ad3a59015898e2cab86d35214",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.244825949552208,
+          "lateral_out_m3_yr": -53.91339149092753,
+          "deep_percolation_m3_yr": 51.38540578903098,
+          "et_m3_yr": -1.5222611755947497
+        },
+        {
+          "surface_out_m3_yr": 8.622214965954768,
+          "lateral_out_m3_yr": -64.74549101222925,
+          "deep_percolation_m3_yr": 27.611816876006678,
+          "et_m3_yr": -20.423646974882786
+        },
+        {
+          "surface_out_m3_yr": 0.010092013014251444,
+          "lateral_out_m3_yr": -205.2234291721733,
+          "deep_percolation_m3_yr": 175.54982340147956,
+          "et_m3_yr": -26.499104639550296
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.040411152544811424,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "898176905d3464bf0fcf65cc1fe1d876421f40d30d3f9652da9bf073281efdac",
+      "record_sha256": "b1cb6305fe77cd055054d07d4fff786022585952897dfbd279c66921d92009c5",
+      "before_kg_yr": 9.052098170037706,
+      "after_kg_yr": 8.319309270558463,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0011506680196662344,
+          "lateral_out_m3_yr": -27.384105647392424,
+          "deep_percolation_m3_yr": 27.46697953453321,
+          "et_m3_yr": 0.0
+        },
+        {
+          "surface_out_m3_yr": 0.7391612003868353,
+          "lateral_out_m3_yr": -13.602714002911586,
+          "deep_percolation_m3_yr": 0.782446342675887,
+          "et_m3_yr": -15.201541381009541
+        },
+        {
+          "surface_out_m3_yr": -0.05920731694894421,
+          "lateral_out_m3_yr": -24.18926566267443,
+          "deep_percolation_m3_yr": 21.418977125256983,
+          "et_m3_yr": -9.997205109725883
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.010776307345281566,
+        -12.266131835768363,
+        -0.6977659006070738
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "6210899d11b582eb0a2d066e3558fe276a0872675a405ae06c22dde4f61342ac",
+      "record_sha256": "dbc6efe1b56629d5e2dd795028d7f33e6170ba4e60c59bb30f3a5ad619062e7d",
+      "before_kg_yr": 8.44862495870186,
+      "after_kg_yr": 7.758941288603748,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0011506680196662344,
+          "lateral_out_m3_yr": -27.384105647392424,
+          "deep_percolation_m3_yr": 27.46697953453321,
+          "et_m3_yr": 0.0
+        },
+        {
+          "surface_out_m3_yr": 0.7391612003868353,
+          "lateral_out_m3_yr": -13.602714002911586,
+          "deep_percolation_m3_yr": 0.782446342675887,
+          "et_m3_yr": -15.201541381009541
+        },
+        {
+          "surface_out_m3_yr": -0.05920731694894421,
+          "lateral_out_m3_yr": -24.18926566267443,
+          "deep_percolation_m3_yr": 21.418977125256983,
+          "et_m3_yr": -9.997205109725883
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.008082230508962951,
+        -12.268825912604711,
+        -0.6950718237707516
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "9a47837dc3aa5653f8cf0428458b4a3ba0ec2aec6fc4ff71e2de00eeacb4bd0a",
+      "record_sha256": "96718840bc4a934d7f8c1f7e42b1587e0db7beae3ee9672fc83d359342afc006",
+      "before_kg_yr": 2.5001033041056524,
+      "after_kg_yr": 2.5001033041056524,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0011531912920297316,
+          "lateral_out_m3_yr": -27.281816938070996,
+          "deep_percolation_m3_yr": 27.36568582410309,
+          "et_m3_yr": 0.0001508683028319524
+        },
+        {
+          "surface_out_m3_yr": 1.2396565626148064,
+          "lateral_out_m3_yr": -4.323827097753994,
+          "deep_percolation_m3_yr": 1.6799478351441228,
+          "et_m3_yr": -25.706204150663282
+        },
+        {
+          "surface_out_m3_yr": 0.004843365979021463,
+          "lateral_out_m3_yr": -24.317352851780466,
+          "deep_percolation_m3_yr": 21.442132012416955,
+          "et_m3_yr": -0.20280471608509743
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.002694076836322168,
+        0.32598329719481,
+        -0.021552614690565797
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "d565775cb5dc4fec3a6b8b8e51b9dd421bcf4df83be5508f5d51b0dfa7ed2d7e",
+      "record_sha256": "2a41cedfd34a32ee21383038e10ef62260b5c9164bdfdbf565aad736c1ec0da0",
+      "before_kg_yr": 19.871510744701823,
+      "after_kg_yr": 17.759354505026355,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.14291994811537734,
+          "lateral_out_m3_yr": -8.766806209378693,
+          "deep_percolation_m3_yr": 8.747473937661471,
+          "et_m3_yr": -0.06879594609226913
+        },
+        {
+          "surface_out_m3_yr": 0.5023080735720669,
+          "lateral_out_m3_yr": -9.468983121989838,
+          "deep_percolation_m3_yr": 4.449456142938453,
+          "et_m3_yr": -4.111200046932147
+        },
+        {
+          "surface_out_m3_yr": -0.03411560760727017,
+          "lateral_out_m3_yr": -24.34510507608677,
+          "deep_percolation_m3_yr": 21.61825457041884,
+          "et_m3_yr": -6.277339659440258
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -10.768225114773998,
+        -2.125626623857066
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "516827bb97bf54f82a1283b161da8aadd088acf1420a9ca08ba242553f3237d2",
+      "record_sha256": "21b6030620c66c9174e58cfcffe0d242e0062afe652506dd761866f8fce9acdb",
+      "before_kg_yr": 19.871510744701823,
+      "after_kg_yr": 17.759354505026355,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.14291994811537734,
+          "lateral_out_m3_yr": -8.766806209378693,
+          "deep_percolation_m3_yr": 8.747473937661471,
+          "et_m3_yr": -0.06879594609226913
+        },
+        {
+          "surface_out_m3_yr": 0.5023080735720669,
+          "lateral_out_m3_yr": -9.468983121989838,
+          "deep_percolation_m3_yr": 4.449456142938453,
+          "et_m3_yr": -4.111200046932147
+        },
+        {
+          "surface_out_m3_yr": -0.03411560760727017,
+          "lateral_out_m3_yr": -24.34510507608677,
+          "deep_percolation_m3_yr": 21.61825457041884,
+          "et_m3_yr": -6.277339659440258
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -10.768225114773998,
+        -2.125626623857066
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.0,
+      "source_record_sha256": "e6e03b9bd9350d89f6994a5b1e3a7b461a23e0b753daed5f78e6c0aeb80541ea",
+      "record_sha256": "57c0317f05484a3d82b1970f14ea7f43ecd61bf2c73d65b8110a3988c76cbffb",
+      "before_kg_yr": 2.5001033041056524,
+      "after_kg_yr": 1.7673144046264093,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.1430564534540082,
+          "lateral_out_m3_yr": -8.631326473433797,
+          "deep_percolation_m3_yr": 8.610753156341833,
+          "et_m3_yr": -0.0672872630639283
+        },
+        {
+          "surface_out_m3_yr": 1.1941816516093198,
+          "lateral_out_m3_yr": -4.416905297187405,
+          "deep_percolation_m3_yr": 1.8052613954224588,
+          "et_m3_yr": -7.053751589866394
+        },
+        {
+          "surface_out_m3_yr": 0.052819647895034905,
+          "lateral_out_m3_yr": -24.483866197618298,
+          "deep_percolation_m3_yr": 21.61954862114423,
+          "et_m3_yr": -0.40133985919817405
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -0.024246691526887076,
+        -0.7516474373334878
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 36.04392,
+      "source_record_sha256": "2ec0b61d1aa25d8524cdbbdee63ec3edf13951ea54f926c61d864010d44a2cc3",
+      "record_sha256": "9f94666d5bc704cfd53197c57dd600a0143a86de6dfab81c73342196267efb82",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0026999068134849757,
+          "lateral_out_m3_yr": -26.791956576000334,
+          "deep_percolation_m3_yr": 28.42729914936146,
+          "et_m3_yr": 0.0012070079999944028
+        },
+        {
+          "surface_out_m3_yr": 0.36991546393450214,
+          "lateral_out_m3_yr": -13.169524722749937,
+          "deep_percolation_m3_yr": -1.191872594717792,
+          "et_m3_yr": -12.672417260249997
+        },
+        {
+          "surface_out_m3_yr": -0.002790449296717498,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.9086116046472217,
+          "et_m3_yr": -12.036117208500087
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.00866249999999269,
+        -0.9553499999999957,
+        -0.034897500000000026
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 22.4532,
+      "source_record_sha256": "b562b97773b08850bb8c754b640fafb806b9f8b9621ae62826653c8a666bf753",
+      "record_sha256": "cf0d61e4f26c4822eb51326a37c79c748bf1cad0d5388fbcb80c1f6c2146f289",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0026999068134849757,
+          "lateral_out_m3_yr": -26.791956576000334,
+          "deep_percolation_m3_yr": 28.42729914936146,
+          "et_m3_yr": 0.0012070079999944028
+        },
+        {
+          "surface_out_m3_yr": 0.36991546393450214,
+          "lateral_out_m3_yr": -13.169524722749937,
+          "deep_percolation_m3_yr": -1.191872594717792,
+          "et_m3_yr": -12.672417260249997
+        },
+        {
+          "surface_out_m3_yr": -0.002790449296717498,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.9086116046472217,
+          "et_m3_yr": -12.036117208500087
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.0014849999999988484,
+        -0.9278774999999984,
+        -0.034897500000000026
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "native_failure",
+      "physical_pass": false,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 14.1372,
+      "source_record_sha256": "46bd6cb4806277e8ae8c4be943d8b1303d3ac7439dc8501e2d1d14a78ccbcccb",
+      "record_sha256": "4d8084755d31aefb1a444d0aef9a03b212e682cb97a8a43e3924f410010985e4"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 30.75336,
+      "source_record_sha256": "ac7064501cc99a5b59db46c768d7d0f1b87a8acd80d178fd65f0bb4100499cc9",
+      "record_sha256": "a595ceb2cf284356d31e9dc5e39fd4167d0d1553e5c011061f2f699af556e300",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0026999068134849757,
+          "lateral_out_m3_yr": -26.791956576000334,
+          "deep_percolation_m3_yr": 28.42729914936146,
+          "et_m3_yr": 0.0012070079999944028
+        },
+        {
+          "surface_out_m3_yr": 0.36991546393450214,
+          "lateral_out_m3_yr": -13.169524722749937,
+          "deep_percolation_m3_yr": -1.191872594717792,
+          "et_m3_yr": -12.672417260249997
+        },
+        {
+          "surface_out_m3_yr": -0.002790449296717498,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.9086116046472217,
+          "et_m3_yr": -12.036117208500087
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.054450000000001,
+        -1.0001475000000024,
+        -0.034897500000000026
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 21.05136,
+      "source_record_sha256": "fbdd646586eaa69f58fde1c85f35c1d31ff0b7a358927b55d903f8e4496ea7b6",
+      "record_sha256": "bf3af899ec29251c93db9d287ddbdc801943a5baa470f0cdc7160e95deb8abf5",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0026999068134849757,
+          "lateral_out_m3_yr": -26.791956576000334,
+          "deep_percolation_m3_yr": 28.42729914936146,
+          "et_m3_yr": 0.0012070079999944028
+        },
+        {
+          "surface_out_m3_yr": 0.36991546393450214,
+          "lateral_out_m3_yr": -13.169524722749937,
+          "deep_percolation_m3_yr": -1.191872594717792,
+          "et_m3_yr": -12.672417260249997
+        },
+        {
+          "surface_out_m3_yr": -0.002790449296717498,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.9086116046472217,
+          "et_m3_yr": -12.036117208500087
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.013117499999999893,
+        -0.9392624999999999,
+        -0.034650000000000014
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "native_failure",
+      "physical_pass": false,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 12.375,
+      "source_record_sha256": "f1aa09b3486dd627022fda1648f8c2deab1b0990880cbe51cdff3475c5924a00",
+      "record_sha256": "40552c01b5054fc1210c09a648c9012420de90b5566f9c24d1ea4778c86ba902"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 36.186479999999996,
+      "source_record_sha256": "543e4053b26cdebcb2273dd7969837fc33a3500f5a6fa2141fa2fd5524e28b7c",
+      "record_sha256": "78518ee45bc30603a126b7dd68b2d4f30857a4f3f8e8a24de949266c603b8e4b",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.002800442764508748,
+          "lateral_out_m3_yr": -26.785016280000324,
+          "deep_percolation_m3_yr": 28.419402597652514,
+          "et_m3_yr": 0.0004526279999907956
+        },
+        {
+          "surface_out_m3_yr": 0.3676802047674128,
+          "lateral_out_m3_yr": -13.177928609999947,
+          "deep_percolation_m3_yr": -1.187689947002864,
+          "et_m3_yr": -12.659828395500007
+        },
+        {
+          "surface_out_m3_yr": -0.002789361467392497,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.908533988591782,
+          "et_m3_yr": -12.045432861000094
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.12177000000000326,
+        -1.0706849999999974,
+        -0.034897500000000026
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 22.48488,
+      "source_record_sha256": "8c09dd92325b8798532d370e3fe49679a8daa8f824fb3f916075f5dc48a909ac",
+      "record_sha256": "d56124b0adc33fa6c10c6324ef312f47d89f0dfdf84c200e1fee3ff9bd888b06",
+      "before_kg_yr": 0.297,
+      "after_kg_yr": 0.26136000000000004,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.002800442764508748,
+          "lateral_out_m3_yr": -26.785016280000324,
+          "deep_percolation_m3_yr": 28.419402597652514,
+          "et_m3_yr": 0.0004526279999907956
+        },
+        {
+          "surface_out_m3_yr": 0.3676802047674128,
+          "lateral_out_m3_yr": -13.177928609999947,
+          "deep_percolation_m3_yr": -1.187689947002864,
+          "et_m3_yr": -12.659828395500007
+        },
+        {
+          "surface_out_m3_yr": -0.002789361467392497,
+          "lateral_out_m3_yr": -3.5147466584999982,
+          "deep_percolation_m3_yr": 2.908533988591782,
+          "et_m3_yr": -12.045432861000094
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.03217499999999962,
+        -0.9605475000000014,
+        -0.034897500000000026
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "native_failure",
+      "physical_pass": false,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 14.1372,
+      "source_record_sha256": "f2711819fb547599c873974f3f072bf54c685d86cbb5b7fe28c12d3cefce7456",
+      "record_sha256": "094f6b2e870d6ee0f657ac05c02f2aa8bcf2c4a76411129d66b4beb802c61a3d"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 25.09452,
+      "source_record_sha256": "50bf41d54e8cc550618d37afc2b7d48f817296278647be4cbf1b301439c52f31",
+      "record_sha256": "169d0fab56e0646be6244a4468edf9ec2952c6cef12ddcc0ca25df690e4090ab",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0020163389553247146,
+          "lateral_out_m3_yr": -25.32151908000019,
+          "deep_percolation_m3_yr": 27.57026883064389,
+          "et_m3_yr": 0.00015087600000640577
+        },
+        {
+          "surface_out_m3_yr": 0.40165328277606394,
+          "lateral_out_m3_yr": -12.267831732750018,
+          "deep_percolation_m3_yr": -1.235430050235733,
+          "et_m3_yr": -12.07398809925002
+        },
+        {
+          "surface_out_m3_yr": -0.005002843786874961,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.548565374499987
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.018810000000001992,
+        -1.1642399999999995,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 17.332919999999998,
+      "source_record_sha256": "059c137c04bd356d8e5a6e1c6b90fe50d12d7c5ac2fb40ad42088549e84f185c",
+      "record_sha256": "49fd07a997456c3ea48c62f22b352ccccec91052546afa9c6562f85652db8f07",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0020163389553247146,
+          "lateral_out_m3_yr": -25.32151908000019,
+          "deep_percolation_m3_yr": 27.57026883064389,
+          "et_m3_yr": 0.00015087600000640577
+        },
+        {
+          "surface_out_m3_yr": 0.40165328277606394,
+          "lateral_out_m3_yr": -12.267831732750018,
+          "deep_percolation_m3_yr": -1.235430050235733,
+          "et_m3_yr": -12.07398809925002
+        },
+        {
+          "surface_out_m3_yr": -0.005002843786874961,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.548565374499987
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.0019799999999987605,
+        -1.1253825000000006,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inbare",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "native_failure",
+      "physical_pass": false,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 9.7218,
+      "source_record_sha256": "1da6f72f1deed19f2ad5d64d71861c4e474d58b1d1268a41e4a4da981e8d0aef",
+      "record_sha256": "af29320d7ec16d46066ec1cfc39d42971f600b9590753de972f86347c6e286f3"
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 22.3542,
+      "source_record_sha256": "2e0cc89d86ec878262287ab9ea60d6e8eb915828e030f8eef382ecd3988c1252",
+      "record_sha256": "f593b5cd6588171fd444456430466aab1bf506ec3e5c9ca30b3c72de51a6b65f",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0020163389553247146,
+          "lateral_out_m3_yr": -25.32151908000019,
+          "deep_percolation_m3_yr": 27.57026883064389,
+          "et_m3_yr": 0.00015087600000640577
+        },
+        {
+          "surface_out_m3_yr": 0.40165328277606394,
+          "lateral_out_m3_yr": -12.267831732750018,
+          "deep_percolation_m3_yr": -1.235430050235733,
+          "et_m3_yr": -12.07398809925002
+        },
+        {
+          "surface_out_m3_yr": -0.005002843786874961,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.548565374499987
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.016830000000000567,
+        -1.1278574999999993,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "inveg",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 16.311239999999998,
+      "source_record_sha256": "4f136081c3c2d46c1986685d0d766ae16e11260075a6b201ba4d77ed392a0c11",
+      "record_sha256": "9260bf972effed286a70b0b85ac83afe6c0193641838fec0ac88bf36efc9b680",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0020163389553247146,
+          "lateral_out_m3_yr": -25.32151908000019,
+          "deep_percolation_m3_yr": 27.57026883064389,
+          "et_m3_yr": 0.00015087600000640577
+        },
+        {
+          "surface_out_m3_yr": 0.40165328277606394,
+          "lateral_out_m3_yr": -12.267831732750018,
+          "deep_percolation_m3_yr": -1.235430050235733,
+          "et_m3_yr": -12.07398809925002
+        },
+        {
+          "surface_out_m3_yr": -0.005002843786874961,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.548565374499987
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0069299999999987705,
+        -1.1154825000000006,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 25.13016,
+      "source_record_sha256": "bd7af780014ceabdd90763e519713bd7bcb8d29edf901ec7f892de283db1c842",
+      "record_sha256": "4fa45c76b75c33c96f30d5ecd94a120b0fc18d205b4b74b75cf8e038a3962a3f",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.002049693821762677,
+          "lateral_out_m3_yr": -25.314427908000194,
+          "deep_percolation_m3_yr": 27.563223431075826,
+          "et_m3_yr": 0.0003017520000057061
+        },
+        {
+          "surface_out_m3_yr": 0.40225147329538746,
+          "lateral_out_m3_yr": -12.274177063499984,
+          "deep_percolation_m3_yr": -1.2304296079816333,
+          "et_m3_yr": -12.066930191250002
+        },
+        {
+          "surface_out_m3_yr": -0.005000970013874978,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.552585813999926
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.021037499999994935,
+        -1.1719125000000048,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 17.33688,
+      "source_record_sha256": "c90b1deb60332af361bd8bc0dd8be474d1a21aab337b0715fba10eb0d7eb5da6",
+      "record_sha256": "c5b617d3c405c297d3ed7ade8c51694cf27803fffd09b6622c67253f179b3292",
+      "before_kg_yr": 1.1523599999999998,
+      "after_kg_yr": 1.386,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.002049693821762677,
+          "lateral_out_m3_yr": -25.314427908000194,
+          "deep_percolation_m3_yr": 27.563223431075826,
+          "et_m3_yr": 0.0003017520000057061
+        },
+        {
+          "surface_out_m3_yr": 0.40225147329538746,
+          "lateral_out_m3_yr": -12.274177063499984,
+          "deep_percolation_m3_yr": -1.2304296079816333,
+          "et_m3_yr": -12.066930191250002
+        },
+        {
+          "surface_out_m3_yr": -0.005000970013874978,
+          "lateral_out_m3_yr": -2.424226959000001,
+          "deep_percolation_m3_yr": 2.226233591515745,
+          "et_m3_yr": -11.552585813999926
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        -0.002474999999999561,
+        -1.1290949999999995,
+        0.23487750000000007
+      ]
+    },
+    {
+      "case": {
+        "climate": "denver",
+        "soil": "2711250",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "native_failure",
+      "physical_pass": false,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 9.7218,
+      "source_record_sha256": "2bc6d909ee89cf7558133d132d45e8264ae9bf4aaeb2c17e6062fc3d0fb093a1",
+      "record_sha256": "46e11cf066937a16e2a347126063ffa49924c8753ffeffd558b489aee49ed7fc"
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.5603679819547152,
+      "source_record_sha256": "aa36fb556b7588bae31fb6ebd77c185b915209189f120f7e49b1eb8499473aaa",
+      "record_sha256": "aecf0610dd946127af9dd86a29534f8b7492eaced9cf57373d9881e047f59002",
+      "before_kg_yr": 18.70766955141126,
+      "after_kg_yr": 18.664564322030127,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0925618828406245,
+          "lateral_out_m3_yr": -52.09210933911583,
+          "deep_percolation_m3_yr": 52.02989545898329,
+          "et_m3_yr": 0.04842872520971753
+        },
+        {
+          "surface_out_m3_yr": 1.5842113804645273,
+          "lateral_out_m3_yr": -27.91250221130743,
+          "deep_percolation_m3_yr": 5.467822639798724,
+          "et_m3_yr": -31.244726374885772
+        },
+        {
+          "surface_out_m3_yr": -0.6791789279124565,
+          "lateral_out_m3_yr": -36.60198168029161,
+          "deep_percolation_m3_yr": 29.882203915121252,
+          "et_m3_yr": -18.92808437014162
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0484933830537706,
+        -0.3286773740311233,
+        -0.07004599774433728
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.5603679819547152,
+      "source_record_sha256": "a409ef793edc2818d1cfda4780cd5a736e1d26041aeae76b1a0b19ce4136e166",
+      "record_sha256": "396d8421e90e535c7e1f54413f458a7f590c99ab00acc1c206a2f8ad6ac741a5",
+      "before_kg_yr": 11.207359639094303,
+      "after_kg_yr": 11.164254409713172,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.0925618828406245,
+          "lateral_out_m3_yr": -52.09210933911583,
+          "deep_percolation_m3_yr": 52.02989545898329,
+          "et_m3_yr": 0.04842872520971753
+        },
+        {
+          "surface_out_m3_yr": 1.5842113804645273,
+          "lateral_out_m3_yr": -27.91250221130743,
+          "deep_percolation_m3_yr": 5.467822639798724,
+          "et_m3_yr": -31.244726374885772
+        },
+        {
+          "surface_out_m3_yr": -0.6791789279124565,
+          "lateral_out_m3_yr": -36.60198168029161,
+          "deep_percolation_m3_yr": 29.882203915121252,
+          "et_m3_yr": -18.92808437014162
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.026940768363207468,
+        -0.3232892203584896,
+        -0.03771707570849081
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "small_exceedance",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 0.5172627525735832,
+      "source_record_sha256": "d5969a76501a99643ce88fbe43c7031d806f05eac3f95ea9c1b99aea48a3de68",
+      "record_sha256": "f4123cb65e4d9dd9382331d272014ab96e5143e28c29e81779f8fcbfbe0f781c",
+      "before_kg_yr": 15.302356430301836,
+      "after_kg_yr": 14.95751459525278,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.09256275787678181,
+          "lateral_out_m3_yr": -52.05107316074499,
+          "deep_percolation_m3_yr": 51.98805501039956,
+          "et_m3_yr": 0.04888133011822049
+        },
+        {
+          "surface_out_m3_yr": 1.876415802607701,
+          "lateral_out_m3_yr": -12.77313608256459,
+          "deep_percolation_m3_yr": 1.5389842930658784,
+          "et_m3_yr": -42.4674209687408
+        },
+        {
+          "surface_out_m3_yr": -0.4842828353574049,
+          "lateral_out_m3_yr": -36.11951993465892,
+          "deep_percolation_m3_yr": 30.16559208031081,
+          "et_m3_yr": -4.395525372820657
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.010776307345281566,
+        -0.11045715028914671,
+        -0.37986483392122494
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 1.1207359639094303,
+      "source_record_sha256": "6797f73561e589f694257caf6b73467aeee46092b086b928e48c677ad5880e1a",
+      "record_sha256": "9cd2fc9f55af688aa94bb6e70f172c05f0ec0b8dd36b849301e4abdd8ff2e2b3",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.9841684345255857,
+          "lateral_out_m3_yr": -19.82107762632583,
+          "deep_percolation_m3_yr": 19.24301624149371,
+          "et_m3_yr": -0.4087022323771947
+        },
+        {
+          "surface_out_m3_yr": 2.6611753873128237,
+          "lateral_out_m3_yr": -17.234610570485998,
+          "deep_percolation_m3_yr": 7.956690190009914,
+          "et_m3_yr": -12.205802295541986
+        },
+        {
+          "surface_out_m3_yr": 0.0012489731295788654,
+          "lateral_out_m3_yr": -53.31202289241622,
+          "deep_percolation_m3_yr": 47.76865831457367,
+          "et_m3_yr": -9.031214225217127
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -0.4499108316655631,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 1.1207359639094303,
+      "source_record_sha256": "757ab13ea648b7ec7ee30da8d07cfdabde308f5c7b0784a7dde35c4e637655b0",
+      "record_sha256": "fb7aba04bd2aee061fc422432aa29caacc5f2242123e2483299f755a10015ee7",
+      "before_kg_yr": 0.0,
+      "after_kg_yr": 0.0,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.9841684345255857,
+          "lateral_out_m3_yr": -19.82107762632583,
+          "deep_percolation_m3_yr": 19.24301624149371,
+          "et_m3_yr": -0.4087022323771947
+        },
+        {
+          "surface_out_m3_yr": 2.6611753873128237,
+          "lateral_out_m3_yr": -17.234610570485998,
+          "deep_percolation_m3_yr": 7.956690190009914,
+          "et_m3_yr": -12.205802295541986
+        },
+        {
+          "surface_out_m3_yr": 0.0012489731295788654,
+          "lateral_out_m3_yr": -53.31202289241622,
+          "deep_percolation_m3_yr": 47.76865831457367,
+          "et_m3_yr": -9.031214225217127
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -0.4499108316655631,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 115.22027813576567,
+      "source_record_sha256": "e6707488541555df52cc64a7010014f32dd82a5be93ecc1dc5559d0f1e4ab218",
+      "record_sha256": "487f312b92f188388616453a0d8ae18c8887633b0f62b727876f1ca76e9223c8",
+      "before_kg_yr": 5.77610073707168,
+      "after_kg_yr": 6.8537314715999775,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.544489632584511,
+          "lateral_out_m3_yr": -374.3593262615933,
+          "deep_percolation_m3_yr": 374.755316022117,
+          "et_m3_yr": 0.8952525090167853
+        },
+        {
+          "surface_out_m3_yr": -0.04272907807077786,
+          "lateral_out_m3_yr": -553.3823991298533,
+          "deep_percolation_m3_yr": 204.06003692068236,
+          "et_m3_yr": -20.32441280987878
+        },
+        {
+          "surface_out_m3_yr": 7.9866066649921805,
+          "lateral_out_m3_yr": -2847.7485992822935,
+          "deep_percolation_m3_yr": 2402.1896476176676,
+          "et_m3_yr": -65.95743063691089
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        1.3874495707051793,
+        1.3443443413240477,
+        1.0803248113646182
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 59.83005838101112,
+      "source_record_sha256": "4a331e4aec00c97a6c681c2c02d55ee09acef9978b01ba75b3a7930ed78dd802",
+      "record_sha256": "61a080e926d69c7027b0b019b56a6c019da746b4ef273581e4ac79e7f88dfa8c",
+      "before_kg_yr": 2.931155597916972,
+      "after_kg_yr": 3.4915235798716866,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.544489632584511,
+          "lateral_out_m3_yr": -374.3593262615933,
+          "deep_percolation_m3_yr": 374.755316022117,
+          "et_m3_yr": 0.8952525090167853
+        },
+        {
+          "surface_out_m3_yr": -0.04272907807077786,
+          "lateral_out_m3_yr": -553.3823991298533,
+          "deep_percolation_m3_yr": 204.06003692068236,
+          "et_m3_yr": -20.32441280987878
+        },
+        {
+          "surface_out_m3_yr": 7.9866066649921805,
+          "lateral_out_m3_yr": -2847.7485992822935,
+          "deep_percolation_m3_yr": 2402.1896476176676,
+          "et_m3_yr": -65.95743063691089
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.6923777469344357,
+        0.6519665943896236,
+        0.573838366136318
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 88.9260882132752,
+      "source_record_sha256": "ed2a310a009fbd24d548666e2974e0082d521300f45cb80deeb78a854f796807",
+      "record_sha256": "b31b2a4c3e21d460ad35d1ca409490008cbc6a67efa659abec7b9442d16a04a8",
+      "before_kg_yr": 5.34504844326036,
+      "after_kg_yr": 6.638205324694318,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 4.531099093081398,
+          "lateral_out_m3_yr": -374.27634869503464,
+          "deep_percolation_m3_yr": 374.68556105478814,
+          "et_m3_yr": 0.8935929576856125
+        },
+        {
+          "surface_out_m3_yr": 0.46311812940695063,
+          "lateral_out_m3_yr": -520.2635505965347,
+          "deep_percolation_m3_yr": 174.88411245577274,
+          "et_m3_yr": -24.703520478459907
+        },
+        {
+          "surface_out_m3_yr": 8.979916412785855,
+          "lateral_out_m3_yr": -2811.679246830037,
+          "deep_percolation_m3_yr": 2389.8884830370107,
+          "et_m3_yr": -57.073516679163276
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        1.4655777989584866,
+        1.4386370305952791,
+        1.312015419288202
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 37.28602341467912,
+      "source_record_sha256": "970b6a61f35e68148a4e2f4931b33e08f95d77cc472fd944831281a1a0d5b974",
+      "record_sha256": "156eed7b5be47e9dc866aef0cbe3a916682eac363662094714473508471670fd",
+      "before_kg_yr": 1.3793673401962219,
+      "after_kg_yr": 1.2500516520528262,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 24.62301962863637,
+          "lateral_out_m3_yr": -103.1036998933353,
+          "deep_percolation_m3_yr": 78.72175492500499,
+          "et_m3_yr": 0.32572466581865456
+        },
+        {
+          "surface_out_m3_yr": 3.4485552599649623,
+          "lateral_out_m3_yr": -337.7059292025103,
+          "deep_percolation_m3_yr": 261.8652536877238,
+          "et_m3_yr": -6.298168375683005
+        },
+        {
+          "surface_out_m3_yr": 11.382623091205247,
+          "lateral_out_m3_yr": -2831.986403269553,
+          "deep_percolation_m3_yr": 2587.4881289399796,
+          "et_m3_yr": -52.76124797925627
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -1.9316530916419623,
+        -0.10776307345282965
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 37.28602341467912,
+      "source_record_sha256": "0e6041b567ff5f18e8dfdf9a874fc2c17284f9d979129da19e4ee9e366842893",
+      "record_sha256": "7663deea0babedd34452f33c80827042bbd9ea05791683ca1d617b00c7b1d780",
+      "before_kg_yr": 1.3793673401962219,
+      "after_kg_yr": 1.2500516520528262,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 24.62301962863637,
+          "lateral_out_m3_yr": -103.1036998933353,
+          "deep_percolation_m3_yr": 78.72175492500499,
+          "et_m3_yr": 0.32572466581865456
+        },
+        {
+          "surface_out_m3_yr": 3.4485552599649623,
+          "lateral_out_m3_yr": -337.7059292025103,
+          "deep_percolation_m3_yr": 261.8652536877238,
+          "et_m3_yr": -6.298168375683005
+        },
+        {
+          "surface_out_m3_yr": 11.382623091205247,
+          "lateral_out_m3_yr": -2831.986403269553,
+          "deep_percolation_m3_yr": 2587.4881289399796,
+          "et_m3_yr": -52.76124797925627
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -1.9316530916419623,
+        -0.10776307345282965
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 122.24643052489016,
+      "source_record_sha256": "336a73f9c084b36e21dad759bc5fbe58d812d2dd3ef8b7b7ed1b791be8577120",
+      "record_sha256": "6f26bb7e6a0dc0c745a9dfe5358295a762d19a5af50522de70e0e7b73f205529",
+      "before_kg_yr": 0.8621045876226388,
+      "after_kg_yr": 0.8621045876226388,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 27.571697144027326,
+          "lateral_out_m3_yr": -106.54183764661843,
+          "deep_percolation_m3_yr": 79.03354337288967,
+          "et_m3_yr": 0.5049562095853446
+        },
+        {
+          "surface_out_m3_yr": 5.436439809014416,
+          "lateral_out_m3_yr": -320.721127714896,
+          "deep_percolation_m3_yr": 245.0844100723163,
+          "et_m3_yr": -8.969734314181977
+        },
+        {
+          "surface_out_m3_yr": 13.23784077989778,
+          "lateral_out_m3_yr": -2792.4597641046676,
+          "deep_percolation_m3_yr": 2563.703206003722,
+          "et_m3_yr": -51.41633249364736
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.2694076836320747,
+        0.0
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 92.2020856462412,
+      "source_record_sha256": "eccc5402c907441163522833ae2dce9c742a935f5cee4a57b8fd83efc476c6f3",
+      "record_sha256": "4b863dae805d89c6f7d2c03bf92ec39d041885a4c92b399f1203972896295875",
+      "before_kg_yr": 4.2674177087320615,
+      "after_kg_yr": 4.181207249969797,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 33.66411842898623,
+          "lateral_out_m3_yr": -114.71331753301217,
+          "deep_percolation_m3_yr": 80.93231422359763,
+          "et_m3_yr": 1.4214811493015844
+        },
+        {
+          "surface_out_m3_yr": 13.396409815950733,
+          "lateral_out_m3_yr": -392.05017766668004,
+          "deep_percolation_m3_yr": 306.06496098804286,
+          "et_m3_yr": -8.77840690423578
+        },
+        {
+          "surface_out_m3_yr": -218.11408501940878,
+          "lateral_out_m3_yr": -2581.4297156930215,
+          "deep_percolation_m3_yr": 2577.838940899834,
+          "et_m3_yr": -120.3272402326952
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -0.9429268927122614,
+        -0.12392753447075489
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "low",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 92.2020856462412,
+      "source_record_sha256": "48aaa76aef039b05d39bbd48ade08f1b648d7923017124c22e5a5b4309bb0e9d",
+      "record_sha256": "134b170ba31ad1215dcaae4b9d566a4f30ab080f621f29310ecd2ed642c936df",
+      "before_kg_yr": 4.2674177087320615,
+      "after_kg_yr": 4.181207249969797,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 33.66411842898623,
+          "lateral_out_m3_yr": -114.71331753301217,
+          "deep_percolation_m3_yr": 80.93231422359763,
+          "et_m3_yr": 1.4214811493015844
+        },
+        {
+          "surface_out_m3_yr": 13.396409815950733,
+          "lateral_out_m3_yr": -392.05017766668004,
+          "deep_percolation_m3_yr": 306.06496098804286,
+          "et_m3_yr": -8.77840690423578
+        },
+        {
+          "surface_out_m3_yr": -218.11408501940878,
+          "lateral_out_m3_yr": -2581.4297156930215,
+          "deep_percolation_m3_yr": 2577.838940899834,
+          "et_m3_yr": -120.3272402326952
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        -0.9429268927122614,
+        -0.12392753447075489
+      ]
+    },
+    {
+      "case": {
+        "climate": "site",
+        "soil": "2711250",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_low",
+      "status": "completed",
+      "physical_pass": true,
+      "within": false,
+      "baseline_within": false,
+      "reference_kg_yr": 192.16311258108618,
+      "source_record_sha256": "ced01757a31ff8c7afe84872b00f4c86ae0ed418362e7a11f6fa664903402697",
+      "record_sha256": "0802088f3a65f712e9a08f9f14782ad1b2989f88ae64463d89b127040a7ffe35",
+      "before_kg_yr": 3.448418350490555,
+      "after_kg_yr": 3.448418350490555,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 36.06081343334921,
+          "lateral_out_m3_yr": -117.3850443078988,
+          "deep_percolation_m3_yr": 81.09940923357756,
+          "et_m3_yr": 1.526636356376855
+        },
+        {
+          "surface_out_m3_yr": 13.85122097069302,
+          "lateral_out_m3_yr": -375.70978265503607,
+          "deep_percolation_m3_yr": 292.6884036700196,
+          "et_m3_yr": -12.468908264046021
+        },
+        {
+          "surface_out_m3_yr": -212.14850355804916,
+          "lateral_out_m3_yr": -2554.928476266981,
+          "deep_percolation_m3_yr": 2558.980919419591,
+          "et_m3_yr": -117.17736277392828
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.4094996791207537,
+        -0.0026940768363208356
+      ]
+    },
+    {
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "group": "meaningful_pass",
+      "status": "completed",
+      "physical_pass": true,
+      "within": true,
+      "baseline_within": true,
+      "reference_kg_yr": 1.1207359639094303,
+      "source_record_sha256": "e980f9a8c659906386bc7e225d703d2d1fd674aef49ca9361111b543b400a602",
+      "record_sha256": "cf934963a5e6238ccf666c47d8a97a6560724a8d8c5e63bb86c601f6fa42fd65",
+      "before_kg_yr": 5.043311837592436,
+      "after_kg_yr": 5.043311837592436,
+      "water_deltas": [
+        {
+          "surface_out_m3_yr": 0.5545276573354414,
+          "lateral_out_m3_yr": -16.82241923919804,
+          "deep_percolation_m3_yr": 16.27653335098782,
+          "et_m3_yr": 0.033040158320666535
+        },
+        {
+          "surface_out_m3_yr": 1.7403526651013976,
+          "lateral_out_m3_yr": -27.788028587462005,
+          "deep_percolation_m3_yr": 18.915188369116542,
+          "et_m3_yr": -9.131759328010958
+        },
+        {
+          "surface_out_m3_yr": -0.5326620699607254,
+          "lateral_out_m3_yr": -37.26483288391533,
+          "deep_percolation_m3_yr": 30.732367352258507,
+          "et_m3_yr": -18.934488729606983
+        }
+      ],
+      "boundary_deltas_kg_yr": [
+        0.0,
+        0.1454801491613198,
+        -0.024246691526886188
+      ]
+    }
+  ],
+  "script_sha256": "aefb97f487e50630f1d402ae78993d3c67e3bbd7a88e2dae3acdd522ae512b08",
+  "limits": "No-detected-class diagnostic endmember only. Independent native audits and exact only-flag soil mutation. Water residual is not complete closure; median internal flows must not be summed."
+}
