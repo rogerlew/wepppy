@@ -1,0 +1,33 @@
+{
+  "review": "Independent implementation design review: fresh whole-hillslope roughness response study",
+  "accepted_preparation": true,
+  "approved_design": true,
+  "accepted_native_execution": false,
+  "accepted_interpretation": false,
+  "accepted_parameter_promotion": false,
+  "blocking_findings": [],
+  "plan_sha256": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-readback.json": "318dcb2c0c20a4dc9ea7290b32d166cffc6268ef40241afee777784589d3e457",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-acceptance.json": "b616b311f5773f18a6695e4ced61fb3c72f1e3157f422598525a462193c3f988"
+  },
+  "scope": "Fresh36 full16-year histories on exact original nine pairs and two modes. Reuse exact08ad4c67 binary and complete frozen build/source closure; no native edit or rebuild.",
+  "findings": [
+    "A separate declaration is appropriate: the prior paired isolation gate remains failed, and independently verified native coupling supplies the source-based rationale for reporting active-mode upstream responses.",
+    "Only the equality requirement for active-mode endogenous upstream fields changes. Exact inputs, off/reference controls,12 prespecified null controls, first-two-layer density/porosity/driver trajectories, full-calendar native-bit contracts and accounting remain mandatory.",
+    "Union-key output/state differences must distinguish missing rows from numeric changes and retain counts, first occurrence and maximum differences. Do not infer zero from an absent event row.",
+    "Initial4 must pass independent actual readback before remaining32; remaining-run gate must bind runner, declaration, preflight records and scientific first4 receipt."
+  ],
+  "pending_execution_gates": [
+    "Exact new runner and declaration review, including strict null/protected predicates and upstream report consumers.",
+    "Exact inherited source/object/include/calendar/binary provenance and immutable historical evidence. Disable bytecode writes when importing archived readers.",
+    "Fresh-process dependency closure through canonical physical/particle audits, actual SOIL conversion and paired Parquet reads.",
+    "First4 actual output/state/input/source/log/accounting and independent scientific readback."
+  ],
+  "limits": [
+    "This design studies model response; neither100mm roughness nor shared-duration routing is physically validated.",
+    "No production/default/UI/withheld validation changes or further coefficient search are approved."
+  ],
+  "public_disclosure": "Original source-free design receipt; private native source and patches stay in ignored research retention."
+}

@@ -1,0 +1,36 @@
+{
+  "review_type": "Independent AI scientific design review, not institutional peer review",
+  "approved_scientific_design": true,
+  "approved_execution": false,
+  "approved_parameterization": false,
+  "accepted_original_isolation": false,
+  "blocking_design_findings": [],
+  "response_unit": "Complete modeled soil-profile history; nine paired legacy/generated profiles, two modes, full16years,36fresh runs. Target dates are bounded illustrations, not independent replicates.",
+  "scientific_intervention": "Same reviewed diagnostic binary and single post-initialization buffer RRC persistence rule; no new constant or direct state override.",
+  "required_controls": [
+    "All18O4 histories seven-file exact reference parity",
+    "Twelve prespecified native-bit identity controls with output/state/consumer equality",
+    "All18pairs protected first-two-layer BD/POR and recorded drivers exact",
+    "Identical core and auxiliary inputs, guards and source/binary closure",
+    "Six active generated histories must exercise nonidentity restoration",
+    "Strict unchanged physical and particle gates",
+    "Original annual reference and magnitude envelope; recovery/no-regression criterion"
+  ],
+  "permitted_response": "Endogenous modeled upstream and downstream hydraulics, geometry, residue, ridge-height and roughness changes through unchanged native equations; observe and retain all-period role comparisons. No physical validity claim for shared-duration routing.",
+  "staging_requirement": "Fresh firstfour runs and independently accepted actual preflight before32remaining; final independent complete readback before pooled interpretation. Reusing earlier runs as accepted outcomes is disallowed.",
+  "next_required_review": "Exact runner/declaration and independently frozen additive scientific readback before native execution; source/binary copies must retain complete exact provenance.",
+  "limits": [
+    "Model sensitivity only; configured100mm roughness is not validated by these comparisons.",
+    "Legacy profiles and old FSWEPP2 reference are comparators, not physical truth.",
+    "Net boundary exchange does not identify gross process rates or particle origin.",
+    "Zero interrill delivery at100mm remains an active modeled consequence, so not depression-storage-only.",
+    "The failed isolated-buffer campaign remains failed; this is a new whole-hillslope response contract."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-acceptance.json": "b616b311f5773f18a6695e4ced61fb3c72f1e3157f422598525a462193c3f988",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-publication-scientific-review.json": "7572f44e57541ef89cf13a4dcfd5e27666e13db993a460ce9a19e21e0fac1574",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-plan.md": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525"
+  }
+}

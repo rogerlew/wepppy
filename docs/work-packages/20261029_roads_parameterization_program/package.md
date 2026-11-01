@@ -1,6 +1,6 @@
 # Roads parameterization and configuration view
 
-## Current: native coupling localized; declare whole-hillslope response study
+## Current: whole-hillslope design reviewed; prepare fresh execution
 
 Current [candidate ledger v19](artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
 
@@ -9,9 +9,10 @@ The roughness counterfactual remains failed on upstream isolation; its remaining
 terminal flow duration changes upstream peaks and persistent rill widths, then
 width-dependent friction changes runoff in the next storm. All 28 ordinary
 outputs and four full-period state traces reproduce the retained modes exactly.
-Both independent reviews pass. Next declare a fresh nine-pair whole-hillslope
-response study; physical correctness of the routing approximation and initial
-100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](artifacts/buffer-roughness-hillslope-response-r4-plan.md)
+has scientific and implementation design approval; execution requires the fresh
+runner and four-run preflight gates. Physical correctness of the routing
+approximation and initial 100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
 candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The

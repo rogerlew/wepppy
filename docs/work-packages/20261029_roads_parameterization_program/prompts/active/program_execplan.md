@@ -5,7 +5,7 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: native coupling localized; declare whole-hillslope response study
+## Current: whole-hillslope design reviewed; prepare fresh execution
 
 Current [candidate ledger v19](../../artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
 
@@ -14,9 +14,10 @@ The roughness counterfactual remains failed on upstream isolation; its remaining
 terminal flow duration changes upstream peaks and persistent rill widths, then
 width-dependent friction changes runoff in the next storm. All 28 ordinary
 outputs and four full-period state traces reproduce the retained modes exactly.
-Both independent reviews pass. Next declare a fresh nine-pair whole-hillslope
-response study; physical correctness of the routing approximation and initial
-100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](../../artifacts/buffer-roughness-hillslope-response-r4-plan.md)
+has scientific and implementation design approval; execution requires the fresh
+runner and four-run preflight gates. Physical correctness of the routing
+approximation and initial 100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
 candidate is accepted. See the [executed coupling findings](../../artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -120,7 +121,8 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Freeze the scientific and implementation preparation-design reviews. Density/porosity have exact source-supported invariants; ridge height and residue-dependent decay remain observed endogenous responses. No source implementation or execution is accepted by those design receipts.
 - [x] Complete exact source/build/runner reviews and four full-period u1b preflight executions. Individual runtime/accounting gates pass, but modern upstream outputs differ: the paired isolation gate fails and the remaining 32 runs stay unexecuted.
 - [x] Execute and independently review all four [coupling localization replays](../../artifacts/buffer-roughness-coupling-localization-r4-plan.md): 28 ordinary outputs and four full-state traces exact; executed duration/peak/width/friction/runoff path established. Original isolation remains failed.
-- [ ] Predeclare and independently review a fresh nine-pair whole-hillslope response experiment, permitting the observed endogenous coupling while preserving exact off/null/density/input and physical gates. Execute only under the new declaration.
+- [x] Predeclare and independently review the fresh nine-pair whole-hillslope response experiment, permitting observed endogenous coupling while preserving exact off/null/density/input and physical gates.
+- [ ] Bind and independently review the fresh runner, complete four-run preflight, then execute the remaining 32 only if all declared gates pass. Retain all outcomes; stop after this single rule.
 - [x] Read and independently verify all 315,576 published SOIL rows for the nine frozen pairs; fresh v3 conversion binds the actual Rust library and preserves source artifacts. Archive all three attempts with all 65 members verified.
 - [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
