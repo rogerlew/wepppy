@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "real_cases": 72,
+  "rejected_controls": [
+    "missing-case",
+    "duplicate-case",
+    "precision-drift",
+    "basis-projection-drift",
+    "source-prepared-drift"
+  ]
+}

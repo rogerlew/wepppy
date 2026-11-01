@@ -1,0 +1,28 @@
+{
+  "scope": "All checkpoint files except this manifest itself",
+  "sha256": {
+    "PROJECT_TRACKER.md": "2d72e17c328b2857f1e6d373adb18f51fcbb239b4d145d1f54d19a2891298e0e",
+    "docs/schemas/rock-fragment-representation-contract.md": "a5e8e331cfef37ccf6ead404246bd6e8c911a266bc02db607409dcba905c5536",
+    "docs/schemas/whole-soil-water-capacity-contract.md": "993192328fea64eb467e4a70ffbab63778775c5c4c142af0f9b86bfc77885bd4",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/acquire_sources.py": "8e816969aadec687c548a6f4a3dc117c4cee54c5fe76a054b577fe3807f4d182",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/archive-receipt.json": "17316ee0114ebac70c4879b2eff51a2881a63210b73f8eccea932e5784c81bd1",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/audit_retention.py": "9359dca577449bb47ef5687a213fb050f10273602b2720da18045086112eb9d6",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/check_readback.py": "552e9fecb81a78f2e41aa098a1fc452ba0f359ea8a4db6f9b2d4061413c9a281",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/declaration.md": "b09d80c338cf66a714498aa83d2a0ab10632ac2eaf5f24c042084c8e6c1375b1",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/domain-controls.json": "8fc85b7e663fa3dfd9043eb55f063b7a6ecd8f076e6ec1996694a79293e325cf",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/domain_controls.py": "7bf3a04b14cfa425b5bb9e81d2ac0f8868d30eaa9524a28646974acb9cc0cda7",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/final-packaging-review.md": "e7986d53bea8e7ae178f2caead1cc1a4615cb412624c2e24eace0a97ee197457",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/final-science-review.md": "9c04cd4c66cdc640dacc1352c558fdf663262116e156bdcf2c453f531d43b1d5",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/findings.md": "bd2d9db976f40257aa81614a59ec882fb2eaab4d5f6435d4efd86c24a2b7b8a4",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/implementation-design-review.md": "27471c7ecd61fed98fb32cac29a7a67e0403bfb5507012db9b23bcf8da90f91d",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/implementation-review.md": "e6bc9dd89844123ebcbef18cd8d66bb1853021c4bf4ab0496336de0ba6e122bd",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/prior-preservation.json": "6b64fb2c886df24a1501e75c78692420303fdf2abe2d6554b16e5ca141114033",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/readback-receipt.json": "a8f196b911e79b6420f658f4c437903ea0f8444df3b07f93ada407da1a882e15",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/reader-controls.json": "7d75e394a9b1b628697738c7feb027f078fc6cea18e2045ea72670a0724b50f6",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/runtime-receipt.json": "6043bfc150f9f2e2e0f105ea7fd55571ad5d8001df214c05946745f339aeca65",
+    "docs/work-packages/20261101_whole_soil_retention_contract/artifacts/science-design-review.md": "a390cf9b6484431483b892d3cf209fdb6038dc466997811ab7d1e8046b45ef3f",
+    "docs/work-packages/20261101_whole_soil_retention_contract/package.md": "43c797554fae54fb709dad2cadf0674d4b5a352bde6f06c27bde5b244ce1cd16",
+    "docs/work-packages/20261101_whole_soil_retention_contract/prompts/active/retention_execplan.md": "adecd3e712939fba6813fafdbe7360efb636554bd58e685961dcdafe436ad888",
+    "docs/work-packages/20261101_whole_soil_retention_contract/tracker.md": "d9c9e55eb2f244398b8413e72ddafb622d87d6a3cf4b1daac5cf00d61ef7c3ab"
+  }
+}

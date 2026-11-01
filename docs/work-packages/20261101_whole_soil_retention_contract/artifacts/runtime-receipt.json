@@ -1,0 +1,20 @@
+{
+  "captured_after_execution": true,
+  "hostname": "c43e684eaa16",
+  "python": "3.12.16 (main, Oct 26 2026, 22:51:49) [GCC 14.2.0]",
+  "executable": "/opt/venv/bin/python",
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.41",
+  "packages": {
+    "numpy": "1.26.0",
+    "scipy": "1.13.1",
+    "pandas": "2.2.2"
+  },
+  "rosetta_distribution_names": [],
+  "rosetta_identity": "All loaded package/model files SHA256 bound and copied; rosetta-soil distribution metadata unavailable",
+  "executed_command": "wctl exec -T weppcloud /opt/venv/bin/python -B /workdir/wepppy/docs/work-packages/20261101_whole_soil_retention_contract/artifacts/audit_retention.py --source /workdir/wepppy/out/whole-soil-retention-20261101/sources-v1/horizons.json --out /workdir/wepppy/out/whole-soil-retention-20261101/audit-v1",
+  "exit_code": 0,
+  "stdout": "{'serialized': 60, 'serialization-unavailable': 6, 'construction-unavailable': 6}",
+  "process_output_provenance": "Transcribed from completed execution tool result; no separate live redirected process log",
+  "dependencies_copied_and_hash_verified": 50,
+  "metadata_capture_attempt1": "PackageNotFoundError: rosetta-soil after asset copy; no audit artifact changed"
+}

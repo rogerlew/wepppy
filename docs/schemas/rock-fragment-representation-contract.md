@@ -56,3 +56,7 @@ BC's published BCSLF dictionary defines COFRAG as volume percent and BD as fine-
 Surface summary producers must distinguish absent rows, zero representative cover with uncertainty, unsupported component share and unallocated component share. Component percentages need not total100 and must not be silently renormalized to imply complete observation. Survey composition is not measured project footprint. Native capacity prerequisites and these source distinctions prevent a partial observation from becoming an unsupported model default.
 
 SIFT mineral output must have the complete7778 OFE header, including initial saturation SAT0.75 between SALB and KI, consistent with the established generated-soil default. Render original source-summary columns/values in comments without the undeclared prettytable dependency; comment whitespace is not a numeric input contract. These narrowly scoped writer repairs are required to carry the converted mass to a parseable native file and are recorded in ADR-0126.
+
+Retention preparation and native capacity changes must also meet the
+[whole-soil water capacity contract](whole-soil-water-capacity-contract.md),
+including source/fallback bases and independent conductivity/drainage domains.

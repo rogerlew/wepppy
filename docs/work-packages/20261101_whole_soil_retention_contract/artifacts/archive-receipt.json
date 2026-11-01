@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/whole-soil-retention-20261101/whole-soil-retention-checkpoint.tar.gz",
+  "sha256": "bda16b066e560379c0cd8b9e8bdb445792dc7808103bbd2cd36709b68c5adc23",
+  "bytes": 19784790,
+  "gzip_compression_level": 1,
+  "files": 272,
+  "uncompressed_bytes": 39774855,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "d11955ca51d10e39e88b7974d73073369ef3833f55f331e75b2524d59f25d2f8"
+}

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "native_executed": false,
+  "controls": 3,
+  "ordered_retention_singular_drainage": {
+    "current_ul": "7/16",
+    "volume_scaled_ul": "3/16",
+    "fc": "1/8",
+    "drfc": "3/16",
+    "current_drainage_denominator": "1/4",
+    "candidate_drainage_denominator": "0",
+    "current_fc_ul": "2/7",
+    "candidate_fc_ul": "2/3"
+  },
+  "zero_rock_identity": {
+    "current_ul": "7/16",
+    "volume_scaled_ul": "7/16",
+    "fc": "1/8",
+    "drfc": "3/16",
+    "current_drainage_denominator": "1/4",
+    "candidate_drainage_denominator": "1/4",
+    "current_fc_ul": "2/7",
+    "candidate_fc_ul": "2/7"
+  },
+  "conductivity_ratio_one_log_zero": true
+}

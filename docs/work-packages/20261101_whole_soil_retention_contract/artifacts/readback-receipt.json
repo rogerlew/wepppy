@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "native_executed": false,
+  "case_counts": {
+    "current-SDA-horizon": {
+      "serialization-unavailable": 6,
+      "serialized": 27,
+      "construction-unavailable": 6
+    },
+    "synthetic": {
+      "serialized": 33
+    }
+  },
+  "artifact_count": 60,
+  "emitted_rows": 120,
+  "source_unchanged": true,
+  "dependencies_unchanged": true,
+  "receipt_sha256": "8cc2b27294120ad5d5edf1cab8b84645e7ecefff57f1c7ba81e79286cebb1792",
+  "declaration_sha256": "cfd6092d1c38fafd3e5e35c69f177c4301e26096264ce3b5c063dff5301c13b6",
+  "projection_metadata_erratum": "source_native_density_equal_assumption means hypothetical native=emitted rounded BD, not original source BD"
+}
