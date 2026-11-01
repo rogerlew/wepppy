@@ -1,0 +1,58 @@
+{
+  "scope": "Read-only full FRWATC design; no execution",
+  "source_root": "/workdir/wepp-forest-release-20261009/src",
+  "files": {
+    "frwatc.for": {
+      "sha256": "a834dbe62497989e8f99945acc880cdb31ced4ccc88d31f215c91738a0a0f1c1",
+      "bytes": 8515
+    },
+    "pmxtil.inc": {
+      "sha256": "6e071809fb03a87d3494046b5867101aaa0412ad792769b10a818890ec5a787b",
+      "bytes": 313
+    },
+    "pmxtls.inc": {
+      "sha256": "166ae159b3821fe52008bc7d02b23737dbcf5a74c8be2d29fb0b11a4abf8dc12",
+      "bytes": 291
+    },
+    "pmxpln.inc": {
+      "sha256": "bce6ada0bd2f45e4840245329d241a9b98fb8f702bde1dbe2b6f122f63af3cbb",
+      "bytes": 583
+    },
+    "pmxhil.inc": {
+      "sha256": "23ccc0606ae74be34b6e64c7370aaaccebd0b20aee21b8456d1c7a2479ff480c",
+      "bytes": 280
+    },
+    "pmxnsl.inc": {
+      "sha256": "126d631016a2c557dbaad79cf4da25d71bda1b75335625cdea39245f95af8c8d",
+      "bytes": 268
+    },
+    "cstruc.inc": {
+      "sha256": "8a84968435289f77ff28a08573eef5ad672186303edeabe50ae7d5dd80e583f4",
+      "bytes": 1018
+    },
+    "cupdate.inc": {
+      "sha256": "db14406077610a00bd9bdb71c58081fbcb4182b752be752817dcf7c85ee50b2e",
+      "bytes": 714
+    },
+    "cwint.inc": {
+      "sha256": "9725e9f25ef05d47d34a945f5268e1f3ce863281b7ccb0613d18ffa7aa6506f6",
+      "bytes": 6995
+    },
+    "cflgfs.inc": {
+      "sha256": "e2ef19534154941a4faecb2f558f88154941a11747ee0855bece28170c3ee20a",
+      "bytes": 1365
+    },
+    "cpfrst.inc": {
+      "sha256": "10e0ff133a9940a243aefcde9f1751fa29f86779fd1ca3fa5c66216fac12d7d6",
+      "bytes": 1572
+    },
+    "csaxp.inc": {
+      "sha256": "0b5fca9ba2e3a102812d9a47eb8022201c6c2fa61207e008cb6b69c71581f0db",
+      "bytes": 994
+    },
+    "cwater.inc": {
+      "sha256": "208268aa61bb2049a9ccb9eb0a6fa41ff0707e66888b4b3e7ab6383baa0daed3",
+      "bytes": 3972
+    }
+  }
+}

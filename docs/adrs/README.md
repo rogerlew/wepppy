@@ -140,3 +140,5 @@ Each ADR should normally include:
 - [ADR-0117: Native constant-discharge channel support](ADR-0117-native-constant-discharge-channel-support.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
 
 - [ADR-0118: Stable Yalin transport capacity](ADR-0118-stable-yalin-transport-capacity.md) (Accepted for 261029 artifact revision 2; Roads defaults unchanged).
+
+- [ADR-0126: BC SIFT fragment volume to native mass](ADR-0126-sift-rock-volume-to-mass.md)
