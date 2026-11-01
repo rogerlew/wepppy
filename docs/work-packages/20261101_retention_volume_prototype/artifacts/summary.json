@@ -1,0 +1,747 @@
+{
+  "readback_sha256": "940ef768260c849f8f8dfdc29ebf3229758de80c83be669de41c3a35332cce73",
+  "pairs": [
+    {
+      "chkey": "84543623",
+      "baseline": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.12600000202655792,
+          "input_fc": 0.2800000011920929,
+          "input_density": 1500.0,
+          "native_density": 1500.0,
+          "cpm": 1.0,
+          "por": 0.41697773337364197,
+          "air": 0.9608617424964905,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.12600000202655792,
+          "postrock_fc": 0.2800000011920929,
+          "final_wp": 0.12600000202655792,
+          "final_fc": 0.2800000011920929,
+          "reconstructed_guard_branches": [
+            "sm20-ceiling"
+          ],
+          "ul": 0.029097771272063255,
+          "fc_capacity": 0.015399999916553497,
+          "st": 0.018673328682780266,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.009783945977687836,
+          "initialized_fc_ul": 0.5292501449584961,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          },
+          {
+            "ofe": 2,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          },
+          {
+            "ofe": 3,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.009783945977687836,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.12600000202655792,
+          "input_fc": 0.2800000011920929,
+          "input_density": 1500.0,
+          "native_density": 1500.0,
+          "cpm": 1.0,
+          "por": 0.41697773337364197,
+          "air": 0.9608617424964905,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.12600000202655792,
+          "postrock_fc": 0.2800000011920929,
+          "final_wp": 0.12600000202655792,
+          "final_fc": 0.2800000011920929,
+          "reconstructed_guard_branches": [
+            "sm20-ceiling"
+          ],
+          "ul": 0.029097771272063255,
+          "fc_capacity": 0.015399999916553497,
+          "st": 0.018673328682780266,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.009783945977687836,
+          "initialized_fc_ul": 0.5292501449584961,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          },
+          {
+            "ofe": 2,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          },
+          {
+            "ofe": 3,
+            "st_mm": 112.0399758219719,
+            "absolute_initial_water_mm": 187.63998004198078,
+            "structural_porosity_mm": 250.18664996570905,
+            "available_ul_minus_st_mm": 62.546659260988235
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.009783945977687836,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 0.0
+    },
+    {
+      "chkey": "84543461",
+      "baseline": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.13850000500679016,
+          "input_fc": 0.2615000009536743,
+          "input_density": 1400.0,
+          "native_density": 1400.0,
+          "cpm": 0.6721951365470886,
+          "por": 0.4582228362560272,
+          "air": 0.9714324474334717,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.09309902787208557,
+          "postrock_fc": 0.17577902972698212,
+          "final_wp": 0.09309902787208557,
+          "final_fc": 0.17577902972698212,
+          "reconstructed_guard_branches": [],
+          "ul": 0.036512382328510284,
+          "fc_capacity": 0.008268000558018684,
+          "st": 0.01379123330116272,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.025387626141309738,
+          "initialized_fc_ul": 0.22644373774528503,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 82.74740166962147,
+            "absolute_initial_water_mm": 138.6068206125266,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.32689230144024
+          },
+          {
+            "ofe": 2,
+            "st_mm": 82.74740166962147,
+            "absolute_initial_water_mm": 138.6068206125266,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.32689230144024
+          },
+          {
+            "ofe": 3,
+            "st_mm": 82.74740166962147,
+            "absolute_initial_water_mm": 138.6068206125266,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.32689230144024
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.025387626141309738,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.1071000024676323,
+          "input_fc": 0.20229999721050262,
+          "input_density": 1400.0,
+          "native_density": 1400.0,
+          "cpm": 0.6721951365470886,
+          "por": 0.4582228362560272,
+          "air": 0.9714324474334717,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.07199209928512573,
+          "postrock_fc": 0.13598507642745972,
+          "final_wp": 0.07199209928512573,
+          "final_fc": 0.13598507642745972,
+          "reconstructed_guard_branches": [],
+          "ul": 0.03862307593226433,
+          "fc_capacity": 0.006399297621101141,
+          "st": 0.015901926904916763,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.029367022216320038,
+          "initialized_fc_ul": 0.16568586230278015,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 95.41156142950058,
+            "absolute_initial_water_mm": 138.60682271700142,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.3268941640854
+          },
+          {
+            "ofe": 2,
+            "st_mm": 95.41156142950058,
+            "absolute_initial_water_mm": 138.60682271700142,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.3268941640854
+          },
+          {
+            "ofe": 3,
+            "st_mm": 95.41156142950058,
+            "absolute_initial_water_mm": 138.60682271700142,
+            "structural_porosity_mm": 274.9337126785001,
+            "available_ul_minus_st_mm": 136.3268941640854
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.029367022216320038,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 2.1044748166332283e-06
+    },
+    {
+      "chkey": "84543462",
+      "baseline": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.1979999989271164,
+          "input_fc": 0.3140000104904175,
+          "input_density": 1400.0,
+          "native_density": 1400.0,
+          "cpm": 0.46536582708358765,
+          "por": 0.45160916447639465,
+          "air": 0.9574114680290222,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.09214243292808533,
+          "postrock_fc": 0.14612486958503723,
+          "final_wp": 0.09214243292808533,
+          "final_fc": 0.14612486958503723,
+          "reconstructed_guard_branches": [],
+          "ul": 0.03594667464494705,
+          "fc_capacity": 0.00539824366569519,
+          "st": 0.006548017263412476,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.026289578527212143,
+          "initialized_fc_ul": 0.15017366409301758,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 39.323373697698116,
+            "absolute_initial_water_mm": 94.6088356513961,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.45771894603968
+          },
+          {
+            "ofe": 2,
+            "st_mm": 39.323373697698116,
+            "absolute_initial_water_mm": 94.6088356513961,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.45771894603968
+          },
+          {
+            "ofe": 3,
+            "st_mm": 39.323373697698116,
+            "absolute_initial_water_mm": 94.6088356513961,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.45771894603968
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.026289578527212143,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.2126999944448471,
+          "input_fc": 0.33739998936653137,
+          "input_density": 1400.0,
+          "native_density": 1400.0,
+          "cpm": 0.46536582708358765,
+          "por": 0.45160916447639465,
+          "air": 0.9574114680290222,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.09898331016302109,
+          "postrock_fc": 0.15701442956924438,
+          "final_wp": 0.09898331016302109,
+          "final_fc": 0.15701442956924438,
+          "reconstructed_guard_branches": [],
+          "ul": 0.0352625846862793,
+          "fc_capacity": 0.00580311194062233,
+          "st": 0.005863929633051157,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.02520062029361725,
+          "initialized_fc_ul": 0.16456854343414307,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 35.218846052885056,
+            "absolute_initial_water_mm": 94.60883451064373,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.4577142894268
+          },
+          {
+            "ofe": 2,
+            "st_mm": 35.218846052885056,
+            "absolute_initial_water_mm": 94.60883451064373,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.4577142894268
+          },
+          {
+            "ofe": 3,
+            "st_mm": 35.218846052885056,
+            "absolute_initial_water_mm": 94.60883451064373,
+            "structural_porosity_mm": 271.0665512521313,
+            "available_ul_minus_st_mm": 176.4577142894268
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.02520062029361725,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 1.1407523743400816e-06
+    },
+    {
+      "chkey": "87913598",
+      "baseline": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.17399999499320984,
+          "input_fc": 0.2800000011920929,
+          "input_density": 1330.0,
+          "native_density": 1330.0,
+          "cpm": 0.4200517535209656,
+          "por": 0.4711860120296478,
+          "air": 0.9459416270256042,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.07308900356292725,
+          "postrock_fc": 0.1176144927740097,
+          "final_wp": 0.07308900356292725,
+          "final_fc": 0.1176144927740097,
+          "reconstructed_guard_branches": [],
+          "ul": 0.039809700101614,
+          "fc_capacity": 0.004452548921108246,
+          "st": 0.007535287644714117,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.029951313510537148,
+          "initialized_fc_ul": 0.11184582859277725,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 45.238615944981575,
+            "absolute_initial_water_mm": 89.09201982531556,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70494596660137
+          },
+          {
+            "ofe": 2,
+            "st_mm": 45.238615944981575,
+            "absolute_initial_water_mm": 89.09201982531556,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70494596660137
+          },
+          {
+            "ofe": 3,
+            "st_mm": 45.238615944981575,
+            "absolute_initial_water_mm": 89.09201982531556,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70494596660137
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.029951313510537148,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.2071000039577484,
+          "input_fc": 0.33329999446868896,
+          "input_density": 1330.0,
+          "native_density": 1330.0,
+          "cpm": 0.4200517535209656,
+          "por": 0.4711860120296478,
+          "air": 0.9459416270256042,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.08699271827936172,
+          "postrock_fc": 0.1400032490491867,
+          "final_wp": 0.08699271827936172,
+          "final_fc": 0.1400032490491867,
+          "reconstructed_guard_branches": [],
+          "ul": 0.03841933235526085,
+          "fc_capacity": 0.005301053170114756,
+          "st": 0.006144916173070669,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.027712441980838776,
+          "initialized_fc_ul": 0.13797879219055176,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 36.89638711512089,
+            "absolute_initial_water_mm": 89.09202015680594,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70496086776257
+          },
+          {
+            "ofe": 2,
+            "st_mm": 36.89638711512089,
+            "absolute_initial_water_mm": 89.09202015680594,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70496086776257
+          },
+          {
+            "ofe": 3,
+            "st_mm": 36.89638711512089,
+            "absolute_initial_water_mm": 89.09202015680594,
+            "structural_porosity_mm": 282.79697230750855,
+            "available_ul_minus_st_mm": 193.70496086776257
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.027712441980838776,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 3.314903835871519e-07
+    },
+    {
+      "chkey": "85179904",
+      "baseline": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.18889999389648438,
+          "input_fc": 0.41670000553131104,
+          "input_density": 800.0,
+          "native_density": 800.0,
+          "cpm": 0.7954418659210205,
+          "por": 0.6695154905319214,
+          "air": 0.9590356945991516,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.15025895833969116,
+          "postrock_fc": 0.3314606249332428,
+          "final_wp": 0.15025895833969116,
+          "final_fc": 0.3314606249332428,
+          "reconstructed_guard_branches": [
+            "sm20-ceiling"
+          ],
+          "ul": 0.0519256554543972,
+          "fc_capacity": 0.018120167776942253,
+          "st": 0.02491615153849125,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.02970905601978302,
+          "initialized_fc_ul": 0.3489636778831482,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 149.4969129562378,
+            "absolute_initial_water_mm": 239.65229154250522,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.057027220726
+          },
+          {
+            "ofe": 2,
+            "st_mm": 149.4969129562378,
+            "absolute_initial_water_mm": 239.65229154250522,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.057027220726
+          },
+          {
+            "ofe": 3,
+            "st_mm": 149.4969129562378,
+            "absolute_initial_water_mm": 239.65229154250522,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.057027220726
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.02970905601978302,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 400.0,
+        "native_depth_mm": 600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.12759999930858612,
+          "input_fc": 0.28139999508857727,
+          "input_density": 800.0,
+          "native_density": 800.0,
+          "cpm": 0.7954418659210205,
+          "por": 0.6695154905319214,
+          "air": 0.9590356945991516,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.10149838030338287,
+          "postrock_fc": 0.22383733093738556,
+          "final_wp": 0.10149838030338287,
+          "final_fc": 0.22383733093738556,
+          "reconstructed_guard_branches": [],
+          "ul": 0.05680171400308609,
+          "fc_capacity": 0.012233895249664783,
+          "st": 0.02979220822453499,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.0404713898897171,
+          "initialized_fc_ul": 0.21537898480892181,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 178.75325307250023,
+            "absolute_initial_water_mm": 239.6522836744399,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.0570383965969
+          },
+          {
+            "ofe": 2,
+            "st_mm": 178.75325307250023,
+            "absolute_initial_water_mm": 239.6522836744399,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.0570383965969
+          },
+          {
+            "ofe": 3,
+            "st_mm": 178.75325307250023,
+            "absolute_initial_water_mm": 239.6522836744399,
+            "structural_porosity_mm": 401.709310281646,
+            "available_ul_minus_st_mm": 162.0570383965969
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.0404713898897171,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 7.868065324601048e-06
+    },
+    {
+      "chkey": "85179901",
+      "baseline": {
+        "emitted_depth_mm": 1400.0,
+        "native_depth_mm": 1600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.05999999865889549,
+          "input_fc": 0.17599999904632568,
+          "input_density": 800.0,
+          "native_density": 800.0,
+          "cpm": 0.3689095377922058,
+          "por": 0.6646642684936523,
+          "air": 0.9520866274833679,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.02213457226753235,
+          "postrock_fc": 0.0649280771613121,
+          "final_wp": 0.02213457226753235,
+          "final_fc": 0.0649280771613121,
+          "reconstructed_guard_branches": [],
+          "ul": 0.06425297260284424,
+          "fc_capacity": 0.004279350396245718,
+          "st": 0.0161766167730093,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.055182285606861115,
+          "initialized_fc_ul": 0.06660159677267075,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 258.82595404982567,
+            "absolute_initial_water_mm": 294.24127843219014,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216970026493
+          },
+          {
+            "ofe": 2,
+            "st_mm": 258.82595404982567,
+            "absolute_initial_water_mm": 294.24127843219014,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216970026493
+          },
+          {
+            "ofe": 3,
+            "st_mm": 258.82595404982567,
+            "absolute_initial_water_mm": 294.24127843219014,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216970026493
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.055182285606861115,
+        "all_initialized_domains_valid": true
+      },
+      "candidate": {
+        "emitted_depth_mm": 1400.0,
+        "native_depth_mm": 1600.0,
+        "first_layer": {
+          "ofe": 1,
+          "layer": 1,
+          "input_wp": 0.08129999786615372,
+          "input_fc": 0.23849999904632568,
+          "input_density": 800.0,
+          "native_density": 800.0,
+          "cpm": 0.3689095377922058,
+          "por": 0.6646642684936523,
+          "air": 0.9520866274833679,
+          "reconstructed_sat": 0.75,
+          "postrock_wp": 0.029992343857884407,
+          "postrock_fc": 0.08798492699861526,
+          "final_wp": 0.029992343857884407,
+          "final_fc": 0.08798492699861526,
+          "reconstructed_guard_branches": [],
+          "ul": 0.06346719712018967,
+          "fc_capacity": 0.005799258593469858,
+          "st": 0.015390840359032154,
+          "depth": 0.10000000149011612,
+          "initialized_drainage_denominator": 0.05287659913301468,
+          "initialized_fc_ul": 0.09137410670518875,
+          "initialized_domains_valid": true,
+          "drainage_division_executed": false
+        },
+        "by_ofe": [
+          {
+            "ofe": 1,
+            "st_mm": 246.25352211296558,
+            "absolute_initial_water_mm": 294.24128439913136,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216616123915
+          },
+          {
+            "ofe": 2,
+            "st_mm": 246.25352211296558,
+            "absolute_initial_water_mm": 294.24128439913136,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216616123915
+          },
+          {
+            "ofe": 3,
+            "st_mm": 246.25352211296558,
+            "absolute_initial_water_mm": 294.24128439913136,
+            "structural_porosity_mm": 1063.4629485126936,
+            "available_ul_minus_st_mm": 769.2216616123915
+          }
+        ],
+        "minimum_initialized_drainage_denominator_m": 0.05287659913301468,
+        "all_initialized_domains_valid": true
+      },
+      "max_absolute_water_delta_mm": 5.966941216684063e-06
+    }
+  ],
+  "comparisons": [
+    {
+      "chkey": "84543623",
+      "changed_outputs": []
+    },
+    {
+      "chkey": "84543461",
+      "changed_outputs": [
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.wat.dat",
+        "H1.element.dat"
+      ]
+    },
+    {
+      "chkey": "84543462",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "87913598",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "85179904",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "85179901",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    }
+  ],
+  "native_reruns": 0
+}

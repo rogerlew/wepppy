@@ -1,0 +1,10 @@
+# Prototype producer implementation prereview
+
+Disposition: **hold execution pending the two bounded closures below.** This review covers actual builder execution only; no native runner is approved. Reviewed producer SHA-256: `7a329a35398191935baedbcb874484e9068bbc39cf52042f95b23c04026d9021`. ADR-0127 SHA-256: `9eadb448e3a5633b3676b56936cc2ec053b47ca32ba3368e45493c6effd200d6`.
+
+The eligibility formula, strict source/porosity screen, fallback preservation and isolated prepared FC/WP override match the ADR. The real Horizon constructor and real writer are used. Baseline reproduction of all 60 prior files, unchanged fallback/zero lanes, preservation of twelve prior exclusions without reattempt, candidate precision checks and parsed nonretention equality are appropriate. Prior native/model execution is neither required nor authorized by this builder review.
+
+1. Pin the accepted prior receipt and declaration before constructing any Horizon. Current code accepts whichever 72-row receipt is passed and dynamically records its hash. Required accepted receipt SHA-256 is `8cc2b27294120ad5d5edf1cab8b84645e7ecefff57f1c7ba81e79286cebb1792`; declaration is `cfd6092d1c38fafd3e5e35c69f177c4301e26096264ce3b5c063dff5301c13b6`. Also retain/check the producer's own before/after identity. Existing dependency checks are useful but do not establish authority of an arbitrary prior receipt.
+2. Close the plan's exact nonretention-byte contract. Equality of normalized parser objects cannot detect ignored header/text/format differences. Compare file bytes after replacing only candidate horizon FC/WP token spans with corresponding baseline token bytes, or narrow the declared contract. Exact masked-byte comparison is preferred since both lanes use the same writer.
+
+Retain the supported container command, process status/logs and numerical/model dependency identities for the invocation. A failure must remain explicit with its attempted outputs; never retry inside an existing result directory. No old-package or raw-root writes were performed by this review.

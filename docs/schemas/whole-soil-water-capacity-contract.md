@@ -79,9 +79,24 @@ complete histories with a zero-rock control and supported high-rock/freeze-thaw
 cases. Validate stocks and accepted fluxes, not only persisted parameters or job
 success. Do not alter uploaded files or existing projects implicitly.
 
-The next admissible experiment is a bounded preparation prototype comparing the
+An admissible staged experiment is a bounded preparation prototype comparing the
 volume inverse with the current heuristic, accompanied by native guard and
 capacity-domain readback. It is not authority to promote the inverse or a global
 porosity multiplier. Source incompatibilities must remain visible. Surface area,
 exposure and RUSLE overlap remain separate under the
 [rock representation contract](rock-fragment-representation-contract.md).
+
+## Native support and execution coverage
+
+The audited native input path adds200mm to the final source boundary before its
+1800mm cap and computational resampling. Keep emitted support and consumed layer
+depths separately; compare integrated stocks using actual native thickness. Bind
+the exact reader/build, because a file boundary alone does not prove native depth.
+Native input density floors/caps and binary32 remapping can also prevent source
+density or nominal RFG from reaching SCON unchanged. Preserve these stages.
+
+Winter summary records can count eligible gates before a KSFLAG skip. Establish
+actual frost routine calls from payloads and their source-owned counter semantics,
+not the number of summary lines or the length of the climate history. A paired
+change in relative ST must be interpreted with its dry-reference offset; it does
+not alone demonstrate changed absolute initial water or available storage.

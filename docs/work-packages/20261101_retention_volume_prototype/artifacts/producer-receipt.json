@@ -1,0 +1,16 @@
+{
+  "exit_code": 0,
+  "command": "wctl exec -T weppcloud /opt/venv/bin/python -B /workdir/wepppy/docs/work-packages/20261101_retention_volume_prototype/artifacts/produce_prototype.py --old /workdir/wepppy/out/whole-soil-retention-20261101 --out /workdir/wepppy/out/retention-volume-prototype-20261101/fixtures-v1",
+  "stdout_sha256": "3f9f9e4ccbba10153b3f9ca4db67f30068a097db3407fbb86dcca6604a4c819d",
+  "stderr_sha256": "2a47a9d459ce4dd48c8199916a1c971db07ff97515178a20886be886a7ed89cc",
+  "receipt_sha256": "7e7197e1f4455075e8d177560a8a313720c408b17b70e165f26769ecc3ae7f7d",
+  "counts": {
+    "eligible": 42,
+    "fallback-unchanged": 4,
+    "missing-original-input": 1,
+    "native-cap-conflict": 4,
+    "porosity-assumption-conflict": 8,
+    "prior-exclusion": 12,
+    "zero-or-unordered-source": 1
+  }
+}

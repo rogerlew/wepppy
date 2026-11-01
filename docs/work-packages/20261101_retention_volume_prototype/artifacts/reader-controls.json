@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "synthetic_only": true,
+  "rejected": [
+    "wb-value",
+    "initial-stock",
+    "missing-storage",
+    "duplicate-storage",
+    "zero-porosity",
+    "wb-operand",
+    "wrong-hk-clock",
+    "missing-hk",
+    "wrong-hk",
+    "calendar-missing",
+    "nonfinite-output"
+  ]
+}

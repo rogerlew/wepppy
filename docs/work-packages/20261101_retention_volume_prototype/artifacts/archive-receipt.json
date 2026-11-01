@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/retention-volume-prototype-20261101/retention-volume-prototype-checkpoint.tar.gz",
+  "sha256": "a0f283d02f1f6f91cfb8058a05d9ca4a6ffe54617abc7cef01eebd5e7457d88f",
+  "bytes": 76934316,
+  "gzip_compression_level": 1,
+  "files": 2174,
+  "uncompressed_bytes": 684350943,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "d2166cf7595432b44fab5c6144ee45f612fa38aba17f311c61f605a5e3b60fc7"
+}

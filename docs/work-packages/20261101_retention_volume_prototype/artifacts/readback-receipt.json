@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "native_processes": 12,
+  "model_reruns": 0,
+  "initialization_rows": 174,
+  "daily_rows_per_history": 17532,
+  "all_initialized_domains_valid": true,
+  "campaign_files": 1391,
+  "readback_sha256": "940ef768260c849f8f8dfdc29ebf3229758de80c83be669de41c3a35332cce73",
+  "original_failed_campaign_sha256": "54f542ad6d5892c29fdd0f4fd3539674f229eebe0f415a9b7cf75264cf950354",
+  "comparisons": [
+    {
+      "chkey": "84543623",
+      "changed_outputs": []
+    },
+    {
+      "chkey": "84543461",
+      "changed_outputs": [
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.wat.dat",
+        "H1.element.dat"
+      ]
+    },
+    {
+      "chkey": "84543462",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "87913598",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "85179904",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "85179901",
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    }
+  ],
+  "frost_calls": 0,
+  "frost_counter_evidence": "science-readback.md independently sums source-owned gate and skip payloads"
+}
