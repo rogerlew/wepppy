@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "all_clears_retained": true,
+  "coarse_inconsistency_preserved": true,
+  "multiple_pending_ids_preserved": true,
+  "next_mapping_join": true,
+  "initialization_censor_explicit": true
+}

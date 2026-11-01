@@ -1,0 +1,229 @@
+{
+  "scope": "Final WEPPpy source-free observational package and initiative board; manifest excludes itself",
+  "files": {
+    "PROJECT_TRACKER.md": {
+      "sha256": "0fd7fd5a39efd153f88cfb47b661c0dad61186a0cc9c37b26d164be4f9a37f89",
+      "bytes": 336931
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/active-zero-science-review.md": {
+      "sha256": "101ed04978fc730b6ecd4eb15550ea5e7ca9a843b32bf91848e364871b3b01db",
+      "bytes": 3809
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/all-active-science-review.md": {
+      "sha256": "d5d0d56c81684c8d5e12220bc8f671bcca80291bde7c18f90396321599bdc09b",
+      "bytes": 5333
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/archive-receipt.json": {
+      "sha256": "34dc3f509feae9603673d1a741a999750b5c1016b20aa378e82704cf1492e50d",
+      "bytes": 451
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/check_clearing_ledger.py": {
+      "sha256": "cb4dba828750e50aad6ca779e5613e7b6133ccfc60aa8972ebc3385b16fac119",
+      "bytes": 1357
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/check_clearing_ledger_v3.py": {
+      "sha256": "c0906143b22c8401406fe52d1b4649fcbeac0d8169ca2376faafbc50baeb4ebd",
+      "bytes": 1895
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/check_history_reader.py": {
+      "sha256": "2d206fe20c89b31c3d46e0ffc21044a403afa263140b84982dc536fdd7b5d9ce",
+      "bytes": 4868
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/clearing-high.json": {
+      "sha256": "9b5930305fbb13b09dd2f0872038ad232acea2480777b6dff442d76082fcd8b1",
+      "bytes": 86137
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/clearing-normal.json": {
+      "sha256": "cb245c9443b4abdaf170d9a2cf4b68c8a97a64fd92597e15cb0b3e1538a7e0a0",
+      "bytes": 82357
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/clearing-reader-controls.json": {
+      "sha256": "da309ae9e8280409dfbbc425025ef5d9beb0c92da01e2daa2f883ebf22049024",
+      "bytes": 207
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/clearing-summary.json": {
+      "sha256": "41b985006d93e05af60d6ea6cf9afc0e1d62334ca3e7934b0956d7637d39d165",
+      "bytes": 1240
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/clearing-zero.json": {
+      "sha256": "dce3ec89ec53d3661f7ae5097bedac374a9ceb34c3d0599019c257d93a8461a7",
+      "bytes": 84000
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/controls-implementation-review.md": {
+      "sha256": "23922759e97e381e45825323e3ca29a6655ba6a2cc1ea152497c407f847bca54",
+      "bytes": 2970
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/controls-science-review.md": {
+      "sha256": "b7648765f87512318fde84fefd0db2be381722df0dd9cfc125ee514025a517c1",
+      "bytes": 2719
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-approval.json": {
+      "sha256": "0ff1c4e9e17d5429dd28b50608baa7efa738ac4ac61b71f21855e0ce7ddcc063",
+      "bytes": 358
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-implementation-prereview-v2.md": {
+      "sha256": "5ae129b2eec9486cf474b2b0ac8956830a68b6bd37d7b9c21a7bc8b3bacd6396",
+      "bytes": 3078
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-implementation-prereview-v3.md": {
+      "sha256": "c181a152260e644bab9d3a8678cab215637b974df9aafeb50d9059dc4f16842d",
+      "bytes": 4406
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-implementation-prereview.md": {
+      "sha256": "8ff761087629c37e008b5736f71d9c16d1b67498683c334e4e769f1802c3de5b",
+      "bytes": 3764
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-preservation.json": {
+      "sha256": "8fef3c3540bf88693794220291c26d23cb0bf3c41e21691d11b9fbfd3243006a",
+      "bytes": 48
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-science-prereview-v3.md": {
+      "sha256": "4258bdb03d83cd155e32446c6178eb3f3e5fad608f98b8e984c5fe651bb85d09",
+      "bytes": 4031
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/execution-science-prereview.md": {
+      "sha256": "cbeb78f746a164234089b61f751a8432048f9894eb9c29be7394b002b6462970",
+      "bytes": 4851
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/fh_observer.for": {
+      "sha256": "a6d3e4bc05a07515544fb2688cd0bb50bd722829f5c65a84e2033f2d1725329a",
+      "bytes": 10492
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/fh_state.inc": {
+      "sha256": "a8b738dcfb0b6797f6d56c5b35dd0e1513a61aaf1f6ebc4365ddbc0888d24cea",
+      "bytes": 545
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/final-packaging-review.md": {
+      "sha256": "11f3fd2ff028c62af3ac541393320d35d28cf01322f12b524aaf29497839f3f4",
+      "bytes": 2355
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/final-science-review.md": {
+      "sha256": "85b7a425a75c878f3ce0ab07f0781291686c19c8d71a04e64017c747bea5bbc0",
+      "bytes": 2305
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/findings.md": {
+      "sha256": "a7a146d6e494c72292be06df423f8d513d768b5c6c84a908e3641514316ed54b",
+      "bytes": 5567
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/history-declaration.md": {
+      "sha256": "1d350bc2fdeb9036c53a67a7cf1acab78ae88ccf9dfea64f664b2843b61a3b82",
+      "bytes": 8277
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/history-implementation-review.md": {
+      "sha256": "7eefa60edb22623f6ccda367e30b7117436a222f936789a82b9b5c7867292845",
+      "bytes": 5476
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/history-summary.json": {
+      "sha256": "3631603b4a54559695b5064eb8c81c98528893df95efbbc75d3e91c93f35d1f3",
+      "bytes": 30114
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/implementation-design-review.md": {
+      "sha256": "053078b1870429314767599965aa656047b1017934571e914670242009f38860",
+      "bytes": 8308
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/implementation-preparation-review-v6.md": {
+      "sha256": "9a199f6a6935a4b1e48fca6714554a5d822e8923170585e93e4fdcee6205913e",
+      "bytes": 3277
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/implementation-preparation-review-v7.md": {
+      "sha256": "cbc1141ad4d73645f39c5cdc647c9a7ec6c1e435c3a1a74d37a23bc2b00d9eb0",
+      "bytes": 2598
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/independent_clearing_review.py": {
+      "sha256": "ef93fbb11ac7e1763aec921a66db08be59988c12de785d39ce497f6efc72fb35",
+      "bytes": 3621
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/independent_profile_review.py": {
+      "sha256": "05c6c763f98096840b63c2b1e14639f6be51db4124484a6c52880dffe96edb9d",
+      "bytes": 2816
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/instrumentation-science-prereview.md": {
+      "sha256": "d7edefb5d3fda6d87e677fd1eb59304e10cdb221bd314523d1df82c866d9c440",
+      "bytes": 8305
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/native-checkpoint.json": {
+      "sha256": "1bab907925408cf76e4457c225e3d0992cd9a4466156a69ed459b5d6ef004d01",
+      "bytes": 541
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/normal-and-supplement-science-review.md": {
+      "sha256": "e8bed32b4937cbfb6c2c501a4856b7af38da14237de3361632a6f4b8af83cbf2",
+      "bytes": 2381
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/observer-runtime.json": {
+      "sha256": "949f0e3bc219a0081043d98f77bb277e866c90df422314830c9ee543329c1244",
+      "bytes": 1127
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/observer_control_driver.for": {
+      "sha256": "65c94b8a6298151c11d701d20f770fc9f77854d7cdf9a2a3f04ba162c4eb1c0b",
+      "bytes": 3373
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/packaging-review.md": {
+      "sha256": "fd2b4d932541295bc289a00e14b55a3f0b5723d6e3a9d4fa709a3c2c71008b09",
+      "bytes": 2069
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/prior-preservation.json": {
+      "sha256": "ca5a21e9838cdc4b59914345ce234c1ec6dce39fdf80da30d6e75cfe17761c6c",
+      "bytes": 316
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/read_clearing_ownership.py": {
+      "sha256": "2d2bb08382df2ae5bb41dc40edb85137694ce64ecc04384be123996f7b357152",
+      "bytes": 7753
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/read_clearing_ownership_v2.py": {
+      "sha256": "988a173bbd7a359ff0625f4d6c180da7b0e9407b448018227320a6076704dcbc",
+      "bytes": 9361
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/read_clearing_ownership_v3.py": {
+      "sha256": "ce528ea0277194ca3e2adfc85fa0836022c6676e81f70fff265842863826f72e",
+      "bytes": 10236
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/read_history.py": {
+      "sha256": "10fdf713328edda69c16659a3ea43799a9e2c40f314bcb87035efd416d61140e",
+      "bytes": 21252
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/readback-amendment.md": {
+      "sha256": "dfb3f76a875931f5b65e5db120ac9af1066be5c48d8fd8958373579891123a37",
+      "bytes": 2406
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/reader-controls.json": {
+      "sha256": "d51d0f289d9ace947ae01aa4d10283d6aefe39a4bc76c7122fc7be2b3bc25563",
+      "bytes": 2056
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/reproduce.md": {
+      "sha256": "dbe9835fc752ac6e0d8de63facaf738032c429d95b3ad7a0d3dfa9362fce8bbf",
+      "bytes": 2435
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/run_history_campaign.py": {
+      "sha256": "613cec5c0bbdc9a950df92ff7cb4481535ba882ac857fd0b30041bd97a3d89f4",
+      "bytes": 17672
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/science-design-review.md": {
+      "sha256": "bbf5a07cab932956c06be87f3bbc2b32ecf8146b31a8042fd83237d7960b1922",
+      "bytes": 15052
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/science-source-bindings.json": {
+      "sha256": "0f9269acb84e799a24b9f7c98740c1d7fb454a3567befcef7a5c8f757d9739f7",
+      "bytes": 4060
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/summarize_campaign.py": {
+      "sha256": "07b70315c00914cb0e17d8d7fe7a4bcdb9303a9ea4ed98d9a25d2cfe8c303e56",
+      "bytes": 4186
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/artifacts/validation.md": {
+      "sha256": "330a91d43fa5dd6d2ef6d982080dae7af7b22e3ccc4cc195de7f68b83078226c",
+      "bytes": 1861
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/package.md": {
+      "sha256": "c6adeca81c4b88539a3a3f03a0edeacc7c6ad9bb4e0a6d51789f43a9ae513b82",
+      "bytes": 1194
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/prompts/active/history_execplan.md": {
+      "sha256": "bf1a0171c7544d88586ae67ce3326fb1069554fa002629aad2b8ea0c3b9d41d7",
+      "bytes": 9287
+    },
+    "docs/work-packages/20261101_frozen_water_history_ownership/tracker.md": {
+      "sha256": "4865e7e7d3720393146b1f7e8a87c9628c120d268ed6c734f3b300ceda19cd3d",
+      "bytes": 1868
+    }
+  }
+}

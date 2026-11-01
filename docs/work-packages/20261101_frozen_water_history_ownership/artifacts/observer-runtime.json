@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "fb885d126413b3f19488c640ef3e7fb8d7d9a872f0f8b08b48a207092a956c0f",
+  "ldd": "\tlinux-vdso.so.1 (0x00007fffa44f8000)\n\tlibgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x0000702599600000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x0000702599517000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x0000702599200000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007025999c0000)\n\t/lib64/ld-linux-x86-64.so.2 (0x0000702599a0d000)\n",
+  "libraries": {
+    "/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0": "342618ccfebe840446e4ef2b7893f4161b2084845e570f42d68a70bfde58a58d",
+    "/usr/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+    "/usr/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+    "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+    "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+  },
+  "exact_pinned_runtime": true
+}

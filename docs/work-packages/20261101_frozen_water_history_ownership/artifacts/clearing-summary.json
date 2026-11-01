@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "scenario": "zero-ks1",
+      "actual_clearings": 20,
+      "original_valid_state_count": 6,
+      "previously_excluded": 14,
+      "next_initialization": 20,
+      "next_mapping": 7,
+      "next_map_censored_by_initialization": 13,
+      "unresolved": 0,
+      "min_cleared_m": 1.0913936421275139e-11,
+      "max_cleared_m": 0.000619398255366832
+    },
+    {
+      "scenario": "normal-ks1",
+      "actual_clearings": 19,
+      "original_valid_state_count": 9,
+      "previously_excluded": 10,
+      "next_initialization": 19,
+      "next_mapping": 8,
+      "next_map_censored_by_initialization": 11,
+      "unresolved": 0,
+      "min_cleared_m": 4.001776687800884e-11,
+      "max_cleared_m": 0.0011304033687338233
+    },
+    {
+      "scenario": "high-ks1",
+      "actual_clearings": 19,
+      "original_valid_state_count": 9,
+      "previously_excluded": 10,
+      "next_initialization": 19,
+      "next_mapping": 10,
+      "next_map_censored_by_initialization": 9,
+      "unresolved": 0,
+      "min_cleared_m": 1.2557713489513844e-05,
+      "max_cleared_m": 0.0009386108722537756
+    }
+  ],
+  "total_actual_clearings": 58,
+  "interpretation": "Observed state assignments, not an annual external loss budget."
+}

@@ -1,0 +1,87 @@
+{
+  "scope": "Read-only audit, all978 pinned build member bytes/hashes verified",
+  "build_receipt_sha256": "ab8c57fc6a1786864cc581907e40aaa11673fe15cc925cad44b04786cbe27036",
+  "binary_sha256": "5f6bcebac1c82111a6a7c9685cd0d2a04f2e6c3066a3637e533a1a8054ff38b1",
+  "files": {
+    "frwatc.for": {
+      "pinned_sha256": "a834dbe62497989e8f99945acc880cdb31ced4ccc88d31f215c91738a0a0f1c1",
+      "canonical_sha256": "a834dbe62497989e8f99945acc880cdb31ced4ccc88d31f215c91738a0a0f1c1",
+      "identical": true
+    },
+    "frostn.for": {
+      "pinned_sha256": "cdf107e59cd9a24e3e1898deb1f0791925c8a14de8fc3638e966a5f19628c5df",
+      "canonical_sha256": "cdf107e59cd9a24e3e1898deb1f0791925c8a14de8fc3638e966a5f19628c5df",
+      "identical": true
+    },
+    "winter.for": {
+      "pinned_sha256": "6dca46e762611ddd93e030d7fcc619af92922d614a4ddc1c44576b90ee9d86ff",
+      "canonical_sha256": "6dca46e762611ddd93e030d7fcc619af92922d614a4ddc1c44576b90ee9d86ff",
+      "identical": true
+    },
+    "frzng.for": {
+      "pinned_sha256": "f77cb1fe79aa187f1f4aca303c50825b6e3972f918e7025505cd9b6e33f04135",
+      "canonical_sha256": "f77cb1fe79aa187f1f4aca303c50825b6e3972f918e7025505cd9b6e33f04135",
+      "identical": true
+    },
+    "frznw.for": {
+      "pinned_sha256": "ce3732c33eea7688d19c512d8c87cc222fd3cc532ff6b72add7f3cdb413b917c",
+      "canonical_sha256": "ce3732c33eea7688d19c512d8c87cc222fd3cc532ff6b72add7f3cdb413b917c",
+      "identical": true
+    },
+    "mlttp.for": {
+      "pinned_sha256": "50f691ca08cf499429e8148c49ee80078e0fde842e81d5733bca91b867382377",
+      "canonical_sha256": "50f691ca08cf499429e8148c49ee80078e0fde842e81d5733bca91b867382377",
+      "identical": true
+    },
+    "mltbtm.for": {
+      "pinned_sha256": "6a6b280ae446b6389116bc079b161260a04d60ba7b0d72938eb1b56550db284a",
+      "canonical_sha256": "6a6b280ae446b6389116bc079b161260a04d60ba7b0d72938eb1b56550db284a",
+      "identical": true
+    },
+    "watdst.for": {
+      "pinned_sha256": "039f4253c4210816a44333ac7753a28ee73ec7ebc53a65b34b0f10385eb0eafc",
+      "canonical_sha256": "039f4253c4210816a44333ac7753a28ee73ec7ebc53a65b34b0f10385eb0eafc",
+      "identical": true
+    },
+    "contin.for": {
+      "pinned_sha256": "78adeaed5495910a61bfc06dc3f91481b51af2d8c6e95b6044b713e7393ab069",
+      "canonical_sha256": "a9bf340f08a9a26f5b910e4df5a3aa36df9a2cc57c7471776c72c337245cad30",
+      "identical": false
+    },
+    "irs.for": {
+      "pinned_sha256": "8beae52254d69ce84f95b18768d8afc76151eecb3e67a52fdd9bd6e508e24751",
+      "canonical_sha256": "8c7723c55caa9608cd74d8e6d15423df6fdbdbb983973121992779bd5a8f1ccc",
+      "identical": false
+    },
+    "grna.for": {
+      "pinned_sha256": "e8b43f7edecf51596a8a3d41df385fef91999c8dcb413f7e1f1e9c7681ece2af",
+      "canonical_sha256": "f1cbd5638b4b415ceb21fe0262cfc4329b5b0de797f480b301ca769f393f2e1d",
+      "identical": false
+    },
+    "soil.for": {
+      "pinned_sha256": "b4c3cbfe4284632d57f02c4bdb726b3fabf340351d183377e24f44920a0350fd",
+      "canonical_sha256": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e",
+      "identical": false
+    },
+    "infpar.for": {
+      "pinned_sha256": "66487d6206fa36f936934073caf9cb2c2c2b053432bee5de437093aeba67f4a8",
+      "canonical_sha256": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352",
+      "identical": false
+    },
+    "watbal.for": {
+      "pinned_sha256": "f1335d415e4c727a6b23fe542b9d4974f729ad956d7b87edd2a84268c8285ce8",
+      "canonical_sha256": "ebe0921be87752bd446f7784a530b433edeae56d56fdb48578a20280b331a928",
+      "identical": false
+    },
+    "watbal_hourly.for": {
+      "pinned_sha256": "dbfeed35c303c54037d130bc62852b59fcd76946e62addc30ff5ed5910abf986",
+      "canonical_sha256": "c1fe46626fa9b49dea44a2116b3152a11897b42148b3c13d5bcf96fcf746ee20",
+      "identical": false
+    },
+    "scon.for": {
+      "pinned_sha256": "e1b65e38fa186d61d48dfb36da40694b95b39daea2e6b8b8473ce7a62e7d3f05",
+      "canonical_sha256": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+      "identical": false
+    }
+  }
+}

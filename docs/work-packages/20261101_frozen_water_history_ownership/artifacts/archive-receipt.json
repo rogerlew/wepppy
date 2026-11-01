@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/frozen-water-history-20261101/frozen-water-history-checkpoint.tar.gz",
+  "sha256": "751f110c03e6089cbb58e9bef539b246bcfa9aec6c7a981b4aac1ed9bce8f922",
+  "bytes": 602863091,
+  "gzip_compression_level": 1,
+  "files": 1914,
+  "uncompressed_bytes": 7331335126,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "736bdba1234e92af110b37b3026c83273c700e35dcf43f9ab36aa28edbd84f46"
+}

@@ -1,0 +1,11 @@
+{
+  "commit": "c56c331ebab872c6c57ee6297080e151ef43a8c3",
+  "branch": "wepp_260430_negmeltfix_comparator",
+  "scope": "Source-free observational evidence only; no native source or release change",
+  "files": 265,
+  "manifest_rows": 243,
+  "checksummed_files": 264,
+  "manifest_sha256": "8100bc9e991dfddce1e513b4eec39107459290feeeda63ea3cc7d4038e30d751",
+  "checksums_sha256": "b602d135aafb0eacb155fdf42d723c5c7b352a287e2afbe8ead7c9855e0f393f",
+  "archive_receipt_sha256": "34dc3f509feae9603673d1a741a999750b5c1016b20aa378e82704cf1492e50d"
+}

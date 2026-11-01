@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "malformed_controls": [
+    {
+      "case": "missing_footer",
+      "rejected": true,
+      "reason": "Missing footer/truncated observation"
+    },
+    {
+      "case": "missing_coarse",
+      "rejected": true,
+      "reason": "Orphan fine layer"
+    },
+    {
+      "case": "missing_fine",
+      "rejected": true,
+      "reason": "Missing fine support"
+    },
+    {
+      "case": "duplicate_fine",
+      "rejected": true,
+      "reason": "Duplicate/invalid fine support"
+    },
+    {
+      "case": "duplicate_coarse",
+      "rejected": true,
+      "reason": "Duplicate/invalid coarse support"
+    },
+    {
+      "case": "identity_drift",
+      "rejected": true,
+      "reason": "Map return identity drift"
+    },
+    {
+      "case": "sequence_gap",
+      "rejected": true,
+      "reason": "Noncontiguous event sequence"
+    },
+    {
+      "case": "invalid_clock",
+      "rejected": true,
+      "reason": "Invalid clock/support/identity"
+    },
+    {
+      "case": "nonfinite",
+      "rejected": true,
+      "reason": "Nonfinite observation"
+    },
+    {
+      "case": "parent_drift",
+      "rejected": true,
+      "reason": "Frost parent drift"
+    },
+    {
+      "case": "map_count",
+      "rejected": true,
+      "reason": "Unmatched map/call or footer map count"
+    },
+    {
+      "case": "trailing_data",
+      "rejected": true,
+      "reason": "Empty/trailing record"
+    },
+    {
+      "case": "branch_clock",
+      "rejected": true,
+      "reason": "Branch identity drift"
+    },
+    {
+      "case": "branch_direction",
+      "rejected": true,
+      "reason": "Branch direction drift"
+    },
+    {
+      "case": "missing_finish",
+      "rejected": true,
+      "reason": "Missing/duplicate mapping boundary"
+    },
+    {
+      "case": "missing_branch_layer",
+      "rejected": true,
+      "reason": "Missing/duplicate mapping boundary"
+    }
+  ],
+  "unavailable_is_not_zero": true,
+  "branch_gap_is_not_absence": true,
+  "stale_frozen_uses_actual_clear": true,
+  "invalid_nw_excluded": true,
+  "native_request_observed": true
+}

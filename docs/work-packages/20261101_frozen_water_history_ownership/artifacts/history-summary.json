@@ -1,0 +1,892 @@
+{
+  "passed": true,
+  "histories_sha256": "102f7d75ec7a9c3eb31296f1fba810abcfb9f0ba20395a58f7225cb908cdcf61",
+  "cases": [
+    {
+      "scenario": "zero-ks0",
+      "accepted": true,
+      "observed_frost_calls": 0,
+      "weather_eligible": 84331,
+      "maps": 0,
+      "signature_counts": {},
+      "signature_examples": {},
+      "signed_ranges": {},
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 674940,
+        "WIN_PRE": 7449,
+        "WINTER_HOUR": 178776,
+        "WINTER_HOUR:value=0": 178776,
+        "WEATHER_ELIGIBLE": 84331,
+        "WEATHER_ELIGIBLE:value=0": 84331,
+        "WIN_POST": 7449,
+        "WB_PRE": 13308,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13308,
+        "IRS_WB_PRE": 4224,
+        "IRS_WB_POST": 4224,
+        "FOOTER": 1
+      },
+      "effects": {},
+      "ownership_counts": {},
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {},
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "ed744611960abb7f54a6dc1b5a1cd874dd5a138a8067e4c5544eaa2dd12a64fa",
+        "H1.soil.dat": "5ba505cce5994c39bc28ca336246aef696a4ec135c780fbc2153a943fcc6beae",
+        "H1.pass.dat": "2e06e24a7c78a754ca3635a280f31cb214fc6f9ace30e38a6959a6974d62a238",
+        "H1.plot.dat": "028f5af6e415fa5a965a87d91120f6d3459e3f6f029bf96be611366ec18811b0",
+        "H1.wat.dat": "5cbe25d04bb3782707fbe077d2ace10c72c2dc6eb7fc3b8f40e7776c144deea1",
+        "H1.element.dat": "ca852157516f15ed7e05f5a446fa933d5b480f028de50fea28f614ee9adace6f",
+        "H1.ebe.dat": "be42bae9579e57f086a22f7abefde09f87b62b650712fcbdd2d77413e3b29333"
+      },
+      "trace_sha256": "d24e53908d67d18d8b5b7b2bd1fbe6ffd4ebd021a61bb033c8e4e8444e113e54",
+      "transfers_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ownership_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "scenario": "zero-ks1",
+      "accepted": true,
+      "observed_frost_calls": 128408,
+      "weather_eligible": 128408,
+      "maps": 11855,
+      "signature_counts": {
+        "G_update_support_skip": 1992,
+        "I_volumetric_gate": 948,
+        "I_absolute_gate": 2413,
+        "H_frozen_liquid_clear": 6
+      },
+      "signature_examples": {
+        "invalid_state": {
+          "event": {
+            "seq": 3837,
+            "map": 12,
+            "year": 1,
+            "day": 3,
+            "ofe": 2,
+            "hour": 24,
+            "parent": 3835,
+            "epoch": 6
+          },
+          "layer": 1,
+          "dg": 0.10000000149011612,
+          "frozen": 0.0,
+          "nw": 0.0,
+          "stocks": {
+            "coarse_liquid": 0.02707684898078444,
+            "coarse_ice": -9.540263272356242e-05,
+            "coarse_total": 0.026981446348060878,
+            "soilw_minus_coarse_liquid": -0.00022771136164667638,
+            "fine_liquid": 0.02605865329684995,
+            "fine_ice": 0.00040172686567530036,
+            "fine_total": 0.02646038016252525,
+            "geometry_residual": -3.725290298461914e-09
+          }
+        },
+        "G_update_support_skip": {
+          "event": {
+            "seq": 10750,
+            "map": 32,
+            "year": 1,
+            "day": 10,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 10749,
+            "epoch": 32
+          },
+          "layer": 1,
+          "residual_m": 2.5342594689448106e-10
+        },
+        "I_volumetric_gate": {
+          "event": {
+            "seq": 15293,
+            "map": 46,
+            "year": 1,
+            "day": 12,
+            "ofe": 2,
+            "hour": 1,
+            "parent": 15292,
+            "epoch": 47
+          },
+          "layer": 2,
+          "volumetric_request": 4.163011908531189e-06,
+          "residual_m": -4.163011908531189e-07
+        },
+        "I_absolute_gate": {
+          "event": {
+            "seq": 128274,
+            "map": 460,
+            "year": 1,
+            "day": 294,
+            "ofe": 2,
+            "hour": 1,
+            "parent": 128273,
+            "epoch": 245
+          },
+          "layer": 9,
+          "request_m": -2.421438694000244e-08,
+          "residual_m": 2.421438694000244e-08
+        },
+        "H_frozen_liquid_clear": {
+          "event": {
+            "seq": 168499,
+            "map": 606,
+            "year": 1,
+            "day": 345,
+            "ofe": 1,
+            "hour": 24,
+            "parent": 168497,
+            "epoch": 359
+          },
+          "layer": 2,
+          "cleared_m": 1.0913936421275139e-11,
+          "fine_change_m": -8.541974072517888e-11
+        }
+      },
+      "signed_ranges": {
+        "direction_0_residual_m": {
+          "count": 77703,
+          "min": -0.0015955380843699907,
+          "max": 0.001547307613227994
+        },
+        "direction_0_fine_change_m": {
+          "count": 77703,
+          "min": -0.001595538669508817,
+          "max": 0.0015473071402521965
+        },
+        "direction_0_profile_residual_m": {
+          "count": 6314,
+          "min": -1.735806909319848e-08,
+          "max": 1.4643341705866675e-08
+        },
+        "direction_1_residual_m": {
+          "count": 38920,
+          "min": -0.00040053400024259167,
+          "max": 0.0004005340049221262
+        },
+        "direction_1_fine_change_m": {
+          "count": 38920,
+          "min": -0.0044663551530013945,
+          "max": 0.006361383206515386
+        },
+        "direction_1_profile_residual_m": {
+          "count": 3892,
+          "min": -1.3803935539624668e-06,
+          "max": 0.00022528624667239594
+        },
+        "invalid_direction_0_residual_m": {
+          "count": 1927,
+          "min": -0.00109611937370524,
+          "max": 0.001396152149413488
+        },
+        "invalid_direction_0_fine_change_m": {
+          "count": 1927,
+          "min": -0.0010961204522225154,
+          "max": 0.001396151567729648
+        }
+      },
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 681560,
+        "WIN_PRE": 7780,
+        "WINTER_HOUR": 186720,
+        "WINTER_HOUR:value=1": 186720,
+        "WEATHER_ELIGIBLE": 128408,
+        "WEATHER_ELIGIBLE:value=1": 128408,
+        "FROST_CALL": 128408,
+        "FROST_CALL:value=1": 128408,
+        "FN_INIT": 13258,
+        "FN_INIT:value=1": 13258,
+        "FN_READY": 128408,
+        "FN_READY:value=1": 128408,
+        "FROST_DONE": 128408,
+        "FROST_DONE:value=1": 128408,
+        "MAP_PRE": 11855,
+        "D0_START": 7963,
+        "D0_LAYER": 79630,
+        "D0_SUPPORT": 796300,
+        "D0_DRY_CLEAR": 738297,
+        "D0_CLEAR_PRE": 79630,
+        "D0_CLEAR_POST": 79630,
+        "D0_FINISH": 7963,
+        "MAP_POST": 11855,
+        "unavailable_branch_records": 0,
+        "INIT_PRE": 4068,
+        "INIT_POST": 4068,
+        "WIN_POST": 7780,
+        "WB_PRE": 13305,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13305,
+        "D1_START": 3892,
+        "D1_LAYER": 38920,
+        "D1_REQUEST": 35984,
+        "D1_ABS_ACTIVE": 8279,
+        "D1_NW_AFTER": 7421,
+        "D1_DRAIN_SUPPORT": 72620,
+        "D1_DRAIN_CAP": 65339,
+        "D1_DRAIN_AFTER": 72620,
+        "D1_TOTAL_U": 8279,
+        "D1_VOL_REQUEST": 8279,
+        "D1_END": 35984,
+        "D1_FINISH": 3892,
+        "FROST_BLOCK_PRE": 3892,
+        "FROST_BLOCK_POST": 3892,
+        "invalid_layer_snapshots": 2721,
+        "invalid_mapping_layers_excluded_from_signatures": 1927,
+        "D0_DRY_FLOOR": 23927,
+        "D1_VOL_ACTIVE": 6415,
+        "D1_UPDATE_SUPPORT": 64150,
+        "D1_NEW_CARRY": 4098,
+        "D1_UPDATE_END": 64150,
+        "D1_CARRY_APPLY": 4084,
+        "IRS_WB_PRE": 4227,
+        "IRS_WB_POST": 4227,
+        "D1_ADD": 858,
+        "D1_FROZEN_ROOM": 466,
+        "D1_FROZEN_ALLOC": 466,
+        "D1_ZERO": 2936,
+        "D1_NW_DRAIN": 208,
+        "D1_SMALL_FROZEN": 121,
+        "FOOTER": 1
+      },
+      "effects": {
+        "mode0": {
+          "layers": 77703,
+          "max_absolute_residual_m": 0.0015955380843699907,
+          "max_absolute_fine_change_m": 0.001595538669508817,
+          "max_request_rounding_difference_m": 2.3283064365386963e-10
+        },
+        "mode1": {
+          "layers": 38920,
+          "max_absolute_residual_m": 0.0004005340049221262,
+          "max_absolute_fine_change_m": 0.006361383206515386,
+          "max_request_rounding_difference_m": 2.3283064365386963e-10
+        },
+        "invalid_mode0": {
+          "layers": 1927,
+          "max_absolute_residual_m": 0.001396152149413488,
+          "max_absolute_fine_change_m": 0.001396151567729648,
+          "max_request_rounding_difference_m": 1.1641532182693481e-10
+        }
+      },
+      "ownership_counts": {
+        "clears_followed_to_next_initialization": 6
+      },
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {
+        "observed_initialization_fine_change_m_not_causal_recovery": {
+          "count": 3,
+          "min": -0.002354152597021625,
+          "max": 0.0002898530597272575
+        }
+      },
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "88ea5a2a07330d7536c38d04b73eb0a9d6dd579544b165fe7bc1eb0525187c09",
+        "H1.soil.dat": "8f386380b2154b7260803f793baeeae628a029c74032a57e985e80f7978a6edb",
+        "H1.pass.dat": "879431dbdeabeeaa42209a090e3cecd0a8d2d683116675fdef5c40b1850e1da8",
+        "H1.plot.dat": "bb9a916a56c9c0a5bc6db53fc34f116ebc14208ca2baec89bb58aa551ff3608e",
+        "H1.wat.dat": "5d0286c75f0c4fcbea8854ad44bd45c62ff39033d4a0fceb9358461588fa1715",
+        "H1.element.dat": "26def315ec663a9b7f7713fd115087f115a4c229d31e24da58ccd4ec90692f50",
+        "H1.ebe.dat": "ec5a3facfd3c668885d993fe44b37d037aaf251073889c49d1e1d4b917f7acf2"
+      },
+      "trace_sha256": "0d77cc243706ee91d4cee4bd7be3d6d386609c0e452d21f1ade321f91fd8dba2",
+      "transfers_sha256": "e39a1d8980864f91f3f0eea6ab03cab7c557f0aec22092bd7929b2f696a262b0",
+      "ownership_sha256": "c1ca3ddbc177dd769c97b49db869879fa45cb18a845bd16c0bbe8b34953a812c"
+    },
+    {
+      "scenario": "normal-ks0",
+      "accepted": true,
+      "observed_frost_calls": 0,
+      "weather_eligible": 84331,
+      "maps": 0,
+      "signature_counts": {},
+      "signature_examples": {},
+      "signed_ranges": {},
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 674940,
+        "WIN_PRE": 7449,
+        "WINTER_HOUR": 178776,
+        "WINTER_HOUR:value=0": 178776,
+        "WEATHER_ELIGIBLE": 84331,
+        "WEATHER_ELIGIBLE:value=0": 84331,
+        "WIN_POST": 7449,
+        "WB_PRE": 13308,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13308,
+        "IRS_WB_PRE": 4224,
+        "IRS_WB_POST": 4224,
+        "FOOTER": 1
+      },
+      "effects": {},
+      "ownership_counts": {},
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {},
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "cb401b78fa5cfcda7cbb79e430a6af2356ec9f9f48535e29fd3bd600531aa2d9",
+        "H1.soil.dat": "a9dbd902a8f651f104065f3344853b4fa00bab12fb8a468e40a02e68baef527f",
+        "H1.pass.dat": "2e9c36f0b9d78a8fcca0bcaa5b1a5465d80a11476279be3e64213fa64a4d4e69",
+        "H1.plot.dat": "2529cf47c458dec7cf7bc69be644ac43854f7d95a40627c004d063511e40eb1a",
+        "H1.wat.dat": "5574ba46a65e1653ddc1cc8d06d3119c310de857127b310c71283b6b7ac3db4d",
+        "H1.element.dat": "ac511eec17f6c1070b18dbd8d7df31dd1787b03f38d59b0e62d96106cf9a584b",
+        "H1.ebe.dat": "876c2747aef29bcd4661cca8c664fd5f30b2e3fc7ed430b66c22c679f6544b3e"
+      },
+      "trace_sha256": "0ff2e4e211e6feec000f1627b8b1a76cdcc93b9f235e3c911edb529d486baa81",
+      "transfers_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ownership_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "scenario": "normal-ks1",
+      "accepted": true,
+      "observed_frost_calls": 130165,
+      "weather_eligible": 130165,
+      "maps": 11932,
+      "signature_counts": {
+        "G_update_support_skip": 1978,
+        "H_frozen_liquid_clear": 9,
+        "I_volumetric_gate": 680,
+        "I_absolute_gate": 2983
+      },
+      "signature_examples": {
+        "invalid_state": {
+          "event": {
+            "seq": 6094,
+            "map": 18,
+            "year": 1,
+            "day": 4,
+            "ofe": 2,
+            "hour": 1,
+            "parent": 5705,
+            "epoch": 6
+          },
+          "layer": 1,
+          "dg": 0.10000000149011612,
+          "frozen": 0.0,
+          "nw": 0.0,
+          "stocks": {
+            "coarse_liquid": 0.020594982216298574,
+            "coarse_ice": -8.145056199282408e-06,
+            "coarse_total": 0.02058683716009929,
+            "soilw_minus_coarse_liquid": -0.0006476694440245567,
+            "fine_liquid": 0.020042603996361437,
+            "fine_ice": 0.0006258194334805012,
+            "fine_total": 0.020668423429841938,
+            "geometry_residual": -3.725290298461914e-09
+          }
+        },
+        "G_update_support_skip": {
+          "event": {
+            "seq": 7247,
+            "map": 23,
+            "year": 1,
+            "day": 5,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 7246,
+            "epoch": 6
+          },
+          "layer": 1,
+          "residual_m": 6.156593845840774e-10
+        },
+        "H_frozen_liquid_clear": {
+          "event": {
+            "seq": 42073,
+            "map": 126,
+            "year": 1,
+            "day": 26,
+            "ofe": 1,
+            "hour": 15,
+            "parent": 42071,
+            "epoch": 85
+          },
+          "layer": 1,
+          "cleared_m": 0.00016806955682113767,
+          "fine_change_m": -0.00016806955682113767
+        },
+        "I_volumetric_gate": {
+          "event": {
+            "seq": 54353,
+            "map": 161,
+            "year": 1,
+            "day": 34,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 54352,
+            "epoch": 90
+          },
+          "layer": 7,
+          "volumetric_request": -9.788197530724574e-06,
+          "residual_m": 1.957640051841736e-06
+        },
+        "I_absolute_gate": {
+          "event": {
+            "seq": 92076,
+            "map": 284,
+            "year": 1,
+            "day": 56,
+            "ofe": 3,
+            "hour": 1,
+            "parent": 92075,
+            "epoch": 433
+          },
+          "layer": 9,
+          "request_m": -7.82310962677002e-08,
+          "residual_m": 7.82310962677002e-08
+        }
+      },
+      "signed_ranges": {
+        "direction_0_residual_m": {
+          "count": 77542,
+          "min": -0.0012373025982534286,
+          "max": 0.0011627144856689309
+        },
+        "direction_0_fine_change_m": {
+          "count": 77542,
+          "min": -0.0012373029909140687,
+          "max": 0.0011627131904004828
+        },
+        "direction_0_profile_residual_m": {
+          "count": 6347,
+          "min": -1.4709200663043376e-08,
+          "max": 0.0002238722475728233
+        },
+        "direction_1_residual_m": {
+          "count": 39950,
+          "min": -0.00027478630762747813,
+          "max": 0.00041642652413609316
+        },
+        "direction_1_fine_change_m": {
+          "count": 39950,
+          "min": -0.004210801179465623,
+          "max": 0.007610720116645098
+        },
+        "direction_1_profile_residual_m": {
+          "count": 3995,
+          "min": -2.062911638150977e-06,
+          "max": 0.0003109555951326948
+        },
+        "invalid_direction_0_residual_m": {
+          "count": 1828,
+          "min": -0.0012188352686582915,
+          "max": 0.0012373034983448258
+        },
+        "invalid_direction_0_fine_change_m": {
+          "count": 1828,
+          "min": -0.001218835684236086,
+          "max": 0.0012373031026727752
+        }
+      },
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 681620,
+        "WIN_PRE": 7783,
+        "WINTER_HOUR": 186792,
+        "WINTER_HOUR:value=1": 186792,
+        "WEATHER_ELIGIBLE": 130165,
+        "WEATHER_ELIGIBLE:value=1": 130165,
+        "FROST_CALL": 130165,
+        "FROST_CALL:value=1": 130165,
+        "FN_INIT": 12470,
+        "FN_INIT:value=1": 12470,
+        "FN_READY": 130165,
+        "FN_READY:value=1": 130165,
+        "FROST_DONE": 130165,
+        "FROST_DONE:value=1": 130165,
+        "MAP_PRE": 11932,
+        "D0_START": 7937,
+        "D0_LAYER": 79370,
+        "D0_SUPPORT": 793700,
+        "D0_DRY_CLEAR": 711769,
+        "D0_CLEAR_PRE": 79370,
+        "D0_CLEAR_POST": 79370,
+        "D0_FINISH": 7937,
+        "MAP_POST": 11932,
+        "unavailable_branch_records": 0,
+        "INIT_PRE": 3939,
+        "INIT_POST": 3939,
+        "WIN_POST": 7783,
+        "WB_PRE": 13305,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13305,
+        "D1_START": 3995,
+        "D1_LAYER": 39950,
+        "D1_REQUEST": 35704,
+        "D1_ABS_ACTIVE": 10306,
+        "D1_NW_AFTER": 8077,
+        "D1_DRAIN_SUPPORT": 79090,
+        "D1_DRAIN_CAP": 72345,
+        "D1_DRAIN_AFTER": 79090,
+        "D1_TOTAL_U": 10306,
+        "D1_VOL_REQUEST": 10306,
+        "D1_VOL_ACTIVE": 9176,
+        "D1_UPDATE_SUPPORT": 91760,
+        "D1_UPDATE_END": 91760,
+        "D1_END": 35704,
+        "D1_ADD": 2229,
+        "D1_FINISH": 3995,
+        "FROST_BLOCK_PRE": 3995,
+        "FROST_BLOCK_POST": 3995,
+        "invalid_layer_snapshots": 2592,
+        "invalid_mapping_layers_excluded_from_signatures": 1828,
+        "IRS_WB_PRE": 4227,
+        "IRS_WB_POST": 4227,
+        "D0_DRY_FLOOR": 43310,
+        "D1_NEW_CARRY": 3874,
+        "D1_CARRY_APPLY": 3808,
+        "D1_FROZEN_ROOM": 521,
+        "D1_FROZEN_ALLOC": 521,
+        "D1_ZERO": 4246,
+        "D1_NW_DRAIN": 210,
+        "D1_SMALL_FROZEN": 152,
+        "FOOTER": 1
+      },
+      "effects": {
+        "mode0": {
+          "layers": 77542,
+          "max_absolute_residual_m": 0.0012373025982534286,
+          "max_absolute_fine_change_m": 0.0012373029909140687,
+          "max_request_rounding_difference_m": 2.3283064365386963e-10
+        },
+        "mode1": {
+          "layers": 39950,
+          "max_absolute_residual_m": 0.00041642652413609316,
+          "max_absolute_fine_change_m": 0.007610720116645098,
+          "max_request_rounding_difference_m": 2.3283064365386963e-10
+        },
+        "invalid_mode0": {
+          "layers": 1828,
+          "max_absolute_residual_m": 0.0012373034983448258,
+          "max_absolute_fine_change_m": 0.0012373031026727752,
+          "max_request_rounding_difference_m": 1.3278622645884752e-10
+        }
+      },
+      "ownership_counts": {
+        "clears_followed_to_next_initialization": 9
+      },
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {
+        "observed_initialization_fine_change_m_not_causal_recovery": {
+          "count": 6,
+          "min": -0.0012270347499765133,
+          "max": 8.723281128929228e-05
+        }
+      },
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "12f09573695cace91387b5151866a378cad373b7f3370ab83bc52150fb7d8950",
+        "H1.soil.dat": "8a853a1c5252ae6f644ccddb64983a52220c0be64ac533ccbf829b755e19f69a",
+        "H1.pass.dat": "974cbf89cfdf465949f8369d167d33adbb70e8a163add055b0e2fb40ba96ca96",
+        "H1.plot.dat": "90b4fe1f915137a1cbbbe412a2bcf2f3ee39cf0474a82ef7e0179e75546c36af",
+        "H1.wat.dat": "d06ba7f220c98bf858d2152c65dc501b43972ae86a6075d3b97e1ba8d432924c",
+        "H1.element.dat": "de20ab772750385c1dd15d1261f46eb89e5a036350381fd6f23ca738cb093820",
+        "H1.ebe.dat": "b12c5df3805f2ded22e3468506822daa59e3e4a05078005ea10449fc895d7cd0"
+      },
+      "trace_sha256": "315ae0fe721e482e6aa6efeb1f430d09d19abbf76aa1c1ee4a39cd57c9c4c84c",
+      "transfers_sha256": "be2f7052b75ccc0de154c14f7cd7d1b7549b067a80b347bdea33e2e4db762027",
+      "ownership_sha256": "3278a6a9cdd1df0bbecbc5e367e3b16b81fab6693cd35b8bc9057c89c28092dc"
+    },
+    {
+      "scenario": "high-ks0",
+      "accepted": true,
+      "observed_frost_calls": 0,
+      "weather_eligible": 84331,
+      "maps": 0,
+      "signature_counts": {},
+      "signature_examples": {},
+      "signed_ranges": {},
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 674940,
+        "WIN_PRE": 7449,
+        "WINTER_HOUR": 178776,
+        "WINTER_HOUR:value=0": 178776,
+        "WEATHER_ELIGIBLE": 84331,
+        "WEATHER_ELIGIBLE:value=0": 84331,
+        "WIN_POST": 7449,
+        "WB_PRE": 13305,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13305,
+        "IRS_WB_PRE": 4227,
+        "IRS_WB_POST": 4227,
+        "FOOTER": 1
+      },
+      "effects": {},
+      "ownership_counts": {},
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {},
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "59b7881e2c28c79f0b2b119c857f286039308d64b11eb88c3a32105fbbcd9ff2",
+        "H1.soil.dat": "beaf7c6c2a5d85512625066e6894b104dd261a4cf7bedf8a2fbc5f66af2d0809",
+        "H1.pass.dat": "b647588d8c10ef90f1e188387fa0a3d81a1820648aa01fba3807f8e19619088f",
+        "H1.plot.dat": "23b11136bd027881af7e2983312e8f74e5f440ffcef4bacd52c5c38ff9b3bbc5",
+        "H1.wat.dat": "6e1b5dcae5375b7cdac904b2abdd92ff64f3aa919a644cc0547a6ed6ce77abbc",
+        "H1.element.dat": "8f2c6b9655a3629dc6424ec573106aef53aececf4da1aaa59122c6dadf9e58ff",
+        "H1.ebe.dat": "678b83e9868a791c1291af7cd112b9fbcca15b01dc0679432b854f0ac9c311af"
+      },
+      "trace_sha256": "c30aded1533c9bff7bf9399393bbbe24e72b08fa29cc33da8218d8d7d7262e6c",
+      "transfers_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ownership_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "scenario": "high-ks1",
+      "accepted": true,
+      "observed_frost_calls": 138092,
+      "weather_eligible": 138092,
+      "maps": 12443,
+      "signature_counts": {
+        "I_volumetric_gate": 1401,
+        "I_absolute_gate": 444,
+        "G_update_support_skip": 3236,
+        "H_frozen_liquid_clear": 9
+      },
+      "signature_examples": {
+        "I_volumetric_gate": {
+          "event": {
+            "seq": 1541,
+            "map": 6,
+            "year": 1,
+            "day": 2,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 1540,
+            "epoch": 1
+          },
+          "layer": 5,
+          "volumetric_request": -7.320195891225012e-06,
+          "residual_m": 1.4640390872955322e-06
+        },
+        "I_absolute_gate": {
+          "event": {
+            "seq": 1541,
+            "map": 6,
+            "year": 1,
+            "day": 2,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 1540,
+            "epoch": 1
+          },
+          "layer": 7,
+          "request_m": -1.0244548320770264e-08,
+          "residual_m": 1.0244548320770264e-08
+        },
+        "invalid_state": {
+          "event": {
+            "seq": 2036,
+            "map": 7,
+            "year": 1,
+            "day": 2,
+            "ofe": 1,
+            "hour": 24,
+            "parent": 2034,
+            "epoch": 1
+          },
+          "layer": 1,
+          "dg": 0.10000000149011612,
+          "frozen": 0.0,
+          "nw": 0.0,
+          "stocks": {
+            "coarse_liquid": 0.007550390769073906,
+            "coarse_ice": -3.555289003998041e-05,
+            "coarse_total": 0.007514837879033925,
+            "soilw_minus_coarse_liquid": -5.950159979814518e-05,
+            "fine_liquid": 0.006595593136823244,
+            "fine_ice": 0.0013997196801938117,
+            "fine_total": 0.007995312817017056,
+            "geometry_residual": -3.725290298461914e-09
+          }
+        },
+        "G_update_support_skip": {
+          "event": {
+            "seq": 3623,
+            "map": 12,
+            "year": 1,
+            "day": 3,
+            "ofe": 1,
+            "hour": 1,
+            "parent": 3622,
+            "epoch": 1
+          },
+          "layer": 1,
+          "residual_m": 3.3235261764907875e-10
+        },
+        "H_frozen_liquid_clear": {
+          "event": {
+            "seq": 128858,
+            "map": 361,
+            "year": 1,
+            "day": 63,
+            "ofe": 3,
+            "hour": 24,
+            "parent": 128856,
+            "epoch": 266
+          },
+          "layer": 1,
+          "cleared_m": 2.8344922611722723e-05,
+          "fine_change_m": -2.8344922611722723e-05
+        }
+      },
+      "signed_ranges": {
+        "direction_0_residual_m": {
+          "count": 78281,
+          "min": -0.00027057409864614246,
+          "max": 0.00013952513181090392
+        },
+        "direction_0_fine_change_m": {
+          "count": 78281,
+          "min": -0.0003556331212166697,
+          "max": 0.0001395249521838511
+        },
+        "direction_0_profile_residual_m": {
+          "count": 6832,
+          "min": -5.761626648004281e-09,
+          "max": 6.1003592177755195e-09
+        },
+        "direction_1_residual_m": {
+          "count": 44920,
+          "min": -0.0008473630928812689,
+          "max": 0.0008473630886627892
+        },
+        "direction_1_fine_change_m": {
+          "count": 44920,
+          "min": -0.004799641561516188,
+          "max": 0.010708869270037051
+        },
+        "direction_1_profile_residual_m": {
+          "count": 4492,
+          "min": -5.378246867193681e-06,
+          "max": 0.00018437790738388277
+        },
+        "invalid_direction_0_residual_m": {
+          "count": 1229,
+          "min": -0.00024319952152250524,
+          "max": 0.0002705746640635845
+        },
+        "invalid_direction_0_fine_change_m": {
+          "count": 1229,
+          "min": -0.0009386108722537756,
+          "max": 0.0002705745338520138
+        }
+      },
+      "counts": {
+        "DAY_WIN_GATE": 17532,
+        "unavailable_layer_snapshots": 683080,
+        "WIN_PRE": 7856,
+        "WINTER_HOUR": 188544,
+        "WINTER_HOUR:value=1": 188544,
+        "WEATHER_ELIGIBLE": 138092,
+        "WEATHER_ELIGIBLE:value=1": 138092,
+        "FROST_CALL": 138092,
+        "FROST_CALL:value=1": 138092,
+        "FN_INIT": 9651,
+        "FN_INIT:value=1": 9651,
+        "FN_READY": 138092,
+        "FN_READY:value=1": 138092,
+        "FROST_DONE": 138092,
+        "FROST_DONE:value=1": 138092,
+        "MAP_PRE": 12443,
+        "D0_START": 7951,
+        "D0_LAYER": 79510,
+        "D0_SUPPORT": 795100,
+        "D0_DRY_CLEAR": 579780,
+        "D0_CLEAR_PRE": 79510,
+        "D0_CLEAR_POST": 79510,
+        "D0_FINISH": 7951,
+        "MAP_POST": 12443,
+        "unavailable_branch_records": 0,
+        "WIN_POST": 7856,
+        "INIT_PRE": 3456,
+        "INIT_POST": 3456,
+        "WB_PRE": 13302,
+        "WB_PATH": 17532,
+        "WB_PATH:value=1": 17532,
+        "WB_POST": 13302,
+        "D1_START": 4492,
+        "D1_LAYER": 44920,
+        "D1_REQUEST": 35349,
+        "D1_ABS_ACTIVE": 21874,
+        "D1_NW_AFTER": 14849,
+        "D1_DRAIN_SUPPORT": 138470,
+        "D1_DRAIN_CAP": 126994,
+        "D1_DRAIN_AFTER": 138470,
+        "D1_TOTAL_U": 21874,
+        "D1_VOL_REQUEST": 21874,
+        "D1_VOL_ACTIVE": 18768,
+        "D1_UPDATE_SUPPORT": 187680,
+        "D1_UPDATE_END": 187680,
+        "D1_END": 35349,
+        "D1_FINISH": 4492,
+        "FROST_BLOCK_PRE": 4492,
+        "FROST_BLOCK_POST": 4492,
+        "invalid_layer_snapshots": 1621,
+        "invalid_mapping_layers_excluded_from_signatures": 1229,
+        "D1_ZERO": 9571,
+        "D0_DRY_FLOOR": 145018,
+        "IRS_WB_PRE": 4230,
+        "IRS_WB_POST": 4230,
+        "D1_ADD": 7025,
+        "D1_NEW_CARRY": 1359,
+        "D1_CARRY_APPLY": 1355,
+        "D1_FROZEN_ROOM": 1411,
+        "D1_FROZEN_ALLOC": 1411,
+        "D1_NW_DRAIN": 1225,
+        "D1_SMALL_FROZEN": 718,
+        "FOOTER": 1
+      },
+      "effects": {
+        "mode0": {
+          "layers": 78281,
+          "max_absolute_residual_m": 0.00027057409864614246,
+          "max_absolute_fine_change_m": 0.0003556331212166697,
+          "max_request_rounding_difference_m": 3.4924596548080444e-10
+        },
+        "mode1": {
+          "layers": 44920,
+          "max_absolute_residual_m": 0.0008473630928812689,
+          "max_absolute_fine_change_m": 0.010708869270037051,
+          "max_request_rounding_difference_m": 3.4924596548080444e-10
+        },
+        "invalid_mode0": {
+          "layers": 1229,
+          "max_absolute_residual_m": 0.0002705746640635845,
+          "max_absolute_fine_change_m": 0.0009386108722537756,
+          "max_request_rounding_difference_m": 1.1641532182693481e-10
+        }
+      },
+      "ownership_counts": {
+        "clears_followed_to_next_initialization": 9
+      },
+      "clearing_events_without_next_initialization": 0,
+      "endpoint_ranges": {
+        "observed_initialization_fine_change_m_not_causal_recovery": {
+          "count": 5,
+          "min": -0.005005117989962143,
+          "max": 0.002337568424547423
+        }
+      },
+      "daily_keys": 17532,
+      "output_hashes": {
+        "H1.loss.dat": "d4f9ac090fa4e63b194b4ff9990e436874a0c8ad611790b11396354c112163ec",
+        "H1.soil.dat": "53e6c6d4c28df858e9a60ec27e79165f4f589be1c1a8655dfd2da338b4274919",
+        "H1.pass.dat": "e4577c05c6495a62f853495fdbf2642523628b85823dacc154a306db8b4d7b2d",
+        "H1.plot.dat": "bb38b6ddc8da978c5c71d911e95185555600e4dad37034201f6ed25d7b5ce2f8",
+        "H1.wat.dat": "90b1cc7a32261951f0711b1a293a122168ce5eb0044e956c80ed32c0d1c8545b",
+        "H1.element.dat": "ccbc216c2b5dd8fde93e98feba75b8b525000e568b0a30ebc628709f2f14dde3",
+        "H1.ebe.dat": "e6c0703d7fc41d7d7fafb933a219b97bf66f87bce16dfa22a7cf66e0daa82c51"
+      },
+      "trace_sha256": "0c7304ff446c6b141d9e27fe75071f9818914bcfcf5a55fcfc090bb14fa88238",
+      "transfers_sha256": "8d1e59159c4f83b047db3d2d68150620e9e27a4f895b5b25ea169b9face9de4b",
+      "ownership_sha256": "9de47a093db5668c7a9021cac5bbf3abeab2e5187831350885e0b5a1ad72cf59"
+    }
+  ],
+  "interpretation": "Signed state differences and exposure counts; no annual external loss estimate."
+}
