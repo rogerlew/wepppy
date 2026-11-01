@@ -1,0 +1,484 @@
+{
+  "campaign_passed": false,
+  "processes": 12,
+  "complete_histories": 11,
+  "failed_histories": 1,
+  "observer_native_builds": 0,
+  "observer_processes": 0,
+  "zero_rock_nulls": {
+    "0": true,
+    "1": true
+  },
+  "cases": [
+    {
+      "cell": [
+        "84543623",
+        "baseline",
+        1
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "524bc48b09bd434ec5b5795bea86e7008b812440cce1e9e9aedcea462d46c12e",
+      "full_calendar_rows": 17532,
+      "frost_calls": 106774,
+      "frost_done": 106774,
+      "output_hashes": {
+        "H1.loss.dat": "1c34d677bc3a0bb971bdbdfd00af82a02961b9008fc11b45e1024c4a47d52395",
+        "H1.soil.dat": "4bb251f66ae38ba3c135f998ebf637c4ee01e4b6759c2711ee0fd4efdd840d8b",
+        "H1.pass.dat": "630fc51e7bb54139eca690cd021a5dfd68127aad87d1ecdd046e8c90e4c68c62",
+        "H1.plot.dat": "74b18248a99f205ddb7e3b4717e43d8854e111f943f4d3fbb8952f3c21a65255",
+        "H1.wat.dat": "6416c1d48c9cb2cebca7a2838a6ac5b32cce52617c90be348b090ed3d0057e73",
+        "H1.element.dat": "5089af4780b6fa4576d4e7a604f3ccb2fbd88ee2fec5b00ef946312a5ab8766f",
+        "H1.ebe.dat": "4dab7fd0cebfdb3b0d7378f5acdf187007932ae9a2290090d230b0332c2b095c"
+      }
+    },
+    {
+      "cell": [
+        "84543461",
+        "baseline",
+        1
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "6bc97fa11cfc0ad6dac48a8c4d2879262301a26fd6b27caca66fd652cbb75cf2",
+      "full_calendar_rows": 17532,
+      "frost_calls": 111786,
+      "frost_done": 111786,
+      "output_hashes": {
+        "H1.loss.dat": "18a4af83cc4f40927787d1fd4fa8a0b84f1702bb3f353672e5a7474b1c8e0f4c",
+        "H1.soil.dat": "ad3313fae88d79cbc15bd3b142cf38e3e98d19deab6bb40ae1659ac7635f7152",
+        "H1.pass.dat": "80738997378db2c00f10c4c7d169967699fa66a6ed6a938eec01d7b603ba64cf",
+        "H1.plot.dat": "0c356afb3aed2bb7e5a2230c34993b13ee813777b91e57484ec811b8da1c6382",
+        "H1.wat.dat": "b212e95162dcd99cfdd34f49052fcbc65592c0a2eed03b8272aea15f2ca7b183",
+        "H1.element.dat": "72143c3c0719874e8313168527e4ee9053a7489e0940480c77da5d92ece109dd",
+        "H1.ebe.dat": "f2a52849e776adc5787f3c5ee47597280577a013f110d146cceed763244ac2fc"
+      }
+    },
+    {
+      "cell": [
+        "85179901",
+        "baseline",
+        1
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "8b49237d5dc4f3e12f7fe7887d25c47d13fe1e46e0e5d0c6126b1011b3e50f83",
+      "full_calendar_rows": 17532,
+      "frost_calls": 243109,
+      "frost_done": 243109,
+      "output_hashes": {
+        "H1.loss.dat": "b57abe10fcb86277dcf8bfde46d95a55ae8cf50de7f47ef794e62ffb248cb381",
+        "H1.soil.dat": "7299a43a38799f1fb3e04409490ea2af03af50ab7a5168e04afb69b38178ca7a",
+        "H1.pass.dat": "c41c7b29b9f3bfd3ec55047cd986a255e3033852944e69e6c368485bdc27dec0",
+        "H1.plot.dat": "21ff37be99a1c813e741dd4928bd9c78f7b40ffd40c436fd46bc48a37ded1017",
+        "H1.wat.dat": "624da3b6cb9517fb9c51fc7e1ec65a2c49899e21394912bd9312de334cb3be37",
+        "H1.element.dat": "db272a2bd1cebfbd76ac128d4a1f72de41640430593b111b50ebe55c99c17861",
+        "H1.ebe.dat": "c0eb02be748466448b772163bbe8363a7667e4695dcfc8c538d374e1353395ba"
+      }
+    },
+    {
+      "cell": [
+        "84543623",
+        "baseline",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "ec9f0c763f42568d8e0c468b52f8aed102d2c12bfa5615f47999d4a81064d9e6",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "6ca23ff1071bed2eb47f89dbd8344cad631082d79f049941d5c21f46c3a1e861",
+        "H1.soil.dat": "d91fd0bd0995652410a06e4a56fe9ca4a36bdcbd89c8ef1f8524807bfd6bbc73",
+        "H1.pass.dat": "0b4826f2a563d35522ca52c7c3f15e56b857b6c7bdb5cfe558659e37f8a61718",
+        "H1.plot.dat": "9479281d14c8fb3eebc052eb5248bebe9477763698791d7ccefe7ef20474289d",
+        "H1.wat.dat": "e03b8030ef2dcb407a1bb29714692bad3e239d6b0dd41e4d3b15ea2dd70b86a8",
+        "H1.element.dat": "61bf104ede42988e1f4e8400626b011af16cabdd12db2e096f5620e75d1fef5b",
+        "H1.ebe.dat": "e9f93f07cd68df1f88b71ff5809d2fc00fc37109477e440fcbfc8212eb399574"
+      }
+    },
+    {
+      "cell": [
+        "84543623",
+        "candidate",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "58afa8c679b12e06213a30c685dc1c05c0d84a9630b5d2915e9bd4c02df41062",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "6ca23ff1071bed2eb47f89dbd8344cad631082d79f049941d5c21f46c3a1e861",
+        "H1.soil.dat": "d91fd0bd0995652410a06e4a56fe9ca4a36bdcbd89c8ef1f8524807bfd6bbc73",
+        "H1.pass.dat": "0b4826f2a563d35522ca52c7c3f15e56b857b6c7bdb5cfe558659e37f8a61718",
+        "H1.plot.dat": "9479281d14c8fb3eebc052eb5248bebe9477763698791d7ccefe7ef20474289d",
+        "H1.wat.dat": "e03b8030ef2dcb407a1bb29714692bad3e239d6b0dd41e4d3b15ea2dd70b86a8",
+        "H1.element.dat": "61bf104ede42988e1f4e8400626b011af16cabdd12db2e096f5620e75d1fef5b",
+        "H1.ebe.dat": "e9f93f07cd68df1f88b71ff5809d2fc00fc37109477e440fcbfc8212eb399574"
+      }
+    },
+    {
+      "cell": [
+        "84543623",
+        "candidate",
+        1
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "88538cfe7aedf71d24f23a5c9010e1031235998aeb85d7bdb60d113c6c8c6cf3",
+      "full_calendar_rows": 17532,
+      "frost_calls": 106774,
+      "frost_done": 106774,
+      "output_hashes": {
+        "H1.loss.dat": "1c34d677bc3a0bb971bdbdfd00af82a02961b9008fc11b45e1024c4a47d52395",
+        "H1.soil.dat": "4bb251f66ae38ba3c135f998ebf637c4ee01e4b6759c2711ee0fd4efdd840d8b",
+        "H1.pass.dat": "630fc51e7bb54139eca690cd021a5dfd68127aad87d1ecdd046e8c90e4c68c62",
+        "H1.plot.dat": "74b18248a99f205ddb7e3b4717e43d8854e111f943f4d3fbb8952f3c21a65255",
+        "H1.wat.dat": "6416c1d48c9cb2cebca7a2838a6ac5b32cce52617c90be348b090ed3d0057e73",
+        "H1.element.dat": "5089af4780b6fa4576d4e7a604f3ccb2fbd88ee2fec5b00ef946312a5ab8766f",
+        "H1.ebe.dat": "4dab7fd0cebfdb3b0d7378f5acdf187007932ae9a2290090d230b0332c2b095c"
+      }
+    },
+    {
+      "cell": [
+        "84543461",
+        "baseline",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "6f04071446ad32770fd958389c0323141af2b67392e7b5c605ae328f565d3a46",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "b93acf6e782e433b1034d3c217fc49d4ae41fd476dafa8207fb619861ee8ffec",
+        "H1.soil.dat": "34381900b0aa245ae9d5517d458be353e2cec6b7c6880e4b415c13db3aaabd71",
+        "H1.pass.dat": "ef0a5b90adfbe9c17baf8dc5d43f8ce25f17815cd985cc81a4d8f8ab4f97a7ad",
+        "H1.plot.dat": "9479281d14c8fb3eebc052eb5248bebe9477763698791d7ccefe7ef20474289d",
+        "H1.wat.dat": "e4c5fd42779c313ce76d412a20cc5fa7d038bd629310a34eac5fd1105406ac03",
+        "H1.element.dat": "e0afadf5c14e055cbb4d49fcdf5c897617f2ef106eb1fa487baad1e31b97c7ac",
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6"
+      }
+    },
+    {
+      "cell": [
+        "84543461",
+        "candidate",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "bf3cfa14cbe5c45366b3d691cdbedb8e25e7a7c025e9d661959822cfa4405cd7",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "b93acf6e782e433b1034d3c217fc49d4ae41fd476dafa8207fb619861ee8ffec",
+        "H1.soil.dat": "89856943e03d7372b802b9f754c454e8d06bf38a85ff496e3413166c9d86946b",
+        "H1.pass.dat": "5c9182c0e6d857e45e10a7212b8daec9728de4dc2294d0b8133a6976fce9765d",
+        "H1.plot.dat": "9479281d14c8fb3eebc052eb5248bebe9477763698791d7ccefe7ef20474289d",
+        "H1.wat.dat": "226a1044c9b10a456e6d175fa57ef9480329f45dd802ef5dcd1b637b10a54ee8",
+        "H1.element.dat": "477beb47771856165a68bbbecf6bd8f11c7708efaef5ac5cd19e83d0db207247",
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6"
+      }
+    },
+    {
+      "cell": [
+        "84543461",
+        "candidate",
+        1
+      ],
+      "returncode": 1,
+      "completion": false,
+      "passed": false,
+      "receipt_sha256": "ff272759bddcc490af23d878913c1da65f63843d664efd13b3c833e19bd81fb8",
+      "full_calendar_rows": null,
+      "frost_calls": null,
+      "frost_done": null,
+      "output_hashes": null,
+      "failure_diagnostic": "HOURLY_WATER_UNMET day,ofe,hour,demand,available:          355           3           1  -2.42531928E-12   0.0000000000000000",
+      "last_announced_year": 9,
+      "stderr": "Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL\nSTOP 1\n",
+      "prefix_only": {
+        "event_counts": {
+          "DAY_WIN_GATE": 9831,
+          "WIN_PRE": 4274,
+          "WINTER_HOUR": 102576,
+          "WEATHER_ELIGIBLE": 61802,
+          "FROST_CALL": 61802,
+          "FN_INIT": 14273,
+          "FN_READY": 61802,
+          "FROST_DONE": 61802,
+          "MAP_PRE": 5775,
+          "D0_START": 4301,
+          "D0_LAYER": 17204,
+          "D0_SUPPORT": 172040,
+          "D0_DRY_CLEAR": 143413,
+          "D0_CLEAR_PRE": 17204,
+          "D0_CLEAR_POST": 17204,
+          "D0_FINISH": 4301,
+          "MAP_POST": 5775,
+          "INIT_PRE": 2826,
+          "INIT_POST": 2826,
+          "WIN_POST": 4274,
+          "WB_PRE": 7416,
+          "WB_PATH": 9831,
+          "WB_POST": 7416,
+          "D1_START": 1474,
+          "D1_LAYER": 5896,
+          "D1_REQUEST": 4568,
+          "D1_ABS_ACTIVE": 2745,
+          "D1_NW_AFTER": 2259,
+          "D1_DRAIN_SUPPORT": 22470,
+          "D1_DRAIN_CAP": 21285,
+          "D1_DRAIN_AFTER": 22470,
+          "D1_TOTAL_U": 2745,
+          "D1_VOL_REQUEST": 2745,
+          "D1_VOL_ACTIVE": 2416,
+          "D1_UPDATE_SUPPORT": 24160,
+          "D1_UPDATE_END": 24160,
+          "D1_END": 4568,
+          "D1_FINISH": 1474,
+          "FROST_BLOCK_PRE": 1474,
+          "FROST_BLOCK_POST": 1474,
+          "D1_ADD": 486,
+          "IRS_WB_PRE": 2415,
+          "IRS_WB_POST": 2414,
+          "D0_DRY_FLOOR": 19501,
+          "D1_ZERO": 1328,
+          "D1_FROZEN_ROOM": 144,
+          "D1_FROZEN_ALLOC": 144,
+          "D1_NW_DRAIN": 28,
+          "D1_SMALL_FROZEN": 20,
+          "D1_NEW_CARRY": 664,
+          "D1_CARRY_APPLY": 663
+        },
+        "last_event": "E WB_PATH       976158            0            9          355            3            0           -1            4            0         7937",
+        "last_complete_snapshot": {
+          "event": "E IRS_WB_PRE       976157            0            9          355            3            0           -1            4            0         7937",
+          "nsl": 4,
+          "rows": [
+            [
+              0.10000000149011612,
+              0.07199209928512573,
+              0.03862307593226433,
+              0.0,
+              0.0,
+              0.0,
+              0.007199210114777088,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.10000000149011612,
+              0.07199209928512573,
+              0.03862307593226433,
+              0.0,
+              0.0,
+              0.0,
+              0.007199210114777088,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.20000000298023224,
+              0.07199209928512573,
+              0.07724615186452866,
+              0.0,
+              0.0,
+              0.0,
+              0.014398420229554176,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.20000001788139343,
+              0.07199209928512573,
+              0.07724615186452866,
+              0.0,
+              0.0,
+              0.0,
+              0.014398421160876751,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "not_full_history_admission": true
+      },
+      "partial_daily_rows": 9830,
+      "trace_sha256": "b0666f3c0882c96266789e279220c36f4b9699418315b033cd8e0eee2a5d8bcd"
+    },
+    {
+      "cell": [
+        "85179901",
+        "baseline",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "4b3c0d16ef9a27b094680ce73cdd7bb29ced718ece5706f01ac853b2bbb39f66",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "51ccdf6df00e7af28709c6688a8695ac4b331c4e0793f731376abc5c95a54818",
+        "H1.soil.dat": "c87f570ba00a93140f3df5689c45e079ce2e6b44835d70132151d57318174dfa",
+        "H1.pass.dat": "3d492513b1d2d8bb1c34f669e6f981511c828758883152ad6da6cdfc09f90ebb",
+        "H1.plot.dat": "cd5c898fa3423e4c31dcfda0e07f6afbba5d5b3497236897e232938eff65978e",
+        "H1.wat.dat": "1abfb4580b77be19fa261e49b63f18fee08622894756ae1695b50cb834f65db1",
+        "H1.element.dat": "7beb905c90113457f875dc9dea8a5422b5de86267859809673aa08d1bb96a9bd",
+        "H1.ebe.dat": "f8ac953f408cf82e8a4d08abe716352f8d1145abb99b135f6670573108846c96"
+      }
+    },
+    {
+      "cell": [
+        "85179901",
+        "candidate",
+        0
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "187406957b92d8f210c823313ff5ffe53e31a3a53b6d340da1dcf74fcc0eb5d0",
+      "full_calendar_rows": 17532,
+      "frost_calls": 0,
+      "frost_done": 0,
+      "output_hashes": {
+        "H1.loss.dat": "50e7b89c1915bd6c0535546d15ac13d9ab8a4504f4dbe5a6a06aedfd68a26f62",
+        "H1.soil.dat": "a7aabfb4c34d31258ca04663e0eb15264979effef336c6c8065e1ad7f3f4c4fd",
+        "H1.pass.dat": "b8f9aead85e4b600cfd732940c1e915872680d6c82c63241f70e924b9fd81f50",
+        "H1.plot.dat": "20df4295e5949ebec633e99401c9741306d7064dff4e0020700cfa2dfd74ff79",
+        "H1.wat.dat": "7aec769439f5e374a2df1a21b23a21c8248dcf07a20e311afa4b296a5ec1d94e",
+        "H1.element.dat": "1f68528dba07a86a5210b892f3c5e761d079f2b953dbb6211462d85c397b89c0",
+        "H1.ebe.dat": "e3896bde7bc7b569dcf88b5cda40112a181b4491e396ac48b8896236c6db60aa"
+      }
+    },
+    {
+      "cell": [
+        "85179901",
+        "candidate",
+        1
+      ],
+      "returncode": 0,
+      "completion": true,
+      "passed": true,
+      "receipt_sha256": "5cf1f431da1e7d5fa0963c67ad828388601d54cd1049123833a7ce7daf0d72eb",
+      "full_calendar_rows": 17532,
+      "frost_calls": 249204,
+      "frost_done": 249204,
+      "output_hashes": {
+        "H1.loss.dat": "31e6882534a7db20a2580ad8baa25f0b721c5b388ebc247413910865422a45bb",
+        "H1.soil.dat": "bec2b8b82df29d0835b0972601797c93ba96b5946be633938b9aad44bb66562f",
+        "H1.pass.dat": "b62ac20a2eb4ecf109865a50f250e3af9d840ff37ea77bb0f90dc51379aea737",
+        "H1.plot.dat": "36d49f8c5a45548958805dd569b767da5cd36f782970132a3f85f9ea31afaf4a",
+        "H1.wat.dat": "0b5d1d836f507ad72899ec494b4ed3121a8d3fa3d78115a77f318509309c706c",
+        "H1.element.dat": "4367f00703afd758c15956e62e99cdc08c66d76a20f75e31679e5a18edb9a501",
+        "H1.ebe.dat": "e368c0ff7cb58a786fe5de44bd51d65988453962d8d79625db8a83c5ccb6ee9c"
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "chkey": "84543623",
+      "ksflag": 0,
+      "complete_pair": true,
+      "changed_outputs": []
+    },
+    {
+      "chkey": "84543623",
+      "ksflag": 1,
+      "complete_pair": true,
+      "changed_outputs": []
+    },
+    {
+      "chkey": "84543461",
+      "ksflag": 0,
+      "complete_pair": true,
+      "changed_outputs": [
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.wat.dat",
+        "H1.element.dat"
+      ]
+    },
+    {
+      "chkey": "84543461",
+      "ksflag": 1,
+      "complete_pair": false,
+      "changed_outputs": null
+    },
+    {
+      "chkey": "85179901",
+      "ksflag": 0,
+      "complete_pair": true,
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    },
+    {
+      "chkey": "85179901",
+      "ksflag": 1,
+      "complete_pair": true,
+      "changed_outputs": [
+        "H1.loss.dat",
+        "H1.soil.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.wat.dat",
+        "H1.element.dat",
+        "H1.ebe.dat"
+      ]
+    }
+  ],
+  "windows": {
+    "84543623": {
+      "target": [
+        1,
+        9
+      ],
+      "source_receipt_sha256": "524bc48b09bd434ec5b5795bea86e7008b812440cce1e9e9aedcea462d46c12e",
+      "coverage": true
+    },
+    "84543461": {
+      "target": [
+        1,
+        9
+      ],
+      "source_receipt_sha256": "6bc97fa11cfc0ad6dac48a8c4d2879262301a26fd6b27caca66fd652cbb75cf2",
+      "coverage": true
+    },
+    "85179901": {
+      "target": [
+        1,
+        2
+      ],
+      "source_receipt_sha256": "8b49237d5dc4f3e12f7fe7887d25c47d13fe1e46e0e5d0c6126b1011b3e50f83",
+      "coverage": true
+    }
+  },
+  "decision": "Retention admission failed; consumer observer and selected flux campaign deferred. No model repair or promotion."
+}

@@ -1,0 +1,160 @@
+{
+  "passed": true,
+  "command": [
+    "/usr/bin/gfortran",
+    "-O0",
+    "-fcheck=all",
+    "-ffpe-trap=invalid,zero,overflow",
+    "-o",
+    "/home/workdir/wepppy/out/retention-frost-consumers-20261101/domain-controls-v5/probe",
+    "/home/workdir/wepppy/out/retention-frost-consumers-20261101/domain-controls-v5/driver.f90",
+    "/home/workdir/wepppy/docs/work-packages/20261101_retention_frost_consumers/artifacts/domain_logger.for"
+  ],
+  "logger_sha256": "a84d15e17dda1e8ad337abf21d6836ff226e0c97d30eed56f59a7691887ee678",
+  "reader_sha256": "fb71fb68201f02cd487bd78da8645a718606267c577ca32be8cb7c1c2739f74d",
+  "rejected": {
+    "footer": "Domain completeness footer",
+    "duplicate": "Summary support/order",
+    "missing_witness": "Missing/orphan witness",
+    "nonfinite": "Summary counts/numbers",
+    "witness_clock": "Witness clock class",
+    "footer_count": "Domain footer shape",
+    "orphan": "Domain completeness footer",
+    "frozen_summary": "Detailed/summary domain flags",
+    "raw_lateral": "Lateral operand reconstruction",
+    "full_support_4": "Full hourly lower-ratio coverage",
+    "full_support_9": "Full hourly lower-ratio coverage",
+    "compiled_nonfinite-O0": "Nonfinite executed operands retained; domain accounting incomplete",
+    "compiled_nonfinite-O2": "Nonfinite executed operands retained; domain accounting incomplete"
+  },
+  "results": {
+    "valid": {
+      "passed": true,
+      "sites": {
+        "1": {
+          "site": "HK_log",
+          "units": "dimensionless",
+          "calls": 2,
+          "bad": 1,
+          "frozen_calls": 0,
+          "minimum_denominator": 1.0,
+          "minimum_margin": 0.0
+        },
+        "2": {
+          "site": "lower_ratio_1",
+          "units": "meters",
+          "calls": 2,
+          "bad": 0,
+          "frozen_calls": 1,
+          "minimum_denominator": 0.2,
+          "minimum_margin": 0.2
+        },
+        "3": {
+          "site": "lower_ratio_2",
+          "units": "meters",
+          "calls": 1,
+          "bad": 1,
+          "frozen_calls": 1,
+          "minimum_denominator": 0.0,
+          "minimum_margin": 0.0
+        },
+        "4": {
+          "site": "lateral_ratio",
+          "units": "meters",
+          "calls": 2,
+          "bad": 0,
+          "frozen_calls": 0,
+          "minimum_denominator": 0.25,
+          "minimum_margin": 0.25
+        },
+        "5": {
+          "site": "HK_guard",
+          "units": "dimensionless",
+          "calls": 1,
+          "bad": 0,
+          "frozen_calls": 0,
+          "minimum_denominator": 1.0,
+          "minimum_margin": 1.0
+        }
+      },
+      "summary_rows": 7,
+      "days": 3,
+      "witnesses": {
+        "0,0,1,1,3": {
+          "hour": 0,
+          "sequence": 3,
+          "values": [
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "1,1,3,1,2": {
+          "hour": 1,
+          "sequence": 6,
+          "values": [
+            0.1,
+            0.0,
+            0.01,
+            0.0
+          ]
+        }
+      },
+      "selected": {
+        "1,1,2,1,2": {
+          "count": 2,
+          "bad": 0,
+          "icy": 1,
+          "values": [
+            0.1,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.01
+          ]
+        },
+        "1,1,3,1,2": {
+          "count": 1,
+          "bad": 1,
+          "icy": 1,
+          "values": [
+            0.1,
+            0.1,
+            0.0,
+            0.0,
+            0.0,
+            0.01
+          ]
+        },
+        "1,1,4,1,1": {
+          "count": 1,
+          "bad": 0,
+          "icy": 0,
+          "values": [
+            0.125,
+            0.125,
+            0.25,
+            0.25,
+            0.25,
+            0.0
+          ]
+        },
+        "1,2,4,1,1": {
+          "count": 1,
+          "bad": 0,
+          "icy": 0,
+          "values": [
+            0.125,
+            0.125,
+            0.25,
+            0.25,
+            0.25,
+            0.0
+          ]
+        }
+      }
+    }
+  }
+}

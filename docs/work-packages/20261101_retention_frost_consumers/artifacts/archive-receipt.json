@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/retention-frost-consumers-20261101/retention-frost-consumers-checkpoint.tar.gz",
+  "sha256": "9da2823954f78e7e68bcea390e8ba33641b3e9793cb824006f5b0ab290cef467",
+  "bytes": 817418185,
+  "gzip_compression_level": 1,
+  "files": 3048,
+  "uncompressed_bytes": 9675252695,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "4625e67bb72acbc298d593398aed823e0086f86e178ed9bc529649d93eed31c8"
+}

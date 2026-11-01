@@ -1,0 +1,15 @@
+# Observer source prereview
+
+Disposition: **source placement is appropriate; hold build/execution approval until witness identity and the concrete reader/controls/runner are reviewed.** No native build or invocation was performed here.
+
+Independently compared prepared-v1 with the accepted flux source: main.for has one inserted terminal call and watbal_hourly.for has 132 inserted lines; no original line was deleted or replaced. Added fixed-form lines fit 72 columns. The logger is a separate procedure with implicit none, no native COMMON/includes and explicitly initialized owned counters/state. Its internal emit routine accesses only logger-owned variables and initialized entries guarded by positive counts.
+
+LOW1 and LOW2 additions explicitly require a nonbottom layer before reading layer+1, immediately before the original lower-layer ST/UL branches. LAT observes actual REAL numerator/denominator expressions within the existing executed storage/meblfc branch. HK observes the already initialized native ratio in its existing positive and fallback branches, with zero padding instead of uninitialized hour/frozen values. Main closes the new stream before the pre-existing frozen-history footer. No original arithmetic, capacity or branch condition is changed.
+
+The logger computes no diagnostic division/logarithm and preserves counts/extrema plus the first invalid operand payload. Slot 1's stricter interval flag is diagnostic, not a native guard. LOW/LAT frozen-exposure counts are based on actual initialized active-layer frozen thickness; they are not a complete frozen-geometry validity test. Empty/skipped sites must remain distinguishable from validated executed sites in the eventual reader.
+
+One concrete identity gap remains: the first-invalid B payload currently has day/site/OFE/layer but lacks hour or a monotonically unique call sequence. Multiple evaluations per day cannot be uniquely joined to frozen-history or selected stage evidence. Retain actual hour for lower-layer/lateral events, explicit initialization hour for HK, and a logger-owned call sequence without reading an uninitialized native local. This requires additive prepared-source revision, not overwriting v1 evidence.
+
+The new stream is a full-history domain summary only. Accepted hourly flux stage audits still come from the pre-existing selected-window BPO observer. Unless a separate full-history stage ledger is added and reviewed, the contract must state selected-window flux accounting and full-history domain counts separately. Terminal counts must reconcile with complete expected calendar/site support; a successfully written footer alone is insufficient.
+
+Reviewed logger SHA-256: `71472587e9af455e43362ba796fb52d9a4002b7bebe434f63d0b77910f3d1c44`. Prepared watbal_hourly.for: `704265e425b62911b4d1e0dc6272340d2b9b805efb59d186e9f8f68712585747`. Prepared main.for: `a24367916e73c27d849c3a535ec453ce420bcd42bfb041291f1854b3d42eeaa4`. Private native source text is not reproduced here. Prior roots and raw files were not written.

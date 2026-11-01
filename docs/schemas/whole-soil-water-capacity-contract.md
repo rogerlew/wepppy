@@ -100,3 +100,21 @@ actual frost routine calls from payloads and their source-owned counter semantic
 not the number of summary lines or the length of the climate history. A paired
 change in relative ST must be interpreted with its dry-reference offset; it does
 not alone demonstrate changed absolute initial water or available storage.
+
+
+## Configuration and signed-input failure admission
+
+KSFLAG changes both frost execution and rangeland conductivity in the audited
+native path. Compare retention within each configuration; configuration contrasts
+do not isolate frost causality. A failed configured history blocks complete-
+history admission even when the printed unmet withdrawal is numerically small.
+Record the actual signed-input guard, its available relative ST, dry-reference
+water, and producer timing before considering a tolerance or accounting change.
+Zero allocatable ST is not proof of zero absolute liquid. A failure encountered
+under KSFLAG1 is not proof that water was frozen at the failing boundary.
+
+Rationale: the bounded retention/configuration experiment reached a zero-ST
+signed-withdrawal stop after earlier active frost. Its last coarse snapshot had
+zero frozen thickness; retained evidence does not establish the signed-input
+origin. Preserve failed histories and defer consumer/closure claims that depend
+on their completion. See [ADR-0128](../adrs/ADR-0128-retention-frost-consumer-experiment.md).

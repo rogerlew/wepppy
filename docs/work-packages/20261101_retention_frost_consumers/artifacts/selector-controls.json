@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "rejected": [
+    "missing-day",
+    "duplicate-day",
+    "parent",
+    "missing-footer",
+    "reversed-clock"
+  ],
+  "foreign_ofe_not_selected": true
+}
