@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "scenario": "normal-ks1",
+  "original_readback_passed": true,
+  "original_readback_sha256": "840efda49b8bec8df8f25d986da58cb4b6bcd838cf682d36625e5a2b9d43cf51",
+  "original_error": null,
+  "output_hashes": {
+    "H1.loss.dat": "12f09573695cace91387b5151866a378cad373b7f3370ab83bc52150fb7d8950",
+    "H1.soil.dat": "8a853a1c5252ae6f644ccddb64983a52220c0be64ac533ccbf829b755e19f69a",
+    "H1.pass.dat": "974cbf89cfdf465949f8369d167d33adbb70e8a163add055b0e2fb40ba96ca96",
+    "H1.plot.dat": "90b4fe1f915137a1cbbbe412a2bcf2f3ee39cf0474a82ef7e0179e75546c36af",
+    "H1.wat.dat": "d06ba7f220c98bf858d2152c65dc501b43972ae86a6075d3b97e1ba8d432924c",
+    "H1.element.dat": "de20ab772750385c1dd15d1261f46eb89e5a036350381fd6f23ca738cb093820",
+    "H1.ebe.dat": "b12c5df3805f2ded22e3468506822daa59e3e4a05078005ea10449fc895d7cd0"
+  },
+  "daily_keys": 17532,
+  "trace_sha256": "315ae0fe721e482e6aa6efeb1f430d09d19abbf76aa1c1ee4a39cd57c9c4c84c",
+  "observations_sha256": "43215957b83b92b9d4a2790abddf2297aaca1c3ed000f80dbaa75f35a82dd3a9",
+  "hourly_groups": 144,
+  "daily_groups": 6,
+  "outside_allowance": 0,
+  "flagged_hours": 0,
+  "flagged_days": 0,
+  "legacy_filtered_sha256": "f8f8f159020229baca392db858a0a07da5a1b8b16f119b8311f75838e9c2fe94"
+}

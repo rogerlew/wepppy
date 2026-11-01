@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/frozen-water-flux-20261101/frozen-water-flux-checkpoint.tar.gz",
+  "sha256": "4c8a4a81e61b54539adc8fde6c0a862cb2b8c5ca08c36ffbe7642cbbeca1f286",
+  "bytes": 500100445,
+  "gzip_compression_level": 1,
+  "files": 2292,
+  "uncompressed_bytes": 5954449692,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "c441a609e766aaa899043df512deab0a5ab677e43ed47e96f13a51acfff5dc7f"
+}

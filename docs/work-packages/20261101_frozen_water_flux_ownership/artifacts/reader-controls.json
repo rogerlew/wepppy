@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "hourly_groups": 144,
+  "daily_groups": 6,
+  "malformed_rejected": {
+    "global_wrong_day": "Clock/OFE",
+    "global_wrong_index": "Clock/OFE",
+    "new_global_forbidden": "Clock/OFE",
+    "flux_before_drain": "Drain flux order",
+    "duplicate": "Duplicate tag/support",
+    "missing_layer": "Missing layer/stage",
+    "nonfinite": "Nonfinite",
+    "wrong_method": "ET method disagreement",
+    "orphan_et": "Duplicate tag/support",
+    "wrong_hour": "ET hour",
+    "unknown_tag": "Unknown new tag",
+    "wrong_day": "Clock/OFE",
+    "wrong_ofe": "Clock/OFE",
+    "wrong_order": "Stage layer order",
+    "missing_uptake": "'FX_UP_OUT'",
+    "daily_before_hours": "Uptake order",
+    "missing_flux": "Missing operands"
+  },
+  "nonzero_arithmetic_checks": 4
+}

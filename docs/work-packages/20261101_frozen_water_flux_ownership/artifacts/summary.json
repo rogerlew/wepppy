@@ -1,0 +1,1709 @@
+{
+  "cases": [
+    {
+      "scenario": "zero-ks1",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "flagged_hours": 24,
+      "flagged_days": 1,
+      "flag_counts": {
+        "negative_relative_coordinate": 170
+      },
+      "outside_allowance": 0,
+      "metrics": {
+        "ET": {
+          "comparisons": 144,
+          "nonzero_changes": 5,
+          "max_abs_residual_m": 5.820766091346741e-11,
+          "outside_allowance": 0
+        },
+        "capacity": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "drain": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "lateral": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "surface": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        }
+      },
+      "ET_methods": [
+        2
+      ],
+      "actual_drain_calls": 0,
+      "actual_SWU_calls": 4,
+      "selected": {
+        "clock": [
+          3,
+          19,
+          1,
+          24
+        ],
+        "top_ST_by_stage": {
+          "BP_WBH_BEFORE": 0.0008679584134370089,
+          "BP_WBH_PURK": 0.0008679584134370089,
+          "FX_ET": 0.0,
+          "FX_CAP": 0.0,
+          "FX_DRAIN": 0.0,
+          "FX_LAT": 0.0,
+          "BP_WBH_AFTER": 0.0
+        },
+        "metrics": {
+          "ET": {
+            "change_m": -0.0008679584134370089,
+            "flux_terms_m": [
+              0.0,
+              -0.0,
+              0.0008679584134370089
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.12131255991678e-15,
+            "native_arithmetic_allowance_m": 2.749504721735825e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "method": 2,
+            "pre": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.0
+            ],
+            "request": [
+              0.002245685551315546,
+              0.002245685551315546,
+              0.0,
+              0.0,
+              0.0,
+              0.002245685551315546
+            ],
+            "returned": [
+              0.0013777271378785372,
+              0.0008679584134370089,
+              0.0,
+              0.0,
+              0.0,
+              0.0008679584134370089
+            ],
+            "post": [
+              0.0,
+              0.0008679584134370089,
+              0.0,
+              0.0,
+              0.0,
+              2.0
+            ],
+            "unsupported_negative_residue": false
+          },
+          "capacity": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "drain": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "called": false
+          },
+          "lateral": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "surface": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        "daily": {
+          "clock": [
+            3,
+            19,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "pre": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0008679584134370089,
+            0.0
+          ],
+          "post": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0008679584134370089,
+            0.0
+          ],
+          "canopy_m": 0.0,
+          "root_uptake_m": 0.0,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "stages": {
+            "pre": {
+              "1": [
+                0.0,
+                0.03595428913831711,
+                0.0,
+                0.13300001621246338,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0030015455558896065,
+                0.03595428913831711,
+                0.005517411045730114,
+                0.13300001621246338,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.009488267824053764,
+                0.0719304010272026,
+                0.007757240906357765,
+                0.13300000131130219,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.02349122427403927,
+                0.0719304010272026,
+                0.0,
+                0.13300000131130219,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.02411692775785923,
+                0.07193039357662201,
+                0.0,
+                0.13300000131130219,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.024052215740084648,
+                0.0719304010272026,
+                0.0,
+                0.132999986410141,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.023923542350530624,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.023804962635040283,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.023732468485832214,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.023711053654551506,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            },
+            "post": {
+              "1": [
+                0.0,
+                0.03595428913831711,
+                0.0,
+                0.13300001621246338,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0030015455558896065,
+                0.03595428913831711,
+                0.005517411045730114,
+                0.13300001621246338,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.009488267824053764,
+                0.0719304010272026,
+                0.007757240906357765,
+                0.13300000131130219,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.02349122427403927,
+                0.0719304010272026,
+                0.0,
+                0.13300000131130219,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.02411692775785923,
+                0.07193039357662201,
+                0.0,
+                0.13300000131130219,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.024052215740084648,
+                0.0719304010272026,
+                0.0,
+                0.132999986410141,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.023923542350530624,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.023804962635040283,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.023732468485832214,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.023711053654551506,
+                0.0719304159283638,
+                0.0,
+                0.13300000131130219,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            }
+          }
+        },
+        "flags": []
+      },
+      "daily_comparisons": [
+        {
+          "clock": [
+            3,
+            19,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.096643698092399e-15,
+            "native_arithmetic_allowance_m": 2.7362606263457386e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            19,
+            2
+          ],
+          "flags": [
+            [
+              "FX_UP_PRE",
+              2,
+              "negative_relative_coordinate"
+            ],
+            [
+              "FX_UP_POST",
+              2,
+              "negative_relative_coordinate"
+            ]
+          ],
+          "called": true,
+          "uptake": {
+            "change_m": -0.0019585850823204964,
+            "flux_terms_m": [
+              0.001958585111424327
+            ],
+            "residual_m": 2.9103830456733704e-11,
+            "reader_roundoff_m": 4.367649722448016e-15,
+            "native_arithmetic_allowance_m": 2.344881979816933e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.367649722034426e-15,
+            "native_arithmetic_allowance_m": 2.3448819795948866e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            19,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.00031006296636348907,
+            "flux_terms_m": [
+              0.00031006307108327746
+            ],
+            "residual_m": 1.0471978839632357e-10,
+            "reader_roundoff_m": 1.9987028892496664e-16,
+            "native_arithmetic_allowance_m": 1.0730536297179825e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.9987028743680894e-16,
+            "native_arithmetic_allowance_m": 1.0730536217284357e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.0673391175919226e-15,
+            "native_arithmetic_allowance_m": 2.720527729454193e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 5.0673391175919226e-15,
+            "native_arithmetic_allowance_m": 2.720527729454193e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            2
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.00032491242745891213,
+            "flux_terms_m": [
+              0.00032491254387423396
+            ],
+            "residual_m": 1.1641532182693481e-10,
+            "reader_roundoff_m": 4.344022811651201e-15,
+            "native_arithmetic_allowance_m": 2.33219728189314e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.34402280999684e-15,
+            "native_arithmetic_allowance_m": 2.332197281004955e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.00022986581545580975,
+            "flux_terms_m": [
+              0.00022986583644524217
+            ],
+            "residual_m": 2.098943241435336e-11,
+            "reader_roundoff_m": 1.6397862972663463e-16,
+            "native_arithmetic_allowance_m": 8.803602815143912e-08,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.6397862942835686e-16,
+            "native_arithmetic_allowance_m": 8.803602799130124e-08,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "normal-ks1",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "flagged_hours": 0,
+      "flagged_days": 0,
+      "flag_counts": {},
+      "outside_allowance": 0,
+      "metrics": {
+        "ET": {
+          "comparisons": 144,
+          "nonzero_changes": 5,
+          "max_abs_residual_m": 2.9103830456733704e-11,
+          "outside_allowance": 0
+        },
+        "capacity": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "drain": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "lateral": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "surface": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        }
+      },
+      "ET_methods": [
+        2
+      ],
+      "actual_drain_calls": 0,
+      "actual_SWU_calls": 4,
+      "selected": {
+        "clock": [
+          3,
+          19,
+          1,
+          24
+        ],
+        "top_ST_by_stage": {
+          "BP_WBH_BEFORE": 0.001152466400526464,
+          "BP_WBH_PURK": 0.001152466400526464,
+          "FX_ET": 0.0,
+          "FX_CAP": 0.0,
+          "FX_DRAIN": 0.0,
+          "FX_LAT": 0.0,
+          "BP_WBH_AFTER": 0.0
+        },
+        "metrics": {
+          "ET": {
+            "change_m": -0.001152466400526464,
+            "flux_terms_m": [
+              0.0,
+              -0.0,
+              0.001152466400526464
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.070689595800671e-15,
+            "native_arithmetic_allowance_m": 2.185451509438181e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "method": 2,
+            "pre": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.0
+            ],
+            "request": [
+              0.0025307987816631794,
+              0.0025307987816631794,
+              0.0,
+              0.0,
+              0.0,
+              0.0025307987816631794
+            ],
+            "returned": [
+              0.0013783323811367154,
+              0.001152466400526464,
+              0.0,
+              0.0,
+              0.0,
+              0.001152466400526464
+            ],
+            "post": [
+              0.0,
+              0.001152466400526464,
+              0.0,
+              0.0,
+              0.0,
+              2.0
+            ],
+            "unsupported_negative_residue": false
+          },
+          "capacity": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "drain": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "called": false
+          },
+          "lateral": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "surface": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        "daily": {
+          "clock": [
+            3,
+            19,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "pre": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.001152466400526464,
+            0.0
+          ],
+          "post": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.001152466400526464,
+            0.0
+          ],
+          "canopy_m": 0.0,
+          "root_uptake_m": 0.0,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "stages": {
+            "pre": {
+              "1": [
+                0.0,
+                0.0386182926595211,
+                0.0,
+                0.10635999590158463,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0027597201988101006,
+                0.0386182926595211,
+                0.004944375716149807,
+                0.10635999590158463,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.0036528431810438633,
+                0.07725840061903,
+                0.012160848826169968,
+                0.10635998845100403,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.018674449995160103,
+                0.0772584080696106,
+                0.0,
+                0.10635998845100403,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.019401073455810547,
+                0.07725840061903,
+                0.0,
+                0.10635998845100403,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.019469022750854492,
+                0.07725840061903,
+                0.0,
+                0.10635998100042343,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.01950995624065399,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.019526923075318336,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.01953602395951748,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.019542178139090538,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            },
+            "post": {
+              "1": [
+                0.0,
+                0.0386182926595211,
+                0.0,
+                0.10635999590158463,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0027597201988101006,
+                0.0386182926595211,
+                0.004944375716149807,
+                0.10635999590158463,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.0036528431810438633,
+                0.07725840061903,
+                0.012160848826169968,
+                0.10635998845100403,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.018674449995160103,
+                0.0772584080696106,
+                0.0,
+                0.10635998845100403,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.019401073455810547,
+                0.07725840061903,
+                0.0,
+                0.10635998845100403,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.019469022750854492,
+                0.07725840061903,
+                0.0,
+                0.10635998100042343,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.01950995624065399,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.019526923075318336,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.01953602395951748,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.019542178139090538,
+                0.07725842297077179,
+                0.0,
+                0.10635998845100403,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            }
+          }
+        },
+        "flags": []
+      },
+      "daily_comparisons": [
+        {
+          "clock": [
+            3,
+            19,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.037934530636604e-15,
+            "native_arithmetic_allowance_m": 2.1678661335651585e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            19,
+            2
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.001977582724066451,
+            "flux_terms_m": [
+              0.0019775826949626207
+            ],
+            "residual_m": -2.9103830456733704e-11,
+            "reader_roundoff_m": 3.682474794788634e-15,
+            "native_arithmetic_allowance_m": 1.9770286850269967e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 3.6824747952022245e-15,
+            "native_arithmetic_allowance_m": 1.977028685249043e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            19,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.00023854035146952945,
+            "flux_terms_m": [
+              0.0002385403058724478
+            ],
+            "residual_m": -4.5597081665960104e-11,
+            "reader_roundoff_m": 1.5831465860964116e-16,
+            "native_arithmetic_allowance_m": 8.499518361251453e-08,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.5831465925761466e-16,
+            "native_arithmetic_allowance_m": 8.499518396039531e-08,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.061271141983852e-15,
+            "native_arithmetic_allowance_m": 2.1803949769696345e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 4.061271141983852e-15,
+            "native_arithmetic_allowance_m": 2.1803949769696345e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            2
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -8.377549238502979e-05,
+            "flux_terms_m": [
+              8.377549966098741e-05
+            ],
+            "residual_m": 7.275957614183426e-12,
+            "reader_roundoff_m": 3.6144045442903586e-15,
+            "native_arithmetic_allowance_m": 1.940483468744046e-06,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 3.614404544186961e-15,
+            "native_arithmetic_allowance_m": 1.9404834686885345e-06,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            3,
+            20,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.0001735313864785759,
+            "flux_terms_m": [
+              0.00017353141447529197
+            ],
+            "residual_m": 2.7996716056577498e-11,
+            "reader_roundoff_m": 1.291550409029849e-16,
+            "native_arithmetic_allowance_m": 6.934011362206548e-08,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.2915504050512762e-16,
+            "native_arithmetic_allowance_m": 6.934011340846586e-08,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "high-ks1",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "flagged_hours": 0,
+      "flagged_days": 0,
+      "flag_counts": {},
+      "outside_allowance": 0,
+      "metrics": {
+        "ET": {
+          "comparisons": 144,
+          "nonzero_changes": 5,
+          "max_abs_residual_m": 2.0190685928733743e-11,
+          "outside_allowance": 0
+        },
+        "capacity": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "drain": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "lateral": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        },
+        "surface": {
+          "comparisons": 144,
+          "nonzero_changes": 0,
+          "max_abs_residual_m": 0.0,
+          "outside_allowance": 0
+        }
+      },
+      "ET_methods": [
+        2
+      ],
+      "actual_drain_calls": 0,
+      "actual_SWU_calls": 4,
+      "selected": {
+        "clock": [
+          7,
+          343,
+          1,
+          24
+        ],
+        "top_ST_by_stage": {
+          "BP_WBH_BEFORE": 0.0014075114158913493,
+          "BP_WBH_PURK": 0.0014241781318560243,
+          "FX_ET": 0.0,
+          "FX_CAP": 0.0,
+          "FX_DRAIN": 0.0,
+          "FX_LAT": 0.0,
+          "BP_WBH_AFTER": 0.0
+        },
+        "metrics": {
+          "ET": {
+            "change_m": -0.0014241781318560243,
+            "flux_terms_m": [
+              0.0,
+              -2.0190685928733743e-11,
+              0.0014241781318560243
+            ],
+            "residual_m": -2.0190685928733743e-11,
+            "reader_roundoff_m": 1.4360592752500837e-15,
+            "native_arithmetic_allowance_m": 7.709843349332292e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "method": 2,
+            "pre": [
+              0.0,
+              0.0,
+              0.0,
+              2.0190685928733743e-11,
+              0.0,
+              2.0
+            ],
+            "request": [
+              0.001718062674626708,
+              0.001718062674626708,
+              0.0,
+              0.0,
+              0.0,
+              0.001718062674626708
+            ],
+            "returned": [
+              0.00029388454277068377,
+              0.0014241781318560243,
+              0.0,
+              0.0,
+              0.0,
+              0.0014241781318560243
+            ],
+            "post": [
+              0.0,
+              0.0014241781318560243,
+              0.0,
+              0.0,
+              0.0,
+              2.0
+            ],
+            "unsupported_negative_residue": false
+          },
+          "capacity": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "drain": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true,
+            "called": false
+          },
+          "lateral": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "surface": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        "daily": {
+          "clock": [
+            7,
+            343,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "pre": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0014241781318560243,
+            0.0
+          ],
+          "post": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0014241781318560243,
+            0.0
+          ],
+          "canopy_m": 0.0,
+          "root_uptake_m": 0.0,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "stages": {
+            "pre": {
+              "1": [
+                0.0,
+                0.04573565348982811,
+                0.0,
+                0.03518636152148247,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0015505882911384106,
+                0.04573565348982811,
+                0.0020428115967661142,
+                0.03518636152148247,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.0019108493579551578,
+                0.09149312973022461,
+                0.004917942453175783,
+                0.03518635779619217,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.006732817739248276,
+                0.0914931371808052,
+                0.0,
+                0.03518635779619217,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.006589566357433796,
+                0.09149312227964401,
+                0.0,
+                0.03518635779619217,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.006492943037301302,
+                0.09149311482906342,
+                0.0,
+                0.03518637269735336,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.0064546954818069935,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.006449259351938963,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.006456317380070686,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.006465628743171692,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            },
+            "post": {
+              "1": [
+                0.0,
+                0.04573565348982811,
+                0.0,
+                0.03518636152148247,
+                0.10000000149011612,
+                0.10000000149011612
+              ],
+              "2": [
+                0.0015505882911384106,
+                0.04573565348982811,
+                0.0020428115967661142,
+                0.03518636152148247,
+                0.10000000149011612,
+                0.20000000298023224
+              ],
+              "3": [
+                0.0019108493579551578,
+                0.09149312973022461,
+                0.004917942453175783,
+                0.03518635779619217,
+                0.20000000298023224,
+                0.4000000059604645
+              ],
+              "4": [
+                0.006732817739248276,
+                0.0914931371808052,
+                0.0,
+                0.03518635779619217,
+                0.20000001788139343,
+                0.6000000238418579
+              ],
+              "5": [
+                0.006589566357433796,
+                0.09149312227964401,
+                0.0,
+                0.03518635779619217,
+                0.19999998807907104,
+                0.800000011920929
+              ],
+              "6": [
+                0.006492943037301302,
+                0.09149311482906342,
+                0.0,
+                0.03518637269735336,
+                0.19999998807907104,
+                1.0
+              ],
+              "7": [
+                0.0064546954818069935,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.2000000476837158
+              ],
+              "8": [
+                0.006449259351938963,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.4000000953674316
+              ],
+              "9": [
+                0.006456317380070686,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.6000001430511475
+              ],
+              "10": [
+                0.006465628743171692,
+                0.0914931520819664,
+                0.0,
+                0.03518635779619217,
+                0.20000004768371582,
+                1.8000001907348633
+              ]
+            }
+          }
+        },
+        "flags": []
+      },
+      "daily_comparisons": [
+        {
+          "clock": [
+            7,
+            343,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.395581697922409e-15,
+            "native_arithmetic_allowance_m": 7.492529352803484e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            7,
+            343,
+            2
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -4.819186870008707e-06,
+            "flux_terms_m": [
+              4.819128662347794e-06
+            ],
+            "residual_m": -5.820766091346741e-11,
+            "reader_roundoff_m": 1.0577348818702857e-15,
+            "native_arithmetic_allowance_m": 5.678714231990352e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.0577348826974663e-15,
+            "native_arithmetic_allowance_m": 5.678714236431278e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            7,
+            343,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 3.3636220128426425e-17,
+            "native_arithmetic_allowance_m": 1.805844595158958e-08,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 3.3636220128426425e-17,
+            "native_arithmetic_allowance_m": 1.805844595158958e-08,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            7,
+            344,
+            1
+          ],
+          "flags": [],
+          "called": false,
+          "uptake": {
+            "change_m": 0.0,
+            "flux_terms_m": [
+              0.0
+            ],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.397954831123348e-15,
+            "native_arithmetic_allowance_m": 7.505270111866619e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.397954831123348e-15,
+            "native_arithmetic_allowance_m": 7.505270111866619e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            7,
+            344,
+            2
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -0.00014657022984465584,
+            "flux_terms_m": [
+              0.00014657028077635914
+            ],
+            "residual_m": 5.093170329928398e-11,
+            "reader_roundoff_m": 1.0514516627084836e-15,
+            "native_arithmetic_allowance_m": 5.644981198610805e-07,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 1.0514516619847005e-15,
+            "native_arithmetic_allowance_m": 5.644981194724994e-07,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        },
+        {
+          "clock": [
+            7,
+            344,
+            3
+          ],
+          "flags": [],
+          "called": true,
+          "uptake": {
+            "change_m": -9.01881321624387e-06,
+            "flux_terms_m": [
+              9.018811397254467e-06
+            ],
+            "residual_m": -1.8189894035458565e-12,
+            "reader_roundoff_m": 2.9331064616147636e-17,
+            "native_arithmetic_allowance_m": 1.5747115551359155e-08,
+            "zeroing_allowance_m": 1e-09,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          },
+          "growth": {
+            "change_m": 0.0,
+            "flux_terms_m": [],
+            "residual_m": 0.0,
+            "reader_roundoff_m": 2.933106464199703e-17,
+            "native_arithmetic_allowance_m": 1.574711556523705e-08,
+            "zeroing_allowance_m": 0.0,
+            "negative_ST": false,
+            "within_declared_allowance": true
+          }
+        }
+      ]
+    }
+  ]
+}

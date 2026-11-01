@@ -1,0 +1,10 @@
+{
+  "repository": "/workdir/wepp-forest-release-20261009",
+  "branch": "wepp_260430_negmeltfix_comparator",
+  "commit": "2f35f0d6c002251549d089eeb39e6672783a8f9f",
+  "scope": "Source-free accepted-flux ownership observations; no native production source/binary changes",
+  "incident": "docs/ablation/20261101_frozen_water_flux_ownership",
+  "archive_receipt_sha256": "e864c3de312667d20f9389bbc221591494493c994d72fec36dce907a0f3ab3bd",
+  "native_artifact_policy": "passed",
+  "native_staged_bytes": "36 files exact"
+}

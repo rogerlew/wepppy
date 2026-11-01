@@ -1,0 +1,88 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "passed": true,
+      "scenario": "zero-ks1",
+      "original_readback_passed": true,
+      "original_readback_sha256": "9cdf4faf9c4cdd54c4fd84df62dd1aedccee0982ffa317c802125ebdbb289b1c",
+      "original_error": null,
+      "output_hashes": {
+        "H1.loss.dat": "88ea5a2a07330d7536c38d04b73eb0a9d6dd579544b165fe7bc1eb0525187c09",
+        "H1.soil.dat": "8f386380b2154b7260803f793baeeae628a029c74032a57e985e80f7978a6edb",
+        "H1.pass.dat": "879431dbdeabeeaa42209a090e3cecd0a8d2d683116675fdef5c40b1850e1da8",
+        "H1.plot.dat": "bb9a916a56c9c0a5bc6db53fc34f116ebc14208ca2baec89bb58aa551ff3608e",
+        "H1.wat.dat": "5d0286c75f0c4fcbea8854ad44bd45c62ff39033d4a0fceb9358461588fa1715",
+        "H1.element.dat": "26def315ec663a9b7f7713fd115087f115a4c229d31e24da58ccd4ec90692f50",
+        "H1.ebe.dat": "ec5a3facfd3c668885d993fe44b37d037aaf251073889c49d1e1d4b917f7acf2"
+      },
+      "daily_keys": 17532,
+      "trace_sha256": "0d77cc243706ee91d4cee4bd7be3d6d386609c0e452d21f1ade321f91fd8dba2",
+      "observations_sha256": "eb453d0bb8e15d2399fb215c42383bfb02bdd28687b40afef0fab3f60d84ab2d",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "outside_allowance": 0,
+      "flagged_hours": 24,
+      "flagged_days": 1,
+      "legacy_filtered_sha256": "55aa96d62c27f66c31469996cc35503c2dee5c0d0d2e1e617d26a64a1f284acb"
+    },
+    {
+      "passed": true,
+      "scenario": "normal-ks1",
+      "original_readback_passed": true,
+      "original_readback_sha256": "840efda49b8bec8df8f25d986da58cb4b6bcd838cf682d36625e5a2b9d43cf51",
+      "original_error": null,
+      "output_hashes": {
+        "H1.loss.dat": "12f09573695cace91387b5151866a378cad373b7f3370ab83bc52150fb7d8950",
+        "H1.soil.dat": "8a853a1c5252ae6f644ccddb64983a52220c0be64ac533ccbf829b755e19f69a",
+        "H1.pass.dat": "974cbf89cfdf465949f8369d167d33adbb70e8a163add055b0e2fb40ba96ca96",
+        "H1.plot.dat": "90b4fe1f915137a1cbbbe412a2bcf2f3ee39cf0474a82ef7e0179e75546c36af",
+        "H1.wat.dat": "d06ba7f220c98bf858d2152c65dc501b43972ae86a6075d3b97e1ba8d432924c",
+        "H1.element.dat": "de20ab772750385c1dd15d1261f46eb89e5a036350381fd6f23ca738cb093820",
+        "H1.ebe.dat": "b12c5df3805f2ded22e3468506822daa59e3e4a05078005ea10449fc895d7cd0"
+      },
+      "daily_keys": 17532,
+      "trace_sha256": "315ae0fe721e482e6aa6efeb1f430d09d19abbf76aa1c1ee4a39cd57c9c4c84c",
+      "observations_sha256": "43215957b83b92b9d4a2790abddf2297aaca1c3ed000f80dbaa75f35a82dd3a9",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "outside_allowance": 0,
+      "flagged_hours": 0,
+      "flagged_days": 0,
+      "legacy_filtered_sha256": "f8f8f159020229baca392db858a0a07da5a1b8b16f119b8311f75838e9c2fe94"
+    },
+    {
+      "passed": true,
+      "scenario": "high-ks1",
+      "original_readback_passed": false,
+      "original_readback_sha256": "1a30cd98fec585c03c4d8a1fb5327912821acedfea58aec885c55b816bbb660d",
+      "original_error": "Clock/OFE",
+      "output_hashes": {
+        "H1.loss.dat": "d4f9ac090fa4e63b194b4ff9990e436874a0c8ad611790b11396354c112163ec",
+        "H1.soil.dat": "53e6c6d4c28df858e9a60ec27e79165f4f589be1c1a8655dfd2da338b4274919",
+        "H1.pass.dat": "e4577c05c6495a62f853495fdbf2642523628b85823dacc154a306db8b4d7b2d",
+        "H1.plot.dat": "bb38b6ddc8da978c5c71d911e95185555600e4dad37034201f6ed25d7b5ce2f8",
+        "H1.wat.dat": "90b1cc7a32261951f0711b1a293a122168ce5eb0044e956c80ed32c0d1c8545b",
+        "H1.element.dat": "ccbc216c2b5dd8fde93e98feba75b8b525000e568b0a30ebc628709f2f14dde3",
+        "H1.ebe.dat": "e6c0703d7fc41d7d7fafb933a219b97bf66f87bce16dfa22a7cf66e0daa82c51"
+      },
+      "daily_keys": 17532,
+      "trace_sha256": "0c7304ff446c6b141d9e27fe75071f9818914bcfcf5a55fcfc090bb14fa88238",
+      "observations_sha256": "ee5649376227742cc864ee26231669d069a24dd911ef458d679675c7fca32500",
+      "hourly_groups": 144,
+      "daily_groups": 6,
+      "outside_allowance": 0,
+      "flagged_hours": 0,
+      "flagged_days": 0,
+      "legacy_filtered_sha256": "63d3dce6a9ad071a909066ebfed2e78d7e9497d22a3763320f0e3564549f5d34"
+    }
+  ],
+  "original_campaign_unchanged": true,
+  "original_dependencies_unchanged": true,
+  "reader_files": {
+    "/home/workdir/wepppy/docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/reread_flux.py": "78bef2d3020bf60b2384100271743564158221c0686de0da37de65c8abf9e41f",
+    "/home/workdir/wepppy/docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux_v5.py": "c0793beae8ec7f3653544fb1d2c1d62fff77b50cfd068379d95e7a56c559480c",
+    "/home/workdir/wepppy/docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v7.py": "4bea12cbb04a592b30f4587862331ea40bfdc6d0e708ec49d9471b14041f6a69",
+    "/home/workdir/wepppy/out/frozen-water-flux-20261101/reader-controls-v7/receipt.json": "6d0238415ba145e59a3e00f426cbae4ac4dd36f50e686ebff44ec887dfae8865"
+  }
+}

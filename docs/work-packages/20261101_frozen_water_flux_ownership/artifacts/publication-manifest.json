@@ -1,0 +1,213 @@
+{
+  "scope": "Final source-free flux checkpoint and initiative board; excludes this manifest",
+  "files": {
+    "PROJECT_TRACKER.md": {
+      "sha256": "c3047758d97a3b119bd2a1447ed1bfc74798102a0c1ac679cbb46805a3ec70c3",
+      "bytes": 337747
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/archive-receipt.json": {
+      "sha256": "e864c3de312667d20f9389bbc221591494493c994d72fec36dce907a0f3ab3bd",
+      "bytes": 445
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader.py": {
+      "sha256": "ca23f6163837bc8a0864e0a176acf2f8a2c601db7fec7e710aeb700cb2777205",
+      "bytes": 3203
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v2.py": {
+      "sha256": "dc7cc18924908d01dcbbac5b99eff54d292f8c9dc51c8f88fa34ac2d19373f1a",
+      "bytes": 4251
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v3.py": {
+      "sha256": "fd6f233b3c626d0b5cfb01cb1d914ebbd7b1938e080ef6aedf4fc35e104851ba",
+      "bytes": 4255
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v4.py": {
+      "sha256": "b25cdf59df89cc68e1d79cdf81a7c156b68ebbae6723482827d9874a3872dd25",
+      "bytes": 4509
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v5.py": {
+      "sha256": "9ccf2bb029dfc2fa165dfeb080a561cbf15a389365145e858d9759b6d62dc3f9",
+      "bytes": 4509
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v6.py": {
+      "sha256": "48b2bf405da5db4ff369e7e7a018f5c26a98e7173eb7bb64d50b12a6b32f815e",
+      "bytes": 4804
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/check_flux_reader_v7.py": {
+      "sha256": "4bea12cbb04a592b30f4587862331ea40bfdc6d0e708ec49d9471b14041f6a69",
+      "bytes": 4873
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/declaration.md": {
+      "sha256": "a9b1cb1c78bdd9e24984241c49625c8502e388a62496ea045b475b5c92614440",
+      "bytes": 2456
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/execution-implementation-prereview-v2.md": {
+      "sha256": "7bc0e3c2a2c5741ef88d0fb7dc77a2bc1b167148fe0b18b0eba51c203dc385a2",
+      "bytes": 3494
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/execution-implementation-prereview.md": {
+      "sha256": "5d5ba10a2ee5e94deead6b01adfb60214c2e5f6b23d7f35096cc74d4bd9d46a1",
+      "bytes": 3916
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/execution-science-prereview-v2.md": {
+      "sha256": "ce9cc686ef41bc9f45b5c0ec9341c80accfb38b83aea93425e309b245b1fa5ce",
+      "bytes": 2284
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/execution-science-prereview.md": {
+      "sha256": "d0327df47fd09ec164ac8270fdeaa5abef35e85f3eee6f5717c248624d09b4fc",
+      "bytes": 3160
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/final-packaging-review.md": {
+      "sha256": "17455d70722c388e3fa6e9eea3fd22efd77ef03acb70cf4b740721638a1132ee",
+      "bytes": 3167
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/final-science-review.md": {
+      "sha256": "933f2d21a15ed4bcb7cd8a11c230e65650f97cd1946d3020ce3a551a17a4316b",
+      "bytes": 1656
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/findings.md": {
+      "sha256": "b89391f53af44b48f5af1e57b1a3a8c811e11da6a4bab58af49c89062c3212b4",
+      "bytes": 7013
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/high-ks1.json": {
+      "sha256": "be3f443b04a070b66008a68d8bd2cfa5d436eebd54e18646802df823548733d7",
+      "bytes": 1262
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/implementation-design-review.md": {
+      "sha256": "cf1a2b1417a3bac8703285cbdb0fbfb2e68490ebb32c084647155f9e308f2a7d",
+      "bytes": 6450
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/implementation-preparation-review-v2.md": {
+      "sha256": "0dfbe2c991d1aad1c750424f43f6f06ede2fec4c0703bb6dc15d21e12da63a3b",
+      "bytes": 3281
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/implementation-readback.md": {
+      "sha256": "57bf8ef3228d72d766df7f79675e72d659c9c86118d96064a17da7fff2645c5a",
+      "bytes": 4093
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/native-checkpoint.json": {
+      "sha256": "4aa90037abddb96e2fb183fbc84c6b6b1b8cb440dbcc6fa56cfce63bf83e4d92",
+      "bytes": 517
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/normal-ks1.json": {
+      "sha256": "360a85bbb9449764e597952074628d735588a47cf1bdcd5f865056b5829e6386",
+      "bytes": 1256
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/observer-runtime.json": {
+      "sha256": "73ecca7deac56124aa91002b3858c550a59f5650dd7c5afa3b8ca4374f28a64a",
+      "bytes": 692
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/ownership-contract.md": {
+      "sha256": "dbd0df98e3f88242553589f9f2c829f240365ffb98ba31452e6a8265264a2abd",
+      "bytes": 4985
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/prior-preservation.json": {
+      "sha256": "0c6fc73fccfb95497a8f1111a9f0456e57cdc9ef410d188861c009ac55e73b89",
+      "bytes": 536
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux.py": {
+      "sha256": "8d52ad946701bd18d8089bc290a3f572984bc6bb4978d09d4c4f16e7e33699e3",
+      "bytes": 8177
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux_v2.py": {
+      "sha256": "aa64687fba45d0b39c37fc381d6322e043468171d759c1b78ca64c06d4deba64",
+      "bytes": 9201
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux_v3.py": {
+      "sha256": "1dcdd8f05376b0059327bb84fbd280112dc0b24d808f6564a517b7ef8051320d",
+      "bytes": 9203
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux_v4.py": {
+      "sha256": "475ea461e1767f6cdc79a6cbdf9bcb440b9ca6d34d7ab8dffa8815a4ca911fa1",
+      "bytes": 9223
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/read_flux_v5.py": {
+      "sha256": "c0793beae8ec7f3653544fb1d2c1d62fff77b50cfd068379d95e7a56c559480c",
+      "bytes": 9302
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/readback-receipt.json": {
+      "sha256": "3649015dc1ea4be4bae43e6120227f8fbc4f47f47ff01f31c9ce4dd2d78d348f",
+      "bytes": 4920
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/reader-controls.json": {
+      "sha256": "6d0238415ba145e59a3e00f426cbae4ac4dd36f50e686ebff44ec887dfae8865",
+      "bytes": 782
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/reader-science-prereview.md": {
+      "sha256": "e9f851a9f5cc12187c9f22878af39d83fd061386057155fd49e08b07c2b552c4",
+      "bytes": 2349
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/reproduce.md": {
+      "sha256": "1f04a210a5089a517fc2e498ec60d4b7a89696550edad2a275a68d88e695fa99",
+      "bytes": 2101
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/reread_flux.py": {
+      "sha256": "78bef2d3020bf60b2384100271743564158221c0686de0da37de65c8abf9e41f",
+      "bytes": 2466
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/run_flux.py": {
+      "sha256": "490538d0455c5fef0aee826f1b476276b481836bf501475472d7cb4e00442eb8",
+      "bytes": 6600
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/run_flux_v2.py": {
+      "sha256": "83994e666a15dcf9edfc7f6a66a3faa77417e8f57e5ba706da8024ecb1eed60e",
+      "bytes": 6600
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/science-design-review.md": {
+      "sha256": "3e044d5fdfb86d457b66e47c55563878b8a1801d2898583d7c7e4e91808de1d6",
+      "bytes": 9126
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/science-readback.md": {
+      "sha256": "d87e569d03947b353dc8d9bf65e94fa123bfb423909d0230574a9e38b809eea5",
+      "bytes": 4708
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/summarize_flux.py": {
+      "sha256": "405f298b451293f989031b3417a0877714038078e4b3eb35388f9424ddcfa09c",
+      "bytes": 1854
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/summarize_flux_v2.py": {
+      "sha256": "97069361dbc717fa1cf8746d002471aa236dcfec9e417a0586409ab785307a15",
+      "bytes": 1960
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/summarize_flux_v3.py": {
+      "sha256": "e25eb0c346b44f0611d65c9ba188f81c094bb9545d6a17a55bc64f0e18f2e685",
+      "bytes": 1961
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/summary.json": {
+      "sha256": "e3f5f7f8474eba710916d7ad5974ededdd2303870bac4d42e202cffbb97faed6",
+      "bytes": 49985
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/supplemental-reader-implementation-review.md": {
+      "sha256": "4d0d68089f47c2d23c22976c3d71a78834409dc7d4b05019191a781ef45e3459",
+      "bytes": 2267
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/supplemental-runner-implementation-prereview.md": {
+      "sha256": "40f198f0a739904dcebd98af9b9d448f7d477b07c8ad232c038cb00b294a6f19",
+      "bytes": 2309
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/validation.md": {
+      "sha256": "288cbc2aa2d58b56c5ab702aa1f123fbf782e9a6f8969edc3caa94e6d3a3b5d1",
+      "bytes": 1783
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/zero-and-supplement-science-review.md": {
+      "sha256": "129f4b8e8fec2f2289a324b3ecd93d4934a331e5da7cfcb540dde9d8ca000cc5",
+      "bytes": 2433
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/artifacts/zero-ks1.json": {
+      "sha256": "5356bcec8fd5541b8af5494de2698be57639eb93c61315d539dc3fd557a4baba",
+      "bytes": 1255
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/package.md": {
+      "sha256": "bc575045ee9a920133b5f131b7bf5ea33c589053cbf754b40df7544545bb3237",
+      "bytes": 749
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/prompts/active/flux_execplan.md": {
+      "sha256": "a8ef88a8c197d69ff882a36c7c349d0f6ef74f25586e672d2f6d91f2d6e25cbd",
+      "bytes": 10012
+    },
+    "docs/work-packages/20261101_frozen_water_flux_ownership/tracker.md": {
+      "sha256": "42ccf5d0a802a42bb4113fa86b1a8ebef67d90f1764f6776a1834551029dd098",
+      "bytes": 1102
+    }
+  }
+}

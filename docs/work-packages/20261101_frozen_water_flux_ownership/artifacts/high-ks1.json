@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "scenario": "high-ks1",
+  "original_readback_passed": false,
+  "original_readback_sha256": "1a30cd98fec585c03c4d8a1fb5327912821acedfea58aec885c55b816bbb660d",
+  "original_error": "Clock/OFE",
+  "output_hashes": {
+    "H1.loss.dat": "d4f9ac090fa4e63b194b4ff9990e436874a0c8ad611790b11396354c112163ec",
+    "H1.soil.dat": "53e6c6d4c28df858e9a60ec27e79165f4f589be1c1a8655dfd2da338b4274919",
+    "H1.pass.dat": "e4577c05c6495a62f853495fdbf2642523628b85823dacc154a306db8b4d7b2d",
+    "H1.plot.dat": "bb38b6ddc8da978c5c71d911e95185555600e4dad37034201f6ed25d7b5ce2f8",
+    "H1.wat.dat": "90b1cc7a32261951f0711b1a293a122168ce5eb0044e956c80ed32c0d1c8545b",
+    "H1.element.dat": "ccbc216c2b5dd8fde93e98feba75b8b525000e568b0a30ebc628709f2f14dde3",
+    "H1.ebe.dat": "e6c0703d7fc41d7d7fafb933a219b97bf66f87bce16dfa22a7cf66e0daa82c51"
+  },
+  "daily_keys": 17532,
+  "trace_sha256": "0c7304ff446c6b141d9e27fe75071f9818914bcfcf5a55fcfc090bb14fa88238",
+  "observations_sha256": "ee5649376227742cc864ee26231669d069a24dd911ef458d679675c7fca32500",
+  "hourly_groups": 144,
+  "daily_groups": 6,
+  "outside_allowance": 0,
+  "flagged_hours": 0,
+  "flagged_days": 0,
+  "legacy_filtered_sha256": "63d3dce6a9ad071a909066ebfed2e78d7e9497d22a3763320f0e3564549f5d34"
+}
