@@ -1,0 +1,46 @@
+{
+  "scenario": "zero-ks1",
+  "counts": {
+    "mode1_maps": 3892,
+    "zero_layers": 2936,
+    "nonzero_layers": 35984,
+    "unavailable_zero_layers": 0,
+    "clearing_ids_started": 20,
+    "clearing_ids_closed": 20
+  },
+  "ranges": {
+    "nominal_residual_m": {
+      "count": 2936,
+      "min": -3.060470488147615e-10,
+      "max": 0.00022528624667239594
+    },
+    "inherited_reference_mismatch_m": {
+      "count": 2936,
+      "min": -3.060470488147615e-10,
+      "max": 0.00022528624667239594
+    },
+    "reset_assignment_error_m": {
+      "count": 2936,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "fine_change_m": {
+      "count": 2936,
+      "min": -0.0044663551530013945,
+      "max": 0.0
+    },
+    "coordinate_offset_m": {
+      "count": 2936,
+      "min": -8.359178904626674e-09,
+      "max": 2.1301209685020694e-09
+    }
+  },
+  "trace_sha256": "0d77cc243706ee91d4cee4bd7be3d6d386609c0e452d21f1ade321f91fd8dba2",
+  "declaration_sha256": "a1f4679fe52dd8b189e73f3108553ffb2fe2e803b04fa9485ac6c6c0cd7bb8ee",
+  "outputs": {
+    "resets.jsonl": "ca8c791bb3e0b17a2fbc9f4d115e91fd3ecc3c50b41d3813a118a5905ea1345a",
+    "nonzero-comparison.jsonl": "aaf22a7ffd854501dace00961aa63e908f05be6cd7f6215887a6d018b67fda23",
+    "sequences.jsonl": "ba99bbf9e00d9f0fceea1450bae2871b98a9ee22212e4d3a947affd33a53c1ca"
+  },
+  "limitation": "Net coarse changes do not identify accepted fluxes or individual internal writers."
+}

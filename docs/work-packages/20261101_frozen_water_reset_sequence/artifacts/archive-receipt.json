@@ -1,0 +1,11 @@
+{
+  "archive": "/wc1/runs/ro/frozen-water-reset-20261101/frozen-water-reset-checkpoint.tar.gz",
+  "sha256": "0823468449c1211093d2f9ba9e1638eefcb0f13eb37afd0fd44b4b916b32be33",
+  "bytes": 486568640,
+  "gzip_compression_level": 1,
+  "files": 268,
+  "uncompressed_bytes": 5865030717,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "208b9ca54230a05fbdc7a58d1770457616287055b580f561aff8fef6710ecd3e"
+}

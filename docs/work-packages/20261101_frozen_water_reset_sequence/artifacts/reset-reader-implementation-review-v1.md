@@ -1,0 +1,16 @@
+# Reset reader implementation review, first revision
+
+Disposition: **FINDINGS; do not treat this reader revision as final accepted analysis.** Review covers `audit_resets.py` SHA-256 `3cbbbd201861f4262dc9127001fa08447a40ca57563f98d76248a4e9724b20b2` and control source SHA-256 `63963f39f1aafb9a62ea00d21ac9a0d1e3aa1bf06ee1519daff6a76e5e45650b`. Retained-v1 scans were running at review; no active output was modified or accepted. Native execution remains outside this review.
+
+The core reset assignment checks correctly enforce NWFRZZ zero, every active SLSW equal THETDR, unchanged ice/support and unchanged coarse fields. The reconstructed request is explicitly unobserved and uses REAL32 arithmetic. Dependency hashes and trace hashes are checked before/after reading. Pending clearing lists retain multiple identities until the declared next initialization. The bound/assignment distinction and no-flux-attribution limitation are appropriate.
+
+Required closures:
+
+1. Branch joins check only map ID and insert into sets. Duplicate D1_ZERO or D1_REQUEST markers therefore collapse silently, while wrong hour, parent, epoch or direction can pass the new join layer. Reject duplicate markers and require the full branch/pre-map identity. Reconcile all zero/request marker counts with the accepted source receipt. Add actual streaming identity/duplicate/missing-join controls; current controls exercise only `decompose`.
+2. Invalid-state reporting does not retain geometry flags and checks negative fine water only through aggregate liquid/ice stocks. A pure function control with SLSW cell 1 = -0.125 and a positive neighboring cell is accepted with `negative_fine_component=false`. Preserve component-level signs, support/geometry validity and unavailable identity separately. Unavailable zero branches currently contribute only a count; retain their identities. Nonzero layers currently retain only a count, so declared comparison coverage needs explicit disposition.
+3. Derived arithmetic is not explicitly finite-checked, and JSON permits NaN. A pure function control with a NaN pre-reset SLSW returns NaN residual/change without raising. The imported frozen trace parser rejects raw nonfinite payloads, limiting exposure on accepted inputs, but the decomposition interface and derived-result boundary still need explicit finite checks and `allow_nan=False`. Add controls for nonfinite derived values.
+4. Clearing start selection uses map/layer alone. Validate the supplement's scenario/OFE/clock/parent/epoch identity and unique start/endpoint inventory, rather than assuming those metadata are consistent. Preserve all 58 IDs and the established censoring semantics.
+
+The reconstruction bound is based on absolute aggregate stocks, rather than the sum of absolute fine-cell arithmetic terms requested by the scientific prereview. Refer its validity under cancellation and invalid components to scientific review; do not adjust the bound after observing residuals. Preserve the current source, declaration, control failure and running results before a corrected read-only revision.
+
+The retained decimal-double control failure is appropriately separate from native behavior. It does not justify weakening the REAL32 operand contract. No source or production correction is requested by these reader findings.

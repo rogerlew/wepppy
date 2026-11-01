@@ -1,0 +1,10 @@
+{
+  "repository": "/workdir/wepp-forest-release-20261009",
+  "branch": "wepp_260430_negmeltfix_comparator",
+  "commit": "0c44b8b2728e5e0f39ed56175bab34eb7d7773f6",
+  "scope": "Source-free frozen-water reset observational incident; no native production source or binary changes",
+  "incident": "docs/ablation/20261101_frozen_water_reset_sequence",
+  "archive_receipt_sha256": "632f61e9c583547d60d4ab249d9e88b18edfdfbd293ddcba93a5b64eca721c38",
+  "native_artifact_policy": "passed",
+  "native_staged_bytes": "80 files exact"
+}

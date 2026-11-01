@@ -1,0 +1,632 @@
+[
+  {
+    "id": "U-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Coherent unfrozen reference; prescribed depletion to zero with stable neighbor"
+  },
+  {
+    "id": "P-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.001,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": -888.0,
+        "f": [
+          0.02,
+          0.03
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.005,
+          0.0075
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Partial frost and NW; exact dry reset"
+  },
+  {
+    "id": "F-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": -888.0,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Full frost; clearing NW while zero-support SLSW also resets"
+  },
+  {
+    "id": "dry-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.05,
+          0.05
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Dry no-change control"
+  },
+  {
+    "id": "reference-plus",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": 0.023,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Deliberately positive reference mismatch"
+  },
+  {
+    "id": "reference-minus",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": 0.017,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Deliberately negative reference mismatch"
+  },
+  {
+    "id": "mismatch-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": 0.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Wet fine grid with zero reference; diagnostic mismatch"
+  },
+  {
+    "id": "mismatch-positive",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 2.9802322387695312e-08,
+        "yst": 0.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Same mismatch with positive ST below absolute gate"
+  },
+  {
+    "id": "thin-zero",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 1e-05,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": -888.0,
+        "f": [
+          0.0495,
+          0.0495
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.012375,
+          0.012375
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Positive submillimeter unfrozen support; zero branch still resets it"
+  },
+  {
+    "id": "carry-zero-middle",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.001,
+        "yst": 0.006,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.06,
+          0.06
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.0,
+        "yst": 0.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Diagnostic depletion exceeds available fine water; shortage crosses zero middle layer"
+  },
+  {
+    "id": "carry-positive-middle",
+    "sequence": 1,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 0.001,
+        "yst": 0.006,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.06,
+          0.06
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": 2.9802322387695312e-08,
+        "yst": 0.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "Matched positive middle layer consumes incoming shortage"
+  },
+  {
+    "id": "clear-zero-repeat",
+    "sequence": 2,
+    "layers": [
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 5e-05,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.00045,
+          0.00045
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0001125,
+          0.0001125
+        ]
+      },
+      {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "st": -888.0,
+        "yst": -888.0,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "purpose": "D0 clearing, prescribed ST0, two D1 calls without YST advance; repeat is not a second loss"
+  }
+]

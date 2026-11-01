@@ -1,0 +1,121 @@
+{
+  "passed": true,
+  "coherent": {
+    "before": {
+      "liquid": 0.0390625,
+      "ice": 0.0,
+      "total": 0.0390625,
+      "dry_target": 0.0078125,
+      "available": 0.03125
+    },
+    "after": {
+      "liquid": 0.0078125,
+      "ice": 0.0,
+      "total": 0.0078125,
+      "dry_target": 0.0078125,
+      "available": 0.0
+    },
+    "coarse_ST": 0.0,
+    "coarse_YST": 0.03125,
+    "reconstructed_request_m": -0.03125,
+    "request_observed": false,
+    "fine_change_m": -0.03125,
+    "nominal_residual_m": 0.0,
+    "inherited_reference_mismatch_m": 0.0,
+    "coarse_reference_mismatch_m": 0.0,
+    "coordinate_offset_m": 0.0,
+    "reset_assignment_error_m": 0.0,
+    "reconstruction_bound_m": 7.549516567451172e-15,
+    "negative_fine_cell": false,
+    "negative_nw": false,
+    "invalid_geometry": false,
+    "negative_fine_component": false,
+    "negative_coarse_component": false
+  },
+  "signed_mismatch": [
+    {
+      "before": {
+        "liquid": 0.0390625,
+        "ice": 0.0,
+        "total": 0.0390625,
+        "dry_target": 0.0078125,
+        "available": 0.03125
+      },
+      "after": {
+        "liquid": 0.0078125,
+        "ice": 0.0,
+        "total": 0.0078125,
+        "dry_target": 0.0078125,
+        "available": 0.0
+      },
+      "coarse_ST": 0.0,
+      "coarse_YST": 0.03515625,
+      "reconstructed_request_m": -0.03515625,
+      "request_observed": false,
+      "fine_change_m": -0.03125,
+      "nominal_residual_m": 0.00390625,
+      "inherited_reference_mismatch_m": 0.00390625,
+      "coarse_reference_mismatch_m": 0.00390625,
+      "coordinate_offset_m": 0.0,
+      "reset_assignment_error_m": 0.0,
+      "reconstruction_bound_m": 7.99360577730124e-15,
+      "negative_fine_cell": false,
+      "negative_nw": false,
+      "invalid_geometry": false,
+      "negative_fine_component": false,
+      "negative_coarse_component": false
+    },
+    {
+      "before": {
+        "liquid": 0.0390625,
+        "ice": 0.0,
+        "total": 0.0390625,
+        "dry_target": 0.0078125,
+        "available": 0.03125
+      },
+      "after": {
+        "liquid": 0.0078125,
+        "ice": 0.0,
+        "total": 0.0078125,
+        "dry_target": 0.0078125,
+        "available": 0.0
+      },
+      "coarse_ST": 0.0,
+      "coarse_YST": 0.02734375,
+      "reconstructed_request_m": -0.02734375,
+      "request_observed": false,
+      "fine_change_m": -0.03125,
+      "nominal_residual_m": -0.00390625,
+      "inherited_reference_mismatch_m": -0.00390625,
+      "coarse_reference_mismatch_m": -0.00390625,
+      "coordinate_offset_m": 0.0,
+      "reset_assignment_error_m": 0.0,
+      "reconstruction_bound_m": 7.105427357601103e-15,
+      "negative_fine_cell": false,
+      "negative_nw": false,
+      "invalid_geometry": false,
+      "negative_fine_component": false,
+      "negative_coarse_component": false
+    }
+  ],
+  "rejected": {
+    "wrong_dry": "Unexpected reset assignment or ice/support mutation",
+    "ice_mutation": "Unexpected reset assignment or ice/support mutation",
+    "support_mutation": "Unexpected reset assignment or ice/support mutation",
+    "uncleared_nw": "Zero reset left NWFRZZ",
+    "changed_yst": "Coarse field mutation in reset: yst",
+    "unavailable": "Not an available zero-ST reset",
+    "nonfinite": true,
+    "duplicate_branch": true,
+    "branch_map": true,
+    "branch_year": true,
+    "branch_day": true,
+    "branch_ofe": true,
+    "branch_hour": true,
+    "branch_mode": true,
+    "branch_nsl": true,
+    "branch_parent": true,
+    "branch_epoch": true
+  },
+  "negative_coordinate_retained": true
+}

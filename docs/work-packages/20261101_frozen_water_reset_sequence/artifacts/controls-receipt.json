@@ -1,0 +1,2417 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "started": 1793565064.305063,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/U-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11477947235107422,
+      "stdout_sha256": "185ad8b3757be7d808388b7675e83ac81541fff753f6f07294fd1a7a9d5a9d27",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "U-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.020000001415610313,
+          "reconstructed_request_m": -0.020000001415610313,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": 4.4703482582342247e-10,
+          "inherited_reference_mismatch_m": 4.4703482582342247e-10,
+          "coarse_reference_mismatch_m": 4.4703482582342247e-10,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.8316908615138e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565064.4242394,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/P-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11555624008178711,
+      "stdout_sha256": "cc0c1cae7eb9b1996cdfa36d30e4f29f3bc00c023e8369abdb05da2eb6886e0f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "P-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.04999999701976776,
+            "frzw": 0.009999999776482582,
+            "nw": 0.0010000000474974513,
+            "st": 0.0,
+            "yst": 0.010500000789761543,
+            "soilw": 0.013000001199543476,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.019999999552965164,
+                "sw": 0.20000000298023224,
+                "ice": 0.004999999888241291,
+                "u": 0.030000001192092896
+              },
+              "2": {
+                "f": 0.029999999329447746,
+                "sw": 0.30000001192092896,
+                "ice": 0.007499999832361937,
+                "u": 0.020000001415610313
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.04999999701976776,
+            "frzw": 0.009999999776482582,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.010500000789761543,
+            "soilw": 0.013000001199543476,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.019999999552965164,
+                "sw": 0.05000000074505806,
+                "ice": 0.004999999888241291,
+                "u": 0.030000001192092896
+              },
+              "2": {
+                "f": 0.029999999329447746,
+                "sw": 0.05000000074505806,
+                "ice": 0.007499999832361937,
+                "u": 0.020000001415610313
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.013000001038424691,
+            "ice": 0.012499999720603228,
+            "total": 0.02550000075902792,
+            "dry_target": 0.0025000001676380654,
+            "available": 0.010500000870786626
+          },
+          "after": {
+            "liquid": 0.0025000001676380654,
+            "ice": 0.012499999720603228,
+            "total": 0.014999999888241293,
+            "dry_target": 0.0025000001676380654,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.010500000789761543,
+          "reconstructed_request_m": -0.010500000789761543,
+          "request_observed": false,
+          "fine_change_m": -0.010500000870786626,
+          "nominal_residual_m": -8.102508247675999e-11,
+          "inherited_reference_mismatch_m": -8.102508247675999e-11,
+          "coarse_reference_mismatch_m": -4.377218032480812e-11,
+          "coordinate_offset_m": -3.725290215195187e-11,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.6327387785574825e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565064.5442839,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/F-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11563682556152344,
+      "stdout_sha256": "ead57622cb6cb601789aa86c961cd10e0c70f95d8b71c3bff647b18b8addfef0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "F-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.10000000149011612,
+            "frzw": 0.019999999552965164,
+            "nw": 0.0020000000949949026,
+            "st": 0.0,
+            "yst": 0.0020000000949949026,
+            "soilw": 0.0020000000949949026,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.05000000074505806,
+                "sw": 0.20000000298023224,
+                "ice": 0.012500000186264515,
+                "u": 0.0
+              },
+              "2": {
+                "f": 0.05000000074505806,
+                "sw": 0.30000001192092896,
+                "ice": 0.012500000186264515,
+                "u": 0.0
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.10000000149011612,
+            "frzw": 0.019999999552965164,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0020000000949949026,
+            "soilw": 0.0020000000949949026,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.05000000074505806,
+                "sw": 0.05000000074505806,
+                "ice": 0.012500000186264515,
+                "u": 0.0
+              },
+              "2": {
+                "f": 0.05000000074505806,
+                "sw": 0.05000000074505806,
+                "ice": 0.012500000186264515,
+                "u": 0.0
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.0020000000949949026,
+            "ice": 0.02500000037252903,
+            "total": 0.027000000467523932,
+            "dry_target": 0.0,
+            "available": 0.0020000000949949026
+          },
+          "after": {
+            "liquid": 0.0,
+            "ice": 0.02500000037252903,
+            "total": 0.02500000037252903,
+            "dry_target": 0.0,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.0020000000949949026,
+          "reconstructed_request_m": -0.0020000000949949026,
+          "request_observed": false,
+          "fine_change_m": -0.0020000000949949026,
+          "nominal_residual_m": 0.0,
+          "inherited_reference_mismatch_m": 0.0,
+          "coarse_reference_mismatch_m": -6.705522526129215e-10,
+          "coordinate_offset_m": 6.705522526129215e-10,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.604316969336008e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565064.6644304,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/dry-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.1156167984008789,
+      "stdout_sha256": "5aa924588ebf0122f465c0949d91332e4ed98fefa8c8341e9b0ee3c520cc2b81",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "dry-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.005000000353902578,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.005000000353902578,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.0,
+          "reconstructed_request_m": 0.0,
+          "request_observed": false,
+          "fine_change_m": 0.0,
+          "nominal_residual_m": 0.0,
+          "inherited_reference_mismatch_m": 0.0,
+          "coarse_reference_mismatch_m": 0.0,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 1.4210855138718682e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565064.784294,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/reference-plus",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11562728881835938,
+      "stdout_sha256": "1baa6c1c9a308ffa69f56dfa8f20eb6c2d1d51b5f5084b08852c3f888a054ffd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "reference-plus",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.023000000044703484,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.023000000044703484,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.023000000044703484,
+          "reconstructed_request_m": -0.023000000044703484,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": 0.002999999076127996,
+          "inherited_reference_mismatch_m": 0.002999999076127996,
+          "coarse_reference_mismatch_m": 0.002999999076127996,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 5.17275121882459e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565064.9041195,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/reference-minus",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11541223526000977,
+      "stdout_sha256": "c321a2a2e709d61bf26372dafb6b0f5b84b82b87d08ff085f069f7a69915ffc8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "reference-minus",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.017000000923871994,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.017000000923871994,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.017000000923871994,
+          "reconstructed_request_m": -0.017000000923871994,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": -0.0030000000447034936,
+          "inherited_reference_mismatch_m": -0.0030000000447034936,
+          "coarse_reference_mismatch_m": -0.0030000000447034936,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.490630292444772e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565065.0236647,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/mismatch-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11553406715393066,
+      "stdout_sha256": "4d18f110c69e00ce3dce22e86f57e5e3088d3a01cf89884b28a4d7c8f14a09f0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "mismatch-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.0,
+          "reconstructed_request_m": 0.0,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": -0.020000000968575488,
+          "inherited_reference_mismatch_m": -0.020000000968575488,
+          "coarse_reference_mismatch_m": -0.020000000968575488,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 2.5579539461451868e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565065.1433938,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/mismatch-positive",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11535787582397461,
+      "stdout_sha256": "9d39a8cfa1b91e94cbf55fe582faadcc65fd14b0c56fe79fc0209dc688a7201f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "mismatch-positive",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 2.9802322387695312e-08,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 2.9802322387695312e-08,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": []
+    },
+    {
+      "started": 1793565065.2626565,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/thin-zero",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11559820175170898,
+      "stdout_sha256": "b64b4a5ff1340d609c18b92329cb0424f6ebcf651d24fdee49b07bc3895e9e30",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "thin-zero",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0989999994635582,
+            "frzw": 0.01979999989271164,
+            "nw": 9.999999747378752e-06,
+            "st": 0.0,
+            "yst": 0.00021000042033847421,
+            "soilw": 0.0002600005245767534,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0494999997317791,
+                "sw": 0.20000000298023224,
+                "ice": 0.012374999932944775,
+                "u": 0.0005000010132789612
+              },
+              "2": {
+                "f": 0.0494999997317791,
+                "sw": 0.30000001192092896,
+                "ice": 0.012374999932944775,
+                "u": 0.0005000010132789612
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0989999994635582,
+            "frzw": 0.01979999989271164,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.00021000042033847421,
+            "soilw": 0.0002600005245767534,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0494999997317791,
+                "sw": 0.05000000074505806,
+                "ice": 0.012374999932944775,
+                "u": 0.0005000010132789612
+              },
+              "2": {
+                "f": 0.0494999997317791,
+                "sw": 0.05000000074505806,
+                "ice": 0.012374999932944775,
+                "u": 0.0005000010132789612
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 1,
+          "before": {
+            "liquid": 0.00026000051383745504,
+            "ice": 0.02474999986588955,
+            "total": 0.025010000379727004,
+            "dry_target": 5.000010207295569e-05,
+            "available": 0.00021000041176449935
+          },
+          "after": {
+            "liquid": 5.000010207295569e-05,
+            "ice": 0.02474999986588955,
+            "total": 0.024799999967962505,
+            "dry_target": 5.000010207295569e-05,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.00021000042033847421,
+          "reconstructed_request_m": -0.00021000042033847421,
+          "request_observed": false,
+          "fine_change_m": -0.00021000041176449935,
+          "nominal_residual_m": 8.573974863423928e-12,
+          "inherited_reference_mismatch_m": 8.573974863423928e-12,
+          "coarse_reference_mismatch_m": 8.233472237328954e-11,
+          "coordinate_offset_m": -7.376074750986561e-11,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.270646140539423e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565065.3828378,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/carry-zero-middle",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11549139022827148,
+      "stdout_sha256": "9437f87d223acd7c2512f491e0cdb67624cb737ac5372d2c448173dd53b1aa98",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "carry-zero-middle",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0010000000474974513,
+            "yst": 0.006000000052154064,
+            "soilw": 0.006000000052154064,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05999999865889549,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05999999865889549,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "3": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0010000000474974513,
+            "yst": 0.006000000052154064,
+            "soilw": 0.006000000052154064,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "3": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.11999999731779099,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 0,
+          "post": 1,
+          "layer": 2,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.0,
+          "reconstructed_request_m": 0.0,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": -0.020000000968575488,
+          "inherited_reference_mismatch_m": -0.020000000968575488,
+          "coarse_reference_mismatch_m": -0.020000000968575488,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 2.5579539461451868e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    },
+    {
+      "started": 1793565065.5010028,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/carry-positive-middle",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.11470437049865723,
+      "stdout_sha256": "5fd4d6eeab5cf877a6d2faefabc4dac7fddbbe9a497934c0d4de2a04b99c8b29",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "carry-positive-middle",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0010000000474974513,
+            "yst": 0.006000000052154064,
+            "soilw": 0.006000000052154064,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05999999865889549,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05999999865889549,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 2.9802322387695312e-08,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "3": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0010000000474974513,
+            "yst": 0.006000000052154064,
+            "soilw": 0.006000000052154064,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 2.9802322387695312e-08,
+            "yst": 0.0,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.12000029534101486,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000030994415283,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          },
+          "3": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": []
+    },
+    {
+      "started": 1793565065.6200132,
+      "command": [
+        "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/build/probe"
+      ],
+      "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/controls-v1/clear-zero-repeat",
+      "PATH": "/usr/bin:/bin",
+      "FC": "/usr/bin/gfortran",
+      "timeout_seconds": 60,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 0.1153707504272461,
+      "stdout_sha256": "a620eef3555ad271cf7fe5c1ecb3ab20e8bba4d0945532139495e53802eb4344",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id": "clear-zero-repeat",
+      "passed": true,
+      "states": {
+        "0": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0008999999845400453,
+            "frzw": 0.00018000000272877514,
+            "nw": 4.999999873689376e-05,
+            "st": 0.019870001822710037,
+            "yst": 0.019870001822710037,
+            "soilw": 0.024825001135468483,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.00044999999227002263,
+                "sw": 0.20000000298023224,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              },
+              "2": {
+                "f": 0.00044999999227002263,
+                "sw": 0.30000001192092896,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.020000001415610313,
+            "yst": 0.020000001415610313,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "1": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0008999999845400453,
+            "frzw": 0.00018000000272877514,
+            "nw": 0.0,
+            "st": 0.019870001822710037,
+            "yst": 0.019870001822710037,
+            "soilw": 0.024825002998113632,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.00044999999227002263,
+                "sw": 0.20000000298023224,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              },
+              "2": {
+                "f": 0.00044999999227002263,
+                "sw": 0.30000001192092896,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.019999999552965164,
+            "yst": 0.019999999552965164,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "2": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0008999999845400453,
+            "frzw": 0.00018000000272877514,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019870001822710037,
+            "soilw": 0.024825002998113632,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.00044999999227002263,
+                "sw": 0.20000000298023224,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              },
+              "2": {
+                "f": 0.00044999999227002263,
+                "sw": 0.30000001192092896,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019999999552965164,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.20000000298023224,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.30000001192092896,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "3": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0008999999845400453,
+            "frzw": 0.00018000000272877514,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019870001822710037,
+            "soilw": 0.024825002998113632,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.00044999999227002263,
+                "sw": 0.05000000074505806,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              },
+              "2": {
+                "f": 0.00044999999227002263,
+                "sw": 0.05000000074505806,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019999999552965164,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        },
+        "4": {
+          "1": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0008999999845400453,
+            "frzw": 0.00018000000272877514,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019870001822710037,
+            "soilw": 0.024825002998113632,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.00044999999227002263,
+                "sw": 0.05000000074505806,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              },
+              "2": {
+                "f": 0.00044999999227002263,
+                "sw": 0.05000000074505806,
+                "ice": 0.00011249999806750566,
+                "u": 0.049550000578165054
+              }
+            }
+          },
+          "2": {
+            "dg": 0.10000000149011612,
+            "dry": 0.05000000074505806,
+            "ul": 0.03999999910593033,
+            "saxfc": 0.25,
+            "frozen": 0.0,
+            "frzw": 0.0,
+            "nw": 0.0,
+            "st": 0.0,
+            "yst": 0.019999999552965164,
+            "soilw": 0.02500000223517418,
+            "n": 2,
+            "available": 1,
+            "fine": {
+              "1": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              },
+              "2": {
+                "f": 0.0,
+                "sw": 0.05000000074505806,
+                "ice": 0.0,
+                "u": 0.05000000074505806
+              }
+            }
+          }
+        }
+      },
+      "resets": [
+        {
+          "pre": 2,
+          "post": 3,
+          "layer": 1,
+          "before": {
+            "liquid": 0.024775001027435073,
+            "ice": 0.00022499999613501132,
+            "total": 0.025000001023570084,
+            "dry_target": 0.00495500013165176,
+            "available": 0.019820000895783313
+          },
+          "after": {
+            "liquid": 0.00495500013165176,
+            "ice": 0.00022499999613501132,
+            "total": 0.005180000127786771,
+            "dry_target": 0.00495500013165176,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.019870001822710037,
+          "reconstructed_request_m": -0.019870001822710037,
+          "request_observed": false,
+          "fine_change_m": -0.019820000895783313,
+          "nominal_residual_m": 5.000092692672431e-05,
+          "inherited_reference_mismatch_m": 5.000092692672431e-05,
+          "coarse_reference_mismatch_m": 5.000095088034118e-05,
+          "coordinate_offset_m": -2.3953616867800065e-11,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.832259333615073e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        },
+        {
+          "pre": 2,
+          "post": 3,
+          "layer": 2,
+          "before": {
+            "liquid": 0.0250000011175871,
+            "ice": 0.0,
+            "total": 0.0250000011175871,
+            "dry_target": 0.005000000149011613,
+            "available": 0.020000000968575488
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.019999999552965164,
+          "reconstructed_request_m": -0.019999999552965164,
+          "request_observed": false,
+          "fine_change_m": -0.020000000968575488,
+          "nominal_residual_m": -1.4156103234075346e-09,
+          "inherited_reference_mismatch_m": -1.4156103234075346e-09,
+          "coarse_reference_mismatch_m": -1.4156103234075346e-09,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 4.831690649755563e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        },
+        {
+          "pre": 3,
+          "post": 4,
+          "layer": 1,
+          "before": {
+            "liquid": 0.00495500013165176,
+            "ice": 0.00022499999613501132,
+            "total": 0.005180000127786771,
+            "dry_target": 0.00495500013165176,
+            "available": 0.0
+          },
+          "after": {
+            "liquid": 0.00495500013165176,
+            "ice": 0.00022499999613501132,
+            "total": 0.005180000127786771,
+            "dry_target": 0.00495500013165176,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.019870001822710037,
+          "reconstructed_request_m": -0.019870001822710037,
+          "request_observed": false,
+          "fine_change_m": 0.0,
+          "nominal_residual_m": 0.019870001822710037,
+          "inherited_reference_mismatch_m": 0.019870001822710037,
+          "coarse_reference_mismatch_m": 0.019870001846663654,
+          "coordinate_offset_m": -2.3953616867800065e-11,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 3.705622720874456e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        },
+        {
+          "pre": 3,
+          "post": 4,
+          "layer": 2,
+          "before": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "after": {
+            "liquid": 0.005000000149011613,
+            "ice": 0.0,
+            "total": 0.005000000149011613,
+            "dry_target": 0.005000000149011613,
+            "available": 0.0
+          },
+          "coarse_ST": 0.0,
+          "coarse_YST": 0.019999999552965164,
+          "reconstructed_request_m": -0.019999999552965164,
+          "request_observed": false,
+          "fine_change_m": 0.0,
+          "nominal_residual_m": 0.019999999552965164,
+          "inherited_reference_mismatch_m": 0.019999999552965164,
+          "coarse_reference_mismatch_m": 0.019999999552965164,
+          "coordinate_offset_m": 0.0,
+          "reset_assignment_error_m": 0.0,
+          "reconstruction_bound_m": 3.694822217482245e-15,
+          "negative_fine_cell": false,
+          "negative_nw": false,
+          "invalid_geometry": false,
+          "negative_fine_component": false,
+          "negative_coarse_component": false
+        }
+      ]
+    }
+  ],
+  "paired_checks": {
+    "positive_subthreshold_no_fine_change": true,
+    "zero_branch_resets_wet_fine": true,
+    "carry_reaches_bottom_through_zero_middle": true,
+    "positive_middle_consumes_carry_bottom_unchanged": true
+  },
+  "binary_sha256": "0eb4dd040d78e2e8efade737310b3b03d25b46bae72fe9a7af2f1064e2b8820b",
+  "build_files": {
+    "build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cpfrst.inc": "10e0ff133a9940a243aefcde9f1751fa29f86779fd1ca3fa5c66216fac12d7d6",
+    "frwatc.for": "a834dbe62497989e8f99945acc880cdb31ced4ccc88d31f215c91738a0a0f1c1",
+    "pmxtil.inc": "6e071809fb03a87d3494046b5867101aaa0412ad792769b10a818890ec5a787b",
+    "cstruc.inc": "8a84968435289f77ff28a08573eef5ad672186303edeabe50ae7d5dd80e583f4",
+    "pmxtls.inc": "166ae159b3821fe52008bc7d02b23737dbcf5a74c8be2d29fb0b11a4abf8dc12",
+    "cflgfs.inc": "e2ef19534154941a4faecb2f558f88154941a11747ee0855bece28170c3ee20a",
+    "build-result.json": "2ca87be97ac65dc9813ed19ace4d3571e57ef5c009eba3aeeb761ff2e36785ba",
+    "pmxpln.inc": "bce6ada0bd2f45e4840245329d241a9b98fb8f702bde1dbe2b6f122f63af3cbb",
+    "cupdate.inc": "db14406077610a00bd9bdb71c58081fbcb4182b752be752817dcf7c85ee50b2e",
+    "pmxnsl.inc": "126d631016a2c557dbaad79cf4da25d71bda1b75335625cdea39245f95af8c8d",
+    "cwater.inc": "208268aa61bb2049a9ccb9eb0a6fa41ff0707e66888b4b3e7ab6383baa0daed3",
+    "pmxhil.inc": "23ccc0606ae74be34b6e64c7370aaaccebd0b20aee21b8456d1c7a2479ff480c",
+    "cwint.inc": "9725e9f25ef05d47d34a945f5268e1f3ce863281b7ccb0613d18ffa7aa6506f6",
+    "csaxp.inc": "0b5fca9ba2e3a102812d9a47eb8022201c6c2fa61207e008cb6b69c71581f0db",
+    "probe": "0eb4dd040d78e2e8efade737310b3b03d25b46bae72fe9a7af2f1064e2b8820b",
+    "driver.for": "6557fce8d8efa84d7ff0fb48a470b579a180fcbb282cc83faebc1727b40e250c"
+  },
+  "freeze_sha256": "44285312355ea8586da91db5d6e4adcb7df5d8367f1041b9d5a10af157a2634b",
+  "all_dependencies_unchanged": true
+}

@@ -1,0 +1,197 @@
+{
+  "scope": "Final source-free reset checkpoint and initiative board; excludes this manifest",
+  "files": {
+    "PROJECT_TRACKER.md": {
+      "sha256": "57b4b113e776320f623fb84be21250224ac6a74ae015d6d5c0a115d174bf506d",
+      "bytes": 337345
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/archive-receipt.json": {
+      "sha256": "632f61e9c583547d60d4ab249d9e88b18edfdfbd293ddcba93a5b64eca721c38",
+      "bytes": 446
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/audit_resets.py": {
+      "sha256": "3cbbbd201861f4262dc9127001fa08447a40ca57563f98d76248a4e9724b20b2",
+      "bytes": 9594
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/audit_resets_v2.py": {
+      "sha256": "c035b0698573508cfa7e84f34c6db5d864ce81f584efce05e6a91e133dc521aa",
+      "bytes": 12319
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/check_reset_reader.py": {
+      "sha256": "63963f39f1aafb9a62ea00d21ac9a0d1e3aa1bf06ee1519daff6a76e5e45650b",
+      "bytes": 1962
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/check_reset_reader_v2.py": {
+      "sha256": "b292f7e752753ec572e1f5873d0443908fb58f2ef751e211580fef2e62e2608c",
+      "bytes": 3118
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/check_targeted_reader.py": {
+      "sha256": "b62199983f3355a36cfa25e11c6da9e24db55aedc3cef425482b2f7adeff0b67",
+      "bytes": 1671
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/control-declaration.md": {
+      "sha256": "e17f8e3e5537a13bb42919c232018c7eb4df4720c25abbc872e207ecbdd1a9d4",
+      "bytes": 3229
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/control-implementation-prereview.md": {
+      "sha256": "ea4f72c50a723d3d15b36be3096c9fe470219f6a5a8df590393a0ecd9c165fa1",
+      "bytes": 2956
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/control-implementation-readback.md": {
+      "sha256": "e78e972dbc568a4a4f903dfe43c11d9e8d7a1b0d1fbdaa2098ea66a7008c12db",
+      "bytes": 2434
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/control-science-prereview.md": {
+      "sha256": "36500bad425ab405b5e58815aae7fc481e2f0fed1fd68890f5ed7ad1fe3cc80d",
+      "bytes": 4323
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/controls-receipt.json": {
+      "sha256": "2a61f78368208da110f3b07679a099a932c94ab225ef5db3e3e0063d3b96b4ce",
+      "bytes": 75717
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/controls-science-readback.md": {
+      "sha256": "3f8444ea5507660bbe8445eb0c75dd451b924b92759eb91204e26c41c4afa481",
+      "bytes": 2313
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/declare_cases.py": {
+      "sha256": "39aaade3f6e4e4dec40d42a73791dbc4b76fbd9cc775e0e944c6c97efdc66c95",
+      "bytes": 2316
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/final-packaging-review.md": {
+      "sha256": "e448c34aaded0a03a217b341a580dd7c63c854e3e1a494f28577fe552fb49be1",
+      "bytes": 2975
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/final-science-review.md": {
+      "sha256": "25d467a13decc9f30e9eacfd48377a7fa7e5d49fff1723ee8311c7903e9ebcdf",
+      "bytes": 1504
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/findings.md": {
+      "sha256": "bf10cc0a3c5bb83bf3d2e277cbfc4361c22fc4fbf4d8b10c53524a3e4e002214",
+      "bytes": 5859
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/native-checkpoint.json": {
+      "sha256": "733f97b5f6e3ac01fecd13c5e5c6c3e1c41173ee593f8468df8b86e9542de729",
+      "bytes": 525
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/prior-preservation.json": {
+      "sha256": "5db88eb5221517dd7914c4263485065b13db16ea398ae9b7d0777153b2532eb8",
+      "bytes": 428
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reader-controls-receipt.json": {
+      "sha256": "a7db241ccc2fe6ce0882b5e42087a948229b3bb9a08e175d14b8d9751ee92eec",
+      "bytes": 3553
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reproduce.md": {
+      "sha256": "d8a327ac3074d08fb0a5e6e08c1d7b8e44cc508d96eef6d0d432dd8e00144d53",
+      "bytes": 1396
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-audit-code-science-review.md": {
+      "sha256": "f183e7e8e1fbb0aa150ad751d3d82321206c333f1d94676530a8e0aa5b28a804",
+      "bytes": 2750
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-cases.json": {
+      "sha256": "76ca8b887b89c7cbae46b106413543c45464f1697ddeeb23f822bd69f8c64ad7",
+      "bytes": 10368
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-implementation-design-review.md": {
+      "sha256": "641f0b708ec0c71050f804365149164291cfe24836a6931db6a646805d884265",
+      "bytes": 5160
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-reader-implementation-review-v1.md": {
+      "sha256": "f19fed75c2ea126174b6419d18300c45c2cb48d67802cd52f3495a6acc2518cc",
+      "bytes": 3313
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-reader-implementation-review-v2.md": {
+      "sha256": "95b535cd61627b75a5d5eef8025b3aa378f5be1482c4f4d473d7856033b799d9",
+      "bytes": 2563
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset-science-design-review.md": {
+      "sha256": "3bc6c5988083146a9425756f314205150443a2bba064e9c7b922935f9d6df42a",
+      "bytes": 8679
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/reset_driver.for": {
+      "sha256": "6557fce8d8efa84d7ff0fb48a470b579a180fcbb282cc83faebc1727b40e250c",
+      "bytes": 3976
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/retained-high-ks1.json": {
+      "sha256": "4c3fe6354b2a4b2c2f9432a069bb5c805414a7aa03ec2f2de3b701f21ccbf4e5",
+      "bytes": 1418
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/retained-normal-ks1.json": {
+      "sha256": "ca0d1c5f6a888d0a0c8ec54651996026d6b32ea651dfb1415707cbbeacea8365",
+      "bytes": 1421
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/retained-science-readback.md": {
+      "sha256": "b09144d46ed887d3d5b9a2dd47e8d5073e888c52f2b42ebdd30cf3dca10d056c",
+      "bytes": 3009
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/retained-zero-ks1.json": {
+      "sha256": "fda7ff505a9d9edcfddb0a043b1e7dba5ac15cde72bfa37558d2dcebae9a6e2d",
+      "bytes": 1420
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/run_reset_controls.py": {
+      "sha256": "ecf47419c4adcb6d372b91b0ed7024b74660e7d82a742f206675c0feb624f5b7",
+      "bytes": 9068
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/run_targeted_histories.py": {
+      "sha256": "b9c67d7c0b5f2ac276db71100cd9971865ce665058a6f6e158d88cc6882c745e",
+      "bytes": 7088
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/sequence-summary.json": {
+      "sha256": "321884474f39fa0f4496994d65d749386f9c881d478154b24452ca3db5a9b245",
+      "bytes": 972076
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/summarize_sequences.py": {
+      "sha256": "8b202ffc0f569613a4475c04e74518d4e427be3fcaa15d75dcd17d6d9dff023c",
+      "bytes": 4124
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-declaration.md": {
+      "sha256": "eac3af9c29f6cfd19f3ddb982b9c0a98f240584a85c0b891e96b27a4796025ed",
+      "bytes": 2365
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-high-ks1.json": {
+      "sha256": "883474847184c68147d910ba23cf2f14946bf4686d88abfec0e686404206fdee",
+      "bytes": 3041
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-implementation-prereview.md": {
+      "sha256": "6f1fa9e49d9514402a3ba43378d1c8eaeccb02d614d46b503974d50e5b25e80d",
+      "bytes": 2851
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-implementation-readback.md": {
+      "sha256": "b1ccad470f2ca53571d40c0312f6174f71431bb3cfebafd3dafbc228325d8b9a",
+      "bytes": 2843
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-normal-ks1.json": {
+      "sha256": "ae7a5f3bbe990cadf3495acff3d669c146c24921aa31ecae30a865ab755cd34e",
+      "bytes": 3045
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-science-prereview.md": {
+      "sha256": "d681ad8ce83fcb802bbf296a01032ffc5615e55fb5a9c1bbcf36c414f5998886",
+      "bytes": 4279
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-science-readback.md": {
+      "sha256": "2ffcb4daf7442289d87a14d16adfac1a054e348e2b949ad84834a807330af28e",
+      "bytes": 3920
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/targeted-zero-ks1.json": {
+      "sha256": "3fe401affc9862a8f971dc8817ee21ae4dfd8bfa93092a17da85f1e229ade782",
+      "bytes": 3041
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/artifacts/validation.md": {
+      "sha256": "69bda3834f05b274ca525089e38c36409f2cde0097122c4bfb180c8670a66d2d",
+      "bytes": 1388
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/package.md": {
+      "sha256": "e8bc3357ad6137da6392c76d68d65426b4547313fd2e49d63a13112f2d1648ce",
+      "bytes": 722
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/prompts/active/reset_execplan.md": {
+      "sha256": "dee81ad549146961494b0307efd99ac890699bf4c5e6310385dc4fde71c29856",
+      "bytes": 8548
+    },
+    "docs/work-packages/20261101_frozen_water_reset_sequence/tracker.md": {
+      "sha256": "b6c73c36b743394212a4351261e5684dcf641f0b0754a77e900b2814741417d1",
+      "bytes": 961
+    }
+  }
+}

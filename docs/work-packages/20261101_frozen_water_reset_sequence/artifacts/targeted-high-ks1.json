@@ -1,0 +1,49 @@
+{
+  "PATH": "/usr/bin:/bin",
+  "FC": "/usr/bin/gfortran",
+  "scenario": "high-ks1",
+  "inputs": {
+    "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "roughness-control.txt": "350195e792e3f97da28b8c02fe2f90f2c128d5713ea1414caa32c5c3c98c64cf",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "buffer_observe.on": "4ce23cc8f7dd61fe7c847e4e6017d1190788516da394d63d45a49f610ef22f3e",
+    "reference.sol": "154adc92c9d2b1c2598503c5f829e23aeeded6f87d830bd5772e88f154f19717",
+    "frwatc_history.on": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "p1.sol": "3d042a663196588321c287fc8da89aa4c0da3562d06473bf637808ea2e35cf26",
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "storage_observe.on": "6bd79158e29e95c107ddb901f3b2b13a68d080b806e644ebce6249be412014c6",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+  },
+  "binary_sha256": "fb885d126413b3f19488c640ef3e7fb8d7d9a872f0f8b08b48a207092a956c0f",
+  "started": 1793565440.5085404,
+  "command": [
+    "/home/workdir/wepppy/out/frozen-water-history-20261101/campaign-v1/build/src/wepp"
+  ],
+  "cwd": "/home/workdir/wepppy/out/frozen-water-reset-20261101/targeted-v1/high-ks1/runs",
+  "timeout_seconds": 900,
+  "returncode": 0,
+  "status": "completed",
+  "elapsed_seconds": 53.56611227989197,
+  "stdout_sha256": "346cdbc870bd653e114b753cf9ffd517d4229645a324788b76451f162126c4ff",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "daily_keys": 17532,
+  "output_hashes": {
+    "H1.loss.dat": "d4f9ac090fa4e63b194b4ff9990e436874a0c8ad611790b11396354c112163ec",
+    "H1.soil.dat": "53e6c6d4c28df858e9a60ec27e79165f4f589be1c1a8655dfd2da338b4274919",
+    "H1.pass.dat": "e4577c05c6495a62f853495fdbf2642523628b85823dacc154a306db8b4d7b2d",
+    "H1.plot.dat": "bb38b6ddc8da978c5c71d911e95185555600e4dad37034201f6ed25d7b5ce2f8",
+    "H1.wat.dat": "90b1cc7a32261951f0711b1a293a122168ce5eb0044e956c80ed32c0d1c8545b",
+    "H1.element.dat": "ccbc216c2b5dd8fde93e98feba75b8b525000e568b0a30ebc628709f2f14dde3",
+    "H1.ebe.dat": "e6c0703d7fc41d7d7fafb933a219b97bf66f87bce16dfa22a7cf66e0daa82c51"
+  },
+  "passed": true,
+  "trace_sha256": "0c7304ff446c6b141d9e27fe75071f9818914bcfcf5a55fcfc090bb14fa88238",
+  "buffer_observation_sha256": "63d3dce6a9ad071a909066ebfed2e78d7e9497d22a3763320f0e3564549f5d34"
+}
