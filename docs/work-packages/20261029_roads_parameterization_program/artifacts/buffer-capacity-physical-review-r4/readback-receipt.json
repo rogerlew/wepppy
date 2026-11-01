@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "original_readonly_review": true,
+  "native_runs_added": 0,
+  "tables_reproduced": {
+    "unique-owner-summary.csv": "05c8a771141c7010ebcc9691c218d5684bd2cc35e878a81022dea87c25c34ab5",
+    "initial-physical-basis.csv": "dc0243fa960c97a0e0474ccc433cfeba679b941b9a486c11391da72f551ea188",
+    "consumed-physical-basis.csv": "2650fdbe9e1d16936ff0fa032f017015205f44693fd957ec4e4d0fe6d08bf486",
+    "connected-physical-basis.csv": "7561d9046e33a3517e238c0f594e4baeccf5298a8a6ee5f6ad2ac4cafc222228",
+    "target-physical-basis.csv": "14cb94b3d2791d5af5c08624bf767feb877fb5c71ac437c933a0e8600b0d1577",
+    "infpar.csv": "ae80f3a11c5a2c67d2ce50b2ad78a0d4fea105b1ce24d2cff88b71ee6e91659d",
+    "emitted-rfg-lineage.csv": "b7081bb625751dbeddf815f73d0bbd0e087336061fefe3c38a1bf3380a48de7b"
+  },
+  "unique_owner_snapshots": 304,
+  "snapshots_above_native_interpreted_bulk_effective_ceiling": 102,
+  "no_observed_native_ceiling_violation": true,
+  "infpar_exact_calls": 216,
+  "infpar_reconstructed_clamps": [
+    6,
+    68
+  ],
+  "emitted_rfg_rows": 108,
+  "bindings": {
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/declaration.md": "23d2e4a68512b7020d2cf563f5164e069a6871d5d5acd302bc5c611f0b6a0439",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/infiltration-context-declaration.md": "06311c79bd64873e230ce322d1d8bebdba557464c335ce80606c50693d41f0d9",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/readback-v4/receipt.json": "77aae24914df85db30b5d5514a680a97b8fce087df58b37085031607000eb950",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/implementation-review/infpar-readback-v3/receipt.json": "507bedc9ed21f1b17c673bfd2b6d238030759d195ed84dcdafdf03fd8cb6e7b3",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/rfg-audit-v2/receipt.json": "db4f083ebd927c8fbe00f36b68f7d22b29068f9def7a913ad7d6d0cbf49a0910",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/references/manifest.json": "095a5d9dca02de3a040f535cd3d6079b56145e68244222c79b2db33599c03237",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/references/nrcs-source.json": "0282425d6c223a565cbe663db44dd4eeda06c3dc6aa34be09307d7360a54853b"
+  }
+}

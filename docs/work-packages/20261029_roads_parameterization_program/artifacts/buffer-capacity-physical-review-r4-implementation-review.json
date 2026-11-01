@@ -1,0 +1,36 @@
+{
+  "status": "approved",
+  "independent_implementation_and_publication_review": true,
+  "manifest_sha256": "48d56c8cfc95c14d99b8af82db5a6d65823bb9e6176986a7b30936c66bd315a4",
+  "published_files_verified": 15,
+  "actual_public_csv_reproductions_exact": {
+    "unique-owner-summary.csv": true,
+    "initial-physical-basis.csv": true,
+    "consumed-physical-basis.csv": true,
+    "connected-physical-basis.csv": true,
+    "target-physical-basis.csv": true,
+    "infpar.csv": true,
+    "emitted-rfg-lineage.csv": true
+  },
+  "headline_rows_verified": 9,
+  "independent_capacity_rows": 556,
+  "independent_capacity_field_comparisons": 3336,
+  "independent_infpar_groups_exact_float32": 216,
+  "direct_emitted_rfg_histories": 18,
+  "direct_emitted_upper200mm_rows": 108,
+  "required_control_closures": [
+    "Actual missing-owner join replaces trivial empty-map lookup",
+    "Direct9002 emitted horizon parsing replaces metadata-only RFG comparison"
+  ],
+  "source_free_publication_checked": true,
+  "native_runs_added": 0,
+  "no_new_production_behavior": true,
+  "scope": "Diagnostic physical-capacity convention review, not physical field validation, annual causality or proven primary sediment remedy; next contract/scalar study specified but unexecuted.",
+  "bindings": {
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/implementation-review/reader-v4-review.json": "0f8347182426ee50743631400a647cd06d7db0ab4fcab98f88e448270e2713d9",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/implementation-review/infpar-readback-v3/receipt.json": "507bedc9ed21f1b17c673bfd2b6d238030759d195ed84dcdafdf03fd8cb6e7b3",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/implementation-review/capacity-readback-v1/receipt.json": "87ce8362106110f54d016d3d37f8e3e8e350498c41ca4f6e4a4677c72d130c09",
+    "out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/implementation-review/rfg-v2-review.json": "4c99aeebec68075a9858959fc9f92d9f412baee545de9b6003fac5183b47adca"
+  },
+  "unresolved_blocking_findings": []
+}

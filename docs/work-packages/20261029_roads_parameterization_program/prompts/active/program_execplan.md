@@ -5,35 +5,40 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: consumed storage and initialization ownership established
+## Current: physical review isolates the effective-capacity basis
 
-Current [candidate ledger v21](../../artifacts/candidate-ledger-v21.json) records the
-reviewed [all-nine storage decomposition](../../artifacts/buffer-storage-ownership-r4/findings.md).
-Primary B1/B2/B3 available-storage deficits mainly reflect initialized structural
-UL: both pore volume and corrected dry-water offset matter. Opposite-direction
-underprediction controls retain higher capacity and less occupied water. Target
-storage barely changes between roughness modes, so this does not quantify annual
-sediment causality. No new native defect or parameter promotion is established.
+[Candidate ledger v22](../../artifacts/candidate-ledger-v22.json) records the reviewed
+[physical-capacity study](../../artifacts/buffer-capacity-physical-review-r4/findings.md).
+The dry-water offset cancels between capacity and stored water at fixed absolute
+stock. Prior storage decomposition remains exact, but its dry term is not an
+independent loss of physical pore space. No dry-offset fit or immediate daily
+UL refresh is justified as a remedy by these observations.
 
-Retained traces reproduce all 152 native storage calls. A narrowly scoped,
-independently reviewed initialization observer completes 36 original 16-year
-histories with 252 ordinary outputs and 72 existing traces byte-identical to
-accepted u2 modes. Independent readbacks validate 586 initialization layers,
-556 consumed layer operands and all 152 initialized minimum-conductivity
-weightings. All 6,908 prior artifacts retain exact inventories, hashes, sizes
-and mtimes; canonical native source and release binaries remain unchanged.
+A separate internal capacity-basis inconsistency is supported: initialization
+and infiltration use a coarse-fragment factor that the absolute UL ceiling
+omits. Of 304 distinct selected owner-layer snapshots, 102 exceed the native-
+interpreted air-and-rock effective ceiling; none exceeds the native ceiling.
+All 216 INFPAR parameter calculations reconstruct exactly, including 68 second
+clamps that affect a proxy, not conserved water. The generated RFG input-unit
+concern is resolved: weight-based preparation and all 108 emitted upper-layer
+rows preserve their retained source values. No input conversion fix is justified.
 
-The [ownership map](../../artifacts/buffer-storage-ownership-r4/ownership.md) establishes
-SCON/hourly-water-balance UL assignments and sequential upstream STOLD reuse.
-Current porosity cannot silently replace initialized UL. Next review the
-physical meaning of pore/dry capacity, its volume basis and evolving-porosity
-water accounting before declaring any behavioral ablation. Preserve all
-controls and original acceptance gates.
+This remains a model-convention diagnostic, not field pore-volume validation,
+water creation, annual sediment causality or an accepted correction. Generated
+B1/B2/B3 have no target-event excess under the diagnostic; B2/B3's relevant
+contributors have no rock correction. The inconsistency is not a demonstrated
+primary-failure remedy. All nine pairs and both modes remain in seven reproducible
+tables; no new model run, source behavior, default or release change occurred.
 
-The earlier roughness study still recovers only B8; primary small-load and
-underprediction failures remain. Roughness persistence is insufficient, and
-the original isolated-buffer experiment remains failed. See its retained
-[response findings](../../artifacts/buffer-roughness-hillslope-response-r4/findings.md).
+Next execute the [effective-capacity contract/scalar specification](../../artifacts/buffer-capacity-physical-review-r4/next-study.md):
+map shared consumers and test a conservative static basis before any separate
+behavioral lane. Do not multiply POR globally or combine dynamic porosity,
+roughness, conductivity or depth changes. Original magnitude/physical gates,
+withheld materials and human UI approval remain unchanged.
+
+The earlier [storage ownership study](../../artifacts/buffer-storage-ownership-r4/findings.md)
+remains accepted and immutable. Roughness persistence remains insufficient; no
+parameter is promoted, and the original isolated-buffer experiment remains failed.
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](../../artifacts/param-u12-scientific-acceptance.json) binds the
@@ -132,6 +137,10 @@ The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
 This execution stops at the explicit human specification/layout gate.
 
 ## Progress
+
+- [ ] Execute the user-authorized rock-cover provenance/consumer audit declared in `out/roads-parameterization-program-20261031/rock-cover-audit-r4/declaration.md`; retain all nine contrasts and both modes, independent review and no behavioral changes.
+
+- [x] Execute the authorized physical-capacity review in `out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/declaration.md`: reconcile dry-water coordinates, bulk/fine-earth capacity and dynamic porosity before deciding on any behavioral ablation.
 
 - [x] Draft the [roughness-persistence counterfactual](../../artifacts/buffer-roughness-counterfactual-r4-plan.md): 18 off controls and 18 persistence runs, full periods, unchanged profiles and fixed nine pairs. Retain mature-forest management metadata provenance separately.
 - [x] Freeze the scientific and implementation preparation-design reviews. Density/porosity have exact source-supported invariants; ridge height and residue-dependent decay remain observed endogenous responses. No source implementation or execution is accepted by those design receipts.
@@ -326,6 +335,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Physical review: dry offsets cancel at fixed absolute stock. The native UL ceiling omits the coarse-fragment factor used in initial water and infiltration; 102/304 distinct snapshots exceed the documented effective diagnostic, while none exceeds native capacity. The suspected RFG unit issue is disproved for the selected preparation path.
+
 - Consumed-storage continuation: retained traces exactly reconstruct 152 GRNA storage calls. All 432 selected structural UL cells use initialized porosity; 176 differ if current porosity is substituted. The initialization-only observer closes the actual UL/minimum-conductivity producer gap with 586 assigned layers and exact output/state parity.
 
 - The first fresh whole-hillslope attempt completed four valid native histories and scientific preflight, but continuation verification would regenerate live Parquet artifacts. Metadata serialization can change hashes without changing tables. All 38 existing scientific bindings were still exact when checked; preserve this attempt and use a fresh attempt with audits on disposable copies and an explicit nonmutation regression. This is a verification-risk stop, not a native or scientific failure.
@@ -428,6 +439,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Physical review: accept only the read-only capacity-basis diagnosis. Advance the linked shared-consumer contract/scalar gate; do not combine it with daily porosity refresh or present it as a B1/B2/B3 remedy. Rationale: primary generated targets lack diagnostic excess and B2/B3 have no relevant rock factor; silently lowering a limit can delete water.
+
 - Storage study: retain all nine pairs/both modes, and add only initialization assignment observations after independent preparation review. Existing daily traces already establish saved STOLD versus advanced upstream water state; no new daily instrumentation or parameter change is justified. The private declaration and evidence-gap table are under `out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/`.
 
 - 2026-10-31: accept the fresh 36-history dataset for bounded model sensitivity only. One of seven selected failures recovers, with no passing regression, but all three primary small-reference failures and three underprediction controls remain unresolved. Prioritize decomposition of retained consumed-storage and snapshot-ownership observations before a broader sweep or new observer; do not tune a new roughness, conductivity, porosity or layer-depth value. Capacity contrasts are hypothesis-generating, not annual causality or a confirmed defect.
@@ -527,6 +540,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+- Physical review completes 556 consumed-row identities, 216 exact INFPAR reconstructions and 108 direct emitted-RFG horizon checks. Seven public tables reproduce. Earlier studies remain immutable; no new native run or model behavior change. Physical field validation, annual causes and a conservative correction remain unestablished.
 
 - Storage study complete: all 6,908 original files retain exact bytes, sizes, mtimes and inventory. Independent readers validate 152 storage calls, 586 initialization layers and sequential state ownership. Primary deficits are structural pore/dry capacity; opposite controls remain distinct. Eleven published CSVs reproduce exactly. Annual causality and physical adequacy remain unresolved; no new defect or parameter promotion.
 
@@ -1416,3 +1431,13 @@ publication revisions and failed preparation/readback attempts are retained.
 The native incident checkpoint is `4dbffaf21`; all 20 final publication members
 match reviewed bytes after Git staging. Scoped docs lint and native artifact
 policy pass; the application suite is not rerun for this analysis-only study.
+
+2026-10-31 physical-capacity continuation: reviewed native volume conventions
+against primary USDA/NRCS documentation and all nine retained contrasts. Updated
+current status and living entries to distinguish dry-coordinate bookkeeping,
+internal effective-capacity inconsistency and resolved input units. The next
+contract/scalar specification is concrete but not an executed behavioral lane.
+
+## Rock-cover audit continuation — 2026-10-31
+
+The operator requested and authorized auditing rock cover before the next behavioral experiment, using the prior gridded RUSLE work as evidence. Inventory actual profile and surface quantities separately, verify proxy availability and native consumers, and evaluate overlap and spatial support. Do not transfer a RUSLE fraction-of-bare parameter into soil RFG. Read-only evidence and review determine whether any later revision is justified. The effective-capacity contract remains separate and unexecuted. This amendment records the new sequencing and prevents confounded cover/capacity tuning.

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "docs_lint_files": 8,
+  "docs_errors": 0,
+  "docs_warnings": 0,
+  "public_tables_replayed_exact": 7,
+  "prior_raw_nonmutation_files": 2223,
+  "reviewed_packet_hashes_exact": 15,
+  "archive_files_verified": 100,
+  "native_artifact_policy": "PASS",
+  "native_incident_checkpoint": "c503a78f9",
+  "application_tests": "not run: read-only scientific analysis, no production code changes",
+  "spelling_preview": "clean scoped study/living docs; preexisting unrelated project board suggestions preserved"
+}

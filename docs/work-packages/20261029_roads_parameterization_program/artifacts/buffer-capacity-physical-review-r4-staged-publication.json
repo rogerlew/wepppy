@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "reviewed_manifest_sha256": "48d56c8cfc95c14d99b8af82db5a6d65823bb9e6176986a7b30936c66bd315a4",
+  "reviewed_staged_file_hashes": {
+    "audit_rfg_basis.py": "95d00bdb64b23e4bf3ba9b91b7e3b084877e60db66b80c6254fcb283364b8d3e",
+    "connected-physical-basis.csv": "7561d9046e33a3517e238c0f594e4baeccf5298a8a6ee5f6ad2ac4cafc222228",
+    "consumed-physical-basis.csv": "2650fdbe9e1d16936ff0fa032f017015205f44693fd957ec4e4d0fe6d08bf486",
+    "emitted-rfg-lineage.csv": "b7081bb625751dbeddf815f73d0bbd0e087336061fefe3c38a1bf3380a48de7b",
+    "findings.md": "2b6e85b6b40f919cdce169cc59206fdc9e8f35823c7bbf576e8115322b4762a2",
+    "infpar.csv": "ae80f3a11c5a2c67d2ce50b2ad78a0d4fea105b1ce24d2cff88b71ee6e91659d",
+    "initial-physical-basis.csv": "dc0243fa960c97a0e0474ccc433cfeba679b941b9a486c11391da72f551ea188",
+    "next-study.md": "e4db86ae674c1c255b22eec2cc4340462dd61e5bc663f32c4fcedae6fd2168e1",
+    "read_capacity.py": "9370173890cb4ccb897a38f4ed2edeb2c35cf5618ae389c106b94421c3f10403",
+    "read_infiltration.py": "719fe43c023967193ca91c746bd9354643d16163eaba959cc38370434d223456",
+    "readback-receipt.json": "d916daeeffbbb1f10e657664cdcd9d309eeb7adb46a81dc741b436bbf59e8404",
+    "reproduce.md": "4087c173dc5ba93dd2de174d0983dcd16f4e32f1a5b03e5eb99112fc0ee7fa91",
+    "rfg-basis.md": "3c3c7481b890a8a6376fdb1e6833343dda9e398f6dd5f6939d5fc5915d11fc8a",
+    "target-physical-basis.csv": "14cb94b3d2791d5af5c08624bf767feb877fb5c71ac437c933a0e8600b0d1577",
+    "unique-owner-summary.csv": "05c8a771141c7010ebcc9691c218d5684bd2cc35e878a81022dea87c25c34ab5"
+  }
+}
