@@ -1,0 +1,20 @@
+{
+  "accepted_predata_rebind": true,
+  "native_runs": 0,
+  "reader_unchanged": true,
+  "prior_declaration_sha256": "133bdb34807d822d8490e64be5d96373cc43aa224b67ea2cfb88d33cfa8d496f",
+  "current_declaration_sha256": "b0d4c0e5acc13cc66b3f85763415d896206a5c0cc1a4cba0ffcc7a8487d50d0a",
+  "changed_bound_files": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execute_response.py": {
+      "before": "002f588a8682165eb3e9112885f5f111c56fefcf667219ec8b288bcfdffbf5f7",
+      "after": "6dbda0b655a12d3e87aa47ac23aa021c49bf8f375c3fe0774fd4ec96d1fc9f15"
+    },
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execution-declaration.json": {
+      "before": "59148f7ec698f2965db41fb149343904d21c05d7921642b2cb787b093028d402",
+      "after": "da66be4e1a82acf4e4b3d844fad149676bb607183736384fe0485609f989c1a6"
+    }
+  },
+  "preserved_prior_path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-reader-before-continuation-rebind/buffer-roughness-hillslope-response-r4-independent-reader-declaration.json",
+  "empty_outputs": 36,
+  "exact_dependencies": 553
+}

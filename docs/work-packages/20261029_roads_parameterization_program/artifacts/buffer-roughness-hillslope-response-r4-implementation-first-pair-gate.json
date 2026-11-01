@@ -1,0 +1,49 @@
+{
+  "review": "Independent implementation first4 gate for fresh36 whole-hillslope response study",
+  "accepted_first_pair_execution": true,
+  "accepted_interpretation": false,
+  "accepted_parameterization": false,
+  "approved_remaining_runs": false,
+  "blocking_findings": [],
+  "runner_sha256": "6dbda0b655a12d3e87aa47ac23aa021c49bf8f375c3fe0774fd4ec96d1fc9f15",
+  "execution_declaration_sha256": "da66be4e1a82acf4e4b3d844fad149676bb607183736384fe0485609f989c1a6",
+  "build_receipt_sha256": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+  "binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execute_response.py": "6dbda0b655a12d3e87aa47ac23aa021c49bf8f375c3fe0774fd4ec96d1fc9f15",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execution-declaration.json": "da66be4e1a82acf4e4b3d844fad149676bb607183736384fe0485609f989c1a6",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/dependency-closure-proof.json": "b5adc006c97cb7197db698400d5006049bc5777f28d4aa16c1965eb1e2548cce",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/binary-reuse.json": "ac0f9d53b474385012a3eb10d7e4954fd07019b4ff7300daf167878aedc32acf",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/final-runner-readback-v2/receipt.json": "da1185e3930b6663cca685edac0d2b8951bd73f0ce8c3446f1de3952b71c8e88",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/review_runner_final_v2.py": "54e096ac53e96a4dc29ec8c3363d56ace917754efb0ffc57bee8f0e901ee3b65",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-declaration.json": "b0d4c0e5acc13cc66b3f85763415d896206a5c0cc1a4cba0ffcc7a8487d50d0a",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732"
+  },
+  "checks": {
+    "fresh_decks_verified": 36,
+    "full_period_years": 16,
+    "expected_null_controls": 12,
+    "all36_unexecuted": true,
+    "dependencies_cold_warm_exact": 553,
+    "new_controls_passed": 13,
+    "copied_known_response_exact": true,
+    "compiled_source_object_include_calendar_and_binary_reuse_exact": true,
+    "historical_files_and_inventory_support_unchanged": 5973
+  },
+  "resolved_predata_findings": [
+    "Native-state reports preserve chronological support and tag/layer/field identity; no mixed-unit maxima.",
+    "Cold/warm proof executes unchanged canonical physical and strict particle audits, SOIL conversion and all paired-table readers.",
+    "Remaining-run authorization requires scientific bindings to this exact current declaration and preflight, not merely a valid four-run receipt from another study."
+  ],
+  "execution_scope": "Only first4 fresh histories: B1 legacy O4/U1 then conditioned-generated O4/U1. All individual gates and protected/null paired controls remain mandatory. Independent actual first4 review must precede explicit remaining32 approval.",
+  "required_first4_readback": [
+    "Fresh output/log/input/source/accounting/particle/coverage and complete state verification.",
+    "Verify deterministic mode-specific repetition against retained U1b outputs/state traces without reusing those histories as new runs or accepting their failed original isolation.",
+    "Retain active upstream changes as measured responses; protect exact density/porosity/drivers and12 predicted null controls."
+  ],
+  "limits": [
+    "Model response only; no physical validation of roughness or shared-duration routing.",
+    "No parameter/default/UI/release/withheld-panel change is accepted."
+  ],
+  "public_disclosure": "Original source-free gate; native code and build payload remain private."
+}

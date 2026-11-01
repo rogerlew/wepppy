@@ -1,0 +1,8 @@
+{
+  "status": "Declared compact readback before native experiment; execute only after all36 independent gates",
+  "script_sha256": "2ba920cd0e213e80db5c42b856ed453ab564deb6210216c13f244c4e313a951c",
+  "plan_sha256": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+  "scope": "All18 soil-mode pairs; original annual envelope and annual role budgets; original target days and all3 roles; no selected-event search or added model runs",
+  "units": "Annual historical audit units retained; target native geometry m and runoff m on effective length; handoffs kg/m; local/upstream hourly depths m with support retained",
+  "accepted_parameterization": false
+}

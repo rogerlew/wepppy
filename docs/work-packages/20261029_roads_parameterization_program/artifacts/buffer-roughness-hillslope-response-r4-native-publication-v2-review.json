@@ -1,0 +1,146 @@
+{
+  "accepted_native_publication_v2": true,
+  "blocking_findings": [],
+  "scope": "Additive packaging-only correction to native source-free incident publication. Supersedes only the current native working/staged-byte allowlist; prior reviews remain valid historical evidence for the preserved before-normalization packet.",
+  "scientific_or_numeric_data_changed": false,
+  "native_model_executions": 0,
+  "canonical_native_source_or_binary_changed": false,
+  "csv_line_ending_changes": [
+    {
+      "path": "artifacts/logs/contract_observations.csv",
+      "before_sha256": "71c51d3bcfa839753dd3505e7387c3a2578c7ccac4bbd7f39bdc83c3a63d6209",
+      "after_sha256": "5031e63bc0710e00e06792af4ab0d960bfc637db57fe08ce60bcc3cf221bb482",
+      "crlf_pairs_removed": 2,
+      "logical_csv_rows": 2,
+      "logical_rows_exact": true
+    },
+    {
+      "path": "artifacts/logs/matrix-before-whole-hillslope-response.csv",
+      "before_sha256": "dae5908813b6a4363a796fa4b82310553dd2ee71713a91a1f45597dde7818b64",
+      "after_sha256": "57448cb51f5e5d6999966508e5a2a43f0df7df8dbadfb7ee9b159197f6f857b2",
+      "crlf_pairs_removed": 42,
+      "logical_csv_rows": 42,
+      "logical_rows_exact": true
+    },
+    {
+      "path": "matrix.csv",
+      "before_sha256": "69e191811fc10a7e82cac5b9873baafb4412d3d9545d2fa29bdbe91bfb57ee0e",
+      "after_sha256": "1322989e476acdeaee6f15c3a59139e03083b0c375e4c6ea6a95f27506c22af6",
+      "crlf_pairs_removed": 149,
+      "logical_csv_rows": 149,
+      "logical_rows_exact": true
+    }
+  ],
+  "generated_manifest_timestamp_cells": [
+    {
+      "path": "artifacts/logs/contract_observations.csv",
+      "field": "created_utc",
+      "before": "2026-11-01T01:52:22Z",
+      "after": "2026-11-01T02:32:19Z",
+      "matches_current_producer_file_mtime": true
+    },
+    {
+      "path": "artifacts/logs/matrix-before-whole-hillslope-response.csv",
+      "field": "created_utc",
+      "before": "2026-11-01T01:50:56Z",
+      "after": "2026-11-01T02:32:19Z",
+      "matches_current_producer_file_mtime": true
+    }
+  ],
+  "manifest_other_logical_cells_unchanged": true,
+  "current_checksums_exact": true,
+  "staged_native_files": 12,
+  "all_staged_blob_bytes_equal_working_tree": true,
+  "existing_eol_policy_enforced": true,
+  "artifact_policy": {
+    "returncode": 0,
+    "stdout": "ablation artifact policy OK (root=/home/workdir/wepp-forest-release-20261009/docs/ablation, max_file=100.00 MiB, max_watershed_repro=250.00 MiB, max_incident_artifacts=500.00 MiB, exemptions=1)\n",
+    "stderr": ""
+  },
+  "supplementary_retention": {
+    "archive_sha256": "65b36c3c6f60468c53f6d44fb5fcba3dc03e6441578e83c235020faf9ec2b0e7",
+    "manifest_sha256": "23da66e9fabb35cdc3db5ffb974eb634f2c08a422eea14feeeb3ce9f80944b07",
+    "files": 25,
+    "all_member_names_and_bytes_verified": true,
+    "raw_inventory_exact": true
+  },
+  "preserved_prior_native_packet": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/native-roughness-document-publication-r4/before-lf-normalization",
+  "predecessor_receipts_unchanged": true,
+  "primary_ledger_and_public_scientific_packet_unchanged": true,
+  "raw_writer_clear": true,
+  "native_public_allowlist": [
+    {
+      "path": "artifacts/README.md",
+      "sha256": "1a19f69057fa26c6ce3c0df47ff0ca7de158d675a72e383bee7916997be42dc3"
+    },
+    {
+      "path": "artifacts/checksums.sha256",
+      "sha256": "bfa01bc16ab4fc556166f153cda326424c316726130ca343093164fa7dccd391"
+    },
+    {
+      "path": "artifacts/logs/completed-hillslope-response.json",
+      "sha256": "2a62546983bf8352b72079694cdcfc11594bd5cab69f828e9a20916022e7951c"
+    },
+    {
+      "path": "artifacts/logs/completed-localization.json",
+      "sha256": "d6bfe25fe2065573b462c0aef5b143e7ac0f1fb551be6403ead0b4a27c1ff4ac"
+    },
+    {
+      "path": "artifacts/logs/contract_observations.csv",
+      "sha256": "5031e63bc0710e00e06792af4ab0d960bfc637db57fe08ce60bcc3cf221bb482"
+    },
+    {
+      "path": "artifacts/logs/fuzzy_failures.md",
+      "sha256": "c8340a5fa6a30034bd05f4749cad9a0400f234bc95dd5a4a838bc41eaa61b7cf"
+    },
+    {
+      "path": "artifacts/logs/matrix-before-whole-hillslope-response.csv",
+      "sha256": "57448cb51f5e5d6999966508e5a2a43f0df7df8dbadfb7ee9b159197f6f857b2"
+    },
+    {
+      "path": "artifacts/logs/planned-matrix.csv",
+      "sha256": "4699014f0486af2ca46600bd13ff515352f600234391c99f4d90c7248dd60768"
+    },
+    {
+      "path": "artifacts/manifest.csv",
+      "sha256": "2d47a803d4004c4d896207ebc980c509a2633afa1590ed754ffceab9547fb1d8"
+    },
+    {
+      "path": "incident.md",
+      "sha256": "dcc64db4a87ff5b11a563c2778c79cb7bf6adf53d8cc7f2efde8e6bb4e3a6c93"
+    },
+    {
+      "path": "matrix.csv",
+      "sha256": "1322989e476acdeaee6f15c3a59139e03083b0c375e4c6ea6a95f27506c22af6"
+    },
+    {
+      "path": "notes.md",
+      "sha256": "6574dca5c4b61ecb6be2cf5ce87080f1311a462ebf5f168aaa7e678989924840"
+    }
+  ],
+  "staged_native_blobs": {
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/README.md": "1a19f69057fa26c6ce3c0df47ff0ca7de158d675a72e383bee7916997be42dc3",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/checksums.sha256": "bfa01bc16ab4fc556166f153cda326424c316726130ca343093164fa7dccd391",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/completed-hillslope-response.json": "2a62546983bf8352b72079694cdcfc11594bd5cab69f828e9a20916022e7951c",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/completed-localization.json": "d6bfe25fe2065573b462c0aef5b143e7ac0f1fb551be6403ead0b4a27c1ff4ac",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/contract_observations.csv": "5031e63bc0710e00e06792af4ab0d960bfc637db57fe08ce60bcc3cf221bb482",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/fuzzy_failures.md": "c8340a5fa6a30034bd05f4749cad9a0400f234bc95dd5a4a838bc41eaa61b7cf",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/matrix-before-whole-hillslope-response.csv": "57448cb51f5e5d6999966508e5a2a43f0df7df8dbadfb7ee9b159197f6f857b2",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/logs/planned-matrix.csv": "4699014f0486af2ca46600bd13ff515352f600234391c99f4d90c7248dd60768",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/artifacts/manifest.csv": "2d47a803d4004c4d896207ebc980c509a2633afa1590ed754ffceab9547fb1d8",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/incident.md": "dcc64db4a87ff5b11a563c2778c79cb7bf6adf53d8cc7f2efde8e6bb4e3a6c93",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/matrix.csv": "1322989e476acdeaee6f15c3a59139e03083b0c375e4c6ea6a95f27506c22af6",
+    "docs/ablation/20261031_roads_buffer_roughness_counterfactual/notes.md": "6574dca5c4b61ecb6be2cf5ce87080f1311a462ebf5f168aaa7e678989924840"
+  },
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-native-incident-review.json": "a155e580441133f0f40d69de19bd69669feeb9a03dfe2a0b979a9fe2cac85a01",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-checkpoint-review.json": "3f88138b1948fc3b7fa90e7e13a7277dd08fd45f7c608ed023066d03020283ab",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-native-roughness-document-publication-retention.json": "ad05ea2082da917a144db234a0568dad7eac5eee47afabd17f187a4ed6f2b0d0",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v20.json": "94687c2a6d693543758431c084820d939da165b8db25a4a072257daa5bcff39f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/manifest.json": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/native-roughness-document-publication-r4/normalization.json": "793f3d3249ec44376c8006787140647b8929b329725d128b946386bbba03147b",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_roughness_native_publication_bytes_r4.py": "4a5d8f6f92a3fc3bfb1f212be942ffc3b7a7a34296e227d7f21b1f8db31373f7",
+    "/home/workdir/wepp-forest-release-20261009/.gitattributes": "578a1cc552f1267e8e35b16cc1356cba3e7cb1c5ce3fe90cd584169041ad953a",
+    "/home/workdir/wepp-forest-release-20261009/tools/check_ablation_artifact_policy.py": "73b6e2dd44445e221cf10bd36a6f67800d46ec415551dce18da8a0e5d000ddc2"
+  }
+}

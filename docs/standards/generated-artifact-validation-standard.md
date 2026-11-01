@@ -92,6 +92,22 @@ is acceptable only when the selection method and coverage risk are stated. Check
 all artifacts when the failure can occur independently in any member and the cost
 is reasonable.
 
+### Preserve Accepted Evidence During Verification
+
+Treat a converter called by an audit as a writer, even when the audit's purpose is
+validation. Once a receipt binds artifact bytes, subsequent verification must not
+regenerate those artifacts in place. For example, repeated Parquet conversion can
+preserve table values while changing serialized metadata ordering and file hashes.
+
+Run artifact-producing audits on disposable copies. Compare regenerated tables,
+schemas and metadata under the declared semantic contract, and independently
+verify that the accepted originals retain their exact file inventory and hashes.
+Do not substitute semantic equality for an existing byte-identity requirement.
+Exercise this nonmutation boundary with actual accepted-format artifacts; include
+failure cases for changed values, schema and metadata. If an executed verifier
+must change, retain its prior declaration and evidence and version the correction
+explicitly rather than rewriting an accepted receipt.
+
 ## Comparative and Scientific Workflows
 
 For baselines, scenarios, counterfactuals, migrations, and before/after studies:

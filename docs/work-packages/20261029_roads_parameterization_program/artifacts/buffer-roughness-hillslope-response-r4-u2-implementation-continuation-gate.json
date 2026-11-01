@@ -1,0 +1,49 @@
+{
+  "review_type": "Independent actual first-four readback and bounded continuation gate",
+  "approved_remaining_runs": true,
+  "accepted_parameterization": false,
+  "accepted_interpretation": false,
+  "accepted_original_isolation": false,
+  "runner_sha256": "3a23a3ba18b622b8b51fd7780d8df80ee8285ccf1166c7d1e653bf4f7421e1db",
+  "execution_declaration_sha256": "e291e9b290f0bf5a360ba74a673e63bca9aa1307a52e6d5fce6de0836e71c30e",
+  "preflight_sha256": "74e444eb2859468033e64e50cd7d74ecfa252d6aa3c695ea6bfb13c19d51e74d",
+  "build_receipt_sha256": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+  "binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "scientific_preflight": {
+    "path": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-preflight.json",
+    "sha256": "c641f7cefa6ed695d98a4337f52fd62f98827dba3b3d9f7c7ae4f25c4982c831"
+  },
+  "blocking_findings": [],
+  "verified": {
+    "actual_fresh_histories": 4,
+    "ordinary_files_exact_to_retained_corresponding_mode": 28,
+    "full_state_traces_exact_to_retained_corresponding_mode": 4,
+    "state_rows": 559888,
+    "exact_derived_table_schema_metadata_comparisons": 16,
+    "bound_copied_audit_and_nonmutation_receipts": 8,
+    "complete_per_case_verifier_coverage": 4,
+    "original_inventory_bytes_sizes_and_mtimes_unchanged": true,
+    "readback_file_bindings": 136,
+    "stable_dependencies": 552,
+    "historical_files_unchanged": 5973,
+    "remaining_cases_unexecuted": 32,
+    "native_executions_by_reviewer": 0
+  },
+  "scope": "Authorize only the already declared remaining32 attempt-u2 histories using the unchanged executable, inputs, scientific criteria and nonmutating verifier. U1 four valid histories remain separate; failed original isolation remains failed.",
+  "pending": [
+    "All36 runtime/accounting/coverage/protected and null controls plus actual input/output/derived-table readback.",
+    "Complete per-case copied-audit/nonmutation receipt inventory for the final dataset, including unchanged first-four accepted artifacts.",
+    "Independent scientific final interpretation; no parameter promotion or whole-matrix validation is granted here."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/first4-u2-actual-readback/receipt.json": "e075641f50f73078a6b0840c653696091b773f1cdd304df43810689c9f00afe3",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/readback_u2_first4.py": "a9a7ac4f65de34e9a99a84e7b088c115b419fa6287ce95f6fbeade36b0e230ea",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-preflight.json": "c641f7cefa6ed695d98a4337f52fd62f98827dba3b3d9f7c7ae4f25c4982c831",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-preflight-verifier-readback.json": "d582ba989e9854e391299f6180da05ffd2a3f94e3ef9e0e9a9602225f9aca324",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/execute_response.py": "3a23a3ba18b622b8b51fd7780d8df80ee8285ccf1166c7d1e653bf4f7421e1db",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/execution-declaration.json": "e291e9b290f0bf5a360ba74a673e63bca9aa1307a52e6d5fce6de0836e71c30e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/preflight.json": "74e444eb2859468033e64e50cd7d74ecfa252d6aa3c695ea6bfb13c19d51e74d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-first-pair-gate.json": "9e4a65f72be877973bb5634846eeea4ac1e1b44f70544b44c147324c03f66b55"
+  }
+}

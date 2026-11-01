@@ -1,0 +1,26 @@
+{
+  "review_type": "Independent AI scientific review, not institutional peer review",
+  "accepted_scientific_verifier_amendment": true,
+  "approved_native_execution": false,
+  "accepted_parameterization": false,
+  "classification": "Attemptu1 verification-risk stop; four valid modeled histories and all38 scientific preflight bindings intact. Not a native or scientific failure.",
+  "unchanged": [
+    "Same reviewed binary and RRC rule",
+    "Same nine input pairs and36fresh runs",
+    "Same off/null/protected density and driver gates",
+    "Same strict physical and particle criteria",
+    "Same original annual envelope and recovery/no-regression rule",
+    "Independent reader scientific logic"
+  ],
+  "verifier_delta": "Canonical audit writes only to retained fresh copies; exact table/schema/metadata-value equivalence and original bytes/size/mtime/inventory preservation. Serialized metadata ordering is reported separately from physical values; no numerical tolerance introduced.",
+  "reader_delta": "Additiveu2 filename and one declaration-filename substitution only; u1reader/declaration/preflight remain unchanged.",
+  "pending_before_execution": "Exact final runner/declaration freeze and independent implementation gate, including hash-bound copied-audit/nonmutation receipts and continuation readback.",
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4.py": "38f07ae423d4b26c4a2a8edca2edca1bbf7b30f64839eef1c4a3826ccd80aec0",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4_u2.py": "25390013cd1783bed58550a4ea7c7f478a8526ac25f6010576b955ad588d7ec5",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-preflight.json": "f2b02e3f440998cec9d1285b8f903623a73210e66db7bc8740f94a3ba05c952f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-verifier-amendment.md": "1b38e244921c8ae980fd9a2b576d2d27b2e02507b40e1c1027b4eb76f755842f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-design-review.json": "da892476817c8d43c940d94ef7fc4ffa0ee99d90a189e0c65a76d15c6572a368",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-reader-controls.json": "4773dd57c802dd62937b302fcf4ec4457ee5b518938e31704be951648e472525"
+  }
+}

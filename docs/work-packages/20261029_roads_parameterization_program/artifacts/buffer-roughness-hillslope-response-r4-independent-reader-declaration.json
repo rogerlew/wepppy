@@ -1,0 +1,53 @@
+{
+  "scope": "Independent predata reader for fresh whole-hillslope roughness response. Original failed isolation and all earlier readers immutable.",
+  "execution_root": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1",
+  "approved_scientific_readback_protocol": true,
+  "approved_native_execution": false,
+  "accepted_interpretation": false,
+  "accepted_parameterization": false,
+  "synthetic_controls": 21,
+  "native_runs_by_reviewer": 0,
+  "predata_check": {
+    "fresh_empty_output_directories": 36,
+    "source_build_files_exact": 977,
+    "dependency_files_exact": 553
+  },
+  "commands": {
+    "first_four": ".venv/bin/python -B docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4.py --root /workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1 --first-pair --output <fresh-json>",
+    "all36": "Same command without --first-pair after accepted preflight and full verification."
+  },
+  "scientific_delta": "Permit/report active-mode endogenous upstream responses; retain exact protected density/drivers, native identity null histories, off/reference outputs, all source/input/runtime/physical/particle gates and original annual envelope.",
+  "coverage": "Complete SOIL calendar and native REAL bits; every supported state field with OFE/tag/index-specific first and maximum differences; canonical upstream table keyed support and numeric unavailability, independently compared to runner summaries; bounded consumer readback. Fresh strict particle audit, retained canonical physical audit evidence plus separate independent implementation rerun.",
+  "limitations": [
+    "No nonlinear law or physical routing validation.",
+    "Printed ELEMENT Ki/Kr retain native printed scale; SOIL adjustment factors are distinct.",
+    "Conditional missing native rows and unavailable printed diagnostics are not zero.",
+    "Synthetic reader checks are not native model fixtures.",
+    "No original isolation acceptance or parameter promotion."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4.py": "38f07ae423d4b26c4a2a8edca2edca1bbf7b30f64839eef1c4a3826ccd80aec0",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_hillslope_reader_r4.py": "8963ecfa9202e243e827543cbad407800eeabbd4ef842d5674753cb0ebbb5ad9",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-controls.json": "c4d84efeca9b2f52a9eefdf028b1b7255ef98ae12ece7002a86502d69a9728b6",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-design-review.json": "da892476817c8d43c940d94ef7fc4ffa0ee99d90a189e0c65a76d15c6572a368",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_runtime_r4.py": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execute_response.py": "6dbda0b655a12d3e87aa47ac23aa021c49bf8f375c3fe0774fd4ec96d1fc9f15",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execution-declaration.json": "da66be4e1a82acf4e4b3d844fad149676bb607183736384fe0485609f989c1a6",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/binary-reuse.json": "ac0f9d53b474385012a3eb10d7e4954fd07019b4ff7300daf167878aedc32acf",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/intervention-map.json": "be23e5503a34f82d61f507f82e8f98459c20696583b3afcd49e39743c779d07b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/counterfactual.patch": "ebcbe3119f54052563775cc4eb67cf9230b5381dc692638533bc6868901c4fcf",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/prebuild-manifest.json": "15374e923ab0a0cf042ebd9ba0ab3fec89f79be9cb512e4a1b9b8b3a4fef664e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/staging-receipt.json": "6d8e2cd95b9fd1fddfdfdbccff457b699d03b940849a9bcef4383aa5136c14f5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-reader-before-continuation-rebind/buffer-roughness-hillslope-response-r4-independent-reader-declaration.json": "133bdb34807d822d8490e64be5d96373cc43aa224b67ea2cfb88d33cfa8d496f"
+  },
+  "revision": 2,
+  "superseded_predata_declaration": {
+    "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-reader-before-continuation-rebind/buffer-roughness-hillslope-response-r4-independent-reader-declaration.json",
+    "sha256": "133bdb34807d822d8490e64be5d96373cc43aa224b67ea2cfb88d33cfa8d496f"
+  },
+  "predata_rebind_reason": "Only continuation authorization now requires exact current-study execution-declaration and preflight keys in the scientific receipt. No native execution, reader logic, table schema or scientific gate changed."
+}

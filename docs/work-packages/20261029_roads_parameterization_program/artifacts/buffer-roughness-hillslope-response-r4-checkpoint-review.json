@@ -1,0 +1,269 @@
+{
+  "accepted_checkpoint": true,
+  "blocking_findings": [],
+  "ledger_sha256": "94687c2a6d693543758431c084820d939da165b8db25a4a072257daa5bcff39f",
+  "ledger_evidence_hashes_verified": 35,
+  "archive": {
+    "files": 6908,
+    "archive_sha256": "5fba9c175a82adfafd779b8781bfee6019cd3f98b909863707e7a2d564552625",
+    "manifest_sha256": "3f76c819224a7f435ee2258c4c6e5b4ec2ab372f850e17a900d41d51c818c68d",
+    "uncompressed_bytes": 3027417400,
+    "all_archive_member_bytes_rehashed": true,
+    "exact_archive_membership": true,
+    "exact_raw_tree_closure": true,
+    "roots": [
+      "buffer-roughness-hillslope-response-r4",
+      "buffer-roughness-hillslope-interpretation-r4"
+    ],
+    "receipt_sha256": "1d9275f54db8832709918f1101f1efc016ceb03dfa3cffc4ac2fe95f44396901"
+  },
+  "public_packet_manifest_sha256": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+  "public_allowlist": [
+    {
+      "path": "PROJECT_TRACKER.md",
+      "sha256": "f006b5fbeef9c645c3fa1ff085647185d0bbf0fb25895dd1f6a9eba8cc9f9fe7"
+    },
+    {
+      "path": "docs/standards/generated-artifact-validation-standard.md",
+      "sha256": "90334f44ae42ef1d4a92b02f4b0964c975e4de812bd8123b1b78240973f4b211"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/analysis-declaration.json",
+      "sha256": "6b5ca79b208b5c89be9934f08b66c7b376f2425c17c2d04267c1ca3c8b627731"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/annual-response.md",
+      "sha256": "ff12c69a871306276c70c4bdb3d53d1af9f947125c14df0d816516ed7cfb5c2a"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/findings.md",
+      "sha256": "95c1d97b8c9927a4d41f98018be5beea959b86bb8f9076fe9ed551bc6a9053bc"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/manifest.json",
+      "sha256": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/readback-receipt.json",
+      "sha256": "e7be21733c61d2e1b6dfbe5c707a08fa4cc1ba0abc6c4434b545721902539bdd"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/reproduce.md",
+      "sha256": "1568660123b17595653a47eda9c16cd78044f4e68e840e5529212e9e19cecf7f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/summarize_response.py",
+      "sha256": "2ba920cd0e213e80db5c42b856ed453ab564deb6210216c13f244c4e313a951c"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/summary.json",
+      "sha256": "a1b53ad54a790207080d8995e20b387971ea330f920f635e181d96c02e2a4a77"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-implementation-first-pair-gate.json",
+      "sha256": "df105d4b99eea6d683a321c3473d98afdf3ae22cad278c03dd9760ea6fb969be"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-preflight.json",
+      "sha256": "f2b02e3f440998cec9d1285b8f903623a73210e66db7bc8740f94a3ba05c952f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-controls-predeclaration.json",
+      "sha256": "4b2c60a03cbaa5db356967a94d7aa8d74b2bb0fd57e4285daba75bbba6054184"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-controls.json",
+      "sha256": "c4d84efeca9b2f52a9eefdf028b1b7255ef98ae12ece7002a86502d69a9728b6"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-declaration.json",
+      "sha256": "b0d4c0e5acc13cc66b3f85763415d896206a5c0cc1a4cba0ffcc7a8487d50d0a"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-reader-rebind.json",
+      "sha256": "fe7ef497782a4ba2b3c7ddad10962c53038c6917412e6dac2648f7f97c7f0b7b"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-native-incident-review.json",
+      "sha256": "a155e580441133f0f40d69de19bd69669feeb9a03dfe2a0b979a9fe2cac85a01"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-publication-review.json",
+      "sha256": "268b5d9a8eb8f67e8205149ff38e794c201a637ec40bc799da7b25f7beefd350"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-publication-scientific-review.json",
+      "sha256": "1f1a28cdf1ba540ed2a4d1d142828c072514c48119a1046f611616acb12dcab7"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-acceptance.json",
+      "sha256": "dd99b80e9a522ffd4285194a05a7d99ba588c31709d553002b190b343e1ace68"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-review.md",
+      "sha256": "58e479dad79885a56ea125c6c11abbe248ddad8da4e06b8ce3fb7e7a2443c0af"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u1-implementation-disposition.json",
+      "sha256": "fe26938b44fb353cca99c0765607b1de1465e21befed51008486a86df384334f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-final-verifier-readback.json",
+      "sha256": "a1f0e82599fcff6547b75d4ee2d4f4a6487b2666d79e04ebe681388a78ee9383"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-continuation-gate.json",
+      "sha256": "2e24f68f8c2ead076c2c41f9f96b9547c86b5c676923ab5875afcfbad9ee1701"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-final-readback.json",
+      "sha256": "b363d599a50b3cb14fb8a4a22f31b303dc0b4943035735a0f7675959da111e80"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-first-pair-gate.json",
+      "sha256": "9e4a65f72be877973bb5634846eeea4ac1e1b44f70544b44c147324c03f66b55"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-full-readback.json",
+      "sha256": "94a6623280055192065443b12e90c85329daa5cf93fc4009090ffad8e75328e2"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-preflight.json",
+      "sha256": "c641f7cefa6ed695d98a4337f52fd62f98827dba3b3d9f7c7ae4f25c4982c831"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-reader-controls.json",
+      "sha256": "4773dd57c802dd62937b302fcf4ec4457ee5b518938e31704be951648e472525"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-reader-declaration.json",
+      "sha256": "3f7785a6f869b6fd6b58b8698db3e7f56bfb4b867f9796e33403d6ddb3559c1f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-preflight-verifier-readback.json",
+      "sha256": "d582ba989e9854e391299f6180da05ffd2a3f94e3ef9e0e9a9602225f9aca324"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-scientific-amendment-review.json",
+      "sha256": "433e0e75c10223b602b04f6d2cb21dd4975fa9c160de2df994876e1b55c1b596"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-verifier-amendment.md",
+      "sha256": "1b38e244921c8ae980fd9a2b576d2d27b2e02507b40e1c1027b4eb76f755842f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v20.json",
+      "sha256": "94687c2a6d693543758431c084820d939da165b8db25a4a072257daa5bcff39f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_hillslope_reader_r4.py",
+      "sha256": "8963ecfa9202e243e827543cbad407800eeabbd4ef842d5674753cb0ebbb5ad9"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_hillslope_reader_r4_u2.py",
+      "sha256": "d96df422ce6786613c483a6f04f1653502c7b50058c0acc66e6c622c6e7b50f6"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4.py",
+      "sha256": "38f07ae423d4b26c4a2a8edca2edca1bbf7b30f64839eef1c4a3826ccd80aec0"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4_u2.py",
+      "sha256": "25390013cd1783bed58550a4ea7c7f478a8526ac25f6010576b955ad588d7ec5"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_verifier_receipts_r4.py",
+      "sha256": "db1b91ae1f3dc3006566f4fbf2d886f0c806da73558c32ed98acda50242b6f1d"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_roughness_hillslope_checkpoint_r4.py",
+      "sha256": "51aa072585e1328157e0d5bd88cbe43c843376645a1d221d6740db3e2af950c1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_roughness_hillslope_native_incident_r4.py",
+      "sha256": "8bcd4df854bdcc55d454e2ca22e8caa45580126d1ab27555e3b7d70d21869c3d"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-buffer-roughness-hillslope-response-retention.json",
+      "sha256": "1d9275f54db8832709918f1101f1efc016ceb03dfa3cffc4ac2fe95f44396901"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/package.md",
+      "sha256": "c24477221aa102bdb6d85699bd126a3b70ab838b020ea9be53321fb79f6e1860"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md",
+      "sha256": "54d5c4d2694268f717665c02cef0488f5dfbf348f6a3d8ebb213ba0f4a5861df"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+      "sha256": "693321a1604351af1f39e45d731999979b8733120d82a5a6db7a5dccaef294c8"
+    }
+  ],
+  "native_incident_review_sha256": "a155e580441133f0f40d69de19bd69669feeb9a03dfe2a0b979a9fe2cac85a01",
+  "native_public_allowlist": [
+    {
+      "path": "artifacts/README.md",
+      "sha256": "1a19f69057fa26c6ce3c0df47ff0ca7de158d675a72e383bee7916997be42dc3"
+    },
+    {
+      "path": "artifacts/checksums.sha256",
+      "sha256": "d4b1208c2d2850df31313d72dcb7ee07e537aa82390f27b134e7dcdf1595f914"
+    },
+    {
+      "path": "artifacts/logs/completed-hillslope-response.json",
+      "sha256": "2a62546983bf8352b72079694cdcfc11594bd5cab69f828e9a20916022e7951c"
+    },
+    {
+      "path": "artifacts/logs/completed-localization.json",
+      "sha256": "d6bfe25fe2065573b462c0aef5b143e7ac0f1fb551be6403ead0b4a27c1ff4ac"
+    },
+    {
+      "path": "artifacts/logs/contract_observations.csv",
+      "sha256": "71c51d3bcfa839753dd3505e7387c3a2578c7ccac4bbd7f39bdc83c3a63d6209"
+    },
+    {
+      "path": "artifacts/logs/fuzzy_failures.md",
+      "sha256": "c8340a5fa6a30034bd05f4749cad9a0400f234bc95dd5a4a838bc41eaa61b7cf"
+    },
+    {
+      "path": "artifacts/logs/matrix-before-whole-hillslope-response.csv",
+      "sha256": "dae5908813b6a4363a796fa4b82310553dd2ee71713a91a1f45597dde7818b64"
+    },
+    {
+      "path": "artifacts/logs/planned-matrix.csv",
+      "sha256": "4699014f0486af2ca46600bd13ff515352f600234391c99f4d90c7248dd60768"
+    },
+    {
+      "path": "artifacts/manifest.csv",
+      "sha256": "31785273af017db0fa8be38d460cf4d0b364bc811395ae177c623304c8b49f1d"
+    },
+    {
+      "path": "incident.md",
+      "sha256": "dcc64db4a87ff5b11a563c2778c79cb7bf6adf53d8cc7f2efde8e6bb4e3a6c93"
+    },
+    {
+      "path": "matrix.csv",
+      "sha256": "69e191811fc10a7e82cac5b9873baafb4412d3d9545d2fa29bdbe91bfb57ee0e"
+    },
+    {
+      "path": "notes.md",
+      "sha256": "6574dca5c4b61ecb6be2cf5ce87080f1311a462ebf5f168aaa7e678989924840"
+    }
+  ],
+  "living_docs_and_standard_reviewed": [
+    "PROJECT_TRACKER.md",
+    "docs/work-packages/20261029_roads_parameterization_program/package.md",
+    "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+    "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md",
+    "docs/standards/generated-artifact-validation-standard.md"
+  ],
+  "scope": "Completed36-history whole-hillslope sensitivity checkpoint, four valid prior whole-hillslope histories retained separately, and source-free incident history. No production parameter/source/binary change or physical-validity acceptance.",
+  "residual_limits": [
+    "Primary small-reference failures and three underprediction controls remain unresolved.",
+    "100 mm roughness and shared-routing physical validity remain unproven.",
+    "Next step is retained storage/epoch decomposition; full-matrix, withheld and human UI gates remain outstanding."
+  ],
+  "raw_writer_clear": true,
+  "native_model_runs_by_reviewer": 0
+}

@@ -1,0 +1,99 @@
+{
+  "accepted_native_source_free_incident": true,
+  "blocking_findings": [],
+  "declared_tasks": 148,
+  "native_executions": 49,
+  "declared_unexecuted": 99,
+  "accepted_dataset_histories": 36,
+  "attempt_counts": {
+    "coverage_attempt": {
+      "declared": 36,
+      "executed": 1,
+      "not_executed": 35
+    },
+    "isolated_buffer": {
+      "declared": 36,
+      "executed": 4,
+      "not_executed": 32
+    },
+    "localization": {
+      "declared": 4,
+      "executed": 4,
+      "not_executed": 0
+    },
+    "whole_hillslope_u1": {
+      "declared": 36,
+      "executed": 4,
+      "not_executed": 32
+    },
+    "whole_hillslope_u2": {
+      "declared": 36,
+      "executed": 36,
+      "not_executed": 0
+    }
+  },
+  "exact_declaration_row_coverage": true,
+  "all_executed_success_and_binary_bindings_checked": true,
+  "checksummed_files": 11,
+  "native_tracked_source_and_binary_changes": false,
+  "artifact_policy": {
+    "returncode": 0,
+    "stdout": "ablation artifact policy OK (root=/home/workdir/wepp-forest-release-20261009/docs/ablation, max_file=100.00 MiB, max_watershed_repro=250.00 MiB, max_incident_artifacts=500.00 MiB, exemptions=1)\n",
+    "stderr": "",
+    "script_sha256": "73b6e2dd44445e221cf10bd36a6f67800d46ec415551dce18da8a0e5d000ddc2"
+  },
+  "disclosure": "Original incident prose, numeric tables, hashes and metadata only; no private native source implementation copied.",
+  "scope": "Research evidence publication. Original isolation remains failed; no parameter, source/binary release, or physical-validity promotion.",
+  "native_public_allowlist": [
+    {
+      "path": "artifacts/README.md",
+      "sha256": "1a19f69057fa26c6ce3c0df47ff0ca7de158d675a72e383bee7916997be42dc3"
+    },
+    {
+      "path": "artifacts/checksums.sha256",
+      "sha256": "d4b1208c2d2850df31313d72dcb7ee07e537aa82390f27b134e7dcdf1595f914"
+    },
+    {
+      "path": "artifacts/logs/completed-hillslope-response.json",
+      "sha256": "2a62546983bf8352b72079694cdcfc11594bd5cab69f828e9a20916022e7951c"
+    },
+    {
+      "path": "artifacts/logs/completed-localization.json",
+      "sha256": "d6bfe25fe2065573b462c0aef5b143e7ac0f1fb551be6403ead0b4a27c1ff4ac"
+    },
+    {
+      "path": "artifacts/logs/contract_observations.csv",
+      "sha256": "71c51d3bcfa839753dd3505e7387c3a2578c7ccac4bbd7f39bdc83c3a63d6209"
+    },
+    {
+      "path": "artifacts/logs/fuzzy_failures.md",
+      "sha256": "c8340a5fa6a30034bd05f4749cad9a0400f234bc95dd5a4a838bc41eaa61b7cf"
+    },
+    {
+      "path": "artifacts/logs/matrix-before-whole-hillslope-response.csv",
+      "sha256": "dae5908813b6a4363a796fa4b82310553dd2ee71713a91a1f45597dde7818b64"
+    },
+    {
+      "path": "artifacts/logs/planned-matrix.csv",
+      "sha256": "4699014f0486af2ca46600bd13ff515352f600234391c99f4d90c7248dd60768"
+    },
+    {
+      "path": "artifacts/manifest.csv",
+      "sha256": "31785273af017db0fa8be38d460cf4d0b364bc811395ae177c623304c8b49f1d"
+    },
+    {
+      "path": "incident.md",
+      "sha256": "dcc64db4a87ff5b11a563c2778c79cb7bf6adf53d8cc7f2efde8e6bb4e3a6c93"
+    },
+    {
+      "path": "matrix.csv",
+      "sha256": "69e191811fc10a7e82cac5b9873baafb4412d3d9545d2fa29bdbe91bfb57ee0e"
+    },
+    {
+      "path": "notes.md",
+      "sha256": "6574dca5c4b61ecb6be2cf5ce87080f1311a462ebf5f168aaa7e678989924840"
+    }
+  ],
+  "script_sha256": "8bcd4df854bdcc55d454e2ca22e8caa45580126d1ab27555e3b7d70d21869c3d",
+  "native_model_runs_by_reviewer": 0
+}

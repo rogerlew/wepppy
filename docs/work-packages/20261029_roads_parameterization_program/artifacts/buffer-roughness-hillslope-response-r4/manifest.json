@@ -1,0 +1,12 @@
+{
+  "scope": "Source-free selected whole-hillslope response report; no parameter acceptance or full-matrix claim",
+  "files": {
+    "analysis-declaration.json": "6b5ca79b208b5c89be9934f08b66c7b376f2425c17c2d04267c1ca3c8b627731",
+    "annual-response.md": "ff12c69a871306276c70c4bdb3d53d1af9f947125c14df0d816516ed7cfb5c2a",
+    "findings.md": "95c1d97b8c9927a4d41f98018be5beea959b86bb8f9076fe9ed551bc6a9053bc",
+    "readback-receipt.json": "e7be21733c61d2e1b6dfbe5c707a08fa4cc1ba0abc6c4434b545721902539bdd",
+    "reproduce.md": "1568660123b17595653a47eda9c16cd78044f4e68e840e5529212e9e19cecf7f",
+    "summarize_response.py": "2ba920cd0e213e80db5c42b856ed453ab564deb6210216c13f244c4e313a951c",
+    "summary.json": "a1b53ad54a790207080d8995e20b387971ea330f920f635e181d96c02e2a4a77"
+  }
+}

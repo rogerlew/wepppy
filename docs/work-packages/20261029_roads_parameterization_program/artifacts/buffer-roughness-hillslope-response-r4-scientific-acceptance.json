@@ -1,0 +1,277 @@
+{
+  "review_type": "Independent AI scientific review, not institutional peer review",
+  "accepted_model_sensitivity_dataset": true,
+  "accepted_prespecified_selected_panel_improvement": true,
+  "accepted_sufficient_remedy_for_selected_discrepancy_set": false,
+  "accepted_parameterization": false,
+  "accepted_physical_routing_validation": false,
+  "accepted_original_isolation": false,
+  "blocking_dataset_findings": [],
+  "full_fresh_histories": 36,
+  "profile_pairs": 9,
+  "exact_null_histories": 12,
+  "active_generated_histories": 6,
+  "modern_annual_responses": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "expected_null": false,
+      "reference_kg_yr": 0.0,
+      "annual_off_on_kg_yr": [
+        7.155468077267901,
+        3.836365414920742
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 1.7070358991622925,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 0.9999999403953552,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "expected_null": false,
+      "reference_kg_yr": 0.5603679819547152,
+      "annual_off_on_kg_yr": [
+        18.190406798837675,
+        13.879883860724483
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 1.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "expected_null": false,
+      "reference_kg_yr": 0.0,
+      "annual_off_on_kg_yr": [
+        8.146888353033935,
+        7.198573306649034
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 1.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "passing_same_signature",
+      "expected_null": false,
+      "reference_kg_yr": 20.216352579750875,
+      "annual_off_on_kg_yr": [
+        180.52470064818053,
+        65.56305388870167
+      ],
+      "original_envelope_off_on_pass": [
+        true,
+        true
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 1.7070358991622925,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 0.9999999403953552,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "expected_null": true,
+      "reference_kg_yr": 115.22027813576567,
+      "annual_off_on_kg_yr": [
+        5.732995507690547,
+        5.732995507690547
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ]
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "expected_null": true,
+      "reference_kg_yr": 37.28602341467912,
+      "annual_off_on_kg_yr": [
+        1.3793673401962219,
+        1.3793673401962219
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ]
+    },
+    {
+      "stratum": "small_passing_control",
+      "expected_null": false,
+      "reference_kg_yr": 0.0,
+      "annual_off_on_kg_yr": [
+        0.7758941288603748,
+        0.2155261469056597
+      ],
+      "original_envelope_off_on_pass": [
+        true,
+        true
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 1.7070358991622925,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 0.9999999403953552,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "meaningful_high",
+      "expected_null": false,
+      "reference_kg_yr": 37.28602341467912,
+      "annual_off_on_kg_yr": [
+        378.85186103076853,
+        96.72813473126007
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        true
+      ],
+      "target_buffer_observed_off_on": [
+        {
+          "roughness_m": 0.006000000052154064,
+          "roughness_shear_factor": 1.0,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 1.0,
+          "interrill_delivery_fraction": 0.9999999403953552,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        },
+        {
+          "roughness_m": 0.10000000149011612,
+          "roughness_shear_factor": 1.752000093460083,
+          "final_shear_adjustment": 2.0,
+          "interrill_roughness_factor": 0.0,
+          "interrill_delivery_fraction": 0.0,
+          "crust_branch": "inactive",
+          "crust_factor": 1.0
+        }
+      ]
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "expected_null": true,
+      "reference_kg_yr": 36.186479999999996,
+      "annual_off_on_kg_yr": [
+        0.08711999999999999,
+        0.08711999999999999
+      ],
+      "original_envelope_off_on_pass": [
+        false,
+        false
+      ]
+    }
+  ],
+  "recovery": [
+    "meaningful_high"
+  ],
+  "regressions": [],
+  "decision": "Retain rule as a research candidate. Primary B1/B2/B3 and opposite-direction failures remain unresolved; no default, release, UI or withheld-validation acceptance.",
+  "next_study": "A predeclared broader development-panel check of the same frozen rule is scientifically reasonable; keep original thresholds and both-direction controls. Physical/management justification remains prerequisite to promotion.",
+  "causal_limits": [
+    "Within-model intervention response, not field validation.",
+    "B8 began only slightly beyond ten-times-reference threshold.",
+    "All six active target buffers suppress interrill delivery; annual attribution among pathways is unresolved.",
+    "Target-day crust path inactive; final critical-shear multiplier already capped in B2/B3/B8.",
+    "Configuredroughness and shared-duration routing physical validity not established.",
+    "Net budgets are not gross erosion, particle origins or complete water closure."
+  ],
+  "history": "Original isolated-buffer campaign failed. Whole-hillslope u1 retained four valid histories and stopped for verification-write risk, not science failure. U2 contains36freshaccepted histories.",
+  "native_runs_by_reviewer": 0,
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-full-readback.json": "94a6623280055192065443b12e90c85329daa5cf93fc4009090ffad8e75328e2",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-final-verifier-readback.json": "a1f0e82599fcff6547b75d4ee2d4f4a6487b2666d79e04ebe681388a78ee9383",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-final-readback.json": "b363d599a50b3cb14fb8a4a22f31b303dc0b4943035735a0f7675959da111e80",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-review.md": "58e479dad79885a56ea125c6c11abbe248ddad8da4e06b8ce3fb7e7a2443c0af",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-reader-declaration.json": "3f7785a6f869b6fd6b58b8698db3e7f56bfb4b867f9796e33403d6ddb3559c1f"
+  }
+}

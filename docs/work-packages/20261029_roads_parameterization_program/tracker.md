@@ -1,8 +1,8 @@
 # Roads parameterization program tracker
 
-## Current: whole-hillslope design reviewed; prepare fresh execution
+## Current: roughness response improves one case; sufficient remedy rejected
 
-Current [candidate ledger v19](artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
+Current [candidate ledger v20](artifacts/candidate-ledger-v20.json) records the failed isolation, completed localization and fresh whole-hillslope response.
 
 The roughness counterfactual remains failed on upstream isolation; its remaining
 32 runs are stopped. Four observation-only replays now establish native coupling:
@@ -10,9 +10,17 @@ terminal flow duration changes upstream peaks and persistent rill widths, then
 width-dependent friction changes runoff in the next storm. All 28 ordinary
 outputs and four full-period state traces reproduce the retained modes exactly.
 Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](artifacts/buffer-roughness-hillslope-response-r4-plan.md)
-has scientific and implementation design approval; execution requires the fresh
-runner and four-run preflight gates. Physical correctness of the routing
-approximation and initial 100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+completed all 36 corrected-attempt histories with both independent runtime
+readbacks passing. All 18 off-mode references and 12 null controls are exact.
+One selected overprediction recovers the original envelope (378.852 to 96.728
+kg/year against 37.286); no passing case regresses. The three primary small-load
+failures improve but remain failed, and all three underprediction controls are
+unchanged. This passes the bounded improvement criterion but rejects roughness
+persistence as a sufficient remedy. See [findings and residual processes](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
+Next decompose retained storage-capacity, liquid/ice and contributing-length
+observations, checking producer/snapshot timing before any new observer or
+parameter change. Physical correctness of the routing approximation and initial
+100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
 candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -48,6 +56,27 @@ has completed; its combinations are rejected on control regressions and unresolv
 The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
+
+The whole-hillslope study is complete and independently reviewed: 36 accepted
+u2 histories, with four valid u1 histories retained separately. All 6,908 files
+in the [raw study and interpretation archive](artifacts/revision4-buffer-roughness-hillslope-response-retention.json)
+are verified. One of seven selected failures recovers; none of the two passing
+controls regresses. The next bounded question uses retained storage operands
+and producer timing before any new observer, parameter fit or broad sweep.
+See [findings](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
+
+The corrected u2 first-four gate and independent nonmutation readback passed,
+then the remaining 32 histories completed under the exact continuation receipt.
+Regenerated copied tables have identical values/schema/metadata but different
+serialized hashes; accepted original bytes, timestamps and inventories remain
+unchanged. All 36 histories now have independent runtime and bounded scientific acceptance.
+
+The first fresh whole-hillslope attempt completed four valid histories and passed
+scientific preflight. It is stopped before the remaining 32 because continuation
+verification regenerates live Parquet artifacts and could invalidate their hashes.
+All 38 bound artifacts remain exact. The verifier-only u2 attempt audited
+disposable copies, proved nonmutation, and completed all 36 fresh histories with
+unchanged science and inputs. The four-run u1 attempt remains a verification-risk stop.
 
 The failed counterfactual is retained in a verified 4,564-file archive; the
 completed localization and interpretation are retained in a verified 1,409-file

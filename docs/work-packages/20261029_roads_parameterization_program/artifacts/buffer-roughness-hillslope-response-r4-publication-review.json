@@ -1,0 +1,29 @@
+{
+  "accepted_public_packet": true,
+  "accepted_reproduction": true,
+  "accepted_private_source_disclosure_boundary": true,
+  "accepted_parameterization": false,
+  "blocking_findings": [],
+  "final_manifest_sha256": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+  "packet_file_count_including_manifest": 8,
+  "all_summary_payload_values_exact": true,
+  "annual_comparison_table_byte_exact": true,
+  "only_permitted_summary_delta": "Public versus original private path for byte-identical summarizer script",
+  "existing_destination_rejected_without_mutation": true,
+  "study_files_unchanged": 6883,
+  "study_file_hash_size_mtime_inventory_unchanged": true,
+  "native_executions_by_reviewer": 0,
+  "disclosure": "Public files contain original Python analysis, numeric results, hashes and prose; no private native implementation fragments. Private source/build/native records remain separately retained.",
+  "scope": "Final eight-file compact report only. Scientific mechanism and next-experiment claims rely on the separately bound scientific disposition. Other new public evidence, native incident policy, living docs and ledger/retention closure receive a separate checkpoint review.",
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/manifest.json": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-review/receipt.json": "a93c9e70ab2b065cee6324500d7070a1e896332caffa7f3e275bf82402cb03e1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-review/final-manifest-addendum.json": "0323f00e24df9b9f55d5eb877fcf6f75d840878cd55b9404fdf8593ac2f669d0",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-review/review_publication.py": "1cd87da72f0a77cf8ca402f9234a91c79cccc7dc83ceaa9c922db3d006149eb1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-review/documented-command.sh": "48f6586907f017c60710e4cbeafc084567b561ef71b19df594634a2a045825a9",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-replay/summary.json": "021929922165565f468671154262ce9f553565bc5c6174c69b26afe9fb68aeab",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/publication-replay/annual-response.md": "ff12c69a871306276c70c4bdb3d53d1af9f947125c14df0d816516ed7cfb5c2a",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-implementation-final-readback.json": "b363d599a50b3cb14fb8a4a22f31b303dc0b4943035735a0f7675959da111e80",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-acceptance.json": "dd99b80e9a522ffd4285194a05a7d99ba588c31709d553002b190b343e1ace68"
+  }
+}

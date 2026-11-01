@@ -1,0 +1,40 @@
+{
+  "review_type": "Independent AI scientific publication review, not institutional peer review",
+  "accepted_publication_claims": true,
+  "accepted_parameterization": false,
+  "accepted_physical_routing_validation": false,
+  "blocking_publication_findings": [],
+  "checks": [
+    "All seven packet members and input bindings rehashed",
+    "Numerical payload exactly reproduced; only explicit identical-script path binding differs",
+    "Annual table byte-identical",
+    "B8 water/net-sediment and B1/B2/B3 target handoffs/grid-net claims checked against complete accepted data",
+    "Connected available-storage primary and opposite-direction values checked",
+    "Primary unresolved failures and selected nonrepresentative scope disclosed"
+  ],
+  "next_priority": "Decompose existing consumed first-two-layer operands and producer epochs before a broader sweep. Use preserved UL/STOLD/FRZW/depth/contributor data with native conditional branches and conductivity/forcing/time support. Add observation only for a specific missing executed producer/epoch; no fitted multiplier or new roughness.",
+  "priority_rationale": "The single rule is insufficient for primary failures and leaves underprediction controls unchanged. A broad sweep should answer a declared decision; retained-operand diagnosis is cheaper and more directly addresses the residual mechanism.",
+  "causal_limits": [
+    "Available-storage contrast is a hypothesis, not annual causal attribution or a confirmed engine defect.",
+    "UL and stored water require native dry-content, coarse-fragment, entrapped-air, depth and ownership semantics; do not equate them to generic porosity or whole-profile storage.",
+    "Original200mm boundary and all accounting/magnitude thresholds remain intact."
+  ],
+  "raw_study_root_writer_clear": true,
+  "raw_interpretation_root_writer_clear": true,
+  "native_runs_by_reviewer": 0,
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/manifest.json": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/analysis-declaration.json": "6b5ca79b208b5c89be9934f08b66c7b376f2425c17c2d04267c1ca3c8b627731",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/annual-response.md": "ff12c69a871306276c70c4bdb3d53d1af9f947125c14df0d816516ed7cfb5c2a",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/findings.md": "95c1d97b8c9927a4d41f98018be5beea959b86bb8f9076fe9ed551bc6a9053bc",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/readback-receipt.json": "e7be21733c61d2e1b6dfbe5c707a08fa4cc1ba0abc6c4434b545721902539bdd",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/reproduce.md": "1568660123b17595653a47eda9c16cd78044f4e68e840e5529212e9e19cecf7f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/summarize_response.py": "2ba920cd0e213e80db5c42b856ed453ab564deb6210216c13f244c4e313a951c",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4/summary.json": "a1b53ad54a790207080d8995e20b387971ea330f920f635e181d96c02e2a4a77",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-scientific-acceptance.json": "dd99b80e9a522ffd4285194a05a7d99ba588c31709d553002b190b343e1ace68",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/scientific-publication-replay-v1/summary.json": "021929922165565f468671154262ce9f553565bc5c6174c69b26afe9fb68aeab",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/scientific-publication-replay-v1/annual-response.md": "ff12c69a871306276c70c4bdb3d53d1af9f947125c14df0d816516ed7cfb5c2a",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/scientific-publication-replay-v1/readback-receipt.json": "33a168406a61ef8cffe955e0675d571831cbb0baf95f9c76c94fc6c9b7ab0f0c",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-interpretation-r4/scientific-publication-replay-v1/manifest-guard-transition.json": "6975ffe5d33942a4d5517dc77d01a6649ae48a27a2e89fdf7e0c05defbfd5abd"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "review_type": "Independent implementation review of nonmutating research verifier",
+  "accepted_first_pair_execution": true,
+  "approved_remaining_runs": false,
+  "accepted_interpretation": false,
+  "accepted_parameterization": false,
+  "runner_sha256": "3a23a3ba18b622b8b51fd7780d8df80ee8285ccf1166c7d1e653bf4f7421e1db",
+  "execution_declaration_sha256": "e291e9b290f0bf5a360ba74a673e63bca9aa1307a52e6d5fce6de0836e71c30e",
+  "build_receipt_sha256": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+  "binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "scope": "Only the declared first four fresh attempt-u2 histories. Preserve attempt-u1; no rebuild, parameter/input change or scientific threshold change.",
+  "blocking_findings": [],
+  "verified": {
+    "exact_fresh_task_input_sets": 36,
+    "unexecuted_cases": 36,
+    "stable_dependency_files": 552,
+    "source_build_files": 977,
+    "unchanged_scientific_function_asts": [
+      "execute",
+      "pair_verify",
+      "state_contract",
+      "bounded_coverage",
+      "response_delta",
+      "source_check",
+      "provenance_check",
+      "soil_table",
+      "gate",
+      "continuation_gate"
+    ],
+    "independent_nonmutation_and_drift_controls": 9,
+    "u1_files_bytes_sizes_mtimes_unchanged": 1749,
+    "native_runs_by_reviewer": 0
+  },
+  "controls": [
+    {
+      "name": "actual_full_case_verify_preserves_bytes_inventory_sizes_mtimes",
+      "passed": true
+    },
+    {
+      "name": "copied_audit_receipts_bind_all_four_tables",
+      "passed": true
+    },
+    {
+      "name": "reject_one_numeric_value_change",
+      "passed": true
+    },
+    {
+      "name": "reject_metadata_value_change",
+      "passed": true
+    },
+    {
+      "name": "reject_schema_column_order_change",
+      "passed": true
+    },
+    {
+      "name": "accept_exact_table_metadata_despite_serialization_order",
+      "passed": true
+    },
+    {
+      "name": "receipt_inventory_rejects_later_original_file_drift",
+      "passed": true
+    },
+    {
+      "name": "receipt_inventory_rejects_regenerated_table_drift",
+      "passed": true
+    },
+    {
+      "name": "verify_rejects_new_file_created_during_check",
+      "passed": true
+    }
+  ],
+  "evidence_contract": "Canonical audit writes to fresh copied outputs. Stored and regenerated Arrow values, schemas and metadata match exactly; byte hashes are retained separately. Verification preserves original full file inventory, byte hashes, sizes and mtimes. Preflight/final receipts bind copied-audit and nonmutation evidence; continuation revalidates the prior receipts and every bound original case file.",
+  "residual_gates": [
+    "Actual U2 first-four runtime/accounting/protected/null controls and exact input/output/derived readback are pending.",
+    "Require per-case copied-audit/nonmutation receipt coverage for all actual completed cases in independent first-four and final readback.",
+    "Remaining32 require a separately bound independent scientific first-four receipt and explicit implementation continuation approval.",
+    "Full36 results and scientific interpretation remain unapproved; original isolation remains failed and no parameter is promoted."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/execute_response.py": "3a23a3ba18b622b8b51fd7780d8df80ee8285ccf1166c7d1e653bf4f7421e1db",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/execution-declaration.json": "e291e9b290f0bf5a360ba74a673e63bca9aa1307a52e6d5fce6de0836e71c30e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/dependency-closure-proof.json": "e719485af7102348bf3db09cfe1e595fd84b58102f729d6ddebcfc74bd461533",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/binary-reuse.json": "741d5575dd74fa401addf15d4b26be1ec3bfcc0c88c058cd9bfe2d5050e64d96",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/stage-response-receipt.json": "e44e9d9d91702694fc9badd834f600cd39987139bb750604a641d02a3adf2cf1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u2/bind_verifier_evidence.py": "9d5a0ef107c2b931e8137337877453b0bc0de1dba47d29249fb0bbf8b1014a35",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-independent-reader-declaration.json": "3f7785a6f869b6fd6b58b8698db3e7f56bfb4b867f9796e33403d6ddb3559c1f",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/u2-nonmutation-controls/receipt.json": "bcfeb6e2ce7fe78b3160cd45b1e1063929a3d11d99ad56eda60e0e7f91b321a2",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/review_u2_nonmutation.py": "a7e514c1c0df365fca884bbe2aac3438cecd402d67b5d9485e618c96db1043ce",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u2-scientific-amendment-review.json": "433e0e75c10223b602b04f6d2cb21dd4975fa9c160de2df994876e1b55c1b596",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-verifier-amendment.md": "1b38e244921c8ae980fd9a2b576d2d27b2e02507b40e1c1027b4eb76f755842f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-u1-implementation-disposition.json": "fe26938b44fb353cca99c0765607b1de1465e21befed51008486a86df384334f"
+  }
+}

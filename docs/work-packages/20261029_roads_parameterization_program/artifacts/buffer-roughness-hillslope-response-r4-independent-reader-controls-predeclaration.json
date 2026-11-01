@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "native_runs": 0,
+  "controls": [
+    "complete leap calendar, active restore and endogenous RH accepted",
+    "missing final calendar row rejected",
+    "duplicate state row rejected",
+    "native REAL bit mismatch rejected",
+    "density drift rejected",
+    "configured irrigation rejected",
+    "nonfinite state rejected",
+    "wrong mode rejected",
+    "unexpected nonidentity in predicted null rejected",
+    "original envelope equality boundaries and both failure directions preserved",
+    "additional IRS friction retained with one owned CONTIN call",
+    "missing CONTIN friction rejected",
+    "post-PARAM friction rejected",
+    "dry CONTIN friction rejected",
+    "active upstream endogenous response reported under fresh contract",
+    "upstream first differing ownership retained",
+    "published union support, finite maximum and unavailable diagnostic stay distinct",
+    "null published change rejected",
+    "duplicate published support rejected",
+    "native identity null accepted",
+    "upstream endogenous change still rejected in null control"
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_hillslope_reader_r4.py": "8963ecfa9202e243e827543cbad407800eeabbd4ef842d5674753cb0ebbb5ad9",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_hillslope_runtime_r4.py": "564ee629205c8dfd66f3a34a131862bd9dc53c39cf56592bb69d352482bf6344"
+  }
+}

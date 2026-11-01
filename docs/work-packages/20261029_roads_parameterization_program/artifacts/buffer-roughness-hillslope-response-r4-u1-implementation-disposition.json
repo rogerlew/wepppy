@@ -1,0 +1,29 @@
+{
+  "review": "Independent implementation readback and verifier-only continuation hold",
+  "accepted_first_four_runtime_evidence": true,
+  "approved_remaining_runs": false,
+  "accepted_parameterization": false,
+  "accepted_original_isolation": false,
+  "full_period_histories": 4,
+  "native_executions_by_reviewer": 0,
+  "verified_ordinary_output_files": 28,
+  "verified_full_state_traces": 4,
+  "full_state_rows": 559888,
+  "independent_runtime_file_bindings_rehashed": 116,
+  "scientific_preflight_file_bindings_rehashed": 38,
+  "paired_parquet_files_unchanged": 12,
+  "remaining32_unexecuted": true,
+  "physical_particle_protected_and_null_controls_passed": true,
+  "derived_table_readback": "Exact Arrow data, schema and metadata; stored bytes independently rehashed. No numeric tolerance or missing-value imputation.",
+  "continuation_blocker": "Current verifier calls canonical audit on the accepted case, which can reserialize Parquet metadata and invalidate prior byte-bound receipts. All currently bound evidence remains unchanged; no model/accounting failure was found.",
+  "disposition": "Preserve attempt-u1 and its valid first-four evidence unchanged. Review a newly declared attempt-u2 using the same binary, inputs and scientific criteria with audits of copied outputs and explicit nonmutation receipts. No remaining-run authorization on attempt-u1.",
+  "scope": "Implementation and actual artifact evidence only. Original failed isolation remains failed. No parameter promotion or whole-panel outcome.",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/independent-implementation-review/first4-actual-readback-v2/receipt.json": "f11b40233de46a411c5c6d9e8805b5147604c500c239f8e03435787ad9e6c7e7",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-hillslope-response-r4-independent-preflight.json": "f2b02e3f440998cec9d1285b8f903623a73210e66db7bc8740f94a3ba05c952f",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execute_response.py": "6dbda0b655a12d3e87aa47ac23aa021c49bf8f375c3fe0774fd4ec96d1fc9f15",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/execution-declaration.json": "da66be4e1a82acf4e4b3d844fad149676bb607183736384fe0485609f989c1a6",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/preflight.json": "cfc764a42c86700603f57ed38e31a8d261f0565bc0a6b0760b2b4e0e8048567e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-hillslope-response-r4/attempt-u1/preflight-immutability-before-audit-fix.json": "e0e01becc3eaf75cf1799750c203d4dc7efef377d9316e4f1b98d4bf347ca8e1"
+  }
+}
