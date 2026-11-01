@@ -48,6 +48,8 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0125`: [Rock fragment unit and basis repairs](ADR-0125-rock-fragment-unit-and-basis-repairs.md) (Development checkpoint; no native physics or deployment).
+
 - `ADR-0121`: [Bounded deposition endpoint search](ADR-0121-depend-bounded-root-search.md) (Proposed; shared native numerical repair).
 - `ADR-0122`: [EROD integration and first-transition support](ADR-0122-erod-subgrid-interval-support.md) (Proposed; includes stiff integration and shared capacity evaluation).
 - `ADR-0123`: [Actual sediment inflow and wet-coordinate boundaries](ADR-0123-roads-nonzero-inflow-sediment-boundary.md) (Proposed; shared native routing).
