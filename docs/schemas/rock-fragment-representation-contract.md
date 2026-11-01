@@ -1,6 +1,6 @@
 # Rock fragment representation contract
 
-Status: development contract, implementation conformance pending. Governs dimensional preparation and evidence; does not change native equations or validate surface proxies.
+Status: independently reviewed development contract; dimensional repairs implemented and locally validated. Governs dimensional preparation and evidence; does not change native equations or validate surface proxies.
 
 ## Quantities and units
 

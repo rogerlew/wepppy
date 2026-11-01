@@ -1,0 +1,127 @@
+{
+  "scope": "Final public research package; excludes this manifest itself. Archive receipt is created after raw publication snapshot to avoid circular hashes.",
+  "contract_ancestor": "b2011d9fb",
+  "native_evidence_checkpoint": "c7ec243c5",
+  "files": {
+    "docs/work-packages/20261031_rock_representation/artifacts/archive-receipt.json": {
+      "sha256": "eceb85cb0d3713c1d73bd2ff893fd65e6ff4c8e851e9ccf53bd8aba75d8e89c5",
+      "bytes": 414
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/capacity-ordering.csv": {
+      "sha256": "8f5c793eed66c73e489330dff76694bc4c7243cc4054e04b14a27e32937c29ec",
+      "bytes": 117141
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/contract-decision.md": {
+      "sha256": "0fbbaf8284fb6f7e12c1d45e219901f1fd6f8466a4010630288050c7b86e5e48",
+      "bytes": 1490
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/contract-implementation-review.md": {
+      "sha256": "d8a2a42830ae53b85cfb59aabcaec02d179db6ff327656863db0756c91b0273f",
+      "bytes": 4181
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/contract-science-review.md": {
+      "sha256": "5e28431e74e6c837a0dec4b89e78296166792732cc107c31383d38e3b1a41d33",
+      "bytes": 5539
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/correctness-review.md": {
+      "sha256": "5e0c6fe35391340602f30c50c1ae29ca9580dcad84ed933601becf010535fc24",
+      "bytes": 5616
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/development-roadmap.md": {
+      "sha256": "6585aa60b12d83f3ce5333debe231ed44359f4ef9821fcdac00e1c96b538630b",
+      "bytes": 5990
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/dimensional-readback.json": {
+      "sha256": "c52aeddfeb1f90433a2807f35ec06d298e704355a21cfc54dc8f3782385d7854",
+      "bytes": 1063
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/fetch_surface_evidence.py": {
+      "sha256": "4f4139486435d9cbda5a062ad29aec8dcdd9b0abbfb58823cc9c894d03793253",
+      "bytes": 1974
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/final-science-review.md": {
+      "sha256": "5dd94ea7010581343bcf20fcfd0ab73d4df51917a21cfbdd09baa98d85e375fe",
+      "bytes": 5162
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/final-validation-review.md": {
+      "sha256": "7e584a8eb9b67191c7c9fedcb6dc0c34f50bf3a55070d5392e929f93473ccd86",
+      "bytes": 5037
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/investigate_rock.py": {
+      "sha256": "1ea3f3fee913c6d2a1caab3a2678fd025872eff016498ce6238a11ca65d6ebc8",
+      "bytes": 5497
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/investigation.md": {
+      "sha256": "e141c95a9b0e5848a7fa5c3f68ff83549c29de15dd4c48242dc411074d8682cd",
+      "bytes": 11203
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/mass-volume-grid.csv": {
+      "sha256": "8c1358ccd9d38b5dd6e40198c57d8a37f76156beb798d793884772f191481934",
+      "bytes": 43115
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/native-calendar-readback.json": {
+      "sha256": "14056c6341134de562fd41afa617fd809a2f66e91d32ccddb907ac36b0d4b244",
+      "bytes": 201
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/native-readback-declaration.md": {
+      "sha256": "8940d6cb9a8618e894fa7e350e0f993d6ce85b3d81853dff59c24504626311bc",
+      "bytes": 1642
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/native-readback-implementation-review.md": {
+      "sha256": "da545253af96b9ed658fb9a36718b3011ea3cc500aea92bd861a140ea4068dd2",
+      "bytes": 2789
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/native-readback-science-review.json": {
+      "sha256": "f7350f9ed71c08bb99c7fcefce4ad79a6afeac7ef40dc0b22fb7e76945906732",
+      "bytes": 1472
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/native-readback.json": {
+      "sha256": "9f0f0e3f429e545ddd6eb04c7b1b4ab424703f197b45ce9eaf474c0c3fe48086",
+      "bytes": 11646
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/plot_rock.py": {
+      "sha256": "53dff3249441440e3410130b60f5fcdfd51985833a47001f8de1c12ac7b7bf1d",
+      "bytes": 1769
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/produce_artifacts.py": {
+      "sha256": "6978da87c85543a690fc41b4c026585f886a10f90aa3373a8a8bd4cb53a8f413",
+      "bytes": 3959
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/read_native_fixture.py": {
+      "sha256": "22316eeb09f5b520459d34d729a1392aa7b0068133d4c67bdbd90ab6c2980db6",
+      "bytes": 4644
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/roadmap-science-review.md": {
+      "sha256": "56f74543481ff606146410c6282356ab3900da6396e9b4f02ab86721391226c5",
+      "bytes": 2163
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/rock-basis-and-overlap.png": {
+      "sha256": "dd7b9e307411e286e13003949510333fea00e0d46c3c68718c13d78f16ad2168",
+      "bytes": 181442
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/surface-overlap-bounds.csv": {
+      "sha256": "7c32a30f9b6b306b35b396d6354b5208e8045c2d06e8bd76f000c1cfb2e57644",
+      "bytes": 981
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/surface-source-status.json": {
+      "sha256": "36fa50a5b838d5b0b981a472bff0d0f415404ae4c91eeec8da546fe54205d7d6",
+      "bytes": 133
+    },
+    "docs/work-packages/20261031_rock_representation/artifacts/validation.md": {
+      "sha256": "43f52af2a7532c46f17f4b3a2507b595ee804cefde39b0321ecd160f043a2b55",
+      "bytes": 3643
+    },
+    "docs/work-packages/20261031_rock_representation/package.md": {
+      "sha256": "8df5ae4b867acdb31dc99c4380ad1a6a7a0c8bffee274775032e82649f552bad",
+      "bytes": 3986
+    },
+    "docs/work-packages/20261031_rock_representation/prompts/active/rock_representation_execplan.md": {
+      "sha256": "26fccee43d8959019da0beb0c0b88d411b4550e5bcd3d3fe31c482ae8fa00842",
+      "bytes": 8412
+    },
+    "docs/work-packages/20261031_rock_representation/tracker.md": {
+      "sha256": "cc153bd7b684bc32e60abcc0b612a757e4c653f3fbd458373cf241b840e89113",
+      "bytes": 2060
+    }
+  }
+}

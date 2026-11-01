@@ -1,0 +1,6 @@
+{
+  "status": "unavailable",
+  "error_type": "TimeoutError",
+  "message": "The read operation timed out",
+  "fallback_used": false
+}

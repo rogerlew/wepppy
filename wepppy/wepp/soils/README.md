@@ -347,3 +347,19 @@ Pre-built WEPP soil files for standardized modeling. Comprehensive documentation
    - 1: restritive layer present
  - ui_bdrkth: bed rock depth (mm)
  - kslast: hydraulic conductivity of restrictive layer
+
+## Profile rock basis
+
+Native RFG is dry coarse-fragment mass percent. SoilGrids cfvo is volume percent
+after source-unit normalization; new SoilGrids builds convert it with source
+fine-earth bulk density and the existing native mineral-fragment density
+convention of 2.65 g/cm3. `rock_fragments.py` provides validated scalar conversions
+in both directions; neither estimates surface cover. Builder `.sol.log` records
+the source volume, density and converted mass value.
+
+Previously generated soils remain unchanged until explicitly rebuilt. Native
+input rounding, density limits and the 85-percent mass cap remain in force, so
+extreme profiles do not preserve an arbitrary original volume fraction. SSURGO
+mass-derived values and uploaded soil files are unchanged. See the
+[rock representation contract](../../../docs/schemas/rock-fragment-representation-contract.md)
+for physical assumptions and validation boundaries.

@@ -1026,11 +1026,13 @@ Shared constraints:
 - SoilGrids `cfvo` should be interpreted as volumetric coarse fragments in
   `cm^3/dm^3` (`vol‰`), with conversion to `vol%` by dividing stored values
   by `10`
-- The current SoilGrids FAQ table should be treated as ambiguous for `cfvo`
-  conversion because it lists mapped units `cm^3/dm^3 (vol‰)` but also lists
-  conversion factor `100`; those two statements are inconsistent
-- For this mod, prefer the unit-algebra-consistent interpretation (`/10`) and
-  cross-check against live service metadata before changing scale assumptions
+- The official SoilGrids layer table checked on 2026-11-01 agrees with `/10`.
+  Older documentation recorded a conflicting table factor; dimensional units
+  and source identity govern, never a raster's footprint maximum.
+- Both C proxy source paths (`soils/cfvo_0-5cm_Q0.5.tif` and its aligned
+  `polaris/cfvo_mean_0_5.tif` copy) retain stored per-mille units. C and K must
+  use `/10` regardless of the finite maximum. C manifest source metadata
+  records `scale_divisor`, `source_units` and `normalized_units`.
 - It should not be described as a literal `RUSLE2` nomograph coarse-fragment
   input:
   - SoilGrids `cfvo` is a volumetric whole-soil coarse-fragment property

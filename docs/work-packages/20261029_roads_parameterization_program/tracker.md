@@ -75,6 +75,10 @@ this is not one uninterrupted green suite. The [928-cell hydraulic factorial](ar
 has completed; its combinations are rejected on control regressions and unresolved magnitude misses.
 The six withheld materials and human UI specification/layout gate remain intact.
 
+## General rock development continuation
+
+The operator expanded the investigation to [volumetric and surface rock representation](../20261031_rock_representation/package.md). That package owns dimensional fixes, general conversion support and surface/volume research. The Roads audit and nine-case evidence remain immutable; no Roads parameter candidate, capacity equation or cover default is promoted by those unit repairs.
+
 ## Latest continuation findings
 
 Rock-cover provenance and consumer audit is complete: all nine-pair inputs, prior RUSLE proxy availability and native surface/profile semantics are retained. No behavioral change was executed.

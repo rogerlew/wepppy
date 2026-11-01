@@ -368,3 +368,13 @@ artifacts (`disturbed_class.tif`, `sbs_4class.tif`) use `uint8` with nodata
 - [../disturbed/README.md](../disturbed/README.md) — Disturbed module
   (provides SBS and management context)
 - [../polaris/](../polaris/) — POLARIS NoDb substrate
+
+### Rock units and rebuilds
+
+The supported raw and aligned SoilGrids cfvo rasters store volume per mille;
+C converts these values to volume percent by dividing by 10, including low-rock
+footprints. The source report records the divisor and units. Existing generated
+products are not rewritten: rebuild RUSLE to obtain the correction. Explicit
+user rock fractions and preferred surface-cover sources retain their behavior.
+This unit repair does not validate profile volume as surface cover. See the
+[rock representation contract](../../../../docs/schemas/rock-fragment-representation-contract.md).

@@ -1,6 +1,6 @@
 # Volumetric and surface rock representation
 
-Status: active, 2026-11-01 03:45 UTC (Pacific start 2026-10-31).
+Status: initial investigation and dimensional-development phase complete, 2026-11-01 UTC (Pacific start 2026-10-31); surface/native research remains open.
 
 ## Purpose and authority
 
@@ -23,3 +23,9 @@ Security impact: none for scientific arithmetic and local tests; no new attack s
 ## Evidence and execution
 
 See [active ExecPlan](prompts/active/rock_representation_execplan.md), [tracker](tracker.md), and [prior audit](../20261029_roads_parameterization_program/artifacts/rock-cover-audit-r4/findings.md). New experimental outputs belong in `out/rock-representation-20261031/`; frozen prior roots are read-only. No native source is published.
+
+## Delivered development evidence
+
+[Investigation](artifacts/investigation.md) covers scientific definitions, consumer failures, 505 conversion cells, 36 overlap bounds and 586 retained layers. Two code repairs plus reusable conversion functions are locally validated with 102 focused tests, 16 real raster/manifest cases and one complete 16-year native consumer fixture. See the [correctness review](artifacts/correctness-review.md) and [scientific review](artifacts/final-science-review.md). Broad validation passed: 12,591 tests passed and 423 skipped. See [validation](artifacts/validation.md), [archive receipt](artifacts/archive-receipt.json), and [continuation gates](artifacts/development-roadmap.md). Native evidence checkpoint: `c7ec243c5`.
+
+Live NRCS surface acquisition timed out; field support, SIFT source basis, SSURGO retention and native storage/permanent-cover development remain explicitly open. The package does not claim a complete field-validated rock model.

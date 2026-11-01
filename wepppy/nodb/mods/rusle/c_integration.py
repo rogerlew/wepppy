@@ -310,8 +310,9 @@ def _load_cfvo_surface_proxy_from_raster(
             continue
 
         cfvo_values = np.asarray(aligned[finite], dtype=np.float64)
-        raw_max = float(np.nanmax(cfvo_values))
-        scale_divisor = 10.0 if raw_max > 100.0 else 1.0
+        # Both supported paths contain SoilGrids per-mille values; alignment
+        # preserves units. Footprint maxima cannot identify a raster scale.
+        scale_divisor = 10.0
         cfvo_volpct = np.clip(cfvo_values / scale_divisor, 0.0, 100.0)
         cfvo_0_5cm_volpct = float(np.nanmean(cfvo_volpct))
         surface_proxy_0_1 = float(np.clip(cfvo_0_5cm_volpct / 100.0, 0.0, 1.0))
@@ -321,6 +322,8 @@ def _load_cfvo_surface_proxy_from_raster(
             "path": raster_path,
             "cfvo_0_5cm_volpct": cfvo_0_5cm_volpct,
             "scale_divisor": scale_divisor,
+            "source_units": "cm3/dm3",
+            "normalized_units": "volume_percent",
             "surface_rock_cover_proxy_0_1": surface_proxy_0_1,
             "sample_cells": int(np.count_nonzero(finite)),
         }

@@ -1,0 +1,19 @@
+{
+  "status": "PASS_FOR_DECLARED_INVOCATION",
+  "reviewer": "/root/rock_contract_science",
+  "declaration_sha256": "8940d6cb9a8618e894fa7e350e0f993d6ce85b3d81853dff59c24504626311bc",
+  "scope": "synthetic serializer-to-native-initialization fixture only; no physical Roads candidate or annual attribution",
+  "scientific_assessment": [
+    "7778 serializes mass-percent RFG; expected33.8 follows corrected20volume% at1.3g/cm3 with2.65 mineral density and existing one-decimal serialization",
+    "Three repeated OFE blocks test consumer propagation under unchanged runtime/management, not role-specific field parameterization",
+    "Compare CPM using observed native density and capped/mapped RFG; do not assume source density remains exact",
+    "Full-period completion and finite outputs are useful execution gates, not complete water or particle closure"
+  ],
+  "execution_obligations": [
+    "Stage only input/runtime artifacts or remove copied prior output files before invocation so every claimed output is freshly generated",
+    "Bind binary and generated soil/input inventory before invocation; retain exact original bundle nonmutation",
+    "Retain all failure/output evidence; reject propagation claim on parser/runtime/missing trace failure"
+  ],
+  "production_source_changes_reviewed": "RUSLE fixed /10 and ISRIC explicit volume-to-mass helper conform to approved scientific contract; final acceptance pending generated evidence",
+  "blocking_findings": []
+}

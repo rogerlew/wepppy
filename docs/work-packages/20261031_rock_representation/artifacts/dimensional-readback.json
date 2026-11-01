@@ -1,0 +1,22 @@
+{
+  "conversion_helper_sha256": "2aedbecbf6cbd1c4b2e91558b859a4c5957f17b972b7861d2866710a910973ca",
+  "production_conversion_cells_verified": 505,
+  "status": "PASS",
+  "mass_volume_cells": 505,
+  "overlap_cells": 36,
+  "retained_layers": 586,
+  "histories": 36,
+  "dry_exceeds_candidate_ceiling": 0,
+  "field_exceeds_candidate_ceiling": 0,
+  "dry_exceeds_field": 0,
+  "minimum_dry_margin": 0.05749448698087711,
+  "minimum_field_margin": 0.0313627490036108,
+  "native_cap_grid_cells": 138,
+  "limitations": "Read-only nonporous/static diagnostic; no capacity correction or field validation. Retention limits are observed after current guards, not recomputed.",
+  "outputs": {
+    "mass-volume-grid.csv": "8c1358ccd9d38b5dd6e40198c57d8a37f76156beb798d793884772f191481934",
+    "capacity-ordering.csv": "8f5c793eed66c73e489330dff76694bc4c7243cc4054e04b14a27e32937c29ec",
+    "surface-overlap-bounds.csv": "7c32a30f9b6b306b35b396d6354b5208e8045c2d06e8bd76f000c1cfb2e57644"
+  },
+  "reader_sha256": "1ea3f3fee913c6d2a1caab3a2678fd025872eff016498ce6238a11ca65d6ebc8"
+}

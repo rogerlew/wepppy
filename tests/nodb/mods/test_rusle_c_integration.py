@@ -755,3 +755,48 @@ def test_observed_rap_supports_mode_specific_output_filename(tmp_path: Path) -> 
 
     assert result.c.endswith("rusle/c_observed_rap.tif")
     assert Path(result.c).exists()
+
+
+@pytest.mark.parametrize('c_mode', ['observed_rap', 'scenario_sbs'])
+@pytest.mark.parametrize('source_path', ['soils/cfvo_0-5cm_Q0.5.tif', 'polaris/cfvo_mean_0_5.tif'])
+@pytest.mark.parametrize('stored_cfvo', [0.0, 20.0, 100.0, 101.0, 800.0])
+def test_soilgrids_cover_units_reach_rasters_and_manifest(
+    tmp_path: Path, c_mode: str, source_path: str, stored_cfvo: float,
+) -> None:
+    """Exercise real raster alignment, auto resolution, C writer and manifest."""
+    dem = tmp_path / 'dem.tif'
+    _write_raster(dem, np.ones((1, 2)), dtype='float32', nodata=-9999.0)
+    cfvo = tmp_path / source_path
+    cfvo.parent.mkdir()
+    _write_raster(cfvo, np.array([[stored_cfvo, -9999.0]]), dtype='float32', nodata=-9999.0)
+    kwargs = {}
+    if c_mode == 'observed_rap':
+        rap = tmp_path / 'rap.tif'
+        _write_default_rap_dataset(rap, bare_ground=np.array([[50.0, 50.0]]))
+        kwargs['rap'] = str(rap)
+        bare = 0.5
+        key = 'rock_fraction_of_rap_bare'
+    else:
+        landuse = tmp_path / 'landuse.tif'
+        mapping = tmp_path / 'disturbed.json'
+        _write_raster(landuse, np.array([[52, 52]]), dtype='uint8', nodata=0)
+        _write_disturbed_mapping(mapping, {52: {'DisturbedClass': 'shrub'}})
+        kwargs.update(landuse=str(landuse), disturbed_mapping_path=str(mapping))
+        bare = 0.1  # Current unburned shrub lookup: ground cover 90%.
+        key = 'rock_fraction_of_sbs_bare'
+    result = c_integration.run_rusle_c_factor(str(tmp_path), dem=str(dem), c_mode=c_mode, **kwargs)
+    manifest = json.loads(Path(result.manifest).read_text())
+    rock = manifest['c'][key]
+    expected_proxy = stored_cfvo / 1000.0
+    assert rock['surface_rock_cover_proxy_0_1'] == pytest.approx(expected_proxy)
+    assert rock['sources']['cfvo']['scale_divisor'] == 10.0
+    expected_cover = 100 * (1 - bare * (1 - min(expected_proxy / bare, 1)))
+    data, nodata = _read_single_band(result.c)
+    assert np.all(data != nodata)
+    assert np.allclose(data, np.exp(-0.04 * expected_cover))
+    # All-nodata optional input must retain the existing fallback, not invent rock.
+    _write_raster(cfvo, np.full((1, 2), -9999.0), dtype='float32', nodata=-9999.0)
+    empty = c_integration.run_rusle_c_factor(str(tmp_path), dem=str(dem), c_mode=c_mode, **kwargs)
+    empty_meta = json.loads(Path(empty.manifest).read_text())['c'][key]
+    assert empty_meta['source'] == 'auto:fallback_0'
+    assert empty_meta['effective'] == 0.0

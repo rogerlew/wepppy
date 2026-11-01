@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/rock-representation-20261031/rock-representation-development.tar.gz",
+  "sha256": "15ade2c0b9a99a2716199fb1fc593b827c78e4fc8f500af086aba3cf50cf53dd",
+  "bytes": 2404616,
+  "files": 353,
+  "uncompressed_bytes": 42596482,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "213cacf5e6efa8a1e51cd25534268563072ce319e142729946070d844e88441f"
+}

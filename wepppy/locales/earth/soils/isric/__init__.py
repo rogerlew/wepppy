@@ -19,6 +19,7 @@ from wepppy.all_your_base.geo import GeoTransformer, RasterDatasetInterpolator
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.rock_fragments import rock_volume_to_mass_fraction
 from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.wepp.soils.utils import simple_texture
 
@@ -336,7 +337,10 @@ class ISRICHorizon(HorizonMixin):
     """Concrete ``HorizonMixin`` implementation backed by ISRIC data."""
 
     def __init__(self, depth: str, horizon_d: Dict[str, float]) -> None:
-        self.rfg = horizon_d['cfvo']
+        # SoilGrids cfvo is volume percent; native RFG is dry mass percent.
+        self.rfg = 100.0 * rock_volume_to_mass_fraction(
+            horizon_d['cfvo'] / 100.0, horizon_d['bdod']
+        )
         self.cec = horizon_d['cec']
         self.clay = horizon_d['clay']
         self.sand = horizon_d['sand']
@@ -460,6 +464,11 @@ class ISRICSoilData:
             horizon._computeConductivity()
             horizon._computeAlbedo()
 
+            _log.append(
+                f'rock_basis: cfvo_volpct={horizon_data["cfvo"]}, '
+                f'fine_earth_density_g_cm3={horizon.bd}, '
+                f'rock_density_g_cm3=2.65, rfg_mass_pct={horizon.rfg}'
+            )
             _log.append(f'sand={horizon.sand}')
             _log.append(f'cec={horizon.cec}')
             _log.append(f'conductivity={horizon.conductivity}')

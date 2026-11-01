@@ -1,6 +1,6 @@
 # ADR-0125: Rock fragment unit and basis repairs
 
-Status: proposed for independently reviewed development checkpoint; not deployed.
+Status: accepted for independently reviewed development; dimensional repairs implemented and locally validated, not deployed.
 Date: 2026-10-31 Pacific / 2026-11-01 UTC.
 
 ## Context and decision

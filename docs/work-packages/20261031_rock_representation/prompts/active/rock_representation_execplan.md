@@ -10,11 +10,11 @@ Users need rock inputs to retain their physical meaning through soil data, model
 
 - [x] (2026-11-01 03:45 UTC) Read prior audit and subsystem/validation instructions; create package on existing branch.
 - [x] M1: independent scientific and implementation review of canonical quantity/basis contract.
-- [ ] M2: literature/data-source and source-consumer evidence matrix; quantitative diagnostics.
-- [ ] M3: reproduce and repair RUSLE SoilGrids unit error with real raster/manifest tests.
-- [ ] M4: verify SoilGrids-to-WEPP mass basis, develop any demonstrated correction and read generated soils.
-- [ ] M5: investigate native capacity and permanent surface-cover feasibility; retain counterexamples and bounded next experiments.
-- [ ] M6: focused/broad validation, independent correctness/science review, immutable evidence, checkpoint.
+- [x] M2: literature/data-source and source-consumer evidence matrix; quantitative diagnostics.
+- [x] M3: reproduce and repair RUSLE SoilGrids unit error with real raster/manifest tests.
+- [x] M4: verify SoilGrids-to-WEPP mass basis, develop any demonstrated correction and read generated soils.
+- [x] M5: investigate native capacity and permanent surface-cover feasibility; retain counterexamples and bounded next experiments.
+- [x] M6: 102 focused and 12,591 broad tests pass (423 broad skips); independent reviews and verified evidence retention complete.
 
 ## Context and Orientation
 
@@ -48,7 +48,9 @@ Use `wctl run-pytest` focused modules then `wctl run-pytest tests --maxfail=1`, 
 
 ## Surprises & Discoveries
 
-Initial inspection identifies `ISRICHorizon.rfg = horizon_d['cfvo']` despite cfvo being normalized volume percent. This is a candidate cross-consumer basis defect requiring serializer/native confirmation. SSURGO field/wilting retention uses a separate mass-fragment heuristic; audit its source basis before any change.
+The two repairs are implemented after contract ancestor `b2011d9fb`. Real raster/build tests pass; native propagation consumes 33.8 mass% across 30 layers in one complete 16-year synthetic history. The 505-cell grid reveals 138 cells affected by the existing mass cap. All 586 observed retention states satisfy candidate static ceiling ordering, but later stock/flux/freeze behavior remains unvalidated. The live surface metadata query timed out, preventing any new source-availability claim.
+
+Initial inspection identifies `ISRICHorizon.rfg = horizon_d['cfvo']` despite cfvo being normalized volume percent. This was confirmed at the serializer and native consumer and repaired under the reviewed contract. SSURGO field/wilting retention uses a separate mass-fragment heuristic; audit its source basis before any change.
 
 ## Decision Log
 
@@ -56,8 +58,10 @@ Initial inspection identifies `ISRICHorizon.rfg = horizon_d['cfvo']` despite cfv
 
 ## Outcomes & Retrospective
 
-Execution active. Completion will report implemented and validated corrections separately from model research requiring field evidence, native scalar gates or full-period physical validation. No overall WEPP rock-physics or Roads acceptance claim is authorized by this package.
+Two unit/basis repairs and general scalar conversion support are implemented and locally validated. Surface-overlap bounds and retained-capacity feasibility are reproducible. Source-specific surface observations, BC basis metadata, SSURGO retention and native physical changes remain explicit research boundaries. Broad validation passed (12,591 passed, 423 skipped); independent scientific and correctness reviews pass. Evidence retention is recorded in `../../artifacts/archive-receipt.json`. No overall rock-physics or Roads acceptance claim is made. Concrete continuation gates are in `../../artifacts/development-roadmap.md`.
 
 ## Recovery and reproducibility
 
 Refuse existing experimental output directories. Never mutate frozen studies or original projects during verification. Keep source and generated-output hashes. Rebuild only disposable fixtures; rollback production corrections by reverting their commit, not rewriting previous evidence.
+
+Development amendment: completed M2-M5 with separate implementation/artifact evidence and uncertainty dispositions. Original failed fixture/diagnostic attempts are retained; no scientific threshold or source data was changed to hide a failure.

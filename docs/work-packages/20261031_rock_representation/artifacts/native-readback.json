@@ -1,0 +1,315 @@
+{
+  "native_binary_sha256": "5f6bcebac1c82111a6a7c9685cd0d2a04f2e6c3066a3637e533a1a8054ff38b1",
+  "build_members_verified": 978,
+  "input_hashes": {
+    "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+    "roughness-control.txt": "350195e792e3f97da28b8c02fe2f90f2c128d5713ea1414caa32c5c3c98c64cf",
+    "pmetpara.txt": "a5ea82343a0e12c2bb6c8b402e272b38ffdb9e04aa1a91f56f7f678c11ecd645",
+    "buffer_observe.on": "691f000e87627caf2ef9574e451dc4ceaa5b540670b0edd1343d978971820cf7",
+    "reference.sol": "154adc92c9d2b1c2598503c5f829e23aeeded6f87d830bd5772e88f154f19717",
+    "p1.sol": "a233cc409e8026074cf7503f50d07a1b28e30081ff40c9c5e65e45ee9cc8e513",
+    "gwcoeff.txt": "6b1baef17985e9d83becd6176416d1d75dec513c46071536dacbdc2dbcc3ecaf",
+    "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "p1.cli": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+    "chntyp.txt": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+    "p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+    "storage_observe.on": "6bd79158e29e95c107ddb901f3b2b13a68d080b806e644ebce6249be412014c6",
+    "tc.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snow.txt": "cbd4a5d43e909efa3dfd359026bda9ed43971eac36d89d59ef02bceb1bfcc9f5",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "chan.inp": "a6d78653faf84c501003d0b8cb3615cf88187fe3696453a0d31a915d34b490bf"
+  },
+  "changed_inputs": [
+    "p1.sol"
+  ],
+  "generated_soil_sha256": "f1f522875734907b4d4c1d8150c1546d4beabc59b68818f32e5b2e42905ded41",
+  "full_period_years": 16,
+  "historical_outputs_copied": false,
+  "purpose": "synthetic serializer/native consumer evidence, not candidate parameterization",
+  "returncode": 0,
+  "completion": true,
+  "passed": true,
+  "initialization_layers": [
+    {
+      "ofe": 1,
+      "layer": 1,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 2,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 3,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 4,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 5,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 6,
+      "rfg_mass_fraction": 0.33799996972084045,
+      "density_kg_m3": 1299.9998779296875,
+      "actual_fine_fraction": 0.7996991872787476,
+      "expected_float32_fine_fraction": 0.7996991872787476,
+      "interpreted_rock_volume_fraction": 0.20030081272125244
+    },
+    {
+      "ofe": 1,
+      "layer": 7,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 8,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 9,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 1,
+      "layer": 10,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 1,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 2,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 3,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 4,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 5,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 6,
+      "rfg_mass_fraction": 0.33799996972084045,
+      "density_kg_m3": 1299.9998779296875,
+      "actual_fine_fraction": 0.7996991872787476,
+      "expected_float32_fine_fraction": 0.7996991872787476,
+      "interpreted_rock_volume_fraction": 0.20030081272125244
+    },
+    {
+      "ofe": 2,
+      "layer": 7,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 8,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 9,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 2,
+      "layer": 10,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 1,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 2,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 3,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 4,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 5,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 6,
+      "rfg_mass_fraction": 0.33799996972084045,
+      "density_kg_m3": 1299.9998779296875,
+      "actual_fine_fraction": 0.7996991872787476,
+      "expected_float32_fine_fraction": 0.7996991872787476,
+      "interpreted_rock_volume_fraction": 0.20030081272125244
+    },
+    {
+      "ofe": 3,
+      "layer": 7,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 8,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 9,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    },
+    {
+      "ofe": 3,
+      "layer": 10,
+      "rfg_mass_fraction": 0.33799999952316284,
+      "density_kg_m3": 1300.0,
+      "actual_fine_fraction": 0.7996991276741028,
+      "expected_float32_fine_fraction": 0.7996991276741028,
+      "interpreted_rock_volume_fraction": 0.20030087232589722
+    }
+  ],
+  "original_inputs_unchanged": true,
+  "output_hashes": {
+    "H1.loss.dat": "95ad229cedda5f64dfa83b8b5db1872677fbbb618ab1aa27d89a3bce18d54d7f",
+    "H1.soil.dat": "244b2e285bb6eafdf64fd2c61e1625921bffb059b322e10f8b7ae638c025d92e",
+    "H1.pass.dat": "c7491c2bc5c8c2d720f84e9b73027c03ab823571e4f6bce3c92550aceaef8b01",
+    "H1.plot.dat": "489282a8636e439bad94daf5d45e38ba5789f06b5b100175f92acc4b1e6ec577",
+    "H1.wat.dat": "123965e5d30fa2f771a993690820d266e758021439eaa1ed332f3dd6aaf94061",
+    "H1.element.dat": "0cdfeb45a9370c6c342d66d3609cdb6a4aaa5ce49a85bc202de1407972613aea",
+    "H1.ebe.dat": "6e5574bc97355f5a92a555692086d3150a6609092a966f13af5ccdec09d5eba8"
+  },
+  "limitation": "No full water/particle closure or field-validity claim"
+}
