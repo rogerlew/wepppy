@@ -1,0 +1,75 @@
+{
+  "bc_dictionary": [
+    {
+      "url": "https://www.env.gov.bc.ca/esd/distdata/ecosystems/Soil_Data/Soil_Data_Pkgs/Readme.txt",
+      "file": "Readme.txt",
+      "bytes": 2908,
+      "sha256": "70bbfe3bfc28ef7d256c2869bd7b69b6a3d6876a1910a0914a391a7cb7e162d8"
+    },
+    {
+      "url": "https://www.env.gov.bc.ca/esd/distdata/ecosystems/Soil_Data/Soil_Data_Pkgs/Readme_DataDict.txt",
+      "file": "Readme_DataDict.txt",
+      "bytes": 259,
+      "sha256": "dfc2ac97b1ffad47ab5b2bb6d62d8b702e3086c7f35ceb5eb872c61338667d0a"
+    },
+    {
+      "url": "https://www.env.gov.bc.ca/esd/distdata/ecosystems/Soil_Data/Soil_Data_Pkgs/SOILDataDictionarySHP_DBF.zip",
+      "file": "SOILDataDictionarySHP_DBF.zip",
+      "bytes": 61520,
+      "sha256": "47276dc724a8d20efe35b900857f2f1ada5c671e07760eab5f815b287acf0e00"
+    },
+    {
+      "url": "https://www.env.gov.bc.ca/esd/distdata/ecosystems/Soil_Data/Soil_Data_Pkgs/SoilDataDictionaryGdb.zip",
+      "file": "SoilDataDictionaryGdb.zip",
+      "bytes": 4203389,
+      "sha256": "1dc3d342613a4ebafd94415f7bae0299afaad6fbde462395cc8de5159aa8b853"
+    }
+  ],
+  "cansis": [
+    {
+      "url": "https://sis.agr.gc.ca/cansis/nsdb/soil/v2/slt/index.html",
+      "file": "index.html",
+      "sha256": "193b0c5271be30d2a9806b2a4d69667eb7eaf41239bd2bc5be6b4c5c918345c6",
+      "acquired_utc": "2026-11-01T07:49:46.249560+00:00"
+    },
+    {
+      "url": "https://sis.agr.gc.ca/cansis/nsdb/soil/v2/slt/cofrag.html",
+      "file": "cofrag.html",
+      "sha256": "74ceb00f5de44e2a49b060232e29c60870e425c38160300f586e3cc4c9687473",
+      "acquired_utc": "2026-11-01T07:49:46.453680+00:00"
+    },
+    {
+      "url": "https://sis.agr.gc.ca/cansis/nsdb/soil/v2/slt/bd.html",
+      "file": "bd.html",
+      "sha256": "a89c6732c7b4d4d6a95499e319e78378119887f3a9c35619edc128303e404318",
+      "acquired_utc": "2026-11-01T07:49:46.658860+00:00"
+    },
+    {
+      "url": "https://sis.agr.gc.ca/cansis/nsdb/soil/v2/slt/kp33.html",
+      "file": "kp33.html",
+      "sha256": "5ac56356544c76504cb19056896edb4ad90e36bdf3e75978897123413e67d2d6",
+      "acquired_utc": "2026-11-01T07:49:46.862270+00:00"
+    },
+    {
+      "url": "https://sis.agr.gc.ca/cansis/nsdb/soil/v2/slt/kp1500.html",
+      "file": "kp1500.html",
+      "sha256": "4bd95436566dfdfb5db2d1af974757d78c65ab5517ae98e552011c66129525bd",
+      "acquired_utc": "2026-11-01T07:49:47.334153+00:00"
+    }
+  ],
+  "surface_request": {
+    "url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "query": "SELECT c.mukey,c.cokey,c.compname,c.comppct_r,s.cosurffragskey,s.sfragcov_l,s.sfragcov_r,s.sfragcov_h,s.sfragkind,s.sfragsize_l,s.sfragsize_r,s.sfragsize_h,s.sfraghard FROM component AS c LEFT JOIN cosurffrags AS s ON c.cokey=s.cokey WHERE c.mukey IN ('1718465','1718494','1856573','2711184') ORDER BY c.mukey,c.cokey,s.cosurffragskey",
+    "format": "xml",
+    "requested_at_utc": "2026-11-01T07:45:19.550649+00:00",
+    "scope": "four public development materials only; no output fitting or withheld access"
+  },
+  "surface_response": {
+    "status": "retrieved",
+    "http_status": 200,
+    "bytes": 7864,
+    "sha256": "3586090cf6f54cbfc5ddf20f4e216755809e0677bf1916fd09988059786ca5d1",
+    "limitation": "Current survey metadata, not original run snapshot or field-measured road armor."
+  },
+  "configured_bc_dataset_present": false
+}

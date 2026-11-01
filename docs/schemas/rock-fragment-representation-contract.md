@@ -29,7 +29,7 @@ The SoilGrids WEPP builder must convert normalized cfvo volume percent to RFG ma
 
 ## Water and native interpretation
 
-A nonporous-fragment approximation gives whole-soil water content (1-v)*theta_f. Porous-fragment storage, interface pores and changed fine-earth packing can violate that approximation. Do not multiply every native porosity consumer by (1-v): some already apply CPM. Dry-reference offsets cancel between capacity and stock at fixed absolute water. Any native limit correction must preserve stock/flux accounting, ordered retention limits and freeze/thaw semantics. The existing 85 percent native mass cap is retained, not a measurement or physical surface-cover bound.
+A nonporous-fragment approximation gives whole-soil water content (1-v)*theta_f. Porous-fragment storage, interface pores and changed fine-earth packing can violate that approximation. Do not multiply every native porosity consumer by (1-v): some already apply CPM. Dry-reference offsets cancel between capacity and stock at fixed absolute water. Any native limit correction must preserve stock/flux accounting, ordered retention limits and freeze/thaw semantics. Ordered dry/field/saturation limits alone are insufficient: independently establish the domains of downstream expressions, including FC/UL in the conductivity logarithm and UL-DRFC in hourly lateral drainage. Preserve adjusted versus absolute frozen-water references and explicit ownership of any overflow. The existing 85 percent native mass cap is retained, not a measurement or physical surface-cover bound.
 
 ## Surface support and overlap
 
@@ -48,3 +48,9 @@ Unit repairs require real input/output rasters and manifest readback for RAP and
 ## Authority and rationale
 
 Operator requested investigation/development on 2026-10-31 Pacific. [ADR-0125](../adrs/ADR-0125-rock-fragment-unit-and-basis-repairs.md) records the bounded changes. Existing RUSLE [specification](../../wepppy/nodb/mods/rusle/specification.md) and [soil boundary contract](soil-horizon-boundary-contract.md) remain applicable. Separate basis variables prevent hidden mass/volume/area substitutions while preserving supported workflows.
+
+## Source-specific conformance gaps
+
+BC's published BCSLF dictionary defines COFRAG as volume percent and BD as fine-earth bulk density; the CanSIS field definition specifies g/cm3. The current SIFT adapter directly emits COFRAG into mass RFG, a confirmed basis mismatch for conforming source records. Its correction remains pending separate ADR, sentinel/error compatibility, generated-soil and native-consumer validation. Do not infer that a deployed local database has been audited from the published dictionary alone. See the [source and scalar investigation](../work-packages/20261101_rock_sources_water_accounting/artifacts/findings.md#bc-sift-the-source-definition-is-now-established).
+
+Surface summary producers must distinguish absent rows, zero representative cover with uncertainty, unsupported component share and unallocated component share. Component percentages need not total100 and must not be silently renormalized to imply complete observation. Survey composition is not measured project footprint. Native capacity prerequisites and these source distinctions prevent a partial observation from becoming an unsupported model default.

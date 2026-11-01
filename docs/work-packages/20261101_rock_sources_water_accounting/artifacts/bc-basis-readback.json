@@ -1,0 +1,56 @@
+{
+  "metadata": [
+    {
+      "Item_MetaData_ID": 160,
+      "FGDB_Name": "COFRAG",
+      "FGDB_Definition": "Indicates the coarse fragments as a percentage of volume.",
+      "BCSLF": 13,
+      "Published_BCSLF": null
+    },
+    {
+      "Item_MetaData_ID": 187,
+      "FGDB_Name": "KP33",
+      "FGDB_Definition": "Idenfifies water retention at 33 kP, in percent by total soil volume.",
+      "BCSLF": 40,
+      "Published_BCSLF": 26
+    },
+    {
+      "Item_MetaData_ID": 189,
+      "FGDB_Name": "KP1500",
+      "FGDB_Definition": "Identifies water retention at 1500 kP, in percent by total soil volume.",
+      "BCSLF": 42,
+      "Published_BCSLF": 27
+    },
+    {
+      "Item_MetaData_ID": 191,
+      "FGDB_Name": "BD",
+      "FGDB_Definition": "Identifies the bulk density. Values are for the fine earth fraction (excluding coarse fragment content).",
+      "BCSLF": 44,
+      "Published_BCSLF": 28
+    }
+  ],
+  "source_record": {
+    "COFRAG": 20.0,
+    "BD": 1.3,
+    "TCLAY": 20.0,
+    "TSAND": 40.0,
+    "TSILT": 40.0,
+    "VFSAND": 0.0,
+    "ORGCARB": 1.0,
+    "WOOD": 0.0,
+    "CEC": 10.0,
+    "KSAT": 10.0,
+    "LDEPTH": 20.0,
+    "HZN_MAS": "B",
+    "SOILNAME": "synthetic-basis-observation"
+  },
+  "actual_rfg_mass_field": 20.0,
+  "density_based_mass_percent": 33.75796178343949,
+  "current_emission_preserves_volume_as_mass": true,
+  "sift_source_sha256": "1207b6169ad5e981b16781e545498344caa80908c1e0856c3c927e878faa2178",
+  "limitations": [
+    "Synthetic serializer observation; local configured BC dataset absent.",
+    "No production correction or native consumer run in this probe.",
+    "Retention fields in this synthetic example are explicit harness inputs, not source-derived estimates."
+  ]
+}

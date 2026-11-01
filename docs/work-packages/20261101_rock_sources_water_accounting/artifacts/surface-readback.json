@@ -1,0 +1,54 @@
+{
+  "source_sha256": "3586090cf6f54cbfc5ddf20f4e216755809e0677bf1916fd09988059786ca5d1",
+  "rows": 15,
+  "components": 9,
+  "surface_records": 8,
+  "zero_representative_records": 2,
+  "materials": [
+    {
+      "mukey": "1718465",
+      "components": 2,
+      "surface_records": 0,
+      "reported_component_percent_total": 100.0,
+      "unallocated_component_percent": 0.0,
+      "reported_component_percent_with_records": 0,
+      "reported_component_percent_without_records": 100.0,
+      "total_surface_cover_percent": null,
+      "disposition": "No cover aggregation: row overlap, completeness and local role not established"
+    },
+    {
+      "mukey": "1718494",
+      "components": 1,
+      "surface_records": 0,
+      "reported_component_percent_total": 100.0,
+      "unallocated_component_percent": 0.0,
+      "reported_component_percent_with_records": 0,
+      "reported_component_percent_without_records": 100.0,
+      "total_surface_cover_percent": null,
+      "disposition": "No cover aggregation: row overlap, completeness and local role not established"
+    },
+    {
+      "mukey": "1856573",
+      "components": 3,
+      "surface_records": 8,
+      "reported_component_percent_total": 100.0,
+      "unallocated_component_percent": 0.0,
+      "reported_component_percent_with_records": 80.0,
+      "reported_component_percent_without_records": 20.0,
+      "total_surface_cover_percent": null,
+      "disposition": "No cover aggregation: row overlap, completeness and local role not established"
+    },
+    {
+      "mukey": "2711184",
+      "components": 3,
+      "surface_records": 0,
+      "reported_component_percent_total": 90.0,
+      "unallocated_component_percent": 10.0,
+      "reported_component_percent_with_records": 0,
+      "reported_component_percent_without_records": 90.0,
+      "total_surface_cover_percent": null,
+      "disposition": "No cover aggregation: row overlap, completeness and local role not established"
+    }
+  ],
+  "limitation": "Component percentages are survey composition, not measured footprint area. Null is not zero. Current response is not the historical run snapshot."
+}

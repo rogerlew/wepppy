@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/rock-sources-water-accounting-20261101/source-and-scalar-checkpoint.tar.gz",
+  "sha256": "67f33424d893949a8d47f8042cd094fbc16cd46a783246df0f8da20c29c16027",
+  "bytes": 8562866,
+  "files": 495,
+  "uncompressed_bytes": 11750691,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "6b0ac7c75b4464c10ebaf550388633628ec32bf9a9c61e00076526ec39bdd505"
+}

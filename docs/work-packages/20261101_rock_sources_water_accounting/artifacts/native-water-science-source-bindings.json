@@ -1,0 +1,131 @@
+{
+  "source_root": "/workdir/wepp-forest-release-20261009/src",
+  "scope": "Read-only independent source audit; hashes identify current native source, not a build or prior instrumented source.",
+  "files": {
+    "inidat.for": {
+      "sha256": "8379728b55894f7a09c0f654eb30ec618379e6a24d58245fefa11ce5202cf28f",
+      "bytes": 26226,
+      "lines": 1200
+    },
+    "tilage.for": {
+      "sha256": "22922a276bb3ce157fc0b180c40993d63ba4b31301836d68c3fcabb2ca3b1420",
+      "bytes": 24231,
+      "lines": 685
+    },
+    "scon.for": {
+      "sha256": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+      "bytes": 30156,
+      "lines": 833
+    },
+    "soil.for": {
+      "sha256": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e",
+      "bytes": 44012,
+      "lines": 1191
+    },
+    "infpar.for": {
+      "sha256": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352",
+      "bytes": 22713,
+      "lines": 651
+    },
+    "grna.for": {
+      "sha256": "f1cbd5638b4b415ceb21fe0262cfc4329b5b0de797f480b301ca769f393f2e1d",
+      "bytes": 19700,
+      "lines": 626
+    },
+    "watbal.for": {
+      "sha256": "ebe0921be87752bd446f7784a530b433edeae56d56fdb48578a20280b331a928",
+      "bytes": 40746,
+      "lines": 1135
+    },
+    "watbal_hourly.for": {
+      "sha256": "c1fe46626fa9b49dea44a2116b3152a11897b42148b3c13d5bcf96fcf746ee20",
+      "bytes": 44234,
+      "lines": 1250
+    },
+    "purk.for": {
+      "sha256": "681d99b1793c757aeb072d374af3d31e14b3d38a9e39c5fc48b08d3cf678aab3",
+      "bytes": 8274,
+      "lines": 197
+    },
+    "perc.for": {
+      "sha256": "0e75a4f4c2c40ba82dcd0bb8be7d6b10984181e52c9f324ca808d6f390064c25",
+      "bytes": 9562,
+      "lines": 259
+    },
+    "evap.for": {
+      "sha256": "6bf78e113cc413131f3feb3516070cf233c6c16e3c0f86b3e78eaa4ba86afdbc",
+      "bytes": 23107,
+      "lines": 676
+    },
+    "evappm.for": {
+      "sha256": "bfd6607f8a0033b5b779bb1830cddda52652316b1e77fafe9640b4c691647d23",
+      "bytes": 18162,
+      "lines": 536
+    },
+    "swu.for": {
+      "sha256": "060b0ea0710ffba720624bb595eb63df0010dc665b71a2287c4e21be9e60f901",
+      "bytes": 6838,
+      "lines": 212
+    },
+    "drain.for": {
+      "sha256": "3ef320c282b941f9e7e2c2f08db2547e7a8d88d0dce89eff94cca653ebfc73f9",
+      "bytes": 10454,
+      "lines": 308
+    },
+    "frwatc.for": {
+      "sha256": "a834dbe62497989e8f99945acc880cdb31ced4ccc88d31f215c91738a0a0f1c1",
+      "bytes": 8515,
+      "lines": 270
+    },
+    "frostn.for": {
+      "sha256": "cdf107e59cd9a24e3e1898deb1f0791925c8a14de8fc3638e966a5f19628c5df",
+      "bytes": 26441,
+      "lines": 713
+    },
+    "frzng.for": {
+      "sha256": "f77cb1fe79aa187f1f4aca303c50825b6e3972f918e7025505cd9b6e33f04135",
+      "bytes": 22359,
+      "lines": 648
+    },
+    "frznw.for": {
+      "sha256": "ce3732c33eea7688d19c512d8c87cc222fd3cc532ff6b72add7f3cdb413b917c",
+      "bytes": 5149,
+      "lines": 167
+    },
+    "mlttp.for": {
+      "sha256": "50f691ca08cf499429e8148c49ee80078e0fde842e81d5733bca91b867382377",
+      "bytes": 21360,
+      "lines": 607
+    },
+    "mltbtm.for": {
+      "sha256": "6a6b280ae446b6389116bc079b161260a04d60ba7b0d72938eb1b56550db284a",
+      "bytes": 19989,
+      "lines": 574
+    },
+    "watdst.for": {
+      "sha256": "039f4253c4210816a44333ac7753a28ee73ec7ebc53a65b34b0f10385eb0eafc",
+      "bytes": 18989,
+      "lines": 534
+    },
+    "contin.for": {
+      "sha256": "a9bf340f08a9a26f5b910e4df5a3aa36df9a2cc57c7471776c72c337245cad30",
+      "bytes": 60595,
+      "lines": 1972
+    },
+    "winter.for": {
+      "sha256": "6dca46e762611ddd93e030d7fcc619af92922d614a4ddc1c44576b90ee9d86ff",
+      "bytes": 15499,
+      "lines": 469
+    },
+    "cwater.inc": {
+      "sha256": "208268aa61bb2049a9ccb9eb0a6fa41ff0707e66888b4b3e7ab6383baa0daed3",
+      "bytes": 3972,
+      "lines": 81
+    },
+    "cwint.inc": {
+      "sha256": "9725e9f25ef05d47d34a945f5268e1f3ce863281b7ccb0613d18ffa7aa6506f6",
+      "bytes": 6995,
+      "lines": 148
+    }
+  }
+}

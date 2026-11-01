@@ -1,0 +1,103 @@
+{
+  "scope": "Public package plus canonical contract; excludes this manifest. Archive receipt follows raw publication snapshot to avoid circular hashes.",
+  "wepppy_base": "234580e22",
+  "native_evidence_commit": "b6904dd4a",
+  "files": {
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/archive-receipt.json": {
+      "sha256": "d128fc9b5d2b699ad6f4cff7c43e114ecf213b7ae59618b5f875ebbfc25681e7",
+      "bytes": 421
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/bc-basis-readback.json": {
+      "sha256": "3059e9381cd2aaac881817021d3543b55549887bc5b525e64665cf114450c7b1",
+      "bytes": 1719
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/final-implementation-review.md": {
+      "sha256": "9a6b3af9762decbac92bcc3ee73236ba602d6ac5468923b370717e9f65c89b13",
+      "bytes": 4335
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/final-science-review.md": {
+      "sha256": "39445e6698a2dc8a2e45ee391d571a4417bf7ce197467c1b85a9d676e3c5bb64",
+      "bytes": 4869
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/findings.md": {
+      "sha256": "968f9d34b397e957292ef039845be4a997161501330b4f80fe8e4d5ee8cb8537",
+      "bytes": 7915
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/native-water-science-review.md": {
+      "sha256": "19bf6620251cb8fc8ed51a08817abfa3cd567132511b7c8848728d2c04256345",
+      "bytes": 13434
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/native-water-science-source-bindings.json": {
+      "sha256": "a3c9b4a8e6cb59dff28f68c2b858fe2f176dbfc5c7c4de5a061565b14714c994",
+      "bytes": 3997
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/read_bc_basis.py": {
+      "sha256": "c91da2e9462038099d24d71dca5a9e49df27ad9af317327444fe2a2b3fec81f9",
+      "bytes": 2475
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/read_surface_records.py": {
+      "sha256": "fb720dfd952b38807a3fc10738ffa059482eb0c22e81a4fd845edd225ac246d4",
+      "bytes": 4661
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/reproduce.md": {
+      "sha256": "230ffd3c6fc60888a1e657212f9dce28d3a2529ed3ac3169565aa6e431f18b8f",
+      "bytes": 3978
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/run_scalar_probes.py": {
+      "sha256": "591c6ed528bd9ebdc87edef6aa419f030bb64fb06af5ddb83896e9e1b18a4065",
+      "bytes": 8929
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/scalar-declaration.md": {
+      "sha256": "f9c128e0ffd5781abd3a3db8411f5c8d75f0351962baddeb23a9d87d628f3ca2",
+      "bytes": 3166
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/scalar-implementation-review.md": {
+      "sha256": "4ab78902be33faacc7dab113d64bd2c428880af3ac73204561672258103ae3ab",
+      "bytes": 3573
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/scalar-readback.json": {
+      "sha256": "12d86705140c699895d58cd21f5ea7a074b7087fb158963b59e293d14ee70f98",
+      "bytes": 15245
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/scalar-science-review.md": {
+      "sha256": "dd5691505533259ecf9b985c0c3155e35be8eb7b93c68d2ebbeea53f7464a65c",
+      "bytes": 2144
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/scalar-source-declaration.json": {
+      "sha256": "ce6af1ca0b956867575dc1ea4233b780b71c977f464106ee362c030907002406",
+      "bytes": 680
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/source-acquisition.json": {
+      "sha256": "7e3a64fd0acb3a590cf5b87b19822e8decf9c6d93987cae57461ba4e5c341d6f",
+      "bytes": 3338
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/surface-readback.json": {
+      "sha256": "123f5ca6c685a003536cdeb503eeea182d35f0ae04bc96546bc45ab10bdcf4ad",
+      "bytes": 2126
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/surface-records.csv": {
+      "sha256": "067d24f126c7a69d0799426d9ca5259de2a20c499e0fd7d646f0baf411209f2a",
+      "bytes": 1128
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/artifacts/surface-records.json": {
+      "sha256": "dec9cb02644dad66f3c812538bda619544cb7984c17866e3971fd75518d4aabc",
+      "bytes": 5217
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/package.md": {
+      "sha256": "5470a1e07044bd383c1cfb144f75d483ea722ae65707f7efb9888817baab65e0",
+      "bytes": 2172
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/prompts/active/source_water_execplan.md": {
+      "sha256": "ba8ccfd9392d5e792c7e5c6fdaa4cff5d29d627a1728de08677c2e2b9f90eb78",
+      "bytes": 7377
+    },
+    "docs/work-packages/20261101_rock_sources_water_accounting/tracker.md": {
+      "sha256": "39ff2109b5c95e2dc5ba45e1616be2a0c9905f4779368917bd144c786af53368",
+      "bytes": 1390
+    },
+    "docs/schemas/rock-fragment-representation-contract.md": {
+      "sha256": "dc66f9dfcd7495450f8b79e47fff0488ae5d27de0dc287791041c5914bbb316a",
+      "bytes": 7337
+    }
+  }
+}

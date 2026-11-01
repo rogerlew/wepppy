@@ -1,0 +1,544 @@
+{
+  "scope": "17 unchanged-source fragment probes; no full-model or promoted candidate claim",
+  "declaration_sha256": "ce6af1ca0b956867575dc1ea4233b780b71c977f464106ee362c030907002406",
+  "scientific_declaration_sha256": "f9c128e0ffd5781abd3a3db8411f5c8d75f0351962baddeb23a9d87d628f3ca2",
+  "source_path": "/home/workdir/wepp-forest-release-20261009/src",
+  "PATH": "/usr/bin:/bin:/home/roger/.codex/packages/app-server-daemon/releases/0.166.0-x86_64-unknown-linux-musl/codex-path:/home/roger/.local/bin:/home/roger/bin:/home/roger/.codex/tmp/arg0-linux/codex-arg08VKFis:/home/roger/.codex/packages/app-server-daemon/releases/0.166.0-x86_64-unknown-linux-musl/codex-path:/home/roger/.codex/tmp/arg0-linux/codex-arg0HushAZ:/home/roger/.codex/packages/app-server-daemon/releases/0.165.0-x86_64-unknown-linux-musl/codex-path:/home/roger/.codex/tmp/arg0-linux/codex-arg0wfEJwX:/home/roger/.codex/packages/app-server-daemon/releases/0.164.0-x86_64-unknown-linux-musl/codex-path:/home/roger/.codex/tmp/arg0-linux/codex-arg0NfPiLY:/home/roger/.codex/packages/app-server-daemon/releases/0.163.0-x86_64-unknown-linux-musl/codex-path:/home/roger/.codex/tmp/arg0/codex-arg03NwvUM:/home/roger/.codex/packages/app-server-daemon/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/roger/.codex/tmp/arg0/codex-arg0viHFwJ:/home/roger/.nvm/versions/node/v25.0.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/home/roger/.local/bin:/home/roger/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/roger/.local/bin:/home/roger/bin:/home/roger/.nvm/versions/node/v25.0.0/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/roger/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/roger/.dotnet/tools",
+  "FC": "/usr/bin/gfortran",
+  "runner_sha256": "591c6ed528bd9ebdc87edef6aa419f030bb64fb06af5ddb83896e9e1b18a4065",
+  "compiler_sha256": "142861efc95f49e33705852027dae8c2e5382fd1155fcec6116ef973f25d8f84",
+  "source": {
+    "scon.for": {
+      "sha256": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+      "slices": [
+        [
+          510,
+          518
+        ]
+      ]
+    },
+    "watbal.for": {
+      "sha256": "ebe0921be87752bd446f7784a530b433edeae56d56fdb48578a20280b331a928",
+      "slices": [
+        [
+          500,
+          520
+        ],
+        [
+          794,
+          821
+        ]
+      ]
+    },
+    "watbal_hourly.for": {
+      "sha256": "c1fe46626fa9b49dea44a2116b3152a11897b42148b3c13d5bcf96fcf746ee20",
+      "slices": [
+        [
+          623,
+          643
+        ],
+        [
+          899,
+          931
+        ],
+        [
+          652,
+          652
+        ],
+        [
+          768,
+          769
+        ]
+      ]
+    }
+  },
+  "results": [
+    {
+      "id": "init_cpm1.0_sat0.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 1.0,
+        "sat": 0.0,
+        "dry": 0.0625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.125,
+        0.0,
+        0.0546875
+      ],
+      "effective_limit_above_dry": 0.0546875,
+      "returncode": 0,
+      "wrapper_sha256": "82af0b038181731e47df7516860cf9014b4b66568eeb920a4fd3e78eceeb5532",
+      "binary_sha256": "dd0bd943e1157481dad872b23b3cdf64bbc268efe848f07fdd3ace2ceead833d",
+      "observed": [
+        0.125,
+        0.0,
+        0.0546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm1.0_sat0.5",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 1.0,
+        "sat": 0.5,
+        "dry": 0.0625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.5,
+        0.0234375,
+        0.0546875
+      ],
+      "effective_limit_above_dry": 0.0546875,
+      "returncode": 0,
+      "wrapper_sha256": "4def021bb68b4db8491f42cbf9e8c4aa58bca8ab59eb521e7acee05fe4edbb6b",
+      "binary_sha256": "e27d44dd232a4474857bee315227c1f836a9108adfff488967605bccfec4a4cc",
+      "observed": [
+        0.5,
+        0.0234375,
+        0.0546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm1.0_sat1.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 1.0,
+        "sat": 1.0,
+        "dry": 0.0625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        1.0,
+        0.0546875,
+        0.0546875
+      ],
+      "effective_limit_above_dry": 0.0546875,
+      "returncode": 0,
+      "wrapper_sha256": "0d057d573eb3c04bae824f6291282ec1e81a20925b3616763a6ea025b0a8e74d",
+      "binary_sha256": "ddebee61c1b0ca39b805fb3f8e53ef4d0c2a1ede309f2585ec4ca4c7faf44410",
+      "observed": [
+        1.0,
+        0.0546875,
+        0.0546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.5_sat0.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.5,
+        "sat": 0.0,
+        "dry": 0.03125,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.125,
+        0.0,
+        0.05859375
+      ],
+      "effective_limit_above_dry": 0.02734375,
+      "returncode": 0,
+      "wrapper_sha256": "543dcf4e113e23b7e3bf60c567052bea77982dff599e06c942980cfaf8d42905",
+      "binary_sha256": "5fb6633640ba77d7a8a00f63ef3b0052a60723e9dafdce8aaa8b90da9e7e14c3",
+      "observed": [
+        0.125,
+        0.0,
+        0.05859375
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.5_sat0.5",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.5,
+        "sat": 0.5,
+        "dry": 0.03125,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.5,
+        0.01171875,
+        0.05859375
+      ],
+      "effective_limit_above_dry": 0.02734375,
+      "returncode": 0,
+      "wrapper_sha256": "eba07c1740c18e9c1602dee0e8dd784d3c5c2f2f7ab0a119d6bb41039e506963",
+      "binary_sha256": "1842f2f8fabb0bef402ff03f14a7cde5dd063d822f26465e7e3d0e216e0c8c7a",
+      "observed": [
+        0.5,
+        0.01171875,
+        0.05859375
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.5_sat1.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.5,
+        "sat": 1.0,
+        "dry": 0.03125,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        1.0,
+        0.02734375,
+        0.05859375
+      ],
+      "effective_limit_above_dry": 0.02734375,
+      "returncode": 0,
+      "wrapper_sha256": "27100f9c2ffa2a0f811517e8c855b54f86f21f01e3bb7e83235fddbabfae1bfd",
+      "binary_sha256": "4bcd20c5beec65f38920d58d26681bfe9a5214d15b7885a47fb849ca7084206c",
+      "observed": [
+        1.0,
+        0.02734375,
+        0.05859375
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.25_sat0.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.25,
+        "sat": 0.0,
+        "dry": 0.015625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.125,
+        0.0,
+        0.060546875
+      ],
+      "effective_limit_above_dry": 0.013671875,
+      "returncode": 0,
+      "wrapper_sha256": "cc595f7b424d2ae5fa7bd20a4c11ca949a7f5e053379c9338224da319ff8da77",
+      "binary_sha256": "f66884d885171987648e5d81348e95419f4cf89c5c87d0147f0dadc75c1061d7",
+      "observed": [
+        0.125,
+        0.0,
+        0.060546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.25_sat0.5",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.25,
+        "sat": 0.5,
+        "dry": 0.015625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        0.5,
+        0.005859375,
+        0.060546875
+      ],
+      "effective_limit_above_dry": 0.013671875,
+      "returncode": 0,
+      "wrapper_sha256": "1967ae6b38ae6212b28cf679b766b8ebabd08073b5bb965d64dc8010bfaada10",
+      "binary_sha256": "3d9be17d67a2667546266c98a61f25ab059fd844efa90ff4fc63c0f87df56d06",
+      "observed": [
+        0.5,
+        0.005859375,
+        0.060546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "init_cpm0.25_sat1.0",
+      "kind": "initialization",
+      "inputs": {
+        "cpm": 0.25,
+        "sat": 1.0,
+        "dry": 0.015625,
+        "por": 0.5,
+        "dg": 0.125
+      },
+      "expected": [
+        1.0,
+        0.013671875,
+        0.060546875
+      ],
+      "effective_limit_above_dry": 0.013671875,
+      "returncode": 0,
+      "wrapper_sha256": "46a7bfeef995c392e9429f02bee5131433f67d39ac7c6cf2fa8a2f6c00bf2764",
+      "binary_sha256": "790d9d74942dd80a0dcd8d9d7f33b03d53d4f1f3e55f727b1ce9b90acdfc9600",
+      "observed": [
+        1.0,
+        0.013671875,
+        0.060546875
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "daily_no_input",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.029,
+          0.025
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.009999999776482582
+        ],
+        "fin": 0.0
+      },
+      "expected": [
+        0.028999999165534973,
+        0.02500000037252903,
+        0.0
+      ],
+      "initial_sum_st": 0.053999999538064,
+      "returncode": 0,
+      "wrapper_sha256": "1a0bbc633a183dc05a7284aa2faad647a136aaa7ad78dcc6ed66b577c0e553a8",
+      "binary_sha256": "9a26934ea78ddf0e714f288039aab601e7b83dbe215d98cc297a8b66fc57d233",
+      "observed": [
+        0.0289999992,
+        0.0250000004,
+        0.0
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": 6.19359979969758e-11
+    },
+    {
+      "id": "daily_with_input_branch",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.029,
+          0.025
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.009999999776482582
+        ],
+        "fin": 2e-06
+      },
+      "expected": [
+        0.029999999329447746,
+        0.019999999552965164,
+        0.004000002518296242
+      ],
+      "initial_sum_st": 0.053999999538064,
+      "returncode": 0,
+      "wrapper_sha256": "a43fabf9d6e94c95a5d13d87bc6d419995f7b8e830b6b7e77c64e1c6800d188e",
+      "binary_sha256": "fcb6df1289085348865636e9dd8a038d17898cb8a35319d74833c9bba1236c4e",
+      "observed": [
+        0.0299999993,
+        0.0199999996,
+        0.00400000252
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": 1.881935995928785e-09
+    },
+    {
+      "id": "daily_small_excess",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.0300005,
+          0.01
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.0
+        ],
+        "fin": 0.0
+      },
+      "expected": [
+        0.029999999329447746,
+        0.009999999776482582,
+        5.010515451431274e-07
+      ],
+      "initial_sum_st": 0.04000050015747547,
+      "returncode": 0,
+      "wrapper_sha256": "87c04cea100536e980a3b9cf1002caf04171cd694648de783733491d7c2a8bcb",
+      "binary_sha256": "5485125460ca5c3a27ae68c565dc283c5f35545aec3edc6f9d2afe8a1d1e7a28",
+      "observed": [
+        0.0299999993,
+        0.00999999978,
+        5.01051545e-07
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": -2.5930473046553715e-11
+    },
+    {
+      "id": "hourly_no_input",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.029,
+          0.025
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.009999999776482582
+        ],
+        "fin": 0.0
+      },
+      "expected": [
+        0.028999999165534973,
+        0.02500000037252903,
+        0.0
+      ],
+      "initial_sum_st": 0.053999999538064,
+      "returncode": 0,
+      "wrapper_sha256": "ac9df7d9c4803977104017e6e2284d1fd7e946ddc5698f49462aa5a4a88f6536",
+      "binary_sha256": "8032aa7a798a260bb0125743210b713b956b45feecf09651c0f650fee0195458",
+      "observed": [
+        0.0289999992,
+        0.0250000004,
+        0.0
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": 6.19359979969758e-11
+    },
+    {
+      "id": "hourly_with_input_branch",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.029,
+          0.025
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.009999999776482582
+        ],
+        "fin": 2e-06
+      },
+      "expected": [
+        0.029999999329447746,
+        0.019999999552965164,
+        0.004000002518296242
+      ],
+      "initial_sum_st": 0.053999999538064,
+      "returncode": 0,
+      "wrapper_sha256": "3962c62b1e8c935ce33ade9687226ee95f20393b9a9aedccbbc47698b52aae6c",
+      "binary_sha256": "5f0cf4b07f1b6e1726914724c0003958461d5bf480362b0d6626a30aea8fae2c",
+      "observed": [
+        0.0299999993,
+        0.0199999996,
+        0.00400000252
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": 1.881935995928785e-09
+    },
+    {
+      "id": "hourly_small_excess",
+      "kind": "overflow",
+      "inputs": {
+        "st": [
+          0.0300005,
+          0.01
+        ],
+        "ul": [
+          0.03,
+          0.03
+        ],
+        "frzw": [
+          0.0,
+          0.0
+        ],
+        "fin": 0.0
+      },
+      "expected": [
+        0.03000050038099289,
+        0.009999999776482582,
+        0.0
+      ],
+      "initial_sum_st": 0.04000050015747547,
+      "returncode": 0,
+      "wrapper_sha256": "f53d14d51adf59ad27ed0dceeb7b857f626382737ce86a071192f3dbf515e929",
+      "binary_sha256": "25ff89d65514bbc8821b19c051ee75166e8790dedfac42d8c6d95966c246cc9a",
+      "observed": [
+        0.0300005004,
+        0.00999999978,
+        0.0
+      ],
+      "disposition": "matches_reference",
+      "signed_stock_plus_surface_flux_residual_m": 2.252453085160866e-11
+    },
+    {
+      "id": "drainage_native_control",
+      "kind": "drainage",
+      "inputs": {
+        "ul": 0.4375,
+        "fc": 0.125,
+        "coca": 0.9375,
+        "dg": 1.0,
+        "st": "drfc"
+      },
+      "expected_trap": false,
+      "expected": [
+        0.1875,
+        0.25,
+        0.0
+      ],
+      "returncode": 0,
+      "wrapper_sha256": "0ed31c16256cfe9947689cea478e06b09c9e032475f97da160552bc8f49a627c",
+      "binary_sha256": "9dc65cac38c9bb6a0f258b08ad11728045b8afaff0f28760cc9730f97c32701e",
+      "observed": [
+        0.1875,
+        0.25,
+        0.0
+      ],
+      "disposition": "matches_reference"
+    },
+    {
+      "id": "drainage_diagnostic_limit",
+      "kind": "drainage",
+      "inputs": {
+        "ul": 0.1875,
+        "fc": 0.125,
+        "coca": 0.9375,
+        "dg": 1.0,
+        "st": "drfc"
+      },
+      "expected_trap": true,
+      "expected": null,
+      "returncode": -8,
+      "wrapper_sha256": "9608ccc93257eaab66d398569c523d2e06ac5be658ab5709e92295dd84c9076e",
+      "binary_sha256": "16a96f9bb23f828c945403ca25445d3f0d6ed06563ca64ee83d1883afc00d3ce",
+      "disposition": "expected_invalid_domain_counterexample"
+    }
+  ]
+}
