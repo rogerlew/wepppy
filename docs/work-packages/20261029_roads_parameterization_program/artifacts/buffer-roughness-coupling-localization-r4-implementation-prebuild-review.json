@@ -1,0 +1,32 @@
+{
+  "review": "Independent implementation prebuild review for isolated roughness coupling localization",
+  "approved_build": true,
+  "accepted_native_execution": false,
+  "accepted_interpretation": false,
+  "accepted_parameter_promotion": false,
+  "blocking_findings": [],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/prebuild-manifest.json": "2e2adacebdee4b05cf33d71611ddcc68aa00272d7e237c9a37b9857cc89f402b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer-map.json": "02d3cd9657d95e8f2afb974c6a11b38392103a56e0128ad6965db198d48a1ad8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer.patch": "99087d93b8d6d5e6929bca7828e97a37d813ad6c85791f42482cbb4432e4d10e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build_observer.py": "ec95b061e2779c07aaf15066a852acfb1d154f0b0435ce7912f5983567e962bd",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/staging-receipt.json": "1ae43e128669cc0a84952379e2ac9a7a2b4a8d2eb1681dcd81fee34c085e1fdd",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/selection.json": "04e811e02ce231592a434554e5204d70e974187e267bd19ec8574aeeac1103b1"
+  },
+  "evidence": {
+    "source_review": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/source-o1/receipt.json",
+    "source_review_sha256": "750f15e6e27c2c6a0c238329d73a20ea4b136cbe7cb971ddbe935a6a6d54aff8",
+    "prebuild_review": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/prebuild-o1-v2/receipt.json",
+    "prebuild_review_sha256": "e287af0d2b613fb5e9937abac079d8899110670362a57fa61bba62a70d041229"
+  },
+  "findings": [
+    "No added model assignments or altered native statements: 12 diagnostic calls inserted across four source files. Four independent syntax checks passed.",
+    "All 977 baseline and 978 staged source/include/object/calendar files independently rehashed. Pinned compiler, frontend, assembler, linker, libraries, exact control inputs and two reference records/state traces verified.",
+    "Compilation approval only. All seven ordinary outputs plus complete full-period state trace must match the corresponding retained U1b mode. The prior upstream isolation failure remains failed."
+  ],
+  "residual_risks": [
+    "Dry-run command count is not the actual build count: unchanged include copy recipes can touch timestamps and trigger additional recompilations. Actual commands and object/source delta require postbuild review.",
+    "Actual runner dependency closure, complete invocation coverage, first-window parity and independent output/accounting readback are pending."
+  ],
+  "public_disclosure": "Source-free review: private native source, patch and source-preparation anchors remain in ignored research retention."
+}

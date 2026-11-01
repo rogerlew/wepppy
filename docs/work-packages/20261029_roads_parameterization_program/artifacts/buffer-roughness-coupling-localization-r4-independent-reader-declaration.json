@@ -1,0 +1,33 @@
+{
+  "scope": "Independent source-ordered arithmetic and observational parity readback, frozen before first-window completion. No native execution.",
+  "synthetic_protocol_controls_passed": 10,
+  "checks": [
+    "All mode-matched ordinary outputs and full-period roughness trace exact to retained U1b.",
+    "Fresh unchanged strict particle audit and equivalent physical/annual report receipts.",
+    "Actual IRS owner/terminal/target pairing and REAL duration/peak assignment.",
+    "Observed SHEARS candidate selection/max/spacing cap, guarded candidate validity.",
+    "FRCFAC width/spacing and equivalent friction REAL arithmetic.",
+    "RDAT consumed friction and REAL alpha arithmetic.",
+    "QINF ordered actual arguments/result; exact changed-input vectors across modes.",
+    "Observed cross-window persistent width values, explicitly not intervening-day observations."
+  ],
+  "limitations": [
+    "Observed native width candidate used for selection checks; power-law evaluation is not independently validated here.",
+    "Different native call support remains explicit, never forced into one-to-one pairing.",
+    "Residue linkage remains association; heterogeneous routing physical legitimacy not established.",
+    "Original isolation failure remains failed and parameterization unaccepted."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_localization_r4.py": "bc7269e574c03ebd8f32e873ef06b7574d63866a3d34837fca934692b0cc35a3",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_coupling_localization_reader_r4.py": "0a8d10d30ba7d5fddf24642aa39332c8a2d8096130d7be9d1191c878e1c1451b",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-reader-controls.json": "16cf328d9b731612480e65ef88e0567e87799426e48e784a258feaee506c0c1a",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_runtime_r4.py": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-plan.md": "5fe90758dc1374f9e77b9b51b95f940af7da77b2e5f49084f31d19a496f521e1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/execute_localization.py": "8d405b06e380ccb96a25c60b8816847e63517c6ee70a75e8b9010ec8dc9c7119",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/execution-declaration.json": "6d0a0e11bccd82b6115c4b4d342dbbc2f5cca0ef1e81c152c3b6177f17949c29",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer-map.json": "02d3cd9657d95e8f2afb974c6a11b38392103a56e0128ad6965db198d48a1ad8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build-receipt.json": "f5efe41abad42e1c111d9d394ca8de2fc25a4da6a33975586399c827b4a4ca30",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/selection.json": "04e811e02ce231592a434554e5204d70e974187e267bd19ec8574aeeac1103b1"
+  }
+}

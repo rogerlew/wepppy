@@ -1,0 +1,47 @@
+{
+  "review": "Independent implementation gate for first localization window, both modern roughness modes",
+  "accepted_first_pair_execution": true,
+  "accepted_interpretation": false,
+  "accepted_parameter_promotion": false,
+  "blocking_findings": [],
+  "runner_sha256": "8d405b06e380ccb96a25c60b8816847e63517c6ee70a75e8b9010ec8dc9c7119",
+  "execution_declaration_sha256": "6d0a0e11bccd82b6115c4b4d342dbbc2f5cca0ef1e81c152c3b6177f17949c29",
+  "build_receipt_sha256": "f5efe41abad42e1c111d9d394ca8de2fc25a4da6a33975586399c827b4a4ca30",
+  "binary_sha256": "0671b86941c9a92528eac6216fbdfe87c8904cd8e55c13fa898b39eb12548a90",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/execute_localization.py": "8d405b06e380ccb96a25c60b8816847e63517c6ee70a75e8b9010ec8dc9c7119",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/execution-declaration.json": "6d0a0e11bccd82b6115c4b4d342dbbc2f5cca0ef1e81c152c3b6177f17949c29",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/dependency-closure-proof.json": "28116a6e93ce7d15a39fb2651868ee90c64891f18947b59aba7a467eeef36f19",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build-receipt.json": "f5efe41abad42e1c111d9d394ca8de2fc25a4da6a33975586399c827b4a4ca30",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/selection.json": "04e811e02ce231592a434554e5204d70e974187e267bd19ec8574aeeac1103b1"
+  },
+  "independent_receipts": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/source-o1/receipt.json": "750f15e6e27c2c6a0c238329d73a20ea4b136cbe7cb971ddbe935a6a6d54aff8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/prebuild-o1-v2/receipt.json": "e287af0d2b613fb5e9937abac079d8899110670362a57fa61bba62a70d041229",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/build-o1/receipt.json": "448133d5faec657586e6bb07239dcbaeecc0725a138e0630e15cbcc7b7aa5a57",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/runner-o1/receipt.json": "69040ceb082af67eaa0891150cdd42eb099aa7635d8137a6b66f3ad23bd50da4"
+  },
+  "verification": {
+    "all4_decks_and_reference_states_rehashed": true,
+    "native_outputs_not_started": true,
+    "dependency_files": 549,
+    "cold_warm_readback_exact": true,
+    "full_period_years": 16,
+    "controls_passed": 22,
+    "actual_baseline_trace_coverage_passed": true,
+    "build_compiles": 149,
+    "build_links": 1,
+    "modified_native_sources": 4
+  },
+  "execution_scope": "First two declared runs only: year4 selector234, observing days233\u2013234, modes O4/off and U1/retain initial buffer roughness. First-window internal gates must pass before proceeding to the separately declared second window.",
+  "required_acceptance": [
+    "Each complete 16-year run must reproduce all seven ordinary output files and full-period roughness state trace exactly against its corresponding retained U1b mode.",
+    "Unchanged canonical runtime validation, fresh physical and strict particle audits, source/input/log/output inventories, and complete producer coverage are mandatory.",
+    "Complete source-backed ownership covers both SHEARS calls per PARAM, all IRS and CONTIN friction calls, QINF positive-GA paths and globally ordered finalization writeback targets."
+  ],
+  "residual_limits": [
+    "This observer does not independently reevaluate the width power-law or QINF nonlinear law; scientific numerical reconstruction remains separate.",
+    "The original cross-mode upstream isolation criterion remains failed. No broader counterfactual execution, parameter promotion, new native defect claim or physical-validity claim is approved."
+  ],
+  "public_disclosure": "Source-free review; private native fragments and patch remain in ignored research retention."
+}

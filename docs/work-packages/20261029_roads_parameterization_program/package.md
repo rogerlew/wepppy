@@ -1,12 +1,18 @@
 # Roads parameterization and configuration view
 
-## Current: roughness-conditioning counterfactual in preparation
+## Current: native coupling localized; declare whole-hillslope response study
 
-Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The operator has authorized
-the next controlled study of buffer roughness conditioning, with other inputs
-and bulk-density handling fixed. Source/design review is active before execution.
-Revision 4 is delivered; no parameter candidate is accepted.
+Current [candidate ledger v19](artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
+
+The roughness counterfactual remains failed on upstream isolation; its remaining
+32 runs are stopped. Four observation-only replays now establish native coupling:
+terminal flow duration changes upstream peaks and persistent rill widths, then
+width-dependent friction changes runoff in the next storm. All 28 ordinary
+outputs and four full-period state traces reproduce the retained modes exactly.
+Both independent reviews pass. Next declare a fresh nine-pair whole-hillslope
+response study; physical correctness of the routing approximation and initial
+100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
@@ -46,8 +52,10 @@ The paired event ledger and nine-pair native buffer observations are complete.
 All 18 observer runs retain 126 exact ordinary output files, with independent
 accounting and scientific review. [Findings and a paired figure](artifacts/buffer-process-interpretation-r4/findings.md)
 identify hourly surface return and differing storage/conditioning as controlled
-study targets. Next isolate buffer roughness conditioning with other inputs and
-density fixed; no parameter candidate or new native defect is established.
+study targets. The subsequent roughness trial failed upstream isolation, and
+four diagnostic replays established native coupling. A fresh whole-hillslope
+response declaration will retain other inputs and density handling; no parameter
+candidate or new native defect is established.
 The six withheld materials and human UI specification/layout gate remain intact.
 
 Status: active. One outcome-driven program, authorized by the operator on

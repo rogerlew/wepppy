@@ -1,12 +1,18 @@
 # Roads parameterization program tracker
 
-## Current: roughness-conditioning counterfactual in preparation
+## Current: native coupling localized; declare whole-hillslope response study
 
-Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The operator has authorized
-the next controlled study of buffer roughness conditioning, with other inputs
-and bulk-density handling fixed. Source/design review is active before execution.
-Revision 4 is delivered; no parameter candidate is accepted.
+Current [candidate ledger v19](artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
+
+The roughness counterfactual remains failed on upstream isolation; its remaining
+32 runs are stopped. Four observation-only replays now establish native coupling:
+terminal flow duration changes upstream peaks and persistent rill widths, then
+width-dependent friction changes runoff in the next storm. All 28 ordinary
+outputs and four full-period state traces reproduce the retained modes exactly.
+Both independent reviews pass. Next declare a fresh nine-pair whole-hillslope
+response study; physical correctness of the routing approximation and initial
+100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
@@ -42,15 +48,35 @@ The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
 
+The failed counterfactual is retained in a verified 4,564-file archive; the
+completed localization and interpretation are retained in a verified 1,409-file
+archive. See [counterfactual retention](artifacts/revision4-buffer-roughness-counterfactual-retention.json)
+and [localization retention](artifacts/revision4-buffer-roughness-coupling-localization-retention.json).
+Publication reproduction and both independent reviews pass. No released
+source, binary, production default or UI implementation changed.
+
+The corrected u1b preflight completed all four full-period runs with individual
+runtime, physical and strict particle checks passing. The legacy null pair is
+exact, but the modern pair fails upstream isolation: year 4/day 233 road peak
+changes from 942.874 to 113.080 mm/h and duration from 0.051 to 0.426 h. Water
+and residue changes follow. Density, porosity and upstream RRC/RH stay exact.
+The remaining 32 runs have not executed. The
+[separate observation-only localization](artifacts/buffer-roughness-coupling-localization-r4-plan.md)
+completed all four replays with 28 ordinary files and four full-state traces
+exact. Independent arithmetic readback establishes IRS upstream assignments and
+persistent width/friction/recession feedback. Neither a new defect nor an
+accepted parameter follows. A fresh whole-hillslope declaration is next.
+
 The [persistence counterfactual](artifacts/buffer-roughness-counterfactual-r4-plan.md)
-is now predeclared for review: 36 full-period runs, with 18 off controls and 18
+has passed design and source/build review: 36 full-period runs, with 18 off controls and 18
 buffer-initial-roughness persistence runs. Preserve every other input and native
 density handling; verify exact internal state and 12 expected no-op controls.
 Roughness also affects crusting, friction, critical shear and interrill delivery,
-so this is not a depression-storage-only intervention. Build/run gates remain
-pending; no new native experiment has executed. Independent scientific and
-implementation reviews accept the preparation design; exact patch and runner
-reviews remain separate prerequisites.
+so this is not a depression-storage-only intervention. The first O4 legacy preflight
+completed with seven exact reference outputs and a passing physical audit, then
+stopped on an incorrect friction-call coverage assumption. IRS also calls the
+friction routine. That attempt and original reader remain retained; a fresh
+version uses source-backed phase windows. No treatment outcome is accepted.
 
 Supplemental published SOIL readback covers all 315,576 rows from the nine frozen
 pairs. Legacy buffer roughness stays at 100 mm; six conditioned generated profiles

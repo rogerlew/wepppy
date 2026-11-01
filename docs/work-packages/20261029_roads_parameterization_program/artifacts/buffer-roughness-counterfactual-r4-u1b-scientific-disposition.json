@@ -1,0 +1,19 @@
+{
+  "accepted_isolation": false,
+  "accepted_annual_improvement_interpretation": false,
+  "accepted_continuation_of_remaining_32": false,
+  "classification": "Genuine modeled upstream response; protected density/porosity/drivers unchanged. Source-supported connected-routing and persistent-width feedback requires executed localization.",
+  "next_scope": "Four observation-only modern off/on replays with target days4/234 and4/244. Require all7 ordinary outputs byte-identical to corresponding retained u1b lane. Observe IRS segment ownership and peak/duration assignment, SHEARS persistent width, FRCFAC equivalent friction, RDAT alpha, and IRS QINF arguments/result. No behavior/threshold change.",
+  "residue_scope": "Observed subsequent residue differences; detailed residue pathway not proven by current evidence.",
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-isolation-review.md": "c1fb9f2618d905ef86e1cf44a6b71a57df69f6c198f568f8c705383a467bc959",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-independent-isolation-failure.json": "86bdd13508b515a724aa101bad6fb1bd1316125d602d1e592b6c217b5c9fd559",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_isolation_failure_r4.py": "3491ebdeba2d226fa3249c7ce83986aaa9746ba1166d61d7ffef7a0ca23a5e0e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/frcfac.for": "3a665e06158d47c2f158ed2bf4698938dc292706b12fe002d1f0078fe590b3de",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/rdat.for": "38a243137aeae77abdf9fea51b62b34ff64c10529bde271a703d76ed30505863",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/qinf.for": "67693b0e27c73fa97adae1ea4b11c668c4e4264a24a95bb9141c47ae2ad81744",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/irs.for": "8beae52254d69ce84f95b18768d8afc76151eecb3e67a52fdd9bd6e508e24751",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/shears.for": "fff53f1ba6a055e331317f873c456643e925ba7bf1d24a82ef92407f889adbc5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/decomp.for": "934064c3bb52e76acabb40df1a77ae51ccf8d244f3e4a7b7d406766e834f4dd1"
+  }
+}

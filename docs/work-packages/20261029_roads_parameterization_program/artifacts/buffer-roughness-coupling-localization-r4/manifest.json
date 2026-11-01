@@ -1,0 +1,13 @@
+{
+  "scope": "Source-free localization publication packet; exact failed-campaign history preserved, no parameter acceptance.",
+  "files": {
+    "declaration.json": "14d05e3b2f52c1b3aca0b4020ea2ce8acff3948f9cbeaeade2ce33f913432917",
+    "findings.md": "39564814a33f148f2d7cb3d889182d271b2dea415437c984551f848a4ea3477b",
+    "paired-observations.md": "4edb5716746c6bacfb60433841f352987bf65d90e307d77347fb583293a13ef5",
+    "reproduce.md": "219bd1780cc6780745048f2be840ecaf28d8fa20ae2760ad18f73369bad6dbac",
+    "summarize_localization.py": "d5758b6c5c2292615c6addf07eeb1183e6c2836dea97cb33f4b5783210e51735",
+    "summary.json": "fc8a8e19d46f348aa7cd29720b55615fa87cc44647cb0c1580d0c7d7d4d40f85"
+  },
+  "raw_summary_root": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-interpretation-r4",
+  "raw_execution_root": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4"
+}

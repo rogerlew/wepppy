@@ -1,0 +1,460 @@
+{
+  "accepted_isolation": false,
+  "accepted_interpretation": false,
+  "native_runs_by_reviewer": 0,
+  "scope": "Retained first-pair modern off/on diagnostic failure; no annual-improvement interpretation or tolerance change.",
+  "raw_state_change_counts": {
+    "OFE3/RRC_BITS": 5844,
+    "OFE3/RRC_STATE": 5844,
+    "OFE3/RRC_DECAY": 9028,
+    "OFE3/RRC_RESIDUE": 4514,
+    "OFE2/RRC_RESIDUE": 1542,
+    "OFE1/RRC_DECAY": 4338,
+    "OFE1/RRC_RESIDUE": 2169
+  },
+  "first_raw_state_change_per_tag_ofe": [
+    {
+      "key": [
+        1,
+        1,
+        1,
+        3
+      ],
+      "tag": [
+        "RRC_BITS",
+        0
+      ],
+      "off": [
+        1017087363.0,
+        1017087363.0,
+        1036831949.0,
+        1036831949.0,
+        1036831949.0,
+        0.0
+      ],
+      "on": [
+        1017087363.0,
+        1036831949.0,
+        1036831949.0,
+        1036831949.0,
+        1036831949.0,
+        0.0
+      ]
+    },
+    {
+      "key": [
+        1,
+        1,
+        1,
+        3
+      ],
+      "tag": [
+        "RRC_STATE",
+        0
+      ],
+      "off": [
+        0.019472843036055565,
+        0.019472843036055565,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.019472843036055565
+      ],
+      "on": [
+        0.019472843036055565,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.019472843036055565
+      ]
+    },
+    {
+      "key": [
+        1,
+        4,
+        236,
+        3
+      ],
+      "tag": [
+        "RRC_DECAY",
+        1
+      ],
+      "off": [
+        -0.034573592245578766,
+        0.9795125126838684,
+        2.2899019718170166,
+        0.04097502678632736,
+        0.0,
+        0.0
+      ],
+      "on": [
+        -0.034573592245578766,
+        0.9795125722885132,
+        2.2899019718170166,
+        0.04097485914826393,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "key": [
+        1,
+        4,
+        236,
+        3
+      ],
+      "tag": [
+        "RRC_RESIDUE",
+        0
+      ],
+      "off": [
+        0.04097502678632736,
+        0.0,
+        0.0,
+        0.006000000052154064,
+        0.10000000149011612,
+        4.0
+      ],
+      "on": [
+        0.04097485914826393,
+        0.0,
+        0.0,
+        0.006000000052154064,
+        0.10000000149011612,
+        4.0
+      ]
+    },
+    {
+      "key": [
+        1,
+        4,
+        244,
+        2
+      ],
+      "tag": [
+        "RRC_RESIDUE",
+        0
+      ],
+      "off": [
+        0.00016402760229539126,
+        0.0,
+        0.0,
+        0.10000000149011612,
+        0.10000000149011612,
+        4.0
+      ],
+      "on": [
+        0.0001640275731915608,
+        0.0,
+        0.0,
+        0.10000000149011612,
+        0.10000000149011612,
+        4.0
+      ]
+    },
+    {
+      "key": [
+        1,
+        4,
+        247,
+        1
+      ],
+      "tag": [
+        "RRC_DECAY",
+        1
+      ],
+      "off": [
+        -0.034573592245578766,
+        0.999975860118866,
+        0.18930000066757202,
+        4.828273085877299e-05,
+        0.0,
+        0.0
+      ],
+      "on": [
+        -0.034573592245578766,
+        0.999975860118866,
+        0.18930000066757202,
+        4.8282727220794186e-05,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "key": [
+        1,
+        4,
+        247,
+        1
+      ],
+      "tag": [
+        "RRC_RESIDUE",
+        0
+      ],
+      "off": [
+        4.828273085877299e-05,
+        0.0,
+        0.0,
+        0.006000000052154064,
+        0.006000000052154064,
+        4.0
+      ],
+      "on": [
+        4.8282727220794186e-05,
+        0.0,
+        0.0,
+        0.006000000052154064,
+        0.006000000052154064,
+        4.0
+      ]
+    }
+  ],
+  "maximum_absolute_state_difference_per_tag_ofe": {
+    "OFE3/RRC_BITS": 34091303.0,
+    "OFE3/RRC_STATE": 0.09400000143796206,
+    "OFE3/RRC_DECAY": 8.693896234035492e-07,
+    "OFE3/RRC_RESIDUE": 8.693896234035492e-07,
+    "OFE2/RRC_RESIDUE": 1.8189894035458565e-10,
+    "OFE1/RRC_DECAY": 5.960464477539063e-08,
+    "OFE1/RRC_RESIDUE": 9.094947017729282e-11
+  },
+  "protected_density_driver_differences": [],
+  "upstream_published_changes": {
+    "WAT": {
+      "upstream_rows_per_lane": 11688,
+      "changed_rows": 718,
+      "first_three_changes": [
+        {
+          "key": {
+            "year": 4,
+            "julian": 243,
+            "OFE": 1
+          },
+          "fields": {
+            "Q": [
+              12.04311,
+              12.04256
+            ],
+            "QOFE": [
+              12.04311,
+              12.04256
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 243,
+            "OFE": 2
+          },
+          "fields": {
+            "Q": [
+              9.685537,
+              9.684279
+            ],
+            "UpStrmQ": [
+              14.75742,
+              14.75675
+            ],
+            "QOFE": [
+              21.55403,
+              21.55123
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 250,
+            "OFE": 2
+          },
+          "fields": {
+            "latqcc": [
+              0.71,
+              0.72
+            ]
+          }
+        }
+      ],
+      "changed_column_counts": {
+        "Q": 379,
+        "QOFE": 380,
+        "UpStrmQ": 110,
+        "latqcc": 18,
+        "Total-Soil Water": 301,
+        "SoilWaterTotal": 301,
+        "Es": 18,
+        "Dp": 30,
+        "Ep": 7
+      }
+    },
+    "SOIL": {
+      "upstream_rows_per_lane": 11688,
+      "changed_rows": 148,
+      "first_three_changes": [
+        {
+          "key": {
+            "year": 4,
+            "julian": 268,
+            "OFE": 2
+          },
+          "fields": {
+            "Suct": [
+              13.67,
+              13.66
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 297,
+            "OFE": 2
+          },
+          "fields": {
+            "TSW": [
+              14.37,
+              14.38
+            ],
+            "TSMF": [
+              0.3693,
+              0.3694
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 301,
+            "OFE": 1
+          },
+          "fields": {
+            "TSMF": [
+              0.383,
+              0.3831
+            ]
+          }
+        }
+      ],
+      "changed_column_counts": {
+        "Suct": 31,
+        "TSW": 18,
+        "TSMF": 91,
+        "Keff": 13
+      }
+    },
+    "ELEMENT": {
+      "upstream_rows_per_lane": 1690,
+      "changed_rows": 953,
+      "first_three_changes": [
+        {
+          "key": {
+            "year": 4,
+            "julian": 233,
+            "OFE": 1
+          },
+          "fields": {
+            "PeakRO": [
+              942.874,
+              113.08
+            ],
+            "EffDur": [
+              0.051,
+              0.426
+            ],
+            "RilWid": [
+              0.156,
+              0.082
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 233,
+            "OFE": 2
+          },
+          "fields": {
+            "PeakRO": [
+              820.359,
+              98.387
+            ],
+            "EffDur": [
+              0.051,
+              0.426
+            ],
+            "RilWid": [
+              0.18,
+              0.15
+            ],
+            "SedLeave": [
+              0.441,
+              0.648
+            ]
+          }
+        },
+        {
+          "key": {
+            "year": 4,
+            "julian": 243,
+            "OFE": 1
+          },
+          "fields": {
+            "PeakRO": [
+              82.207,
+              82.147
+            ],
+            "EffDur": [
+              0.146,
+              0.147
+            ],
+            "RilWid": [
+              0.156,
+              0.082
+            ]
+          }
+        }
+      ],
+      "changed_column_counts": {
+        "PeakRO": 466,
+        "EffDur": 82,
+        "RilWid": 744,
+        "SedLeave": 68,
+        "Runoff": 180,
+        "Sm": 414,
+        "QRain": 157,
+        "QSnow": 23,
+        "Keff": 15,
+        "Cancov": 68,
+        "IntCov": 71,
+        "RilCov": 71,
+        "LivBio": 1
+      }
+    }
+  },
+  "source_supported_hypothesis": "Connected-segment duration is reassigned upstream by IRS; changed peak feeds XINFLO/PARAM/SHEARS persistent rill width. Residue/cover and infiltration/decomposition are possible later feedback paths. Exact event-chain attribution requires bounded observation replay; source possibilities alone do not prove each link.",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/O4/record.json": "afe052e7a91be47974a148ab4e3eced14271613b6f9f7f808bac2acf12b9a134",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/O4/observations/roughness-contract.txt": "2c8f2656554b56988797569c5a539bbdd0fbf34e752a0b3b76226456dc87e2af",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/U1/record.json": "8018a225c560b09628a9671b82a1d73736b7f4a0373715f54ec811652d068aa2",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/U1/observations/roughness-contract.txt": "6b7959bf90d546840b09971fe5fe9f327656d371a3c2e470bfa1242ed0cd5b17",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/O4/output/interchange/H.wat.parquet": "10cd965e0fd9a27a558b3ce610a723e95a89030ee8b6151d7ae73067c1135a76",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/U1/output/interchange/H.wat.parquet": "9f7d4cb28a4ff7616ce03be494b768e0bc9c0a67f0e474fa68122b7d813f0930",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/O4/derived/H.soil.parquet": "e867f917afedc824da7daa14b00b1ef6eba53789bd99fb5e4ce3b9bed546bb61",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/U1/derived/H.soil.parquet": "f6988e9aa29084316ac1da3dc408b0cb00f7691e5689f6fbbc0da6ea02b924d6",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/O4/output/interchange/H.element.parquet": "9d4e42a9d29ba49b2d70f01947668ee55c982cd19626988e21dc3111ea4be9dc",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/cases/small_paved_dry_legacy/modern/U1/output/interchange/H.element.parquet": "d2f1a5cb5506ee7df53b64aeca037f231b9bf031963e8d651f499689ca6cd2dc",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/irs.for": "8beae52254d69ce84f95b18768d8afc76151eecb3e67a52fdd9bd6e508e24751",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/xinflo.for": "ebae362d316bbee7d8c28799267c7607bb25c52b9d2102a5562a7bc3f4207a76",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/param.for": "88dd5d8abba23e1d742b33c72b786c31d247baf49cab303898a88805e475af99",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/shears.for": "fff53f1ba6a055e331317f873c456643e925ba7bf1d24a82ef92407f889adbc5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/decomp.for": "934064c3bb52e76acabb40df1a77ae51ccf8d244f3e4a7b7d406766e834f4dd1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/covcal.for": "15db3a8b3b5b493bf4158e271683ef8645640c4634bb4719b7a23ed7e9bb8c88",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-process-observation-r4/observer-o3/build/src/infpar.for": "b49321644cb62487088bd072f2d30fc99dc621cdcf62b519db5e2f24c3a312af",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/execution-declaration.json": "68886ff220b3707358979ccbe40fda5f375a4f0b358779bfb8c3e843db402eec",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_isolation_failure_r4.py": "3491ebdeba2d226fa3249c7ce83986aaa9746ba1166d61d7ffef7a0ca23a5e0e",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4_v2.py": "4ffaa73e65e9057b962f70c8d6e2d333bc26ac4bfb55e3a132edd84d3ebf7092"
+  }
+}

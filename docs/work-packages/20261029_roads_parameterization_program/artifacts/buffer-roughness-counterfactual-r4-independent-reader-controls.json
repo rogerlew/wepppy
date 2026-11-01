@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "native_runs": 0,
+  "controls": [
+    "complete leap calendar, active restore and endogenous RH accepted",
+    "missing final calendar row rejected",
+    "duplicate state row rejected",
+    "native REAL bit mismatch rejected",
+    "density drift rejected",
+    "configured irrigation rejected",
+    "nonfinite state rejected",
+    "wrong mode rejected",
+    "unexpected nonidentity in predicted null rejected",
+    "original envelope equality boundaries and both failure directions preserved",
+    "native identity null accepted"
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_runtime_reader_r4.py": "d9faf1b376d19d32255bb04f0edaa8eb764c574af4e313ea988135b296c7be4e",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4.py": "b81042ea101e9dc44a7112f75746ae234fcc251e1735eb20f2b42f5f253090e1"
+  }
+}

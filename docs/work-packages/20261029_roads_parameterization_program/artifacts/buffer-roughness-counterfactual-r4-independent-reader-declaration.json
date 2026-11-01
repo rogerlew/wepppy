@@ -1,0 +1,37 @@
+{
+  "scope": "Independent read-only runtime and scientific readback prepared before first-pair completion; no native execution.",
+  "frozen_before_preflight": true,
+  "first_pair_runs": 4,
+  "full_period_runs": 36,
+  "synthetic_controls_passed": 11,
+  "exact_control_contract": [
+    "Full ordered calendar with separate initialization and unique typed rows.",
+    "Native REAL roughness bits, single intended assignment, correct captured anchor, configured IRSYST zero.",
+    "BD/POR and named drivers exact off/on; full upstream state and published row equality.",
+    "Twelve predicted no-op lanes require native identity and exact output/consumer parity.",
+    "RH/residue changes observed as endogenous, not forced equal.",
+    "Off/original seven-file parity; actual input/output/log/source hashes.",
+    "Fresh unchanged strict particle audit and original physical reports.",
+    "Annual report text parsed independently and original FSWEPP2 envelope recomputed."
+  ],
+  "interpretation_contract": [
+    "Same nine selected pairs, no new tuning or outcome-dependent substitution.",
+    "On-minus-off within soil lane precedes legacy/generated comparison.",
+    "All natural roughness pathways remain; no depression-storage-only attribution.",
+    "Net grid exchange is not gross production or tagged origins.",
+    "No parameter acceptance from selected-panel improvement."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4.py": "b81042ea101e9dc44a7112f75746ae234fcc251e1735eb20f2b42f5f253090e1",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_runtime_reader_r4.py": "d9faf1b376d19d32255bb04f0edaa8eb764c574af4e313ea988135b296c7be4e",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-independent-reader-controls.json": "79a780a9ed9b7992c74270f24bd3b8b0ef62f86ecc3863199a16bbe6fd79b65f",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_observer_runtime_r4.py": "c455cc0ae4827fb8797c4e523952351720bcf312fa967acc334f3f520687b6d8",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/audit_particle_closure_v2.py": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-plan.md": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/execute_counterfactual.py": "8fc351ec38348820dc66a70f53ebbee50d3e7649014afb829c640d57fd80e54d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/execution-declaration.json": "6105b6eda5e491b078a8037c4217dd5b920eb63422cf08ea9e39df4f28891f87",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/intervention-map.json": "be23e5503a34f82d61f507f82e8f98459c20696583b3afcd49e39743c779d07b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/seeds.json": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525"
+  }
+}

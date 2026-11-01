@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "native_runs": 0,
+  "controls": [
+    "complete leap calendar, active restore and endogenous RH accepted",
+    "missing final calendar row rejected",
+    "duplicate state row rejected",
+    "native REAL bit mismatch rejected",
+    "density drift rejected",
+    "configured irrigation rejected",
+    "nonfinite state rejected",
+    "wrong mode rejected",
+    "unexpected nonidentity in predicted null rejected",
+    "original envelope equality boundaries and both failure directions preserved",
+    "additional IRS friction retained with one owned CONTIN call",
+    "missing CONTIN friction rejected",
+    "post-PARAM friction rejected",
+    "dry CONTIN friction rejected",
+    "native identity null accepted"
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_runtime_reader_r4_v2.py": "186d50f6e55b87f542416c9e74e1a39284e343f0a69697385253779f35d355fe",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4_v2.py": "4ffaa73e65e9057b962f70c8d6e2d333bc26ac4bfb55e3a132edd84d3ebf7092"
+  }
+}

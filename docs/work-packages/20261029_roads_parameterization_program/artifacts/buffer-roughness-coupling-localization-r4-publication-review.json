@@ -1,0 +1,214 @@
+{
+  "review": "Independent bounded implementation/publication/disclosure review of completed failed-isolation and four-replay localization evidence",
+  "accepted_publication": true,
+  "blocking_findings": [],
+  "accepted_original_isolation": false,
+  "accepted_parameter_promotion": false,
+  "packet_manifest_sha256": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb",
+  "public_allowlist": [
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-implementation-first-pair-gate.json",
+      "sha256": "0f89e0f10358c913baa0f959ced0db9fc642401f62f1c5d0d54ce5b1525f73ed"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-implementation-prebuild-review.json",
+      "sha256": "39dfe9975c28d4f723b9df24f69c89a4ef0667f6af6c200c170eb479ccf02129"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-implementation-u1b-first-pair-gate.json",
+      "sha256": "c021a7384d9099a0a8061094c3c905d0c7e7ebf4c324d9b69987d026c52af397"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-implementation-u1b-readback.json",
+      "sha256": "7b922cf444d89aba803f2f730b2c7806bc661547e652bf8a116656f7e8dfea29"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-independent-reader-controls.json",
+      "sha256": "79a780a9ed9b7992c74270f24bd3b8b0ef62f86ecc3863199a16bbe6fd79b65f"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-independent-reader-declaration.json",
+      "sha256": "e7f44b114f1bc726c627f976f8374dc2ba445549aa2cd4f4b9e479162d2a3ae1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-independent-reader-v2-controls.json",
+      "sha256": "9a30eb6ee6aed457753dcec136780a8f86aed74b480254825c98a038e8e946e3"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-independent-reader-v2-declaration.json",
+      "sha256": "edecef0fa4ee47a0729ddc1d281a2e744d2b030bc5bfcb01404ec3f9608fec41"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-prebuild-scientific-review.json",
+      "sha256": "cd64dd50a8afd503eeece1cc49497f480901064c5fbc2345c4e47b677f448cd7"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-prebuild-scientific-review.md",
+      "sha256": "64572c11c2768b286edd75733738d2c9f98e411fa134d84c38eafa107cac03b9"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-independent-isolation-failure.json",
+      "sha256": "86bdd13508b515a724aa101bad6fb1bd1316125d602d1e592b6c217b5c9fd559"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-isolation-review.md",
+      "sha256": "c1fb9f2618d905ef86e1cf44a6b71a57df69f6c198f568f8c705383a467bc959"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-scientific-disposition.json",
+      "sha256": "e55b0e42a80871cdcf71032396022b07b619973aa21cd5d3709b2c6064365455"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/declaration.json",
+      "sha256": "14d05e3b2f52c1b3aca0b4020ea2ce8acff3948f9cbeaeade2ce33f913432917"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/findings.md",
+      "sha256": "39564814a33f148f2d7cb3d889182d271b2dea415437c984551f848a4ea3477b"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/manifest.json",
+      "sha256": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/paired-observations.md",
+      "sha256": "4edb5716746c6bacfb60433841f352987bf65d90e307d77347fb583293a13ef5"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/reproduce.md",
+      "sha256": "219bd1780cc6780745048f2be840ecaf28d8fa20ae2760ad18f73369bad6dbac"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/summarize_localization.py",
+      "sha256": "d5758b6c5c2292615c6addf07eeb1183e6c2836dea97cb33f4b5783210e51735"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/summary.json",
+      "sha256": "fc8a8e19d46f348aa7cd29720b55615fa87cc44647cb0c1580d0c7d7d4d40f85"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-executed-chain.json",
+      "sha256": "4b3f6def6ca61ae027984628a0b37fd496f98ffeed89cea3a496357c13f26aaa"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-acceptance.json",
+      "sha256": "b616b311f5773f18a6695e4ced61fb3c72f1e3157f422598525a462193c3f988"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-review.md",
+      "sha256": "d1024e6ebcf3b414165081a110b5b9a3b555cbbe620bdd8b0589b66ad08b8ec7"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-first-pair-gate.json",
+      "sha256": "5bd52a1821768d046edb0e590dffced235950abfddda0649dbfae7c1c6ec6e85"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-prebuild-review.json",
+      "sha256": "544aee45cdbeeca0448c86a12fdd0c59fa0f36d4e5cbc9d5027fb7637da487fc"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-readback.json",
+      "sha256": "318dcb2c0c20a4dc9ea7290b32d166cffc6268ef40241afee777784589d3e457"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-full-readback.json",
+      "sha256": "1f243d222c6d8dfc3a4dab70f2c9415f7d6d475bc2e06c898858ef10ea0bfdb6"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-preflight.json",
+      "sha256": "94e570b49d003c28666170dce7f0b8f8f44bd1482e764d35d8efcfc5c1fbd8d1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-reader-controls.json",
+      "sha256": "16cf328d9b731612480e65ef88e0567e87799426e48e784a258feaee506c0c1a"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-reader-declaration.json",
+      "sha256": "ade00365efaf11419642e7fbce8e92c5acedb1cd0b1104bb31df36d5fc33f306"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-plan.md",
+      "sha256": "5fe90758dc1374f9e77b9b51b95f940af7da77b2e5f49084f31d19a496f521e1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-prebuild-scientific-review.json",
+      "sha256": "bfacf8d3cb46b326c576fc4c1f94974af6345af5f6cb9ece2549ff8687232db1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-prebuild-scientific-review.md",
+      "sha256": "ea7cf775324a3674beb105c239ea32f4199e2a6850be22eba85cd4bfbdf9ef82"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-publication-scientific-review.json",
+      "sha256": "7572f44e57541ef89cf13a4dcfd5e27666e13db993a460ce9a19e21e0fac1574"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_coupling_localization_reader_r4.py",
+      "sha256": "0a8d10d30ba7d5fddf24642aa39332c8a2d8096130d7be9d1191c878e1c1451b"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_runtime_reader_r4.py",
+      "sha256": "d9faf1b376d19d32255bb04f0edaa8eb764c574af4e313ea988135b296c7be4e"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_roughness_runtime_reader_r4_v2.py",
+      "sha256": "186d50f6e55b87f542416c9e74e1a39284e343f0a69697385253779f35d355fe"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_chain_r4.py",
+      "sha256": "19ee117fd829632f00e4571a95d603b6ff046b0e407ef8a0215bc725b171f500"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_localization_r4.py",
+      "sha256": "bc7269e574c03ebd8f32e873ef06b7574d63866a3d34837fca934692b0cc35a3"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_isolation_failure_r4.py",
+      "sha256": "3491ebdeba2d226fa3249c7ce83986aaa9746ba1166d61d7ffef7a0ca23a5e0e"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4.py",
+      "sha256": "b81042ea101e9dc44a7112f75746ae234fcc251e1735eb20f2b42f5f253090e1"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_roughness_runtime_r4_v2.py",
+      "sha256": "4ffaa73e65e9057b962f70c8d6e2d333bc26ac4bfb55e3a132edd84d3ebf7092"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-buffer-roughness-counterfactual-retention.json",
+      "sha256": "45df35e0e2b7687f070f1c0e4354b2730af00ac9739e39891793aabadbe92b1b"
+    }
+  ],
+  "reproduction": {
+    "documented_summary_shell_passed": true,
+    "table_byte_exact": true,
+    "summary_numeric_fields_exact": true,
+    "only_documented_declaration_provenance_hash_differs": true,
+    "existing_destination_rejected_without_mutation": true,
+    "independent_public_reader_exact_replay": true,
+    "executed_chain_certificate_exact_replay": true,
+    "failed_isolation_diagnostic_exact_replay": true,
+    "public_reader_controls_passed": [
+      11,
+      15,
+      10
+    ]
+  },
+  "corrected_clarity": "Final findings explicitly distinguish local RDAT ALPHA in the paired table from the equivalent-plane effective ALPHA received by QINF; no numerical/script changes.",
+  "disclosure": "Only original analysis/readers/synthetic tests, computed observations and source-free hashes/paths/prose are public. No private native source fragments, source-preparation anchors, patch, objects or binaries are included.",
+  "limits": [
+    "Native rebuilding requires retained private dependencies; summary reproduction is readback, not a native rerun.",
+    "Existing failed reader versions and failed campaign receipts remain historical evidence; they are not relabeled as passed.",
+    "Physical validity of shared-duration routing and100mm roughness is not established; future whole-hillslope study requires a fresh declaration."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-readback.json": "318dcb2c0c20a4dc9ea7290b32d166cffc6268ef40241afee777784589d3e457",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/publication-checks/summary-reproduction-receipt.json": "cbb308668633f8b4138191148fcbea9271b0d8ceea8d41967bab6f987f13eb45",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/all-four-readback/receipt.json": "969da5058fa6fff2498386f70e0102c156ee30a64afe8ab125f19688d7c289cb",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/review_publication_final_v2.py": "e15148933000de8d0874a746eb710e360e1971219fbc5dd119caf01c2d58de8b"
+  },
+  "writer_clear_roots": [
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-interpretation-r4"
+  ]
+}

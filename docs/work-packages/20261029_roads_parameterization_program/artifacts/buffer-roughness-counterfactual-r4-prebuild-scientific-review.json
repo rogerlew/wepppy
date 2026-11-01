@@ -1,0 +1,57 @@
+{
+  "review_type": "Independent AI scientific review, not institutional peer review",
+  "approved_build": true,
+  "accepted_scientific_prebuild": true,
+  "accepted_runtime": false,
+  "accepted_observation_interpretation": false,
+  "accepted_parameterization": false,
+  "accepted_release": false,
+  "blocking_findings": [],
+  "scope": "Compilation of the frozen isolated roughness-persistence counterfactual only; no native execution by reviewer.",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/prebuild-manifest.json": "15374e923ab0a0cf042ebd9ba0ab3fec89f79be9cb512e4a1b9b8b3a4fef664e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/intervention-map.json": "be23e5503a34f82d61f507f82e8f98459c20696583b3afcd49e39743c779d07b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/counterfactual.patch": "ebcbe3119f54052563775cc4eb67cf9230b5381dc692638533bc6868901c4fcf",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build_counterfactual.py": "505bd494b13f1516d9f32b555065d8dde8330ee9d4586754798e4ef51ee4ae37",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/staging-receipt.json": "6d8e2cd95b9fd1fddfdfdbccff457b699d03b940849a9bcef4383aa5136c14f5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/prepare_source.py": "b7893ecbad148fef87e43fbb50d57d3305fc1e9699a8e3b9e089c40308825a07",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/freeze_prebuild.py": "6ce6642fc4e14036c9daf16f1568037e4244dfadd62a85d4899b7db43cd64952",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/stage_build.py": "97d5b70b038c7ef8cc070b17a75f4c129775285ef48a3f022394af67d0692f7b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build-dry-run.log": "d883001159a9fa4ad47038348cb0e39f70e491a72947d3c03d92b633370862ec",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-plan.md": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-scientific-design-review.json": "2ee0d37559522d96251a2f7ec4f4c34710a10a61b8d777624016c41cb6b365c7",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-prebuild-scientific-review.md": "64572c11c2768b286edd75733738d2c9f98e411fa134d84c38eafa107cac03b9",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/source/param.for": "e1f91915bc95cef5fa59411a202c7ba2d596d5b9d6956291ec205a68b2942823",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/source/frcfac.for": "2246fa641f25ac4badf7a671529bfe0d47fb7c7afa9f70cfa0c2c12ce7db5a9a",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/source/infpar.for": "66487d6206fa36f936934073caf9cb2c2c2b053432bee5de437093aeba67f4a8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/source/soil.for": "b4c3cbfe4284632d57f02c4bdb726b3fabf340351d183377e24f44920a0350fd"
+  },
+  "independent_readback": {
+    "base_files": 977,
+    "calendar_siblings": 1,
+    "staged_files": 978,
+    "candidate_source_files": 4,
+    "exact_reconstructed_patch": true,
+    "original_model_statements_preserved": true,
+    "toolchain_and_libraries_rehashed": true,
+    "python_scripts_syntax_checked_without_execution": true
+  },
+  "resolved_findings": [
+    "RKECUM energy units corrected, distinct from RFCUM depth.",
+    "Native pre-restore U1 value explicitly belongs to treated history.",
+    "Configured IRSYST zero guard added; NOIRR labeled carried prior state."
+  ],
+  "runtime_requirements": [
+    "Separate runner and post-build provenance gates.",
+    "All off-lane ordinary outputs exact to frozen references.",
+    "Predicted null controls proved with native full-period values and exact outputs.",
+    "Exact BD/POR and driver trajectories; native RH/residue differences observed without overrides.",
+    "Unchanged strict physical and particle gates; unexplained failure blocks interpretation."
+  ],
+  "limitations": [
+    "No physical validation of configured initial forest roughness.",
+    "Multiple natural roughness pathways remain; no depression-only attribution.",
+    "Same-call pre/post identity is not historical nonintervention.",
+    "Selected nine-pair diagnostic is not parameter or production acceptance."
+  ]
+}

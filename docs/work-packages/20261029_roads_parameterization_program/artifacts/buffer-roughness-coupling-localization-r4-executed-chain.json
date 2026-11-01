@@ -1,0 +1,102 @@
+{
+  "accepted_executed_model_coupling": true,
+  "accepted_physical_routing_validation": false,
+  "accepted_original_isolation": false,
+  "accepted_parameterization": false,
+  "scope": "Two full16yr mode histories, each replayed under two diagnostic selectors. This certificate verifies the first two upstream event links; not four independent scientific samples.",
+  "native_runs_by_reviewer": 0,
+  "chain": [
+    {
+      "ofe": 1,
+      "day233_terminal_off_on": [
+        3,
+        2
+      ],
+      "day233_duration_off_on_s": [
+        183.73585510253906,
+        1532.0115966796875
+      ],
+      "day233_peak_off_on_mm_h": [
+        942.8742108866572,
+        113.07995446259156
+      ],
+      "day233_width_off_on_m": [
+        0.1564873605966568,
+        0.08229919523000717
+      ],
+      "day243_consumed_width_off_on_m": [
+        0.1564873605966568,
+        0.08229919523000717
+      ],
+      "day243_frcteq_off_on": [
+        3.606802225112915,
+        3.826399564743042
+      ],
+      "day243_effective_alpha_off_on_m_half_per_s": [
+        1.1424245834350586,
+        1.1091582775115967
+      ],
+      "day243_qinf_only_changed_input": "effective alpha",
+      "day243_qinf_output_off_on_mm": [
+        12.04310730099678,
+        12.04256247729063
+      ],
+      "day243_runoff_on_minus_off_mm": -0.0005448237061500549
+    },
+    {
+      "ofe": 2,
+      "day233_terminal_off_on": [
+        3,
+        2
+      ],
+      "day233_duration_off_on_s": [
+        183.73585510253906,
+        1532.0115966796875
+      ],
+      "day233_peak_off_on_mm_h": [
+        820.359232602641,
+        98.3865960733965
+      ],
+      "day233_width_off_on_m": [
+        0.17975470423698425,
+        0.15000000596046448
+      ],
+      "day243_consumed_width_off_on_m": [
+        0.17975470423698425,
+        0.15000000596046448
+      ],
+      "day243_frcteq_off_on": [
+        14.095712661743164,
+        14.514427185058594
+      ],
+      "day243_effective_alpha_off_on_m_half_per_s": [
+        1.4247593879699707,
+        1.3950855731964111
+      ],
+      "day243_qinf_only_changed_input": "effective alpha",
+      "day243_qinf_output_off_on_mm": [
+        9.685537777841091,
+        9.684279561042786
+      ],
+      "day243_runoff_on_minus_off_mm": -0.0012582167983055115
+    }
+  ],
+  "counts": {
+    "writeback": 12,
+    "width": 24,
+    "friction": 21,
+    "alpha": 9,
+    "qinf": 9
+  },
+  "next_recommended_study": "Fresh36-run nine-pair whole-hillslope response declaration; same RRC rule and original input/off/null/density/physical/magnitude gates, explicitly permitting documented endogenous coupling. Original failed campaign is not relabeled.",
+  "limits": [
+    "No physical calibration of100mm roughness or legacy soil truth.",
+    "No physical validation of connected shared-duration routing.",
+    "Residue effects remain downstream association.",
+    "No annual magnitude outcome interpreted by this localization."
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-full-readback.json": "1f243d222c6d8dfc3a4dab70f2c9415f7d6d475bc2e06c898858ef10ea0bfdb6",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_chain_r4.py": "19ee117fd829632f00e4571a95d603b6ff046b0e407ef8a0215bc725b171f500"
+  }
+}

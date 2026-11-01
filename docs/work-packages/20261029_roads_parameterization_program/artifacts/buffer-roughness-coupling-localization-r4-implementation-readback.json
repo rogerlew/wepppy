@@ -1,0 +1,145 @@
+{
+  "review": "Independent actual four-run implementation and artifact readback",
+  "accepted_runtime_evidence": true,
+  "accepted_original_isolation": false,
+  "accepted_parameter_promotion": false,
+  "accepted_physical_validity_claim": false,
+  "blocking_findings": [],
+  "binary_sha256": "0671b86941c9a92528eac6216fbdfe87c8904cd8e55c13fa898b39eb12548a90",
+  "runner_sha256": "8d405b06e380ccb96a25c60b8816847e63517c6ee70a75e8b9010ec8dc9c7119",
+  "execution_declaration_sha256": "6d0a0e11bccd82b6115c4b4d342dbbc2f5cca0ef1e81c152c3b6177f17949c29",
+  "build_receipt_sha256": "f5efe41abad42e1c111d9d394ca8de2fc25a4da6a33975586399c827b4a4ca30",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/verification.json": "cc5188de6dfb5e25a092cad8a1befad09f50da8fcb47f63d575bdac993b6a3e4",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/results.json": "99d33991aa7624edbd7244e162f9ad3fb2a76b96db62cf008dadd84fbbcf32bc",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/all-four-readback/receipt.json": "969da5058fa6fff2498386f70e0102c156ee30a64afe8ab125f19688d7c289cb",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/first-window-readback/receipt.json": "6c01cd57e81d1fe9b6759da16ece5a6afe219e3fd1f48bce9b115336b22afc9e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/independent-implementation-review/readback_localization_o1.py": "a8108d344261a7e6b082413884ef6b78a680306f14765beacbf7bef4935e837e"
+  },
+  "checks": {
+    "full_period_runs": 4,
+    "years_per_run": 16,
+    "ordinary_output_files_byte_exact": 28,
+    "full_period_state_traces_byte_exact": 4,
+    "total_state_rows": 583264,
+    "total_bounded_observation_rows": 22268,
+    "artifact_files_independently_rehashed": 112,
+    "stable_dependencies": 549,
+    "fresh_canonical_runtime_physical_particle_audits": 4,
+    "source_include_object_calendar_and_binary_readback": true,
+    "compiled_source_tree_files": 977
+  },
+  "runs": [
+    {
+      "window": "first_peak",
+      "mode": 0,
+      "calendar_years": [
+        1,
+        16
+      ],
+      "ordinary_outputs_exact": 7,
+      "full_state_trace_exact": true,
+      "state_rows": 145816,
+      "state_days": 5844,
+      "observation_rows": 5515,
+      "producer_counts": {
+        "width_invocations": 6,
+        "friction_invocations": 6,
+        "alpha_invocations": 3,
+        "qinf_invocations": 3,
+        "finalization_invocations": 1
+      },
+      "writeback_rows": 3,
+      "independent_chronological_owner_checks": true,
+      "canonical_runtime_pass": true,
+      "fresh_copied_physical_audit_exact": true,
+      "strict_particle_audit_pass": true,
+      "record_sha256": "908e8af401c5d5be45d47ed35a6cbedd3847f06fd1979354cd34d70adbed60c6"
+    },
+    {
+      "window": "first_peak",
+      "mode": 1,
+      "calendar_years": [
+        1,
+        16
+      ],
+      "ordinary_outputs_exact": 7,
+      "full_state_trace_exact": true,
+      "state_rows": 145816,
+      "state_days": 5844,
+      "observation_rows": 5487,
+      "producer_counts": {
+        "width_invocations": 6,
+        "friction_invocations": 5,
+        "alpha_invocations": 2,
+        "qinf_invocations": 2,
+        "finalization_invocations": 1
+      },
+      "writeback_rows": 3,
+      "independent_chronological_owner_checks": true,
+      "canonical_runtime_pass": true,
+      "fresh_copied_physical_audit_exact": true,
+      "strict_particle_audit_pass": true,
+      "record_sha256": "cfcbb83c86d169924a7c05951edeb98686d64bab5680c915730cd67cd009a295"
+    },
+    {
+      "window": "next_runoff",
+      "mode": 0,
+      "calendar_years": [
+        1,
+        16
+      ],
+      "ordinary_outputs_exact": 7,
+      "full_state_trace_exact": true,
+      "state_rows": 145816,
+      "state_days": 5844,
+      "observation_rows": 5633,
+      "producer_counts": {
+        "width_invocations": 6,
+        "friction_invocations": 5,
+        "alpha_invocations": 2,
+        "qinf_invocations": 2,
+        "finalization_invocations": 1
+      },
+      "writeback_rows": 3,
+      "independent_chronological_owner_checks": true,
+      "canonical_runtime_pass": true,
+      "fresh_copied_physical_audit_exact": true,
+      "strict_particle_audit_pass": true,
+      "record_sha256": "78723d6849c4a79d2c8e05e04450ab3858c86cf4a5b0ddb6bf10d7819a811181"
+    },
+    {
+      "window": "next_runoff",
+      "mode": 1,
+      "calendar_years": [
+        1,
+        16
+      ],
+      "ordinary_outputs_exact": 7,
+      "full_state_trace_exact": true,
+      "state_rows": 145816,
+      "state_days": 5844,
+      "observation_rows": 5633,
+      "producer_counts": {
+        "width_invocations": 6,
+        "friction_invocations": 5,
+        "alpha_invocations": 2,
+        "qinf_invocations": 2,
+        "finalization_invocations": 1
+      },
+      "writeback_rows": 3,
+      "independent_chronological_owner_checks": true,
+      "canonical_runtime_pass": true,
+      "fresh_copied_physical_audit_exact": true,
+      "strict_particle_audit_pass": true,
+      "record_sha256": "4f76e7b4c7964eb748ffc4d2eba5eefe603912ba85df07b736e62e9e195bfbf0"
+    }
+  ],
+  "implementation_disposition": "The added observer reproduces each retained U1b mode exactly while exposing complete producer records. Independent chronological checks confirm IRS friction\u2192RDAT order, CONTIN friction ownership, both SHEARS calls within PARAM, QINF within its positive-GA producer interval, and finalization owner/target ordering.",
+  "limits": [
+    "The original cross-mode upstream-isolation gate remains failed; its remaining32 runs were not executed.",
+    "Observed assignment reconstruction does not validate the physical correctness of equivalent-plane routing. Independent scientific interpretation is separate.",
+    "No new native source/binary release, parameter-default change or broader counterfactual approval is implied."
+  ],
+  "public_disclosure": "Source-free receipt; private native snippets and build artifacts remain in ignored research retention."
+}

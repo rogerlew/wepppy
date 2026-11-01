@@ -1,0 +1,40 @@
+{
+  "review_type": "Independent AI scientific publication review, not institutional peer review",
+  "accepted_publication_claims": true,
+  "accepted_parameterization": false,
+  "accepted_original_isolation": false,
+  "accepted_physical_routing_validation": false,
+  "packet_manifest_sha256": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb",
+  "checks": {
+    "all_six_packet_members_rehashed": true,
+    "independent_summarizer_replay": true,
+    "table_byte_equal": true,
+    "summary_equal_except_actual_declaration_identity": true,
+    "local_RDAT_vs_effective_QINF_coefficient_distinction_explicit": true
+  },
+  "findings": [],
+  "scope": "One selected modern whole-profile history, two observer windows and both intervention modes. Executed model coupling; no independently solved nonlinear law or annual improvement claim.",
+  "limitations": [
+    "Original upstream-isolation failure remains a failure.",
+    "Shared-duration law and configured initial roughness are not physically validated.",
+    "Call absence is not zero; stored pre-writeback state is not an independent hydrograph.",
+    "Residue causal closure and broader nine-pair response remain unestablished."
+  ],
+  "next_study": "Fresh 36-run whole-hillslope response declaration with unchanged intervention and other gates.",
+  "native_model_runs": 0,
+  "raw_execution_root_writer_clear": true,
+  "raw_interpretation_root_writer_clear": true,
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/manifest.json": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/declaration.json": "14d05e3b2f52c1b3aca0b4020ea2ce8acff3948f9cbeaeade2ce33f913432917",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/findings.md": "39564814a33f148f2d7cb3d889182d271b2dea415437c984551f848a4ea3477b",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/paired-observations.md": "4edb5716746c6bacfb60433841f352987bf65d90e307d77347fb583293a13ef5",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/reproduce.md": "219bd1780cc6780745048f2be840ecaf28d8fa20ae2760ad18f73369bad6dbac",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/summarize_localization.py": "d5758b6c5c2292615c6addf07eeb1183e6c2836dea97cb33f4b5783210e51735",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4/summary.json": "fc8a8e19d46f348aa7cd29720b55615fa87cc44647cb0c1580d0c7d7d4d40f85",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-acceptance.json": "b616b311f5773f18a6695e4ced61fb3c72f1e3157f422598525a462193c3f988",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-interpretation-r4/scientific-publication-replay-v1/declaration.json": "07d9ef6077dc5a0b36314eaa1cac7f992007448dbedbecb1d7e3723097104901",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-interpretation-r4/scientific-publication-replay-v1/summary.json": "66248c1400ef7a8480fee6c2b1e3bdde9b4ab7e3a82649b2ec748b8cdb6dc8b6",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-interpretation-r4/scientific-publication-replay-v1/paired-observations.md": "4edb5716746c6bacfb60433841f352987bf65d90e307d77347fb583293a13ef5"
+  }
+}

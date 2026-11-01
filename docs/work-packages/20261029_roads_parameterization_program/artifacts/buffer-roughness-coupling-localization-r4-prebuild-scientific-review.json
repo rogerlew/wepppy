@@ -1,0 +1,46 @@
+{
+  "review_type": "Independent AI scientific review, not institutional peer review",
+  "approved_build": true,
+  "accepted_scientific_prebuild": true,
+  "accepted_execution": false,
+  "accepted_interpretation": false,
+  "accepted_original_isolation": false,
+  "accepted_parameterization": false,
+  "blocking_findings": [],
+  "scope": "Compilation-only of four-source observation delta; four full-history mode-matched localization replays require separate runner and runtime gates. No native execution by reviewer.",
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer-map.json": "02d3cd9657d95e8f2afb974c6a11b38392103a56e0128ad6965db198d48a1ad8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer.patch": "99087d93b8d6d5e6929bca7828e97a37d813ad6c85791f42482cbb4432e4d10e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/prebuild-manifest.json": "2e2adacebdee4b05cf33d71611ddcc68aa00272d7e237c9a37b9857cc89f402b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build_observer.py": "ec95b061e2779c07aaf15066a852acfb1d154f0b0435ce7912f5983567e962bd",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/staging-receipt.json": "1ae43e128669cc0a84952379e2ac9a7a2b4a8d2eb1681dcd81fee34c085e1fdd",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/prepare_source.py": "3957536a149bd535b3cc95a72685817e58a7a0cc637c990e82263c031fa498c3",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build-dry-run.log": "10f03edc3c80b14e6f278f78a6dffd8e955e22960fb5ba6b8a348bb61a602bde",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/selection.json": "04e811e02ce231592a434554e5204d70e974187e267bd19ec8574aeeac1103b1",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-plan.md": "5fe90758dc1374f9e77b9b51b95f940af7da77b2e5f49084f31d19a496f521e1",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-prebuild-scientific-review.md": "ea7cf775324a3674beb105c239ea32f4199e2a6850be22eba85cd4bfbdf9ef82",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-u1b-scientific-disposition.json": "e55b0e42a80871cdcf71032396022b07b619973aa21cd5d3709b2c6064365455",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/source/frcfac.for": "759c4ffce60e8d4250843f016931dd6e74261650f6e7342acb0b522139d04fd8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/source/shears.for": "97ea28c9ed7ca646c5e26b02cef299c183d23b877fc378f00e614cb17738e29d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/source/irs.for": "fe8c77841d2feff72bc312cd5d2f14f5f9af958db899c58e82ab5e31caa6ed97",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/source/rdat.for": "eca748c262d9b5cd829d4975a1610bd0a27151f4fbce9f010d3dddc3f8969cad"
+  },
+  "readback": {
+    "base_files": 977,
+    "calendar_siblings": 1,
+    "staged_files": 978,
+    "candidate_sources": 4,
+    "reference_output_files": 14,
+    "reference_full_period_state_traces": 2,
+    "exact_patch_and_original_lines": true,
+    "toolchain_and_libraries": true
+  },
+  "limits": [
+    "Current owner IPLANE may differ from terminal KPLANE.",
+    "Stored pre-writeback state is not an independently computed upstream hydrograph.",
+    "Preserve repeated producer calls and valid branch absence.",
+    "Mode-matched ordinary outputs and full state traces must be exact to failed U1b.",
+    "Residue feedback and physical legitimacy of equivalent-plane routing remain unproved.",
+    "Original isolation failure remains failed; no remaining32 continuation or promotion."
+  ]
+}

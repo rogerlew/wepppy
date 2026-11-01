@@ -1,0 +1,123 @@
+{
+  "scope": "Independent readback of retained u1b firstfour and its failed upstream isolation gate",
+  "accepted_individual_execution_evidence": true,
+  "accepted_original_upstream_isolation_contract": false,
+  "accepted_remaining_pool_execution": false,
+  "accepted_parameterization": false,
+  "blocking_findings": [
+    {
+      "severity": "scientific isolation gate",
+      "finding": "Modern paired upstream states and outputs change despite exact unchanged upstream direct roughness/density parameters. This is real output variation, not a comparison-schema mismatch; remaining32 must stay stopped pending separately reviewed localization."
+    }
+  ],
+  "bindings": {
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1b-first-four-readback/receipt.json": "1f3da85b506e7809d90b8c9b89531d1901f9d5861df248b37b9f7642e615f388",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/readback_first4_u1b.py": "624acb2e3354ae63acac0c70803bcc176d0d1e7f5d57504789f12c86900c6414",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1b-upstream-isolation-diagnostic.json": "d6dca544b5d0883b550b2632bdb781d85dfb960db20516246d6f9d7910e43440",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/diagnose_upstream_u1b.py": "9d3919913a437fce15f1446c0a67eb6d0d4264658a471fb96c0c3b589b96a290"
+  },
+  "readback": {
+    "individual_full_period_passes": 4,
+    "years_each": 16,
+    "files_rehashed": 108,
+    "full_period_state_rows": 559888,
+    "fresh_copied_canonical_physical_and_particle_audits_match": true,
+    "fresh_soil_reader_tables_match": true,
+    "legacy_null_pair_exact": true,
+    "remaining32_unexecuted": true
+  },
+  "diagnosis": {
+    "first_upstream_element_change": {
+      "year": 4,
+      "julian": 233,
+      "ofe": 1,
+      "fields": {
+        "PeakRO": [
+          942.874,
+          113.08
+        ],
+        "EffDur": [
+          0.051,
+          0.426
+        ],
+        "RilWid": [
+          0.156,
+          0.082
+        ]
+      }
+    },
+    "first_upstream_water_change": {
+      "year": 4,
+      "julian": 243,
+      "ofe": 1,
+      "fields": {
+        "Q": [
+          12.04311,
+          12.04256
+        ],
+        "QOFE": [
+          12.04311,
+          12.04256
+        ]
+      }
+    },
+    "first_upstream_state_change": {
+      "key": [
+        "RRC_RESIDUE",
+        1,
+        4,
+        244,
+        2,
+        0
+      ],
+      "off": [
+        0.00016402760229539126,
+        0.0,
+        0.0,
+        0.10000000149011612,
+        0.10000000149011612,
+        4.0
+      ],
+      "on": [
+        0.0001640275731915608,
+        0.0,
+        0.0,
+        0.10000000149011612,
+        0.10000000149011612,
+        4.0
+      ]
+    },
+    "first_upstream_soil_change": {
+      "year": 4,
+      "julian": 268,
+      "ofe": 2,
+      "fields": {
+        "Suct": [
+          13.67,
+          13.66
+        ]
+      }
+    },
+    "upstream_changed_row_counts": {
+      "WAT": 718,
+      "ELEMENT": 953,
+      "SOIL": 148
+    },
+    "protected_density_porosity_drivers_context_changes": {},
+    "upstream_rrc_and_rh_exact": true,
+    "added_direct_model_state_write": "Only buffer RRC, unchanged from reviewed source."
+  },
+  "source_supported_path": [
+    "IRS assigns final connected-group duration and peak to upstream OFEs.",
+    "CONTIN then calls XINFLO/PARAM; upstream peak feeds discharge/shear and SHEARS updates persistent rill width.",
+    "FRCFAC consumes that carried rill width at the next hydrologic storm; RDAT produces its hydraulic coefficient, and QINF uses that coefficient for recession infiltration.",
+    "Native SHEARS width update is persistent until a qualifying tillage reset; no intervention assignment to upstream width, density or roughness was added."
+  ],
+  "limits": [
+    "First ELEMENT differences are actual published differences, not schema/order mismatches.",
+    "The next runoff event after day233 is day243, when upstream WAT first differs; chronology is consistent with the inspected width-feedback path.",
+    "Exact internal first-event and next-event operands were not selected by the frozen year16/day127 observation. This is source-supported classification, not a complete arithmetic reconstruction or proof of physical realism.",
+    "The original exact-upstream gate remains failed; no threshold or comparison has been relaxed."
+  ],
+  "next_gate": "Separately declared first-divergence/next-storm native observation may establish exact mechanism. It must preserve both original mode outputs and full-period state traces. No tolerance relaxation, extra parameter manipulation or model defect claim follows from this readback."
+}

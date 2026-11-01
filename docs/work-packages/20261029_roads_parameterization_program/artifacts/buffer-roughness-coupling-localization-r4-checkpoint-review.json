@@ -1,0 +1,93 @@
+{
+  "review": "Independent exact checkpoint and archive closure addendum",
+  "accepted_checkpoint": true,
+  "blocking_findings": [],
+  "ledger_sha256": "da9d4c98e832c2aaffcd85f6e9afabe60ac509bbf360dd4b20b79e2b9797ed36",
+  "evidence_hashes_verified": 24,
+  "public_allowlist_files_rehashed": 43,
+  "packet_manifest_sha256": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb",
+  "archives": [
+    {
+      "receipt": "revision4-buffer-roughness-counterfactual-retention.json",
+      "receipt_sha256": "45df35e0e2b7687f070f1c0e4354b2730af00ac9739e39891793aabadbe92b1b",
+      "archive_sha256": "447eb9ea8a4f4b111e75f2564b3fbbb7673a940ffd670e8a9250ccf69ef27d95",
+      "manifest_sha256": "be4347dc764e725ebf4fdd1664bd4001ab796aeb6933a3da15ecf0069e1ba81c",
+      "files": 4564,
+      "uncompressed_bytes": 407957857,
+      "exact_archive_member_set": true,
+      "all_member_bytes_rehashed": true,
+      "raw_tree_matches_full_manifest": true,
+      "roots": [
+        "buffer-roughness-counterfactual-r4"
+      ]
+    },
+    {
+      "receipt": "revision4-buffer-roughness-coupling-localization-retention.json",
+      "receipt_sha256": "538d5f678084fb8a2d10939f45bd3d4a5292f342b2d903472fdb946c91e7beb9",
+      "archive_sha256": "8f5981e5a63b5f63ddbd26de7d15564e55da109f20cb0b0f043b9c7df1cf37a7",
+      "manifest_sha256": "0aa3c1b13a62c484daa8d7ef0497e468b82aa7342efec7ff1abd3ab024bba6c2",
+      "files": 1409,
+      "uncompressed_bytes": 284243515,
+      "exact_archive_member_set": true,
+      "all_member_bytes_rehashed": true,
+      "raw_tree_matches_full_manifest": true,
+      "roots": [
+        "buffer-roughness-coupling-localization-r4",
+        "buffer-roughness-coupling-interpretation-r4"
+      ]
+    }
+  ],
+  "total_archive_members_verified": 5973,
+  "living_documents_reviewed": [
+    "PROJECT_TRACKER.md",
+    "docs/work-packages/20261029_roads_parameterization_program/package.md",
+    "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+    "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md"
+  ],
+  "scope": "Completed failed-isolation and accepted observation-only localization checkpoint. New36-run study is separate and is not accepted by this receipt.",
+  "remaining_limits": [
+    "Original upstream-isolation campaign remains failed.",
+    "No parameter/default/binary change or physical-routing validation is accepted.",
+    "New study design, executable runner and fresh execution declaration require their own review."
+  ],
+  "additional_public_allowlist": [
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/candidate-ledger-v19.json",
+      "sha256": "da9d4c98e832c2aaffcd85f6e9afabe60ac509bbf360dd4b20b79e2b9797ed36"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revision4-buffer-roughness-coupling-localization-retention.json",
+      "sha256": "538d5f678084fb8a2d10939f45bd3d4a5292f342b2d903472fdb946c91e7beb9"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-publication-review.json",
+      "sha256": "92b361e6eeef54e1112a5ae19d43b4438b5e5eeedf3c128cd6da1e5f8c93cc05"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-publication-scientific-review.json",
+      "sha256": "7572f44e57541ef89cf13a4dcfd5e27666e13db993a460ce9a19e21e0fac1574"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_roughness_localization_checkpoint_r4.py",
+      "sha256": "db0809cfab0e14507e82af86038f94de602c42de39667cae03d31788e6cdf283"
+    },
+    {
+      "path": "PROJECT_TRACKER.md",
+      "sha256": "4b07dfc0f6180930d188d6f990e853a65fb11993950bbcd1cc2159c011294706"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/package.md",
+      "sha256": "85c05dadabe92784e7855d37820ef25a26fcb921de81a217fe600fdef951b7d8"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+      "sha256": "a7875c0ae5243fc57ca7d8d38c25405557c2357dce6ec5598c107a6ee646e464"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md",
+      "sha256": "d72fe8f27ec1ab4fc1790e1535f2256182c6c87a808c5c7505eacba0e5a5b916"
+    }
+  ],
+  "writer_clear": true,
+  "native_model_runs_by_reviewer": 0
+}

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "native_runs": 0,
+  "scope": "Synthetic validation of readback ownership and exact-assignment checks, not model validation.",
+  "controls": [
+    "Valid owner different from terminal; complete target range and exact assignments accepted",
+    "duration mutation rejected",
+    "peak mutation rejected",
+    "width cap mutation rejected",
+    "friction mutation rejected",
+    "alpha mutation rejected",
+    "QINF unexpected argument mutation rejected",
+    "missing width return rejected",
+    "missing QINF return rejected",
+    "duplicate writeback rejected"
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/check_buffer_coupling_localization_reader_r4.py": "0a8d10d30ba7d5fddf24642aa39332c8a2d8096130d7be9d1191c878e1c1451b",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_localization_r4.py": "bc7269e574c03ebd8f32e873ef06b7574d63866a3d34837fca934692b0cc35a3"
+  }
+}

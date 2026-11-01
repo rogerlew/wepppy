@@ -1,0 +1,67 @@
+{
+  "scope": "Execute only the declared first paired case in both soil lanes and off/on modes; no interpretation or remaining pool acceptance yet",
+  "accepted_first_pair_execution": true,
+  "accepted_interpretation": false,
+  "accepted_remaining_pool_execution": false,
+  "blocking_findings": [],
+  "runner_sha256": "8fc351ec38348820dc66a70f53ebbee50d3e7649014afb829c640d57fd80e54d",
+  "execution_declaration_sha256": "6105b6eda5e491b078a8037c4217dd5b920eb63422cf08ea9e39df4f28891f87",
+  "build_receipt_sha256": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+  "binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "first_four_tasks": [
+    [
+      "small_paved_dry_legacy",
+      "legacy",
+      0
+    ],
+    [
+      "small_paved_dry_legacy",
+      "legacy",
+      1
+    ],
+    [
+      "small_paved_dry_legacy",
+      "modern",
+      0
+    ],
+    [
+      "small_paved_dry_legacy",
+      "modern",
+      1
+    ]
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/execute_counterfactual.py": "8fc351ec38348820dc66a70f53ebbee50d3e7649014afb829c640d57fd80e54d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/execution-declaration.json": "6105b6eda5e491b078a8037c4217dd5b920eb63422cf08ea9e39df4f28891f87",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/dependency-closure-proof.json": "ad7e0f5f7cdb49f865af40fcffa8943201320671a447d548f8de79dbd7561fd0",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/probe_dependency_closure.py": "a4d9f247a8e764a7326390d3564db49741c52f2dc1b7726fb35cd26feca81545"
+  },
+  "independent_evidence": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1-runner-readback/receipt.json": "22239b530fc84b21c353218c95b977537796c83270ea498dd74750376d22e52d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1-build-readback/receipt.json": "092801e14fa87c061139cea291907ce114f19110a2f0119573507ee86d03e915",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/review_runner_u1.py": "69bbe03a03ebdeb2133b66364867d3cf78ec67ecc1fb53a1e232e782343a048c"
+  },
+  "checks": {
+    "all36_staged_inputs_controls_and_references_exact": true,
+    "all36_output_folders_empty_before_review": true,
+    "full_period_years": 16,
+    "cold_warm_dependencies": 548,
+    "copied_canonical_audit_and_new_soil_reader_exact": true,
+    "independent_synthetic_coverage_controls": 17,
+    "independent_synthetic_controls_passed": 17,
+    "postbuild_source_files_verified": 977,
+    "calendar_sibling_verified": true,
+    "actual_compiler_link_commands": 148,
+    "changed_objects": 147,
+    "extra_objects_all_depend_on_recopied_identical_includes": true
+  },
+  "resolved_preexecution_findings": [
+    "Require friction producer count to match actual PARAM entry count.",
+    "Require complete ordered particle class indices1..5 for every delivery record and match PARAM entry/completion counts.",
+    "Require integral native REAL bit representations and residue singleton index0.",
+    "Bind actual cold/warm dependency proof after copied canonical audit plus SOIL conversion and all paired table readers."
+  ],
+  "build_prediction_correction": "The dry-run listed4 recompilations. Actual make recopied four byte-identical includes and rebuilt143 additional dependent objects. Every extra object was traced to those prerequisites with identical declared compiler flags. This is an explained build dependency effect; do not report actual4-object compilation.",
+  "required_next": "Stop after four full-period executions and retain success/failure. Independent actual output, trace, no-op, upstream and accounting readback must precede remaining32 runs or interpretation. Existing source/runner/inputs stay frozen."
+}

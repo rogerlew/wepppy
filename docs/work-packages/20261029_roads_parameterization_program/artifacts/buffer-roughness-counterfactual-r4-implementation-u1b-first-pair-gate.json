@@ -1,0 +1,76 @@
+{
+  "scope": "Corrected harness attempt only, exact same native binary/source. Execute declared firstfour full-period runs; no remainingpool/interpretation approval.",
+  "accepted_first_pair_execution": true,
+  "accepted_interpretation": false,
+  "accepted_remaining_pool_execution": false,
+  "blocking_findings": [],
+  "runner_sha256": "f7ddfd0dad8cea9b76e6d7cf6f04aff93fb0553318a744aa37ca662626fce199",
+  "execution_declaration_sha256": "68886ff220b3707358979ccbe40fda5f375a4f0b358779bfb8c3e843db402eec",
+  "build_receipt_sha256": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+  "binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "first_four_tasks": [
+    [
+      "small_paved_dry_legacy",
+      "legacy",
+      0
+    ],
+    [
+      "small_paved_dry_legacy",
+      "legacy",
+      1
+    ],
+    [
+      "small_paved_dry_legacy",
+      "modern",
+      0
+    ],
+    [
+      "small_paved_dry_legacy",
+      "modern",
+      1
+    ]
+  ],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/execute_counterfactual.py": "f7ddfd0dad8cea9b76e6d7cf6f04aff93fb0553318a744aa37ca662626fce199",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/execution-declaration.json": "68886ff220b3707358979ccbe40fda5f375a4f0b358779bfb8c3e843db402eec",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/build-receipt.json": "5a98c95f475c1c1e1f3d559a2fb8d9388dbe737fa799461e4fb8f5bac2598307",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/binary-reuse.json": "ead66032a9c078b80e385795d745fad5eb70d5237c3bff50a5db58b567b438d1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/dependency-closure-proof.json": "d8a10a3ac496d66cdc77554038f49a2c60abcdf0b158bb7ee43a50a9369bc573",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1b/probe_dependency_closure.py": "a4d9f247a8e764a7326390d3564db49741c52f2dc1b7726fb35cd26feca81545"
+  },
+  "independent_evidence": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1b-runner-readback/receipt.json": "4f5a3d51cd21eec691b9cd8b49e34fe34a5200cea7708c1aadcd39cc7e265de0",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/review_runner_u1b.py": "21229e717bf7bfdd3597cf4279318a12babf3e8e1ef302a3b885291bd4bd5b0d",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1-failed-attempt-readback-v2/receipt.json": "643f52aa70127ed31bffba2881ecc2f8188c18c09ad8648b52e79730cc90a6ec",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/review_failed_u1_v2.py": "745b2fd76779548ff3664b11039e598c12b35b583311f837505403bce480c9be",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1-friction-callpath-readback.json": "6c5b6fe7495a8730c938683b68edcdcf6d9bb3d79bd51bb70d36b00664f6fe5b"
+  },
+  "checks": {
+    "all36restaged_inputs_controls_and_reference_bytes_exact": true,
+    "all36outputs_empty": true,
+    "period_years": 16,
+    "stable_cold_warm_dependencies": 549,
+    "synthetic_and_actual_trace_coverage_controls": 22,
+    "controls_passed": 22,
+    "exact_source_binary_reuse": true
+  },
+  "prior_failure_disposition": {
+    "attempt": "attempt-u1",
+    "completed_native_runs": 1,
+    "completed_treatment_runs": 0,
+    "accepted_campaign_records": 0,
+    "ordinary_output_files_exact_reference": 7,
+    "fresh_copied_physical_audit_exact": true,
+    "strict_particle_audit_pass": true,
+    "state_trace_rows": 134128,
+    "days": 5844,
+    "cause": "Reviewer and author incorrectly treated total FRCFAC calls as one CONTIN/PARAM call. IRS has three additional guarded callsites. Frozen failed source/runner/declaration/output and failed assertion remain retained.",
+    "reviewer_responsibility": "Initial implementation review also missed the IRS callers; synthetic coverage fixture mirrored that incomplete assumption. Corrected tests include the retained actual multi-call trace and source-derived call ownership."
+  },
+  "coverage_correction": [
+    "CONTIN call is owned after BP_OWNER and before BP_PARAM_ENTER; exactly one iff PARAM actually enters. No final-flow flag substitutes for entry, preserving legitimate no-IRS late-flow/skipped-PARAM paths.",
+    "IRS pre-WATBAL calls counted from positive native GRNA/ROCHEK runoff producers; post-WATBAL call counted from exact REAL-rounding surface-return predicate using existing emitted operands. No tolerance change or model source rewrite.",
+    "Reject missing/duplicate IRS calls, missing/late CONTIN calls, spurious dry/skipped-PARAM calls, incomplete particle classes and malformed state records."
+  ],
+  "required_next": "Retain firstfour outputs and stop for independent actual readback before remaining32. Unexpected source/provenance/accounting/coverage/isolation differences block interpretation."
+}

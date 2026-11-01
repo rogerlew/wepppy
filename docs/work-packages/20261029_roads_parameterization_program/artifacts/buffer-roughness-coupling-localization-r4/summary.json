@@ -1,0 +1,280 @@
+{
+  "accepted_scope": "Observed whole-hillslope routing feedback in one selected modern profile, two windows, same single RRC intervention.",
+  "original_counterfactual_campaign": "Failed upstream isolation;32remaining runs not executed.",
+  "native_replays": 4,
+  "ordinary_outputs_exact": 28,
+  "full_state_traces_exact": 4,
+  "first_peak": [
+    {
+      "mode": 0,
+      "ofe": 1,
+      "owner": 3,
+      "terminal": 3,
+      "duration_s": 183.73585510253906,
+      "peak_mm_h": 942.8742108866572,
+      "native_equivalent_runoff_m": 0.04812216758728027,
+      "width_before_first_shear_m": 0.07878966629505157,
+      "width_after_last_shear_m": 0.1564873605966568
+    },
+    {
+      "mode": 0,
+      "ofe": 2,
+      "owner": 3,
+      "terminal": 3,
+      "duration_s": 183.73585510253906,
+      "peak_mm_h": 820.359232602641,
+      "native_equivalent_runoff_m": 0.041869278997182846,
+      "width_before_first_shear_m": 0.15000000596046448,
+      "width_after_last_shear_m": 0.17975470423698425
+    },
+    {
+      "mode": 0,
+      "ofe": 3,
+      "owner": 3,
+      "terminal": 3,
+      "duration_s": 183.73585510253906,
+      "peak_mm_h": 2.622711826916202,
+      "native_equivalent_runoff_m": 0.00013385727652348578,
+      "width_before_first_shear_m": 0.15000000596046448,
+      "width_after_last_shear_m": 0.15000000596046448
+    },
+    {
+      "mode": 1,
+      "ofe": 1,
+      "owner": 3,
+      "terminal": 2,
+      "duration_s": 1532.0115966796875,
+      "peak_mm_h": 113.07995446259156,
+      "native_equivalent_runoff_m": 0.04812216758728027,
+      "width_before_first_shear_m": 0.07878966629505157,
+      "width_after_last_shear_m": 0.08229919523000717
+    },
+    {
+      "mode": 1,
+      "ofe": 2,
+      "owner": 3,
+      "terminal": 2,
+      "duration_s": 1532.0115966796875,
+      "peak_mm_h": 98.3865960733965,
+      "native_equivalent_runoff_m": 0.041869278997182846,
+      "width_before_first_shear_m": 0.15000000596046448,
+      "width_after_last_shear_m": 0.15000000596046448
+    },
+    {
+      "mode": 1,
+      "ofe": 3,
+      "owner": 3,
+      "terminal": 2,
+      "duration_s": 1532.0115966796875,
+      "peak_mm_h": 0.0,
+      "native_equivalent_runoff_m": 0.0,
+      "width_before_first_shear_m": 0.15000000596046448,
+      "width_after_last_shear_m": 0.15000000596046448
+    }
+  ],
+  "next_runoff": [
+    {
+      "mode": 0,
+      "ofe": 1,
+      "consumed_width_m": 0.1564873605966568,
+      "rspace_m": 1.0,
+      "rillar": 0.1564873605966568,
+      "interrill_friction": 4.070005416870117,
+      "rill_friction": 1.1100016832351685,
+      "equivalent_friction": 3.606802225112915,
+      "alpha_m_half_per_s": 1.1424245834350586,
+      "qinf_inputs": [
+        0.012070481665432453,
+        1.1424245834350586,
+        5.599999904632568,
+        2.2222227613610812e-08,
+        8322.412109375,
+        6.571722366288668e-08
+      ],
+      "qinf_output_m": 0.01204310730099678,
+      "qinf_recession_reduction_m": 2.737436443567276e-05
+    },
+    {
+      "mode": 0,
+      "ofe": 2,
+      "consumed_width_m": 0.17975470423698425,
+      "rspace_m": 1.0,
+      "rillar": 0.17975470423698425,
+      "interrill_friction": 16.625263214111328,
+      "rill_friction": 2.553025245666504,
+      "equivalent_friction": 14.095712661743164,
+      "alpha_m_half_per_s": 1.6497721672058105,
+      "qinf_inputs": [
+        0.009774591773748398,
+        1.4247593879699707,
+        10.170000076293945,
+        1.1008702216486199e-07,
+        1366.511474609375,
+        2.6262364372087177e-07
+      ],
+      "qinf_output_m": 0.009685537777841091,
+      "qinf_recession_reduction_m": 8.905399590730667e-05
+    },
+    {
+      "mode": 1,
+      "ofe": 1,
+      "consumed_width_m": 0.08229919523000717,
+      "rspace_m": 1.0,
+      "rillar": 0.08229919523000717,
+      "interrill_friction": 4.070005416870117,
+      "rill_friction": 1.1100016832351685,
+      "equivalent_friction": 3.826399564743042,
+      "alpha_m_half_per_s": 1.1091582775115967,
+      "qinf_inputs": [
+        0.012070481665432453,
+        1.1091582775115967,
+        5.599999904632568,
+        2.2222227613610812e-08,
+        8322.412109375,
+        6.571722366288668e-08
+      ],
+      "qinf_output_m": 0.01204256247729063,
+      "qinf_recession_reduction_m": 2.7919188141822815e-05
+    },
+    {
+      "mode": 1,
+      "ofe": 2,
+      "consumed_width_m": 0.15000000596046448,
+      "rspace_m": 1.0,
+      "rillar": 0.15000000596046448,
+      "interrill_friction": 16.625263214111328,
+      "rill_friction": 2.553025245666504,
+      "equivalent_friction": 14.514427185058594,
+      "alpha_m_half_per_s": 1.6258015632629395,
+      "qinf_inputs": [
+        0.009774591773748398,
+        1.3950855731964111,
+        10.170000076293945,
+        1.1008702216486199e-07,
+        1366.511474609375,
+        2.6262364372087177e-07
+      ],
+      "qinf_output_m": 0.009684279561042786,
+      "qinf_recession_reduction_m": 9.031221270561218e-05
+    }
+  ],
+  "qinf_mode_differences": [
+    {
+      "ofe": 1,
+      "changed_qinf_inputs": [
+        "effective_alpha_m_half_per_s"
+      ],
+      "adjusted_runoff_on_minus_off_mm": -0.0005448237061500549
+    },
+    {
+      "ofe": 2,
+      "changed_qinf_inputs": [
+        "effective_alpha_m_half_per_s"
+      ],
+      "adjusted_runoff_on_minus_off_mm": -0.0012582167983055115
+    }
+  ],
+  "cross_window_width_values": [
+    {
+      "mode": 0,
+      "ofe": 1,
+      "last_width_233_m": 0.1564873605966568,
+      "first_consumed_width_243_m": 0.1564873605966568,
+      "exact": true,
+      "scope": "Direct equality of observed cross-window values; no claim of observation on intervening days."
+    },
+    {
+      "mode": 0,
+      "ofe": 2,
+      "last_width_233_m": 0.17975470423698425,
+      "first_consumed_width_243_m": 0.17975470423698425,
+      "exact": true,
+      "scope": "Direct equality of observed cross-window values; no claim of observation on intervening days."
+    },
+    {
+      "mode": 1,
+      "ofe": 1,
+      "last_width_233_m": 0.08229919523000717,
+      "first_consumed_width_243_m": 0.08229919523000717,
+      "exact": true,
+      "scope": "Direct equality of observed cross-window values; no claim of observation on intervening days."
+    },
+    {
+      "mode": 1,
+      "ofe": 2,
+      "last_width_233_m": 0.15000000596046448,
+      "first_consumed_width_243_m": 0.15000000596046448,
+      "exact": true,
+      "scope": "Direct equality of observed cross-window values; no claim of observation on intervening days."
+    }
+  ],
+  "call_support": [
+    {
+      "window": "first_peak",
+      "mode": 0,
+      "trace_rows": 5515,
+      "producers": {
+        "writeback": 3,
+        "width": 6,
+        "friction": 6,
+        "alpha": 3,
+        "qinf": 3
+      }
+    },
+    {
+      "window": "first_peak",
+      "mode": 1,
+      "trace_rows": 5487,
+      "producers": {
+        "writeback": 3,
+        "width": 6,
+        "friction": 5,
+        "alpha": 2,
+        "qinf": 2
+      }
+    },
+    {
+      "window": "next_runoff",
+      "mode": 0,
+      "trace_rows": 5633,
+      "producers": {
+        "writeback": 3,
+        "width": 6,
+        "friction": 5,
+        "alpha": 2,
+        "qinf": 2
+      }
+    },
+    {
+      "window": "next_runoff",
+      "mode": 1,
+      "trace_rows": 5633,
+      "producers": {
+        "writeback": 3,
+        "width": 6,
+        "friction": 5,
+        "alpha": 2,
+        "qinf": 2
+      }
+    }
+  ],
+  "exact_arithmetic": [
+    "IRS duration assignment and peak recomputation",
+    "SHEARS selection/max/spacing cap using observed native candidate",
+    "FRCTEQ linear combination",
+    "RDAT ALPHA square-root expression"
+  ],
+  "observed_not_independently_solved": [
+    "SHEARS width power-law candidate",
+    "QINF nonlinear recession-infiltration law"
+  ],
+  "limits": [
+    "Native producer support may differ between modes; absent calls are not zero values.",
+    "Stored pre-writeback values need not represent independently computed upstream hydrographs.",
+    "No physical validation of shared-duration routing or100mm roughness.",
+    "No direct decomposition/residue attribution.",
+    "No annual magnitude acceptance or whole-nine-pair claim."
+  ],
+  "review_sha256": "1f243d222c6d8dfc3a4dab70f2c9415f7d6d475bc2e06c898858ef10ea0bfdb6",
+  "declaration_sha256": "14d05e3b2f52c1b3aca0b4020ea2ce8acff3948f9cbeaeade2ce33f913432917"
+}

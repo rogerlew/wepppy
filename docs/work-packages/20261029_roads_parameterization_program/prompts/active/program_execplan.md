@@ -5,13 +5,19 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: roughness-conditioning counterfactual in preparation
+## Current: native coupling localized; declare whole-hillslope response study
 
-Current [candidate ledger v18](../../artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The operator has authorized
-the next controlled study of buffer roughness conditioning, with other inputs
-and bulk-density handling fixed. Source/design review is active before execution.
-Revision 4 is delivered; no parameter candidate is accepted.
+Current [candidate ledger v19](../../artifacts/candidate-ledger-v19.json) preserves the failed isolation and completed localization.
+
+The roughness counterfactual remains failed on upstream isolation; its remaining
+32 runs are stopped. Four observation-only replays now establish native coupling:
+terminal flow duration changes upstream peaks and persistent rill widths, then
+width-dependent friction changes runoff in the next storm. All 28 ordinary
+outputs and four full-period state traces reproduce the retained modes exactly.
+Both independent reviews pass. Next declare a fresh nine-pair whole-hillslope
+response study; physical correctness of the routing approximation and initial
+100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
+candidate is accepted. See the [executed coupling findings](../../artifacts/buffer-roughness-coupling-localization-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](../../artifacts/param-u12-scientific-acceptance.json) binds the
@@ -79,11 +85,12 @@ controls retain 100 mm. The three underprediction controls retain equal
 roughness across lanes and still diverge in storage and exchange. Whole-profile
 confounding remains; neither a universal adjustment nor a new defect is proven.
 
-Next predeclare a full-period roughness-conditioning-only counterfactual on the
-same pairs, holding other inputs and bulk-density handling fixed. Observe its
-hydraulic and derived erosion responses; it is not a depression-storage-only
-intervention or an accepted parameter rule. Preserve both directions and passing
-controls. No counterfactual was executed in this observation study.
+The subsequent counterfactual failed upstream isolation, and four diagnostic
+replays established native coupling. Next use a fresh whole-hillslope response
+declaration on the same pairs, holding other inputs and bulk-density handling
+fixed. Preserve both discrepancy directions and passing controls. This remains
+a model-sensitivity experiment, not a depression-storage-only intervention or
+an accepted parameter rule.
 
 The O1 missing-calendar build and O2 lazy-reader dependency failure remain
 retained; O2 includes one completed legacy run, not an accepted pair. The O3
@@ -111,7 +118,9 @@ This execution stops at the explicit human specification/layout gate.
 
 - [x] Draft the [roughness-persistence counterfactual](../../artifacts/buffer-roughness-counterfactual-r4-plan.md): 18 off controls and 18 persistence runs, full periods, unchanged profiles and fixed nine pairs. Retain mature-forest management metadata provenance separately.
 - [x] Freeze the scientific and implementation preparation-design reviews. Density/porosity have exact source-supported invariants; ridge height and residue-dependent decay remain observed endogenous responses. No source implementation or execution is accepted by those design receipts.
-- [ ] Obtain exact source/design and runner review, then execute a four-run first-pair preflight and the remaining 32 runs. O3 remains immutable; no production value or binary is promoted.
+- [x] Complete exact source/build/runner reviews and four full-period u1b preflight executions. Individual runtime/accounting gates pass, but modern upstream outputs differ: the paired isolation gate fails and the remaining 32 runs stay unexecuted.
+- [x] Execute and independently review all four [coupling localization replays](../../artifacts/buffer-roughness-coupling-localization-r4-plan.md): 28 ordinary outputs and four full-state traces exact; executed duration/peak/width/friction/runoff path established. Original isolation remains failed.
+- [ ] Predeclare and independently review a fresh nine-pair whole-hillslope response experiment, permitting the observed endogenous coupling while preserving exact off/null/density/input and physical gates. Execute only under the new declaration.
 - [x] Read and independently verify all 315,576 published SOIL rows for the nine frozen pairs; fresh v3 conversion binds the actual Rust library and preserves source artifacts. Archive all three attempts with all 65 members verified.
 - [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
@@ -130,7 +139,7 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Execute all 18 O3 full-period runs: 126 ordinary output files exactly match revision 4; all physical, strict particle and trace-coverage gates pass.
 - [x] Complete independent full runtime and scientific review, bounded process reconciliation and raw retention; no parameter ablation in this observation study.
 - [x] Complete independent source-free publication and actual documented reproduction checks; retain 34 interpretation/replay files in a separate verified archive. The regenerated PNG is byte-identical; rerunning into existing destinations fails without changing them.
-- [ ] Predeclare and independently review a full-period roughness-conditioning-only counterfactual, keeping other inputs and bulk-density handling fixed; then execute its bounded diagnostic panel before broader validation.
+- [x] Predeclare/review the full-period roughness counterfactual with fixed other inputs and density handling. Its first-pair isolation gate failed; broader validation is not authorized under that failed gate.
 
 - [x] Clean candidate broad native/Disturbed/Roads gates executed; all physical checks pass, magnitude target remains unmet.
 - [x] Complete Cedar watershed semantic/particle/source review and revision-3 delivery.
@@ -294,6 +303,10 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Executed localization closes the native feedback: day 233 buffer runoff disappears under the intervention, changing the terminal flow plane from buffer to fill. IRS assigns the terminal duration upstream; changed peaks alter persistent widths. On day 243 those exact widths change friction and routing ALPHA; all other observed upstream QINF operands are bit-identical. This proves model coupling, not physical correctness of shared-duration routing or the roughness treatment.
+
+- The modern off/on pair has real upstream peak/duration/width changes on year 4/day 233, before water and residue differences. Density, porosity and upstream RRC/RH remain exact. IRS has an explicit connected-group upstream duration/peak assignment; persistent rill width can feed the next storm's friction and recession calculation. At the failed-preflight stage this was only a source-supported mechanism; the subsequent localization above establishes its execution. Neither result demonstrates a new defect or physical realism.
+- The first counterfactual preflight ran only legacy O4, with seven exact ordinary outputs and a passing physical audit, then stopped on a coverage error: friction calls also occur inside IRS, so their global count cannot equal PARAM entries. Retain that attempt and the frozen first independent reader; use a versioned, source-backed phase-window check with a regression for legitimate additional hydrology calls. No U1 outcome or model defect follows from this harness failure.
 - The RRC intervention reaches crust/effective conductivity, critical shear, friction, interrill delivery, depression storage and snow/thermal readers. At this panel's configured initial roughness, the existing interrill roughness factor is zero. A successful persistence counterfactual therefore would not prove a retention-only explanation or validate that roughness as a production default.
 - Two Denver target contrasts have no GRNA excess in either lane, but hourly surface return supplies all generated outlet water. Equal-roughness underprediction controls still diverge in storage/runoff/exchange. Roughness also affects derived erosion corrections, so a roughness-only intervention cannot be described as depression-storage-only causality. The complete profile comparisons do not identify a single correct coefficient.
 
@@ -388,6 +401,9 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-10-31: both independent actual readbacks accept the four-run localization for bounded interpretation. Proceed to a fresh, reviewed whole-hillslope sensitivity declaration because native feedback makes the original upstream-isolation criterion incompatible with this intervention. Keep that original campaign failed and all global magnitude/physical criteria unchanged; do not promote 100 mm roughness or call the observed routing behavior a defect.
+
+- 2026-10-31: retain u1b as a failed upstream-isolation experiment and stop its remaining 32 runs. Authorize four separately predeclared observation-only full-period replays at the first changed storm and next runoff, with exact same-mode output parity. Do not silently relax the failed criterion; a subsequent whole-hillslope-response campaign requires a new reviewed declaration.
 - 2026-10-31: proceed with the recommended counterfactual under the operator's continued authorization. Change only the declared buffer roughness-conditioning path; preserve density handling, generated profile lineage, reference comparisons, withheld materials and the UI human gate. Review the insertion point before execution so all dependent hydraulic and erosion calculations see a consistent state.
 - 2026-10-31: accept O3 for bounded observational interpretation after exact output parity and independent runtime, boundary and scientific review. Choose a separately declared roughness-conditioning-only counterfactual next; preserve density, other inputs, both error directions and passing controls. Do not manipulate density to force the roughness branch or treat legacy behavior as the physical target.
 
@@ -478,6 +494,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+- Roughness isolation failed after four corrected preflight runs; an earlier single legacy run stopped on harness coverage. All five runs are retained. Four additional observation-only replays reproduce their corresponding modes exactly and establish executed native upstream coupling. This changes the next experimental question to whole-hillslope response, without accepting a parameter or changing the released engine.
 
 - Buffer observation is complete: 18 accepted full-period runs, 126 exact ordinary outputs and independently reconciled process observations. O1/O2 staging/inventory failures and the separate review summation-order failure remain retained. Bind external make prerequisites and load existing lazy audit modules before freezing execution dependencies. The findings support a controlled surface-conditioning test, not a default change or a new engine repair.
 
@@ -1333,3 +1351,9 @@ The 36-run persistence design and its independent preparation reviews are frozen
 before implementation. Exact patch, build, runner and execution gates remain;
 the tested intervention retains all natural roughness-dependent responses and
 does not assert that the configured initial roughness is physically correct.
+
+2026-10-31 continuation update: retained the failed roughness-isolation campaign
+(4,564 files) and independently accepted four-replay coupling localization
+(1,409 files). Ledger v19 binds the separate dispositions and exact archives.
+The next experiment requires a fresh whole-hillslope declaration because the
+executed routing feedback contradicts the original isolation expectation.

@@ -1,0 +1,44 @@
+{
+  "review_type": "Independent AI scientific review, not institutional peer review",
+  "accepted_executed_model_coupling": true,
+  "accepted_localization_evidence": true,
+  "accepted_original_isolation": false,
+  "accepted_parameterization": false,
+  "accepted_physical_routing_validation": false,
+  "blocking_findings_for_localization": [],
+  "scope": "Four mode-matched observation-only replays establish native connected-duration and persistent-width feedback for first changed upstream events. No annual improvement conclusion.",
+  "next_study_recommendation": "Fresh36 full-period runs, same9pairs and same single buffer RRC persistence rule, under an explicitly new whole-hillslope response declaration. No inherited acceptance of failed U1b.",
+  "unchanged_next_study_gates": [
+    "Exact ordinary and auxiliary inputs",
+    "Off/reference exact parity",
+    "Twelve predicted native-identity controls",
+    "Exact BD/POR and fixed driver trajectories",
+    "Strict physical and particle audits",
+    "Original magnitude envelope and declared recovery/no-regression criterion"
+  ],
+  "permitted_next_study_response": "Source-established endogenous upstream hydraulics, persistent geometry and erosion changes, explicitly observed and reported.",
+  "remaining_limits": [
+    "No physical validation of the shared-duration heterogeneous-routing approximation.",
+    "No calibration of configured100mm roughness or physical truth claim for legacy soils.",
+    "Residue feedback only association.",
+    "No native defect established merely by nonlocal coupling.",
+    "A new unexplained state/provenance/physical failure still blocks interpretation."
+  ],
+  "native_runs_by_reviewer": 0,
+  "bindings": {
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-final-scientific-review.md": "d1024e6ebcf3b414165081a110b5b9a3b555cbbe620bdd8b0589b66ad08b8ec7",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-full-readback.json": "1f243d222c6d8dfc3a4dab70f2c9415f7d6d475bc2e06c898858ef10ea0bfdb6",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-executed-chain.json": "4b3f6def6ca61ae027984628a0b37fd496f98ffeed89cea3a496357c13f26aaa",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_localization_r4.py": "bc7269e574c03ebd8f32e873ef06b7574d63866a3d34837fca934692b0cc35a3",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/review_buffer_coupling_chain_r4.py": "19ee117fd829632f00e4571a95d603b6ff046b0e407ef8a0215bc725b171f500",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-implementation-readback.json": "318dcb2c0c20a4dc9ea7290b32d166cffc6268ef40241afee777784589d3e457",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-independent-reader-declaration.json": "ade00365efaf11419642e7fbce8e92c5acedb1cd0b1104bb31df36d5fc33f306",
+    "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-coupling-localization-r4-plan.md": "5fe90758dc1374f9e77b9b51b95f940af7da77b2e5f49084f31d19a496f521e1",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/verification.json": "cc5188de6dfb5e25a092cad8a1befad09f50da8fcb47f63d575bdac993b6a3e4",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/results.json": "99d33991aa7624edbd7244e162f9ad3fb2a76b96db62cf008dadd84fbbcf32bc",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/execution-declaration.json": "6d0a0e11bccd82b6115c4b4d342dbbc2f5cca0ef1e81c152c3b6177f17949c29",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/build-receipt.json": "f5efe41abad42e1c111d9d394ca8de2fc25a4da6a33975586399c827b4a4ca30",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/attempt-o1/observer-map.json": "02d3cd9657d95e8f2afb974c6a11b38392103a56e0128ad6965db198d48a1ad8",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-coupling-localization-r4/selection.json": "04e811e02ce231592a434554e5204d70e974187e267bd19ec8574aeeac1103b1"
+  }
+}

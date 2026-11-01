@@ -1,0 +1,68 @@
+{
+  "reviewer": "independent implementation reviewer",
+  "scope": "Exact isolated diagnostic binary build only; no native model execution, interpretation, parameter promotion or canonical binary/source changes",
+  "approved_build": true,
+  "accepted_native_execution": false,
+  "accepted_scientific_interpretation": false,
+  "blocking_findings": [],
+  "bindings": {
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/prebuild-manifest.json": "15374e923ab0a0cf042ebd9ba0ab3fec89f79be9cb512e4a1b9b8b3a4fef664e",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/intervention-map.json": "be23e5503a34f82d61f507f82e8f98459c20696583b3afcd49e39743c779d07b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/counterfactual.patch": "ebcbe3119f54052563775cc4eb67cf9230b5381dc692638533bc6868901c4fcf",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build_counterfactual.py": "505bd494b13f1516d9f32b555065d8dde8330ee9d4586754798e4ef51ee4ae37",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/staging-receipt.json": "6d8e2cd95b9fd1fddfdfdbccff457b699d03b940849a9bcef4383aa5136c14f5",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/stage_build.py": "97d5b70b038c7ef8cc070b17a75f4c129775285ef48a3f022394af67d0692f7b",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/freeze_prebuild.py": "6ce6642fc4e14036c9daf16f1568037e4244dfadd62a85d4899b7db43cd64952",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/prepare_source.py": "b7893ecbad148fef87e43fbb50d57d3305fc1e9699a8e3b9e089c40308825a07",
+    "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/attempt-u1/build-dry-run.log": "d883001159a9fa4ad47038348cb0e39f70e491a72947d3c03d92b633370862ec"
+  },
+  "private_independent_probe": {
+    "path": "/home/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/u1-source-probe/receipt.json",
+    "sha256": "427157255f097d03d7cce991e6a9797c0a72c4f3eff9ac642b68d00dcea2b877"
+  },
+  "independent_readback": {
+    "baseline_src_files": 977,
+    "sibling_source_files": 1,
+    "staged_files": 978,
+    "staging_file_set_exact": true,
+    "candidate_source_files": 4,
+    "all_original_lines_retained": true,
+    "added_lines": 192,
+    "added_executable_fixed_form_lines_within72": true,
+    "syntax_only_checks": 4,
+    "syntax_only_passed": 4,
+    "compiler": "/usr/bin/gfortran",
+    "path": "/usr/bin:/bin",
+    "no_link_or_native_execution": true,
+    "toolchain_and_runtime_hashes_match": true,
+    "dry_run_expected_changed_objects": [
+      "frcfac.o",
+      "infpar.o",
+      "param.o",
+      "soil.o"
+    ],
+    "dry_run_expected_compiler_link_commands": 5
+  },
+  "source_review": [
+    "One added model-state assignment restores only RRC of OFE3 after every native SOIL roughness writer and before INFPAR, preserving downstream critical shear, friction, interrill, storage and active thermal consequences.",
+    "Initialization captures native REAL values once; subsequent buffer RRINIT/tillage and three-OFE/continuous/cropland/layer scope are checked before helper state reads.",
+    "Initialization diagnostics use literal zero dates; daily diagnostics alone access initialized calendar state. Density arrays match caller shapes; CBR and new consumer locals are observed only after assigned producer paths.",
+    "IRSYST now rejects configured irrigation before processing; NOIRR is separately labeled carried state because current daily IRRIG follows SOIL.",
+    "Off mode performs no RRC assignment; exact native REAL bits are recorded for upstream and expected null-control proofs. Exact runtime parity remains unproven until execution.",
+    "New PARAM class observation loop ends with the same loop-index value as the immediately preceding native class loop and changes no class values.",
+    "Private control/trace units do not collide with existing units; explicit control read failures are checked before evaluating parsed fields.",
+    "Sibling calendar source and nested hill/watershed includes are all present and independently rehashed. Only four source files differ from immutable O3."
+  ],
+  "resolved_review_findings": [
+    "RKECUM unit corrected to J/m2 and CKE to m2/J.",
+    "Malformed control read now checks IOSTAT before target/mode use.",
+    "Added IRSYST guard closes pre-daily-IRRIG scope hole."
+  ],
+  "remaining_required_gates": [
+    "Actual build success; compare actual commands and object deltas to declared dry-run, validate ELF/runtime libraries and unchanged source inventories.",
+    "Frozen execution runner/declaration and deterministic eager-PyArrow dependency closure, with independent first-pair approval before any native model run.",
+    "Four full-period first-pair executions, then complete36-run output/accounting/control readback.",
+    "No-op and off-mode ordinary-output parity, all-period upstream and BD/POR driver isolation, branch-aware trace coverage and unchanged strict particle predicates."
+  ],
+  "residual_risk": "Source and syntax review cannot establish floating-point output parity or prove absence of shared-state feedback; actual full-period gates remain mandatory."
+}
