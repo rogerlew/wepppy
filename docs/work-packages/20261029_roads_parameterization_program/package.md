@@ -1,27 +1,34 @@
 # Roads parameterization and configuration view
 
-## Current: roughness response improves one case; sufficient remedy rejected
+## Current: consumed storage and initialization ownership established
 
-Current [candidate ledger v20](artifacts/candidate-ledger-v20.json) records the failed isolation, completed localization and fresh whole-hillslope response.
+Current [candidate ledger v21](artifacts/candidate-ledger-v21.json) records the
+reviewed [all-nine storage decomposition](artifacts/buffer-storage-ownership-r4/findings.md).
+Primary B1/B2/B3 available-storage deficits mainly reflect initialized structural
+UL: both pore volume and corrected dry-water offset matter. Opposite-direction
+underprediction controls retain higher capacity and less occupied water. Target
+storage barely changes between roughness modes, so this does not quantify annual
+sediment causality. No new native defect or parameter promotion is established.
 
-The roughness counterfactual remains failed on upstream isolation; its remaining
-32 runs are stopped. Four observation-only replays now establish native coupling:
-terminal flow duration changes upstream peaks and persistent rill widths, then
-width-dependent friction changes runoff in the next storm. All 28 ordinary
-outputs and four full-period state traces reproduce the retained modes exactly.
-Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](artifacts/buffer-roughness-hillslope-response-r4-plan.md)
-completed all 36 corrected-attempt histories with both independent runtime
-readbacks passing. All 18 off-mode references and 12 null controls are exact.
-One selected overprediction recovers the original envelope (378.852 to 96.728
-kg/year against 37.286); no passing case regresses. The three primary small-load
-failures improve but remain failed, and all three underprediction controls are
-unchanged. This passes the bounded improvement criterion but rejects roughness
-persistence as a sufficient remedy. See [findings and residual processes](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
-Next decompose retained storage-capacity, liquid/ice and contributing-length
-observations, checking producer/snapshot timing before any new observer or
-parameter change. Physical correctness of the routing approximation and initial
-100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
-candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
+Retained traces reproduce all 152 native storage calls. A narrowly scoped,
+independently reviewed initialization observer completes 36 original 16-year
+histories with 252 ordinary outputs and 72 existing traces byte-identical to
+accepted u2 modes. Independent readbacks validate 586 initialization layers,
+556 consumed layer operands and all 152 initialized minimum-conductivity
+weightings. All 6,908 prior artifacts retain exact inventories, hashes, sizes
+and mtimes; canonical native source and release binaries remain unchanged.
+
+The [ownership map](artifacts/buffer-storage-ownership-r4/ownership.md) establishes
+SCON/hourly-water-balance UL assignments and sequential upstream STOLD reuse.
+Current porosity cannot silently replace initialized UL. Next review the
+physical meaning of pore/dry capacity, its volume basis and evolving-porosity
+water accounting before declaring any behavioral ablation. Preserve all
+controls and original acceptance gates.
+
+The earlier roughness study still recovers only B8; primary small-load and
+underprediction failures remain. Roughness persistence is insufficient, and
+the original isolated-buffer experiment remains failed. See its retained
+[response findings](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the

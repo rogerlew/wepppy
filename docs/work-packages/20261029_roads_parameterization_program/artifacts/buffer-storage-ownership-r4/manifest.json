@@ -1,0 +1,27 @@
+{
+  "publication_revision": 2,
+  "predecessor_manifest_sha256": "5d916b5407e48d4d51dc7e2a9e07dfb9ae51cf3b3277dc1ff262350c33ef4cb3",
+  "scope": "Original source-free consumed-storage analysis; selected-event ownership, no parameter promotion or annual causal attribution",
+  "files": {
+    "calls.csv": "c515b1ba1c9b0b7d87f14807489dc377ae98f85e49a1916e12390ad1128f0530",
+    "connected-components.csv": "c7c32abe7a01eb81868b60dd8f1bb35b439d79a1074d76d664ce2346eb93aeab",
+    "consumed-components.csv": "bdbc18eb22f320bd56173b73700bf4bc4087dc726e759628b9a1b2d73cf5bbbf",
+    "coverage.csv": "7dceb3e818ed98b5d52bfb0c27a8de98289d7b2557559536fb9838901ee13d48",
+    "evidence-gaps.md": "30513df1348f52ba3531e017103dafd935856a036960b72b2fa80870c030a662",
+    "findings.md": "21f15fd7223f13ff1d2a03549d62b48ba07561e86b741fd2ce6cc9c2f7ab96c4",
+    "hydraulic-context.csv": "97e5b0cf75218c8fcd51e9af3004cde90a64d9c4bc4d72b8543b9d29496a8354",
+    "initial-layers.csv": "50c333f873ffc082897e5601c5828a151e1e3f07032a8817a62cf288b729af25",
+    "layers.csv": "7498af130b6cfa817fff98b2a6e3ab634e5192a5f2f352aeec821e4f3b4aeb8a",
+    "ownership.md": "32f79d2c8cf39d40a5e90b6efca8bd549512b8fb8457ea028c0d44d1ad64ea81",
+    "read_context.py": "fc147f34f17442213b411d5972d4bebc13bb9fbe6691ec69cb9e0cc7856601ee",
+    "read_contrasts.py": "8608ddeaec9a069be83345c4109130b384e6957118adfa2bab272ecd7b1aee8d",
+    "read_initialization.py": "3ffc9ff22d6c18a232dd7916c0ae66f2f37424fbc651baf405d8710db4e0d38f",
+    "read_retained.py": "968152dba9d3176a3665ae5089c17429367973aaf1949b43ec2fb43a5a245da0",
+    "readback-receipt.json": "e3a3532bc8fdd0437044e09e342ba29e3bfdfced9954fb8842d8b33957fc92c0",
+    "reproduce.md": "e84546e04e1ab7ad4b5b6af470ee48441813e6e6f2b309f1feea2a2113271f83",
+    "structural.csv": "23da606bf649be4222e6c1a4b137fcbfa184f5aefdd88943eddca3dc28ec7a1a",
+    "support.csv": "a50edc8cd354fe30e97f7f9bff16deff60962e42e3a4aabc1b85ccd21c3f18d3",
+    "target-buffer.csv": "b175350677fad3417ca3bd66ea9eca620918e01b5e087433536380f0b6ba0d9c",
+    "target-contrasts.csv": "68a3c632a4442050d90269373587043701c58753cc1edfd53e1ace982eaefc6c"
+  }
+}

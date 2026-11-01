@@ -1,27 +1,34 @@
 # Roads parameterization program tracker
 
-## Current: roughness response improves one case; sufficient remedy rejected
+## Current: consumed storage and initialization ownership established
 
-Current [candidate ledger v20](artifacts/candidate-ledger-v20.json) records the failed isolation, completed localization and fresh whole-hillslope response.
+Current [candidate ledger v21](artifacts/candidate-ledger-v21.json) records the
+reviewed [all-nine storage decomposition](artifacts/buffer-storage-ownership-r4/findings.md).
+Primary B1/B2/B3 available-storage deficits mainly reflect initialized structural
+UL: both pore volume and corrected dry-water offset matter. Opposite-direction
+underprediction controls retain higher capacity and less occupied water. Target
+storage barely changes between roughness modes, so this does not quantify annual
+sediment causality. No new native defect or parameter promotion is established.
 
-The roughness counterfactual remains failed on upstream isolation; its remaining
-32 runs are stopped. Four observation-only replays now establish native coupling:
-terminal flow duration changes upstream peaks and persistent rill widths, then
-width-dependent friction changes runoff in the next storm. All 28 ordinary
-outputs and four full-period state traces reproduce the retained modes exactly.
-Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](artifacts/buffer-roughness-hillslope-response-r4-plan.md)
-completed all 36 corrected-attempt histories with both independent runtime
-readbacks passing. All 18 off-mode references and 12 null controls are exact.
-One selected overprediction recovers the original envelope (378.852 to 96.728
-kg/year against 37.286); no passing case regresses. The three primary small-load
-failures improve but remain failed, and all three underprediction controls are
-unchanged. This passes the bounded improvement criterion but rejects roughness
-persistence as a sufficient remedy. See [findings and residual processes](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
-Next decompose retained storage-capacity, liquid/ice and contributing-length
-observations, checking producer/snapshot timing before any new observer or
-parameter change. Physical correctness of the routing approximation and initial
-100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
-candidate is accepted. See the [executed coupling findings](artifacts/buffer-roughness-coupling-localization-r4/findings.md).
+Retained traces reproduce all 152 native storage calls. A narrowly scoped,
+independently reviewed initialization observer completes 36 original 16-year
+histories with 252 ordinary outputs and 72 existing traces byte-identical to
+accepted u2 modes. Independent readbacks validate 586 initialization layers,
+556 consumed layer operands and all 152 initialized minimum-conductivity
+weightings. All 6,908 prior artifacts retain exact inventories, hashes, sizes
+and mtimes; canonical native source and release binaries remain unchanged.
+
+The [ownership map](artifacts/buffer-storage-ownership-r4/ownership.md) establishes
+SCON/hourly-water-balance UL assignments and sequential upstream STOLD reuse.
+Current porosity cannot silently replace initialized UL. Next review the
+physical meaning of pore/dry capacity, its volume basis and evolving-porosity
+water accounting before declaring any behavioral ablation. Preserve all
+controls and original acceptance gates.
+
+The earlier roughness study still recovers only B8; primary small-load and
+underprediction failures remain. Roughness persistence is insufficient, and
+the original isolated-buffer experiment remains failed. See its retained
+[response findings](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](artifacts/param-u12-scientific-acceptance.json) binds the
@@ -57,12 +64,24 @@ The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
 
+The consumed-storage study completes exact arithmetic, executed producer timing,
+independent implementation/scientific review and source-free reproduction. All
+nine pairs and both modes remain in the tables. A publication packaging revision
+adds the exact headline-table generator without changing findings or data;
+the first reviewed packet is retained separately. See
+[findings and limits](artifacts/buffer-storage-ownership-r4/findings.md),
+[reproduction](artifacts/buffer-storage-ownership-r4/reproduce.md) and
+[retention](artifacts/revision4-buffer-storage-ownership-retention.json): all
+2,223 members and the complete raw-tree inventory verified. Native incident
+checkpoint: `4dbffaf21`.
+
 The whole-hillslope study is complete and independently reviewed: 36 accepted
 u2 histories, with four valid u1 histories retained separately. All 6,908 files
 in the [raw study and interpretation archive](artifacts/revision4-buffer-roughness-hillslope-response-retention.json)
 are verified. One of seven selected failures recovers; none of the two passing
-controls regresses. The next bounded question uses retained storage operands
-and producer timing before any new observer, parameter fit or broad sweep.
+controls regresses. That checkpoint selected retained storage operands and
+producer timing as the next bounded question; the completed continuation above
+now resolves its narrow initialization-observation gap.
 See [findings](artifacts/buffer-roughness-hillslope-response-r4/findings.md).
 
 The corrected u2 first-four gate and independent nonmutation readback passed,
@@ -176,6 +195,7 @@ defect and a Roads concurrency test deadline exceeded under load. Neither invoke
 the native binary. Independent review recommends the scoped native release
 handoff; do not claim one clean original suite or closure of the order defect.
 
+Consumed-storage continuation completed under the existing program ExecPlan. The predeclared initialization-only observer closed actual UL and minimum-conductivity producer gaps. No daily probe or behavior change was needed.
 ## Historical checkpoints
 
 Historical [ledger v10](artifacts/candidate-ledger-v10.json): D2 confirms the

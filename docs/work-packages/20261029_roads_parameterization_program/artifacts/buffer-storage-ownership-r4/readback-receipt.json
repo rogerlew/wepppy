@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "exact_csv_reproductions": {
+    "readback-v3/structural.csv": true,
+    "readback-v3/target-buffer.csv": true,
+    "readback-v3/support.csv": true,
+    "readback-v3/layers.csv": true,
+    "readback-v3/calls.csv": true,
+    "init-readback-full-v1/connected-components.csv": true,
+    "init-readback-full-v1/consumed-components.csv": true,
+    "init-readback-full-v1/coverage.csv": true,
+    "init-readback-full-v1/initial-layers.csv": true,
+    "context-readback-v3/hydraulic-context.csv": true,
+    "headline/target-contrasts.csv": true
+  },
+  "observer_binary_sha256": "5f6bcebac1c82111a6a7c9685cd0d2a04f2e6c3066a3637e533a1a8054ff38b1",
+  "source_binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "histories": 36,
+  "ordinary_output_parity_files": 252,
+  "existing_trace_parity_files": 72,
+  "consumed_calls": 152,
+  "consumed_layers": 556,
+  "initial_layers": 586,
+  "missing_grna_groups": 64,
+  "native_defect_demonstrated": false,
+  "parameter_accepted": false,
+  "bindings": {
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/declaration.md": "33f3f18962e00cf6fd1e6a607b584c41086b1b9b368857754a4361242a761f68",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/native-probe/freeze.json": "cf56799cdbde04a0eb9a2f10a79b8ed8af728fdf3444ceda3cb31e736dfab2c5",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/native-probe/approval.json": "248d4385a2428d3a7bbace15db3d3e59eaf41f6f06c43fa79dee66d0409b2c86",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/native-probe/build-receipt.json": "ab8c57fc6a1786864cc581907e40aaa11673fe15cc925cad44b04786cbe27036",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/native-probe/first4-results.json": "222de37c50d9ee2dd25a08a3761598eee172776751f42071f88a85be4e20acca",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/native-probe/remaining-results.json": "f0ffca3a69bbf50190dffe3f0f4fcd93170636fe45c915d02f6d53905b0d01c2",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/readback-v3/receipt.json": "c7d1a6d77c1aa60b81f905313f960fc5c37a2cc0ad49f99e2d6217676db11181",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/init-readback-full-v1/receipt.json": "d80d706050cde7f45f458c057af6e84b31ee3801f57a9080d56c0adcd4463b5c",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/context-readback-v3/receipt.json": "8c390e04d2002b2e909b6cb95040805e5f543b486ea5153e248e748007c2d911",
+    "out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/publication-contrasts-replay/receipt.json": "3bcf9f788d459ab2988223c0b9242b4bebeef7bb241094d2cc03a0cd0af3f131"
+  },
+  "publication_revision": 2,
+  "previous_manifest_sha256": "5d916b5407e48d4d51dc7e2a9e07dfb9ae51cf3b3277dc1ff262350c33ef4cb3"
+}

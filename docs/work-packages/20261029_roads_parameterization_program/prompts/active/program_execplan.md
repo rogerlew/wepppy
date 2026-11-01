@@ -5,28 +5,35 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: roughness response improves one case; sufficient remedy rejected
+## Current: consumed storage and initialization ownership established
 
-Current [candidate ledger v20](../../artifacts/candidate-ledger-v20.json) records the failed isolation, completed localization and fresh whole-hillslope response.
+Current [candidate ledger v21](../../artifacts/candidate-ledger-v21.json) records the
+reviewed [all-nine storage decomposition](../../artifacts/buffer-storage-ownership-r4/findings.md).
+Primary B1/B2/B3 available-storage deficits mainly reflect initialized structural
+UL: both pore volume and corrected dry-water offset matter. Opposite-direction
+underprediction controls retain higher capacity and less occupied water. Target
+storage barely changes between roughness modes, so this does not quantify annual
+sediment causality. No new native defect or parameter promotion is established.
 
-The roughness counterfactual remains failed on upstream isolation; its remaining
-32 runs are stopped. Four observation-only replays now establish native coupling:
-terminal flow duration changes upstream peaks and persistent rill widths, then
-width-dependent friction changes runoff in the next storm. All 28 ordinary
-outputs and four full-period state traces reproduce the retained modes exactly.
-Both independent reviews pass. The fresh [nine-pair whole-hillslope response study](../../artifacts/buffer-roughness-hillslope-response-r4-plan.md)
-completed all 36 corrected-attempt histories with both independent runtime
-readbacks passing. All 18 off-mode references and 12 null controls are exact.
-One selected overprediction recovers the original envelope (378.852 to 96.728
-kg/year against 37.286); no passing case regresses. The three primary small-load
-failures improve but remain failed, and all three underprediction controls are
-unchanged. This passes the bounded improvement criterion but rejects roughness
-persistence as a sufficient remedy. See [findings and residual processes](../../artifacts/buffer-roughness-hillslope-response-r4/findings.md).
-Next decompose retained storage-capacity, liquid/ice and contributing-length
-observations, checking producer/snapshot timing before any new observer or
-parameter change. Physical correctness of the routing approximation and initial
-100 mm roughness remains unvalidated. Revision 4 is delivered; no parameter
-candidate is accepted. See the [executed coupling findings](../../artifacts/buffer-roughness-coupling-localization-r4/findings.md).
+Retained traces reproduce all 152 native storage calls. A narrowly scoped,
+independently reviewed initialization observer completes 36 original 16-year
+histories with 252 ordinary outputs and 72 existing traces byte-identical to
+accepted u2 modes. Independent readbacks validate 586 initialization layers,
+556 consumed layer operands and all 152 initialized minimum-conductivity
+weightings. All 6,908 prior artifacts retain exact inventories, hashes, sizes
+and mtimes; canonical native source and release binaries remain unchanged.
+
+The [ownership map](../../artifacts/buffer-storage-ownership-r4/ownership.md) establishes
+SCON/hourly-water-balance UL assignments and sequential upstream STOLD reuse.
+Current porosity cannot silently replace initialized UL. Next review the
+physical meaning of pore/dry capacity, its volume basis and evolving-porosity
+water accounting before declaring any behavioral ablation. Preserve all
+controls and original acceptance gates.
+
+The earlier roughness study still recovers only B8; primary small-load and
+underprediction failures remain. Roughness persistence is insufficient, and
+the original isolated-buffer experiment remains failed. See its retained
+[response findings](../../artifacts/buffer-roughness-hillslope-response-r4/findings.md).
 
 The exact combined U12 native pair is scientifically accepted. The
 [acceptance receipt](../../artifacts/param-u12-scientific-acceptance.json) binds the
@@ -98,8 +105,9 @@ The subsequent counterfactual failed upstream isolation, and four diagnostic
 replays established native coupling. The fresh whole-hillslope response
 study then completed 36 histories on the same pairs, preserving inputs,
 bulk-density handling and both discrepancy directions. Its bounded improvement
-does not resolve the primary failures or accept a parameter. Next decompose
-retained storage operands and their producer timing.
+does not resolve the primary failures or accept a parameter. The completed
+consumed-storage continuation now establishes operand decomposition and producer
+timing; physical adequacy and annual causality remain unresolved.
 
 The O1 missing-calendar build and O2 lazy-reader dependency failure remain
 retained; O2 includes one completed legacy run, not an accepted pair. The O3
@@ -133,7 +141,7 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Bind and review the fresh runner. Preserve the four valid u1 histories stopped for verifier risk; u2 passes first-four native, scientific and implementation gates with copied-audit nonmutation proven.
 - [x] Complete and independently read back all 36 u2 histories: 18 off references, 12 null controls and six active histories pass. B8 recovers; no passing regression; primary B1/B2/B3 and three underprediction controls remain failed.
 - [x] Finish independently reviewed process interpretation/publication and verify all 6,908 retained study/interpretation files. The selected-panel criterion passes, but the rule is insufficient for the primary discrepancy set.
-- [ ] Decompose retained first-two-layer storage limits, liquid/ice state, contributing lengths and producer/snapshot timing across all nine controls. Use existing observations first; predeclare only an actually missing producer observation if needed. Preserve physical depth/rock/air/dry-water semantics; no new multiplier or promotion.
+- [x] Decompose retained first-two-layer storage limits, liquid/ice state, contributing lengths and producer/snapshot timing across all nine controls. Use existing observations first; predeclare only an actually missing producer observation if needed. Preserve physical depth/rock/air/dry-water semantics; no new multiplier or promotion.
 - [x] Read and independently verify all 315,576 published SOIL rows for the nine frozen pairs; fresh v3 conversion binds the actual Rust library and preserves source artifacts. Archive all three attempts with all 65 members verified.
 - [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
@@ -210,6 +218,8 @@ This execution stops at the explicit human specification/layout gate.
 - [ ] Complete disposable full-project native/output validation and scientific review.
 - [ ] Draft parameterization ADR, configuration specification and static layout.
 - [ ] Present concrete specification/layout for human approval; do not implement.
+
+- [x] Execute the authorized consumed-storage study: retained readback, exact initialization-only producer observation across 36 histories, independent reviews and source-free reproduction. See the current findings and ledger v21; no annual-causality or physical-validation claim.
 
 ## Context and Orientation
 
@@ -316,6 +326,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Consumed-storage continuation: retained traces exactly reconstruct 152 GRNA storage calls. All 432 selected structural UL cells use initialized porosity; 176 differ if current porosity is substituted. The initialization-only observer closes the actual UL/minimum-conductivity producer gap with 586 assigned layers and exact output/state parity.
+
 - The first fresh whole-hillslope attempt completed four valid native histories and scientific preflight, but continuation verification would regenerate live Parquet artifacts. Metadata serialization can change hashes without changing tables. All 38 existing scientific bindings were still exact when checked; preserve this attempt and use a fresh attempt with audits on disposable copies and an explicit nonmutation regression. This is a verification-risk stop, not a native or scientific failure.
 
 - Executed localization closes the native feedback: day 233 buffer runoff disappears under the intervention, changing the terminal flow plane from buffer to fill. IRS assigns the terminal duration upstream; changed peaks alter persistent widths. On day 243 those exact widths change friction and routing ALPHA; all other observed upstream QINF operands are bit-identical. This proves model coupling, not physical correctness of shared-duration routing or the roughness treatment.
@@ -416,6 +428,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Storage study: retain all nine pairs/both modes, and add only initialization assignment observations after independent preparation review. Existing daily traces already establish saved STOLD versus advanced upstream water state; no new daily instrumentation or parameter change is justified. The private declaration and evidence-gap table are under `out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/`.
+
 - 2026-10-31: accept the fresh 36-history dataset for bounded model sensitivity only. One of seven selected failures recovers, with no passing regression, but all three primary small-reference failures and three underprediction controls remain unresolved. Prioritize decomposition of retained consumed-storage and snapshot-ownership observations before a broader sweep or new observer; do not tune a new roughness, conductivity, porosity or layer-depth value. Capacity contrasts are hypothesis-generating, not annual causality or a confirmed defect.
 
 - 2026-10-31: authorize a verifier-only fresh attempt for the whole-hillslope study. Preserve its first four valid histories and exact receipts, then execute 36 fresh histories after copied-audit verification review. Repeating four inexpensive runs avoids rewriting executed declarations or mixing accepted records across verifier versions; no scientific criterion, model rule or input changes.
@@ -513,6 +527,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+- Storage study complete: all 6,908 original files retain exact bytes, sizes, mtimes and inventory. Independent readers validate 152 storage calls, 586 initialization layers and sequential state ownership. Primary deficits are structural pore/dry capacity; opposite controls remain distinct. Eleven published CSVs reproduce exactly. Annual causality and physical adequacy remain unresolved; no new defect or parameter promotion.
 
 - Fresh whole-hillslope response completes 36 accepted u2 histories, plus four valid u1 histories retained separately after the verifier-risk stop. Both independent runtime reviews pass; one selected case recovers and no passing case regresses. All three primary small-load failures and three underprediction controls remain unresolved. Roughness matters but is insufficient, and the physical suitability of persistence/100 mm remains unvalidated.
 
@@ -1386,3 +1402,17 @@ one selected recovery, unchanged underpredictions and unresolved primary small
 loads. The next question is retained storage/epoch decomposition, not another
 roughness fit. The verifier nonmutation rule is now in the generated-artifact
 validation standard for future agents.
+
+2026-10-31 consumed-storage continuation: completed the bounded operator-requested
+study, including the necessary reviewed initialization probe and all-nine
+interpretation. Publication revision 2 adds a reproducible headline-table
+generator while preserving the first reviewed packet. Current sections and living
+entries now distinguish exact storage/epoch evidence from unresolved physical
+meaning and annual sediment causality; the program remains active.
+
+Retention and checkpoint: all 2,223 new raw archive members and the complete
+study inventory are verified (1,438,253,617 uncompressed bytes). Both reviewed
+publication revisions and failed preparation/readback attempts are retained.
+The native incident checkpoint is `4dbffaf21`; all 20 final publication members
+match reviewed bytes after Git staging. Scoped docs lint and native artifact
+policy pass; the application suite is not rerun for this analysis-only study.

@@ -1,0 +1,20 @@
+{
+  "docs_lint": {
+    "files": 8,
+    "errors": 0,
+    "warnings": 0
+  },
+  "spelling_preview": "Changed prose clean; left preexisting PROJECT_TRACKER suggestions unchanged (including axe tool name).",
+  "native_protocol_finalize": "passed",
+  "native_artifact_policy": "passed",
+  "application_suite": "not run: analysis-only publication and isolated observation probe; exact full-history parity is the scoped validation",
+  "prior_artifact_nonmutation": {
+    "passed": true,
+    "original_response_inventory_files": 6908,
+    "exact_hash_size_mtime_and_file_set": true,
+    "canonical_native_source_and_binary_files": 480,
+    "canonical_native_unchanged": true
+  },
+  "native_checkpoint": "4dbffaf21",
+  "reviewed_publication_staged_bytes": "exact across all20 manifest members"
+}

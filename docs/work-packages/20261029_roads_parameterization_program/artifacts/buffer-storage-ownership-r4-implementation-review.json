@@ -1,0 +1,68 @@
+{
+  "status": "approved",
+  "reviewer": "independent implementation agent",
+  "scope": "Actual storage readback, observation-only execution, reproducible source-free publication; no parameter or full-program acceptance",
+  "publication_manifest_sha256": "a31ace8d9c7f866e607dedff7162ad0dc6ba69ed9495a2896ef6ade5ddfafbc1",
+  "publication_files": 20,
+  "csv_tables": 11,
+  "reviewed_files": {
+    "calls.csv": "c515b1ba1c9b0b7d87f14807489dc377ae98f85e49a1916e12390ad1128f0530",
+    "connected-components.csv": "c7c32abe7a01eb81868b60dd8f1bb35b439d79a1074d76d664ce2346eb93aeab",
+    "consumed-components.csv": "bdbc18eb22f320bd56173b73700bf4bc4087dc726e759628b9a1b2d73cf5bbbf",
+    "coverage.csv": "7dceb3e818ed98b5d52bfb0c27a8de98289d7b2557559536fb9838901ee13d48",
+    "evidence-gaps.md": "30513df1348f52ba3531e017103dafd935856a036960b72b2fa80870c030a662",
+    "findings.md": "21f15fd7223f13ff1d2a03549d62b48ba07561e86b741fd2ce6cc9c2f7ab96c4",
+    "hydraulic-context.csv": "97e5b0cf75218c8fcd51e9af3004cde90a64d9c4bc4d72b8543b9d29496a8354",
+    "initial-layers.csv": "50c333f873ffc082897e5601c5828a151e1e3f07032a8817a62cf288b729af25",
+    "layers.csv": "7498af130b6cfa817fff98b2a6e3ab634e5192a5f2f352aeec821e4f3b4aeb8a",
+    "ownership.md": "32f79d2c8cf39d40a5e90b6efca8bd549512b8fb8457ea028c0d44d1ad64ea81",
+    "read_context.py": "fc147f34f17442213b411d5972d4bebc13bb9fbe6691ec69cb9e0cc7856601ee",
+    "read_contrasts.py": "8608ddeaec9a069be83345c4109130b384e6957118adfa2bab272ecd7b1aee8d",
+    "read_initialization.py": "3ffc9ff22d6c18a232dd7916c0ae66f2f37424fbc651baf405d8710db4e0d38f",
+    "read_retained.py": "968152dba9d3176a3665ae5089c17429367973aaf1949b43ec2fb43a5a245da0",
+    "readback-receipt.json": "e3a3532bc8fdd0437044e09e342ba29e3bfdfced9954fb8842d8b33957fc92c0",
+    "reproduce.md": "e84546e04e1ab7ad4b5b6af470ee48441813e6e6f2b309f1feea2a2113271f83",
+    "structural.csv": "23da606bf649be4222e6c1a4b137fcbfa184f5aefdd88943eddca3dc28ec7a1a",
+    "support.csv": "a50edc8cd354fe30e97f7f9bff16deff60962e42e3a4aabc1b85ccd21c3f18d3",
+    "target-buffer.csv": "b175350677fad3417ca3bd66ea9eca620918e01b5e087433536380f0b6ba0d9c",
+    "target-contrasts.csv": "68a3c632a4442050d90269373587043701c58753cc1edfd53e1ace982eaefc6c"
+  },
+  "evidence": {
+    "implementation-review/prebuild-approval.json": "a08dc489d612f4f39c423adccde207301f6dfad042dd25edcde5ef5a87cb28f7",
+    "implementation-review/first4-readback.json": "9616768732db29d517037fd8e901f2941bb2e29233beeb491017c4f207ec5923",
+    "implementation-review/full-probe-readback/receipt.json": "5a3ba7d44acec4b31265a8e9b945bc40a4788616fa417e67e57282d97f56ba5b",
+    "implementation-review/raw-readback-v3/receipt.json": "fd66542024a1e412b15cc4be15a5890b67932a5b01d59b5eb511f1d4a86eeaa9",
+    "implementation-review/reader-negative-controls.json": "cf420055161b847251b6a305f6cb12f7a6e2ab7b477f4b626718e3035d84556c",
+    "implementation-review/contrast-replay/receipt.json": "3bcf9f788d459ab2988223c0b9242b4bebeef7bb241094d2cc03a0cd0af3f131"
+  },
+  "checks": {
+    "retained_native_storage_calls_independently_exact": 152,
+    "retained_consumed_layer_rows": 556,
+    "fresh_full_period_histories": 36,
+    "ordinary_outputs_independently_byte_exact": 252,
+    "existing_traces_independently_byte_exact": 72,
+    "initialization_rows_independently_read": 4102,
+    "initialized_layer_producers": 586,
+    "UL_assignments_independently_exact": 1172,
+    "air_rock_minimum_assignment_sets_independently_exact": 586,
+    "source_include_object_calendar_compiler_runtime_bound": true,
+    "original_case_and_build_hash_size_mtime_nonmutation": true,
+    "reader_actual_hash_and_mtime_drift_rejected": true,
+    "existing_destination_rejected_before_input_access": true,
+    "headline18_contrasts_public_replay_byte_exact": true,
+    "all20_manifest_files_freshly_rehashed": true,
+    "source_free_publication_no_legacy_source_patch_or_full_trace": true,
+    "archive_writer_exact_inventory_and_member_hash_design_reviewed": true
+  },
+  "resolved_findings": [
+    "Retained reader validation strengthened for tag ownership, lengths, date coverage and baseline metadata.",
+    "Context reader binds exact accepted manifest and summary key with full36 key coverage.",
+    "Headline contrasts now have retained original generator, documented command and actual exact-byte replay; prior19-file packet retained."
+  ],
+  "limitations": [
+    "Selected storage arithmetic and sequential ownership do not establish annual causal shares or physical correctness.",
+    "Original arithmetic mismatch during alternative double-component check was <=1.42e-14mm due decomposition operation order, not native equality failure; final original generator reproduces exact headline bytes.",
+    "Final all6908-artifact nonmutation, archive execution/member verification and staged Git-byte check are root-owned gates after writers stop."
+  ],
+  "blocking_findings": []
+}

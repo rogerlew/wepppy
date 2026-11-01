@@ -1,0 +1,341 @@
+{
+  "version": 21,
+  "predecessor": {
+    "path": "candidate-ledger-v20.json",
+    "sha256": "94687c2a6d693543758431c084820d939da165b8db25a4a072257daa5bcff39f"
+  },
+  "engine": "wepp_261029 revision 4",
+  "wepppy_delivery_commit": "a5c40031a",
+  "status": "no_parameter_candidate_accepted",
+  "baseline_variant": "conditioned U12 erosion_road_cap; not unmodified generated soils",
+  "full_development_gate": {
+    "cases": 840,
+    "meaningful_within": 713,
+    "meaningful_cases": 766,
+    "small_within": 31,
+    "small_cases": 74,
+    "thresholds_unchanged": true
+  },
+  "paired_event_study": {
+    "cases": 116,
+    "lanes": 232,
+    "paired_case_days": 677904,
+    "paired_ofe_days": 2033712,
+    "independent_lane_ofe_rows": 4067424,
+    "annual_flux_comparisons": 8352,
+    "observational_accounting_accepted": true,
+    "small_reference_cases": 43,
+    "small_higher_generated_outlet": 43,
+    "small_lower_generated_fill_supply_and_higher_outlet": 28,
+    "meaningful_passing_controls_with_same_annual_pattern": 13,
+    "meaningful_passing_controls": 18,
+    "meaningful_underprediction_cases": 48,
+    "meaningful_underprediction_lower_generated_outlet": 48,
+    "meaningful_underprediction_lower_generated_fill": 44,
+    "printing_separated_small_case_days": 115,
+    "distinct_climate_dates": 19,
+    "exploratory_higher_generated_surface_outflow_days": 115,
+    "exploratory_zero_legacy_surface_outflow_days": 101,
+    "exploratory_lower_generated_surface_inflow_days": 42,
+    "whole_profile_treatment_not_single_parameter_causality": true
+  },
+  "legacy_anchor_limit": {
+    "within_original_benchmark": 99,
+    "cases": 116,
+    "not_acceptance_target": true
+  },
+  "next": "Review physical meaning of initialized pore/dry-water capacity, its bulk versus fine-earth volume basis, evolving porosity and water accounting before deciding whether any behavioral ablation is warranted. Do not refresh UL or tune roughness/conductivity/porosity/depth based solely on selected contrasts. Preserve full-matrix, withheld and human UI gates.",
+  "withheld_materials_untouched": true,
+  "ui_specification_and_layout_human_gate_preserved": true,
+  "production_defaults_changed": false,
+  "evidence_sha256": {
+    "event-supply-ledger-r4/manifest.json": "c0e9189141de27fef90895747158da72e68b6b3921367f1a697b15ae45c00cb9",
+    "event-supply-ledger-r4-independent-acceptance.json": "d2208fabd8bb8f3de3a1b64f1f6f16ad9cf7bc7b25dc933514a059af6d29ad23",
+    "event-supply-ledger-r4-implementation-publication-review.json": "8c00db583d7924a9bf1a878fa4a664f69f2262a43b8a129e20cdbdf8dd2c0679",
+    "revision4-paired-event-ledger-retention.json": "ca953d7993688885dbcd49ecd598ffe0975551594ae05a9353298b0a817d5e1a",
+    "revision4-delivery-complete.json": "a4fcbac3ef0d88c85bd84ec960d33d7192c2b868f89e04ed624ec57b097d1648",
+    "buffer-process-interpretation-r4/publication-manifest.json": "328a40f1e46b7917d9524c28a633137599284e436ea5672c116d0f40116e8d83",
+    "buffer-process-observation-r4-o3-final-scientific-acceptance.json": "20e5bd61dbcdb20f0f780776665ffc0b38398cac7372a385b93624d3efb83c14",
+    "buffer-process-observation-r4-implementation-final-readback.json": "8fdaa343f2fc48b35a15b5eca1cdb7d0ec7423ece6d1ee230d9abe7300956c41",
+    "buffer-process-observation-r4-retention-coverage.json": "28d79c13859c4d2bb5eac1d9bccc005f16881fb5f4e6087278794a920ce3c983",
+    "revision4-buffer-process-observation-retention.json": "31209ff33d87bc8d989e65e8435acbaa11e4b1aa4ff1e6a98e04a893644ca7b9",
+    "revision4-buffer-process-review-failure-retention.json": "af29e018b6fcd421bcc579161b2df96bc71b5a5fa5543093901c157cb8a87a1a",
+    "buffer-process-observation-r4-implementation-publication-review.json": "b245198f728a3a8a21fa053268c21293505449ebf8f3daaddab132e014eb3ddf",
+    "revision4-buffer-process-interpretation-retention.json": "53783db90afee04220c1b148cddacedffeb0337546408e8fc3d8a6ed96b4a3e7",
+    "buffer-roughness-counterfactual-r4-plan.md": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+    "buffer-roughness-counterfactual-r4-u1b-scientific-disposition.json": "e55b0e42a80871cdcf71032396022b07b619973aa21cd5d3709b2c6064365455",
+    "buffer-roughness-counterfactual-r4-implementation-u1b-readback.json": "7b922cf444d89aba803f2f730b2c7806bc661547e652bf8a116656f7e8dfea29",
+    "revision4-buffer-roughness-counterfactual-retention.json": "45df35e0e2b7687f070f1c0e4354b2730af00ac9739e39891793aabadbe92b1b",
+    "buffer-roughness-coupling-localization-r4-plan.md": "5fe90758dc1374f9e77b9b51b95f940af7da77b2e5f49084f31d19a496f521e1",
+    "buffer-roughness-coupling-localization-r4-final-scientific-acceptance.json": "b616b311f5773f18a6695e4ced61fb3c72f1e3157f422598525a462193c3f988",
+    "buffer-roughness-coupling-localization-r4-implementation-readback.json": "318dcb2c0c20a4dc9ea7290b32d166cffc6268ef40241afee777784589d3e457",
+    "buffer-roughness-coupling-localization-r4/manifest.json": "80fd78d54ad6326279b439dae6ae481dee463b03b459d0cd02e3e17dcbe936fb",
+    "buffer-roughness-coupling-localization-r4-publication-review.json": "92b361e6eeef54e1112a5ae19d43b4438b5e5eeedf3c128cd6da1e5f8c93cc05",
+    "buffer-roughness-coupling-localization-r4-publication-scientific-review.json": "7572f44e57541ef89cf13a4dcfd5e27666e13db993a460ce9a19e21e0fac1574",
+    "revision4-buffer-roughness-coupling-localization-retention.json": "538d5f678084fb8a2d10939f45bd3d4a5292f342b2d903472fdb946c91e7beb9",
+    "buffer-roughness-hillslope-response-r4-plan.md": "5a84605c903628a389bb027a2210447bb16fe800e6f8adc4ed57461316e7c732",
+    "buffer-roughness-hillslope-response-r4-verifier-amendment.md": "1b38e244921c8ae980fd9a2b576d2d27b2e02507b40e1c1027b4eb76f755842f",
+    "buffer-roughness-hillslope-response-r4-u1-implementation-disposition.json": "fe26938b44fb353cca99c0765607b1de1465e21befed51008486a86df384334f",
+    "buffer-roughness-hillslope-response-r4-u2-independent-full-readback.json": "94a6623280055192065443b12e90c85329daa5cf93fc4009090ffad8e75328e2",
+    "buffer-roughness-hillslope-response-r4-u2-implementation-final-readback.json": "b363d599a50b3cb14fb8a4a22f31b303dc0b4943035735a0f7675959da111e80",
+    "buffer-roughness-hillslope-response-r4-u2-implementation-continuation-gate.json": "2e24f68f8c2ead076c2c41f9f96b9547c86b5c676923ab5875afcfbad9ee1701",
+    "buffer-roughness-hillslope-response-r4-scientific-acceptance.json": "dd99b80e9a522ffd4285194a05a7d99ba588c31709d553002b190b343e1ace68",
+    "buffer-roughness-hillslope-response-r4/manifest.json": "b81e3bae199037e737e9aab730408f25130774b124024d3dae12a62db40b09fe",
+    "buffer-roughness-hillslope-response-r4-publication-review.json": "268b5d9a8eb8f67e8205149ff38e794c201a637ec40bc799da7b25f7beefd350",
+    "buffer-roughness-hillslope-response-r4-publication-scientific-review.json": "1f1a28cdf1ba540ed2a4d1d142828c072514c48119a1046f611616acb12dcab7",
+    "revision4-buffer-roughness-hillslope-response-retention.json": "1d9275f54db8832709918f1101f1efc016ceb03dfa3cffc4ac2fe95f44396901",
+    "buffer-storage-ownership-r4/manifest.json": "a31ace8d9c7f866e607dedff7162ad0dc6ba69ed9495a2896ef6ade5ddfafbc1",
+    "buffer-storage-ownership-r4-scientific-review.json": "67541843a36be517e5d452bda6fc79f9d803c6fb5541aeb262bf8de6c835b21a",
+    "buffer-storage-ownership-r4-implementation-review.json": "8931ddf664eb06f3804bb7f14d3e16fb79e1990ba3e57b8614a125dfd3e0de1f",
+    "buffer-storage-ownership-r4-staged-publication.json": "8b8e6749644172ae133dc0d5153211d1a0b9dff450af89b0965a58394ff9d940",
+    "buffer-storage-ownership-r4-validation.json": "59c15dffc055a387c47474dcd26712236bfa5d49f5e2b608919006e9a2c0cf9c",
+    "revision4-buffer-storage-ownership-retention.json": "da491cc654dfaf94d95a4d5df149a98caaf25fb8988a4283125ae3de1f595b13"
+  },
+  "buffer_process_observation": {
+    "pairs": 9,
+    "accepted_full_period_runs": 18,
+    "years_per_run": 16,
+    "ordinary_outputs_exact": 126,
+    "trace_rows": 133468,
+    "observed_day_ofe_groups": 108,
+    "strict_particle_events": 1677,
+    "strict_particle_flags": 0,
+    "element_print_interval_checks": 90,
+    "water_print_interval_checks": 108,
+    "absent_element_rows_preserved": 18,
+    "hourly_real_accumulations_exact": 2592,
+    "runoff_additions_exact": 21,
+    "accepted_for_bounded_observational_interpretation": true,
+    "new_native_defect_established": false,
+    "parameter_ablation_executed": false,
+    "roughness_difference_pairs": 6,
+    "equal_roughness_underprediction_controls": 3,
+    "first_build_attempt": "failed before compilation: missing sibling calendar dependency",
+    "second_attempt": "one completed legacy run; generated lane blocked by lazy audit dependency expansion; pair rejected",
+    "accepted_attempt": "O3, unchanged observer binary with eagerly bound reader dependencies"
+  },
+  "roughness_persistence_isolation": {
+    "planned_runs": 36,
+    "initial_coverage_attempt_native_runs": 1,
+    "corrected_preflight_native_runs": 4,
+    "remaining_runs_not_executed": 32,
+    "individual_runtime_accounting_checks_pass": true,
+    "legacy_null_pair_exact": true,
+    "modern_upstream_isolation_pass": false,
+    "status": "failed_original_isolation_criterion",
+    "first_upstream_output_difference": {
+      "simulation_year": 4,
+      "julian": 233,
+      "road_peak_mm_h_off": 942.874,
+      "road_peak_mm_h_on": 113.08
+    },
+    "density_porosity_drivers_and_upstream_rrc_rh_exact": true,
+    "no_retrospective_acceptance": true
+  },
+  "roughness_coupling_localization": {
+    "full_period_replays": 4,
+    "unique_mode_histories": 2,
+    "years_per_run": 16,
+    "diagnostic_windows": [
+      [
+        233,
+        234
+      ],
+      [
+        243,
+        244
+      ]
+    ],
+    "ordinary_outputs_exact": 28,
+    "full_state_traces_exact": 4,
+    "state_rows_reviewed": 583264,
+    "bounded_rows_reviewed": 22268,
+    "accepted_for_executed_model_coupling": true,
+    "chain": "terminal plane/duration -> upstream peaks -> persistent rill widths -> next-storm equivalent friction/routing coefficient -> recession runoff",
+    "qinf_nonlinear_law_independently_solved": false,
+    "physical_routing_validated": false,
+    "roughness_100mm_physically_validated": false,
+    "new_native_defect_established": false,
+    "parameter_candidate_accepted": false
+  },
+  "roughness_whole_hillslope_response": {
+    "plan": "buffer-roughness-hillslope-response-r4-plan.md",
+    "same_single_rrc_rule": true,
+    "u1_valid_native_histories_retained": 4,
+    "u1_remaining_histories_not_executed": 32,
+    "u1_stop": "verification_nonmutation_risk; all38 scientific bindings intact; not a native/scientific failure",
+    "u2_fresh_full_period_runs": 36,
+    "years_per_run": 16,
+    "off_reference_histories_exact": 18,
+    "predicted_null_pairs_exact": 12,
+    "active_modern_histories": 6,
+    "protected_density_porosity_drivers_exact": true,
+    "individual_physical_and_strict_particle_pass": 36,
+    "independent_scientific_runtime_readback_pass": true,
+    "selected_panel_improvement_criterion": true,
+    "recovered_modern_cases": [
+      "meaningful_high"
+    ],
+    "regressed_original_passing_modern_cases": [],
+    "primary_b1_b2_b3_remain_failed": true,
+    "three_underprediction_controls_unchanged": true,
+    "sufficient_remedy": false,
+    "roughness_100mm_physically_validated": false,
+    "routing_law_physically_validated": false,
+    "parameter_promotion": false,
+    "modern_annual_cases": [
+      {
+        "stratum": "small_paved_dry_legacy",
+        "reference_kg_yr": 0.0,
+        "off_on_kg_yr": [
+          7.155468077267901,
+          3.836365414920742
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      },
+      {
+        "stratum": "small_gravel_less_runon",
+        "reference_kg_yr": 0.5603679819547152,
+        "off_on_kg_yr": [
+          18.190406798837675,
+          13.879883860724483
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      },
+      {
+        "stratum": "small_gravel_dry_legacy",
+        "reference_kg_yr": 0.0,
+        "off_on_kg_yr": [
+          8.146888353033935,
+          7.198573306649034
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      },
+      {
+        "stratum": "passing_same_signature",
+        "reference_kg_yr": 20.216352579750875,
+        "off_on_kg_yr": [
+          180.52470064818053,
+          65.56305388870167
+        ],
+        "original_envelope_off_on_pass": [
+          true,
+          true
+        ]
+      },
+      {
+        "stratum": "underprediction_less_supply",
+        "reference_kg_yr": 115.22027813576567,
+        "off_on_kg_yr": [
+          5.732995507690547,
+          5.732995507690547
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      },
+      {
+        "stratum": "underprediction_not_less_supply",
+        "reference_kg_yr": 37.28602341467912,
+        "off_on_kg_yr": [
+          1.3793673401962219,
+          1.3793673401962219
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      },
+      {
+        "stratum": "small_passing_control",
+        "reference_kg_yr": 0.0,
+        "off_on_kg_yr": [
+          0.7758941288603748,
+          0.2155261469056597
+        ],
+        "original_envelope_off_on_pass": [
+          true,
+          true
+        ]
+      },
+      {
+        "stratum": "meaningful_high",
+        "reference_kg_yr": 37.28602341467912,
+        "off_on_kg_yr": [
+          378.85186103076853,
+          96.72813473126007
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          true
+        ]
+      },
+      {
+        "stratum": "underprediction_other_geometry",
+        "reference_kg_yr": 36.186479999999996,
+        "off_on_kg_yr": [
+          0.08711999999999999,
+          0.08711999999999999
+        ],
+        "original_envelope_off_on_pass": [
+          false,
+          false
+        ]
+      }
+    ],
+    "independent_implementation_runtime_readback_pass": true,
+    "native_output_files_reviewed": 252,
+    "full_state_rows_reviewed": 4931676,
+    "derived_tables_compared_exact": 144,
+    "copied_audit_nonmutation_passes": 44,
+    "verifier_receipts": 88,
+    "bounded_process_publication_review_pass": true
+  },
+  "consumed_storage_ownership": {
+    "status": "reviewed_observational_decomposition_complete",
+    "cases": 9,
+    "profile_lanes": 2,
+    "roughness_modes": 2,
+    "retained_histories": 36,
+    "fresh_initialization_observer_histories": 36,
+    "years_per_history": 16,
+    "ordinary_outputs_exact": 252,
+    "existing_traces_exact": 72,
+    "initialization_layers": 586,
+    "consumed_layer_operands": 556,
+    "storage_calls_exact_float32": 152,
+    "initialized_minimum_conductivity_calls_exact_float32": 152,
+    "selected_day_ofe_groups": 216,
+    "grna_groups_unavailable": 64,
+    "upstream_saved_rows_after_hour24": 252,
+    "upstream_saved_rows_differing_from_hour24": 184,
+    "initial_capacity_cells_exact": 432,
+    "current_porosity_substitution_mismatches": 176,
+    "selected_consumed_ice_all_zero": true,
+    "primary_contrast_mechanism": "initialized structural UL: pore-depth differences and corrected dry-water offsets dominate B1/B2/B3; smaller saved liquid contributions",
+    "opposite_controls": "B5/B6/B9: higher structural capacity and lower saved occupancy",
+    "all_nine_target_storage_nearly_unchanged_between_roughness_modes": true,
+    "annual_sediment_storage_causality_established": false,
+    "physical_capacity_validated": false,
+    "new_native_defect_established": false,
+    "parameter_candidate_accepted": false,
+    "observer_binary_sha256": "5f6bcebac1c82111a6a7c9685cd0d2a04f2e6c3066a3637e533a1a8054ff38b1",
+    "canonical_native_source_and_release_unchanged": true,
+    "native_incident_checkpoint": "4dbffaf21",
+    "public_csv_tables_reproduced_exact": 11,
+    "publication_revision": 2,
+    "previous_reviewed_publication_preserved": true,
+    "prior_retained_files_nonmutated": 6908,
+    "raw_archive_files": 2223
+  }
+}
