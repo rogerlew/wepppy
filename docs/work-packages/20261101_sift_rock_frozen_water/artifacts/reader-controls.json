@@ -1,0 +1,75 @@
+{
+  "controls": [
+    {
+      "control": "numeric_stars",
+      "command": [
+        "/home/linuxbrew/.linuxbrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/home/workdir/wepppy/docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_outputs_v2.py",
+        "--runs",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/numeric_stars/inputs",
+        "--out",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/numeric_stars/readback"
+      ],
+      "mutated_file": "inputs/normal/output/H1.wat.dat",
+      "mutated_sha256": "398a899249b9591b2fe5f84224786e97c89ad433a9bcd8fa42f58f279c33bbb4",
+      "returncode": 1,
+      "expected_rejection": "Numeric or unknown star field",
+      "passed": true
+    },
+    {
+      "control": "summary_numeric_stars",
+      "command": [
+        "/home/linuxbrew/.linuxbrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/home/workdir/wepppy/docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_outputs_v2.py",
+        "--runs",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/summary_numeric_stars/inputs",
+        "--out",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/summary_numeric_stars/readback"
+      ],
+      "mutated_file": "inputs/normal/output/H1.loss.dat",
+      "mutated_sha256": "e34546d8211b9bcc8e591b7a854acdaf6d5eecce8bf387b8cbad8f496f610e0f",
+      "returncode": 1,
+      "expected_rejection": "Numeric or unknown star field",
+      "passed": true
+    },
+    {
+      "control": "duplicate_daily_key",
+      "command": [
+        "/home/linuxbrew/.linuxbrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/home/workdir/wepppy/docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_outputs_v2.py",
+        "--runs",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/duplicate_daily_key/inputs",
+        "--out",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/duplicate_daily_key/readback"
+      ],
+      "mutated_file": "inputs/normal/output/H1.wat.dat",
+      "mutated_sha256": "8aa5405e686a61de7955d3a22e53e112f6ca5052a115117194667123e9c7fb41",
+      "returncode": 1,
+      "expected_rejection": "Duplicate daily key",
+      "passed": true
+    },
+    {
+      "control": "zero_sat_denominator",
+      "command": [
+        "/home/linuxbrew/.linuxbrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/home/workdir/wepppy/docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_outputs_v2.py",
+        "--runs",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/zero_sat_denominator/inputs",
+        "--out",
+        "/home/workdir/wepppy/out/sift-rock-frozen-water-20261101/reader-controls/zero_sat_denominator/readback"
+      ],
+      "mutated_file": "inputs/normal/runs/storage-init.txt",
+      "mutated_sha256": "09eeb59dbe057f3838d84ad8bf4959655e39a2f0965ec1e484ee802e8ddce4f9",
+      "returncode": 1,
+      "expected_rejection": "Invalid SAT denominator",
+      "passed": true
+    }
+  ],
+  "original_members_unchanged": 100,
+  "reader_sha256": "7321e9137ed3c5b4e4b60f0666646c09829775930cc1d4226018cbe210d336fb",
+  "native_invocations": 0
+}

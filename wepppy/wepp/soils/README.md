@@ -338,7 +338,7 @@ Pre-built WEPP soil files for standardized modeling. Comprehensive documentation
  - clay: percentage of  clay content (%)
  - orgmat: percentage of organic matter (%)
  - cec: cation exchange capacity in the layer (meq/100 g of soil)
- - rfg: percentage of rock fragments by volume in the layer (%)
+ - rfg: dry mass percentage of rock fragments in the layer (%)
 
 
 #### Restrictive Layer
@@ -363,3 +363,19 @@ extreme profiles do not preserve an arbitrary original volume fraction. SSURGO
 mass-derived values and uploaded soil files are unchanged. See the
 [rock representation contract](../../../docs/schemas/rock-fragment-representation-contract.md)
 for physical assumptions and validation boundaries.
+
+BC SIFT builds likewise convert source COFRAG volume percent with BD fine-earth
+bulk density. The original JSON and commented source table retain unconverted
+COFRAG and BD; generated comments identify the mass basis. Missing source
+fraction or density leaves an incomplete horizon; invalid present values fail
+explicitly. The mineral writer emits the mandatory initial saturation value
+0.75, matching the established soil-builder convention. This is an initialization
+assumption, not a measured BC saturation value. The source table uses the standard
+library, so generation does not require an undeclared formatting dependency.
+Canned water profiles remain available independently of mineral rock validity.
+
+To use the correction, explicitly rebuild the desired SIFT soils. Existing runs
+and soil files are not migrated. The generated 200 mm horizon boundary and
+native depth and mass caps still apply. See
+[ADR-0126](../../../docs/adrs/ADR-0126-sift-rock-volume-to-mass.md) for the source
+basis, compatibility decision and validation limits.

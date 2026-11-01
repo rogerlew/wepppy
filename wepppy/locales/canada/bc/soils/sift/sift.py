@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE, STDOUT
 from datetime import datetime
 
 from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.rock_fragments import rock_volume_to_mass_fraction
 from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo import GeoTransformer
@@ -186,7 +187,7 @@ class SIFT(object):
                     unique_soils.add(soil_id)
 #                    print('  soil_id', soil_id, soil_name)
                     soil = self._build_horizons(d[mukey]['Layers'][soil_id])
-                    if soil.valid or soil.is_water:
+                    if soil.is_water or soil.valid:
                         valid_cnt += 1
                         covered_area += area
                         soil_text = str(soil)
@@ -320,17 +321,18 @@ class SiftSoil(list):
                     'KP1500')
 
     def summary(self):
-        """Return a prettytable summary of each horizon."""
+        """Return a commented table preserving raw source values."""
         if self.nsl == 0:
             return '# (No Horizons)'
 
-        import prettytable
-        from prettytable import PrettyTable
-        table = PrettyTable(hrules=prettytable.HEADER, vrules=prettytable.NONE) 
-        table.field_names = list(self.summary_keys) + ['VALID']
-        for h in self:
-            table.add_row([h._d[k] for k in self.summary_keys] + [('', 'X')[h.valid]])      
-        return '\n'.join([f'# {L}' for L in table.get_string().split('\n')])
+        rows = [list(self.summary_keys) + ['VALID']]
+        rows.extend([[str(h._d[k]) for k in self.summary_keys] + ['X' if h.valid else '']
+                     for h in self])
+        widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
+        lines = [' '.join(value.center(width) for value, width in zip(row, widths))
+                 for row in rows]
+        # Prefix every physical line so source text cannot escape soil comments.
+        return '\n'.join(f'# {line}' for line in '\n'.join(lines).splitlines())
     
     def _water(self):
         """Return a canned `.sol` representation for open water polygons."""
@@ -363,10 +365,12 @@ class SiftSoil(list):
               '#  Source Data:  BC Soil Information Finder Tool (SIFT) Database',
               '#',
               self.summary(),
+              '# Rock basis: COFRAG volume%; RFG dry mass%; rock density 2.65 g/cm3',
+              '# BD is fine-earth bulk density; source values above remain unconverted.',
               '#',
               "Any Comments:",
              f"1 {self.ksflag}",
-             f"'{self.slid}' '{self.texid}' {self.nsl} {self.salb:.03f} {self.ki:.3f} {self.kr:.3f} {self.shcrit:.3f}"]
+             f"'{self.slid}' '{self.texid}' {self.nsl} {self.salb:.03f} 0.750 {self.ki:.3f} {self.kr:.3f} {self.shcrit:.3f}"]
 
         # horizons
         for i in range(nsl):
@@ -447,8 +451,12 @@ class SiftHorizon(HorizonMixin):
 
     @property
     def rfg(self):
-        """Return coarse fragment percentage."""
-        return _attr_validator(self._d['COFRAG'])
+        """Return dry mass percent from source volume and fine-earth density."""
+        volume_percent = _attr_validator(self._d['COFRAG'])
+        density = self.bd
+        if volume_percent is None or density is None:
+            return None
+        return 100.0 * rock_volume_to_mass_fraction(volume_percent / 100.0, density)
 
     @property
     def bd(self):

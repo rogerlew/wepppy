@@ -9,10 +9,11 @@ Make BC SIFT-generated WEPP soils carry dry fragment mass rather than mislabeled
 ## Progress
 
 - [x] Read SIFT writer, prior source definitions, test guidance and FRWATC.
-- [ ] M1: independent contract reviews and ADR checkpoint before repair.
-- [ ] M2: failing regression, minimal conversion, actual builder/native readback.
-- [ ] M3: predeclared reviewed complete-FRWATC fixtures, execution and accounting.
-- [ ] M4: focused/broad verification, final reviews, archive and checkpoint.
+- [x] M1: independent contract reviews and ADR checkpoint before repair (6b08f3452).
+- [x] M2: failing regression, conversion, actual three-soil builder and three complete native histories validated.
+- [x] M3: reviewed complete-FRWATC 29-case campaign executed; 18 normal controls close, threshold findings retained. Independent scientific and implementation result reviews pass.
+- [x] M4a: focused/broad verification and independent final reviews. Full suite: 12,634 passed, 423 skipped.
+- [x] M4b: 480-member archive verified; final publication checkpoint prepared.
 
 ## Context and Orientation
 
@@ -44,7 +45,7 @@ All attempts require fresh destinations; retain failed probes. No writes to hist
 
 ## Surprises & Discoveries
 
-Actual SIFT mineral writer fails on undeclared prettytable in the canonical container; its header also lacks mandatory SAT. Contract/ADR amended for standard-library commented table and explicit established SAT0.75, with separate parser/native gates. No fallback or installed dependency.
+Actual SIFT mineral writer fails on undeclared prettytable in the canonical container; its header also lacks mandatory SAT. Contract/ADR amended for standard-library commented table and explicit established SAT0.75, with separate parser/native gates. No fallback or installed dependency. Full-routine fixtures show omitted sub-millimeter unfrozen support, loss of small frozen-zone liquid on repeated mapping, and ignored sub-micrometer increments. These remain observations, without invented runoff or ET. The first SIFT history verifier falsely flagged decorative report stars; preserve its failure and accept only the independently reviewed read-only v2 result, with all original files unchanged. The exception inventory uses line-number allowlisting: the new import shifted four unchanged handlers; update their coordinates and retain an unsuppressed 4-to-4 comparison.
 
 ## Decision Log
 
@@ -52,4 +53,12 @@ Actual SIFT mineral writer fails on undeclared prettytable in the canonical cont
 
 ## Outcomes & Retrospective
 
-Work active; no implementation or full-routine outcome claimed yet.
+The actual builder emits 0, 33.8 and 89.1 dry mass percent for source volumes 0, 20 and 80 percent at BD 1.3. Focused verification passes 120 tests. The unchanged complete FRWATC campaign finishes all 29 cases, with 18 normal controls within the declared bound and five threshold fixtures showing discrepancies. This validates neither coupled frost dynamics nor a native correction. Three complete 16-year native histories pass independent mass/CPM/SAT/calendar checks. Both scientific and implementation reviews pass. The full suite passes 12,634 tests with 423 skipped. The 480-member archive is verified against its complete raw inventory; final publication captures this closure. Native source-free evidence is committed at add893ad6. The bounded phase is complete; no deployment or native correction is promoted.
+
+## Concrete Steps and Evidence
+
+Commands and exact private-runtime requirements are in artifacts/reproduce.md. Actual builder output is retained under out/sift-rock-frozen-water-20261101/sift-artifacts-v1; native processes under sift-native-v1; corrected read-only acceptance under sift-readback-v2; complete mapping probes under frozen-campaign-v1. Independent reviews bind each source and receipt identity. Focused tests pass 120; full tests finish successfully with 12,634 passed and 423 skipped. Archive creation follows final writer-clear checks.
+
+## Retention and Follow-up
+
+The private archive is /wc1/runs/ro/sift-rock-frozen-water-20261101/sift-rock-frozen-water-checkpoint.tar.gz, SHA-256 ca38bed2a5b4cda826ab35263f3dd973872dedd16354d86d4d502b73c26590c2. All 480 members and the complete raw tree match; prior 495-file and 353-file studies also remain intact. The raw publication snapshot precedes final archive/closure metadata, which are bound by the final Git publication manifest. The recommended follow-up in artifacts/next-study.md first measures threshold recurrence and residual ownership in complete histories; it is not an active physics-change plan.

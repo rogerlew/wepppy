@@ -1,0 +1,10 @@
+{
+  "command": "wctl run-pytest tests --maxfail=1",
+  "exit_code": 0,
+  "passed": 12634,
+  "skipped": 423,
+  "warnings": 5830,
+  "seconds": 3589.92,
+  "log_sha256": "9648bf53a9e5f2d23aa444c6625f72ef28ee7a713fafe9e6be1b084efed90150",
+  "focused_passed": 120
+}

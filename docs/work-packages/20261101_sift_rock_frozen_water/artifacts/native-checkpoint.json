@@ -1,0 +1,10 @@
+{
+  "native_commit": "add893ad6b10782c2031073b405147b1910ddee0",
+  "base_commit": "b6904dd4a",
+  "branch": "wepp_260430_negmeltfix_comparator",
+  "remote_default": "refs/remotes/origin/wepp_260430_negmeltfix_comparator",
+  "changed_files": 179,
+  "all_changes_source_free_incident": true,
+  "source_release_unchanged": true,
+  "clean_worktree": true
+}

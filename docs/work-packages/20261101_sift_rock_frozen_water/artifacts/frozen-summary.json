@@ -1,0 +1,1518 @@
+{
+  "cases": [
+    {
+      "id": "A-U",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.4156103234075346e-09,
+            "map_coarse_after_minus_fine_before": -1.4156103234075346e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -1.862645149230957e-09,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "A-P",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -8.102506443563584e-10,
+            "map_coarse_after_minus_fine_before": -8.102506443563584e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "A-F",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "map_coarse_after_minus_fine_before": -6.705522526129215e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "B-U",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 4.4703482582342247e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.4156103234075346e-09,
+            "map_coarse_after_minus_fine_before": -1.4156103234075346e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -1.862645149230957e-09,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "B-P",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -8.102506443563584e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -8.102506443563584e-10,
+            "map_coarse_after_minus_fine_before": -8.102506443563584e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "B-F",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "map_coarse_after_minus_fine_before": -6.705522526129215e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "C-U-plus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.001,
+      "actual_delta_m": 0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0009999998062849014,
+            "coarse_minus_fine_after": 8.046626975843907e-10,
+            "fine_minus_requested": -3.576278717609682e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.0579824516465663e-09,
+            "map_coarse_after_minus_fine_before": -1.0579824516465663e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -1.862645149230957e-09,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "C-U-minus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.001,
+      "actual_delta_m": -0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.0010000005513429722,
+            "coarse_minus_fine_after": 8.344650248570673e-10,
+            "fine_minus_requested": -3.8743019903364484e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 8.344650248570673e-10,
+            "map_coarse_after_minus_fine_before": 8.344650248570673e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "C-P-plus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.001,
+      "actual_delta_m": 0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0009999999850988373,
+            "coarse_minus_fine_after": -6.314367084758743e-10,
+            "fine_minus_requested": -1.788139358804841e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.314367084758743e-10,
+            "map_coarse_after_minus_fine_before": -6.314367084758743e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "C-P-minus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.001,
+      "actual_delta_m": -0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.0010000001639127731,
+            "coarse_minus_fine_after": -8.102506443563584e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -8.102506443563584e-10,
+            "map_coarse_after_minus_fine_before": -8.102506443563584e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "C-F-plus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.001,
+      "actual_delta_m": 0.0009999999310821295,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0009999999310821295,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "map_coarse_after_minus_fine_before": -6.705522526129215e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "C-F-minus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.001,
+      "actual_delta_m": -0.0010000000474974513,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.0010000000474974513,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "map_coarse_after_minus_fine_before": -6.705522526129215e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "D-P-0.003",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.003,
+      "actual_delta_m": -0.0030000004917383194,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.0030000006463378748,
+            "coarse_minus_fine_after": -6.556510889765832e-10,
+            "fine_minus_requested": -1.545995553797752e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.556510889765832e-10,
+            "map_coarse_after_minus_fine_before": -6.556510889765832e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "D-P-0.011",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.011,
+      "actual_delta_m": -0.010999999940395355,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.010999999748542898,
+            "coarse_minus_fine_after": -1.0021031018880855e-09,
+            "fine_minus_requested": 1.9185245753172708e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -3.036111709264766e-10,
+            "map_coarse_after_minus_fine_before": -3.036111709264766e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 6.984919309616089e-10,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "E-P-plus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.1,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.001,
+      "actual_delta_m": 0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0009999999850988373,
+            "coarse_minus_fine_after": 9.499490083442197e-11,
+            "fine_minus_requested": -1.788139358804841e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 9.499490083442197e-11,
+            "map_coarse_after_minus_fine_before": 9.499490083442197e-11
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "E-P-minus",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.1,
+        "p": 0.45,
+        "nw": 0.002,
+        "saxfc": 0.25,
+        "f": [
+          0.025,
+          0.025
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.00625,
+          0.00625
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": -0.001,
+      "actual_delta_m": -0.0010000001639127731,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": -0.0010000001639127731,
+            "coarse_minus_fine_after": -8.381903504606214e-11,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -8.381903504606214e-11,
+            "map_coarse_after_minus_fine_before": -8.381903504606214e-11
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.02500000037252903,
+        0.02500000037252903
+      ]
+    },
+    {
+      "id": "F-low",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.049100000000000005,
+          0.049100000000000005
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.012275000000000001,
+          0.012275000000000001
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -0.0002699996584653863,
+            "map_coarse_after_minus_fine_before": -0.0002699996584653863
+          },
+          "closed_within_fixture_bound": false
+        }
+      ],
+      "final_coarse_minus_requested_m": -0.0002700001059565693,
+      "observed_unfrozen_support_m": [
+        0.0009000003337860107,
+        0.0009000003337860107
+      ]
+    },
+    {
+      "id": "G-low",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.019640000000000005,
+        "saxfc": 0.25,
+        "f": [
+          0.049100000000000005,
+          0.049100000000000005
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.012275000000000001,
+          0.012275000000000001
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 2e-05,
+      "actual_delta_m": 1.9999220967292786e-05,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 2.0001152753829077e-05,
+            "fine_minus_requested": -1.9999220967292786e-05
+          },
+          "closed_within_fixture_bound": false
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -0.0002699996584653863,
+            "map_coarse_after_minus_fine_before": -0.0002699996584653863
+          },
+          "closed_within_fixture_bound": false
+        }
+      ],
+      "final_coarse_minus_requested_m": -0.0002900008112192154,
+      "observed_unfrozen_support_m": [
+        0.0009000003337860107,
+        0.0009000003337860107
+      ]
+    },
+    {
+      "id": "F-equal",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.049,
+          0.049
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.01225,
+          0.01225
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 8.310656884891188e-10,
+            "map_coarse_after_minus_fine_before": 8.310656884891188e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 2.9103830456733704e-11,
+      "observed_unfrozen_support_m": [
+        0.0010000020265579224,
+        0.0010000020265579224
+      ]
+    },
+    {
+      "id": "G-equal",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.019600000000000003,
+        "saxfc": 0.25,
+        "f": [
+          0.049,
+          0.049
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.01225,
+          0.01225
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 2e-05,
+      "actual_delta_m": 1.9999220967292786e-05,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 1.9999216793298302e-05,
+            "coarse_minus_fine_after": -2.9980970484011493e-10,
+            "fine_minus_requested": -4.1739944833807385e-12
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 1.562835444390842e-09,
+            "map_coarse_after_minus_fine_before": 1.562835444390842e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 1.862645149230957e-09,
+      "observed_unfrozen_support_m": [
+        0.0010000020265579224,
+        0.0010000020265579224
+      ]
+    },
+    {
+      "id": "F-high",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.048900000000000006,
+          0.048900000000000006
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.012225000000000001,
+          0.012225000000000001
+        ]
+      },
+      "modes": [
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -2.9293820147380245e-10,
+            "map_coarse_after_minus_fine_before": -2.9293820147380245e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0010999999940395355,
+        0.0010999999940395355
+      ]
+    },
+    {
+      "id": "G-high",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.019560000000000004,
+        "saxfc": 0.25,
+        "f": [
+          0.048900000000000006,
+          0.048900000000000006
+        ],
+        "sw": [
+          0.2,
+          0.2
+        ],
+        "ice": [
+          0.012225000000000001,
+          0.012225000000000001
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 2e-05,
+      "actual_delta_m": 1.9999220967292786e-05,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 1.999922681938937e-05,
+            "coarse_minus_fine_after": 8.071552592969766e-10,
+            "fine_minus_requested": 5.852096585101663e-12
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.0554898899339804e-09,
+            "map_coarse_after_minus_fine_before": -1.0554898899339804e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -1.862645149230957e-09,
+      "observed_unfrozen_support_m": [
+        0.0010999999940395355,
+        0.0010999999940395355
+      ]
+    },
+    {
+      "id": "H-low",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 5e-05,
+        "saxfc": 0.25,
+        "f": [
+          0.0009
+        ],
+        "sw": [
+          0.2
+        ],
+        "ice": [
+          0.000225
+        ]
+      },
+      "modes": [
+        0,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": -4.999999873689376e-05,
+            "coarse_minus_fine_after": 5.00002763047791e-05,
+            "map_coarse_after_minus_fine_before": 2.7756788534283316e-10
+          },
+          "closed_within_fixture_bound": false
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 3.6124139790594256e-10,
+            "map_coarse_after_minus_fine_before": 3.6124139790594256e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -5.000084638595581e-05,
+      "observed_unfrozen_support_m": [
+        0.09910000115633011
+      ]
+    },
+    {
+      "id": "H-high",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 5e-05,
+        "saxfc": 0.25,
+        "f": [
+          0.0011
+        ],
+        "sw": [
+          0.2
+        ],
+        "ice": [
+          0.000275
+        ]
+      },
+      "modes": [
+        0,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -3.010023064131673e-10,
+            "map_coarse_after_minus_fine_before": -3.010023064131673e-10
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -3.010023064131673e-10,
+            "map_coarse_after_minus_fine_before": -3.010023064131673e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.09890000522136688
+      ]
+    },
+    {
+      "id": "I-small",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 5e-08,
+      "actual_delta_m": 5.029141902923584e-08,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 5.073845385505926e-08,
+            "fine_minus_requested": -5.029141902923584e-08
+          },
+          "closed_within_fixture_bound": false
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.4156103234075346e-09,
+            "map_coarse_after_minus_fine_before": -1.4156103234075346e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -5.21540641784668e-08,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "I-middle",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 5e-07,
+      "actual_delta_m": 4.991888999938965e-07,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 4.996359348197199e-07,
+            "fine_minus_requested": -4.991888999938965e-07
+          },
+          "closed_within_fixture_bound": false
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -1.4156103234075346e-09,
+            "map_coarse_after_minus_fine_before": -1.4156103234075346e-09
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": -5.010515451431274e-07,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "I-large",
+      "group": "threshold",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.2,
+          0.3
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 2e-06,
+      "actual_delta_m": 2.000480890274048e-06,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 2.000480920083536e-06,
+            "coarse_minus_fine_after": 4.470050163352113e-10,
+            "fine_minus_requested": 2.980948821118545e-14
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 4.470050163352113e-10,
+            "map_coarse_after_minus_fine_before": 4.470050163352113e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "J-U",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.0,
+          0.0
+        ],
+        "sw": [
+          0.05,
+          0.05
+        ],
+        "ice": [
+          0.0,
+          0.0
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 0.0,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": 0.0,
+            "map_coarse_after_minus_fine_before": 0.0
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.05000000074505806,
+        0.05000000074505806
+      ]
+    },
+    {
+      "id": "J-F",
+      "group": "normal",
+      "inputs": {
+        "h": 0.1,
+        "d": 0.05,
+        "p": 0.45,
+        "nw": 0.0,
+        "saxfc": 0.25,
+        "f": [
+          0.05,
+          0.05
+        ],
+        "sw": [
+          0.05,
+          0.05
+        ],
+        "ice": [
+          0.0125,
+          0.0125
+        ]
+      },
+      "modes": [
+        1,
+        0
+      ],
+      "requested_delta_m": 0.0,
+      "actual_delta_m": 0.0,
+      "checks": [
+        {
+          "direction": 1,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "fine_minus_requested": 0.0
+          },
+          "closed_within_fixture_bound": true
+        },
+        {
+          "direction": 0,
+          "residuals_m": {
+            "fine_mutation": 0.0,
+            "coarse_minus_fine_after": -6.705522526129215e-10,
+            "map_coarse_after_minus_fine_before": -6.705522526129215e-10
+          },
+          "closed_within_fixture_bound": true
+        }
+      ],
+      "final_coarse_minus_requested_m": 0.0,
+      "observed_unfrozen_support_m": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "coordinate_pairs": [
+    {
+      "pair": "plus",
+      "max_fine_fraction_difference": 0.0,
+      "fine_stock_difference_m": 0.0,
+      "passed": true
+    },
+    {
+      "pair": "minus",
+      "max_fine_fraction_difference": 0.0,
+      "fine_stock_difference_m": 0.0,
+      "passed": true
+    }
+  ],
+  "unexpected_failures": [],
+  "scope": "Complete unchanged FRWATC mappings only, not frost energy or full hydrology"
+}

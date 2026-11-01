@@ -1,0 +1,81 @@
+{
+  "scope": "Independent retained native output/init readback; no rerun or campaign-reader import",
+  "cases": [
+    {
+      "name": "zero",
+      "initialized_layers": 30,
+      "daily_records": 17532,
+      "sat_range": [
+        0.7500000134887558,
+        0.7500000216620495
+      ],
+      "native_fragment_volume_percent_range": [
+        0.0,
+        0.0
+      ],
+      "native_mass_percent": 0,
+      "output_hashes": {
+        "H1.loss.dat": "ed744611960abb7f54a6dc1b5a1cd874dd5a138a8067e4c5544eaa2dd12a64fa",
+        "H1.soil.dat": "5ba505cce5994c39bc28ca336246aef696a4ec135c780fbc2153a943fcc6beae",
+        "H1.pass.dat": "2e06e24a7c78a754ca3635a280f31cb214fc6f9ace30e38a6959a6974d62a238",
+        "H1.plot.dat": "028f5af6e415fa5a965a87d91120f6d3459e3f6f029bf96be611366ec18811b0",
+        "H1.wat.dat": "5cbe25d04bb3782707fbe077d2ace10c72c2dc6eb7fc3b8f40e7776c144deea1",
+        "H1.element.dat": "ca852157516f15ed7e05f5a446fa933d5b480f028de50fea28f614ee9adace6f",
+        "H1.ebe.dat": "be42bae9579e57f086a22f7abefde09f87b62b650712fcbdd2d77413e3b29333"
+      },
+      "initialization_sha256": "8828ad6ca657410443ae8d96e1b3e3efcdd4331b51074f197a7bc1d1ed0a7b37",
+      "execution_receipt_sha256": "6cba9ab379b5c23f414fb8744c652dc2a9c71c19c921dc457c04c1bd3ceb40f0"
+    },
+    {
+      "name": "normal",
+      "initialized_layers": 30,
+      "daily_records": 17532,
+      "sat_range": [
+        0.7500000259138251,
+        0.7500000545238273
+      ],
+      "native_fragment_volume_percent_range": [
+        20.030081272125244,
+        20.03008723258972
+      ],
+      "native_mass_percent": 33.8,
+      "output_hashes": {
+        "H1.loss.dat": "cb401b78fa5cfcda7cbb79e430a6af2356ec9f9f48535e29fd3bd600531aa2d9",
+        "H1.soil.dat": "a9dbd902a8f651f104065f3344853b4fa00bab12fb8a468e40a02e68baef527f",
+        "H1.pass.dat": "2e9c36f0b9d78a8fcca0bcaa5b1a5465d80a11476279be3e64213fa64a4d4e69",
+        "H1.plot.dat": "2529cf47c458dec7cf7bc69be644ac43854f7d95a40627c004d063511e40eb1a",
+        "H1.wat.dat": "5574ba46a65e1653ddc1cc8d06d3119c310de857127b310c71283b6b7ac3db4d",
+        "H1.element.dat": "ac511eec17f6c1070b18dbd8d7df31dd1787b03f38d59b0e62d96106cf9a584b",
+        "H1.ebe.dat": "876c2747aef29bcd4661cca8c664fd5f30b2e3fc7ed430b66c22c679f6544b3e"
+      },
+      "initialization_sha256": "9d34728ff967a93632de18c063ba39456bd26b6c32f2a9fbd7140016121be0fc",
+      "execution_receipt_sha256": "61263fa98f08739c167bcac70166d8a7f648908d96c5eaa362609015ebe38e57"
+    },
+    {
+      "name": "high",
+      "initialized_layers": 30,
+      "daily_records": 17532,
+      "sat_range": [
+        0.7499999790066819,
+        0.7500000468256287
+      ],
+      "native_fragment_volume_percent_range": [
+        73.54407906532288,
+        73.54409098625183
+      ],
+      "native_mass_percent": 85,
+      "output_hashes": {
+        "H1.loss.dat": "59b7881e2c28c79f0b2b119c857f286039308d64b11eb88c3a32105fbbcd9ff2",
+        "H1.soil.dat": "beaf7c6c2a5d85512625066e6894b104dd261a4cf7bedf8a2fbc5f66af2d0809",
+        "H1.pass.dat": "b647588d8c10ef90f1e188387fa0a3d81a1820648aa01fba3807f8e19619088f",
+        "H1.plot.dat": "23b11136bd027881af7e2983312e8f74e5f440ffcef4bacd52c5c38ff9b3bbc5",
+        "H1.wat.dat": "6e1b5dcae5375b7cdac904b2abdd92ff64f3aa919a644cc0547a6ed6ce77abbc",
+        "H1.element.dat": "8f2c6b9655a3629dc6424ec573106aef53aececf4da1aaa59122c6dadf9e58ff",
+        "H1.ebe.dat": "678b83e9868a791c1291af7cd112b9fbcca15b01dc0679432b854f0ac9c311af"
+      },
+      "initialization_sha256": "0f838549cc6ebd0aeabef12323e447669869a024e2e439e8555878dd7bbffcb9",
+      "execution_receipt_sha256": "e442c669de008b0552be5615a364613ed174d53db509558e9df9d0d537bc71ac"
+    }
+  ],
+  "original_failed_receipt_sha256": "5bd5977a552aa5486f9a7f0b230ff2f5c1f70639d9f9984db1853db2b1c8362a"
+}

@@ -31,7 +31,9 @@ Completed locally: [WEPP 261029 artifact revision 3](docs/work-packages/20261031
 
 Active: [Volumetric and surface rock representation](docs/work-packages/20261031_rock_representation/package.md) — two dimensional repairs locally validated; surface overlap, 505 conversion cases, and a 16-year native consumer fixture retained. Initial phase complete: 102 focused and 12,591 broad tests pass; surface/native research continuation tracked in the package.
 
-Active: [Rock sources and native water accounting](docs/work-packages/20261101_rock_sources_water_accounting/package.md) — bounded source acquisition, BC field-basis confirmation, and compiled native scalar prerequisites; no production physics promotion.
+Completed bounded investigation: [Rock sources and native water accounting](docs/work-packages/20261101_rock_sources_water_accounting/package.md) — bounded source acquisition, BC field-basis confirmation, and compiled native scalar prerequisites; no production physics promotion.
+
+Completed bounded phase: [SIFT rock conversion and frozen-water mapping](docs/work-packages/20261101_sift_rock_frozen_water/package.md) — actual SIFT writer repaired and three 16-year native reader histories validated; full unchanged FRWATC campaign retains 18 closing controls and five threshold counterexamples among 29 cases. 120 focused and 12,634 full-suite tests pass (423 skipped); all 480 archive members verified. No native physics change or deployment.
 
 Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — rock-cover audit complete: all 36 retained histories have per-case identical cropland management; profile RFG is distinct from surface armor. RUSLE C units defect reproduced separately; no selected Roads activation established. Next: separate RUSLE repair and surface-cover contract; capacity scalar analysis remains independent. No parameter promotion; baseline 713/766 meaningful and 31/74 small passes, withheld and human UI gates unchanged.
 

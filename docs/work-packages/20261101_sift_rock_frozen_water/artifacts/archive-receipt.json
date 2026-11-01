@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/sift-rock-frozen-water-20261101/sift-rock-frozen-water-checkpoint.tar.gz",
+  "sha256": "ca38bed2a5b4cda826ab35263f3dd973872dedd16354d86d4d502b73c26590c2",
+  "bytes": 13303121,
+  "files": 480,
+  "uncompressed_bytes": 207870957,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "565a5b643e1ac85c4225c07b31bf7111a38660f67593749e7260c7016479b24b"
+}

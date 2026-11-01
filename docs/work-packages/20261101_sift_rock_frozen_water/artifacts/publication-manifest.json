@@ -1,0 +1,188 @@
+{
+  "scope": "Entire public work package and scoped changed source/tests/contracts/docs, excluding this manifest. The private archive contains a reviewed pre-closure scientific snapshot; archive and final closure metadata remain outside that snapshot to avoid circular hashes.",
+  "contract_ancestor": "6b08f3452",
+  "native_evidence_commit": "add893ad6b10782c2031073b405147b1910ddee0",
+  "archive_sha256": "ca38bed2a5b4cda826ab35263f3dd973872dedd16354d86d4d502b73c26590c2",
+  "files": {
+    "PROJECT_TRACKER.md": {
+      "sha256": "42987c5b454e4edfde76d0db702b1c5a61fed067f7b72b1bee527d05c6125f71",
+      "bytes": 336530
+    },
+    "docs/adrs/ADR-0126-sift-rock-volume-to-mass.md": {
+      "sha256": "95ca4fc9abc2d5d6c9f8ab04c98aedbd81a2911502b3027d9aeae3c321403094",
+      "bytes": 4491
+    },
+    "docs/schemas/rock-fragment-representation-contract.md": {
+      "sha256": "a8c5ac325bb9dfd508a0816dcd555569778a65fc7dc84e6cbd61014e820681e9",
+      "bytes": 8708
+    },
+    "docs/standards/broad-exception-boundary-allowlist.md": {
+      "sha256": "7d0940cff3d4de8ae029ed8d61700ea4d71a03104ecf8cc160fe6304420e5427",
+      "bytes": 242951
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/archive-receipt.json": {
+      "sha256": "511a05829898dceafb51eaf7ac2b4fefd9c989d4c2d149af7cd47a1cf2c8c903",
+      "bytes": 421
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/contract-decision.md": {
+      "sha256": "b83f7b5a3217b98e85c03145a36a11ed3dac6933ffd03f8975e35ababdde0e27",
+      "bytes": 2378
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/final-gates-review.md": {
+      "sha256": "1386a00cd3bc41be6ab12f1705a99b9649a6cbca92ef49094e7a165b0213cd34",
+      "bytes": 2635
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/final-publication-review.md": {
+      "sha256": "ded9853a9335975334a1aa853d85c404691945d98a9bc979ef63c2acacf6e506",
+      "bytes": 3299
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/final-science-review.md": {
+      "sha256": "727a5901d082b1b6b7fb70af27642a0a36d0e6c007d4acddfb4907d491ab735f",
+      "bytes": 1932
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/findings.md": {
+      "sha256": "d7bf085bac4c4a602a64233a271837c10f362d875cfd6b6927e0f2c9d0cd32b3",
+      "bytes": 4455
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-cases.json": {
+      "sha256": "4addc896853fb75b5ef6f2ecd835cf880672e6770c2f344c94969e7581f0d580",
+      "bytes": 10974
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-declaration.md": {
+      "sha256": "daf15df4f4287d022e010accd1119bccf6c75150b681312083407591f830f956",
+      "bytes": 2830
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-design-science-review.md": {
+      "sha256": "63d9176c614a01ea2c29cb5c81624f09a2bf33f21f82855a3bf82c690063c94f",
+      "bytes": 11073
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-design-source-bindings.json": {
+      "sha256": "ea30c0e7c45d6e8f069501d2f09ada74547e061cd75b7a8ca44364bb9f0fae91",
+      "bytes": 1834
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-implementation-prereview.md": {
+      "sha256": "45f92175de20519277721abf03d5da652c60f57bcc8685a601e2cf37c9521ace",
+      "bytes": 4179
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-independent-stock-check.json": {
+      "sha256": "719ba1cf1b7b879e2303783fa2f4dea5620094f7b602a0df83f2f0ed16b8f4df",
+      "bytes": 7761
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-result-science-review.md": {
+      "sha256": "39ac3c05a2f0872eadc0d92ba69fa8dbe563a366a774b243b3395e916a6b296b",
+      "bytes": 4859
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-science-prereview.md": {
+      "sha256": "4a6d04b173fa2530a15425b588e84c6b5f9d1e9436d6c2fbc7b570f07c17cf59",
+      "bytes": 4522
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen-summary.json": {
+      "sha256": "35eea0f1d2b15d461d5b871fea64d1be253fe4144f9b157dfde2a32652986049",
+      "bytes": 35130
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/frozen_driver.for": {
+      "sha256": "63af4a402c6e351387da45d4ca6a6ba67655a6ee20aedb6dbab14516a1ded34e",
+      "bytes": 3185
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/implementation-review.md": {
+      "sha256": "8af2446dfd0a1c7eea90a0f6e63047f398c125f642707f87bcfcbe2ea6ece85b",
+      "bytes": 6213
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/native-checkpoint.json": {
+      "sha256": "056a7f3febf0206cb740b9119c24685dffae92028b0b4a0449241dd2fab49dae",
+      "bytes": 352
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/next-study.md": {
+      "sha256": "917c50ff285e4a6011abde8a960be7afc7d922024b3e6c6295bb93f229b41b59",
+      "bytes": 5082
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/packaging-review.md": {
+      "sha256": "e97aafdc33729ed22777cb5a0790c4b92a92810e42ddfad16da474ef39be91e7",
+      "bytes": 2892
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/produce_sift_fixtures.py": {
+      "sha256": "89e224a5435513904595f4753dd2aef94bf6b91b2a0890eebf2013e03facbfe4",
+      "bytes": 1736
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_native.py": {
+      "sha256": "bf0e15c6a1c04b01d91bfd677e89a8464fefd55cd509bd84464af52a2280de83",
+      "bytes": 8712
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/read_sift_outputs_v2.py": {
+      "sha256": "7321e9137ed3c5b4e4b60f0666646c09829775930cc1d4226018cbe210d336fb",
+      "bytes": 3656
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/reader-controls.json": {
+      "sha256": "eb3b0e23f164ec702371328d5a3785e88ad79f7d3248dca6ba458410145a4033",
+      "bytes": 3326
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/reproduce.md": {
+      "sha256": "7bcb58b5df4b2f1a923a55b89df278893739b91ace83a179685e7588df4abcb1",
+      "bytes": 3959
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/run_frozen_campaign.py": {
+      "sha256": "fb1d05ebd14b0524204fe0da8bc53c6c7feef4534e3eb770185b690fcd0b25e3",
+      "bytes": 10190
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-contract-implementation-review.md": {
+      "sha256": "f1cd7fbf682397201d932663fdcaff895c3a7a2d239304aa445e47b2b125dc4c",
+      "bytes": 8247
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-contract-science-review.md": {
+      "sha256": "3b8912ff30f7b9b63139e502ee6edd14948e00b077d47c82961b6322aee0ac76",
+      "bytes": 4474
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-native-declaration.md": {
+      "sha256": "9facfba161d6d9876d54d2b5f655a8e190503b0563384481ee3f3173cb01e08d",
+      "bytes": 2174
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-native-implementation-prereview.md": {
+      "sha256": "7cb8ac06c51408e960e1cb608fcd73983bac5023a6bfab82ae7910d407569df9",
+      "bytes": 3223
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-native-independent-check.json": {
+      "sha256": "f5028181084512e43b0ad2232187201a9080615d87953d995ec2f444628e44f2",
+      "bytes": 3787
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-native-result-science-review.md": {
+      "sha256": "a94e153551bf62722f59444a109e51d906cdb2958e0d71ef5969f5c2e3d9bf61",
+      "bytes": 2670
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/sift-native-science-prereview.md": {
+      "sha256": "b10bfef62fb2dde65f4c2989d27eec08eac5435a3055979e5aecd4c7c0e6a054",
+      "bytes": 3942
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/test-results.json": {
+      "sha256": "5ecd92cfd8b40a44f585a9e43ee5791a655adb4af6336e72e1f8740a40db1a20",
+      "bytes": 259
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/artifacts/validation.md": {
+      "sha256": "3806a9eb8f75652db125cb766a46e2162982f369f25b39a292f25b37ef1d4999",
+      "bytes": 3248
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/package.md": {
+      "sha256": "8c6044f77332f33eb80019f9df7918327a6dff52e139af3870f83843b6722df1",
+      "bytes": 1941
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/prompts/active/sift_frozen_execplan.md": {
+      "sha256": "72a8ecb2da3b6a4cae620a72338831363450ee36fb8e207317c0bc9f4f71ab59",
+      "bytes": 9400
+    },
+    "docs/work-packages/20261101_sift_rock_frozen_water/tracker.md": {
+      "sha256": "1421b6db403147bb5fb74a8e3d5987676145a80c1aa931b60a008abe88500635",
+      "bytes": 943
+    },
+    "tests/locales/canada/bc/soils/test_sift_rock_basis.py": {
+      "sha256": "817255908f119ef95cd9f3f14103c8227e7781a678bacd365c1db7c0f1732f38",
+      "bytes": 4803
+    },
+    "wepppy/locales/canada/bc/soils/sift/sift.py": {
+      "sha256": "4f9e23df264fffd19bea6af0684da4c87688c58aa8cd4b1e3b630a4dc5b34e13",
+      "bytes": 18338
+    },
+    "wepppy/wepp/soils/README.md": {
+      "sha256": "a6e0f8a624b1d0836059da18f8df3695c0fc2d329d022aa4e36ccd1ecb2aa6b7",
+      "bytes": 14883
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # ADR-0126: Convert BC SIFT fragment volume to native mass
 
-Status: proposed for independently reviewed implementation checkpoint; not deployed.
+Status: accepted for independently reviewed local implementation; not deployed.
 Date: 2026-11-01 Pacific.
 
 ## Context and decision
@@ -25,7 +25,7 @@ Validate deterministic valid/missing/invalid states, actual SIFT construction an
 
 ## Evidence and implementation limits
 
-[Source study](../work-packages/20261101_rock_sources_water_accounting/artifacts/findings.md#bc-sift-the-source-definition-is-now-established), [canonical contract](../schemas/rock-fragment-representation-contract.md), and [current package](../work-packages/20261101_sift_rock_frozen_water/package.md). Generated/native validation is pending. The separate FRWATC campaign changes no model formula and confers no capacity-correction approval.
+[Source study](../work-packages/20261101_rock_sources_water_accounting/artifacts/findings.md#bc-sift-the-source-definition-is-now-established), [canonical contract](../schemas/rock-fragment-representation-contract.md), and [current package](../work-packages/20261101_sift_rock_frozen_water/package.md). Actual builder and three complete native histories validate the conversion and SAT field; see the [validation record](../work-packages/20261101_sift_rock_frozen_water/artifacts/validation.md) for remaining gates and limitations. The separate FRWATC campaign changes no model formula and confers no capacity-correction approval.
 
 Compatibility clarification: missing None/-9 in either input takes precedence over an invalid value in the other input. Preserve the established canned open-water path by checking soil.is_water before mineral soil.valid; open water does not require mineral conversion. Include real writer regressions for water rows with invalid and missing mineral values.
 
