@@ -5,11 +5,12 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: buffer process observations accepted; roughness-conditioning test next
+## Current: roughness-conditioning counterfactual in preparation
 
 Current [candidate ledger v18](../../artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The next controlled question
-is the contribution of buffer roughness conditioning, with all other inputs fixed.
+completed paired event and buffer-process studies. The operator has authorized
+the next controlled study of buffer roughness conditioning, with other inputs
+and bulk-density handling fixed. Source/design review is active before execution.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -108,6 +109,9 @@ This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
+- [x] Draft the [roughness-persistence counterfactual](../../artifacts/buffer-roughness-counterfactual-r4-plan.md): 18 off controls and 18 persistence runs, full periods, unchanged profiles and fixed nine pairs. Retain mature-forest management metadata provenance separately.
+- [x] Freeze the scientific and implementation preparation-design reviews. Density/porosity have exact source-supported invariants; ridge height and residue-dependent decay remain observed endogenous responses. No source implementation or execution is accepted by those design receipts.
+- [ ] Obtain exact source/design and runner review, then execute a four-run first-pair preflight and the remaining 32 runs. O3 remains immutable; no production value or binary is promoted.
 - [x] Read and independently verify all 315,576 published SOIL rows for the nine frozen pairs; fresh v3 conversion binds the actual Rust library and preserves source artifacts. Archive all three attempts with all 65 members verified.
 - [x] Accept exact U12 native pair after complete scientific, source, residual and Cedar review.
 - [x] Verify all 489 retained build inputs against committed source b01a73995; retain complete verified final candidate archive.
@@ -290,6 +294,7 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The RRC intervention reaches crust/effective conductivity, critical shear, friction, interrill delivery, depression storage and snow/thermal readers. At this panel's configured initial roughness, the existing interrill roughness factor is zero. A successful persistence counterfactual therefore would not prove a retention-only explanation or validate that roughness as a production default.
 - Two Denver target contrasts have no GRNA excess in either lane, but hourly surface return supplies all generated outlet water. Equal-roughness underprediction controls still diverge in storage/runoff/exchange. Roughness also affects derived erosion corrections, so a roughness-only intervention cannot be described as depression-storage-only causality. The complete profile comparisons do not identify a single correct coefficient.
 
 - The nine fixed observer pairs have legacy buffer roughness of 100 mm throughout. Six conditioned generated profiles decline to 6 mm; the three selected underprediction profiles retain 100 mm. This is post hoc descriptive context, not causal evidence. The SOIL consolidation branch and IRS depression-storage operands require native observation. See artifacts/buffer-published-soil-context-r4.json.
@@ -383,6 +388,7 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-10-31: proceed with the recommended counterfactual under the operator's continued authorization. Change only the declared buffer roughness-conditioning path; preserve density handling, generated profile lineage, reference comparisons, withheld materials and the UI human gate. Review the insertion point before execution so all dependent hydraulic and erosion calculations see a consistent state.
 - 2026-10-31: accept O3 for bounded observational interpretation after exact output parity and independent runtime, boundary and scientific review. Choose a separately declared roughness-conditioning-only counterfactual next; preserve density, other inputs, both error directions and passing controls. Do not manipulate density to force the roughness branch or treat legacy behavior as the physical target.
 
 - 2026-10-31: add published SOIL history as supplemental context without changing frozen seeds or execution design. Preserve v1/v2 provenance attempts and use a fresh v3 conversion binding the actual native callable module; facade identity alone does not identify the Rust reader.
@@ -1321,3 +1327,9 @@ The next question is a separately declared roughness-conditioning counterfactual
 because observed storage/return/exchange differences do not identify a universal
 parameter adjustment. Corrected stale revision-3 identities in Context and
 Orientation to the delivered revision-4 inputs; earlier entries remain history.
+
+Continuation note, 2026-10-31: the operator authorized the next diagnostic study.
+The 36-run persistence design and its independent preparation reviews are frozen
+before implementation. Exact patch, build, runner and execution gates remain;
+the tested intervention retains all natural roughness-dependent responses and
+does not assert that the configured initial roughness is physically correct.

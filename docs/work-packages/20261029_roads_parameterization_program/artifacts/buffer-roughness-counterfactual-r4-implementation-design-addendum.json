@@ -1,0 +1,16 @@
+{
+  "scope": "Narrow preimplementation plan clarification; original design receipt remains retained",
+  "previous_review_sha256": "124f29f25b3fe0def6c687ffa373941f3324c60ffab6c01fb0005ed1211cdf69",
+  "plan_sha256": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+  "accepted_preparation_design": true,
+  "accepted_build": false,
+  "accepted_native_execution": false,
+  "major_findings": [],
+  "reviewed_delta": [
+    "SNDRFT explicitly dormant.",
+    "Density and porosity driver equality declared for supported fixed-input buffer path; source has COCA assigned only in SCON and POR in SCON/SOIL/TILAGE. The no-tillage restriction is for the buffer; road tillage remains native and its upstream parity is separately required.",
+    "RH/SMRM/CBR are observed endogenous responses, no RH clamping or assumed parity.",
+    "CBR read only inside its assigned decay branch; initialization diagnostics exclude unassigned calendar state."
+  ],
+  "pending": "Exact patch, build closure, runner and independent execution readback remain required."
+}

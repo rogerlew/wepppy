@@ -1,0 +1,112 @@
+{
+  "review_type": "Independent AI scientific design review, not institutional peer review",
+  "accepted_scientific_design": true,
+  "accepted_implementation": false,
+  "accepted_build_execution": false,
+  "accepted_results": false,
+  "accepted_parameterization": false,
+  "scope": "One captured post-initialization RRC persistence counterfactual; nine fixed pairs, 36 full-period runs, no production edit or simulation by reviewer.",
+  "reviewed_plan_sha256": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856",
+  "o3_source_hashes_independently_verified": {
+    "soil.for": "3f776166cd250897029f8ae1d994a9e4f59ae57780b722cdc4554afd5d563c58",
+    "infpar.for": "b49321644cb62487088bd072f2d30fc99dc621cdcf62b519db5e2f24c3a312af",
+    "frcfac.for": "3a665e06158d47c2f158ed2bf4698938dc292706b12fe002d1f0078fe590b3de",
+    "param.for": "88dd5d8abba23e1d742b33c72b786c31d247baf49cab303898a88805e475af99",
+    "irs.for": "8beae52254d69ce84f95b18768d8afc76151eecb3e67a52fdd9bd6e508e24751",
+    "sndrft.for": "0167622624c139aa5d422d2d4d8a31189f6b4f733d132803e5da6160a6288121",
+    "tmpadj.for": "40ea90593a2211cb1a3bf4a3a7758f34b49f17053539c55dcc246bb66e9b9016",
+    "melt.for": "475e6f89ccc6df1e103c1702d083cc47cef742bcba151ec4a05c32c49c04b7aa",
+    "infile.for": "16155c92e65c4418eb8d1d753126899faed0cb0cb8552c28e4dba72c472092fb"
+  },
+  "fixed_trajectory_controls": [
+    "BD",
+    "POR",
+    "BDTLL",
+    "AO",
+    "BDCONS",
+    "COCA",
+    "day counts",
+    "RFCUM"
+  ],
+  "endogenous_observed_responses": [
+    "RH",
+    "SMRM",
+    "CBR at assigned branch",
+    "effective infiltration/crusting",
+    "friction",
+    "critical shear",
+    "interrill delivery",
+    "depression storage",
+    "active thermal/melt response"
+  ],
+  "limitations": [
+    "Exact implementation patch and valid-state map require separate review before build/run.",
+    "Twelve predicted null controls require native unrounded full-period identity proof.",
+    "RHINIT is 0.1 m, so native RH is not an unconditional trajectory invariant.",
+    "No depression-storage-only attribution, validated forest roughness, or native-defect claim.",
+    "Selected-panel success is not broad-matrix or production acceptance.",
+    "SNDRFT call inactive in inspected executable."
+  ],
+  "evidence": [
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-plan.md",
+      "sha256": "76144a38065871bec2b241d952701b6e439914486af73fb25b5e8eb326f01856"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/intervention-map-draft.json",
+      "sha256": "958b165a8379d077229815169a4b7f12ef919ee5ea4f3c07e1fe7fd2db428a3b"
+    },
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-process-observation-r4/seeds.json",
+      "sha256": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525"
+    },
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-management-context.json",
+      "sha256": "b20f4141a3b34c5a954bbdb1fe3b990f7fd8e9567dd1888ab6ff5ef4df503579"
+    },
+    {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-scientific-design-review.md",
+      "sha256": "5a2c8b78b8c04850946821f537ce38b679c5e93d84eaf89ad95bdd2c692f0729"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/soil.for",
+      "sha256": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/scon.for",
+      "sha256": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/tilage.for",
+      "sha256": "22922a276bb3ce157fc0b180c40993d63ba4b31301836d68c3fcabb2ca3b1420"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/contin.for",
+      "sha256": "a9bf340f08a9a26f5b910e4df5a3aa36df9a2cc57c7471776c72c337245cad30"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/infile.for",
+      "sha256": "16155c92e65c4418eb8d1d753126899faed0cb0cb8552c28e4dba72c472092fb"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/infpar.for",
+      "sha256": "822b0018c62e145a0548ea86a06f2ecb03a8cc1ed62de1e91be340c4de575352"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/param.for",
+      "sha256": "889a0557fc43778097377165394bd6b10e0f7eb8d1cef96b849b516d651d262f"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/frcfac.for",
+      "sha256": "3a665e06158d47c2f158ed2bf4698938dc292706b12fe002d1f0078fe590b3de"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/tmpadj.for",
+      "sha256": "40ea90593a2211cb1a3bf4a3a7758f34b49f17053539c55dcc246bb66e9b9016"
+    },
+    {
+      "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/build/src/melt.for",
+      "sha256": "475e6f89ccc6df1e103c1702d083cc47cef742bcba151ec4a05c32c49c04b7aa"
+    }
+  ]
+}

@@ -1,10 +1,11 @@
 # Roads parameterization and configuration view
 
-## Current: buffer process observations accepted; roughness-conditioning test next
+## Current: roughness-conditioning counterfactual in preparation
 
 Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The next controlled question
-is the contribution of buffer roughness conditioning, with all other inputs fixed.
+completed paired event and buffer-process studies. The operator has authorized
+the next controlled study of buffer roughness conditioning, with other inputs
+and bulk-density handling fixed. Source/design review is active before execution.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The

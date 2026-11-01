@@ -1,0 +1,43 @@
+{
+  "reviewer": "independent implementation reviewer",
+  "scope": "Initial preparation design only; no exact implementation/build/native execution approval",
+  "accepted_preparation_design": true,
+  "accepted_build": false,
+  "accepted_native_execution": false,
+  "accepted_scientific_interpretation": false,
+  "reviewed_artifacts": {
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-plan.md": "4e749e2054e1d46f818b0dcab9f5990bf9f44743b4b2c004facf3779ed24a161",
+    "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/intervention-map-draft.json": "958b165a8379d077229815169a4b7f12ef919ee5ea4f3c07e1fe7fd2db428a3b",
+    "/workdir/wepppy/docs/work-packages/20261029_roads_parameterization_program/artifacts/buffer-roughness-counterfactual-r4-management-context.json": "b20f4141a3b34c5a954bbdb1fe3b990f7fd8e9567dd1888ab6ff5ef4df503579"
+  },
+  "initial_source_inventory": {
+    "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/buffer-roughness-counterfactual-r4/independent-implementation-review/initial-source-audit.json",
+    "sha256": "fcff81849f4128d30eb15a3c6131e3ca9c2863ff29b66f50df3621cc81b6e7ec"
+  },
+  "major_findings": [],
+  "source_supported_conclusions": [
+    "SOIL owns every active direct RRC assignment; a single restore after the native writer branches and before INFPAR reaches the later SOIL critical-shear consumer and all mapped downstream consumers.",
+    "Initial RRC must be captured after native initialization; RRINIT is potentially mutable and cannot itself serve as an immutable anchor.",
+    "Fixed three-OFE continuous/no-tillage buffer scope plus management drift rejection supports the proposed single-state intervention.",
+    "Full-period native REAL identity and all-output parity are required to certify expected equal-roughness controls; rounded daily output is insufficient.",
+    "The full-period upstream-output/state comparisons and unchanged strict audits are necessary isolation/acceptance gates. Natural dependent responses cannot be clamped to force parity."
+  ],
+  "independent_management_readback": {
+    "source_hashes": 4,
+    "prepared_record_hashes": 18,
+    "prepared_management_hashes": 18,
+    "all_matched": true,
+    "interpretation": "Existing forest/cropland-format labels motivate the mechanism test but do not calibrate a physical roughness value."
+  },
+  "pending_implementation_gates": [
+    "Exact guarded native patch, initialization and producer-validity review; no unassigned calendar or branch-local reads.",
+    "Complete source/include/object/toolchain closure, sibling calendar dependency, successful dry-run and compiled-byte readback.",
+    "Frozen deterministic eager-PyArrow dependency closure and runner, exact inventories and four-run first-pair gates.",
+    "Independent complete output/state/accounting readback after execution."
+  ],
+  "residual_scope": [
+    "SNDRFT contains a roughness reader but its current caller is commented out; map it as dormant rather than evidence of an active effect.",
+    "RH may vary endogenously through residue-dependent roughness decay; its handling and any differences require source-based classification.",
+    "This review establishes preparation design only, not physical parameter correctness or production suitability."
+  ]
+}

@@ -1,10 +1,11 @@
 # Roads parameterization program tracker
 
-## Current: buffer process observations accepted; roughness-conditioning test next
+## Current: roughness-conditioning counterfactual in preparation
 
 Current [candidate ledger v18](artifacts/candidate-ledger-v18.json) records the
-completed paired event and buffer-process studies. The next controlled question
-is the contribution of buffer roughness conditioning, with all other inputs fixed.
+completed paired event and buffer-process studies. The operator has authorized
+the next controlled study of buffer roughness conditioning, with other inputs
+and bulk-density handling fixed. Source/design review is active before execution.
 Revision 4 is delivered; no parameter candidate is accepted.
 
 The exact combined U12 native pair is scientifically accepted. The
@@ -40,6 +41,16 @@ has completed; its combinations are rejected on control regressions and unresolv
 The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
+
+The [persistence counterfactual](artifacts/buffer-roughness-counterfactual-r4-plan.md)
+is now predeclared for review: 36 full-period runs, with 18 off controls and 18
+buffer-initial-roughness persistence runs. Preserve every other input and native
+density handling; verify exact internal state and 12 expected no-op controls.
+Roughness also affects crusting, friction, critical shear and interrill delivery,
+so this is not a depression-storage-only intervention. Build/run gates remain
+pending; no new native experiment has executed. Independent scientific and
+implementation reviews accept the preparation design; exact patch and runner
+reviews remain separate prerequisites.
 
 Supplemental published SOIL readback covers all 315,576 rows from the nine frozen
 pairs. Legacy buffer roughness stays at 100 mm; six conditioned generated profiles

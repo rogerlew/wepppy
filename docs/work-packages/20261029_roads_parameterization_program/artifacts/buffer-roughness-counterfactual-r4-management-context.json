@@ -1,0 +1,245 @@
+{
+  "scope": "Read-only management metadata provenance; no native execution, input change, or physical roughness calibration.",
+  "fswepp2_head": "c0fe47499406955afc547827cdae8d02ccada432",
+  "fswepp2_source_sha256": {
+    "/workdir/fswepp2/api/wepproad.py": "c848b2178311591079a2fccdee30d818b14e753c12b4f4ab6f0d28e4e7ee9382",
+    "/workdir/fswepp2/api/db/wepproad/managements/3outunr.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+    "/workdir/fswepp2/api/db/wepproad/managements/3outunrn.man": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+    "/workdir/fswepp2/api/db/wepproad/managements/3outrut.man": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b"
+  },
+  "metadata_checks": [
+    {
+      "path": "/workdir/fswepp2/api/db/wepproad/managements/3outunr.man",
+      "forest_age_description_present": true,
+      "forest_initial_conditions_cropland_format_present": true,
+      "evidence_lines": [
+        50,
+        121,
+        212
+      ]
+    },
+    {
+      "path": "/workdir/fswepp2/api/db/wepproad/managements/3outunrn.man",
+      "forest_age_description_present": true,
+      "forest_initial_conditions_cropland_format_present": true,
+      "evidence_lines": [
+        52,
+        123,
+        214
+      ]
+    },
+    {
+      "path": "/workdir/fswepp2/api/db/wepproad/managements/3outrut.man",
+      "forest_age_description_present": true,
+      "forest_initial_conditions_cropland_format_present": true,
+      "evidence_lines": [
+        50,
+        121,
+        212
+      ]
+    }
+  ],
+  "seed_sha256": "9769fadbb85be817802fb40d2bd9fb8aa5e0a94e0fa8441fafdffe13f4a5b525",
+  "prepared_lanes": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "c7fa594491c9a59c0e9f3f8d6f676a97ffcba70cb65469fef19ebfd4741c6cc5"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "c4d5e74ddb6398452ada1744d8a248bad409eeb71cf70ef3ec2830d96bdcaf99"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "5ac4c030a137b3a7be014c6b14857a5525b8f090b7662ae37361f3eb6a6565b7"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "ba5ee442cf822b68fb2e09c6d50c2fc239a2d1be8c640165c0bf740e3f51d8b1"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "1415f33d1caeb9009ece33f0287892f2f623aade96c9e3db00c51c7403182300"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "cc91bfbdb4e8583171c4c7c2384f29938a2118f4b6c3ba7a107bac278b9ffc32"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "d0491a4ae34b8f2bbdb27a53fd1679c2a61f0870c3a8dc52a2509353834df3ad"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "8870a396d39c18dbeeaf880adfaabff411e21c5d51dea78ab043791744df83a2"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1718465-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "d6d08509fd77c02ffd9a210543797234ed868e9b900cdecf1acb296a3e78ae05"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "4f6d14866c4785d38ea7c9c73563d92fd4e79520033d2acca820f9ee834613f4"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "8ed133e3242c38a27714837c264819803882fb30f9552e6ba824ef5842248eff"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "b05b9af414eecd114876fe70cebd6f39158128c4452f36cc13ecf2205431a9c8"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+        "sha256": "9e8aa8e4da8e079eb80f94519b2dab7e2f60302fc28719c74acc717a8ed07f7b"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+        "sha256": "2d309153794133504688894b0f17243316e0abb714e61633280bfb3b77d248a2"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-none-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "81760af826ef5b66ff540aa13cb6add65114e4d69e13ac75956dc6f60226cec2",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "70e02990922cd91a6cdec4ca5d2519d90ac16cc5dadd517e96d4aa24d48ac0e8"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+        "sha256": "fb542910bd466191a90e12bd3c2f28b044de5d25794b5d33da0ac0b9d3014933"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1856573-outunrut-paved-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "8c312eef2984f518f54e433bbacb2b5fee4241719e87d4a1addb54ba6720c2f7"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "forest_metadata_present": true
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "record": {
+        "path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+        "sha256": "e446486c9fc4d91194cb8404210a8d5a7abd66e8d6ea1249b268f954df753d1c"
+      },
+      "management_path": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-2711184-outrut-gravel-high-erosion_road_cap-project/runs/p1.man",
+      "management_sha256": "80a6aa800d53f101ec7183131c35f6b954898948c410448b623dbf20b4e58f6b",
+      "forest_metadata_present": true
+    }
+  ],
+  "interpretation": "Existing FSWEPP2 management labels describe a twenty-year forest buffer in cropland input format. The exact18 prepared lane files retain those descriptions. This motivates testing management/soil-conditioning compatibility, but labels do not prove the configured roughness is physically correct. Native role assignment and initialized numeric state require separate source/runtime readback.",
+  "configuration_selection": "Observed source selects3outunr.man for outunrut with traffic,3outunrn.man without traffic, and3outrut.man for the selected outrut traffic case; no source selector executed."
+}
