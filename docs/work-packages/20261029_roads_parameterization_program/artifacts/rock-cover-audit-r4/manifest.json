@@ -1,0 +1,19 @@
+{
+  "scope": "Source-free read-only rock-cover audit; no parameter acceptance, native run, or annual attribution.",
+  "files": {
+    "audit_native_sources.py": "91af685dde5b2086ddc386516d7849bca504a68801f34ee6380b71c176393d68",
+    "audit_rusle_sources.py": "ef3a69c25a0698606c392fa6a923c3fe7e0669dd84e03789953a8e8ec8ed6dad",
+    "findings.md": "8eed718eb52129679c91b24822f74d5b0cf0066f8883ef47ab366cc36fe0dd99",
+    "histories.csv": "1994fcfc9049ee293287d9a6f2c89ec38a01f97a30fe32bed7516ae82319c044",
+    "input-findings.md": "0d617fb6b508d34f525a64b2091ff14c7eb4bb996880cb2cb2af19f59684a2b4",
+    "management-cover.csv": "be0e81369d41cc21686a74319571d6c769686dfc198c30518e9e53f2d92a4554",
+    "native-consumers.md": "593cdb1bf1b8db588e2d4ba0bff289ce65f75067f5af40d1636b1165f6cf1ba1",
+    "next-study.md": "d260cea3e89729eee83337cb16e413dc3cb2eacbbeb90899111861867dea6bfe",
+    "proxy-controls.json": "9767c97ca51009841874828697de7e318d51f7eb4d7f69eaea1225aa5eedd33c",
+    "proxy-findings.md": "3084076ca9082804de4f5bd84576ed85a2927931019bc5128bfc3ce163c91223",
+    "read_inputs.py": "bb4983fe1127e34cd421a114752210bdb179cd4196461f8a4e5529113ab098b1",
+    "readback-receipt.json": "8300abd46c0dfe8d72798ae367ced0f1a180fccc2d5941a568a6fd048fb0b7ed",
+    "reproduce.md": "6d3077d8275be6755a57f6188adea3222cec3e6bdc703266ffb39ef0e53329c5",
+    "soil-fragments.csv": "7f6c2044eade1712750db7e3cd8ee8d7db03fcfc412f426f6799c6608603765b"
+  }
+}

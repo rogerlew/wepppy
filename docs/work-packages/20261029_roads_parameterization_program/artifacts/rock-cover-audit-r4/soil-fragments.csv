@@ -1,0 +1,355 @@
+case,stratum,case_id,lane,mode,material,ofe,role,soil_format,horizon,top_mm,bottom_mm,rfg_pct
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,0,1718465,1,Road,98.4,1,0.0,200.0,95.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,0,1718465,2,Fill,98.4,1,0.0,400.0,42.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,0,1718465,3,Forest,98.4,1,0.0,400.0,20.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,1,1718465,1,Road,98.4,1,0.0,200.0,95.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,1,1718465,2,Fill,98.4,1,0.0,400.0,42.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,legacy,1,1718465,3,Forest,98.4,1,0.0,400.0,20.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B1,small_paved_dry_legacy,denver-1718465-outunrut-paved-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,0,1718494,1,Road,98.4,1,0.0,200.0,65.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,0,1718494,2,Fill,98.4,1,0.0,300.0,42.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,0,1718494,3,Forest,98.4,1,0.0,300.0,20.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,1,1718494,1,Road,98.4,1,0.0,200.0,65.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,1,1718494,2,Fill,98.4,1,0.0,300.0,42.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,legacy,1,1718494,3,Forest,98.4,1,0.0,300.0,20.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B2,small_gravel_less_runon,flagstaff-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,0,1718494,1,Road,98.4,1,0.0,200.0,65.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,0,1718494,2,Fill,98.4,1,0.0,300.0,42.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,0,1718494,3,Forest,98.4,1,0.0,300.0,20.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,1,1718494,1,Road,98.4,1,0.0,200.0,65.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,1,1718494,2,Fill,98.4,1,0.0,300.0,42.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,legacy,1,1718494,3,Forest,98.4,1,0.0,300.0,20.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,0,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,1,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,2,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,1,0.0,50.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,2,50.0,200.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,3,200.0,230.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,4,230.0,610.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,5,610.0,760.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,6,760.0,860.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,7,860.0,990.0,0.0
+B3,small_gravel_dry_legacy,denver-1718494-outunrut-gravel-high,modern,1,1718494,3,"Fruitland loam, cold variant, 1 to 5 percent slopes",9002,8,990.0,1600.0,12.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,0,1718465,1,Road,98.4,1,0.0,200.0,65.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,0,1718465,2,Fill,98.4,1,0.0,300.0,42.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,0,1718465,3,Forest,98.4,1,0.0,300.0,20.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,1,1718465,1,Road,98.4,1,0.0,200.0,65.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,1,1718465,2,Fill,98.4,1,0.0,300.0,42.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,legacy,1,1718465,3,Forest,98.4,1,0.0,300.0,20.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B4,passing_same_signature,site-1718465-outunrut-gravel-high,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,0,2711184,1,Road,98.4,1,0.0,200.0,65.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,0,2711184,2,Fill,98.4,1,0.0,300.0,42.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,0,2711184,3,Forest,98.4,1,0.0,300.0,20.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,1,2711184,1,Road,98.4,1,0.0,200.0,65.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,1,2711184,2,Fill,98.4,1,0.0,300.0,42.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,legacy,1,2711184,3,Forest,98.4,1,0.0,300.0,20.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B5,underprediction_less_supply,site-2711184-outunrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,0,2711184,1,Road,98.4,1,0.0,200.0,95.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,0,2711184,2,Fill,98.4,1,0.0,400.0,42.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,0,2711184,3,Forest,98.4,1,0.0,400.0,20.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,1,2711184,1,Road,98.4,1,0.0,200.0,95.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,1,2711184,2,Fill,98.4,1,0.0,400.0,42.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,legacy,1,2711184,3,Forest,98.4,1,0.0,400.0,20.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B6,underprediction_not_less_supply,site-2711184-outunrut-paved-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,0,1718465,1,Road,98.4,1,0.0,200.0,95.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,0,1718465,2,Fill,98.4,1,0.0,400.0,42.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,0,1718465,3,Forest,98.4,1,0.0,400.0,20.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,1,1718465,1,Road,98.4,1,0.0,200.0,95.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,1,1718465,2,Fill,98.4,1,0.0,400.0,42.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,legacy,1,1718465,3,Forest,98.4,1,0.0,400.0,20.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,0,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,1,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,2,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,1,0.0,150.0,48.0
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,2,150.0,200.0,68.5
+B7,small_passing_control,denver-1718465-outunrut-paved-none,modern,1,1718465,3,"Bushvalley cobbly sandy loam, 5 to 40 percent slopes",9002,3,200.0,400.0,68.5
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,0,1856573,1,Road,98.4,1,0.0,200.0,95.0
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,0,1856573,2,Fill,98.4,1,0.0,400.0,42.5
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,0,1856573,3,Forest,98.4,1,0.0,400.0,20.0
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,1,1856573,1,Road,98.4,1,0.0,200.0,95.0
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,1,1856573,2,Fill,98.4,1,0.0,400.0,42.5
+B8,meaningful_high,site-1856573-outunrut-paved-high,legacy,1,1856573,3,Forest,98.4,1,0.0,400.0,20.0
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,0,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,1,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,2,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,1,0.0,110.0,36.25
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,2,110.0,200.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,3,200.0,360.0,42.2
+B8,meaningful_high,site-1856573-outunrut-paved-high,modern,1,1856573,3,"Cambern-Bushvalley complex, 1 to 15 percent slopes",9002,4,360.0,800.0,42.2
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,0,2711184,1,Road,98.4,1,0.0,200.0,65.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,0,2711184,2,Fill,98.4,1,0.0,300.0,42.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,0,2711184,3,Forest,98.4,1,0.0,300.0,20.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,1,2711184,1,Road,98.4,1,0.0,200.0,65.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,1,2711184,2,Fill,98.4,1,0.0,300.0,42.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,legacy,1,2711184,3,Forest,98.4,1,0.0,300.0,20.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,0,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,1,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,2,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,1,0.0,180.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,2,180.0,200.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,3,200.0,360.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,4,360.0,610.0,5.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,5,610.0,1090.0,15.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,6,1090.0,1270.0,30.0
+B9,underprediction_other_geometry,denver-2711184-outrut-gravel-high,modern,1,2711184,3,"Murtip-Caterl-Laderly complex, 5 to 30 percent slopes",9002,7,1270.0,1600.0,55.5

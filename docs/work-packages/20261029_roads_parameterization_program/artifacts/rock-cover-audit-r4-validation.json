@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "scope": "read-only audit; no native or production behavior changes",
+  "docs_files_linted": 10,
+  "docs_errors": 0,
+  "docs_warnings": 0,
+  "csv_tables_replayed_exact": 3,
+  "audit_json_replays_exact": 2,
+  "unit_controls": 5,
+  "normalization_controls": 3,
+  "bound_native_build_members_verified": 977,
+  "prior_archived_files_nonmutated": 2323,
+  "raw_archive_members_verified": 60,
+  "native_artifact_policy": "PASS",
+  "native_incident_checkpoint": "da8da8681",
+  "application_tests": "not run: no production code change",
+  "spelling_preview": "nine scoped markdown files clean; project board unrelated suggestions preserved"
+}

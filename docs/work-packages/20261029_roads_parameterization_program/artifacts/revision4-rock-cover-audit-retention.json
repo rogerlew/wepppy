@@ -1,0 +1,10 @@
+{
+  "archive": "/wc1/runs/ro/roads-parameterization-program-20261031/revision4-rock-cover-audit.tar.gz",
+  "sha256": "ab6a0af1eaad429744d89aafddc30f8416a7d70bfbba71e3e077fb769567c18e",
+  "bytes": 89274,
+  "files": 60,
+  "uncompressed_bytes": 792604,
+  "all_members_verified": true,
+  "complete_raw_inventory_verified": true,
+  "manifest_sha256": "b563c6d3bb754e3b6cb8da8242484b9cdfe19dda061625529de694145b998ee1"
+}

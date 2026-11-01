@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "independent_scientific_review": true,
+  "reviewed_manifest_sha256": "ce512bac9be4513dec82e46ab97f374ec385e049a34b15d264c3bdfc346c8d2e",
+  "reviewed_files": {
+    "audit_native_sources.py": "91af685dde5b2086ddc386516d7849bca504a68801f34ee6380b71c176393d68",
+    "audit_rusle_sources.py": "ef3a69c25a0698606c392fa6a923c3fe7e0669dd84e03789953a8e8ec8ed6dad",
+    "findings.md": "8eed718eb52129679c91b24822f74d5b0cf0066f8883ef47ab366cc36fe0dd99",
+    "histories.csv": "1994fcfc9049ee293287d9a6f2c89ec38a01f97a30fe32bed7516ae82319c044",
+    "input-findings.md": "0d617fb6b508d34f525a64b2091ff14c7eb4bb996880cb2cb2af19f59684a2b4",
+    "management-cover.csv": "be0e81369d41cc21686a74319571d6c769686dfc198c30518e9e53f2d92a4554",
+    "native-consumers.md": "593cdb1bf1b8db588e2d4ba0bff289ce65f75067f5af40d1636b1165f6cf1ba1",
+    "next-study.md": "d260cea3e89729eee83337cb16e413dc3cb2eacbbeb90899111861867dea6bfe",
+    "proxy-controls.json": "9767c97ca51009841874828697de7e318d51f7eb4d7f69eaea1225aa5eedd33c",
+    "proxy-findings.md": "3084076ca9082804de4f5bd84576ed85a2927931019bc5128bfc3ce163c91223",
+    "read_inputs.py": "bb4983fe1127e34cd421a114752210bdb179cd4196461f8a4e5529113ab098b1",
+    "readback-receipt.json": "8300abd46c0dfe8d72798ae367ced0f1a180fccc2d5941a568a6fd048fb0b7ed",
+    "reproduce.md": "6d3077d8275be6755a57f6188adea3222cec3e6bdc703266ffb39ef0e53329c5",
+    "soil-fragments.csv": "7f6c2044eade1712750db7e3cd8ee8d7db03fcfc412f426f6799c6608603765b"
+  },
+  "headline_table_all_nine_both_modes_verified": true,
+  "accepted_scope": "read-only input/source/units audit; no field cover estimate, parameter promotion or annual causal inference",
+  "conclusions": {
+    "audit_now_justified": true,
+    "surface_area_distinguished_from_profile_mass_volume": true,
+    "management_equality_not_claimed_equal_dynamic_cover": true,
+    "source_input_branch_support_not_claimed_runtime_probe": true,
+    "rfg_85pct_native_cap_distinguished_from_95pct_file_input": true,
+    "rfg_consolidation_coupling_precludes_surface_only_rfg_change": true,
+    "rusle_units_arithmetic_defect_supported_for_declared_per_mille_inputs": true,
+    "selected_roads_activation_not_established": true,
+    "overlap_and_spatial_support_limits_explicit": true,
+    "no_immediate_surface_sensitivity_accepted": true,
+    "capacity_analysis_remains_separate": true
+  },
+  "required_corrections": [],
+  "remaining_gates": [
+    "Separate source-identified RUSLE units repair with real raster/controller/manifest regression and ADR/spec update.",
+    "Surface measurement and permanent native consumer contract before any Roads cover sensitivity.",
+    "Retain all9 pairs,2 roughness modes,full periods and original physical/particle/magnitude gates."
+  ],
+  "external_reference_check": {
+    "rusle2_guide": "official PDF section7.7 read via web; supports field measurement and overlap limits",
+    "isric_faq": "reviewer live request timed out; parent reports prior successful web read, local contract and dimensional conversion independently checked"
+  },
+  "non_promotion": true
+}

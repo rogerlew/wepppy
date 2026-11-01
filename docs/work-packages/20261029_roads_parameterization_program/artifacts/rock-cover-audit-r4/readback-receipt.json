@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "input_histories": 36,
+  "soil_horizons": 354,
+  "management_ofes": 108,
+  "csv_replays_exact": 3,
+  "input_bindings_unchanged": 73,
+  "proxy_bindings_unchanged": 27,
+  "native_build_members_exact_and_unchanged": 977,
+  "unit_controls": 5,
+  "normalization_controls": 3,
+  "proxy_json_replayed_exact": true,
+  "native_identity_json_replayed_exact": true,
+  "native_binary_sha256": "08ad4c67150a01e7487fda677ffd2fe6d3d39e297b820bb875fbb6de13404a14",
+  "native_runs": 0,
+  "parameters_changed": false
+}

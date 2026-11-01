@@ -5,7 +5,15 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: physical review isolates the effective-capacity basis
+## Current: rock-cover audit separates surface protection from profile fragments
+
+The [rock-cover audit](../../artifacts/rock-cover-audit-r4/findings.md) directly reads all 36 retained histories (354 soil horizons, 108 initial management OFEs). All four histories per contrast have identical management bytes and use cropland scenarios. Explicit rangeland rock fields are absent, not measured zero. Profile RFG differs between lanes; it affects both water and a potential consolidation/erosion pathway. It is not a surface-area cover control.
+
+The prior RUSLE estimator has a reproduced SoilGrids units defect in its C fallback and no preferred surface-cover producer in the inspected standard SSURGO summary path. The selected native capsules contain no proxy products or observed RUSLE execution, so neither finding explains the Roads sediment discrepancies. Mean cover normalization also cannot establish role-specific overlap or persistent armor.
+
+Follow the [next-study boundaries](../../artifacts/rock-cover-audit-r4/next-study.md): separately scope the RUSLE units repair with real raster/manifest checks; establish surface measurement, overlap and active native consumer semantics before a Roads cover experiment. Continue capacity contract/scalar analysis independently. No parameter revision, behavioral run, field validation or release adoption occurred. [Ledger v23](../../artifacts/candidate-ledger-v23.json) retains this decision; original magnitude, physical, withheld and UI gates remain intact.
+
+## Physical-capacity evidence
 
 [Candidate ledger v22](../../artifacts/candidate-ledger-v22.json) records the reviewed
 [physical-capacity study](../../artifacts/buffer-capacity-physical-review-r4/findings.md).
@@ -30,7 +38,7 @@ contributors have no rock correction. The inconsistency is not a demonstrated
 primary-failure remedy. All nine pairs and both modes remain in seven reproducible
 tables; no new model run, source behavior, default or release change occurred.
 
-Next execute the [effective-capacity contract/scalar specification](../../artifacts/buffer-capacity-physical-review-r4/next-study.md):
+The separate next capacity task is the [effective-capacity contract/scalar specification](../../artifacts/buffer-capacity-physical-review-r4/next-study.md):
 map shared consumers and test a conservative static basis before any separate
 behavioral lane. Do not multiply POR globally or combine dynamic porosity,
 roughness, conductivity or depth changes. Original magnitude/physical gates,
@@ -138,7 +146,7 @@ This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
-- [ ] Execute the user-authorized rock-cover provenance/consumer audit declared in `out/roads-parameterization-program-20261031/rock-cover-audit-r4/declaration.md`; retain all nine contrasts and both modes, independent review and no behavioral changes.
+- [x] Execute the user-authorized rock-cover provenance/consumer audit declared in `out/roads-parameterization-program-20261031/rock-cover-audit-r4/declaration.md`; retain all nine contrasts and both modes, independent review and no behavioral changes.
 
 - [x] Execute the authorized physical-capacity review in `out/roads-parameterization-program-20261031/buffer-capacity-physical-review-r4/declaration.md`: reconcile dry-water coordinates, bulk/fine-earth capacity and dynamic porosity before deciding on any behavioral ablation.
 
@@ -335,6 +343,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Rock audit: all 108 initial OFE scenarios are cropland and per-case management is identical across four histories. RFG also enters consolidation/erosion; it cannot isolate surface armor. RUSLE C source units fail synthetic low-value SoilGrids controls, while the selected native capsules contain no RUSLE products. See the rock audit for source and input bindings.
+
 - Physical review: dry offsets cancel at fixed absolute stock. The native UL ceiling omits the coarse-fragment factor used in initial water and infiltration; 102/304 distinct snapshots exceed the documented effective diagnostic, while none exceeds native capacity. The suspected RFG unit issue is disproved for the selected preparation path.
 
 - Consumed-storage continuation: retained traces exactly reconstruct 152 GRNA storage calls. All 432 selected structural UL cells use initialized porosity; 176 differ if current porosity is substituted. The initialization-only observer closes the actual UL/minimum-conductivity producer gap with 586 assigned layers and exact output/state parity.
@@ -439,6 +449,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Decision (2026-10-31, operator-authorized audit): do not transplant RUSLE auto cover or replace RFG. Separate the demonstrated RUSLE units correction from a Roads surface measurement/overlap/persistence contract and from capacity reconciliation. Rationale: different quantities, missing surface evidence and multiple native consumers would confound tuning. No behavior/default change is accepted.
+
 - Physical review: accept only the read-only capacity-basis diagnosis. Advance the linked shared-consumer contract/scalar gate; do not combine it with daily porosity refresh or present it as a B1/B2/B3 remedy. Rationale: primary generated targets lack diagnostic excess and B2/B3 have no relevant rock factor; silently lowering a limit can delete water.
 
 - Storage study: retain all nine pairs/both modes, and add only initialization assignment observations after independent preparation review. Existing daily traces already establish saved STOLD versus advanced upstream water state; no new daily instrumentation or parameter change is justified. The private declaration and evidence-gap table are under `out/roads-parameterization-program-20261031/buffer-storage-ownership-r4/`.
@@ -540,6 +552,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The rock audit retains all 36 histories and verifies the exact 977-member native build. Three input tables and source-function controls reproduce. It identifies a concrete RUSLE units defect but no selected-case activation or field armor estimate. Surface-data/consumer evidence is required before a Roads cover sensitivity; capacity analysis remains independently justified.
 
 - Physical review completes 556 consumed-row identities, 216 exact INFPAR reconstructions and 108 direct emitted-RFG horizon checks. Seven public tables reproduce. Earlier studies remain immutable; no new native run or model behavior change. Physical field validation, annual causes and a conservative correction remain unestablished.
 
@@ -1441,3 +1455,5 @@ contract/scalar specification is concrete but not an executed behavioral lane.
 ## Rock-cover audit continuation — 2026-10-31
 
 The operator requested and authorized auditing rock cover before the next behavioral experiment, using the prior gridded RUSLE work as evidence. Inventory actual profile and surface quantities separately, verify proxy availability and native consumers, and evaluate overlap and spatial support. Do not transfer a RUSLE fraction-of-bare parameter into soil RFG. Read-only evidence and review determine whether any later revision is justified. The effective-capacity contract remains separate and unexecuted. This amendment records the new sequencing and prevents confounded cover/capacity tuning.
+
+Rock-audit completion amendment: current status and living sections now record the bounded provenance/consumer findings and separate next decisions. This preserves the original capacity packet and avoids interpreting absence of explicit rock fields as zero surface rock.

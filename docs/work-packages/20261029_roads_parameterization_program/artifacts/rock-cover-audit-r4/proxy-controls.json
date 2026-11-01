@@ -1,0 +1,170 @@
+{
+  "scope": "actual source function arithmetic with injected raster I/O; not end-to-end or selected-case execution",
+  "controls": [
+    {
+      "label": "low_soilgrids",
+      "raw": [
+        20.0,
+        80.0
+      ],
+      "c_proxy": 0.5,
+      "k_volpct_mean": 5.0,
+      "expected_soilgrids_proxy": 0.05,
+      "c_report": {
+        "status": "available",
+        "source_kind": "cfvo_top_horizon",
+        "path": "/synthetic/soils/cfvo_0-5cm_Q0.5.tif",
+        "cfvo_0_5cm_volpct": 50.0,
+        "scale_divisor": 1.0,
+        "surface_rock_cover_proxy_0_1": 0.5,
+        "sample_cells": 2
+      },
+      "k_report": {
+        "status": "normalized",
+        "scale_divisor": 10.0,
+        "raw_min": 20.0,
+        "raw_max": 80.0,
+        "policy": "always_divide_by_10_soilgrids_per_mille"
+      }
+    },
+    {
+      "label": "at_boundary_soilgrids",
+      "raw": [
+        100.0
+      ],
+      "c_proxy": 1.0,
+      "k_volpct_mean": 10.0,
+      "expected_soilgrids_proxy": 0.1,
+      "c_report": {
+        "status": "available",
+        "source_kind": "cfvo_top_horizon",
+        "path": "/synthetic/soils/cfvo_0-5cm_Q0.5.tif",
+        "cfvo_0_5cm_volpct": 100.0,
+        "scale_divisor": 1.0,
+        "surface_rock_cover_proxy_0_1": 1.0,
+        "sample_cells": 1
+      },
+      "k_report": {
+        "status": "normalized",
+        "scale_divisor": 10.0,
+        "raw_min": 100.0,
+        "raw_max": 100.0,
+        "policy": "always_divide_by_10_soilgrids_per_mille"
+      }
+    },
+    {
+      "label": "above_boundary_soilgrids",
+      "raw": [
+        101.0
+      ],
+      "c_proxy": 0.10099999999999999,
+      "k_volpct_mean": 10.1,
+      "expected_soilgrids_proxy": 0.101,
+      "c_report": {
+        "status": "available",
+        "source_kind": "cfvo_top_horizon",
+        "path": "/synthetic/soils/cfvo_0-5cm_Q0.5.tif",
+        "cfvo_0_5cm_volpct": 10.1,
+        "scale_divisor": 10.0,
+        "surface_rock_cover_proxy_0_1": 0.10099999999999999,
+        "sample_cells": 1
+      },
+      "k_report": {
+        "status": "normalized",
+        "scale_divisor": 10.0,
+        "raw_min": 101.0,
+        "raw_max": 101.0,
+        "policy": "always_divide_by_10_soilgrids_per_mille"
+      }
+    },
+    {
+      "label": "zero",
+      "raw": [
+        0.0
+      ],
+      "c_proxy": 0.0,
+      "k_volpct_mean": 0.0,
+      "expected_soilgrids_proxy": 0.0,
+      "c_report": {
+        "status": "available",
+        "source_kind": "cfvo_top_horizon",
+        "path": "/synthetic/soils/cfvo_0-5cm_Q0.5.tif",
+        "cfvo_0_5cm_volpct": 0.0,
+        "scale_divisor": 1.0,
+        "surface_rock_cover_proxy_0_1": 0.0,
+        "sample_cells": 1
+      },
+      "k_report": {
+        "status": "normalized",
+        "scale_divisor": 10.0,
+        "raw_min": 0.0,
+        "raw_max": 0.0,
+        "policy": "always_divide_by_10_soilgrids_per_mille"
+      }
+    },
+    {
+      "label": "nonfinite",
+      "raw": [
+        null
+      ],
+      "c_proxy": null,
+      "k_volpct_mean": null,
+      "expected_soilgrids_proxy": null,
+      "c_report": {
+        "status": "unavailable",
+        "reason": "missing_cfvo_top_horizon_raster",
+        "expected_paths": [
+          "/synthetic/polaris/cfvo_mean_0_5.tif",
+          "/synthetic/soils/cfvo_0-5cm_Q0.5.tif"
+        ]
+      },
+      "k_report": {
+        "status": "no_finite_values",
+        "scale_divisor": 1.0,
+        "policy": "always_divide_by_10_soilgrids_per_mille"
+      }
+    }
+  ],
+  "normalization_controls": [
+    {
+      "bare_percent": [
+        20.0,
+        80.0
+      ],
+      "proxy_total_surface": 0.2,
+      "effective": 0.4,
+      "implied_local_added_cover": [
+        0.08000000000000002,
+        0.32000000000000006
+      ]
+    },
+    {
+      "bare_percent": [
+        0.0,
+        0.0
+      ],
+      "proxy_total_surface": 0.2,
+      "effective": 0.0,
+      "implied_local_added_cover": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "bare_percent": [
+        10.0,
+        10.0
+      ],
+      "proxy_total_surface": 0.2,
+      "effective": 1.0,
+      "implied_local_added_cover": [
+        0.1,
+        0.1
+      ]
+    }
+  ],
+  "python_producer_name_search_hits": [
+    "wepppy/nodb/mods/rusle/c_integration.py"
+  ],
+  "reader_sha256": "ef3a69c25a0698606c392fa6a923c3fe7e0669dd84e03789953a8e8ec8ed6dad"
+}

@@ -1,6 +1,14 @@
 # Roads parameterization program tracker
 
-## Current: physical review isolates the effective-capacity basis
+## Current: rock-cover audit separates surface protection from profile fragments
+
+The [rock-cover audit](artifacts/rock-cover-audit-r4/findings.md) directly reads all 36 retained histories (354 soil horizons, 108 initial management OFEs). All four histories per contrast have identical management bytes and use cropland scenarios. Explicit rangeland rock fields are absent, not measured zero. Profile RFG differs between lanes; it affects both water and a potential consolidation/erosion pathway. It is not a surface-area cover control.
+
+The prior RUSLE estimator has a reproduced SoilGrids units defect in its C fallback and no preferred surface-cover producer in the inspected standard SSURGO summary path. The selected native capsules contain no proxy products or observed RUSLE execution, so neither finding explains the Roads sediment discrepancies. Mean cover normalization also cannot establish role-specific overlap or persistent armor.
+
+Follow the [next-study boundaries](artifacts/rock-cover-audit-r4/next-study.md): separately scope the RUSLE units repair with real raster/manifest checks; establish surface measurement, overlap and active native consumer semantics before a Roads cover experiment. Continue capacity contract/scalar analysis independently. No parameter revision, behavioral run, field validation or release adoption occurred. [Ledger v23](artifacts/candidate-ledger-v23.json) retains this decision; original magnitude, physical, withheld and UI gates remain intact.
+
+## Physical-capacity evidence
 
 [Candidate ledger v22](artifacts/candidate-ledger-v22.json) records the reviewed
 [physical-capacity study](artifacts/buffer-capacity-physical-review-r4/findings.md).
@@ -25,7 +33,7 @@ contributors have no rock correction. The inconsistency is not a demonstrated
 primary-failure remedy. All nine pairs and both modes remain in seven reproducible
 tables; no new model run, source behavior, default or release change occurred.
 
-Next execute the [effective-capacity contract/scalar specification](artifacts/buffer-capacity-physical-review-r4/next-study.md):
+The separate next capacity task is the [effective-capacity contract/scalar specification](artifacts/buffer-capacity-physical-review-r4/next-study.md):
 map shared consumers and test a conservative static basis before any separate
 behavioral lane. Do not multiply POR globally or combine dynamic porosity,
 roughness, conductivity or depth changes. Original magnitude/physical gates,
@@ -69,7 +77,7 @@ The six withheld materials and human UI specification/layout gate remain intact.
 
 ## Latest continuation findings
 
-Rock-cover provenance and consumer audit is active under the existing plan, authorized after the physical-capacity review. It checks actual nine-pair inputs, prior RUSLE proxy availability and distinct surface/profile semantics before any behavioral change.
+Rock-cover provenance and consumer audit is complete: all nine-pair inputs, prior RUSLE proxy availability and native surface/profile semantics are retained. No behavioral change was executed.
 
 Physical-capacity review is complete and independently reviewed. Seven tables reproduce exactly. The internal effective-capacity inconsistency is separated from coordinate bookkeeping, input-unit confusion and annual causality. See the current findings and the concrete next contract/scalar specification; no behavioral experiment ran.
 
