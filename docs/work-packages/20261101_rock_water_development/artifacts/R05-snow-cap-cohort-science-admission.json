@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "actual-cohort-admission",
+  "component_integration_admitted": true,
+  "combined_release_admitted": false,
+  "retention_admitted": false,
+  "bindings": {
+    "out/rock-water-development-20261101/R05-snow-cap-experiment-v3/receipt.json": "f55d1f591b7eafbeb1ab8861944623b427a8ad85c38051e2edfc7dd592bc785c",
+    "out/rock-water-development-20261101/R05-repair-response-all6-v1/receipt.json": "d27625546ba7659166214750316f88eb2a7d3ab1b682e7ac723e2d6495d4321e",
+    "out/rock-water-development-20261101/R05-snow-cap-source-v8/source-manifest.json": "3f74e5eb7ccaebb7e20db32588a524788a9ea220eb9e3ad38adf4ee5024dac2e",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-run-science-prereview.json": "86932eed55abf558b555a3da131a67461f7c78dd2a99f122119a869d7733bb1a",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-birmingham-response-science-review.json": "e40d7187768c66045859eb18c2c666c3b76fcfd3a32fed80000aa9afe8a4879a",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-charleston-response-science-review.json": "df13b3604be67a6ab2c82ae59e966fe0aad68919275ac48532c25ce866e467e2",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-inbare-response-science-review.json": "25ac9834de116d38c2d36205488506f36785cd1d0350d853b2cb726460da6bf5",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-outunrut-response-science-review.json": "927df5029daf67577386f900aaacf83dbc481b195bc3930bfc8656c83bac597f",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-response-science-review.json": "cac2410664f30f3c0de42bdb830b69ba7b4dec082a25f9cf57fcb8705f153652",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-secondary-response-science-review.json": "f5b7197cfbf6084223984edb88c5c29a923cb5f77d084c6dd6fe35d3839d2971"
+  },
+  "review_sha256": "abcf709698883df7b80228c7519fbb21d5a48db3e53951e6d1135ffc8c76ac08",
+  "native_execution": false
+}

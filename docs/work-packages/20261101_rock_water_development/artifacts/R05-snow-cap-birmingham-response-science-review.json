@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "completed-case-response",
+  "bindings": {
+    "out/rock-water-development-20261101/R05-repair-response-birmingham-v1/case-receipt.json": "a86b4f01f5ce6bd97cdc467a78a01b63119b1671d5dd64b0c13ba793d7556b14",
+    "out/rock-water-development-20261101/R05-repair-response-birmingham-v1/a8-to-cap.json": "ac017010bb8fd84e3603cc78a4ecee1502e745335d12a50085d99b96ccc2f564",
+    "out/rock-water-development-20261101/R05-repair-response-birmingham-v1/r4-to-a8.json": "f5cdd210506bb3e44a76428af67450f2f2bc0b5209eb065c53ebc963808a0558",
+    "out/rock-water-development-20261101/R05-snow-cap-experiment-v3/cases/birmingham-1718465-inbare-paved-high/observer/observation-readback.json": "dbf858ea061655b9c3ec9807f81baf2608668e8fff8b509c3074645dd7207194",
+    "out/rock-water-development-20261101/R05-snow-cap-experiment-v3/cases/birmingham-1718465-inbare-paved-high/candidate/observation-readback.json": "46468a88187977c4c0e11c686b661d022db77ad00d295c6e10825dbd33520700"
+  },
+  "review_sha256": "7cc2d8a60ba0af41c4ce0241bd58d70aa8e99cedbd0bb03710588c83a0addd05",
+  "release_admitted": false,
+  "native_execution": false
+}

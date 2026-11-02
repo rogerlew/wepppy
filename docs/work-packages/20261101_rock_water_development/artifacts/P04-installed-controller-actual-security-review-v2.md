@@ -1,0 +1,13 @@
+# Installed controller v2 actual security outcome
+
+**PASS for actual installed-controller artifacts, confinement and containment.** No unresolved security finding remains in this bounded run. Reviewer `/root/retention_security`, 2026-11-02. No controller, worker or native model was rerun by the reviewer.
+
+Exact aggregate receipt: `e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc`; execution receipt: `d9cd51c7e1fce7abf03b72c89eca7d60f95523ea232844dbbf242e8655145f10`; host finish: `7173ab46a3998e1ffadedda7b14b8a46b5a0e8dbfbd874ddf392ac09644a6a17`. They join declaration `cb2f4950624eb9e5490301557617bb9434a929f37dc1cc194965726f3d369d93`, its matching parent authorization and three exact review roles.
+
+Independent readback inside the configured service recomputed the complete post-exit finalizer and obtained the identical result. All **66 soil files and 66 companions** retain exact accepted P04 hashes, complete support and provenance under the clone root. The original-source/cache association and baseline proofs match. All 2,367 dependencies, 44 model-resource files and 458 immutable clone files pass; the sole changed preexisting file is the permitted clone-root `wepp.log`. The 132 generated soil/companion files are the only new clone files, and no clone symlink is present.
+
+The appended controller log contains exactly one pool submission and 66 distinct completions matching the admitted mapping, with no retry/sequential/spawn-failure fallback. Five installed module identities and the unchanged ordinary factory match the declared parent and separate spawn-probe evidence. The probe has its own PID and verifies ordinary spawn imports without an initializer; actual controller evidence remains the recorded completion log and generated artifacts, with the documented probe scope preserved.
+
+Service context is UID 1000/GID 993, group 993, umask 0022 and the reviewed interpreter. Inner supervisor and host both returned zero with successful, correctly bound terminal receipts. No timeout, residual child or group is reported. Independent service process inspection confirms supervisor 1819540, child 1820674, probe 1826466 and process group 1820674 are absent.
+
+Detailed evidence: `out/rock-water-development-20261101/P04-installed-controller-security-v1/actual-v2-readback/receipt.json`, SHA256 `e61d3193d0681029a3ecf1167c5618e2ea71c6c6dbcb6774b4062c6642b46f89`. The read-only reviewer script and control hashes are retained. This closes installed-controller operational evidence for 66 soils/193 OFEs; it grants no expanded physical admission, defaults or deployment authority. Native model count remains zero, and no duplicate native campaign is requested.

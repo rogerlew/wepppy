@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "role": "implementation",
+  "stage": "final-regression-actual-outcome",
+  "scope": "native",
+  "declaration_sha256": "d4b16e99c341d421ee44f3ac1948241ba1b218f07e827a12afb552819ca2b247",
+  "receipt_sha256": "f8e9d049701ece321533aea32863ea923638aa0fd63c771c3c3e16466cd1d756",
+  "campaign_outcome_sha256": "2bb25389ec126a4f2f54339cb0982cbd17a6fb3b331202b5cbebc9efd3916b6d",
+  "review_sha256": "8e44d9c216befe91a6449882d1fb66e3f52f8f20fab16216637dd6a53b542c21",
+  "evidence_sha256": "1a10c33822d8bdd70ffeef48f9d65d659402f78ebff4fb83e0469af2780f889d",
+  "command_blocks": 5,
+  "tests_passed": 1394,
+  "watchlist_cases": 31,
+  "scientific_acceptance": false
+}

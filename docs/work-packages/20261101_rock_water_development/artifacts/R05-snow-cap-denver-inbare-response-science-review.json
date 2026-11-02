@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "completed-case-response",
+  "bindings": {
+    "out/rock-water-development-20261101/R05-repair-response-denver-inbare-v1/case-receipt.json": "0103ff05ec37d9dcce8daccd358988a785900e02fe5fa80fdf25b468bed43e83",
+    "out/rock-water-development-20261101/R05-repair-response-denver-inbare-v1/a8-to-cap.json": "caf60eb72d25f9b8cbdbbc677671c4beb867741fe80bbbeda7eb4daf9fa68c34",
+    "out/rock-water-development-20261101/R05-repair-response-denver-inbare-v1/r4-to-a8.json": "3c998ca2f426352cabde25f87e1e22f4183657cd9b9d0c9abc971a676986d56d"
+  },
+  "review_sha256": "5dde957629af1af036117418ba2ebc7025fa1902960142b5478546c413a5a9ac",
+  "release_admitted": false,
+  "native_execution": false
+}

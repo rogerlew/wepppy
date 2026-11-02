@@ -1,0 +1,13 @@
+# Combined18 actual implementation review
+
+PASS for the bounded technical outcome of all 18 declared histories. Outer receipt SHA256 `c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d`. This is not scientific interaction admission or release approval.
+
+Independently revalidated both actual compiled source closures, restored includes, clean/observer build receipt and shared archive joins, actual binary copies/sidecars/ELF/runtime identities, all child dependency and retained reference hashes, and exact declaration-bound parent and reviewer approvals. Full archived fuzz histories were not reread. The previously reviewed initial full-archive/build proofs remain the provenance basis; the actual compile closures are the batch integrity boundary.
+
+Rehashed every declared staged input and ordinary output for six snow histories and twelve B04 histories; verified each persisted process receipt against its case receipt, actual log hashes, zero return code and absence of timeout/error. Every case receipt matches its group aggregate. Independently replayed the complete calendar/output readers for all 18 histories and the full initialization, consumer-domain, ownership, daily lifecycle, selected flux, winter writer/census, restoration lineage and snow bridge readers for all six observed B04 histories. Replayed results exactly match retained structured readbacks.
+
+All 42 snow ordinary comparisons equal admitted references. Each snow case has 17,532 daily OFE rows; exact source-owned invocation counts are 9,876; 2,374; 7,448; 7,448; 9,876; and 5,215. The complete CALL/GUAR joins prove zero executed FROSTN calls. Selected hourly evidence is not described as full-period hourly observation.
+
+All 42 B04 plain/observed ordinary comparisons match. Four B04 cases have 24 applied snow caps and all seven outputs equal standalone B04. Both 2711184 cases have 23 applied caps: baseline changes loss, soil, PASS, water and element outputs; candidate changes water only. These exact changed-file comparisons were recomputed against declared standalone hashes. The complete scientific-reader replay passes, including domain and terminal carry checks; causal interpretation of changed trajectories remains with independent scientific attribution.
+
+The outer aggregate accounts for six plus twelve histories with no reuse or extra invocation in its case lists. Both child and outer terminal receipts pass and have no error. The retained replay summary binds all terminal receipts and actual-build binding. No compiler/model invocation, canonical mutation or frozen-root write occurred during this review.

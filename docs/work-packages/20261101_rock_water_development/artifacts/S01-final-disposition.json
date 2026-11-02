@@ -1,0 +1,81 @@
+{
+  "schema": "S01-final-scientific-disposition-v1",
+  "role": "science",
+  "reviewer": "/root/s01_science",
+  "investigation_status": "Results reviewed; explicit scientific limits retained",
+  "native_correctness_gate": "HOLD",
+  "package_closure": "BLOCKED by confirmed native coefficient ownership defect; no repair or general safe-use admission",
+  "recommendation": "Preserve current default and optional-only policy; no native repair within S01 authority",
+  "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "consumer_histories": 4,
+  "boundary_histories": 16,
+  "builder_soils": 22,
+  "boundary_observed_profiles": 24,
+  "boundary_observed_layers": 144,
+  "boundary_source_record_support_mm": 700,
+  "boundary_emitted_support_mm": 800,
+  "boundary_native_support_mm": 1000,
+  "boundary_source_target_semantics": "Uniform source-value extrapolation over actual computational support for algebraic diagnosis, not measured source storage below source record",
+  "boundary_guard_activation_observed": false,
+  "scheduled_tillage": "Deferred and unobserved; no validated supported operation/observer, no adoption claim",
+  "rosetta_scope": "Actual mixed/all-Rosetta3 synthetic branches; no Rosetta2/missing-density generalization",
+  "known_defect": {
+    "policies": [
+      "default",
+      "optional"
+    ],
+    "dynamic_fc_slots_per_policy": 15,
+    "wrong_fc_slots_per_policy": 10,
+    "executed_hk_power_slots_per_policy": 15,
+    "wrong_hk_slots_per_policy": 10,
+    "owner": "OFE3 coefficients used on OFEs1/2",
+    "source_preexists_revision5": true,
+    "repaired_hydrograph_comparison": false
+  },
+  "private_evidence": {
+    "consumer_execution": {
+      "path": "out/rock-water-development-20261101/supplementary-ssurgo-consumer-execution-v2/receipt.json",
+      "sha256": "fde3107595602efc7a51e057363342694ec255e1dcab5cfc14b8939623a78ebc"
+    },
+    "consumer_science": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/consumer-terminal-science-disposition.json",
+      "sha256": "9794141799ccaa81074ab0cad02364d515d3671911c1ee766c789ed94d3e1695"
+    },
+    "consumer_independent_raw_audit": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/consumer-independent-readback.json",
+      "sha256": "6b44e2864bee897c071acbc1ce30f8abbbcdbc4a5f6514928b65de9561963457"
+    },
+    "source_history": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/ownership-source-history.json",
+      "sha256": "a433fb73d945777788f3b91bd8096f1005b90b4322650795b2d1ddf6c9e0cf02"
+    },
+    "source_history_range_annotation": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/ownership-source-history-annotation.json",
+      "sha256": "3bfb0684e36e368e457c21f1baf7cb6c8fb46ed25debbe682b16a00341b35372"
+    },
+    "boundary_builder": {
+      "path": "out/rock-water-development-20261101/S01-boundary-builder-execution-v1/receipt.json",
+      "sha256": "485e594696a4c29d1df61becd95438dae92599f73be2c7575bf8cc39b6cb6086"
+    },
+    "boundary_execution": {
+      "path": "out/rock-water-development-20261101/S01-boundary-native-execution-v3/receipt.json",
+      "sha256": "27219a9022aa6ca512694d7a4fb82a003295d5366069413879d0fa9646d6774a"
+    },
+    "boundary_readback": {
+      "path": "out/rock-water-development-20261101/S01-boundary-native-readback-v1/receipt.json",
+      "sha256": "7e49e15db93a3ef8c06536eb3d785b4be3b9d7b7afc01eee0982fe83efb494dc"
+    },
+    "boundary_science": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/boundary-terminal-science-disposition.json",
+      "sha256": "7b28d896e770e0091fa5f896f0c2dc7209b3dee3048bde8e45656c4a4248b874"
+    },
+    "boundary_independent_readback": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/boundary-independent-readback.json",
+      "sha256": "0783808255423bf5403820e6d97477a44cfd141e86d0596fcc4bebe48863de5f"
+    }
+  },
+  "public_report_sha256": "4e0747ac669e1f2c80c747b8cae5cb3b14e12c5d62006d5458d6c0dc72ad957b",
+  "production_defaults_changed": false,
+  "existing_project_soils_rewritten": false,
+  "deployment": false
+}

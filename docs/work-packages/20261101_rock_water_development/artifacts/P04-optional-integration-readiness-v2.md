@@ -1,0 +1,15 @@
+# Optional retention integration readiness: private v2
+
+The private packet is `out/rock-water-development-20261101/P04-canonical-integration-v2`. Its preparation receipt SHA256 is `c25a9a78b41915393ece6640ac8d213ca2300bb03ee2d8d1cd926e2c72f0223f`; its 13-path preimage manifest is `5218e76efc8ce19d498d913d862b180c39f0691bd981c6d982cbe7167770f44f`. Nothing has been installed in canonical production code.
+
+The allowlist contains the five exact corrected P04 runtime files, four mirrored API stubs, one permanent generated-artifact test module, module operator documentation, a proposed capacity contract amendment and draft ADR-0132. Research import finders, spawned-worker initializers and executor injections are excluded. The dirty `ssurgo.md` is excluded and hash-guarded. Contract and implementation patches are separate so the accepted contract/ADR ancestor checkpoint can precede code application.
+
+V2 resolves all three integration review findings. The docs distinguish caller-supplied receipt syntax and internal lineage consistency from independently verified acquisition/cache/selected-record association: matching hashes are not attestation. Typed stubs expose known scalar/path/optional-record/None contracts and conditional soil metadata. Tests use ordinary imports without private-era helper labels. The five runtime files remain identical to v1 and the actual corrected P04 overlay.
+
+Validation: reuse 137 passing v1 focused tests; three affected v2 generated-chain/default-stack/ordinary-spawn tests pass; both typed API module checks pass; documentation lint, preimage checks and both patch dry-runs pass. The separate existing Disturbed matrix on unchanged v1 runtime code is still running at packet freeze and is explicitly not claimed passed in either receipt. Its result will be retained additively.
+
+`adoption-gates.md` in the packet defines the remaining execution path: accept or reject P03's exact bounded physical evidence; ratify the proposed contract/ADR; apply only hash-matched allowlisted paths; run canonical API/regression gates; then validate a fresh 66-soil project clone through the actual installed prep service and its ordinary spawn factory, with no research initializer. Require complete companions, source association and exact P04 numeric parity. Identical native-consumed soils/settings can reuse P03 evidence after an explicit permitted-difference proof; changed numeric inputs require renewed admission. A physical rejection leaves the private packet uninstalled and preserves existing defaults and evidence.
+
+## Additive regression completion
+
+The unchanged existing Disturbed matrix subsequently finished: **252 passed**, two dependency deprecation warnings, 1,154.20 seconds. [The additive receipt](P04-integration-existing-regressions.json) binds its log and both original packet receipts, rechecks all frozen packet file bindings and canonical preimages, and confirms the dirty SSURGO document is unchanged. The original receipts retain their truthful pending-at-freeze statements. No canonical integration or native execution occurred.

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "PUB3 companion metadata and compact historical star census",
+  "manifest_sha256": "5804d31f1d7dab494d569ab32bfa700369776fdfbae8bfe29e2d66c8d6ba9c28",
+  "listing_count": 16,
+  "listing_bytes_unchanged": true,
+  "compact_summary_sha256": "c3b86a33c2df0ff17034a3db68c2b0fdf38bba0496e806ec798b24c1a1ed6d22",
+  "original_census_sha256": "a2024b7b0a094859e2d0a368ddd42682aacca28c0c3d2e07baec80795ae6033a",
+  "summary_exact": true,
+  "checks": "Source hash, manifest hash,840cases/5880files/missing set,74267numeric stars/99affected cases,25242distinct lines and57998loss+840plot occurrences all recomputed from original.",
+  "limitations": "Formatting census only, no final-source regression or physical admission; full histogram/witness text remain private. Additional combined_snow_bridge.for not covered by requested16-file manifest.",
+  "staged": false,
+  "published": false
+}

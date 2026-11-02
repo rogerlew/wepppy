@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "role": "implementation",
+  "stage": "combined18-actual-outcome",
+  "scientific_acceptance": false,
+  "receipt_sha256": "c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d",
+  "snow_declaration_sha256": "89ec97e6686a231118a24e505ded9b62987cf7ea43780b02bbe19124642c5a4e",
+  "b04_declaration_sha256": "8129e0e11d9087bc268928d87b0e1b5e6617e2706f69e91c1bd1a45d0dc70849",
+  "snow_receipt_sha256": "200da50567ac40fdde4667491876d225a731ff37ab9db7cb4387ae01ad146fee",
+  "b04_receipt_sha256": "442b0ad375b4cee69d7fdfc7ed43e13b724fd1fc2ae4468380e1c63fb2fd3b13",
+  "actual_build_binding_sha256": "6f9d7d2b1386ee87a6c8bd7e7ffb2c0792ea78f337016ec1e0b795eab7fcb8f1",
+  "replay_sha256": "2091bd3a38960391d70a67a6b0bf6bcfbcdf2ab8eea7ca48f80b643d6979fbb3",
+  "review_sha256": "9973bfaced9a189ae6dbd56c1704c839902cd205dd28e3aa508dab6e7b542ed9",
+  "histories": 18
+}

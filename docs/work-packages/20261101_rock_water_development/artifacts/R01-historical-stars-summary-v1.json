@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "scope": "Compact historical formatting census; not final-source regression or physical admission.",
+  "source_artifact": "docs/work-packages/20261101_rock_water_development/artifacts/R01-historical-stars.json",
+  "source_sha256": "a2024b7b0a094859e2d0a368ddd42682aacca28c0c3d2e07baec80795ae6033a",
+  "manifest_sha256": "79aee5a98f36d76e2e603ec0f3614be84b21dcbdff64857c43f2247df534d983",
+  "cases": 840,
+  "files": 5880,
+  "missing": [],
+  "numeric_star_counts": {
+    "H1.element.dat:token11": 74267
+  },
+  "affected_cases": {
+    "H1.element.dat:token11": 99
+  },
+  "nonnumeric_star_summary": {
+    "distinct_output_lines": 25242,
+    "occurrences_by_file": {
+      "H1.loss.dat": 57998,
+      "H1.plot.dat": 840
+    }
+  },
+  "omitted": "Full ordinary-output line histogram and witness text remain in the unchanged private source artifact."
+}

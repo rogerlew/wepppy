@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "completed-case-response",
+  "bindings": {
+    "out/rock-water-development-20261101/R05-repair-response-denver-outunrut-v1/case-receipt.json": "eeccee52fb2ac726d40663d1ac3ba82c49bb8f13116d46035bec96c2421c343c",
+    "out/rock-water-development-20261101/R05-repair-response-denver-outunrut-v1/a8-to-cap.json": "25e97b4b68ea75c2de442d397c9b64a0017861b86f3d003e1a29c55815e93a8b",
+    "out/rock-water-development-20261101/R05-repair-response-denver-outunrut-v1/r4-to-a8.json": "7b6bb738f9546c2a186cbb7a77254de4fbb89a0861abee9b5106a7d21dbfe403",
+    "out/rock-water-development-20261101/R05-snow-cap-experiment-v3/cases/denver-1718465-outunrut-paved-high/observer/observation-readback.json": "2781bf564d05b844960017dd386f06a1d0f3f46fbbf29cf7d39d7bdd767f6517",
+    "out/rock-water-development-20261101/R05-snow-cap-experiment-v3/cases/denver-1718465-outunrut-paved-high/candidate/observation-readback.json": "3b7728f5a67374edddf43f018941abfba5d69b555bf8763a69a0023797dc9994"
+  },
+  "review_sha256": "3745f44b53028c34ef3e8e63e3882c938dec4a4edc8849262ed5faafe659a0a1",
+  "release_admitted": false,
+  "native_execution": false
+}

@@ -121,11 +121,15 @@ def test_prep_soil_applies_minimum_before_maximum_clip(
     monkeypatch.setattr(wepp_module, "WeppSoilUtil", FakeWeppSoilUtil)
     monkeypatch.setattr(wepp_module, "_soil_has_symbolic_wepp_parameters", lambda _: False)
 
+    # Keep source-marker inspection real while isolating transformation order.
+    source_fixture = Path(__file__).parents[1] / "data/single_input_soils/7777.sol"
+    src_fn = tmp_path / "src.sol"
+    src_fn.write_bytes(source_fixture.read_bytes())
     dst_fn = str(tmp_path / "p1.sol")
     topaz_id, elapsed = wepp_module.prep_soil(
         (
             "1",
-            "src.sol",
+            str(src_fn),
             dst_fn,
             None,
             None,

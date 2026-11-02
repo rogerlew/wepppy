@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "stage": "integration_preparation_regression_addendum",
+  "tests_passed": 252,
+  "warnings": 2,
+  "duration_seconds": 1154.2,
+  "log": {
+    "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-canonical-integration-v1-existing-tests.log",
+    "sha256": "3a9c4cbe25968fbc81448183f4c276c9c2c0c1bf87741e043a4ab9458ef77c8d"
+  },
+  "packet_receipts": {
+    "/workdir/wepppy/out/rock-water-development-20261101/P04-canonical-integration-v1/preparation-receipt.json": "c5ea6370013550b230eafd2066672a2a7600cee9b7fe64917fa7790187d5910a",
+    "/workdir/wepppy/out/rock-water-development-20261101/P04-canonical-integration-v2/preparation-receipt.json": "c25a9a78b41915393ece6640ac8d213ca2300bb03ee2d8d1cd926e2c72f0223f"
+  },
+  "frozen_packet_file_bindings_reverified": 41,
+  "reuse_scope": "All five runtime files unchanged between v1, v2 and corrected P04 overlay; matrix uses v1 runtime. V2 changes documentation, API stubs and import helpers only; affected helper tests separately passed.",
+  "canonical_preimages_unchanged": true,
+  "dirty_ssurgo_document_unchanged": true,
+  "canonical_integration": false,
+  "native_execution": false,
+  "physical_admission": false
+}

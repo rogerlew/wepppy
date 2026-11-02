@@ -1,0 +1,739 @@
+{
+  "status": "FINAL_PRECOMMIT_DISPOSITION_NATIVE_CORRECTNESS_HOLD",
+  "snapshot_utc": "2026-11-02T19:13:11.053156+00:00",
+  "intended_final_artifact": "docs/work-packages/20261101_rock_water_development/artifacts/final-release-gate-disposition-v1.json",
+  "release_admitted": false,
+  "publication_authorized": false,
+  "deployment_authorized": false,
+  "source_pair": {
+    "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+    "clean_build": {
+      "path": "/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/receipt.json",
+      "sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe"
+    },
+    "promotion": {
+      "path": "/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/promotion-receipt.json",
+      "sha256": "cd53d1932419d788f4156bf56fca5a0d56e912ada845a1127d6ebabd1161399c"
+    },
+    "general_sha256": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+    "hillslope_sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
+    "local_manifest": {
+      "path": "/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-installation-v1/manifest.json",
+      "sha256": "2c09288616859a93ac829da42cb27c7dbb54db26bdb1c8bb253a27e31b597a15"
+    },
+    "application_binding_sha256": "fcddc7dbb4db6f948360b0cfa1e70a544ecb1b17c8629627c59f3efdce906742"
+  },
+  "gates": [
+    {
+      "gate": "combined18",
+      "execution": "passed",
+      "disposition": "bounded_parent_accepted",
+      "scope": "18 histories; unchanged underfunded contracts, explicit changed phase/output consequences; no universal thermal/cold/full-budget/retention claim",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/receipt.json",
+        "sha256": "c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.json",
+          "sha256": "3b7ffa53b66aadfa1226026f1986f08eec80ac02d0849f8cf963433d8ec90cd5"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.json",
+          "sha256": "58c8967795de988c22144eb3ca3d22dba5ea5826cabcd414bab28251a2ca1f17"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/parent-acceptance-v1.json",
+        "sha256": "312a6fd9fefc86a206da01232d6cabe74334647e74003634f8ca8c29001f50b8"
+      },
+      "missing": []
+    },
+    {
+      "gate": "native",
+      "execution": "passed",
+      "disposition": "bounded_parent_accepted",
+      "scope": "1394 tests, 31 watchlist checks, two smokes and artifact policy",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/release-r5-gates-renewal-v2/receipt.json",
+        "sha256": "f8e9d049701ece321533aea32863ea923638aa0fd63c771c3c3e16466cd1d756"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-science-outcome-v1.json",
+          "sha256": "7f6dd0b5c749949eb45d4167bedf38cd9ae7a59be3b3259cb6992a34ed80ca8d"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-actual-implementation-review-v1.json",
+          "sha256": "9d48d3e4b8c5ad8cb716dd178794331222c64d8d35e1bf6272b15d49374bde11"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/release-r5-gates-renewal-v2/parent-acceptance-v1.json",
+        "sha256": "8d8e90ff164a0e37aa5594cebfcc70368f4d82064a73438eb74b082c64b8e599"
+      },
+      "missing": []
+    },
+    {
+      "gate": "legacy",
+      "execution": "passed",
+      "disposition": "bounded_parent_accepted",
+      "scope": "Six activation/exposure histories; Roads water/reporting consequences disclosed; frost policy unchanged",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/legacy-frost-final-renewal-v1/receipt.json",
+        "sha256": "f3ef08eaa9c15029aa5b22d4c577b727da6680d1c18830bb6a1d0918cad2833b"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.json",
+          "sha256": "a2336d510cf1fc403af513786f9550401b1523ac91e3c90208e1a1338d3ed18f"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/legacy-frost-final-actual-implementation-review-v1/review.json",
+          "sha256": "28ebc361f7753cb461e16acaadc8db8cb2bf0038665b1f628e9f5d14a1e62f9c"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/legacy-frost-final-renewal-v1/parent-acceptance-v1.json",
+        "sha256": "7197cc767ac78dc7a22a3c55a1041f14c77233937be2c5d0d66f1887e658f7c9"
+      },
+      "missing": []
+    },
+    {
+      "gate": "Disturbed",
+      "execution": "passed",
+      "disposition": "bounded_parent_accepted",
+      "scope": "67 processes/468 artifacts; 110 changed, outlet +0.08 m3/+1.71 kg; bounded consequence acceptance",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/disturbed-final-renewal-v2/receipt.json",
+        "sha256": "65843c58b59b9d247c5a3af8ca6eb2cb60d8d992879b2b89f14a9f7910f0a66e"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-science-outcome-v1.json",
+          "sha256": "49f959813c39951f4379431e4cd917db50362f5f845b07bee0418c9d8926086d"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-actual-implementation-review-v1.json",
+          "sha256": "e203f8fb04d5d8ca0e89739d5bce224b549820d25a320d1af868d1844fb2418d"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/disturbed-final-renewal-v2/parent-acceptance-v1.json",
+        "sha256": "ff0750ab6bf1704da28c7471ef7c5a0ba9f4ddd533c8d9bf8cfc81bdcb6ba71b"
+      },
+      "missing": []
+    },
+    {
+      "gate": "clean_Roads840",
+      "execution": "completed_audit_passed",
+      "disposition": "bounded_engine_compatibility_parent_accepted_original_screen_failed",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/roads-final-renewal-v2/receipt.json",
+        "sha256": "3d15d9feffe9830901ad24da30fa3bd7da26f40be0c7d2d205a736582bc7ff99"
+      },
+      "actual_reviews": {
+        "ordinary_science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/roads-final-ordinary-consequence-science-review-v1.json",
+          "sha256": "ccc799bf050f8c08115f3a8cacd8efc5e0674d73c146ea2c76f962a9a5d8dc92"
+        },
+        "ordinary_implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/roads-final-renewal-actual-implementation-review-v1.json",
+          "sha256": "9c7b2a2753d675c8bb125c0990bb3eb97b3dc35aa50d41b33d44558d8f6d42c5"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/final-roads-parent-disposition-v1/decision.json",
+        "sha256": "fb384407f3d7cf85046e24103ef5fa15e0b415e71d3c9ef5e18579ef4f18c473"
+      },
+      "original_score": "744/840",
+      "physical_gate": true,
+      "numerical_gate": false,
+      "screen_gate": false,
+      "original_acceptance": false,
+      "candidate_admitted": false,
+      "missing": [],
+      "interpretation": "The original Roads parameterization acceptance remains failed. Do not relabel an engine repair physical disposition as calibration or parameterization acceptance.",
+      "magnitude_screen": {
+        "accepted": false,
+        "total_pass": 744,
+        "total": 840,
+        "meaningful_pass": 713,
+        "meaningful_total": 766,
+        "small_pass": 31,
+        "small_total": 74,
+        "thresholds_changed": false
+      },
+      "parameterization_admitted": false,
+      "field_calibration": false
+    },
+    {
+      "gate": "capacity_R03_R04",
+      "execution": "completed_840_observed_with_exact_clean_parity",
+      "disposition": "bounded_executed_arithmetic_parent_accepted",
+      "declaration": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/final-capacity-execution-v1/declaration.json",
+        "sha256": "e2f57a895c826621d368791600ad87392595caca580720df0221e8dea8d958d7"
+      },
+      "launch_authority": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/final-capacity-execution-v1/approval.json",
+        "sha256": "d79f0fc316c8b468da5fcbb113fe383ca83f151b7acb0f40a2c9c2370aa0c4e2"
+      },
+      "declared_total": 840,
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/final-capacity-execution-v1/receipt.json",
+        "sha256": "fe4780f31163dc008f9ab610893eec571ab6890af2e74a589a2b0d7556f5f2c8"
+      },
+      "actual_reviews": {
+        "capacity_science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-capacity-outcome-science-review-v1.json",
+          "sha256": "0b3dd29c603cae54cc475fdff41fea91ead5a42c35614152f3c615dcbcabfdd3"
+        },
+        "capacity_implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-capacity-outcome-implementation-review-v1.json",
+          "sha256": "59e1967407cc3cc8b0ddafb7dd044be20de81ca802578330d7330864ad592b3e"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/final-roads-parent-disposition-v1/decision.json",
+        "sha256": "fb384407f3d7cf85046e24103ef5fa15e0b415e71d3c9ef5e18579ef4f18c473"
+      },
+      "missing": [],
+      "notes": "Accepted bounded ordinary-output consequences and executed capacity/particle arithmetic for the final matched engine. Material event, vegetation, storage and sediment differences remain disclosed; printed difference context is not universal water-budget closure. Sole strict particle fraction flag remains recorded with fresh native/printed arithmetic disposition.",
+      "actual_manifest_sha256": "ba6e368e280cd812794589041e08b66193ea3fe594a0f299f66ccfd1c3ef37ab"
+    },
+    {
+      "gate": "P03_retention",
+      "execution": "completed_142_actual",
+      "disposition": "bounded_consumer_physical_and_optional_contract_parent_accepted",
+      "declaration": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P03-final-continuation-v2/declaration.json",
+        "sha256": "1290118a5315d017d17bc40dd16b5e1d90ac6b1c92fe2d4e65c672f63cb44907"
+      },
+      "launch_authority": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P03-final-continuation-v2/run-approval.json",
+        "sha256": "e589fe24b73094e32bb480579c3c3530cf769029c8736c821d9ad9d106143229"
+      },
+      "declared_total": 142,
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P03-final-continuation-v2/execution-result.json",
+        "sha256": "19cf9032023aff47dd3af9a32870cc5bbf9486cd0a41815cc6cbee62d598e28e"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P03-terminal-science-admission-v1.json",
+          "sha256": "505710d3c5c2460944d8a4c4981aa04325ee0e63f98bad7717c47212f17184c3"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P03-terminal-implementation-outcome-v1.json",
+          "sha256": "cbb54e05bd744691bd3ff50cdd7a902e5fa10e6060d7295186f15cb0a62cc56e"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P03-parent-admission-v1/decision.json",
+        "sha256": "b32e16c4ca31c02f2271dc99954a70daeae4d8bac36fc2c30ec875ac8467801d"
+      },
+      "missing": [],
+      "notes": "P03 reuses 71 fully validated results and runs 71 new calls; failed v1 preserved. Capacity reuses the completed clean840 comparator. P03 admission is separate from fixed-engine release.",
+      "scope": "Six-source project, unchanged-density treatments, actual hourly engine; internal observations H11/H28/H40 and nonvacuous H40 accepted-root proof.",
+      "optional_api_contract_decision": "Proceed with explicit opt-in SSURGO capability using the already reviewed mathematical eligibility and provenance guards. Eligibility is not universal physical validation; describe the tested consumer scope and independent acquisition association requirement. No case-specific whitelist or tuning is introduced.",
+      "integration_conditions": [
+        "Accepted contract and ADR ancestor checkpoint before code application",
+        "Exact reviewed implementation/preimage verification and preservation of unrelated ssurgo.md",
+        "Actual ordinary installed-module 66-soil controller artifact gate, with complete companions and source joins",
+        "Required focused, stub and broad tests and independent integration outcome reviews"
+      ],
+      "default_adoption": false,
+      "universal_physical_validation": false,
+      "canonical_optional_code_installed": true,
+      "integration_conditions_status": "Fulfilled by optional_installed_controller and current_WEPPpy_broad_validation gates; bounded applicability and no default adoption remain."
+    },
+    {
+      "gate": "P04_artifacts_and_optional_integration",
+      "execution": "ordinary_installed_controller_reproduction_passed",
+      "disposition": "bounded_artifact_and_explicit_opt_in_canonical_local_integration_parent_accepted",
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-v2/receipt.json",
+        "sha256": "e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc"
+      },
+      "artifact_handoff": {
+        "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-actual-artifact-handoff-v6.json",
+        "sha256": "5bfcd1b99b411817ec662b7ced822d568b721faf7036c092ea5ffc91774695e2"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-science-outcome-v1.json",
+          "sha256": "a10b4803d81a93f324d9005c9953a105196b09636854ca0886db9ea3e4f1517e"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-actual-implementation-review-v2/review.json",
+          "sha256": "2199b588313f3f7674d56121a141e58b68317c46982c22db0b24196bef4831ad"
+        },
+        "security": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-actual-security-review-v2.json",
+          "sha256": "0e0e9f5d793a1ee89707198d50b724860d010d1cf33f961be6d2b15f9b718d4c"
+        }
+      },
+      "integration_preparation": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-canonical-integration-v2/preparation-receipt.json",
+        "sha256": "c25a9a78b41915393ece6640ac8d213ca2300bb03ee2d8d1cd926e2c72f0223f"
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-parent-integration-disposition-v1/decision.json",
+        "sha256": "5b426af69fe64e6c7ced5adbe0edbe22e38598ef80ba094028498543075cb855"
+      },
+      "missing": [],
+      "scope": "66 soils and companions reproduced by ordinary installed modules; bounded explicit opt-in implementation accepted, not default or universal retention adoption. Durable contract/ADR status updated after controller bindings cleared.",
+      "canonical_optional_code_installed": true,
+      "historical_staged_evidence": {
+        "execution": "artifact_staging_passed",
+        "receipt": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/receipt.json",
+          "sha256": "9a73068af0f0e0f8bbe083acc61c6c5a0c98cb98b0a76be0af218f53aef58df6"
+        },
+        "actual_reviews": {
+          "science": {
+            "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-project-builder-actual-science-review.json",
+            "sha256": "46e4aa2f15b966e316423fab0ba574978f56bf9bb8b6e924a7dbcd76b8478330"
+          },
+          "implementation": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-actual-implementation-review-v1/review.json",
+            "sha256": "19609c0036e229eca1d676b5d7d5243794442d77bb5684f451b4f955223de00b"
+          },
+          "security": {
+            "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-project-builder-actual-security-review-v6.json",
+            "sha256": "2e2685d2625d54116841103171030426b02afde48c36347a572b6a0d8e672f6e"
+          }
+        }
+      },
+      "execution_result": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-v2/execution-result.json",
+        "sha256": "d9cd51c7e1fce7abf03b72c89eca7d60f95523ea232844dbbf242e8655145f10"
+      },
+      "canonical_validation": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-canonical-validation-v1/receipt.json",
+        "sha256": "a22256d2a08140d78e936d1a8b9f5a882a635eaedbe97c91220c1b07a710c694"
+      }
+    },
+    {
+      "gate": "local_WEPPpy_r5_installation",
+      "execution": "installed_and_targeted_validation_passed",
+      "disposition": "local_known_defect_artifact_delivery_accepted",
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-installation-v1/receipt.json",
+        "sha256": "3dcbb45f9b589e478bb28862c2039eeeff05de7d7626e4670544b15f1833f4c0"
+      },
+      "post_install": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-installation-v1/post-install-validation.json",
+        "sha256": "b3d2d32a3331dc53357790af44c77f05bbdba596e427baeefb18867d6fa608a9"
+      },
+      "parent_install_authority": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-installation-v1/parent-approval.json",
+        "sha256": "603984bc7e6a18e0335f0b28586e85dd0e6445a0f6bfc6bf5df98f66742f8e47"
+      },
+      "rollback_inventory_sha256": "50e8a0d5dd99b6fce1fe3d91974f8bde4cab12c1c65e99192189e462de8c868c",
+      "actual_reviews": {
+        "implementation": {
+          "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-final-independent-implementation-v1/actual-delivery-review.json",
+          "sha256": "ee56909e4e099f522c94d2999f539307332364aa19bd828da8f111917eb1cb2f"
+        },
+        "security": {
+          "path": "/home/workdir/wepppy/out/rock-water-development-20261101/closeout-security-local-delivery-v1/review.json",
+          "sha256": "be242afaf373848619199c6c4f64e3128f267a6a17509c2a15cf8f3870258f20"
+        },
+        "public_manifest_science": {
+          "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-public-manifest-science-review-v1/review.json",
+          "sha256": "adfb5ee7712b34db24c229113b91c03ddeb29be14bdc7d6444acd8756bbdd242"
+        }
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-parent-local-delivery-disposition-v1/decision.json",
+        "sha256": "73d0b647bfcff47e60731813b60aa7d8a0de1433c0e141745ed8941bb342c900"
+      },
+      "targeted_tests": 47,
+      "missing": [],
+      "scope": "Exact binary pair retained; descriptive sidecars and17page report installed locally. General/native correctness/package closure HOLD. No default change/deployment.",
+      "final_delivery": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-local-delivery-v1/receipt.json",
+        "sha256": "46732571ddbd537db79b6645f7912fb7dcc189081b566191b1ca227b3e469d9e"
+      },
+      "post_delivery": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-local-delivery-v1/post-install-validation.json",
+        "sha256": "d11bff2140028c4c775ffb7f9983ebe7c54953b4e84d5e16da7793543f79be64"
+      },
+      "publication_manifest": {
+        "path": "/home/workdir/wepppy/wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r5.json",
+        "sha256": "4f8f60e6c88daeae00f13b18b7b43d78169cc32332086f5583944298555942dd"
+      }
+    },
+    {
+      "gate": "service_application_medium492",
+      "execution": "passed",
+      "disposition": "bounded_application_medium_parent_accepted",
+      "scope": "Actual configured development-service role selection, runners, containment, artifacts and medium regression consequences. Material lateral/storage timing, liquid/ice partition and channel-area effects remain explicit. Unchanged Snow-Water and differing printed Precip coordinates do not establish universal physics or unique-formula attribution.",
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-application-parent-disposition-v1/decision.json",
+        "sha256": "615cedebc5ad2c19e3ca18ac930030f4a9f7aef7decd1b2cdf0a50b59d298194"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-medium-application-science-outcome-v1.json",
+          "sha256": "1c10de71375a597bdfd93cde39ae5e1bfbc2f9dc069d6111490827c817be4f36"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/application-final-actual-implementation-review-v1.json",
+          "sha256": "0ca9223955ff674cb86cc41caf3e2c457d36b478376ffb902119b4c8b7503620"
+        },
+        "security": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/application-actual-security-outcome-v1.json",
+          "sha256": "9bd2066c8aa8e549e9a998b72c33bf196378077ad984937926350a28d1129042"
+        }
+      },
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-medium-application-renewal-v3/receipt.json",
+        "sha256": "6ef49ea56dd162ca2119c0028e13db3a1b346cd2917918bfa162ea73c133e21a"
+      },
+      "quantitative_readback": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-medium-application-readback-v2/receipt.json",
+        "sha256": "6e3d98895e2280e0b00505ffbfa07235421f8213eb5b1ff2b60e1b77059c5792"
+      },
+      "output_files": 3443,
+      "changed_files": 978,
+      "native_histories": 492,
+      "missing": [],
+      "limits": [
+        "No universal physics or unique-formula attribution",
+        "No full-system water-budget proof",
+        "No deployment or default adoption"
+      ]
+    },
+    {
+      "gate": "current_WEPPpy_broad_validation",
+      "execution": "passed",
+      "disposition": "parent_accepted_regression_evidence",
+      "scope": "Completed final installed-code regression: 12729 passed, 423 skipped, 5833 warnings; original v1 failure and narrow fixture correction retained.",
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-v2/result.json",
+        "sha256": "2ecd33337873066f1c83e17e6e48e23c0a7a9591b946379e051d07de91921087"
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-parent-disposition-v1/decision.json",
+        "sha256": "c72571780b7552e3840d5c5cfc90cddda623343054a4679e986f593974c504d9"
+      },
+      "missing": [],
+      "prior_failure": {
+        "tests_passed": 10451,
+        "skipped": 423,
+        "failed": 1,
+        "cause": "Old mock supplied nonexistent src.sol to legitimate source-marker inspection; fixture-only correction retained; v2 required."
+      },
+      "takeover_review": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-v2-takeover-review-v1/receipt.json",
+        "sha256": "438722c33bb2506f91f8656bdcb1e3764984754a696fd81c02812e26c6e8f58f"
+      },
+      "actual_review": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-v2-terminal-review-v1/receipt.json",
+        "sha256": "7e3b2d49c1235b1dc02e61e25366820f26c47f953cda4e09475e065444bba875"
+      },
+      "tests_passed": 12729,
+      "skipped": 423,
+      "warnings": 5833
+    },
+    {
+      "gate": "optional_installed_controller",
+      "execution": "passed",
+      "disposition": "bounded_canonical_local_implementation_parent_accepted",
+      "scope": "Explicit opt-in SSURGO capability under accepted ADR-0132; ordinary installed controller reproduces all66 soils and companions exactly, retaining bounded P03 applicability and independent acquisition association.",
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-parent-integration-disposition-v1/decision.json",
+        "sha256": "5b426af69fe64e6c7ced5adbe0edbe22e38598ef80ba094028498543075cb855"
+      },
+      "actual_reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-science-outcome-v1.json",
+          "sha256": "a10b4803d81a93f324d9005c9953a105196b09636854ca0886db9ea3e4f1517e"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-actual-implementation-review-v2/review.json",
+          "sha256": "2199b588313f3f7674d56121a141e58b68317c46982c22db0b24196bef4831ad"
+        },
+        "security": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-actual-security-review-v2.json",
+          "sha256": "0e0e9f5d793a1ee89707198d50b724860d010d1cf33f961be6d2b15f9b718d4c"
+        }
+      },
+      "actual_receipt_sha256": "e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc",
+      "canonical_validation_sha256": "a22256d2a08140d78e936d1a8b9f5a882a635eaedbe97c91220c1b07a710c694",
+      "wepppy_implementation_commit": "41c8b53cfe93f9657a0ce53f602e3e134b48d172",
+      "focused_tests": 84,
+      "affected_tests": 346,
+      "stub_modules": 2,
+      "test_stub_check_passed": true,
+      "missing": [],
+      "limits": [
+        "Generic mathematical eligibility is not universal physical validation",
+        "Independent acquisition association remains mandatory",
+        "No default adoption or deployment"
+      ]
+    },
+    {
+      "gate": "code_quality_observability",
+      "execution": "completed",
+      "disposition": "observe_only_not_scientific_or_regression_admission",
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-code-quality-v1/receipt.json",
+        "sha256": "88a6076e9485849c3de84d60fd8df11d760f1798d37cec4bfd597d2e4094d957"
+      },
+      "limits": [
+        "Python complexity unavailable: radon absent; no dependency added for optional telemetry",
+        "124-line validator function retained as readability follow-up, not unreviewed release refactor"
+      ],
+      "broad_exception_check_exit_code": 0,
+      "net_unsuppressed_delta": -4
+    },
+    {
+      "gate": "private_archive_first_five",
+      "execution": "passed_for_selected_scope",
+      "disposition": "accepted_first_five_scope_with_later_archives_recorded_separately",
+      "index": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-index-v1/index.json",
+        "sha256": "4bad78499b397d80440f47ad51b1b7fed1d33be85a3936dfecfe3b63c848171d"
+      },
+      "completeness": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-completeness-audit-v1/receipt.json",
+        "sha256": "2bf20ac8974b03efd672423249cc3619a02a96cd420a0005fa28edc0e74308ab"
+      },
+      "independent_review": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/archive-completeness-implementation-review-v1.json",
+        "sha256": "96f47d88ce826f4b13225799de7dd00af974cf71d7987128cc30034fb1976739"
+      },
+      "selected_roots": 298,
+      "members": 269974,
+      "missing": [],
+      "limits": [
+        "This gate covers first-five scope; complete immutable archive coverage and postcommit boundary are defined by private-retention-index-v1.json."
+      ],
+      "aggregate_receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-execution-v1/receipt.json",
+        "sha256": "0893a71b89f7e8689ae888d6fcb877c91cfc73c6d51b3f2e44c09c9abd0eb51a"
+      }
+    },
+    {
+      "gate": "S01_supplementary_compensation",
+      "execution": "20_histories_completed_with_confirmed_native_defect",
+      "disposition": "investigation_findings_accepted_native_correctness_HOLD",
+      "source_preparation_science_review": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-science-closeout-v1/preparation-v1-review.json",
+        "sha256": "cfc4d70b72968606d3ef6fdb151fd0ba452d785d0c42803c5d4a2de91bd0da0f"
+      },
+      "source_preparation_implementation_review": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-implementation-closeout-v1/preparation-review-v1.json",
+        "sha256": "3cd015cfe6f9e405fbdc9c1594802bd20c97b54174fdac4e3f27d435c4004f89"
+      },
+      "missing": [
+        "Separately authorized native ownership repair and affected-consumer validation"
+      ],
+      "limits": [
+        "No supplementary production repair",
+        "Default unchanged; optional remains explicit experimental opt-in. Neither formula repairs cross-OFE ownership. Native/general/package correctness HOLD; no broader safe-use class."
+      ],
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-parent-final-investigation-disposition-v1/decision.json",
+        "sha256": "bef67047cb2ea6c6150aa5b63314d2cdb8809056850b4562cec397657b1d4c20"
+      },
+      "public_science": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.json",
+        "sha256": "f03519ad33ab91a893cece55a5e7540f2a83ee2e3b28e6bef92fa9606acb7482"
+      },
+      "actual_implementation": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-implementation-closeout-v1/actual-ownership-review-v1.json",
+        "sha256": "ec1114fb243da32c563c09121ca777fa8e819e1f6a7882c8b3a8364bad185ace"
+      },
+      "boundary_implementation": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-implementation-closeout-v1/actual-boundary-review-v1.json",
+        "sha256": "d1ebbe02fb714116716ab8b8f8cf82c40b824ae4685a6e349ca654a7b7593121"
+      },
+      "governance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-release-governance-v1/review.json",
+        "sha256": "5d735dcfb59e564a927c30420afe25e9792fe5efdb9e3ad24eaf8ac74ded3cde"
+      },
+      "unexecuted_limits": [
+        "scheduled tillage/later density",
+        "Rosetta2/missing-density generalization",
+        "retention guard activation",
+        "repaired-ownership counterfactual"
+      ],
+      "final_public_report_review": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-independent-implementation-closeout-v1/final-public-report-review-v1.json",
+        "sha256": "ef487c49d400fd60805cd7aeaa791e0a3c0055769c2f3ee7bacc6514bfee633c"
+      },
+      "correctness_review": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/20261102_correctness_review.md",
+        "sha256": "68c377375fa479460c5da572b17cfea78d2739381bc3518ebe1b1b5615a16c7d"
+      },
+      "optional_final_disposition": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/optional-retention-final-disposition-v1.md",
+        "sha256": "e943f43d8b53a5d56d9fe9db54df48d3cd50548613437679e4022b5fcc01c884"
+      }
+    },
+    {
+      "gate": "corrected_delta_and_final_tail",
+      "execution": "passed",
+      "disposition": "parent_accepted_exact_archive_scopes",
+      "delta_receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-next-delta-v2/receipt.json",
+        "sha256": "4bc445c22cae58561fb91a2ecc64afa52aa54ec5772fd76ec5b72c076e9aa6d7"
+      },
+      "delta_implementation": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/archive-bytecode-independent-implementation-v1/actual-delta-v2-review.json",
+        "sha256": "49d63a5d146582c5bcb6c211e3cd035d0d013f2a438a327cd4eb24db90792183"
+      },
+      "delta_security": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/closeout-security-delta-v2-actual-v1/review.json",
+        "sha256": "19e8182f625f760d2f09bf6569c87844bd49013e53ee23e554b73fa4da7c83d7"
+      },
+      "delta_acceptance_and_tail_authority": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-tail-parent-approval-v1/approval.json",
+        "sha256": "df208cfed28c9ff5e010e4966cb040797365314dcf46e6440971ce9a93ba3615"
+      },
+      "tail_receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-final-tail-v1/receipt.json",
+        "sha256": "081cc5514a71589e36b2203d7e27ced54f637beae8971aa3c87f2b5cc5be1378"
+      },
+      "tail_implementation": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-tail-independent-implementation-v1/actual-review.json",
+        "sha256": "e4277fc31ccfa002d1dc9b80b8ac1ef80dd1cc6cda798b32bebcbe17e818ffc2"
+      },
+      "tail_security": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/closeout-security-tail-actual-v1/review.json",
+        "sha256": "5979dc660f72f9bbf1566728557b43480747da50aee07ac1ad803ffce65d1334"
+      },
+      "tail_parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-tail-parent-disposition-v1/decision.json",
+        "sha256": "9f2034b037fd30aaefb3725566dcf239dd62c69293e6eadf62127a443349d58e"
+      },
+      "public_index": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/private-retention-index-v1.json",
+        "sha256": "84d8dd1a858196bd079a0840f31d997e0a08af82f7a4fc015a77cac66fd6ea79"
+      },
+      "missing": [],
+      "limits": [
+        "Postcommit closing metadata is outside these immutable archives and must be retained under the separately reviewed envelope."
+      ]
+    }
+  ],
+  "remaining_closure": [
+    "Separately authorized native FC/HK ownership repair and affected-consumer validation"
+  ],
+  "scope_notes": [
+    "Final precommit snapshot: local delivery and main archive results are actual; exact containing commit and closing metadata-copy result are recorded separately, with no predicted future hashes.",
+    "Engine acceptance does not erase original Roads744/840 parameterization failure.",
+    "Previously failed preparation/control receipts remain immutable history.",
+    "This update changes no canonical runtime, sidecar or scientific formula.",
+    "Descriptive-only sidecars bridge typed unchanged execution fields to tested preimages; no regression campaign rerun solely for report/description changes. Native artifact commit contains no scientific source change."
+  ],
+  "supersedes_private_snapshot": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-release-gate-matrix-draft-v5/final-release-gate-disposition.draft.json",
+    "sha256": "5967b2a210f59ce88a3ea847a00946b0cbd50f21e0c8617a94ff9939895070b5"
+  },
+  "delivery_gates": [
+    {
+      "gate": "final_descriptive_sidecar_transition",
+      "status": "passed_local_known_defect_scope",
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-local-delivery-v1/receipt.json",
+        "sha256": "46732571ddbd537db79b6645f7912fb7dcc189081b566191b1ca227b3e469d9e"
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-parent-local-delivery-disposition-v1/decision.json",
+        "sha256": "73d0b647bfcff47e60731813b60aa7d8a0de1433c0e141745ed8941bb342c900"
+      }
+    },
+    {
+      "gate": "final_report",
+      "status": "passed_local_known_defect_scope",
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-local-delivery-v1/receipt.json",
+        "sha256": "46732571ddbd537db79b6645f7912fb7dcc189081b566191b1ca227b3e469d9e"
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-parent-local-delivery-disposition-v1/decision.json",
+        "sha256": "73d0b647bfcff47e60731813b60aa7d8a0de1433c0e141745ed8941bb342c900"
+      }
+    },
+    {
+      "gate": "explicit_public_artifact_selection_and_publication",
+      "status": "finite_selection_declared_exact_manifest_and_staged_checks_pending",
+      "receipt": null,
+      "parent_acceptance": null,
+      "public_record": "docs/work-packages/20261101_rock_water_development/artifacts/final-public-selection-review-v1.json",
+      "boundary": "Four closing governance files omit reciprocal public hashes; the final private manifest and independent staged/commit review bind all selected bytes. This snapshot is not future execution proof."
+    },
+    {
+      "gate": "complete_private_archive_index",
+      "status": "immutable_archive_index_complete_postcommit_metadata_boundary_explicit",
+      "receipt": {
+        "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/private-retention-index-v1.json",
+        "sha256": "84d8dd1a858196bd079a0840f31d997e0a08af82f7a4fc015a77cac66fd6ea79"
+      },
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-tail-parent-disposition-v1/decision.json",
+        "sha256": "9f2034b037fd30aaefb3725566dcf239dd62c69293e6eadf62127a443349d58e"
+      }
+    },
+    {
+      "gate": "final_parent_release_disposition",
+      "status": "HOLD_confirmed_native_correctness",
+      "receipt": null,
+      "parent_acceptance": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-parent-final-investigation-disposition-v1/decision.json",
+        "sha256": "bef67047cb2ea6c6150aa5b63314d2cdb8809056850b4562cec397657b1d4c20"
+      }
+    }
+  ],
+  "durable_document_update": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-durable-docs-private-v2/application-receipt.json",
+    "sha256": "231307f58d71383645505b26431cbbda9c91e847fcac029c12413452044a58aa"
+  },
+  "closeout_reference_audit": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/closeout-gate-reference-audit-v1/receipt.json",
+    "sha256": "68cfe90cbe2b096624fcce145a4600aeb4677cbf0a39ce368983bed901b36e76"
+  },
+  "updated_utc": "2026-11-02T22:21:33.984028+00:00",
+  "durable_native_base": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-native-base-retention-v1/receipt.json",
+    "sha256": "8017e0573b5ef478ef17ef0cc486a06c272d94a29f86a42312df4cc195183ff0"
+  },
+  "overall_disposition": "HOLD_CONFIRMED_NATIVE_CORRECTNESS",
+  "program_complete": false,
+  "deployment": false,
+  "native_artifact_commit": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/native-local-r5-commit-v1/receipt.json",
+    "sha256": "8642aa927bbee16b00c9f6735df5ff60c3e485936cf0b32fba3274b3430b1886"
+  },
+  "remaining_authorized_closeout_work": [
+    "At this precommit snapshot: exact final selection/staged/commit checks and reviewed postcommit metadata copy; actual results are recorded in the declared durable envelope and final handoff."
+  ],
+  "local_report_delivery_authorized": true,
+  "publication_authorized_scope": "Local report delivery is authorized and verified. Finite source-free local commit requires final independent manifest/staged checks; no external push/deployment or general native release authorization.",
+  "draft_correction_review": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-gate-matrix-independent-implementation-v1/review.json",
+    "sha256": "ade89db40f9104c34b9ee34527e0f44333f6f2451f7f8ac15f36146abbc91775"
+  },
+  "final_security_review": {
+    "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/20261102_security_review.md",
+    "sha256": "6320ed281363b1b21dbc081b76f052d1e247f2c003a0c93ac7e640abea74e152"
+  },
+  "post_snapshot_finalization": {
+    "scope": "Final exact file/index/commit checks and metadata-copy execution are mandatory subsequent steps recorded in the durable envelope and final handoff. This precommit artifact makes no future completion claim.",
+    "destination": "/wc1/runs/ro/rock-water-development-20261101/closure-metadata-v1/",
+    "copier_preparation_implementation": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-closure-metadata-independent-implementation-v1/review.json",
+      "sha256": "f28f111b1d601fa039d20a0b96a439b1749990bafd8de4c17b11dd54aa43384b"
+    },
+    "copier_preparation_security": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/closeout-security-closing-copier-preparation-v1/review.json",
+      "sha256": "fafe5d7e6921a23351a2b5fc72040fbf10ad726e01349372bf276458cce525ba"
+    }
+  }
+}

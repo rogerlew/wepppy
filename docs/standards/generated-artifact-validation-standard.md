@@ -92,6 +92,23 @@ is acceptable only when the selection method and coverage risk are stated. Check
 all artifacts when the failure can occur independently in any member and the cost
 is reasonable.
 
+### Finalized Database Identity
+
+For SQLite in WAL mode, a main-file hash taken before the last connection closes
+or a verified checkpoint completes does not identify the complete logical
+database. A transaction context manager does not close its connection. Capture
+the authoritative finalized-file receipt at the existing parent post-process
+boundary, after producer readers and writers have closed, and check for remaining
+WAL state. Do not introduce a new process architecture merely to hash an artifact.
+
+If a premature hash was already recorded, retain the original receipt and mismatch.
+Use a separate, path-bound addendum to establish finalized byte identity and
+source/schema/table semantics; never silently replace the original claim or use
+semantic equality to report that the old byte comparison passed. Audit other
+consumers of the same receipt helper. Verification must leave the original
+database unchanged; use an immutable read-only connection only after confirming
+that no pending WAL is required to read its complete state.
+
 ### Preserve Accepted Evidence During Verification
 
 Treat a converter called by an audit as a writer, even when the audit's purpose is

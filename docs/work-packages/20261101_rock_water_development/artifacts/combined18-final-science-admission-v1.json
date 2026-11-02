@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "actual-combined-admission",
+  "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "native_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "scientific_acceptance": true,
+  "bounded_combined_engine_acceptance": true,
+  "retention_adoption": false,
+  "thermal_closure_proven": false,
+  "actual_receipt_sha256": "c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d",
+  "declarations": {
+    "snow": "89ec97e6686a231118a24e505ded9b62987cf7ea43780b02bbe19124642c5a4e",
+    "b04": "8129e0e11d9087bc268928d87b0e1b5e6617e2706f69e91c1bd1a45d0dc70849"
+  },
+  "build_binding_sha256": "6f9d7d2b1386ee87a6c8bd7e7ffb2c0792ea78f337016ec1e0b795eab7fcb8f1",
+  "binaries": {
+    "wepp": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/candidate/src/wepp",
+      "sha256": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+      "libraries": {
+        "/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0": "342618ccfebe840446e4ef2b7893f4161b2084845e570f42d68a70bfde58a58d",
+        "/usr/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+        "/usr/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+        "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+        "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+      }
+    },
+    "wepp_hill": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/candidate/src/wepp_hill",
+      "sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
+      "libraries": {
+        "/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0": "342618ccfebe840446e4ef2b7893f4161b2084845e570f42d68a70bfde58a58d",
+        "/usr/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+        "/usr/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+        "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+        "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+      }
+    },
+    "observed": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-observer-build-v1/candidate/src/wepp",
+      "sha256": "e186ee1e86b21f0c6df7dfdbd8016d5d9064eefeb0a4bc516c854c54973fcf42",
+      "libraries": {
+        "/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0": "342618ccfebe840446e4ef2b7893f4161b2084845e570f42d68a70bfde58a58d",
+        "/usr/lib/x86_64-linux-gnu/libm.so.6": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0",
+        "/usr/lib/x86_64-linux-gnu/libc.so.6": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf",
+        "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+        "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+      }
+    }
+  },
+  "bindings": {
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/receipt.json": "c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/snow/receipt.json": "200da50567ac40fdde4667491876d225a731ff37ab9db7cb4387ae01ad146fee",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/b04/receipt.json": "442b0ad375b4cee69d7fdfc7ed43e13b724fd1fc2ae4468380e1c63fb2fd3b13",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/snow/execution-declaration.json": "89ec97e6686a231118a24e505ded9b62987cf7ea43780b02bbe19124642c5a4e",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/b04/execution-declaration.json": "8129e0e11d9087bc268928d87b0e1b5e6617e2706f69e91c1bd1a45d0dc70849",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/actual-build-binding.json": "6f9d7d2b1386ee87a6c8bd7e7ffb2c0792ea78f337016ec1e0b795eab7fcb8f1",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-science-actual-v1/receipt.json": "26fb502712b201fbc5860668d7834ff3c20688193994e184e75b756e740800d7",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-science-actual-v1/replay.py": "b632116433ac3edf2b379585efb42d66a2a3a62b813713a7cff9a3c6ffb654f7",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-science-actual-v1/restoration-comparison.json": "118122d3c8842223c9d7d108030e8162d68ba76d152a586172b5bbbf1529cc07",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-science-actual-v1/funded-donor-differences.json": "c9e55ede1408597025b91ddc5455944f4034db9869bea1fa8eb3ddb6ce8638f3",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-science-actual-v1/printed-wat-differences.json": "6f8258341f7eac04305ed5eeeea66ab3cdf38f27ea06bb5b9c4fef52d1065a27",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-B04-interaction-attribution-v1/receipt.json": "d60b38f172942306265e52fd63d67c6ed2c8a1e021f58ac2f4ff11fbcfffe549",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-B04-interaction-attribution-v1/handoff.json": "1de93a5cc7551c1317ffb0ee06bac3dbbf3a0a958596178dbdd506bcb2c1abc6",
+    "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-B04-interaction-attribution-v1/findings.md": "60740fbba5ee3f7bd32b4c2f852dc7c7502103fb978d6f397812a98a9e72a289",
+    "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/combined18-snow-science-actual-v1.json": "ed02e049803e055189be5e888ca13241c2342a88724b54e3d2347b3b3d8f7d00"
+  },
+  "review": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.md",
+  "review_sha256": "6f947d2287ac1cb3db2a77c9c56a17151a4169ad533b60e429ab6071d2f947a7",
+  "native_actions": 0
+}

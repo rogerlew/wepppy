@@ -1,0 +1,58 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "wepp_261029",
+  "artifact_revision": 5,
+  "document_revision": "5",
+  "document_date": "2026-11-02",
+  "publication_status": "Reviewed local known-defect report; general release/native correctness/package closure HOLD",
+  "approval_record": "Owner authorized same-ID local re-release of undeployed artifact and updated notes. Parent accepts reviewed S01 investigation and permits local known-defect artifacts only. Independent AI science, implementation and disclosure reviewers accept exact report contents; no claim of human peer review or institutional endorsement. Final exact local installation uses a separate retained parent approval.",
+  "pdf_filename": "wepp_261029_release-notes-r5.pdf",
+  "pdf_sha256": "4fb75b1b88e0ff9097c47a671f802a85cf81fae537872edbe90422ba519d6cf7",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r5.pdf",
+  "pages": 17,
+  "figures": 0,
+  "model_source_identity": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "source_comparison_baseline": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "binary_sha256": {
+    "wepp_261029": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+    "wepp_261029_hill": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933"
+  },
+  "known_limitations": [
+    "Confirmed cross-OFE FC/HK ownership defect under both retention policies. Unrestricted heterogeneous-use readiness, native correctness and package closure remain HOLD; no ownership repair or broader safe-use class established.",
+    "Preexisting ownership structure does not prove unchanged exposure, harmlessness or corrected hydrograph effects. Exact observer parity and finite domains are not ownership correctness.",
+    "Roads original parameterization screen remains failed at744/840; no threshold relaxation, field calibration, universal thermal validity or complete water-budget claim.",
+    "Scheduled tillage/later density evolution, Rosetta2/missing-density generalization, retention-guard activation and repaired-ownership counterfactual remain unobserved.",
+    "Defaults remain unchanged; optional SSURGO inverse remains explicit and experimental. No existing project soils or persisted outputs rewritten. No deployment or new Windows support."
+  ],
+  "completed_actual_byte_gates": {
+    "native_tests": 1394,
+    "hillslope_watchlist": 31,
+    "host_smokes": 2,
+    "combined_histories": 18,
+    "legacy_histories": 6,
+    "disturbed_processes": 67,
+    "roads_clean_histories": 840,
+    "roads_observed_histories": 840,
+    "application_histories": 492,
+    "broad_wepppy_passed": 12729,
+    "broad_wepppy_skipped": 423,
+    "broad_wepppy_warnings": 5833,
+    "S01_ownership_histories": 4,
+    "S01_synthetic_source_boundary_histories": 16
+  },
+  "S01_parent_disposition_sha256": "bef67047cb2ea6c6150aa5b63314d2cdb8809056850b4562cec397657b1d4c20",
+  "broad_terminal_sha256": "2ecd33337873066f1c83e17e6e48e23c0a7a9591b946379e051d07de91921087",
+  "review_receipts": {
+    "scientific_report_sha256": "f134ef5c63c06d95859a249b1a8916f7038805c71f5d551045f61e9fd76eb11d",
+    "implementation_report_sha256": "9dda9e3008118f4fe29d7a1d2e8df7dbca8cea6857606ab32fae37ec4d6fbb66",
+    "disclosure_report_sha256": "961f4f27c3499342eda1cdc929475232036a08c96be9f748822992683cf4ae8d"
+  },
+  "source_freeze_sha256": "2cdf3e60c5dc1b87879019255545f62f0967faa98ed62a175ed28d154b5d3a39",
+  "preserve_issued_earlier_pdfs": true,
+  "public_attachments": [
+    "PDF report",
+    "this manifest"
+  ],
+  "legacy_source_attached": false,
+  "deployment": false
+}

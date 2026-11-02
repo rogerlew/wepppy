@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "role": "security",
+  "stage": "final-pair-promotion",
+  "reviewer": "/root/retention_security",
+  "declaration_sha256": "48f680d601f37a54b5b55b1d0fe4e38adbc5dea1d40f1aaa8b2f69b84e28e8f8",
+  "build_receipt_sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe",
+  "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "scope": "Exact six local canonical products only; no vendoring, native models, deployment or scientific admission",
+  "open_findings": [],
+  "review_markdown_sha256": "3cc338f371eae86debd29704d10b2d917cee3dcf23fcdb240727895a0259ee5f",
+  "evidence": {
+    "out/rock-water-development-20261101/final-pair-security-review-v1/actual-build-v1.json": "3500c3a6dea88f13e9ff55e44622a633d9d5ffe50215c94c04f3ac6c16a96436",
+    "out/rock-water-development-20261101/final-pair-security-review-v1/observer-coordination-v1.json": "32f9797f5bb2bb8b8ba607b05bec99ae4fcf2d2f15f7820b0683a1e6499204cb",
+    "out/rock-water-development-20261101/final-pair-security-review-v1/inspect_actual_build_v1.py": "84066c0fe5fe4b43133db1c73b71e9abed21c7d462285160611acbb9ef7b5f9c",
+    "out/rock-water-development-20261101/final-pair-security-review-v1/concrete-build-v1.json": "f0370f49af490302dd06baa56d3da4bef3262bc54bd75134cb606456a3d11af1",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-producer-security-review-v3.json": "e75e14b35a9378de39b178bab4c883bee1304637367db0d48d5e5044a6a99219"
+  },
+  "binaries": {
+    "wepp": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+    "wepp_hill": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933"
+  },
+  "checks": {
+    "command_receipts": 2,
+    "active_build_entries_rehashed": 1027,
+    "retained_built_inventory_entries": 61984,
+    "tool_identities": 28,
+    "canonical_six_unchanged": true,
+    "rollback_files_verified": 6,
+    "prior_archive_and_git_blob_proof_reused": true
+  },
+  "observer_coordination": {
+    "passed": true,
+    "dependency_cleared": true,
+    "receipt_sha256": "8a05a7964d61e8917e426aa6812bcc9c74900cd5af4a8f6297e53431fe317932",
+    "terminal_commands": 3,
+    "old_canonical_six_unchanged": true
+  },
+  "reviewer_native_actions": 0
+}

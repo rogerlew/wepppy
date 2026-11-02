@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "role": "implementation",
+  "stage": "final-regression-actual-outcome",
+  "scope": "disturbed67",
+  "declaration_sha256": "a212eb4103171c252433255316d388d44d74e4af79629deddad89abea6a9bf7c",
+  "receipt_sha256": "65843c58b59b9d247c5a3af8ca6eb2cb60d8d992879b2b89f14a9f7910f0a66e",
+  "readback_receipt_sha256": "72639bbc06a9151e75bb5091f9b9372333b0ab65118ffb75aa11cf4777c6e710",
+  "independent_readback_receipt_sha256": "72639bbc06a9151e75bb5091f9b9372333b0ab65118ffb75aa11cf4777c6e710",
+  "review_sha256": "2349a5a5236e9b4dcc7af5198a7c7fd9d9f0ecff2868e661a1fe39c9f8d24f13",
+  "processes": 67,
+  "outputs": 468,
+  "scientific_acceptance": false
+}

@@ -1,0 +1,197 @@
+{
+  "schema_version": "private-evidence-retention-index/v1",
+  "program": "20261101_rock_water_development",
+  "status": "Enumerated immutable archives complete; explicit postcommit metadata boundary pending.",
+  "archive_scope": {
+    "top_level_paths": 840,
+    "directories": 674,
+    "loose_files": 166,
+    "logical_members": 569862,
+    "logical_regular_bytes": 247484028649,
+    "stored_object_bytes": 46631315821,
+    "disjoint_root_list_and_full_restore_mapping": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-composite-index-v1/index.json",
+      "sha256": "04f1ba05e11db0b0b92af453e76a84b0f29eed608b3d9305622f5a9c3949ef07"
+    }
+  },
+  "private_archives": [
+    {
+      "id": "earlier-a-d-e-f-n",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/earlier-a-d-e-f-n-v1.tar.gz",
+      "archive_sha256": "05d589bba09a89959a8e24fbc5a6b77c754bf2935f6323eca6f85fe438ff277e",
+      "archive_bytes": 6941474785,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-earlier-a-d-e-f-n-v1/receipt.json",
+        "sha256": "b4b18efc389ed96babb589e898ca16231560226cc95775062ff406330c09760a"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-earlier-a-d-e-f-n-v1/members.json",
+        "sha256": "4ca618f435da495a58570a3c863934a068e90ee9ede5e6f99a04d2e4692080e8"
+      },
+      "logical_members": 121698,
+      "logical_regular_bytes": 66344744811,
+      "validation": "Accepted original all-member restore and fail-closed completeness audit; unchanged archive size/mtime reused without recompression or new payload rehash."
+    },
+    {
+      "id": "winter-b",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/winter-b-v1.tar.gz",
+      "archive_sha256": "85609f6fbce7e29a8dd9473b7efb4953c1934766323b58fa83f5218e9560f60d",
+      "archive_bytes": 1128494733,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-winter-b-v1/receipt.json",
+        "sha256": "aa021948623e6d83df5372ca5a63ef72bbb12df1990419d348c368bef6be5c12"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-winter-b-v1/members.json",
+        "sha256": "28098ea2c8d3ed9d086b062ca4f023f51fc8a8e80040ce19228e1c9bfd7694cc"
+      },
+      "logical_members": 38163,
+      "logical_regular_bytes": 7978034887,
+      "validation": "Accepted original all-member restore and fail-closed completeness audit; unchanged archive size/mtime reused without recompression or new payload rehash."
+    },
+    {
+      "id": "roads-r01-r04",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/roads-r01-r04-v1.tar.gz",
+      "archive_sha256": "94787799064046b624749b786402ba9feb983969236ec231bed94661d145182a",
+      "archive_bytes": 4331578506,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-roads-r01-r04-v1/receipt.json",
+        "sha256": "80daefa94582f2e856e06b995cd2d2a2bb248981c98444d32e8a375006b2bfa7"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-roads-r01-r04-v1/members.json",
+        "sha256": "a6caa7cf38d337568bf653c52339131890cb9d1ce6f7cf6b3a874a8d4f26b4dc"
+      },
+      "logical_members": 79838,
+      "logical_regular_bytes": 23199126279,
+      "validation": "Accepted original all-member restore and fail-closed completeness audit; unchanged archive size/mtime reused without recompression or new payload rehash."
+    },
+    {
+      "id": "roads-r05",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/roads-r05-v1.tar.gz",
+      "archive_sha256": "288dcbc78e13203c2b86b2daf193d8c78757b72e0e07e754ba15e1147972c2ef",
+      "archive_bytes": 2298931979,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-roads-r05-v1/receipt.json",
+        "sha256": "0f8ac78640f9e028664935e34c71974f953ecc4426d106feb77332466d8708a6"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-roads-r05-v1/members.json",
+        "sha256": "631cb7fb28b4c9c4e0fdad1cf367dcfa918a524c03318febc8590580b523dccc"
+      },
+      "logical_members": 27057,
+      "logical_regular_bytes": 33012509775,
+      "validation": "Accepted original all-member restore and fail-closed completeness audit; unchanged archive size/mtime reused without recompression or new payload rehash."
+    },
+    {
+      "id": "combined",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/combined-v1.tar.gz",
+      "archive_sha256": "33c1bb4256872f9006299e151bb11096f25a466301f6ee685740790dcc606065",
+      "archive_bytes": 66128547,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-combined-v1/receipt.json",
+        "sha256": "24dd01159b4f6a4c99f3db67e6325b9097eb82e54a6093c999b7e7698b9739f3"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-combined-v1/members.json",
+        "sha256": "fdee8501048234292a5fde333758ebe529c8eef427a91690a54a790bf6fff4da"
+      },
+      "logical_members": 3218,
+      "logical_regular_bytes": 608541850,
+      "validation": "Accepted original all-member restore and fail-closed completeness audit; unchanged archive size/mtime reused without recompression or new payload rehash."
+    },
+    {
+      "id": "closed-next-delta-v2",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/closed-next-delta-v2.tar.gz",
+      "archive_sha256": "16ef2eff1e030063f2b611b9fe996028d39adce5ce4837fa639d6926566c4b2e",
+      "archive_bytes": 5899918578,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-next-delta-v2/receipt.json",
+        "sha256": "4bc445c22cae58561fb91a2ecc64afa52aa54ec5772fd76ec5b72c076e9aa6d7"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-next-delta-v2/members.json",
+        "sha256": "acf4af608fd07726a6db60e2c4168e76d8ef64b5b762afed982a14ab633340b7"
+      },
+      "logical_members": 294003,
+      "logical_regular_bytes": 113862190893,
+      "payload_members": 171044,
+      "payload_regular_bytes": 36888522244,
+      "payload_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-next-delta-v2/payload-members.json",
+        "sha256": "9a0f89904ba508e100ecb30f05a6490e32c282d5f87903d2946eaea7d684ce66"
+      },
+      "validation": "Actual all-member temporary-file restore/hash, source-before/after equality, exact tool/input checks and process containment PASS; independently reviewed.",
+      "logical_storage_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-next-delta-v2/logical-storage.json",
+        "sha256": "31394e151b406de606b398bb71caf5d99c3fe4693fedd8ebc152441c5305b2b0"
+      },
+      "base_dependency": "/wc1/runs/ro/rock-water-development-20261101/committed-native-source-d2e14d96.tar"
+    },
+    {
+      "id": "closed-final-tail-v1",
+      "archive": "/wc1/runs/ro/rock-water-development-20261101/closed-final-tail-v1.tar.gz",
+      "archive_sha256": "e47b32319ae8f13c8a4f322536b4c67edc539b6d95b88fd7de9ccce56f2b46ed",
+      "archive_bytes": 265030613,
+      "receipt": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-final-tail-v1/receipt.json",
+        "sha256": "081cc5514a71589e36b2203d7e27ced54f637beae8971aa3c87f2b5cc5be1378"
+      },
+      "member_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-final-tail-v1/members.json",
+        "sha256": "629a3a8d5bd7b9801d561f9460cf3b51f20a44f4f3e20a094f93ff69e8e29824"
+      },
+      "logical_members": 5885,
+      "logical_regular_bytes": 2478880154,
+      "payload_members": 5885,
+      "payload_regular_bytes": 2478880154,
+      "payload_manifest": {
+        "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-retention-closed-final-tail-v1/payload-members.json",
+        "sha256": "629a3a8d5bd7b9801d561f9460cf3b51f20a44f4f3e20a094f93ff69e8e29824"
+      },
+      "validation": "Actual all-member temporary-file restore/hash, source-before/after equality, exact tool/input checks and process containment PASS; independently reviewed."
+    }
+  ],
+  "durable_base": {
+    "id": "committed-native-source-d2e14d96",
+    "path": "/wc1/runs/ro/rock-water-development-20261101/committed-native-source-d2e14d96.tar",
+    "sha256": "45eda24a4835531797339a4b97d0588ff1097dd10477d197c2720db7a8a6b82d",
+    "bytes": 25699758080,
+    "receipt": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-native-base-retention-v1/receipt.json",
+      "sha256": "8017e0573b5ef478ef17ef0cc486a06c272d94a29f86a42312df4cc195183ff0"
+    },
+    "role": "One raw-tar durable base serves exact proved logical clone maps; already counted logical content is not added again."
+  },
+  "acceptance": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-archive-final-tail-parent-disposition-v1/decision.json",
+    "sha256": "9f2034b037fd30aaefb3725566dcf239dd62c69293e6eadf62127a443349d58e"
+  },
+  "outside_raw_artifacts": {
+    "snapshot_v1": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-outside-raw-artifact-retention-v1/receipt.json",
+      "sha256": "f099afd8c1741d38482d6fe37e96032955a5d22c0500741f4707be1362e0815e"
+    },
+    "snapshot_v2": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-outside-raw-artifact-retention-v2/receipt.json",
+      "sha256": "2d312f3620b93562fa6567271355962f1592311ff26dff806d2e6fdbf844f3b7"
+    },
+    "current_files_at_v2_snapshot": 1248,
+    "storage": "Exact snapshots and original-path/content mappings are members of closed-final-tail-v1. Later new/changed artifacts belong to the postcommit envelope."
+  },
+  "post_commit_metadata_boundary": {
+    "status": "Pending at this committed index; no future PASS or hash asserted.",
+    "durable_envelope": "/wc1/runs/ro/rock-water-development-20261101/closure-metadata-v1",
+    "scope": "Every RAW top-level path outside the enumerated immutable archives, final selected document bytes, final outside-artifact delta, and exact native/WEPPpy commit receipts. Exact exhaustive selection, independent reviews and parent approval precede copying.",
+    "method": "Finite regular-file copies with fsync, content/metadata readback, source-before/after equality and exhaustive top-level classification; no source deletion, hardlinks or archive/base recompression.",
+    "manifest_boundary": "payload-manifest.json and controls-manifest.json describe the copied original paths. Generated manifests and receipt.json are audit-envelope objects outside those manifests. receipt.json binds both manifest hashes; the final handoff records its actual hash and any later durable audit-object hashes.",
+    "commit_boundary": "This index anchors completed archives before the final WEPPpy commit. The later envelope retains that commit receipt and final document bytes. It does not require this commit to contain its own future receipt hash.",
+    "preparation": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/private-final-closure-metadata-preparation-v1/manifest.json",
+      "sha256": "d498b3f88f604c46fa756b84e7d82d798997675051083e3caf28c9c6afb4eaac"
+    }
+  },
+  "preservation_limits": "Original relative names, regular bytes, mode, uid, gid, mtime_ns and archive symlink targets; atime excluded. Symlink targets are retained as metadata, not certified relocation-ready links. The closing metadata-only copier rejects symlinks, special files and xattrs.",
+  "release_boundary": "Private retention is not general release readiness or package scientific closure. The confirmed FC/HK ownership defect remains a separate release HOLD; defaults and deployment are unchanged.",
+  "no_external_publication_or_source_deletion": true
+}

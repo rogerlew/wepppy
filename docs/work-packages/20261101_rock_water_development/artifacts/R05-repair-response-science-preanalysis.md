@@ -1,0 +1,21 @@
+# Repair-response scientific preanalysis contract
+
+This is an analysis/disposition contract for the frozen 21-history snow-cap experiment, not an execution or release approval. It adopts the distinction in [the ET policy disposition](R05-et-stress-policy-disposition.md): an inherited physiological-model limitation does not automatically veto a separately justified conservative repair, but its activated material responses require explicit assessment. No source, cases, thresholds or native processes are added here.
+
+## Required comparisons using existing evidence
+
+Use final-a8 observer versus clean/observed snow-cap candidate for repair effects, with clean/observed seven-file parity. Use the three declared r4 counterlanes plus retained completed R05 pairs for the original allocation-to-demand contrast. Preserve both comparisons; do not present final-a8 parity as the behavioral baseline comparison. Use existing full-period ordinary outputs and daily state/flux/plant census, supplemented by declared diagnostic windows.
+
+Report per case/OFE annual and complete-period runoff, sediment and ET components, with local-area versus cumulative-area units explicit. Summarize canopy/residue storage changes, LAI/root-depth/biomass and carried stress trajectories, exact first differences, maxima/dates and persistence or recovery. Sparse event rows need a keyed union, not row-position pairing. Daily extrema and cancellation must remain visible alongside totals. Use existing diagnostic definitions rather than new universality thresholds.
+
+For both Denver directions and secondary Flagstaff, distinguish diagnostic potential basal transpiration from actual availability-limited EP, canopy-satisfied residual demand, actual accepted root uptake and final reported EP. Classify the observed demand/gate cases from existing initialized operands, including guard/inactive states and positive-product underflow if encountered. Join pre-growth demand state, actual growth epoch, SWU/skip carry and next-day growth. Retain all observed branch transitions; detailed formula attribution outside declared windows is not implied by the full daily census. An unsupported additional material episode remains an explicit evidence gap, not an inferred copy of a selected mechanism.
+
+## Acceptance and refusal criteria
+
+A bounded repair can be recommended only when its independent ownership contract passes: no unavailable-water spending, no arbitrary tail deletion, correctly identified complete pack, preserved non-target arithmetic, and signed rounding budgets derived from the actual operations. Compiled local probes and observed-versus-clean parity must pass. Negative/nonfinite demand, unowned transfers, unintended algorithm/order changes, or unexplained material stock/flux differences block admission for affected scope.
+
+A fully attributed response under the unchanged ET/stress policy is eligible for scientific consequence review; it is neither automatically acceptable nor automatically rejected by its size. Compare its magnitude, duration, affected OFEs and propagated runoff/sediment against the declared release uses and existing regression/empirical gates. Explain the physical/model consequence explicitly. No new universal percentage, near-zero epsilon or relaxed empirical criterion is introduced. A favorable local repair outcome cannot substitute for the full-period comparisons or refreshed affected native, Roads and general-model validation on final bytes.
+
+Residual limitations must state the inherited availability-conditioned demand and canopy/skip stress semantics, the observed activation conditions and quantified consequences. Do not label watstr as an independently validated physiological ratio. If consequence review cannot support the stated use under those semantics, retain HOLD and govern a separate stress experiment; do not alter physiology or erase an owned positive remainder in this experiment.
+
+The decision remains conditional on actual results. It does not require exhaustive new-physiology validation, exact zero residual across all native arithmetic, or additional histories absent demonstrated missing evidence. All current finite process and source boundaries remain in force.

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "actual-legacy-compatibility",
+  "execution_and_activation_accepted": true,
+  "bounded_legacy_compatibility_accepted": true,
+  "roads_consequence_pending": false,
+  "release_admitted": false,
+  "optional_retention_admitted": false,
+  "new_model_followup_required_for_declared_scope": false,
+  "bindings": {
+    "out/rock-water-development-20261101/legacy-frost-final-renewal-v1/declaration.json": "9a35007694fe81265c3d610753d1fc4d6cf875edb6ab29a38278818af3ef54d8",
+    "out/rock-water-development-20261101/legacy-frost-final-renewal-v1/receipt.json": "f3ef08eaa9c15029aa5b22d4c577b727da6680d1c18830bb6a1d0918cad2833b",
+    "out/rock-water-development-20261101/legacy-frost-final-renewal-v1/comparison.json": "11b3de1498729ae62f8aa6595e3d15774191e2df552d0d02e8620d62f80dec80",
+    "out/rock-water-development-20261101/legacy-frost-final-readback-v1/receipt.json": "d0e3e7b02f3462b21ca04e54c4a49f4606e4e74da87ce84d48798d36613d3775",
+    "out/rock-water-development-20261101/legacy-frost-final-readback-v1/readback.py": "c5f641d35579fa5b50217ec79fcd72f9ca4a1a73731493702481b1fc3cd504c4",
+    "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-actual-outcome-v1.md": "7d332f19a8d0e4c5992ccefeef1353c8b480452ebbfabf13a08624b8ff2c9c1c",
+    "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v1.json": "7c2f368276ae2a484832623a3df10496b92e3a900b06c3696dc52f4219c734b1"
+  },
+  "review_sha256": "63c7ff668799a0454f5da37f92315d95c0985159647e620babb5f2fff3c3cbfc"
+}

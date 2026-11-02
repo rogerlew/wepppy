@@ -1,0 +1,2051 @@
+{
+  "passed": true,
+  "scope": "Artifact handoff only; independent actual reviews and native admission remain required. Private code not integrated.",
+  "root_receipt": {
+    "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/receipt.json",
+    "sha256": "9a73068af0f0e0f8bbe083acc61c6c5a0c98cb98b0a76be0af218f53aef58df6"
+  },
+  "lanes": {
+    "baseline": {
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/baseline-receipt.json",
+        "sha256": "8a26cf238f5efe9d59f30625418035c88d069d60ca36dd0d1ffe965708ac4f2f"
+      },
+      "project_root": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline",
+      "files": {
+        "p1.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p1.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p10.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p10.sol",
+          "sha256": "f28b00354ce4df48f342b99a75d0e319fe3d7487613d6bfd37db0e188b81c8e1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p11.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p11.sol",
+          "sha256": "cf4bd3257634b865a5094a5e056bb15b607f92db45dfcf316f984524f36b9a9b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p12.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p12.sol",
+          "sha256": "d3ccb74234950c5efd04c684cdee72efcad3221784c794c38053c9576b849091",
+          "ofes": 2,
+          "ksflag": 0
+        },
+        "p13.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p13.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p14.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p14.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p15.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p15.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p16.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p16.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p17.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p17.sol",
+          "sha256": "f28b00354ce4df48f342b99a75d0e319fe3d7487613d6bfd37db0e188b81c8e1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p18.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p18.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p19.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p19.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p2.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p2.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p20.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p20.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p21.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p21.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p22.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p22.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p23.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p23.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p24.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p24.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p25.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p25.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p26.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p26.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p27.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p27.sol",
+          "sha256": "f28b00354ce4df48f342b99a75d0e319fe3d7487613d6bfd37db0e188b81c8e1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p28.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p28.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p29.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p29.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p3.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p3.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p30.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p30.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p31.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p31.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p32.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p32.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p33.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p33.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p34.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p34.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p35.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p35.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p36.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p36.sol",
+          "sha256": "f28b00354ce4df48f342b99a75d0e319fe3d7487613d6bfd37db0e188b81c8e1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p37.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p37.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p38.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p38.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p39.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p39.sol",
+          "sha256": "f28b00354ce4df48f342b99a75d0e319fe3d7487613d6bfd37db0e188b81c8e1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p4.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p4.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p40.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p40.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p41.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p41.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p42.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p42.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p43.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p43.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p44.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p44.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p45.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p45.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p46.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p46.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p47.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p47.sol",
+          "sha256": "a535b569ceef41d37d182bc7d02923e608f65a5e501f9a810c7838d1ce63e16e",
+          "ofes": 2,
+          "ksflag": 0
+        },
+        "p48.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p48.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p49.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p49.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p5.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p5.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p50.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p50.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p51.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p51.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p52.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p52.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p53.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p53.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p54.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p54.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p55.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p55.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p56.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p56.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p57.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p57.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p58.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p58.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p59.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p59.sol",
+          "sha256": "b157b13931fdc2aa8d785287511c238a543c9d2cadc62a11c7c8e51befde4aab",
+          "ofes": 1,
+          "ksflag": 0
+        },
+        "p6.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p6.sol",
+          "sha256": "9340228a87a3961dd2b6d241de9b1332aec74b24f6d93bbe5b59bd801ff8f1f1",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p60.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p60.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p61.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p61.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p62.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p62.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p63.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p63.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p64.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p64.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p65.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p65.sol",
+          "sha256": "b46468e7511ed97011ff75792c9914221566e9afd89b5c40f1ad075e28579b9d",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p66.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p66.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p7.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p7.sol",
+          "sha256": "c3e88c103916c1ad4685398ab0587f5848496fbc97828a52e9984b366585c09b",
+          "ofes": 3,
+          "ksflag": 0
+        },
+        "p8.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p8.sol",
+          "sha256": "d3ccb74234950c5efd04c684cdee72efcad3221784c794c38053c9576b849091",
+          "ofes": 2,
+          "ksflag": 0
+        },
+        "p9.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v4/p04v4-20261102-baseline/wepp/runs/p9.sol",
+          "sha256": "17b5450be167dc401dac0d92b711c16312b7a59922800c7ed14dd5ee97194e66",
+          "ofes": 3,
+          "ksflag": 0
+        }
+      },
+      "ofes": 193,
+      "mapping": {
+        "212": {
+          "wepp_id": 46,
+          "soil_key": "hill_212.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_212.mofe.sol"
+        },
+        "42": {
+          "wepp_id": 5,
+          "soil_key": "hill_42.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_42.mofe.sol"
+        },
+        "32": {
+          "wepp_id": 3,
+          "soil_key": "hill_32.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_32.mofe.sol"
+        },
+        "103": {
+          "wepp_id": 20,
+          "soil_key": "hill_103.mofe",
+          "source_mukey": "67225",
+          "file": "hill_103.mofe.sol"
+        },
+        "142": {
+          "wepp_id": 30,
+          "soil_key": "hill_142.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_142.mofe.sol"
+        },
+        "62": {
+          "wepp_id": 11,
+          "soil_key": "hill_62.mofe",
+          "source_mukey": "2711253",
+          "file": "hill_62.mofe.sol"
+        },
+        "231": {
+          "wepp_id": 51,
+          "soil_key": "hill_231.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_231.mofe.sol"
+        },
+        "242": {
+          "wepp_id": 54,
+          "soil_key": "hill_242.mofe",
+          "source_mukey": "67225",
+          "file": "hill_242.mofe.sol"
+        },
+        "271": {
+          "wepp_id": 61,
+          "soil_key": "hill_271.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_271.mofe.sol"
+        },
+        "23": {
+          "wepp_id": 2,
+          "soil_key": "hill_23.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_23.mofe.sol"
+        },
+        "82": {
+          "wepp_id": 15,
+          "soil_key": "hill_82.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_82.mofe.sol"
+        },
+        "283": {
+          "wepp_id": 66,
+          "soil_key": "hill_283.mofe",
+          "source_mukey": "67225",
+          "file": "hill_283.mofe.sol"
+        },
+        "63": {
+          "wepp_id": 12,
+          "soil_key": "hill_63.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_63.mofe.sol"
+        },
+        "202": {
+          "wepp_id": 43,
+          "soil_key": "hill_202.mofe",
+          "source_mukey": "67225",
+          "file": "hill_202.mofe.sol"
+        },
+        "153": {
+          "wepp_id": 34,
+          "soil_key": "hill_153.mofe",
+          "source_mukey": "67225",
+          "file": "hill_153.mofe.sol"
+        },
+        "223": {
+          "wepp_id": 50,
+          "soil_key": "hill_223.mofe",
+          "source_mukey": "67225",
+          "file": "hill_223.mofe.sol"
+        },
+        "51": {
+          "wepp_id": 7,
+          "soil_key": "hill_51.mofe",
+          "source_mukey": "67225",
+          "file": "hill_51.mofe.sol"
+        },
+        "213": {
+          "wepp_id": 47,
+          "soil_key": "hill_213.mofe",
+          "source_mukey": "67225",
+          "file": "hill_213.mofe.sol"
+        },
+        "172": {
+          "wepp_id": 38,
+          "soil_key": "hill_172.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_172.mofe.sol"
+        },
+        "93": {
+          "wepp_id": 18,
+          "soil_key": "hill_93.mofe",
+          "source_mukey": "67225",
+          "file": "hill_93.mofe.sol"
+        },
+        "272": {
+          "wepp_id": 62,
+          "soil_key": "hill_272.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_272.mofe.sol"
+        },
+        "33": {
+          "wepp_id": 4,
+          "soil_key": "hill_33.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_33.mofe.sol"
+        },
+        "162": {
+          "wepp_id": 35,
+          "soil_key": "hill_162.mofe",
+          "source_mukey": "67225",
+          "file": "hill_162.mofe.sol"
+        },
+        "61": {
+          "wepp_id": 10,
+          "soil_key": "hill_61.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_61.mofe.sol"
+        },
+        "72": {
+          "wepp_id": 13,
+          "soil_key": "hill_72.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_72.mofe.sol"
+        },
+        "211": {
+          "wepp_id": 45,
+          "soil_key": "hill_211.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_211.mofe.sol"
+        },
+        "102": {
+          "wepp_id": 19,
+          "soil_key": "hill_102.mofe",
+          "source_mukey": "67225",
+          "file": "hill_102.mofe.sol"
+        },
+        "152": {
+          "wepp_id": 33,
+          "soil_key": "hill_152.mofe",
+          "source_mukey": "67225",
+          "file": "hill_152.mofe.sol"
+        },
+        "173": {
+          "wepp_id": 39,
+          "soil_key": "hill_173.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_173.mofe.sol"
+        },
+        "253": {
+          "wepp_id": 57,
+          "soil_key": "hill_253.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_253.mofe.sol"
+        },
+        "252": {
+          "wepp_id": 56,
+          "soil_key": "hill_252.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_252.mofe.sol"
+        },
+        "171": {
+          "wepp_id": 37,
+          "soil_key": "hill_171.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_171.mofe.sol"
+        },
+        "123": {
+          "wepp_id": 25,
+          "soil_key": "hill_123.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_123.mofe.sol"
+        },
+        "141": {
+          "wepp_id": 29,
+          "soil_key": "hill_141.mofe",
+          "source_mukey": "67225",
+          "file": "hill_141.mofe.sol"
+        },
+        "22": {
+          "wepp_id": 1,
+          "soil_key": "hill_22.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_22.mofe.sol"
+        },
+        "233": {
+          "wepp_id": 53,
+          "soil_key": "hill_233.mofe",
+          "source_mukey": "67225",
+          "file": "hill_233.mofe.sol"
+        },
+        "131": {
+          "wepp_id": 26,
+          "soil_key": "hill_131.mofe",
+          "source_mukey": "67225",
+          "file": "hill_131.mofe.sol"
+        },
+        "222": {
+          "wepp_id": 49,
+          "soil_key": "hill_222.mofe",
+          "source_mukey": "67225",
+          "file": "hill_222.mofe.sol"
+        },
+        "263": {
+          "wepp_id": 60,
+          "soil_key": "hill_263.mofe",
+          "source_mukey": "67225",
+          "file": "hill_263.mofe.sol"
+        },
+        "112": {
+          "wepp_id": 22,
+          "soil_key": "hill_112.mofe",
+          "source_mukey": "67225",
+          "file": "hill_112.mofe.sol"
+        },
+        "43": {
+          "wepp_id": 6,
+          "soil_key": "hill_43.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_43.mofe.sol"
+        },
+        "221": {
+          "wepp_id": 48,
+          "soil_key": "hill_221.mofe",
+          "source_mukey": "67225",
+          "file": "hill_221.mofe.sol"
+        },
+        "122": {
+          "wepp_id": 24,
+          "soil_key": "hill_122.mofe",
+          "source_mukey": "67225",
+          "file": "hill_122.mofe.sol"
+        },
+        "83": {
+          "wepp_id": 16,
+          "soil_key": "hill_83.mofe",
+          "source_mukey": "67225",
+          "file": "hill_83.mofe.sol"
+        },
+        "203": {
+          "wepp_id": 44,
+          "soil_key": "hill_203.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_203.mofe.sol"
+        },
+        "143": {
+          "wepp_id": 31,
+          "soil_key": "hill_143.mofe",
+          "source_mukey": "67225",
+          "file": "hill_143.mofe.sol"
+        },
+        "273": {
+          "wepp_id": 63,
+          "soil_key": "hill_273.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_273.mofe.sol"
+        },
+        "262": {
+          "wepp_id": 59,
+          "soil_key": "hill_262.mofe",
+          "source_mukey": "67225",
+          "file": "hill_262.mofe.sol"
+        },
+        "232": {
+          "wepp_id": 52,
+          "soil_key": "hill_232.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_232.mofe.sol"
+        },
+        "132": {
+          "wepp_id": 27,
+          "soil_key": "hill_132.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_132.mofe.sol"
+        },
+        "53": {
+          "wepp_id": 9,
+          "soil_key": "hill_53.mofe",
+          "source_mukey": "67141",
+          "file": "hill_53.mofe.sol"
+        },
+        "151": {
+          "wepp_id": 32,
+          "soil_key": "hill_151.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_151.mofe.sol"
+        },
+        "201": {
+          "wepp_id": 42,
+          "soil_key": "hill_201.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_201.mofe.sol"
+        },
+        "133": {
+          "wepp_id": 28,
+          "soil_key": "hill_133.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_133.mofe.sol"
+        },
+        "182": {
+          "wepp_id": 40,
+          "soil_key": "hill_182.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_182.mofe.sol"
+        },
+        "243": {
+          "wepp_id": 55,
+          "soil_key": "hill_243.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_243.mofe.sol"
+        },
+        "281": {
+          "wepp_id": 64,
+          "soil_key": "hill_281.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_281.mofe.sol"
+        },
+        "52": {
+          "wepp_id": 8,
+          "soil_key": "hill_52.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_52.mofe.sol"
+        },
+        "261": {
+          "wepp_id": 58,
+          "soil_key": "hill_261.mofe",
+          "source_mukey": "67225",
+          "file": "hill_261.mofe.sol"
+        },
+        "163": {
+          "wepp_id": 36,
+          "soil_key": "hill_163.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_163.mofe.sol"
+        },
+        "92": {
+          "wepp_id": 17,
+          "soil_key": "hill_92.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_92.mofe.sol"
+        },
+        "282": {
+          "wepp_id": 65,
+          "soil_key": "hill_282.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_282.mofe.sol"
+        },
+        "183": {
+          "wepp_id": 41,
+          "soil_key": "hill_183.mofe",
+          "source_mukey": "67225",
+          "file": "hill_183.mofe.sol"
+        },
+        "113": {
+          "wepp_id": 23,
+          "soil_key": "hill_113.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_113.mofe.sol"
+        },
+        "73": {
+          "wepp_id": 14,
+          "soil_key": "hill_73.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_73.mofe.sol"
+        },
+        "111": {
+          "wepp_id": 21,
+          "soil_key": "hill_111.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_111.mofe.sol"
+        }
+      }
+    },
+    "candidate": {
+      "receipt": {
+        "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/candidate-receipt.json",
+        "sha256": "7b1caed8bbd48dc975affbc9a35f9879980f77ae80768394aa411e8299e79e12"
+      },
+      "project_root": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate",
+      "files": {
+        "p1.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p1.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p1.sol.retention.json",
+            "sha256": "d50f2d213711c997dd052d492d5eeb28471b2580f76afbac2393cc730459bea8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p10.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p10.sol",
+          "sha256": "f95fa5d96bc86adb3bc65cd0ce2e56d70feb289e392992075cbb674779d3215d",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p10.sol.retention.json",
+            "sha256": "0f80c27501f5fdf9cfd673e286fd5ea08d0aae4ede0a19dc11c8288d116b8495",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p11.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p11.sol",
+          "sha256": "247c9a26a2d61940f8f067bb2df8bb7a8b600252e763650233c90d6c0b4ed463",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p11.sol.retention.json",
+            "sha256": "4b3c86d6d6fd70b95557eb009c441636f1b5c899cabf865690772fd9e9e17abd",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p12.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p12.sol",
+          "sha256": "4a1396c2807e1110b551038852596fef27483c328a12cb043132254fad1914f4",
+          "ofes": 2,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p12.sol.retention.json",
+            "sha256": "04867e35d8adb278aae0c7d73c4e23c069cc7a05b2b4e3117b67e9fdbbfa65c4",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p13.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p13.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p13.sol.retention.json",
+            "sha256": "8ba1b9529ef5232c680031d5ca695e1eb0f0e1732c0de985bd4aea4c1e0e219f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p14.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p14.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p14.sol.retention.json",
+            "sha256": "a53a2515451a8b19b78c80d0fcc469aac4d66de3f0a1f494a80d863ce837afcb",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p15.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p15.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p15.sol.retention.json",
+            "sha256": "628116fe63a75846b706beef071dbe40c151da2a67ef439f8489c5c5a62dd2dd",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p16.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p16.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p16.sol.retention.json",
+            "sha256": "871216eeb2e94fc7d238d1d1e90bb88102eaa222b19539ad430c007b5134aaa1",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p17.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p17.sol",
+          "sha256": "f95fa5d96bc86adb3bc65cd0ce2e56d70feb289e392992075cbb674779d3215d",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p17.sol.retention.json",
+            "sha256": "6360a7881c89b0589e7b906538018db2c68a61ba1e70bac57f369dc343f7c4f5",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p18.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p18.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p18.sol.retention.json",
+            "sha256": "f93dd997f0baed8498dadae98588959302c23a9001e38463bb78374a919125da",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p19.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p19.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p19.sol.retention.json",
+            "sha256": "ee71525662783d7900ba52eab5c4d88d248133bf71e4a899faf467b8b626b1af",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p2.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p2.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p2.sol.retention.json",
+            "sha256": "cad629f6cd5e50550b61b090de72c93be2c26e37277a8c444976560e6e311079",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p20.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p20.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p20.sol.retention.json",
+            "sha256": "32a01c4bd16941cbbf51422c67f35bc872a28e8b198dc718e565bd9b3a40f309",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p21.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p21.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p21.sol.retention.json",
+            "sha256": "a3e148f571a6f11aa8529bb4b39cfa227af78d6dcd2f37d009baee008d2ff8c3",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p22.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p22.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p22.sol.retention.json",
+            "sha256": "b8b34e99949477bfae0fb2e4786ff7d49c3fca532a6d1e5b4ba01b863ed4b945",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p23.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p23.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p23.sol.retention.json",
+            "sha256": "d3f9b62d80a9b582c29a9cb9bd8c4e5c96af40528cf3460e024307b466d674f0",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p24.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p24.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p24.sol.retention.json",
+            "sha256": "027b4530ab6d1b49044daafe5ec7435277906f394b1e2c58e3630d9a4d6f303f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p25.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p25.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p25.sol.retention.json",
+            "sha256": "e20b4e5af3d3d83afa82bc97f41d289a01a4e1bda9b851dfa442869ca9c5d5e8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p26.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p26.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p26.sol.retention.json",
+            "sha256": "eea87000f12e8a7c514b49bddf2f3e5f480674d0fb50d53d1c020d5b9a456e17",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p27.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p27.sol",
+          "sha256": "f95fa5d96bc86adb3bc65cd0ce2e56d70feb289e392992075cbb674779d3215d",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p27.sol.retention.json",
+            "sha256": "31b4d686090f4bb2cd388cd3ec1bf1033d9fa78f4ccaf09203bdbbc7545e49a6",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p28.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p28.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p28.sol.retention.json",
+            "sha256": "03acdf40b5f2ad9db4f29456732b15d6e67863f7298a4305c067afcc3c6f8b8f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p29.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p29.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p29.sol.retention.json",
+            "sha256": "a4cb9f63283143a6b4a4eabb50417ee602af551988f49f76239fd4909ec273f6",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p3.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p3.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p3.sol.retention.json",
+            "sha256": "690651155772cc6357400ad9c1a9d87e014030d397bfe69fae468e794ed0a4c8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p30.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p30.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p30.sol.retention.json",
+            "sha256": "2473aefaf67d39e9f22133b6a91f959442c39de5130dab1dc46bdf6d4c5a811b",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p31.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p31.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p31.sol.retention.json",
+            "sha256": "fdb304b2a8396f9765ff550c79c6e8afefdcc1b07c19ce163f37fa5da17f2691",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p32.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p32.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p32.sol.retention.json",
+            "sha256": "fe66d09523b7cc3ef58921b65f40116c1e49628c8b6c5d454535f50b2ba5fb18",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p33.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p33.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p33.sol.retention.json",
+            "sha256": "809dcafe8fbb5b19bc37453b921144c63430dc448a26791b72c8ab54091310e5",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p34.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p34.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p34.sol.retention.json",
+            "sha256": "17e9a19cbb7d18465fbbc53d666bc005b703e1f91885cea8d67dc62baa9cc478",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p35.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p35.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p35.sol.retention.json",
+            "sha256": "de7ee00a6668d2d1f19295bb8ee5261eaa665e250961a2abbbde179545171e83",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p36.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p36.sol",
+          "sha256": "f95fa5d96bc86adb3bc65cd0ce2e56d70feb289e392992075cbb674779d3215d",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p36.sol.retention.json",
+            "sha256": "e40cbf317d83018efc29b8b7be471212bfcd12e2baa1f1d590f51b1f9550af60",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p37.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p37.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p37.sol.retention.json",
+            "sha256": "273528a53e9570e92c085ab389ead59608bf47d541e633b56351b23e4d22f64c",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p38.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p38.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p38.sol.retention.json",
+            "sha256": "f7f9413813aca5230752ad82b3f89c093c8c082536786299db93ce65116766e7",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p39.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p39.sol",
+          "sha256": "f95fa5d96bc86adb3bc65cd0ce2e56d70feb289e392992075cbb674779d3215d",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p39.sol.retention.json",
+            "sha256": "eb7512ef2d223921d663a967add7f9696c61bdf6dfb927626b141d8007d32fd0",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p4.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p4.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p4.sol.retention.json",
+            "sha256": "bffa607e62cecc18e6fa71e033febd12da8ad010a824ed805a712d0d7dd829ae",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p40.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p40.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p40.sol.retention.json",
+            "sha256": "1f438d0e6d8aef8c765e8846ab1a67ed910bc599497727d1b7cba5a6a7ad9188",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p41.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p41.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p41.sol.retention.json",
+            "sha256": "a77d845c4f5d9e838d5b57e3adf6fec1656160d381ac8dc21757e38f6516dcc8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p42.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p42.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p42.sol.retention.json",
+            "sha256": "c429fb82c106403c9f092c770ddb9c320777f5dd7aa4430ebabb765332ae25f4",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p43.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p43.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p43.sol.retention.json",
+            "sha256": "e0208fb20431e0163e05345538fa2f0d083f199799f4897de84a3a284eee139b",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p44.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p44.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p44.sol.retention.json",
+            "sha256": "96b9d0e2b49db8943ddc0ae127a855929b6a3f445482a1a9c3b822de726f03f8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p45.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p45.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p45.sol.retention.json",
+            "sha256": "ebcf729632f85a6407be6711741d4ed930d7a8516cd87457516b56d906df65b1",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p46.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p46.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p46.sol.retention.json",
+            "sha256": "c2e70f1e1aa69041f8a8231cba2312702fd715958ed577b1eaff8058d4afc7d2",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p47.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p47.sol",
+          "sha256": "dcf6ba49a753887f7fddc2acb7e207212f7d0eeae8e9dd94fc0354921babec95",
+          "ofes": 2,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p47.sol.retention.json",
+            "sha256": "e164436d3dc4b0641c1b54ec9cbbcce0f3d2d737d20d5ed1f92678c40d57c66c",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p48.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p48.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p48.sol.retention.json",
+            "sha256": "997bef08d1204369df76e0b24ae6def905ce143d808e25bc91620357c8b893b1",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p49.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p49.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p49.sol.retention.json",
+            "sha256": "b063cc4b2dd8055112f34dec473f7e06ad0bc68dde726f36e956789973b8fb49",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p5.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p5.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p5.sol.retention.json",
+            "sha256": "b31f4d2718da02cedab8af5aeebbc6fa851e59d797439d17bea64ff34fa5058e",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p50.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p50.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p50.sol.retention.json",
+            "sha256": "8e4fcec84126862d6495307654adef5ea51903283f3f2e9a0f9e9e06bf6c3250",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p51.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p51.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p51.sol.retention.json",
+            "sha256": "23f482f12bd04732088b8721b88da296ddfc9b6b306c0692167154e479003ee4",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p52.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p52.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p52.sol.retention.json",
+            "sha256": "b87c1f8e7ab31c568b2e1a865b87c3f1af1d870a16ad4c2c15cbe5ba992cad5f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p53.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p53.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p53.sol.retention.json",
+            "sha256": "9ef9aa144c0d43c52e3961d712aa827ba02bb19a9fb3aa12c61a78b6c3da2d06",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p54.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p54.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p54.sol.retention.json",
+            "sha256": "5a955a99d05590f0bb7586c04d1318c43020593a766eca969627510c9b9d00f3",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p55.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p55.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p55.sol.retention.json",
+            "sha256": "5d360f42675a9d4461b1c57e21a9742b1985d2283ada4f7e1c31fbf8dd16caa8",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p56.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p56.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p56.sol.retention.json",
+            "sha256": "b28a2eb846a5eceeb427ed5eed48b835b60a6cc037731764beea0a2042384287",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p57.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p57.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p57.sol.retention.json",
+            "sha256": "f0720121cba3c44bdb5e696fc4d309763f746903b66f3d4d821c39f95f9035a9",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p58.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p58.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p58.sol.retention.json",
+            "sha256": "1645334bbf30fdc0b248bf734a038a413dc4c92d8abe6640ae01e6cda5ff7adf",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p59.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p59.sol",
+          "sha256": "8c412dcf1772ab7eee5b36b9ec10e218f252b734cd75cc3749b27f4262c918bd",
+          "ofes": 1,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p59.sol.retention.json",
+            "sha256": "6c8363e849044bac3443dd28083245dcb32f8dfa3d01cc95cdee16e86d5dbd09",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p6.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p6.sol",
+          "sha256": "65b2972aab5941d60d09ec466d0e078511557ce4dcda8a680e19b448ccb8e709",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p6.sol.retention.json",
+            "sha256": "899aa7813ff3a3f466ee8dfbe261278db9dc8eb82b3db8345a12d24b0037bd4d",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p60.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p60.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p60.sol.retention.json",
+            "sha256": "7831fe601b8b65c4f5e78d39d708d7596d848b593465904b98cd9a45ad54b2f5",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p61.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p61.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p61.sol.retention.json",
+            "sha256": "bdbbe0dcd399ce391ff63a038f10291cf02d0db3c25ccd1f210c2b642cce6dff",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p62.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p62.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p62.sol.retention.json",
+            "sha256": "1bbeb1347236b685b928caa040dfea8d9501b4b42a7c25c3e9e575627bdde172",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p63.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p63.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p63.sol.retention.json",
+            "sha256": "8a5347ad0b06011b6c4ee4ecbe40ba6fb68c0fcf477310f74c004e6aa65ffc05",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p64.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p64.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p64.sol.retention.json",
+            "sha256": "9781ffc44ad0111d01bbe20e1a169a79b8ff4df903c918d2f6e2b31bc071b90f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p65.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p65.sol",
+          "sha256": "b2202c24b8342fea98b4b6a36b4a2bd6ea2439552794eb7ad8c04b7d5e184735",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p65.sol.retention.json",
+            "sha256": "2f5d58e24bb776575539ac10eabdc2befa28a1116364aa9b31b9ffd487846ad5",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p66.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p66.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p66.sol.retention.json",
+            "sha256": "0bc965c4735cfaa08eb56cf0c91c44c3edf67aaab2c621003f86d0d0e42698e0",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p7.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p7.sol",
+          "sha256": "5a5297ee366c67591defd0cf4583e32bf11274756e9c4c8eb04ed504620a3001",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p7.sol.retention.json",
+            "sha256": "8f373e26bf82d217e706e92791b07c461ac58a050f8d5cedbebdaed18c17793f",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p8.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p8.sol",
+          "sha256": "4a1396c2807e1110b551038852596fef27483c328a12cb043132254fad1914f4",
+          "ofes": 2,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p8.sol.retention.json",
+            "sha256": "04492b07552fbd897d37540b494d589bac14eb18de3e552a4107ec77e9c9019c",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        },
+        "p9.sol": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p9.sol",
+          "sha256": "eee3da9518c75ef5efff36b0a132bd7775beaf4bbd0485d2621a0bed209be850",
+          "ofes": 3,
+          "ksflag": 0,
+          "companion": {
+            "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/p04v6-20261102-candidate/wepp/runs/p9.sol.retention.json",
+            "sha256": "9fba3125738f3c34de624784a2e3a1518c6d071f8d195e5450e297149444eb2e",
+            "schema": "ssurgo-retention-stage-v3"
+          }
+        }
+      },
+      "ofes": 193,
+      "mapping": {
+        "212": {
+          "wepp_id": 46,
+          "soil_key": "hill_212.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_212.mofe.sol"
+        },
+        "42": {
+          "wepp_id": 5,
+          "soil_key": "hill_42.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_42.mofe.sol"
+        },
+        "32": {
+          "wepp_id": 3,
+          "soil_key": "hill_32.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_32.mofe.sol"
+        },
+        "103": {
+          "wepp_id": 20,
+          "soil_key": "hill_103.mofe",
+          "source_mukey": "67225",
+          "file": "hill_103.mofe.sol"
+        },
+        "142": {
+          "wepp_id": 30,
+          "soil_key": "hill_142.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_142.mofe.sol"
+        },
+        "62": {
+          "wepp_id": 11,
+          "soil_key": "hill_62.mofe",
+          "source_mukey": "2711253",
+          "file": "hill_62.mofe.sol"
+        },
+        "231": {
+          "wepp_id": 51,
+          "soil_key": "hill_231.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_231.mofe.sol"
+        },
+        "242": {
+          "wepp_id": 54,
+          "soil_key": "hill_242.mofe",
+          "source_mukey": "67225",
+          "file": "hill_242.mofe.sol"
+        },
+        "271": {
+          "wepp_id": 61,
+          "soil_key": "hill_271.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_271.mofe.sol"
+        },
+        "23": {
+          "wepp_id": 2,
+          "soil_key": "hill_23.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_23.mofe.sol"
+        },
+        "82": {
+          "wepp_id": 15,
+          "soil_key": "hill_82.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_82.mofe.sol"
+        },
+        "283": {
+          "wepp_id": 66,
+          "soil_key": "hill_283.mofe",
+          "source_mukey": "67225",
+          "file": "hill_283.mofe.sol"
+        },
+        "63": {
+          "wepp_id": 12,
+          "soil_key": "hill_63.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_63.mofe.sol"
+        },
+        "202": {
+          "wepp_id": 43,
+          "soil_key": "hill_202.mofe",
+          "source_mukey": "67225",
+          "file": "hill_202.mofe.sol"
+        },
+        "153": {
+          "wepp_id": 34,
+          "soil_key": "hill_153.mofe",
+          "source_mukey": "67225",
+          "file": "hill_153.mofe.sol"
+        },
+        "223": {
+          "wepp_id": 50,
+          "soil_key": "hill_223.mofe",
+          "source_mukey": "67225",
+          "file": "hill_223.mofe.sol"
+        },
+        "51": {
+          "wepp_id": 7,
+          "soil_key": "hill_51.mofe",
+          "source_mukey": "67225",
+          "file": "hill_51.mofe.sol"
+        },
+        "213": {
+          "wepp_id": 47,
+          "soil_key": "hill_213.mofe",
+          "source_mukey": "67225",
+          "file": "hill_213.mofe.sol"
+        },
+        "172": {
+          "wepp_id": 38,
+          "soil_key": "hill_172.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_172.mofe.sol"
+        },
+        "93": {
+          "wepp_id": 18,
+          "soil_key": "hill_93.mofe",
+          "source_mukey": "67225",
+          "file": "hill_93.mofe.sol"
+        },
+        "272": {
+          "wepp_id": 62,
+          "soil_key": "hill_272.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_272.mofe.sol"
+        },
+        "33": {
+          "wepp_id": 4,
+          "soil_key": "hill_33.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_33.mofe.sol"
+        },
+        "162": {
+          "wepp_id": 35,
+          "soil_key": "hill_162.mofe",
+          "source_mukey": "67225",
+          "file": "hill_162.mofe.sol"
+        },
+        "61": {
+          "wepp_id": 10,
+          "soil_key": "hill_61.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_61.mofe.sol"
+        },
+        "72": {
+          "wepp_id": 13,
+          "soil_key": "hill_72.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_72.mofe.sol"
+        },
+        "211": {
+          "wepp_id": 45,
+          "soil_key": "hill_211.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_211.mofe.sol"
+        },
+        "102": {
+          "wepp_id": 19,
+          "soil_key": "hill_102.mofe",
+          "source_mukey": "67225",
+          "file": "hill_102.mofe.sol"
+        },
+        "152": {
+          "wepp_id": 33,
+          "soil_key": "hill_152.mofe",
+          "source_mukey": "67225",
+          "file": "hill_152.mofe.sol"
+        },
+        "173": {
+          "wepp_id": 39,
+          "soil_key": "hill_173.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_173.mofe.sol"
+        },
+        "253": {
+          "wepp_id": 57,
+          "soil_key": "hill_253.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_253.mofe.sol"
+        },
+        "252": {
+          "wepp_id": 56,
+          "soil_key": "hill_252.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_252.mofe.sol"
+        },
+        "171": {
+          "wepp_id": 37,
+          "soil_key": "hill_171.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_171.mofe.sol"
+        },
+        "123": {
+          "wepp_id": 25,
+          "soil_key": "hill_123.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_123.mofe.sol"
+        },
+        "141": {
+          "wepp_id": 29,
+          "soil_key": "hill_141.mofe",
+          "source_mukey": "67225",
+          "file": "hill_141.mofe.sol"
+        },
+        "22": {
+          "wepp_id": 1,
+          "soil_key": "hill_22.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_22.mofe.sol"
+        },
+        "233": {
+          "wepp_id": 53,
+          "soil_key": "hill_233.mofe",
+          "source_mukey": "67225",
+          "file": "hill_233.mofe.sol"
+        },
+        "131": {
+          "wepp_id": 26,
+          "soil_key": "hill_131.mofe",
+          "source_mukey": "67225",
+          "file": "hill_131.mofe.sol"
+        },
+        "222": {
+          "wepp_id": 49,
+          "soil_key": "hill_222.mofe",
+          "source_mukey": "67225",
+          "file": "hill_222.mofe.sol"
+        },
+        "263": {
+          "wepp_id": 60,
+          "soil_key": "hill_263.mofe",
+          "source_mukey": "67225",
+          "file": "hill_263.mofe.sol"
+        },
+        "112": {
+          "wepp_id": 22,
+          "soil_key": "hill_112.mofe",
+          "source_mukey": "67225",
+          "file": "hill_112.mofe.sol"
+        },
+        "43": {
+          "wepp_id": 6,
+          "soil_key": "hill_43.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_43.mofe.sol"
+        },
+        "221": {
+          "wepp_id": 48,
+          "soil_key": "hill_221.mofe",
+          "source_mukey": "67225",
+          "file": "hill_221.mofe.sol"
+        },
+        "122": {
+          "wepp_id": 24,
+          "soil_key": "hill_122.mofe",
+          "source_mukey": "67225",
+          "file": "hill_122.mofe.sol"
+        },
+        "83": {
+          "wepp_id": 16,
+          "soil_key": "hill_83.mofe",
+          "source_mukey": "67225",
+          "file": "hill_83.mofe.sol"
+        },
+        "203": {
+          "wepp_id": 44,
+          "soil_key": "hill_203.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_203.mofe.sol"
+        },
+        "143": {
+          "wepp_id": 31,
+          "soil_key": "hill_143.mofe",
+          "source_mukey": "67225",
+          "file": "hill_143.mofe.sol"
+        },
+        "273": {
+          "wepp_id": 63,
+          "soil_key": "hill_273.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_273.mofe.sol"
+        },
+        "262": {
+          "wepp_id": 59,
+          "soil_key": "hill_262.mofe",
+          "source_mukey": "67225",
+          "file": "hill_262.mofe.sol"
+        },
+        "232": {
+          "wepp_id": 52,
+          "soil_key": "hill_232.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_232.mofe.sol"
+        },
+        "132": {
+          "wepp_id": 27,
+          "soil_key": "hill_132.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_132.mofe.sol"
+        },
+        "53": {
+          "wepp_id": 9,
+          "soil_key": "hill_53.mofe",
+          "source_mukey": "67141",
+          "file": "hill_53.mofe.sol"
+        },
+        "151": {
+          "wepp_id": 32,
+          "soil_key": "hill_151.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_151.mofe.sol"
+        },
+        "201": {
+          "wepp_id": 42,
+          "soil_key": "hill_201.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_201.mofe.sol"
+        },
+        "133": {
+          "wepp_id": 28,
+          "soil_key": "hill_133.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_133.mofe.sol"
+        },
+        "182": {
+          "wepp_id": 40,
+          "soil_key": "hill_182.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_182.mofe.sol"
+        },
+        "243": {
+          "wepp_id": 55,
+          "soil_key": "hill_243.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_243.mofe.sol"
+        },
+        "281": {
+          "wepp_id": 64,
+          "soil_key": "hill_281.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_281.mofe.sol"
+        },
+        "52": {
+          "wepp_id": 8,
+          "soil_key": "hill_52.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_52.mofe.sol"
+        },
+        "261": {
+          "wepp_id": 58,
+          "soil_key": "hill_261.mofe",
+          "source_mukey": "67225",
+          "file": "hill_261.mofe.sol"
+        },
+        "163": {
+          "wepp_id": 36,
+          "soil_key": "hill_163.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_163.mofe.sol"
+        },
+        "92": {
+          "wepp_id": 17,
+          "soil_key": "hill_92.mofe",
+          "source_mukey": "2711195",
+          "file": "hill_92.mofe.sol"
+        },
+        "282": {
+          "wepp_id": 65,
+          "soil_key": "hill_282.mofe",
+          "source_mukey": "2711198",
+          "file": "hill_282.mofe.sol"
+        },
+        "183": {
+          "wepp_id": 41,
+          "soil_key": "hill_183.mofe",
+          "source_mukey": "67225",
+          "file": "hill_183.mofe.sol"
+        },
+        "113": {
+          "wepp_id": 23,
+          "soil_key": "hill_113.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_113.mofe.sol"
+        },
+        "73": {
+          "wepp_id": 14,
+          "soil_key": "hill_73.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_73.mofe.sol"
+        },
+        "111": {
+          "wepp_id": 21,
+          "soil_key": "hill_111.mofe",
+          "source_mukey": "2711184",
+          "file": "hill_111.mofe.sol"
+        }
+      }
+    }
+  },
+  "source_receipt": {
+    "path": "/workdir/wepppy/out/rock-water-development-20261101/P01-source-tables-v2/receipt.json",
+    "sha256": "512aaca1984ccbaf238a42d92328b848c54e54e592c5ff48b50773f2c27c96bc"
+  },
+  "finalized_cache": {
+    "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v5/profiles/collection.sqlite",
+    "sha256": "2f74c36460cc58520400a619c68097b23e77026144275ab89a3b8306d3e9f162",
+    "bytes": 69632,
+    "tables": {
+      "component": {
+        "raw_rows": 16,
+        "cached_rows": 16,
+        "missing_keys": []
+      },
+      "chorizon": {
+        "raw_rows": 91,
+        "cached_rows": 91,
+        "missing_keys": []
+      },
+      "corestrictions": {
+        "raw_rows": 15,
+        "cached_rows": 15,
+        "missing_keys": [
+          28366590
+        ]
+      },
+      "chfrags": {
+        "raw_rows": 172,
+        "cached_rows": 62,
+        "missing_keys": [
+          85179718,
+          85179889,
+          85179893,
+          85179894,
+          85179900,
+          85179902,
+          85179903,
+          85180108,
+          85180114,
+          85180119,
+          85180120,
+          85180122,
+          85180126,
+          85180175,
+          85180179,
+          85180180,
+          85180186,
+          86063088,
+          86063094,
+          86063099,
+          86063100,
+          86063102,
+          86063106,
+          86064148,
+          86064152,
+          86064153,
+          86064159,
+          86064161,
+          86064162
+        ]
+      },
+      "chtexturegrp": {
+        "raw_rows": 196,
+        "cached_rows": 91,
+        "missing_keys": []
+      }
+    }
+  },
+  "worker_origin": {
+    "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-project-experiment-v6/worker-origins/worker-1313026.json",
+    "sha256": "c485fed09b9b8d9aee61a575e1286fa98e43d167285e255db9f3dbe0af65ea5b",
+    "record": {
+      "pid": 1313026,
+      "start_method": "spawn",
+      "modules": {
+        "wepppy.soils.ssurgo.ssurgo": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-density-guard-overlay-v1/tree/wepppy/soils/ssurgo/ssurgo.py",
+          "sha256": "3feed6ac05d8f1db491d7e60d9ac292b6c38e2a76d6ff31fde0ab47e71ca3cd2"
+        },
+        "wepppy.soils.ssurgo.retention": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-density-guard-overlay-v1/tree/wepppy/soils/ssurgo/retention.py",
+          "sha256": "9ac690110248b9982550eb1c887d452db8436b78e38c8037799c1fe12809d670"
+        },
+        "wepppy.nodb.mods.disturbed.disturbed": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-density-guard-overlay-v1/tree/wepppy/nodb/mods/disturbed/disturbed.py",
+          "sha256": "fb6128da54d5d7bb3109cba1ffa837aacd4a218e408834f8f9d32b20fcd41cd5"
+        },
+        "wepppy.wepp.soils.utils.multi_ofe": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-density-guard-overlay-v1/tree/wepppy/wepp/soils/utils/multi_ofe.py",
+          "sha256": "774beb06c21a8142ec2c339090ffd875eecf5bfab2beec6ec43c88c9826893d3"
+        },
+        "wepppy.nodb.core.wepp": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/P04-density-guard-overlay-v1/tree/wepppy/nodb/core/wepp.py",
+          "sha256": "852481db0fd89fec25bebcaa426ab1e4b35420ab778eadfe863a4df5d1c1e71e"
+        }
+      },
+      "passed": true
+    }
+  },
+  "consumer_contract": "Copy matching actual files; retain full candidate source/parent companion chain and caller-owned project-root authority for readback. Preserve D03 nonsoil inputs. Do not mutate or flatten source companions. 700 mm serialized support is not a claim about native remapped support.",
+  "native_processes": 0,
+  "physical_admission": false,
+  "production_integration": false
+}

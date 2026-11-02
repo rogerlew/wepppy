@@ -1,0 +1,107 @@
+{
+  "schema": "original-reader-dependency-provenance-v1",
+  "scope": "Seven finite original Python dependencies supplementing the66-candidate public selection; content review only, no standalone data bundle or launch authority.",
+  "entries": [
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_roads_final_readback.py",
+      "sha256": "af220daad0809d3b502c060c0b193f27cd6498d55f8a2447be431f19b4a44b36",
+      "bytes": 8260,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Synthetic negative controls for finite calendars, named output fields, numeric framing and bounded Roads readback.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [
+        "read_roads_final.py"
+      ],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_r05_observation.py",
+      "sha256": "b6bea42139c85be23c136b5c1e2330fcb0b77779ec59c780b13c17a6216ddd28",
+      "bytes": 18193,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Typed observation parsing, complete framing/clock/owner validation and paired diagnostic comparison.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [
+        "r05_causal_joins.py",
+        "r05_daily_ledger.py",
+        "r05_flow_joins.py"
+      ],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/replay_allocation.py",
+      "sha256": "196f0c82a212c38b3667ee5b1b3cca2b00906c4d39eb2e1f4c85b81fb72fafd3",
+      "bytes": 5752,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Historical A01 observation campaign driver plus shared hashing, inventory and runtime binding utilities. Import does not launch models; CLI prepare/run is an operational historical driver, not a read-only reader.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final_pair_binding_v2.py",
+      "sha256": "a3d5c720f95009d949a65d04f093c345d1399cd2362f93994436e9276d8a27ab",
+      "bytes": 3123,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Historical matched-pair source/binary/runtime identity binder retained as negative/control dependency of v3 tests; v3 remains current binder.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [
+        "replay_allocation.py"
+      ],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_flow_joins.py",
+      "sha256": "880686e6cf5de1bac82f314c60d8b946584ab8ace93811f9aa8eac0fb9343c1b",
+      "bytes": 14943,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Original interval/hour observation state machine and represented-arithmetic checks for producer/consumer joins.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_daily_ledger.py",
+      "sha256": "910bf2026ca3dd7acb502fceb218045f59f32c67f86c5a2d26adfcbe725687ee",
+      "bytes": 5219,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Original rational daily stock/flux ledger and contemporaneous layer representation checks.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_causal_joins.py",
+      "sha256": "e12f83b0e38b7d609cf85d7e4169859aae2aa63a81580cada92d4c92f4bb06ac",
+      "bytes": 8315,
+      "author_origin": "Codex rock-water study analysis/helper contribution; attribution at work-package level, no claim of a particular human author or external institutional endorsement.",
+      "version": "Exact SHA-256 identifies retained version; preserve executed bytes.",
+      "purpose": "Original water-balance and withdrawal observation ownership/sequence/arithmetic validation.",
+      "production_relationship": "Research analysis/control/helper, not a canonical production modification or native physical repair.",
+      "disclosure": "Native routine/variable names, operand labels and mathematical/native-rounding reconstruction are diagnostic references in original Python. No embedded legacy Fortran source block, source insertion anchor or patch payload identified.",
+      "local_imports": [
+        "r05_flow_joins.py"
+      ],
+      "evidence_dependency": "Reproducing retained scientific results requires separately bound private observations, schemas, input/output inventories and receipts; code publication is not a standalone evidence/data bundle."
+    }
+  ],
+  "operational_caution": "replay_allocation.py has historical prepare/run entrypoints using private evidence and native processes. Publish unchanged as historical code plus imported utilities; do not execute it to demonstrate publication completeness. final_pair_binding_v2.py is historical control dependency, not the current final binder.",
+  "publication_boundary": "All private native source, patches, observation traces, source-preparation anchors and observer binaries remain excluded. Source-derived equations/diagnostic arithmetic are distinguished from copied native source.",
+  "no_execution_or_production_admission": true,
+  "owner_confirmations": {
+    "check_roads_final_readback.py": "capacity_reader directly confirmed original authored synthetic reader/control code, not native excerpt or patch payload.",
+    "read_r05_observation.py,r05_flow_joins.py,r05_daily_ledger.py,r05_causal_joins.py": "rock_consumers directly confirmed authoring original parsing, ownership joins and arithmetic/ledger checks; no embedded Fortran, patch, encoded payload. Native tags/equations reflect private source review, not an independent scientific derivation claim."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "final-regression-actual",
+  "scope": "disturbed67",
+  "bounded_consequence_accepted": true,
+  "combined_release_admitted": false,
+  "optional_retention_admitted": false,
+  "additional_model_followup_required": false,
+  "bindings": {
+    "out/rock-water-development-20261101/disturbed-final-renewal-v2/receipt.json": "65843c58b59b9d247c5a3af8ca6eb2cb60d8d992879b2b89f14a9f7910f0a66e",
+    "out/rock-water-development-20261101/disturbed-final-renewal-readback-v1/receipt.json": "72639bbc06a9151e75bb5091f9b9372333b0ab65118ffb75aa11cf4777c6e710",
+    "out/rock-water-development-20261101/disturbed-final-consequence-triage-v1/receipt.json": "fc2948a045ef3d09ca35a6f841dbd8edb209d0daa3f1169a9371cd433b288ecf",
+    "out/rock-water-development-20261101/disturbed-final-consequence-triage-v1/manifest.json": "4fc431a33887502b30673133c45031eddde617fff1da59d14a8f66086c1659a2",
+    "out/rock-water-development-20261101/disturbed-final-consequence-triage-v1/readback.py": "6e03d00151f1159b110e1be372f34a3b431bdd5f21fd019c7c5f89cb012e3d08",
+    "out/rock-water-development-20261101/disturbed-final-consequence-triage-v1/bindings.json": "e3eed64e45d5b5bbd33510a4281f9a23b7ca21d417a1c9215fffce89a3e67734",
+    "out/rock-water-development-20261101/disturbed-final-renewal-readback-v1/water-differences.json": "5bc8f79444560288f8414adafcf31d70a4b299db55b0719bfa676ef36206e3a5",
+    "out/rock-water-development-20261101/disturbed-final-renewal-readback-v1/numeric-screen.json": "36373c4a6e3ba53f7530b79e50f89371381e8d04fb851623971320f8e431c687",
+    "out/rock-water-development-20261101/disturbed-final-renewal-readback-v1/bindings.json": "5d8880e8ab7edf5614ad0d28bcbea09ff39851598f499a3a125be8179d60cc00",
+    "/workdir/wepp-forest-release-20261009/src/wshchr.for": "52ab00eda3f5bd44ae652ed2e199b04c97e48f56a1de41a5b1d18dcbca096369",
+    "/workdir/wepp-forest-release-20261009/src/wshini.for": "b3eee708ffebbe0dfe3af8f9e05886a29bfe9a2cd3b52fc10f480027f34fd0b1",
+    "/workdir/wepp-forest-release-20261009/src/watbalprint.for": "01bf736863cb07a5756dfdd6d27058ac0469ceed6a16aeb193750f102e9bccf1",
+    "/workdir/wepp-forest-release-20261009/src/outfil.for": "bee4ec4ec33e7702d146e424a87bb9669542523f5946b26784d8180479fc53b2"
+  },
+  "review_sha256": "d84f28220c0fa1b4efd2e84f0e4b93297b37eddee6aad9403de27fb5889d740d"
+}

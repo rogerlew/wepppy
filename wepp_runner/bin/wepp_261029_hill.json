@@ -1,49 +1,32 @@
 {
-  "artifact_revision": 4,
+  "artifact_revision": 5,
   "binary_name": "wepp_261029_hill",
   "binary_role": "hillslope",
   "build": {
-    "build_log_sha256": "0f188f92c90281b90eb8536a110cd0eab8817c408e9829254e417415401416bb",
-    "build_preceded_source_commit": true,
-    "candidate_source_manifest_sha256": "aa21435c12615c6bc119b2dcffd6bef4283bd2cb3ce6b7a0118d059858ecf447",
+    "canonical_builder": "tools/build_wepp_dated_release.sh",
+    "declaration_sha256": "48f680d601f37a54b5b55b1d0fe4e38adbc5dea1d40f1aaa8b2f69b84e28e8f8",
+    "native_generator_sidecar_sha256": "e01bba87ff03fc16a2d7de7e06d86aa53fa01fafb9a9175feb74d011b55efb25",
     "path_prefix": "/usr/bin:/bin",
-    "source_base_commit": "5089a1b262c3f142fc0fa1223ebbe217c5dba36c",
-    "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
-    "source_manifest_files": 489,
-    "source_manifest_sha256": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0",
-    "source_verification": "All 489 retained build inputs match committed source; no rebuild or strip at promotion",
-    "toolchain": {
-      "as": {
-        "path": "/usr/bin/as",
-        "sha256": "21aff249b692b5c31a44007491f922dcb49f41323e362c57d2ada3f52eddb7f0",
-        "version": "GNU assembler (GNU Binutils for Ubuntu) 2.42"
-      },
-      "gcc": {
-        "path": "/usr/bin/gcc",
-        "sha256": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
-        "version": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
-      },
-      "gfortran": {
-        "path": "/usr/bin/gfortran",
-        "sha256": "142861efc95f49e33705852027dae8c2e5382fd1155fcec6116ef973f25d8f84",
-        "version": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
-      },
-      "ld": {
-        "path": "/usr/bin/ld",
-        "sha256": "e9ceb054c12207970f2726dfc07e9a66b411602748628baf27399f02a9bbb31b",
-        "version": "GNU ld (GNU Binutils for Ubuntu) 2.42"
-      },
-      "make": {
-        "path": "/usr/bin/make",
-        "sha256": "d78b8f1d099fbcfb6f2f49ab87223b9b68fb3956642f92d6ec6de812e8afa965",
-        "version": "GNU Make 4.3"
-      }
-    }
+    "receipt_sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe",
+    "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+    "source_preceded_build": true
   },
-  "built_utc": "2026-10-31T20:39:11Z",
-  "built_utc_basis": "Retained exact candidate executable mtime; not promotion time",
+  "built_utc": "2026-11-02T15:58:06Z",
   "capacity": {
     "ofes": 32
+  },
+  "current_interchange_observations": {
+    "configured_service": {
+      "extension_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-staging-v2/service-reader-v2.json",
+      "sha256": "56b8a697fb96aff739e18ecf3771c34b0364aee3b079653c02bd226dc9756aad"
+    },
+    "host": {
+      "extension_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-staging-v2/host-reader-v2.json",
+      "sha256": "618e1cb819d7df53cc6c5023ec7481b8a66e9669574424cc20924760ee444973"
+    },
+    "scope": "Observed installed artifacts at metadata mint time. Same mounted reader release artifact is tracked by wepppyo3 commit 4d4c075421c4013cba99a0addc76482229e7f3f7; current repository HEAD is not inferred reader build source. Subsequent application validation remains separate."
   },
   "execution_calendar": {
     "ascii_pass_daily_key_validation": true,
@@ -66,29 +49,22 @@
     "process_mode_pass_pw0_required": true,
     "single_user_defined_inputs_supported": true
   },
-  "inherited_revision3_evidence": {
-    "scope": "Earlier defects and unchanged runtime contracts; historical validation counts do not describe revision 4",
-    "sidecar_sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99"
+  "historical_revision4_evidence": {
+    "scope": "Historical evidence only; old counts/capacity certificates are not revision5 validation.",
+    "sidecar_sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d"
   },
   "known_limitations": [
-    "Acceptance is bounded by retained scalar/interface/native controls, full-period intermediate sign/finiteness checks and a 34-date local source/bed audit. It does not establish universal heterogeneous source ownership, whole-watershed closure or measured calibration.",
-    "QINF also serves CONRUN contour runoff and WSHIRS channel-surface runoff. Complete CONRUN event empirical validation is not claimed. The idealized uniform-plane scalar domain does not prove arbitrary heterogeneous or unsteady routing.",
-    "413 negative incremental recession differences remain; 93 negative total FIN states outside linked QINF are supported by explicit upstream surface return. Legitimate signed exchanges are not globally prohibited.",
-    "Signed soil/channel withdrawal acceptance, negative-discharge clipping and Muskingum-Cunge storage authority remain separate open limitations.",
-    "Hourly source-time return partition and late-source support are not a travel-time solver or independently reconstructed physical hydrograph.",
-    "Connected melt repair retains mixed-rain precedence, zero-local-melt and absolute-clock limitations; channel indices are excluded from that melt repair.",
-    "Storage subtotal repair preserves the existing contributing set and does not redefine channel processing-order membership or upstream state freshness.",
-    "Channel transport retains segment-average width, linear capacity, onset/cohort handoff, hydraulic limiting guard and historical unit-conversion approximations.",
-    "The stable Yalin factor applies to hillslope and channel capacities; correcting one negative class can change allocation for all classes. Fresh outputs were validated; complete output parity with the preceding candidate is not claimed.",
-    "Revision 4 Cedar outlet sediment 517671.83 kg versus revision 3 517670.63 kg over 24 years; +1.20 kg. All 5201 inputs and 1728 raw water/soil files match revision 3 and U11. Four raw sediment files differ from U11; aggregate similarity is not universal event parity.",
-    "Roads magnitude remains 713/766 meaningful and31/74 small. No parameterization, withheld-soil or UI acceptance.",
-    "Two strict fraction flags remain visible and explained by exact native arithmetic replay; no threshold or particle renormalization changes.",
-    "40006 negative raw-capacity observations are quantitatively explained on dry-terminal bands; raw capacity is not everywhere nonnegative. Local dimensionless error bounds are not annual mass certificates.",
-    "No new Windows release, project default switch or production deployment. Regenerate complete matched hillslope/PASS/watershed chain."
+    "Known native FC/HK cross-OFE ownership defect under both default and optional retention policies: OFEs1/2 consume OFE3 initialized coefficients at10/15observed slots for each quantity, including actual HK powers. Exact observer parity does not establish model correctness. The structure predates revision5; unchanged exposure and harmlessness are unproved. No repaired counterfactual, corrected hydrograph magnitude or broader safe-use class is established. General release/native correctness/package closure remain HOLD. No repair included.",
+    "Acceptance is bounded to retained source, arithmetic and consumer experiments; no universal physical closure, measured calibration, global frost restoration or parameterization-performance acceptance.",
+    "Roads magnitude screen remains unmet at 744/840 overall, 713/766 meaningful and 31/74 small. Final negative-capacity populations and one strict printed fraction flag remain explicit and receive local source-based numerical disposition, not deletion or a global transport error budget.",
+    "Disturbed outlet volume changes +0.08 m3 and sediment +1.71 kg over 2000\u20132015; medium application outlet volume changes \u22121129.18 m3 and sediment \u221249.22 kg over 2016\u20132024. Real internal/channel/dynamic-field differences and producer-coordinate limitations remain documented.",
+    "Optional whole-soil retention support remains experimental and opt-in. P03 admits its tested six-source unchanged-density hourly path; eligibility predicates do not establish universal physical validity, unexecuted branches, other source families, density-changing treatments or default adoption.",
+    "Any separately authorized regeneration must preserve the full matched hillslope/PASS/watershed chain; this is a compatibility requirement, not a regeneration instruction or safety admission. No Windows release, project default migration or production deployment is implied. Publication is tracked separately.",
+    "S01 scheduled tillage/later density, Rosetta2/missing-density generalization and retention-guard activation remain unobserved. Synthetic-source boundary integrals extrapolate uniform source values beyond0.7m source/0.8m emitted to1.0m actual native support; not field validation."
   ],
   "matched_pair_sha256": {
-    "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
-    "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
+    "wepp_261029": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+    "wepp_261029_hill": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933"
   },
   "math_runtime": {
     "architecture": "x86_64",
@@ -100,52 +76,178 @@
     "toolchain": "GNU Fortran/GCC 13.3.0 Ubuntu 13.3.0-6ubuntu2~24.04.1"
   },
   "paired_interchange": {
+    "evidence_role": "Historical compatibility release reference retained from revision 4; not the currently installed reader identity.",
     "pass_components_version": 3,
     "release_commit": "bd63094",
     "sha256": "06319303a2337cc75a3c57eb594161565d8a2af1d58cee18c17abcfe6eea8cf8",
     "source_commit": "c3d8481d1c7dcaf59dceb37d9ea2e860b89f4307"
   },
-  "release_status": "Revision 4 native repair scientifically accepted; exact accepted bytes promoted; application and publication tracked separately",
+  "preserved_contracts_evidence": {
+    "path": "/home/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-staging-v1/preserved-contract-source-proof.json",
+    "scope": "Unchanged capacity includes, portable math/calendar kernels and PASS reader/writer sources; native final gates exercise current integration.",
+    "sha256": "a72648d2aaaeb7ef95d79add427bdb9efa67c115e83939c8e33205ebc458035a"
+  },
+  "release_status": "LOCAL_KNOWN_DEFECT_BOUNDED_VALIDATION; UNRESTRICTED_HETEROGENEOUS_USE_NATIVE_CORRECTNESS_GENERAL_RELEASE_AND_PACKAGE_CLOSURE_HOLD",
   "release_tag": "261029",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+  "sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
   "source_branch": "wepp_260430_negmeltfix_comparator",
-  "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804",
+  "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "supersedes": {
-    "artifact_revision": 3,
+    "artifact_revision": 4,
     "matched_pair_sha256": {
-      "wepp_261029": "1d07f5e47692a543e653f449feea23cf298093a9fd664d7a01a1b71dc5e01531",
-      "wepp_261029_hill": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d"
+      "wepp_261029": "2a3f9f2b9efd202365c6ef27222bc9f4836918bd16e865c1e3cd54b14c297b48",
+      "wepp_261029_hill": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010"
     },
-    "sha256": "568edf8130c33e1d81dc045344cddbfb7106496ef4bda62dfe734d5e1b73b66d",
-    "sidecar_sha256": "b3a55356ff82e82b1fe6f0416bde20e308dd37b2c82d506a7b25018126dccc99",
-    "source_commit": "6112b68bce0e21a77f510bde5c24af067a47a647"
+    "sha256": "9ef6b62677407a66255a2b95becc9f350c87ef8e4cf67ab4e543ddb89ed4a010",
+    "sidecar_sha256": "719868551b78678dffc7d525709253541e4238e8684a0e74fe4191fd7da4115d",
+    "source_commit": "b01a739957bef5aacf35b4a89bc13eddc9d94804"
   },
   "validation": {
-    "application_suite": "Post-vendor gates tracked in revision4-delivery receipt",
-    "artifact_policy": "pass",
-    "binary_provenance": "System loader/runtime pass; no Homebrew/Conda paths",
-    "disturbed_matrix": "99 passed",
-    "downstream_panel": "348 physical checks pass, including one recovered native failure",
-    "hillslope_watchlist": "28 passed",
-    "host_smoke": "Both exact binaries pass",
-    "independent_scientific_review": "exact pair scientifically accepted",
+    "S01": "Reviewed20native histories:4ownership and16boundary; exact observer pairs. Both-policy wrong-owner FC/HK confirmed. Preserve default and optional-only; correctness/general release/package closure HOLD.",
+    "application_medium": "Actual configured-service 491 hillslopes plus watershed completed with 3,443 artifacts; technical/security/scientific consequence reviews accepted within declared regression scope.",
+    "broad_wepppy": "PASS:12729passed423skipped5833warnings; canonical wctl run-pytest tests --maxfail=1 exit0; bound code/binary/sidecar bytes unchanged. Preserved v1 fixture failure and narrow test correction; no production missing-input weakening.",
+    "capacity_particle": "Exact-final all-call capacity and sole strict printed fraction flag disposition accepted within source-owned local arithmetic bounds; raw negative capacity and printed flag remain documented.",
+    "combined_engine": "Accepted bounded 18-history final-source panel",
+    "disturbed": "Accepted bounded 67-process compatibility with quantified output changes",
+    "full_P03": "142 native histories including 71 inherited / 71 new; bounded six-source unchanged-density hourly consumer evidence accepted. No universal physical validity or default adoption.",
+    "legacy_compatibility": "Accepted bounded six-history activation/compatibility panel",
+    "native_canonical_gates": "PASS: 1394 pytest tests, both exact host smokes, 31-case hillslope watchlist and artifact policy",
+    "optional_controller": "Installed controller: 66 soils / 66 companions / 193 OFEs exactly match reviewed builder evidence; optional feature remains experimental and opt-in, no default adoption.",
     "production_deployment": "not deployed",
-    "pytest": "1253 passed; 2 known tarfile deprecation warnings",
-    "roads_development_panel": "840 physical checks pass; magnitude remains unaccepted",
-    "same_build_watershed_replay": "864 fresh Cedar hillslopes and24 years; semantic/particle review passes within declared scope",
-    "source_observers": "1188 exact-output-parity replays; residual certificates accepted"
+    "roads_final": "840 complete executions and bounded ordinary consequences accepted; original magnitude screen remains unmet: 744/840 overall, 713/766 meaningful,31/74 small."
   },
   "validation_evidence": {
-    "param-u12-cedar-scientific-review.json": "31385d3f53da6de0b3cf8c900ccd82ec4ad211833d9d1d3be39db0d8e9f0b1e9",
-    "param-u12-gates-final.json": "e874c38766d19f713362ef578337ee3486b136611512b44aa99be47f70ed7631",
-    "param-u12-implementation-review.md": "6c989b5fb1b5e5f87285d7a138998c20c7e1873c8ce41f16a4d7417955aa4939",
-    "param-u12-mixed-reconstruction-clarification.md": "3599a5889036e59615b9284679aafed8bcd0baa22f1cfd74390031504c797c8b",
-    "param-u12-scientific-acceptance.json": "a08723d4cbced7903e2678a26daa53d64741d9f98d713c1002e9010b31001cbb",
-    "param-u12-scientific-disposition.md": "4e2b8d5d2a60107670147abde0e792349c0e71e86feaaa11fcbf5d14c440968d",
-    "revision4-artifact-policy.json": "32b9539e91f5ca9b3809da3588e2c7a12864f38bf336a7d170b5ab0b06754630",
-    "revision4-source-commit-verification.json": "94b5e0a2f02ef2764a07f7d4c78879cb8182e2cf5503dd2b1067214a3d8e89b0"
+    "S01_default_pair": {
+      "path": "out/rock-water-development-20261101/S01-independent-implementation-closeout-v1/default-pair-independent-readback-v1.json",
+      "sha256": "1a3546309e980698aac4052762e220468c3d1c0169640389c1cb2e6dd4df1aad"
+    },
+    "S01_final_parent": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/S01-parent-final-investigation-disposition-v1/decision.json",
+      "sha256": "bef67047cb2ea6c6150aa5b63314d2cdb8809056850b4562cec397657b1d4c20"
+    },
+    "S01_final_receipts": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.json",
+      "sha256": "f03519ad33ab91a893cece55a5e7540f2a83ee2e3b28e6bef92fa9606acb7482"
+    },
+    "S01_final_report": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.md",
+      "sha256": "4e0747ac669e1f2c80c747b8cae5cb3b14e12c5d62006d5458d6c0dc72ad957b"
+    },
+    "S01_ownership_history": {
+      "path": "out/rock-water-development-20261101/S01-independent-science-closeout-v1/ownership-source-history.json",
+      "sha256": "a433fb73d945777788f3b91bd8096f1005b90b4322650795b2d1ddf6c9e0cf02"
+    },
+    "application_execution": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-medium-application-renewal-v3/receipt.json",
+      "sha256": "6ef49ea56dd162ca2119c0028e13db3a1b346cd2917918bfa162ea73c133e21a"
+    },
+    "application_implementation": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/application-final-actual-implementation-review-v1.json",
+      "sha256": "0ca9223955ff674cb86cc41caf3e2c457d36b478376ffb902119b4c8b7503620"
+    },
+    "application_readback": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-medium-application-readback-v2/receipt.json",
+      "sha256": "6e3d98895e2280e0b00505ffbfa07235421f8213eb5b1ff2b60e1b77059c5792"
+    },
+    "application_science": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-medium-application-science-outcome-v1.json",
+      "sha256": "1c10de71375a597bdfd93cde39ae5e1bfbc2f9dc069d6111490827c817be4f36"
+    },
+    "application_security": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/application-actual-security-outcome-v1.json",
+      "sha256": "9bd2066c8aa8e549e9a998b72c33bf196378077ad984937926350a28d1129042"
+    },
+    "broad_independent_review": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-v2-terminal-review-v1/receipt.json",
+      "sha256": "7e3b2d49c1235b1dc02e61e25366820f26c47f953cda4e09475e065444bba875"
+    },
+    "broad_wepppy": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/final-broad-tests-v2/result.json",
+      "sha256": "2ecd33337873066f1c83e17e6e48e23c0a7a9591b946379e051d07de91921087"
+    },
+    "build": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/receipt.json",
+      "sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe"
+    },
+    "build_declaration": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-renewed-pair-v2/declaration.json",
+      "sha256": "48f680d601f37a54b5b55b1d0fe4e38adbc5dea1d40f1aaa8b2f69b84e28e8f8"
+    },
+    "capacity_particle_implementation": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-capacity-outcome-implementation-review-v1.json",
+      "sha256": "59e1967407cc3cc8b0ddafb7dd044be20de81ca802578330d7330864ad592b3e"
+    },
+    "capacity_particle_science": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/final-capacity-outcome-science-review-v1.json",
+      "sha256": "0b3dd29c603cae54cc475fdff41fea91ead5a42c35614152f3c615dcbcabfdd3"
+    },
+    "combined_engine": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/combined18-final-execution-v3/parent-acceptance-v1.json",
+      "sha256": "312a6fd9fefc86a206da01232d6cabe74334647e74003634f8ca8c29001f50b8"
+    },
+    "disturbed": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/disturbed-final-renewal-v2/parent-acceptance-v1.json",
+      "sha256": "ff0750ab6bf1704da28c7471ef7c5a0ba9f4ddd533c8d9bf8cfc81bdcb6ba71b"
+    },
+    "full_P03_execution": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P03-final-continuation-v2/execution-result.json",
+      "sha256": "19cf9032023aff47dd3af9a32870cc5bbf9486cd0a41815cc6cbee62d598e28e"
+    },
+    "full_P03_implementation": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P03-terminal-implementation-outcome-v1.json",
+      "sha256": "cbb54e05bd744691bd3ff50cdd7a902e5fa10e6060d7295186f15cb0a62cc56e"
+    },
+    "full_P03_science": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P03-terminal-science-admission-v1.md",
+      "sha256": "7b8a1b0a896d6957f052deb4776071ce1d891b28556653141dbeb77aef2551af"
+    },
+    "legacy_compatibility": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/legacy-frost-final-renewal-v1/parent-acceptance-v1.json",
+      "sha256": "7197cc767ac78dc7a22a3c55a1041f14c77233937be2c5d0d66f1887e658f7c9"
+    },
+    "local_delivery_checks": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/local-vendor-r5-installation-v1/post-install-validation.json",
+      "sha256": "b3d2d32a3331dc53357790af44c77f05bbdba596e427baeefb18867d6fa608a9"
+    },
+    "native_gates": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/release-r5-gates-renewal-v2/receipt.json",
+      "sha256": "f8e9d049701ece321533aea32863ea923638aa0fd63c771c3c3e16466cd1d756"
+    },
+    "optional_controller_artifacts": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-v2/receipt.json",
+      "sha256": "e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc"
+    },
+    "optional_controller_execution": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-v2/execution-result.json",
+      "sha256": "d9cd51c7e1fce7abf03b72c89eca7d60f95523ea232844dbbf242e8655145f10"
+    },
+    "optional_controller_implementation": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/P04-installed-controller-actual-implementation-review-v2/review.json",
+      "sha256": "2199b588313f3f7674d56121a141e58b68317c46982c22db0b24196bef4831ad"
+    },
+    "optional_controller_science": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-science-outcome-v1.json",
+      "sha256": "a10b4803d81a93f324d9005c9953a105196b09636854ca0886db9ea3e4f1517e"
+    },
+    "optional_controller_security": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-actual-security-review-v2.json",
+      "sha256": "0e0e9f5d793a1ee89707198d50b724860d010d1cf33f961be6d2b15f9b718d4c"
+    },
+    "roads_execution": {
+      "path": "/home/workdir/wepppy/out/rock-water-development-20261101/roads-final-renewal-v2/receipt.json",
+      "sha256": "3d15d9feffe9830901ad24da30fa3bd7da26f40be0c7d2d205a736582bc7ff99"
+    },
+    "roads_implementation": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/roads-final-renewal-actual-implementation-review-v1.json",
+      "sha256": "9c7b2a2753d675c8bb125c0990bb3eb97b3dc35aa50d41b33d44558d8f6d42c5"
+    },
+    "roads_ordinary_science": {
+      "path": "/home/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/roads-final-ordinary-consequence-science-review-v1.json",
+      "sha256": "ccc799bf050f8c08115f3a8cacd8efc5e0674d73c146ea2c76f962a9a5d8dc92"
+    }
   },
+  "validation_evidence_scope": "Descriptive update only in five approved top-level fields. Execution/identity projection and executable bytes equal tested snapshots; earlier tests bind their actual JSON bytes. Final bridge binds proposed/final bytes and per-file atomic replacement checks. Known native ownership defect remains unresolved; no general release, default change, deployment or package closure.",
   "wepp_banner_version": "2020.500"
 }

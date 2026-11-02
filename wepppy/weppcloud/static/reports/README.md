@@ -4,6 +4,12 @@ Caddy serves this tree at `/weppcloud/static/reports/` using the existing
 static-file route. Only publication-approved PDFs and public provenance records
 belong here. Do not add legacy source, internal review records or raw run data.
 
+- `wepp/release-notes/wepp_261029/`: revision 5 documents the local known-defect
+  matched artifact, bounded water-accounting repairs and S01 cross-OFE FC/HK
+  ownership defect. **Unrestricted heterogeneous-use readiness remains HOLD;
+  package closure is blocked.** The report does not establish a broader safe-use
+  class or repair efficacy. Earlier revisions 1–4 remain unchanged. No model
+  deployment, default change or institutional peer-review claim is included.
 - `wepp/release-notes/wepp_261010/`: revision 2, approved by Roger Lew on
   2026-10-12, adds Topanga/Rattlesnake frequent-event comparisons. Revision 1
   (approved 2026-10-10) remains unchanged. LaTeX and authoring evidence remain in wepp-forest under

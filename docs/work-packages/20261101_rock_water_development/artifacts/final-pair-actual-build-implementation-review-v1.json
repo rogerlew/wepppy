@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "role": "implementation",
+  "stage": "final-pair-promotion",
+  "declaration_sha256": "48f680d601f37a54b5b55b1d0fe4e38adbc5dea1d40f1aaa8b2f69b84e28e8f8",
+  "build_receipt_sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe",
+  "review_sha256": "82e0b5ab393013d875d418b0157e543e34130920321a0db7f3c6e2a41cb206d3",
+  "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "binaries": {
+    "candidate/wepp": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+    "candidate/wepp_hill": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933"
+  },
+  "checks": {
+    "command_receipts": 2,
+    "current_compile_entries": 998,
+    "current_tools_entries": 29,
+    "retained_full_inventory_entries": 61984,
+    "tool_identities": 28,
+    "canonical_and_backup_entries": 6,
+    "canonical_unchanged": true,
+    "prior_full_archive_and_builder_tree_proof_reused": true
+  },
+  "coordination": "Complete observer build canonical-six nonmutation postcheck before promotion",
+  "scope": "Six local canonical binary/sidecar products only; no WEPPpy vendoring or model/deployment admission",
+  "reviewer_native_actions": 0
+}

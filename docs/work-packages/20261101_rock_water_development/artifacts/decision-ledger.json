@@ -1,0 +1,1018 @@
+{
+  "program": "rock-water-development-20261101",
+  "decisions": [
+    {
+      "id": "A01-v2",
+      "status": "passed",
+      "purpose": "Unchanged-binary failure replay",
+      "model_changes": false,
+      "processes": 1,
+      "result": "Same STOP1; ordinary and frost byte parity"
+    },
+    {
+      "id": "A02-v3",
+      "status": "passed",
+      "purpose": "IDAT producer observation",
+      "model_changes": false,
+      "processes": 1,
+      "result": "Rounded owned supply overallocates residue; all prior outputs/observations exact"
+    },
+    {
+      "id": "A03-scalar-v2",
+      "status": "bounded_pass",
+      "purpose": "Conservative allocation scalar controls",
+      "cases": 2148,
+      "result": "Current selected controls pass; mixed-exponent counterexample blocks universal admission"
+    },
+    {
+      "id": "A03-v2",
+      "status": "bounded_target_pass",
+      "purpose": "One conservative allocation diagnostic replay",
+      "model_changes": true,
+      "processes": 1,
+      "limitations": [
+        "wide-exponent exactness",
+        "carry-transfer branch",
+        "storm depletion precision",
+        "non-target regressions"
+      ]
+    },
+    {
+      "id": "F01-v4",
+      "status": "partial_evidence",
+      "purpose": "Legacy/current frost activation",
+      "model_changes": false,
+      "processes": 10,
+      "result": "Legacy Roads calls frost with and without sidecar; modern missing required roughness control; legacy eRMiT water calendar reader mismatch"
+    },
+    {
+      "id": "F02-v1",
+      "status": "superseded_unexecuted",
+      "purpose": "Modern Roads runtime correction and two-year eRMiT consecutive-date controls",
+      "model_changes": false,
+      "processes": 6
+    },
+    {
+      "id": "surface-support",
+      "status": "committed",
+      "purpose": "Add missingness and weighted support provenance without numeric change",
+      "tests": "48 focused; broad12642passed423skipped; unchanged production source",
+      "artifacts": "surface-artifacts-v1:45files; four distinct roots; auto/manual raster parity",
+      "commit": "a90f56948"
+    },
+    {
+      "id": "A04-v2",
+      "status": "panel_pass",
+      "processes": 12,
+      "model_changes": true,
+      "result": "Exact expansion; allfull16year histories complete; zero-rockpairedidentitybothKS; no physicaladmission"
+    },
+    {
+      "id": "A05-v1",
+      "status": "census_pass",
+      "processes": 12,
+      "model_changes": false,
+      "result": "30974527executeddomainobservations;0bad;2507859frozencontexts;five-sitesonly"
+    },
+    {
+      "id": "A06-v1",
+      "status": "bounded_accounting_pass",
+      "processes": 12,
+      "model_changes": false,
+      "result": "12 ordinary/FH exact histories; 64935267 domains,0bad;210384 daily ownership entries with0violations;1728 input/PURK hours and8379clamps,0outside-bound;zero storm/tile coverage",
+      "limitations": [
+        "Selected two-day flux windows",
+        "No annual physical conservation or field-basis admission",
+        "Storm follow-up A07 required"
+      ]
+    },
+    {
+      "id": "F02-v2",
+      "status": "partial_evidence",
+      "processes": 6,
+      "result": "ModernRoadscomplete nofrost;legacyERMiTfirsthit;experimentalmodernERMiTblocked3OFEguard"
+    },
+    {
+      "id": "F03-v3",
+      "status": "passed",
+      "processes": 2,
+      "result": "General releasedbinary supports1OFEERMiT andsuppressesfrost;exactdebugparity"
+    },
+    {
+      "id": "F04-v3",
+      "status": "passed_bounded_policy_ablation",
+      "processes": 16,
+      "result": "Same-sourcefrostgatebypass coldactivation; warm/KS1outputs exact; no globalrestoreadmission"
+    },
+    {
+      "id": "N01-build-v2",
+      "status": "build_pass",
+      "purpose": "General canonical baseline/candidate matched watershed/hillslope builds",
+      "result": "All four binaries built; pinned toolchain/runtime and ELF compatibility; no model/release admission"
+    },
+    {
+      "id": "A07-v2",
+      "status": "bounded_pass",
+      "purpose": "Actual storm/carry ownership plus zero-rock pair",
+      "processes": 3,
+      "model_changes": false,
+      "result": "3parityhistories333stormintervals; allocation difference observed but selectedeventhasnoexecutedrunoff response"
+    },
+    {
+      "id": "release-authority-261029",
+      "status": "operator_authorized",
+      "result": "Re-release undeployed wepp_261029 matched Linuxpair in WEPPpy and revise release note after gates; preserve previous publication revisions; no deployment or unvalidated Windows publication"
+    },
+    {
+      "id": "N01-regression-v2",
+      "status": "gates_pass",
+      "result": "1260pytest,2smokes,31watchlist;3newfullartifactcontrols; finalmanifestcheck"
+    },
+    {
+      "id": "N02-v2",
+      "status": "bounded_fullproject_pass",
+      "result": "2fresh491hill211channel9yearchains;3443files994changed; quantitativewater/outletreadback retained"
+    },
+    {
+      "id": "B01-profiles-v2",
+      "status": "builder_pass",
+      "result": "4actualprofiles12writerfiles;18emittedsourcehorizons11changed22rows; experimentalnotadmitted"
+    },
+    {
+      "id": "N01-canonical-integration",
+      "status": "admitted_source",
+      "commit": "21e1f99e16752723acac3ae1e3c59e2b2d8db577",
+      "release_status": "First dated build prepared; no WEPPpy vendoring"
+    },
+    {
+      "id": "R01-Sm-output-overflow",
+      "status": "confirmed_preexisting_defect",
+      "historical_cases": 99,
+      "historical_star_fields": 74267,
+      "repair": "Sm formatting only in SEDOUT and CONTIN; E01 controls pass, native parity pending"
+    },
+    {
+      "id": "D01-full-fixture",
+      "status": "rejected_invalid_forcing",
+      "failed_baseline_hills": 255,
+      "nonfinite_days_per_climate": 129,
+      "action": "Preserve; choose separate full finite fixture, no truncation"
+    },
+    {
+      "id": "D02-channel-deck",
+      "status": "obsolete_input_rejected",
+      "baseline_hills_passed": 66,
+      "action": "D03 actual current builder regeneration; only HMAX token differs"
+    },
+    {
+      "id": "261029-same-name-authority",
+      "status": "authorized_local_rerelease",
+      "revision": 5,
+      "scope": "Matched Linux pair and report in WEPPpy; no deployment/default/Windows or experimental retention/frost policy"
+    },
+    {
+      "id": "E01-v4",
+      "status": "admitted_display_repair",
+      "result": "Four complete histories; 42 former Sm star fields repaired, ordinary control unchanged; all non-Sm bytes exact",
+      "commit": "a8e008135f82e6a071acd836672d829e8e9e8e8d"
+    },
+    {
+      "id": "D03-D04",
+      "status": "bounded_fullproject_pass",
+      "result": "Current-builder paired Disturbed readback admitted; final 67-process replay reproduces all 468 candidate files exactly"
+    },
+    {
+      "id": "N03-v1",
+      "status": "final_pair_exact_parity",
+      "result": "492 fresh native processes; all 3443 N02 candidate outputs exact"
+    },
+    {
+      "id": "release-r5-gates-v3",
+      "status": "independently_verified_pass",
+      "result": "1296 tests, 2 host smokes, 31 watchlist cases, artifact policy; all 11879 bound canonical inputs and 456 dependencies unchanged",
+      "scope": "Native gates only; Roads event/capacity admission and WEPPpy delivery pending"
+    },
+    {
+      "id": "B02-plain-v2",
+      "status": "executed_ordinary_pass",
+      "result": "Eight actual full-profile histories; 731 daily records each; frozen water positive in every lane",
+      "scope": "No native remapping/domain/retention admission; observer phase separately prepared"
+    },
+    {
+      "id": "R02-readback-v1",
+      "status": "implementation_pass_science_hold",
+      "result": "840 paired histories; 45647 bindings; unchanged744/840 magnitude score; material local water changes require R05",
+      "scope": "No release admission from aggregate or score parity"
+    },
+    {
+      "id": "R03-capacity-readback-domain-v1",
+      "status": "independent_science_and_implementation_pass",
+      "result": "127149calls;33390negative supports;2022wet coordinates;845quadratures",
+      "sha256": "07b961ec4ab44de4e0d63e4051352bd3494ac088e5fe738f322725c634a7e982",
+      "scope": "All observed negative supports explained by bounded terminal proof; labels preserved; no whole sediment mass closure; R05 hold remains"
+    },
+    {
+      "id": "R04-particle-v2",
+      "status": "independent_science_and_implementation_pass",
+      "result": "Full-history ordinary parity; strict printed fraction flag retained and explained by native arithmetic",
+      "scope": "Local ENRICH/mixing/SLOSS; does not lift R05 hold"
+    },
+    {
+      "id": "R05-water-investigation",
+      "status": "source_scope_preparation_release_hold",
+      "result": "Six paired full histories scoped for hydrograph/ET/carry/drainage/snow ownership; no source cause yet proven"
+    },
+    {
+      "id": "B02-observer-v4",
+      "status": "preserved_reader_failure",
+      "result": "First native process completes; reader assumes hourly mode but inputs select daily WATBAL; actual-path observer correction in preparation",
+      "scope": "No input/physics change or scientific relaxation"
+    },
+    {
+      "id": "B02-observer-v5",
+      "status": "unexecuted_review_hold",
+      "result": "Inherited hourly denominator remained a daily initialization gate; diagnostic decoupled in v6"
+    },
+    {
+      "id": "B02-observer-v6",
+      "status": "preserved_observer_stop",
+      "result": "Build passes; first native history stops on observer reversedclock; PURK addedcall lacked canonical clock declaration"
+    },
+    {
+      "id": "B02-observer-v7",
+      "status": "independent_actual_science_and_implementation_pass",
+      "declaration_sha256": "0a46983503e8ffc28c989d1dfc7672e59211563a489419ea0debf55054a5cabe",
+      "result": "Eight histories;60layers5848dailyrecords56exactoutputs43860PURKgates; no observed invalid domain; absent branches retained",
+      "scope": "Observed initialization/domain/ownership only; accepted fluxes and retention admission pending"
+    },
+    {
+      "id": "R05-water-v1",
+      "status": "unexecuted_reader_review_hold",
+      "declaration_sha256": "f4a691e115de0c22c4a5feb5ab04c715383cb812ae26b438b54d9521dc455262",
+      "result": "Source/type/preflight/controls verified; require pending-store consumption, lane-relative witness order and WB/SWU causal-chain completeness",
+      "scope": "No native builds/models; first-opening cache objection withdrawn after complete initialization callflow"
+    },
+    {
+      "id": "R05-water-v2",
+      "status": "preserved_observer_clock_failure",
+      "result": "First native history completes with seven exact ordinary outputs; opening records missing or year-mislabelled because DAY_OPEN precedes STMGET",
+      "scope": "Source-observer calendar correction and new batch required; eleven cases unexecuted"
+    },
+    {
+      "id": "B02-daily-flux-v2",
+      "status": "preserved_reader_failure_corrected_replay_pass",
+      "result": "First native history and seven ordinary plus three phase1 outputs exact; EVAP FIN ownership corrected in versioned reader;731days11selected25controls pass independent reviews",
+      "scope": "Reuse first history; separate remaining-seven continuation; no retention admission"
+    },
+    {
+      "id": "B02-daily-flux-continuation-v1",
+      "status": "independent_technical_pass_physical_admission_hold",
+      "result": "All8 replayed:5848dailyrows94selecteddays56ordinaryoutputs24sidecars exact; WINTER net profile changes require fine-grid operation attribution",
+      "scope": "Largest candidate WINTER net gain0.3440915606915951mm; common losses also unresolved. No retention admission."
+    },
+    {
+      "id": "R05-water-v3",
+      "status": "prepared_build_reviews_pending",
+      "declaration_sha256": "dff559715669b5be665ed6b8a197731f5f0e42ec1985431e9dce35e6fd9ad367",
+      "result": "Observer-owned clock preserves preweather opening; native weather clock equality witness;97reader32runner322typedcall controls",
+      "scope": "Same twelve full histories; no v3 native action yet"
+    },
+    {
+      "id": "P01-source-tables-v2",
+      "status": "actual_acquisition_pass_usable_component_readback_pending",
+      "declaration_sha256": "79c7830e14dcd1bd54818b4c799bda0fe50c192f07ddf868333895e760707d0d",
+      "result": "All five tables firstattempt:16components91horizons172fragments196textures15restrictions",
+      "scope": "Six allowed project sources; no controllers/builders/models/live changes"
+    },
+    {
+      "id": "R05-flagstaff-snow-cap",
+      "status": "independently_reproduced_defect_repair_design_pending",
+      "result": "Full-pack cap inverse conversion leaves one snowdepth ulp; next-hour tail extends wet support and switches runoffbranch",
+      "scope": "No epsilon, no GRNAthreshold change, no releaseadmission"
+    },
+    {
+      "id": "B03-winter-writer-v1",
+      "status": "independent_technical_pass_confirmed_negative_ice_clamp_defect",
+      "result": "Most largecoarsechanges pondtransfers; thaw deficit\u2192underfundedFRZNGrestoration\u2192iceclamp creates0.0811740174mm; donorlimitedrepairdesignproposed",
+      "scope": "Fine writer/gate/carry/pond attribution; no physicalretentionadmission"
+    },
+    {
+      "id": "P02-builder-v2",
+      "status": "independent_actual_artifact_pass_with_additive_cache_provenance_resolution",
+      "declaration_sha256": "5e85147c4e2dda61cfeae6e59aa34ea61774f1149bcbea0d8bf6c51c3ec3b6d4",
+      "scope": "Two cloned actual builders, six uniform-eligibility sources, exact rowpropagation; no native/livemutation",
+      "result": "288unique files193OFEs857rows/lane; originalWAL-mainfilehash claims remainfalse, finalizedsemantic/byteidentity auditaccepted; no native"
+    },
+    {
+      "id": "R05-water-v3-actual-20261102",
+      "status": "technical_collection_pass_scientific_release_hold",
+      "histories": 12,
+      "paired_readbacks": 6,
+      "daily_compartment_ledgers": 210384,
+      "ordinary_output_parity_files": 84,
+      "aggregate_sha256": "17a5615205a520225dfbb5a057c951d41d86a44ad650c11f257e5e385590e6c3",
+      "reviews": [
+        "R05-aggregate-implementation-outcome-v3.md",
+        "R05-actual-science-synthesis.md"
+      ],
+      "limits": "Snow exhaustion and ET/stress policy require disposition; daily soil/canopy/residue ledger excludes pond. B03 pond/carry evidence is distinct."
+    },
+    {
+      "id": "R05-snow-cap-experiment-v2-build-gate",
+      "status": "independently_approved_build_probes_actual_pending",
+      "declaration_sha256": "a41e28c39de11a5dc63935a6a3b980e70be52919f1a27d94c1bcab1d4a6af9c5",
+      "builds": 4,
+      "actual_object_probes": 4,
+      "cases_per_probe": 26,
+      "approved_climate_histories": 0,
+      "limits": "Maximum 21 histories require separate actual-build review and RUN approval; no physical release admission."
+    },
+    {
+      "id": "B04-restoration-v3-execution-gate",
+      "status": "independently_approved_finite_experiment_actual_pending",
+      "declaration_sha256": "c2c13ec0b2d783d2fc2ed25e657b8d9312baa55dc66a7ded178c626600213f22",
+      "builds": 2,
+      "histories": 12,
+      "reader_controls": 62,
+      "preserved_failures": [
+        "v2 wrong Python stopped before compiler with empty build map",
+        "v3 missing approval preflight stopped before compiler; subsequently bound parent approval retained"
+      ],
+      "limits": "Actual donor/receiver, converter/carry, domain and plain/observed parity gates remain; total-ice donor support does not establish thermal availability or retention admission."
+    },
+    {
+      "id": "repair-execution-20261102",
+      "status": "executing_with_retained_failures",
+      "snow_declaration": "e26ce3bf652d153ba11c8c129c076d56f0cb055164b7eccc119158273ca347e5",
+      "snow_build_receipt": "0be0ca23fed2ff2d0574f0d0e3560024cd2cf2a5f67305d5a2bf9be88be3c546",
+      "snow_compiled_cases": 104,
+      "snow_histories_authorized": 21,
+      "b04": "v4 first pair native complete, exact seven-output reference parity; readback rejects valid WATDST code0; correction/replay then remaining10 pending",
+      "scientific_admission": false
+    },
+    {
+      "id": "B04-bounded-admission-20261102",
+      "status": "accepted_for_controlled_isolated_integration",
+      "aggregate_sha256": "bcb3d1986d30852bbd4acd03f8537fcc7ffcfc27e774eadaa6e37c9b4dd20155",
+      "actual_histories": 12,
+      "underfunded_events": 25,
+      "closed_segments": 19,
+      "reason": "Independent source-owned accounting, actual delayed converter evidence, exact parity and bounded downstream disposition pass",
+      "limits": [
+        "not thermal validation",
+        "not retention adoption",
+        "combined-source and permanent regression gates pending",
+        "canonical changes defer while live dependencies bound"
+      ]
+    },
+    {
+      "id": "P04-security-and-actual-propagation-gate",
+      "status": "v3_hold_v4_correction_pending_review",
+      "finding": "SEC-P04-01: dangling-output symlinks bypass fresh opt-in target check in four writers",
+      "scope": "private optional retention implementation; no canonical or project/native execution",
+      "review": "artifacts/P04-security-review-v3.md",
+      "next": "exclusive-create closure; exact P01/collection association and six-source project propagation; P03 uses actual resulting soils",
+      "default_migration": false
+    },
+    {
+      "id": "P04-security-closure-and-actual-attempt-20261102",
+      "status": "v4_security_closed_project_v3_failed_resource_packaging",
+      "security_review": "artifacts/P04-security-review-v4.json",
+      "project_declaration_sha256": "2a11a9d1f6040fbc0fff5bc4717d831438e313f83b606ffb36f1482fba1f11a5",
+      "project_receipt": "out/rock-water-development-20261101/P04-project-experiment-v3/execution-result.json",
+      "finding": "Actual Disturbed processing needs module-relative data/disturbed_land_soil_lookup.csv absent from isolated overlay",
+      "containment_proven": true,
+      "frozen_inputs_unchanged": true,
+      "native_models_executed": 0,
+      "next": "Preserve failed root and prepare reviewed resource-complete overlay and new declaration before another actual builder attempt",
+      "retention_admitted": false
+    },
+    {
+      "id": "R05-snow-component-admission-20261102",
+      "status": "accepted_for_canonical_component_integration",
+      "native_aggregate_sha256": "f55d1f591b7eafbeb1ab8861944623b427a8ad85c38051e2edfc7dd592bc785c",
+      "response_aggregate_sha256": "d27625546ba7659166214750316f88eb2a7d3ab1b682e7ac723e2d6495d4321e",
+      "science_admission_sha256": "6f9a60dca1537d30255c3aaa4eb49f13af70c972a9563ffcbecabefa4191e68b",
+      "histories": 21,
+      "paired_comparisons": 9,
+      "limits": [
+        "retained ET policy and material responses documented",
+        "combined-engine execution pending",
+        "not retention adoption or field calibration",
+        "final source/binary release gates pending"
+      ]
+    },
+    {
+      "id": "P04-v6-actual-input-binding-20261102",
+      "status": "actual_builder_artifacts_accepted_for_P03_input_binding",
+      "checkpoint_utc": "2026-11-02 16:18 UTC",
+      "root_receipt": "out/rock-water-development-20261101/P04-project-experiment-v6/receipt.json",
+      "root_receipt_sha256": "9a73068af0f0e0f8bbe083acc61c6c5a0c98cb98b0a76be0af218f53aef58df6",
+      "actual_reviews": {
+        "science": {
+          "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-project-builder-actual-science-review.json",
+          "sha256": "46e4aa2f15b966e316423fab0ba574978f56bf9bb8b6e924a7dbcd76b8478330"
+        },
+        "implementation": {
+          "path": "out/rock-water-development-20261101/P04-actual-implementation-review-v1/review.json",
+          "sha256": "19609c0036e229eca1d676b5d7d5243794442d77bb5684f451b4f955223de00b"
+        },
+        "security": {
+          "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-project-builder-actual-security-review-v6.json",
+          "sha256": "2e2685d2625d54116841103171030426b02afde48c36347a572b6a0d8e672f6e"
+        }
+      },
+      "candidate_staged_soils_and_companions": 66,
+      "ofes": 193,
+      "P02_numeric_parity": true,
+      "native_histories": 0,
+      "retention_admitted": false,
+      "rationale": "Actual spawned-worker provenance closes staging artifact gap; native physical support remains P03 responsibility."
+    },
+    {
+      "id": "final-clean-and-P03-observer-builds-20261102",
+      "status": "builds_passed_not_promoted",
+      "checkpoint_utc": "2026-11-02 16:18 UTC",
+      "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "clean_pair_receipt": {
+        "path": "out/rock-water-development-20261101/release-r5-renewed-pair-v2/receipt.json",
+        "sha256": "8f97f78ab2119c1fcc91be62a0b0de36c2cf283c979a83a2ea9f430d7aafddbe"
+      },
+      "P03_observer_receipt": {
+        "path": "out/rock-water-development-20261101/P03-final-observer-build-v3/receipt.json",
+        "sha256": "c0cdf17001b878f611f02e86d0cfc4a940e2f0802cb6b731dfa9e42bf674cf16"
+      },
+      "combined_observer_build": {
+        "session": 61069,
+        "status_at_checkpoint": "running; no final receipt"
+      },
+      "pending": [
+        "P03 executor v5 independent reviews and actual execution binding",
+        "combined18 execution and admission",
+        "renewed final-source regression gates",
+        "promotion and vendoring"
+      ],
+      "promotion_performed": false,
+      "rationale": "Successful compilation and runtime identity do not establish model behavior or release readiness."
+    },
+    {
+      "id": "P04-optional-integration-v2-readiness-20261102",
+      "status": "private_readiness_only",
+      "checkpoint_utc": "2026-11-02 16:18 UTC",
+      "preparation_receipt": {
+        "path": "out/rock-water-development-20261101/P04-canonical-integration-v2/preparation-receipt.json",
+        "sha256": "c25a9a78b41915393ece6640ac8d213ca2300bb03ee2d8d1cd926e2c72f0223f"
+      },
+      "existing_regression_addendum": {
+        "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-integration-existing-regressions.json",
+        "sha256": "278f763326f3787c53d096c97314c152c54fc70659d24b0c98cc4d9093c05821",
+        "passed": 252
+      },
+      "canonical_integration": false,
+      "physical_admission": false,
+      "rationale": "Prepare reversible integration separately; await P03 disposition and canonical adoption gates."
+    },
+    {
+      "id": "P03-Disturbed-exact-input-dedup-assessment-20261102",
+      "status": "not_eligible_under_frozen_criteria",
+      "assessment": {
+        "path": "out/rock-water-development-20261101/P03-disturbed-dedup-assessment-v1/assessment.json",
+        "sha256": "dc4f4969704342f66df630b3db523c5230c56f7c12a4b31a1b18fd8c953efcc0"
+      },
+      "nonsoil_exact_matches": 278,
+      "soil_exact_matches": 0,
+      "soil_comment_only_differences": 66,
+      "changed_comment_lines": 193,
+      "ordinary_output_names_match": 468,
+      "deduplication_authorized": false,
+      "rationale": "Noncomment equality and matching output scope do not satisfy frozen exact-byte complete-input acceptance."
+    },
+    {
+      "id": "combined18-launched-promotion-started-20261102-1628",
+      "status": "combined_execution_and_canonical_promotion_in_progress",
+      "checkpoint_utc": "2026-11-02 16:28 UTC",
+      "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "evidence": {
+        "combined_observer": {
+          "path": "out/rock-water-development-20261101/combined18-observer-build-v1/receipt.json",
+          "sha256": "8a05a7964d61e8917e426aa6812bcc9c74900cd5af4a8f6297e53431fe317932"
+        },
+        "combined_binding": {
+          "path": "out/rock-water-development-20261101/combined18-final-execution-v3/binding.json",
+          "sha256": "e061dd6b437323452bacc6d2b9b4f4c4a7bfa75959880c353c39a1e2232dadfe"
+        },
+        "promotion_start": {
+          "path": "out/rock-water-development-20261101/release-r5-renewed-pair-v2/promotion-start.json",
+          "sha256": "b761dbf7078323246c995ee9645f085148dd92cd189a06204fa8918e4db5fed2"
+        },
+        "snow_approval": {
+          "path": "out/rock-water-development-20261101/combined18-final-execution-v3/snow/approval.json",
+          "sha256": "0c3f60c84632af967afd8397449bd21cb4a0d59dfcf75158be882bb4642ff2ea"
+        },
+        "b04_approval": {
+          "path": "out/rock-water-development-20261101/combined18-final-execution-v3/b04/approval.json",
+          "sha256": "43bc37bc24cf95b5b563f39d4a761e1c8d52340c014dac1945eed2f6e71af2ea"
+        }
+      },
+      "combined_session": 24894,
+      "promotion_session": 95675,
+      "all_six_promotion_targets_complete": false,
+      "terminal_combined_result_claimed": false,
+      "release_admitted": false,
+      "rationale": "Build PASS and exact approval support execution; launch and partial receipts do not establish terminal completion. Refresh active overview while preserving historical records."
+    },
+    {
+      "id": "combined18-accepted-and-native-promoted-20261102-1642",
+      "status": "bounded_combined_acceptance_and_native_promotion_pass",
+      "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "evidence": {
+        "combined_actual": {
+          "path": "out/rock-water-development-20261101/combined18-final-execution-v3/receipt.json",
+          "sha256": "c9550ce86d66a4659c33c9e5bcd70890afa0b5a47abab80be3237da01a59272d"
+        },
+        "science": {
+          "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.json",
+          "sha256": "3b7ffa53b66aadfa1226026f1986f08eec80ac02d0849f8cf963433d8ec90cd5"
+        },
+        "implementation": {
+          "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.json",
+          "sha256": "58c8967795de988c22144eb3ca3d22dba5ea5826cabcd414bab28251a2ca1f17"
+        },
+        "parent_acceptance": {
+          "path": "out/rock-water-development-20261101/combined18-final-execution-v3/parent-acceptance-v1.json",
+          "sha256": "312a6fd9fefc86a206da01232d6cabe74334647e74003634f8ca8c29001f50b8"
+        },
+        "promotion": {
+          "path": "out/rock-water-development-20261101/release-r5-renewed-pair-v2/promotion-receipt.json",
+          "sha256": "cd53d1932419d788f4156bf56fca5a0d56e912ada845a1127d6ebabd1161399c"
+        },
+        "legacy_execution": {
+          "path": "out/rock-water-development-20261101/legacy-frost-final-renewal-v1/receipt.json",
+          "sha256": "f3ef08eaa9c15029aa5b22d4c577b727da6680d1c18830bb6a1d0918cad2833b"
+        }
+      },
+      "histories": 18,
+      "native_promotion_targets": 6,
+      "exact_six_target_readback": true,
+      "underfunded_intervals_unchanged": 19,
+      "phase_arrays_changed": 5,
+      "changed_funded_debits": 2,
+      "legacy_execution_passed": true,
+      "roads_consequence_science_pending": true,
+      "p03_final_binding_pending": true,
+      "final_launcher_corrections_pending": [
+        "FG-I1",
+        "FG-I2",
+        "FG-I3",
+        "FG-I4"
+      ],
+      "release_admitted": false,
+      "retention_admitted": false,
+      "deployment_authorized": false,
+      "rationale": "Actual combined source and promoted artifacts pass bounded gates. Preserve phase/output consequences and existing water/donor policy; no tolerance waiver or thermal/cold/full-system/retention inference. Correct confirmed launcher failure classes additively before remaining release execution."
+    },
+    {
+      "id": "legacy-final-terminal-acceptance-20261102-1646",
+      "status": "bounded_compatibility_exposure_accepted",
+      "parent_acceptance": {
+        "path": "out/rock-water-development-20261101/legacy-frost-final-renewal-v1/parent-acceptance-v1.json",
+        "sha256": "7197cc767ac78dc7a22a3c55a1041f14c77233937be2c5d0d66f1887e658f7c9"
+      },
+      "reviews": {
+        "science": {
+          "path": "/workdir/wepppy/docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.json",
+          "sha256": "a2336d510cf1fc403af513786f9550401b1523ac91e3c90208e1a1338d3ed18f"
+        },
+        "implementation": {
+          "path": "/workdir/wepppy/out/rock-water-development-20261101/legacy-frost-final-actual-implementation-review-v1/review.json",
+          "sha256": "28ebc361f7753cb461e16acaadc8db8cb2bf0038665b1f628e9f5d14a1e62f9c"
+        }
+      },
+      "execution_receipt_sha256": "f3ef08eaa9c15029aa5b22d4c577b727da6680d1c18830bb6a1d0918cad2833b",
+      "histories": 6,
+      "roads_consequence_science_pending": false,
+      "roads_changes_disclosed": true,
+      "frost_policy_changed": false,
+      "additional_experiment_required": false,
+      "p03_execution_science_passed": true,
+      "p03_execution_implementation_pending": true,
+      "release_admitted": false,
+      "retention_admitted": false,
+      "rationale": "Strict parity, complete calendar and activation evidence support this remit; real Roads water/internal-erosion changes are retained with correct units and no unique-FRZNG attribution or tolerance waiver. Earlier pending review remains historical."
+    },
+    {
+      "id": "P03-exact-launch-20261102-1647",
+      "status": "running_not_admitted",
+      "session": 8515,
+      "declared_runs": 142,
+      "declaration": {
+        "path": "out/rock-water-development-20261101/P03-final-execution-v1/declaration.json",
+        "sha256": "154828f169648f5440d62e934d60d634b69541f112fa950fce4a0851867b2df8"
+      },
+      "approval": {
+        "path": "out/rock-water-development-20261101/P03-final-execution-v1/run-approval.json",
+        "sha256": "e0c176723a674b945dadbb53a86c2037b94420197229faa8bac72d1800adaae8"
+      },
+      "both_execution_reviews_passed": true,
+      "terminal_result_claimed": false,
+      "retention_admitted": false,
+      "production_integration_claimed": false
+    },
+    {
+      "id": "native-disturbed-and-active-gates-20261102-1732",
+      "status": "native_and_disturbed_pass_other_gates_in_progress",
+      "evidence": {
+        "native": {
+          "path": "out/rock-water-development-20261101/release-r5-gates-renewal-v2/receipt.json",
+          "sha256": "f8e9d049701ece321533aea32863ea923638aa0fd63c771c3c3e16466cd1d756"
+        },
+        "disturbed_acceptance": {
+          "path": "out/rock-water-development-20261101/disturbed-final-renewal-v2/parent-acceptance-v1.json",
+          "sha256": "ff0750ab6bf1704da28c7471ef7c5a0ba9f4ddd533c8d9bf8cfc81bdcb6ba71b"
+        },
+        "roads_declaration": {
+          "path": "out/rock-water-development-20261101/roads-final-renewal-v2/declaration.json",
+          "sha256": "72e7b92b32af53d228521241ad26e9fcb6b16619a577cadf37f96202f4fd7071"
+        },
+        "capacity_build": {
+          "path": "out/rock-water-development-20261101/final-capacity-build-v1/receipt.json",
+          "sha256": "5c372269dfd36caad52f598331f7cfb4f4e94dba193fd93b90d61413d360a11b"
+        },
+        "archive_approval": {
+          "path": "out/rock-water-development-20261101/private-archive-parent-approval-v1/approval.json",
+          "sha256": "87942b90ef7a56cb5717c8fb48110715ec6c0c24cdf52d9a955e28c765c40930"
+        },
+        "archive_combined": {
+          "path": "out/rock-water-development-20261101/private-retention-combined-v1/receipt.json",
+          "sha256": "24dd01159b4f6a4c99f3db67e6325b9097eb82e54a6093c999b7e7698b9739f3"
+        },
+        "archive_winter": {
+          "path": "out/rock-water-development-20261101/private-retention-winter-b-v1/receipt.json",
+          "sha256": "aa021948623e6d83df5372ca5a63ef72bbb12df1990419d348c368bef6be5c12"
+        }
+      },
+      "native": {
+        "all_five_commands_passed": true,
+        "tests": 1394,
+        "smokes": 2,
+        "watchlist_checks": 31,
+        "artifact_policy_passed": true
+      },
+      "disturbed": {
+        "parent_accepted": true,
+        "processes": 67,
+        "artifacts": 468,
+        "changed_artifacts": 110,
+        "outlet_volume_delta_m3": 0.08,
+        "outlet_sediment_delta_kg": 1.71,
+        "source_unit_state_timing_triage_retained": true
+      },
+      "roads": {
+        "session": 39585,
+        "declared_cases": 840,
+        "status": "running"
+      },
+      "p03": {
+        "session": 8515,
+        "status": "running",
+        "completed_case_receipts_approximately": 62,
+        "H40_both_lanes_passed": true,
+        "terminal_result_claimed": false
+      },
+      "capacity_observer": {
+        "build_passed": true,
+        "binary_sha256": "84ae424cf4a0dc2354177ec5d49ab61d07221141b1d8f06b041f53ca518b6880",
+        "future_observed_cases": 840,
+        "model_execution_approved": false,
+        "clean_reference_pending": true
+      },
+      "launcher_findings_closed": [
+        "FG-I1",
+        "FG-I2",
+        "FG-I3",
+        "FG-I4",
+        "FG-I5"
+      ],
+      "launcher_version": 6,
+      "application_medium_v3": "dual_preparation_pass_actual_pending",
+      "archive": {
+        "approved_roots": 298,
+        "passed_shards": [
+          "combined",
+          "winter-b"
+        ],
+        "remaining": "serial execution",
+        "excluded": [
+          "all P03",
+          "all P04",
+          "final gates",
+          "living documents"
+        ],
+        "overall_completion_claimed": false
+      },
+      "wepppy_vendored": false,
+      "deployment_claimed": false,
+      "retention_admitted": false,
+      "rationale": "Actual gates and bounded changed-output consequences are distinguished from running, build-only, preparation-only and partial archival evidence. Preserve all earlier failures and checkpoints."
+    },
+    {
+      "id": "P03-watershed-reader-stop-20261102-1741",
+      "status": "stopped_reader_allowance_defect",
+      "session": 8515,
+      "session_exit_code": 1,
+      "accepted_case_receipts": 70,
+      "total_attempted_receipts": 71,
+      "case": "project-baseline-watershed",
+      "native_exit_code": 0,
+      "native_seconds": 31.72547674179077,
+      "post_integrity_passed": true,
+      "reader_error": "Unexpected run-side file set",
+      "source_confirmed_generated_files": [
+        "chan.out",
+        "chanwb.out",
+        "tc_out.txt",
+        "chntyp.txt"
+      ],
+      "evidence": {
+        "execution-result.json": {
+          "path": "out/rock-water-development-20261101/P03-final-execution-v1/execution-result.json",
+          "sha256": "466536c09a34cc11c8f8ae6816c10aa3b3a48b94b62ff25c7de31a3c8cdd456e"
+        },
+        "cases/project-baseline-watershed/receipt.json": {
+          "path": "out/rock-water-development-20261101/P03-final-execution-v1/cases/project-baseline-watershed/receipt.json",
+          "sha256": "4b78b63cddefa6d2bdc0145c174fa583427460bfc4738b1ce1548b53442a9f6e"
+        },
+        "cases/project-baseline-watershed/process.json": {
+          "path": "out/rock-water-development-20261101/P03-final-execution-v1/cases/project-baseline-watershed/process.json",
+          "sha256": "05e6d84e6abe3b35dec7edf28628a696cef55ba9b64667d70921413823b60b01"
+        }
+      },
+      "physical_failure_established": false,
+      "watershed_fully_validated": false,
+      "continuation_approved": false,
+      "retention_admitted": false,
+      "correction_owner": "rock_consumers",
+      "planned_reuse": "Prior70 and completed watershed only after fully validated additive readback and exact continuation reviews",
+      "reported_project_case_medians_seconds": {
+        "native": 0.784,
+        "verification_overhead": 39.35
+      },
+      "cadence_change": "May be proposed under explicit continuation review; frozen v6 unchanged",
+      "remaining_gates": "unchanged"
+    },
+    {
+      "id": "P03-continuation-observer-and-local-install-20261102-1804",
+      "status": "running_evaluations_local_installation_passed",
+      "evidence": {
+        "p03_declaration": {
+          "path": "out/rock-water-development-20261101/P03-final-continuation-v2/declaration.json",
+          "sha256": "1290118a5315d017d17bc40dd16b5e1d90ac6b1c92fe2d4e65c672f63cb44907"
+        },
+        "p03_approval": {
+          "path": "out/rock-water-development-20261101/P03-final-continuation-v2/run-approval.json",
+          "sha256": "e589fe24b73094e32bb480579c3c3530cf769029c8736c821d9ad9d106143229"
+        },
+        "capacity_declaration": {
+          "path": "out/rock-water-development-20261101/final-capacity-execution-v1/declaration.json",
+          "sha256": "e2f57a895c826621d368791600ad87392595caca580720df0221e8dea8d958d7"
+        },
+        "capacity_approval": {
+          "path": "out/rock-water-development-20261101/final-capacity-execution-v1/approval.json",
+          "sha256": "d79f0fc316c8b468da5fcbb113fe383ca83f151b7acb0f40a2c9c2370aa0c4e2"
+        },
+        "local_installation": {
+          "path": "out/rock-water-development-20261101/local-vendor-r5-installation-v1/receipt.json",
+          "sha256": "3dcbb45f9b589e478bb28862c2039eeeff05de7d7626e4670544b15f1833f4c0"
+        },
+        "post_install_validation": {
+          "path": "out/rock-water-development-20261101/local-vendor-r5-installation-v1/post-install-validation.json",
+          "sha256": "b3d2d32a3331dc53357790af44c77f05bbdba596e427baeefb18867d6fa608a9"
+        }
+      },
+      "p03": {
+        "status": "running",
+        "inherited_validated_native_results": 71,
+        "new_native_calls": 71,
+        "total_ceiling": 142,
+        "prior_failure_preserved": true,
+        "prior_failure_kind": "normal watershed auxiliary-output allowance contract",
+        "cadence": "runtime closures at group boundaries; runtime assets, active-process loaders and dependencies every invocation",
+        "scientific_admission": false
+      },
+      "capacity": {
+        "declared_histories": 840,
+        "status": "running",
+        "reported_failures": 0,
+        "terminal_result_claimed": false
+      },
+      "native_gate_counts": {
+        "tests": 1394,
+        "watchlist": 31,
+        "smokes": 2,
+        "artifact_policy_passed": true
+      },
+      "local_installation": {
+        "passed": true,
+        "targeted_tests_passed": 47,
+        "rollback_inventory_sha256": "50e8a0d5dd99b6fce1fe3d91974f8bde4cab12c1c65e99192189e462de8c868c"
+      },
+      "application": {
+        "binding_sha256": "fcddc7dbb4db6f948360b0cfa1e70a544ecb1b17c8629627c59f3efdce906742",
+        "science_passed": true,
+        "implementation_passed": true,
+        "security_pending": false,
+        "declared_histories": 492,
+        "executed": false,
+        "security_passed": true,
+        "parent_approval_sha256": "064922bd713f1ce69f54e7a3e09f42877aeb22f8cff1740f9a56c4ba5612eefd",
+        "single_service_launch_authorized": true,
+        "execution_status": "Launch authorized; completed actual execution not claimed",
+        "approval_update_utc": "2026-11-02 18:07 UTC"
+      },
+      "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "deployment_claimed": false,
+      "publication_claimed": false,
+      "final_program_scientific_admission": false,
+      "roads_comparator": {
+        "receipt_sha256": "3d15d9feffe9830901ad24da30fa3bd7da26f40be0c7d2d205a736582bc7ff99",
+        "execution_audit_passed": true,
+        "physical_gate": true,
+        "numerical_gate": false,
+        "screen_gate": false,
+        "acceptance": false,
+        "candidate_admitted": false,
+        "original_acceptance_score": "744/840",
+        "observed_capacity_and_quantitative_comparisons_pending": true
+      },
+      "durable_contract_followup": {
+        "files": [
+          "docs/schemas/whole-soil-water-capacity-contract.md",
+          "docs/adrs/ADR-0129-conservative-interception-allocation.md"
+        ],
+        "timing": "after final accepted Roads/capacity/application boundary",
+        "coordinator": "surface_scope",
+        "current_edit_authorized": false,
+        "reason": "P04 integration binds whole-soil preimages; preserve historical chronology and use additive reviewed final merge"
+      }
+    },
+    {
+      "id": "S01-supplementary-compensation-scope",
+      "status": "open_read_only_static_and_gap_analysis",
+      "authority": "User-requested supplement in same active program; parent coordinates",
+      "formulas": {
+        "default": "source/(1-min(w,0.5))",
+        "native_c": "2.65*(1-w)/(rho*w+2.65*(1-w))",
+        "optional": "source/c"
+      },
+      "question": "Source density equality does not establish effective native density/cancellation; assess inversion versus horizon averaging.",
+      "trace": [
+        "source branch/density",
+        "serialization/treatment",
+        "native caps/units/remap/tillage",
+        "initial CPM versus later density",
+        "guards/storage/accepted fluxes"
+      ],
+      "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "comparison_checkout": "/workdir/wepp-forest",
+      "owners": {
+        "native": "rock_consumers",
+        "preparation": "surface_scope"
+      },
+      "raw_root": "out/rock-water-development-20261101/supplementary-ssurgo-compensation-static-v1",
+      "experiment_gate": "Reuse existing histories; static report and gap matrix before finite declared isolated experiments with parent prereview.",
+      "coverage_questions": [
+        "zero/moderate uniform rock",
+        "heterogeneous boundaries",
+        "MOFE combinations",
+        "density floor/cap",
+        "50/85 percent rock",
+        "tillage",
+        "source/mixed/Rosetta with eligibility preserved"
+      ],
+      "deliverables": [
+        "static report",
+        "gap matrix",
+        "hash-bound inputs/readbacks/results",
+        "retain-default/optional-only/separately-review-default recommendation",
+        "limits and rebuild compatibility"
+      ],
+      "production_changes_authorized": false,
+      "third_formula_authorized": false,
+      "final_report_and_package_closure_require_disposition": true,
+      "current_integration": {
+        "commit": "41c8b53cfe93f9657a0ce53f602e3e134b48d172",
+        "parent_acceptance_sha256": "5b426af69fe64e6c7ced5adbe0edbe22e38598ef80ba094028498543075cb855",
+        "broad_regression": "running"
+      }
+    },
+    {
+      "id": "S01-final-investigation-native-correctness-hold",
+      "recorded_utc": "2026-11-02T20:37:12.181630+00:00",
+      "status": "investigation_complete_native_correctness_HOLD",
+      "parent_disposition_sha256": "bef67047cb2ea6c6150aa5b63314d2cdb8809056850b4562cec397657b1d4c20",
+      "supersedes_current_status_of": "S01-supplementary-compensation-scope",
+      "ownership_histories": 4,
+      "boundary_histories": 16,
+      "finding": "Both policies consume last-writer OFE3 FC/HK onOFEs1/2;10/15dynamic slots perpolicy mismatch own initialized coefficients; actual HK power execution observed.",
+      "report": "artifacts/S01-final-disposition.md",
+      "recommendation": "retain_default_and_explicit_optional_only",
+      "general_release": "HOLD",
+      "package_closure": "HOLD",
+      "native_repair_authorized": false,
+      "unexecuted_classes": [
+        "scheduled tillage/later density",
+        "Rosetta2/missing-density generalization",
+        "retention guard activation",
+        "repaired-ownership counterfactual"
+      ],
+      "permitted_remaining_work": "local known-defect r5 artifacts, broad terminal validation, private retention/index, exact local commits",
+      "deployment": false,
+      "existing_project_soils_rewritten": false
+    },
+    {
+      "id": "final-broad-v2-terminal",
+      "recorded_utc": "2026-11-02T20:43:36.480821+00:00",
+      "status": "passed",
+      "passed": 12729,
+      "skipped": 423,
+      "warnings": 5833,
+      "exit_code": 0,
+      "code_changes": 0,
+      "binary_changes": 0,
+      "result_sha256": "2ecd33337873066f1c83e17e6e48e23c0a7a9591b946379e051d07de91921087",
+      "independent_review_sha256": "7e3b2d49c1235b1dc02e61e25366820f26c47f953cda4e09475e065444bba875",
+      "parent_sha256": "c72571780b7552e3840d5c5cfc90cddda623343054a4679e986f593974c504d9",
+      "prior_fixture_failure_preserved": true,
+      "native_correctness_hold_unchanged": true
+    },
+    {
+      "id": "local-r5-final-archival-disposition",
+      "status": "bounded_local_delivery_and_main_archive_pass",
+      "native_artifact_commit": "56e4fc293c1aa4c1654d0c24014e1f3a51a45b66",
+      "delta_receipt_sha256": "4bc445c22cae58561fb91a2ecc64afa52aa54ec5772fd76ec5b72c076e9aa6d7",
+      "tail_receipt_sha256": "081cc5514a71589e36b2203d7e27ced54f637beae8971aa3c87f2b5cc5be1378",
+      "tail_parent_sha256": "9f2034b037fd30aaefb3725566dcf239dd62c69293e6eadf62127a443349d58e",
+      "boundary": "Exact final WEPPpy commit, final selection and new closing evidence are recorded in the reviewed postcommit metadata envelope; no future hash or PASS is asserted by this precommit ledger.",
+      "native_correctness": "HOLD",
+      "default_change": false,
+      "deployment": false
+    }
+  ],
+  "admitted_changes": [
+    {
+      "id": "surface-support",
+      "scope": "Additive provenance only",
+      "commit": "a90f56948"
+    },
+    {
+      "id": "exact-interception",
+      "scope": "Canonical native allocation and confirmed shared consumers; no retention default or universal physical closure",
+      "commit": "1e57cf6fe"
+    },
+    {
+      "id": "element-sm-format",
+      "scope": "Overflow-only seven-character numeric reporting in both writers; state unchanged",
+      "commit": "a8e008135f82e6a071acd836672d829e8e9e8e8d"
+    },
+    {
+      "id": "snowpack-exhaustion",
+      "scope": "Full-pack-cap ownership across coordinate conversion; retained ET/frost policy",
+      "commit": "d2e14d96af5942409c9a315dc8594fcc164a702a"
+    },
+    {
+      "id": "donor-limited-freeze-restoration",
+      "scope": "Underfunded restoration limited by available total ice; funded arithmetic retained; no thermal validation",
+      "commit": "d2e14d96af5942409c9a315dc8594fcc164a702a"
+    },
+    {
+      "id": "bounded-combined-snow-restoration-compatibility",
+      "scope": "Actual18 compatibility under existing water/donor policy; thermal/cold/full-system closure, retention and deployment excluded",
+      "commit": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+      "parent_acceptance_sha256": "312a6fd9fefc86a206da01232d6cabe74334647e74003634f8ca8c29001f50b8"
+    }
+  ],
+  "rejected_changes": [
+    {
+      "id": "A03-general-arithmetic",
+      "scope": "OrdinaryDOUBLEsum plus singlepredecessor asuniversalconservation",
+      "reason": "Two represented-input counterexamples; replaced by exactexpansion"
+    },
+    {
+      "id": "global-frost-restoration",
+      "scope": "Productionpolicychange",
+      "reason": "Bounded native1compatibility evidence doesnotestablishthermal/field/general-path validity"
+    }
+  ],
+  "history_semantics": "Earlier decisions preserve checkpoint-time statuses; later explicit dispositions supersede current pending claims without rewriting historical evidence.",
+  "current_status": {
+    "decision_id": "S01-final-investigation-native-correctness-hold",
+    "native_correctness_gate": "HOLD",
+    "general_release": "HOLD",
+    "package_closure": "HOLD",
+    "broad_regression": "v2_passed_12729_423_skipped",
+    "local_artifact_and_retention_work": "local_delivery_and_main_archives_passed; exact_final_commit_and_metadata_result_recorded_in_postcommit_envelope",
+    "defaults_changed": false,
+    "deployment": false,
+    "finalization_boundary": "/wc1/runs/ro/rock-water-development-20261101/closure-metadata-v1/"
+  }
+}

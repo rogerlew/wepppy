@@ -1,0 +1,32 @@
+{
+  "schema": "original-probe-listing-provenance-supplement-v1",
+  "supplements": {
+    "path": "docs/work-packages/20261101_rock_water_development/artifacts/original-probe-listing-provenance-v1.json",
+    "sha256": "5804d31f1d7dab494d569ab32bfa700369776fdfbae8bfe29e2d66c8d6ba9c28"
+  },
+  "entry": {
+    "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined_snow_bridge.for",
+    "sha256": "555774e31539b5ba6d00390c372bbc5bf09a3849dfb886eabbbacd87177e1f3b",
+    "bytes": 2270,
+    "author_contributor": "Codex ownership agent, confirmed directly to implementation reviewer on2026-11-02.",
+    "origin": "Original study diagnostic code authored November2; no copied legacy implementation or excerpts. Native include filenames, cupdate year/sdate and caller interfaces are references only.",
+    "version": "B5 stream schema1; exact content SHA256 is version identity",
+    "date": "2026-11-02",
+    "purpose": "Observe full-period B04 combined-interaction snow calls using REAL-to-INTEGER32 bit records, INTEGER operands, native clock/OFE/hour, sequence and counted footer.",
+    "production_relationship": "Observation-only research helper, not canonical production code or a physical repair. No compiled/run B5 evidence asserted by this disclosure entry.",
+    "inputs_units": "Tagged REAL/INTEGER arrays of1..16operands; bit preservation rather than unit conversion. Operand units remain defined by caller schemas. Native year/day,OFE/hour identify records.",
+    "state_effects": "Updates only observer-owned /b5obs/ counters and saved initialization flag; writes combined-snow.txt when combined_snow.on exists. Invalid shape/output errors stop execution. Actual neutrality requires later paired evidence.",
+    "native_interface_references": [
+      "pmxtil.inc",
+      "pmxtls.inc",
+      "pmxpln.inc",
+      "cupdate.inc"
+    ],
+    "omitted_material": "Expanded includes, staged MAIN/SNOWD/MELT source, native insertion patches, observer binaries and full trace data remain private.",
+    "disclosure_status": "Reviewed eligible original diagnostic listing for later explicit public-file selection under AUTHORING; no staging/publication or execution approval.",
+    "disclosure_reviewer": "implementation_review"
+  },
+  "scope": "Additive17th listing. Prior manifest and all helper bytes preserved; prior scope exclusion superseded only for this exact bridge hash.",
+  "owner_confirmation": "Direct ownership-agent message identifies authorship and combined-water preparation/readiness bindings; no human/NSERL coauthorship or endorsement asserted.",
+  "publication_boundary": "Explicit allowlist and final publication review still required; mixed-source P03 preparation helpers remain private."
+}

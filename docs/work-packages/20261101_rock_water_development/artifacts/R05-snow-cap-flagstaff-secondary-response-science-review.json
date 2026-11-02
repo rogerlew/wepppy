@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "role": "science",
+  "stage": "completed-case-response",
+  "bindings": {
+    "out/rock-water-development-20261101/R05-repair-response-flagstaff-secondary-v1/case-receipt.json": "d94350785d268dee66380eba4a42f0aa97313b035a82f458f44441d54fa16b39",
+    "out/rock-water-development-20261101/R05-repair-response-flagstaff-secondary-v1/a8-to-cap.json": "c465541fd741d0d0803fc2bc3d2722d0be5307c35a12b06d9dc78b9cbf455b45",
+    "out/rock-water-development-20261101/R05-repair-response-flagstaff-secondary-v1/r4-to-a8.json": "6c4584b1ad4332c8140a5fabe20a90087e14a3e9f075757d8c35834ac3f41267"
+  },
+  "review_sha256": "3fcc8219b6e6c0a57ed34e42d32b09ddb24dbcd8eea1d8591667ea62ec28f1dd",
+  "release_admitted": false,
+  "native_execution": false
+}

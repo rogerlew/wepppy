@@ -1,10 +1,10 @@
 # ADR-0132: optional SSURGO retention builder
 
-Status: accepted bounded opt-in contract decision, 2026-11-02; implementation acceptance and deployment remain separate.
+Status: accepted bounded opt-in contract and canonical local implementation, 2026-11-02; broad regression passes. General release and package closure remain HOLD for the confirmed native FC/HK ownership defect; no deployment.
 
 ## Decision provenance
 
-Venue: user-authorized rock/water development program, agent workspace, 2026-11-02 America/Los_Angeles. Participants: user and Codex implementation/review agents; no external institutional endorsement. Decision authority: user-authorized program; parent agent recorded the bounded admission and optional API decision on 2026-11-02. Implementer: Codex surface_scope. Independent implementation, science and security reviews remain required for integration.
+Venue: user-authorized rock/water development program, agent workspace, 2026-11-02 America/Los_Angeles. Participants: user and Codex implementation/review agents; no external institutional endorsement. Decision authority: user-authorized program; parent agent recorded the bounded admission and optional API decision on 2026-11-02. Implementer: Codex surface_scope. Independent implementation, science and security integration outcome reviews have passed; the dated evidence below bounds this acceptance.
 
 ## Decision
 
@@ -29,9 +29,42 @@ Exact retained decisions:
 - Parent: `out/rock-water-development-20261101/P03-parent-admission-v1/decision.json`, SHA256 `b32e16c4ca31c02f2271dc99954a70daeae4d8bac36fc2c30ec875ac8467801d`.
 - Actual P03 receipt: `out/rock-water-development-20261101/P03-final-continuation-v2/execution-result.json`, SHA256 `19cf9032023aff47dd3af9a32870cc5bbf9486cd0a41815cc6cbee62d598e28e`.
 
-Review JSON files are retained in `docs/work-packages/20261101_rock_water_development/artifacts/`. Contract/ADR ancestor commit, exact reviewed implementation/preimage verification, ordinary installed-module 66-soil controller propagation with complete companions, focused/stub/broad tests and independent integration outcome reviews remain acceptance gates. The installed controller outcome is not yet available. If its native soils are byte-identical to admitted P04 inputs, reuse P03 native evidence rather than repeat it solely for integration provenance.
+At the contract decision checkpoint, installed-controller and integration outcomes
+were pending. The following dated admission supersedes that pending status while
+preserving the original P03/P04 scope and unchanged formulas.
+
+### Canonical local integration admission, 2026-11-02
+
+Parent decision `out/rock-water-development-20261101/P04-parent-integration-disposition-v1/decision.json`
+(SHA256 `5b426af69fe64e6c7ced5adbe0edbe22e38598ef80ba094028498543075cb855`)
+accepts the canonical local explicit opt-in implementation and installed-controller
+artifact gate. Actual receipt `e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc`
+binds exact reproduction of all 66 soils and companions through ordinary installed
+modules. Independent science, implementation and security outcomes pass. Canonical
+validation `a22256d2a08140d78e936d1a8b9f5a882a635eaedbe97c91220c1b07a710c694`
+records 84 focused tests, 346 affected tests, two stub modules and test-stub checks
+passing. Exact unchanged inputs permit reuse of bounded P03 evidence without a
+new native campaign. At that integration checkpoint, broad repository validation
+and final documentation, archive, public selection and release signoff remained
+open. Broad-v2 subsequently passes 12,729 tests with 423 skips and unchanged bound
+code/binaries; parent `c72571780b7552e3840d5c5cfc90cddda623343054a4679e986f593974c504d9`
+accepts the terminal regression evidence. This does not resolve the native
+ownership HOLD described below. No default adoption, deployment,
+universal physical validation or relaxation of acquisition association follows.
+
 
 ## Risk, rejection and rollback
+
+S01 subsequently confirms wrong-OFE dynamic FC/HK consumption under both the
+default and optional policies on heterogeneous native inputs. Unrestricted
+heterogeneous-use readiness is HOLD; the existing API's mathematical eligibility
+does not certify physical validity. Preserve the current default and explicit
+optional implementation, but do not infer a general safe-use class or close the
+native correctness finding through documentation. The defect's pre-revision5
+source history is not evidence of harmlessness or unchanged output consequences.
+See the [known native ownership limit](../schemas/whole-soil-water-capacity-contract.md#known-native-coefficient-ownership-defect).
+The supplementary investigation authorizes observation and disposition, not a
+native repair. Prior P03/P04 evidence remains bounded to its measured scope.
 
 Companion loss, unsupported density changes or stale artifacts must fail closed. Do not remove markers or relax checks to resume a failed build. If integration gates fail, retain the private packet and failed artifacts; do not enable the optional capability or reinterpret failure as default admission. After optional integration, rollback removes the optional entrypoint only after preserving existing opt-in artifacts and their validator; do not silently reinterpret those artifacts as legacy soils. No automatic rebuild or default migration is authorized.
 

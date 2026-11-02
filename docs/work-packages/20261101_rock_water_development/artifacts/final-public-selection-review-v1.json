@@ -1,0 +1,1144 @@
+{
+  "schema": "finite-public-selection-boundary-v1",
+  "status": "FINITE_CONTENT_BOUNDARY_REVIEWED_EXACT_PRIVATE_MANIFEST_AND_STAGED_CHECKS_REQUIRED",
+  "reviewer": "/root/public_selection",
+  "created_utc": "2026-11-02T22:23:23.733392+00:00",
+  "selected_path_count": 124,
+  "selected_paths": [
+    "PROJECT_TRACKER.md",
+    "docs/adrs/ADR-0129-conservative-interception-allocation.md",
+    "docs/adrs/ADR-0130-explicit-snowpack-exhaustion.md",
+    "docs/adrs/ADR-0131-donor-limited-freeze-restoration.md",
+    "docs/adrs/ADR-0132-optional-ssurgo-retention-builder.md",
+    "docs/binary-lifecycle.md",
+    "docs/schemas/rock-fragment-representation-contract.md",
+    "docs/schemas/whole-soil-water-capacity-contract.md",
+    "docs/standards/generated-artifact-validation-standard.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/20261102_correctness_review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/20261102_security_review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/F04-science-readback.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/P04-actual-artifact-handoff-v6.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/P04-actual-outcomes-v6.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-actual-security-review-v2.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/P04-integration-existing-regressions.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/P04-optional-integration-readiness-v2.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R01-historical-stars-summary-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-actual-science-synthesis.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-birmingham-mechanism-implementation-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-denver-et-mechanism.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-et-stress-contract-history.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-et-stress-policy-disposition.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-flagstaff-mechanism.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-repair-response-reader-contract.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-repair-response-science-preanalysis.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-birmingham-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-birmingham-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-charleston-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-charleston-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-implementation-outcome-v3.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-science-admission.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-science-admission.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-inbare-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-inbare-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-outunrut-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-outunrut-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-secondary-response-science-review.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-secondary-response-science-review.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/S01-evidence-gap-matrix.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/S01-retained-comparison.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/S01-static-analysis.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/application-final-actual-implementation-review-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b02_daily_flux_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b02_domain_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b02_initialization_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b02_lifecycle_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b03_winter_context.inc",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b03_winter_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_context.inc",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_logger_v4.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_combined_frost_activation.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_combined_snow_bridge_v2.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_final_pair_binding_v3.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_roads_final_readback.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_snow_cap_diagnostics.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/check_snow_cap_response.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/combined_snow_bridge.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/consumer_domain_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/decision-ledger.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-actual-implementation-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-science-outcome-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-science-outcome-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-actual-build-implementation-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-actual-build-security-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-binding-v3-preparation.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-public-selection-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final-release-gate-disposition-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final_pair_binding_v2.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/final_pair_binding_v3.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/frost-lineage.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/general-native-comparator-map.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/interception_budget.f90",
+    "docs/work-packages/20261101_rock_water_development/artifacts/interception_budget_exact.f90",
+    "docs/work-packages/20261101_rock_water_development/artifacts/interception_observe.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-actual-implementation-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-science-outcome-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-science-outcome-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/optional-retention-final-disposition-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/original-probe-listing-provenance-supplement-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/original-probe-listing-provenance-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/original-reader-dependency-provenance-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/p03_domain_logger_v5.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/p03_initialization_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/p03_root_logger.for",
+    "docs/work-packages/20261101_rock_water_development/artifacts/private-retention-index-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/publication-provenance-and-stars-review-v1.json",
+    "docs/work-packages/20261101_rock_water_development/artifacts/r05_causal_joins.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/r05_daily_ledger.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/r05_flow_joins.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/re-release-261029-scope.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_combined_frost_activation.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_combined_snow_bridge_v2.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_r05_observation.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_roads_final.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_snow_cap_diagnostics.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/read_snow_cap_response.py",
+    "docs/work-packages/20261101_rock_water_development/artifacts/release-r5-final-source-range-audit-v1.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/release-r5-source-range-audit.md",
+    "docs/work-packages/20261101_rock_water_development/artifacts/replay_allocation.py",
+    "docs/work-packages/20261101_rock_water_development/package.md",
+    "docs/work-packages/20261101_rock_water_development/prompts/active/program_execplan.md",
+    "docs/work-packages/20261101_rock_water_development/prompts/launch.md",
+    "docs/work-packages/20261101_rock_water_development/tracker.md",
+    "tests/wepp/test_wepp_regressions.py",
+    "wepp_runner/bin/wepp_261029",
+    "wepp_runner/bin/wepp_261029.json",
+    "wepp_runner/bin/wepp_261029_hill",
+    "wepp_runner/bin/wepp_261029_hill.json",
+    "wepppy/weppcloud/routes/usersum/weppcloud/wepp-model.md",
+    "wepppy/weppcloud/static/reports/README.md",
+    "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r5.json",
+    "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r5.pdf"
+  ],
+  "ordinary_exact_entries": [
+    {
+      "path": "PROJECT_TRACKER.md",
+      "raw_sha256": "8232c34d362a4688aea9f72fded67bd0fdac03b4c8a1e9a38d45203efcd0a743",
+      "raw_bytes": 339540,
+      "git_blob_sha1": "468cf97d076f395e076133f4376742b86ca91649",
+      "git_blob_sha256": "8232c34d362a4688aea9f72fded67bd0fdac03b4c8a1e9a38d45203efcd0a743",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0129-conservative-interception-allocation.md",
+      "raw_sha256": "6b6d714f889b35080bdaf9853ad8568ca9b15f39b922a8cdf652d364f793430a",
+      "raw_bytes": 11538,
+      "git_blob_sha1": "1108ffc13506182a4e00df4f731b0f6807293d60",
+      "git_blob_sha256": "6b6d714f889b35080bdaf9853ad8568ca9b15f39b922a8cdf652d364f793430a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0130-explicit-snowpack-exhaustion.md",
+      "raw_sha256": "1b79c9c3d455f0a48661061f82dfc0b44ac2d437bcdb88a5b0a893476036ce03",
+      "raw_bytes": 13975,
+      "git_blob_sha1": "b1e0d10b2a7f0530a984722dd6ba07a4d39f217b",
+      "git_blob_sha256": "1b79c9c3d455f0a48661061f82dfc0b44ac2d437bcdb88a5b0a893476036ce03",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0131-donor-limited-freeze-restoration.md",
+      "raw_sha256": "6ba945370da4cc9c7c0a34d90b2290b4f53d5fc056dd4b9c0159781bf1079823",
+      "raw_bytes": 6347,
+      "git_blob_sha1": "e89f4e001d341691be173554c0f483ebf983a94d",
+      "git_blob_sha256": "6ba945370da4cc9c7c0a34d90b2290b4f53d5fc056dd4b9c0159781bf1079823",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/adrs/ADR-0132-optional-ssurgo-retention-builder.md",
+      "raw_sha256": "eb8dadd84e399f3333ed8c8af00f6d319581dd1c368d6d9f768de74a0a4e28aa",
+      "raw_bytes": 8235,
+      "git_blob_sha1": "cd1aee9f395aca05ad2098e8997e3928bd2ccb27",
+      "git_blob_sha256": "eb8dadd84e399f3333ed8c8af00f6d319581dd1c368d6d9f768de74a0a4e28aa",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/binary-lifecycle.md",
+      "raw_sha256": "d793ffcb8a797ad26c83eb755b083aed72392b52e605ee9fa69c7e56161ad430",
+      "raw_bytes": 18963,
+      "git_blob_sha1": "87884900b92d1dd60dc37ac65600e9b23b3ac9c9",
+      "git_blob_sha256": "d793ffcb8a797ad26c83eb755b083aed72392b52e605ee9fa69c7e56161ad430",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/schemas/rock-fragment-representation-contract.md",
+      "raw_sha256": "ee0c64cec29b23deee1d776e843d14e0d37991cb2ff90dc28193dc89e6067dbb",
+      "raw_bytes": 9678,
+      "git_blob_sha1": "10339b90fe9ea33b648db81b5f9ee926fae2372e",
+      "git_blob_sha256": "ee0c64cec29b23deee1d776e843d14e0d37991cb2ff90dc28193dc89e6067dbb",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/schemas/whole-soil-water-capacity-contract.md",
+      "raw_sha256": "16d020bc8ec2970e51a423e4afaa26a834f7457f92d6e538ccf41c1b34e4ef1c",
+      "raw_bytes": 20624,
+      "git_blob_sha1": "dfa2afe5cb78d08cd5ed0276daef2b8ab5d9fff0",
+      "git_blob_sha256": "16d020bc8ec2970e51a423e4afaa26a834f7457f92d6e538ccf41c1b34e4ef1c",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/standards/generated-artifact-validation-standard.md",
+      "raw_sha256": "f24784ea743b835ded06f5e5b60d015985721ccb80ddb91b0addd808c948346a",
+      "raw_bytes": 12457,
+      "git_blob_sha1": "84db139fc0b4d13f13f87ed1d9e90836f83f7ed5",
+      "git_blob_sha256": "f24784ea743b835ded06f5e5b60d015985721ccb80ddb91b0addd808c948346a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/20261102_correctness_review.md",
+      "raw_sha256": "68c377375fa479460c5da572b17cfea78d2739381bc3518ebe1b1b5615a16c7d",
+      "raw_bytes": 8815,
+      "git_blob_sha1": "0ccdf0d0a59345f3249a577abeeb66a54488aae8",
+      "git_blob_sha256": "68c377375fa479460c5da572b17cfea78d2739381bc3518ebe1b1b5615a16c7d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/F04-science-readback.md",
+      "raw_sha256": "ba2350a40178fd71e8d20f38c6295bcfa7cd882c90175026eb64432a815d90d6",
+      "raw_bytes": 6067,
+      "git_blob_sha1": "d0384566b4768a913ea66a97d5c4b4d835c34d45",
+      "git_blob_sha256": "ba2350a40178fd71e8d20f38c6295bcfa7cd882c90175026eb64432a815d90d6",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-actual-artifact-handoff-v6.json",
+      "raw_sha256": "5bfcd1b99b411817ec662b7ced822d568b721faf7036c092ea5ffc91774695e2",
+      "raw_bytes": 89300,
+      "git_blob_sha1": "dc7f1496a2f61c1437ff3668581582c70acdfb97",
+      "git_blob_sha256": "5bfcd1b99b411817ec662b7ced822d568b721faf7036c092ea5ffc91774695e2",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-actual-outcomes-v6.md",
+      "raw_sha256": "ad86f7e1ddd20292b88de2ac8fa9d99179937b0eea63b55f3870840c239cee14",
+      "raw_bytes": 3314,
+      "git_blob_sha1": "32fc3afc3251ccad4d22c4e0cac6d1130d4b2823",
+      "git_blob_sha256": "ad86f7e1ddd20292b88de2ac8fa9d99179937b0eea63b55f3870840c239cee14",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-installed-controller-actual-security-review-v2.md",
+      "raw_sha256": "c10d55abb634a07601a04aea244373d4e34a4dc3f99ffbffcad4bacbf932e5c8",
+      "raw_bytes": 2696,
+      "git_blob_sha1": "4cb805b852c859a62213565cf021638e6b0d25a5",
+      "git_blob_sha256": "c10d55abb634a07601a04aea244373d4e34a4dc3f99ffbffcad4bacbf932e5c8",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-integration-existing-regressions.json",
+      "raw_sha256": "278f763326f3787c53d096c97314c152c54fc70659d24b0c98cc4d9093c05821",
+      "raw_bytes": 1197,
+      "git_blob_sha1": "22b61dd1d678a0af7d91dc7e7532ce2936673ed0",
+      "git_blob_sha256": "278f763326f3787c53d096c97314c152c54fc70659d24b0c98cc4d9093c05821",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/P04-optional-integration-readiness-v2.md",
+      "raw_sha256": "e46f34fcfee56fcf3b297ca02ecf6eb7817937f4270784d4d9c3af79d42e1c6e",
+      "raw_bytes": 3089,
+      "git_blob_sha1": "a9da5b18470bf553947d4ee01fbf3b6d059081ba",
+      "git_blob_sha256": "e46f34fcfee56fcf3b297ca02ecf6eb7817937f4270784d4d9c3af79d42e1c6e",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R01-historical-stars-summary-v1.json",
+      "raw_sha256": "c3b86a33c2df0ff17034a3db68c2b0fdf38bba0496e806ec798b24c1a1ed6d22",
+      "raw_bytes": 872,
+      "git_blob_sha1": "95b26233a6a0ca34900d24cb78f89c107a11a147",
+      "git_blob_sha256": "c3b86a33c2df0ff17034a3db68c2b0fdf38bba0496e806ec798b24c1a1ed6d22",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-actual-science-synthesis.md",
+      "raw_sha256": "92c7534739ede68f3eb475897c8316514dc7ddfa2e48ac348fa8163eaf7f3eae",
+      "raw_bytes": 5241,
+      "git_blob_sha1": "93b5bd0235187dfb2c5700eb21186db917f54c0b",
+      "git_blob_sha256": "92c7534739ede68f3eb475897c8316514dc7ddfa2e48ac348fa8163eaf7f3eae",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-birmingham-mechanism-implementation-review.md",
+      "raw_sha256": "e887bb7578c2dd7f3dc8ef6498dc554885e4f9331ed6f4a6a4cbd6a613ec423f",
+      "raw_bytes": 4981,
+      "git_blob_sha1": "04154eab5420c63690f1a52f17e1eb96c1aa9193",
+      "git_blob_sha256": "e887bb7578c2dd7f3dc8ef6498dc554885e4f9331ed6f4a6a4cbd6a613ec423f",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-denver-et-mechanism.md",
+      "raw_sha256": "94baa78bccfb97bd342accd9b27c3d959795fa0f84af1a064dd0a8d385b74381",
+      "raw_bytes": 9346,
+      "git_blob_sha1": "74622de989f677dd15650023392e7bb5e97babca",
+      "git_blob_sha256": "94baa78bccfb97bd342accd9b27c3d959795fa0f84af1a064dd0a8d385b74381",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-et-stress-contract-history.md",
+      "raw_sha256": "0e4313467fc518d49073e3dcc2ea96c4de3d2c390be51dbf7d9df9e1b605e2b8",
+      "raw_bytes": 8039,
+      "git_blob_sha1": "a75029b6b28984fa4ce31f85b8df9bdccd00c7e8",
+      "git_blob_sha256": "0e4313467fc518d49073e3dcc2ea96c4de3d2c390be51dbf7d9df9e1b605e2b8",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-et-stress-policy-disposition.md",
+      "raw_sha256": "791a969035bb49abfad447d9c5190b6cd765a991ca7ca3e3340bf96f3bb4afbf",
+      "raw_bytes": 12573,
+      "git_blob_sha1": "0c0f010ddbd1d9c756b2bec8ab44c83b9fdbba03",
+      "git_blob_sha256": "791a969035bb49abfad447d9c5190b6cd765a991ca7ca3e3340bf96f3bb4afbf",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-flagstaff-mechanism.md",
+      "raw_sha256": "227262d86ab60b7b7accc83940de42f7c178638d967fa49da90a285c3b188ae8",
+      "raw_bytes": 6129,
+      "git_blob_sha1": "94e669d2fe613a79a9c0d0c98a1edae80d207c6c",
+      "git_blob_sha256": "227262d86ab60b7b7accc83940de42f7c178638d967fa49da90a285c3b188ae8",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-repair-response-reader-contract.md",
+      "raw_sha256": "d547cbc38816bd2ee90c729eb65e41e1ca16b8c4d4267cd3019c546177a21d53",
+      "raw_bytes": 8029,
+      "git_blob_sha1": "8304f46951488669a2b5be2fb25ee165b2dbec29",
+      "git_blob_sha256": "d547cbc38816bd2ee90c729eb65e41e1ca16b8c4d4267cd3019c546177a21d53",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-repair-response-science-preanalysis.md",
+      "raw_sha256": "6cc85c8a9fb53ab1dad9bd1b4537839b237b952cbb1e701bf789147c4079b72a",
+      "raw_bytes": 4221,
+      "git_blob_sha1": "b27394373bd532080957b88fbee09946b988b939",
+      "git_blob_sha256": "6cc85c8a9fb53ab1dad9bd1b4537839b237b952cbb1e701bf789147c4079b72a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-birmingham-response-science-review.json",
+      "raw_sha256": "e40d7187768c66045859eb18c2c666c3b76fcfd3a32fed80000aa9afe8a4879a",
+      "raw_bytes": 1160,
+      "git_blob_sha1": "56c1c34d96b65c6a27f4606ad7f67d43f950a991",
+      "git_blob_sha256": "e40d7187768c66045859eb18c2c666c3b76fcfd3a32fed80000aa9afe8a4879a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-birmingham-response-science-review.md",
+      "raw_sha256": "7cc2d8a60ba0af41c4ce0241bd58d70aa8e99cedbd0bb03710588c83a0addd05",
+      "raw_bytes": 2981,
+      "git_blob_sha1": "2de10cd6c9f3c6bcf803e686c7ff01cd5253be99",
+      "git_blob_sha256": "7cc2d8a60ba0af41c4ce0241bd58d70aa8e99cedbd0bb03710588c83a0addd05",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-charleston-response-science-review.json",
+      "raw_sha256": "df13b3604be67a6ab2c82ae59e966fe0aad68919275ac48532c25ce866e467e2",
+      "raw_bytes": 1160,
+      "git_blob_sha1": "c5bd4e462f3690695f7469cd988c6ef3c0bb719a",
+      "git_blob_sha256": "df13b3604be67a6ab2c82ae59e966fe0aad68919275ac48532c25ce866e467e2",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-charleston-response-science-review.md",
+      "raw_sha256": "4496e02b48affcd29c603cb7b3b22820232b0b36d9d9d3d75978b71c461404c0",
+      "raw_bytes": 3075,
+      "git_blob_sha1": "2fddd844e9960419835c0fc6a20444ad7cb81e1d",
+      "git_blob_sha256": "4496e02b48affcd29c603cb7b3b22820232b0b36d9d9d3d75978b71c461404c0",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-implementation-outcome-v3.md",
+      "raw_sha256": "f034ef1402f40b4b1e00943d85bf4cbd0b3c8421a66c48eb2b1f99f525345154",
+      "raw_bytes": 4094,
+      "git_blob_sha1": "695532739b9c9bbfc4be07260d14929b0cf6453d",
+      "git_blob_sha256": "f034ef1402f40b4b1e00943d85bf4cbd0b3c8421a66c48eb2b1f99f525345154",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-science-admission.json",
+      "raw_sha256": "6f9a60dca1537d30255c3aaa4eb49f13af70c972a9563ffcbecabefa4191e68b",
+      "raw_bytes": 2111,
+      "git_blob_sha1": "7672842fc8ad668271cf288ca4883962dc7cdcbe",
+      "git_blob_sha256": "6f9a60dca1537d30255c3aaa4eb49f13af70c972a9563ffcbecabefa4191e68b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-science-admission.md",
+      "raw_sha256": "abcf709698883df7b80228c7519fbb21d5a48db3e53951e6d1135ffc8c76ac08",
+      "raw_bytes": 5607,
+      "git_blob_sha1": "90661afb6c0b0e00dccfe2d55240201bc5f8903f",
+      "git_blob_sha256": "abcf709698883df7b80228c7519fbb21d5a48db3e53951e6d1135ffc8c76ac08",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-inbare-response-science-review.json",
+      "raw_sha256": "25ac9834de116d38c2d36205488506f36785cd1d0350d853b2cb726460da6bf5",
+      "raw_bytes": 736,
+      "git_blob_sha1": "a9f5bf382733cc427c2e30bae3867026218b1c6b",
+      "git_blob_sha256": "25ac9834de116d38c2d36205488506f36785cd1d0350d853b2cb726460da6bf5",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-inbare-response-science-review.md",
+      "raw_sha256": "5dde957629af1af036117418ba2ebc7025fa1902960142b5478546c413a5a9ac",
+      "raw_bytes": 3170,
+      "git_blob_sha1": "45b27c385cc4ff4c1eebbae89bebc791824caebf",
+      "git_blob_sha256": "5dde957629af1af036117418ba2ebc7025fa1902960142b5478546c413a5a9ac",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-outunrut-response-science-review.json",
+      "raw_sha256": "927df5029daf67577386f900aaacf83dbc481b195bc3930bfc8656c83bac597f",
+      "raw_bytes": 1171,
+      "git_blob_sha1": "b34c6d104d8c428ea28782be10170078c7a03944",
+      "git_blob_sha256": "927df5029daf67577386f900aaacf83dbc481b195bc3930bfc8656c83bac597f",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-denver-outunrut-response-science-review.md",
+      "raw_sha256": "3745f44b53028c34ef3e8e63e3882c938dec4a4edc8849262ed5faafe659a0a1",
+      "raw_bytes": 3491,
+      "git_blob_sha1": "b5dc3e8d8b8b4f7396487ad02f61392159749c96",
+      "git_blob_sha256": "3745f44b53028c34ef3e8e63e3882c938dec4a4edc8849262ed5faafe659a0a1",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-response-science-review.json",
+      "raw_sha256": "cac2410664f30f3c0de42bdb830b69ba7b4dec082a25f9cf57fcb8705f153652",
+      "raw_bytes": 724,
+      "git_blob_sha1": "cab2a439815f5bd5ad1a3bd0b47cadf35c822520",
+      "git_blob_sha256": "cac2410664f30f3c0de42bdb830b69ba7b4dec082a25f9cf57fcb8705f153652",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-response-science-review.md",
+      "raw_sha256": "e93eb1f54f12136e24ae332e8b8b387c678b1fe4ed7f4bcfde7a79bce2be4865",
+      "raw_bytes": 3314,
+      "git_blob_sha1": "fbd9d96ed7db317b3b9271920b89c98c88bda38a",
+      "git_blob_sha256": "e93eb1f54f12136e24ae332e8b8b387c678b1fe4ed7f4bcfde7a79bce2be4865",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-secondary-response-science-review.json",
+      "raw_sha256": "f5b7197cfbf6084223984edb88c5c29a923cb5f77d084c6dd6fe35d3839d2971",
+      "raw_bytes": 754,
+      "git_blob_sha1": "23de710fda39306a7dff564d13a131412c1a01cc",
+      "git_blob_sha256": "f5b7197cfbf6084223984edb88c5c29a923cb5f77d084c6dd6fe35d3839d2971",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-flagstaff-secondary-response-science-review.md",
+      "raw_sha256": "3fcc8219b6e6c0a57ed34e42d32b09ddb24dbcd8eea1d8591667ea62ec28f1dd",
+      "raw_bytes": 3148,
+      "git_blob_sha1": "f912fad968d02fbb184c2da576a8bb83a4d44ade",
+      "git_blob_sha256": "3fcc8219b6e6c0a57ed34e42d32b09ddb24dbcd8eea1d8591667ea62ec28f1dd",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/S01-evidence-gap-matrix.md",
+      "raw_sha256": "343fcc11d44e6fabb9a05419801f20f3d980e91dad1486d4b58245ae55bb2392",
+      "raw_bytes": 4901,
+      "git_blob_sha1": "fc25e91b6c1f278caaff0dad2062345abb958f31",
+      "git_blob_sha256": "343fcc11d44e6fabb9a05419801f20f3d980e91dad1486d4b58245ae55bb2392",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.json",
+      "raw_sha256": "f03519ad33ab91a893cece55a5e7540f2a83ee2e3b28e6bef92fa9606acb7482",
+      "raw_bytes": 4228,
+      "git_blob_sha1": "3e216500a924bc139a5a667a9dcc21eae5a58134",
+      "git_blob_sha256": "f03519ad33ab91a893cece55a5e7540f2a83ee2e3b28e6bef92fa9606acb7482",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/S01-final-disposition.md",
+      "raw_sha256": "4e0747ac669e1f2c80c747b8cae5cb3b14e12c5d62006d5458d6c0dc72ad957b",
+      "raw_bytes": 8519,
+      "git_blob_sha1": "27f8050c9dd0584e3849dcc8cea6923ef4fc7339",
+      "git_blob_sha256": "4e0747ac669e1f2c80c747b8cae5cb3b14e12c5d62006d5458d6c0dc72ad957b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/S01-retained-comparison.md",
+      "raw_sha256": "eb4f4c52c96ce105c4e5c2b589a324f4cd7be21dacf4ab96e97c3a921ea497ef",
+      "raw_bytes": 7970,
+      "git_blob_sha1": "93547148e38030a483b939ba7fe81feb06144015",
+      "git_blob_sha256": "eb4f4c52c96ce105c4e5c2b589a324f4cd7be21dacf4ab96e97c3a921ea497ef",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/S01-static-analysis.md",
+      "raw_sha256": "4001c7116d2bab2252bb40657002fed25ee4e978fa69b49a2ef251067aa9e67d",
+      "raw_bytes": 7612,
+      "git_blob_sha1": "34372158fdc7430e818ed53865e76046c1ae12b2",
+      "git_blob_sha256": "4001c7116d2bab2252bb40657002fed25ee4e978fa69b49a2ef251067aa9e67d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/application-final-actual-implementation-review-v1.md",
+      "raw_sha256": "ed8c48ce77b50e534a32440c62ba0fd30245d8f093414c7d4ed1a2315e2b548e",
+      "raw_bytes": 3444,
+      "git_blob_sha1": "04f81a3ef122a0df7065b828452cb97e2a7cfb3a",
+      "git_blob_sha256": "ed8c48ce77b50e534a32440c62ba0fd30245d8f093414c7d4ed1a2315e2b548e",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b02_daily_flux_logger.for",
+      "raw_sha256": "72dc1038fce07a9945df93a9908ea023d6f64cf4ed4976933c5cf44771ad51b0",
+      "raw_bytes": 3111,
+      "git_blob_sha1": "dde28e583235e21d25a7aa7fde27bd8dc1f0bb45",
+      "git_blob_sha256": "72dc1038fce07a9945df93a9908ea023d6f64cf4ed4976933c5cf44771ad51b0",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b02_domain_logger.for",
+      "raw_sha256": "3da25ed488ed0ab31b5c48d9d538e58aaa3e81c4260b6088cc8ee9a5268d4927",
+      "raw_bytes": 3749,
+      "git_blob_sha1": "3fb30831054f7e2d54e960d9dd552ff49d6570f2",
+      "git_blob_sha256": "3da25ed488ed0ab31b5c48d9d538e58aaa3e81c4260b6088cc8ee9a5268d4927",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b02_initialization_logger.for",
+      "raw_sha256": "93bb582a01858d8ea077cf7836bfc61afadbc5a1f77a1cea4f3f8e9bbae5a66b",
+      "raw_bytes": 1123,
+      "git_blob_sha1": "5983390ae91c132039b4134c7bf735cb8ddeb4e6",
+      "git_blob_sha256": "93bb582a01858d8ea077cf7836bfc61afadbc5a1f77a1cea4f3f8e9bbae5a66b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b02_lifecycle_logger.for",
+      "raw_sha256": "d1ddba71fa7038b6a0a0b38100c9e1301b8542eab7d3dd8b310fcdf77906d2ca",
+      "raw_bytes": 2501,
+      "git_blob_sha1": "446a3aea196c300424d62ffa5316e5fc9d3d2ae3",
+      "git_blob_sha256": "d1ddba71fa7038b6a0a0b38100c9e1301b8542eab7d3dd8b310fcdf77906d2ca",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b03_winter_context.inc",
+      "raw_sha256": "7db7d8bc66410b80a3e64af0b72ab03c3315a9893874cae46e19aed8883bcd0f",
+      "raw_bytes": 351,
+      "git_blob_sha1": "c90b2849bd1c9eb85a34af3f857db775d5ec6383",
+      "git_blob_sha256": "7db7d8bc66410b80a3e64af0b72ab03c3315a9893874cae46e19aed8883bcd0f",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b03_winter_logger.for",
+      "raw_sha256": "1013137b2002e4a778d813f387283918edd2eab7cbf78109c8abc1e619ef8a57",
+      "raw_bytes": 5587,
+      "git_blob_sha1": "a24ac1566f0e3cd9433d39b25587125e2670f99c",
+      "git_blob_sha256": "1013137b2002e4a778d813f387283918edd2eab7cbf78109c8abc1e619ef8a57",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_context.inc",
+      "raw_sha256": "73727d287e430df69035b99684883c1fd6c18d49c2efa1be8049724258c5da09",
+      "raw_bytes": 593,
+      "git_blob_sha1": "1a5ca7aa17216ce8b4722b5592b1dfbb9e13caa2",
+      "git_blob_sha256": "73727d287e430df69035b99684883c1fd6c18d49c2efa1be8049724258c5da09",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_logger.for",
+      "raw_sha256": "a752c00de234c371a32ee7b82be885b3f9cae8715d683b4860c4e20ada54a0d3",
+      "raw_bytes": 8939,
+      "git_blob_sha1": "534523f75e3265a16c6fc67fa82f56bc66c7aa25",
+      "git_blob_sha256": "a752c00de234c371a32ee7b82be885b3f9cae8715d683b4860c4e20ada54a0d3",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/b04_restoration_logger_v4.for",
+      "raw_sha256": "f8d682bc5b892e271635fa2226ec72b363284381d160e9bd71d38128af4fa170",
+      "raw_bytes": 8954,
+      "git_blob_sha1": "564132c383ae902d04151e6cbaa4f95894fd1f35",
+      "git_blob_sha256": "f8d682bc5b892e271635fa2226ec72b363284381d160e9bd71d38128af4fa170",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_combined_frost_activation.py",
+      "raw_sha256": "55ce375268acf31439dc1d177198855e3199f33fcde1163a1e9349b92e32feb4",
+      "raw_bytes": 3178,
+      "git_blob_sha1": "3a983808df39f835f4426322c6989ed899e07676",
+      "git_blob_sha256": "55ce375268acf31439dc1d177198855e3199f33fcde1163a1e9349b92e32feb4",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_combined_snow_bridge_v2.py",
+      "raw_sha256": "32c52a3941b9ccd247ca7766486b5154b095db4d62d91bde7fd4757dd126b2dc",
+      "raw_bytes": 7045,
+      "git_blob_sha1": "1cc850e85738b26c9531e8f296272c45837da28c",
+      "git_blob_sha256": "32c52a3941b9ccd247ca7766486b5154b095db4d62d91bde7fd4757dd126b2dc",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_final_pair_binding_v3.py",
+      "raw_sha256": "95b0448fa520027371e0b6f9ebbeae5683592de200e3a473e9905c6a3f628673",
+      "raw_bytes": 5624,
+      "git_blob_sha1": "612c78ee7c0717b5274df0cc7c093877cc61eb1b",
+      "git_blob_sha256": "95b0448fa520027371e0b6f9ebbeae5683592de200e3a473e9905c6a3f628673",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_roads_final_readback.py",
+      "raw_sha256": "af220daad0809d3b502c060c0b193f27cd6498d55f8a2447be431f19b4a44b36",
+      "raw_bytes": 8260,
+      "git_blob_sha1": "b6aaf9fc51ab9c9d65ca8e212145413262786f65",
+      "git_blob_sha256": "af220daad0809d3b502c060c0b193f27cd6498d55f8a2447be431f19b4a44b36",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_snow_cap_diagnostics.py",
+      "raw_sha256": "2ca42c78a86aa10b0b6c8d47b6cd9f6ebbf71387fc390b082f3c0312d6e50194",
+      "raw_bytes": 14779,
+      "git_blob_sha1": "b757579332d15d8cd4e44415914a5a22ed6503a4",
+      "git_blob_sha256": "2ca42c78a86aa10b0b6c8d47b6cd9f6ebbf71387fc390b082f3c0312d6e50194",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/check_snow_cap_response.py",
+      "raw_sha256": "6342b9088cf652d692d1c5896444d6742978778a9b276b483ed6c61285832261",
+      "raw_bytes": 12958,
+      "git_blob_sha1": "2aaeb9314c4e621ca2ade9bf10106a89dfb657a0",
+      "git_blob_sha256": "6342b9088cf652d692d1c5896444d6742978778a9b276b483ed6c61285832261",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.json",
+      "raw_sha256": "58c8967795de988c22144eb3ca3d22dba5ea5826cabcd414bab28251a2ca1f17",
+      "raw_bytes": 883,
+      "git_blob_sha1": "a37ef685bae77eedd97d699303909af0da86e4bf",
+      "git_blob_sha256": "58c8967795de988c22144eb3ca3d22dba5ea5826cabcd414bab28251a2ca1f17",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-actual-implementation-review-v1.md",
+      "raw_sha256": "9973bfaced9a189ae6dbd56c1704c839902cd205dd28e3aa508dab6e7b542ed9",
+      "raw_bytes": 2621,
+      "git_blob_sha1": "537d6cfedc0297547605f37053f066fab3b4d11e",
+      "git_blob_sha256": "9973bfaced9a189ae6dbd56c1704c839902cd205dd28e3aa508dab6e7b542ed9",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.json",
+      "raw_sha256": "3b7ffa53b66aadfa1226026f1986f08eec80ac02d0849f8cf963433d8ec90cd5",
+      "raw_bytes": 6371,
+      "git_blob_sha1": "77417385cd0d7d36a27467681f9ad140703a3627",
+      "git_blob_sha256": "3b7ffa53b66aadfa1226026f1986f08eec80ac02d0849f8cf963433d8ec90cd5",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined18-final-science-admission-v1.md",
+      "raw_sha256": "6f947d2287ac1cb3db2a77c9c56a17151a4169ad533b60e429ab6071d2f947a7",
+      "raw_bytes": 6447,
+      "git_blob_sha1": "6d2320486a647125233cf19bb7cd19ac69b62741",
+      "git_blob_sha256": "6f947d2287ac1cb3db2a77c9c56a17151a4169ad533b60e429ab6071d2f947a7",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/combined_snow_bridge.for",
+      "raw_sha256": "555774e31539b5ba6d00390c372bbc5bf09a3849dfb886eabbbacd87177e1f3b",
+      "raw_bytes": 2270,
+      "git_blob_sha1": "a079f6f19e50e4355a1b45b98fb7734da4107041",
+      "git_blob_sha256": "555774e31539b5ba6d00390c372bbc5bf09a3849dfb886eabbbacd87177e1f3b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/consumer_domain_logger.for",
+      "raw_sha256": "e4e7f9b82a375fa59272e2c989224d4826c1e4fd3a0b0e1ce92307a9cba9792b",
+      "raw_bytes": 3697,
+      "git_blob_sha1": "1fdcb679ef62950e2c6e02b6fd85ca1f23dd23ba",
+      "git_blob_sha256": "e4e7f9b82a375fa59272e2c989224d4826c1e4fd3a0b0e1ce92307a9cba9792b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/decision-ledger.json",
+      "raw_sha256": "136a8d144194bf638463adf9045662c43e61811fe50b83f8b269721c4e060392",
+      "raw_bytes": 47546,
+      "git_blob_sha1": "6895399115a23559bb312580b248ef95d5190868",
+      "git_blob_sha256": "136a8d144194bf638463adf9045662c43e61811fe50b83f8b269721c4e060392",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-actual-implementation-review-v1.json",
+      "raw_sha256": "e203f8fb04d5d8ca0e89739d5bce224b549820d25a320d1af868d1844fb2418d",
+      "raw_bytes": 665,
+      "git_blob_sha1": "a6147442a8d385380b7d10d9f8a521fc2db7ddbc",
+      "git_blob_sha256": "e203f8fb04d5d8ca0e89739d5bce224b549820d25a320d1af868d1844fb2418d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-science-outcome-v1.json",
+      "raw_sha256": "49f959813c39951f4379431e4cd917db50362f5f845b07bee0418c9d8926086d",
+      "raw_bytes": 2353,
+      "git_blob_sha1": "b30d53acff80d119b68fe24f7bdeaf19f5dced0e",
+      "git_blob_sha256": "49f959813c39951f4379431e4cd917db50362f5f845b07bee0418c9d8926086d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/disturbed-final-renewal-science-outcome-v1.md",
+      "raw_sha256": "d84f28220c0fa1b4efd2e84f0e4b93297b37eddee6aad9403de27fb5889d740d",
+      "raw_bytes": 3755,
+      "git_blob_sha1": "3f8a62b625d746c3f3b77549cfcbdfe646ea85c2",
+      "git_blob_sha256": "d84f28220c0fa1b4efd2e84f0e4b93297b37eddee6aad9403de27fb5889d740d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-actual-build-implementation-review-v1.json",
+      "raw_sha256": "8e9657640ce3efccdac17604394df7dcc5ab0590dd571712f8cbeb50f3fec82f",
+      "raw_bytes": 1190,
+      "git_blob_sha1": "bf49e77b6bbb52203311f935d60593655c18946f",
+      "git_blob_sha256": "8e9657640ce3efccdac17604394df7dcc5ab0590dd571712f8cbeb50f3fec82f",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-actual-build-security-review-v1.json",
+      "raw_sha256": "b1f4bafd7a4c3e3322061978d8ab192419fb0c88d430456242fb15be0d78aa27",
+      "raw_bytes": 2219,
+      "git_blob_sha1": "dee44c4fba8cb07f359d4a1e4d533ae53d268fb5",
+      "git_blob_sha256": "b1f4bafd7a4c3e3322061978d8ab192419fb0c88d430456242fb15be0d78aa27",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final-pair-binding-v3-preparation.md",
+      "raw_sha256": "efb2d432551ae91ae095cb90fb4bf13690fa5aca017a7efde3d9619139c49854",
+      "raw_bytes": 1976,
+      "git_blob_sha1": "d08cba7e090ac6bc054978b8511eec0749b56904",
+      "git_blob_sha256": "efb2d432551ae91ae095cb90fb4bf13690fa5aca017a7efde3d9619139c49854",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final_pair_binding_v2.py",
+      "raw_sha256": "a3d5c720f95009d949a65d04f093c345d1399cd2362f93994436e9276d8a27ab",
+      "raw_bytes": 3123,
+      "git_blob_sha1": "2a5016694abb37fd1b6bff59fda9ea7561b2afca",
+      "git_blob_sha256": "a3d5c720f95009d949a65d04f093c345d1399cd2362f93994436e9276d8a27ab",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final_pair_binding_v3.py",
+      "raw_sha256": "3e9ebf308a8a7e7f6bf054fc8c4a5ad87585aa54d52503695b86c12ab22f2c05",
+      "raw_bytes": 3552,
+      "git_blob_sha1": "66233bec662107863a1395cc85161bb5af78b420",
+      "git_blob_sha256": "3e9ebf308a8a7e7f6bf054fc8c4a5ad87585aa54d52503695b86c12ab22f2c05",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/frost-lineage.md",
+      "raw_sha256": "53d9f69f557f55eb348fa96510297cccb0954250562a57df27a460cd91f57748",
+      "raw_bytes": 8441,
+      "git_blob_sha1": "58a05d9d54aa85bd430e83bd2cd074965db6321f",
+      "git_blob_sha256": "53d9f69f557f55eb348fa96510297cccb0954250562a57df27a460cd91f57748",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/general-native-comparator-map.md",
+      "raw_sha256": "04fcada379a82b24ee437e36d2fed5dcfe683b079ac4b75c44f62dc510ce3d6d",
+      "raw_bytes": 5525,
+      "git_blob_sha1": "d9d1933315ae62712e58613cbe7db8e0274ca10a",
+      "git_blob_sha256": "04fcada379a82b24ee437e36d2fed5dcfe683b079ac4b75c44f62dc510ce3d6d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/interception_budget.f90",
+      "raw_sha256": "7b986568488e818e7b217978085c07748c5f4fca84a5b384dd4332d76ac4dc4d",
+      "raw_bytes": 1340,
+      "git_blob_sha1": "602015d0201e65a2614ffb00b76776ae3938a50f",
+      "git_blob_sha256": "7b986568488e818e7b217978085c07748c5f4fca84a5b384dd4332d76ac4dc4d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/interception_budget_exact.f90",
+      "raw_sha256": "052c46f90d7146023a84163010386a7fc76e777185181a69d306eb268f775561",
+      "raw_bytes": 3771,
+      "git_blob_sha1": "9ac5f933a095c1851ce917d36ad34a771e79b5bf",
+      "git_blob_sha256": "052c46f90d7146023a84163010386a7fc76e777185181a69d306eb268f775561",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/interception_observe.for",
+      "raw_sha256": "0ba067d1e992646b3f05e8f60b0895945b065af5000e3d27f13036e35a575277",
+      "raw_bytes": 1225,
+      "git_blob_sha1": "c0e56950c513344b0b2709054cabbbdf32b28dc7",
+      "git_blob_sha256": "0ba067d1e992646b3f05e8f60b0895945b065af5000e3d27f13036e35a575277",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.json",
+      "raw_sha256": "a2336d510cf1fc403af513786f9550401b1523ac91e3c90208e1a1338d3ed18f",
+      "raw_bytes": 1592,
+      "git_blob_sha1": "2891545577b14c83acb5df7c4d06ba47c6bbd0c7",
+      "git_blob_sha256": "a2336d510cf1fc403af513786f9550401b1523ac91e3c90208e1a1338d3ed18f",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/legacy-frost-final-renewal-science-outcome-v2.md",
+      "raw_sha256": "63c7ff668799a0454f5da37f92315d95c0985159647e620babb5f2fff3c3cbfc",
+      "raw_bytes": 3470,
+      "git_blob_sha1": "bf4c8020a0f0dbb3e4184415c6d52855f1acdf5f",
+      "git_blob_sha256": "63c7ff668799a0454f5da37f92315d95c0985159647e620babb5f2fff3c3cbfc",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-actual-implementation-review-v1.json",
+      "raw_sha256": "9d48d3e4b8c5ad8cb716dd178794331222c64d8d35e1bf6272b15d49374bde11",
+      "raw_bytes": 675,
+      "git_blob_sha1": "2c096052a706677f7a57217edda92b5169f3abb9",
+      "git_blob_sha256": "9d48d3e4b8c5ad8cb716dd178794331222c64d8d35e1bf6272b15d49374bde11",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-science-outcome-v1.json",
+      "raw_sha256": "7f6dd0b5c749949eb45d4167bedf38cd9ae7a59be3b3259cb6992a34ed80ca8d",
+      "raw_bytes": 6176,
+      "git_blob_sha1": "26a0826232f61d7ac1ad63596d43bdc31e07a36a",
+      "git_blob_sha256": "7f6dd0b5c749949eb45d4167bedf38cd9ae7a59be3b3259cb6992a34ed80ca8d",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/native-final-renewal-science-outcome-v1.md",
+      "raw_sha256": "8e2a6638d77cf08ff498cbee38db7f3259e084dbe7f932f1222e678ccf1c1745",
+      "raw_bytes": 1355,
+      "git_blob_sha1": "54abe9042f1e8eba5f604298f6db4fa2406db1fc",
+      "git_blob_sha256": "8e2a6638d77cf08ff498cbee38db7f3259e084dbe7f932f1222e678ccf1c1745",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/optional-retention-final-disposition-v1.md",
+      "raw_sha256": "e943f43d8b53a5d56d9fe9db54df48d3cd50548613437679e4022b5fcc01c884",
+      "raw_bytes": 3052,
+      "git_blob_sha1": "39c1bc3ecd6861742bec1f2491c5e222473bae4d",
+      "git_blob_sha256": "e943f43d8b53a5d56d9fe9db54df48d3cd50548613437679e4022b5fcc01c884",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/original-probe-listing-provenance-supplement-v1.json",
+      "raw_sha256": "a9b6b140892a2096dbee42899546134488f126c585fa041f52d9f19e141fe32a",
+      "raw_bytes": 2732,
+      "git_blob_sha1": "db16181431233b15b201b539bd519398857b289e",
+      "git_blob_sha256": "a9b6b140892a2096dbee42899546134488f126c585fa041f52d9f19e141fe32a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/original-probe-listing-provenance-v1.json",
+      "raw_sha256": "5804d31f1d7dab494d569ab32bfa700369776fdfbae8bfe29e2d66c8d6ba9c28",
+      "raw_bytes": 37047,
+      "git_blob_sha1": "b52ee9b140072aa104811fb5bf6f482e23b5a74f",
+      "git_blob_sha256": "5804d31f1d7dab494d569ab32bfa700369776fdfbae8bfe29e2d66c8d6ba9c28",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/original-reader-dependency-provenance-v1.json",
+      "raw_sha256": "21cd0b1322e3e3c8c9f440e2fac11dc35dfb581eed86087d687f1107caaf9aec",
+      "raw_bytes": 10649,
+      "git_blob_sha1": "98846b015a301dcb980b795e9605662ab01d1af6",
+      "git_blob_sha256": "21cd0b1322e3e3c8c9f440e2fac11dc35dfb581eed86087d687f1107caaf9aec",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/p03_domain_logger_v5.for",
+      "raw_sha256": "da5d8612be0e9d7c76dded9d67c24c6bb3dcfecbbe92d7cdec6f706d457766d0",
+      "raw_bytes": 4537,
+      "git_blob_sha1": "58382e475c27205fab31127d010227aea193f0b0",
+      "git_blob_sha256": "da5d8612be0e9d7c76dded9d67c24c6bb3dcfecbbe92d7cdec6f706d457766d0",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/p03_initialization_logger.for",
+      "raw_sha256": "05347b6d89a7a66e46bddf9f4e729528c4f22b8f2c0083b6e4ae9fda06c5a2a5",
+      "raw_bytes": 1130,
+      "git_blob_sha1": "864fb4e25b5b2e9c63ed8f02943cf297f675110e",
+      "git_blob_sha256": "05347b6d89a7a66e46bddf9f4e729528c4f22b8f2c0083b6e4ae9fda06c5a2a5",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/p03_root_logger.for",
+      "raw_sha256": "7a59ab6c4ffd38eb203727fad832d06462412ae5148b365ffb20b0f6001606ad",
+      "raw_bytes": 2776,
+      "git_blob_sha1": "def3aae55aa9bd306b54f41ad76594b951fbfd01",
+      "git_blob_sha256": "7a59ab6c4ffd38eb203727fad832d06462412ae5148b365ffb20b0f6001606ad",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/publication-provenance-and-stars-review-v1.json",
+      "raw_sha256": "cf97077fc8a6ae6fedb4836b9717ceb59ff5ff357de3cf6ba17babd87c629cb6",
+      "raw_bytes": 907,
+      "git_blob_sha1": "fe8a0e3bb58e7c68e091dc39e3fecd3e86104ab1",
+      "git_blob_sha256": "cf97077fc8a6ae6fedb4836b9717ceb59ff5ff357de3cf6ba17babd87c629cb6",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_causal_joins.py",
+      "raw_sha256": "e12f83b0e38b7d609cf85d7e4169859aae2aa63a81580cada92d4c92f4bb06ac",
+      "raw_bytes": 8315,
+      "git_blob_sha1": "3af9ece7cc5e4e5b75b7046408b3149f0d9eeacb",
+      "git_blob_sha256": "e12f83b0e38b7d609cf85d7e4169859aae2aa63a81580cada92d4c92f4bb06ac",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_daily_ledger.py",
+      "raw_sha256": "910bf2026ca3dd7acb502fceb218045f59f32c67f86c5a2d26adfcbe725687ee",
+      "raw_bytes": 5219,
+      "git_blob_sha1": "cca50ec4b02aef66c609fdd5a0bb4ccee8fe0e05",
+      "git_blob_sha256": "910bf2026ca3dd7acb502fceb218045f59f32c67f86c5a2d26adfcbe725687ee",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/r05_flow_joins.py",
+      "raw_sha256": "880686e6cf5de1bac82f314c60d8b946584ab8ace93811f9aa8eac0fb9343c1b",
+      "raw_bytes": 14943,
+      "git_blob_sha1": "126f8ecdecc36604b7a1b43b6c6cbd8d27cf512d",
+      "git_blob_sha256": "880686e6cf5de1bac82f314c60d8b946584ab8ace93811f9aa8eac0fb9343c1b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/re-release-261029-scope.md",
+      "raw_sha256": "6f89036c57d6834e594f123d09510d4c39f802947619c59768c711689c31094a",
+      "raw_bytes": 8287,
+      "git_blob_sha1": "bdd5613d0e9a8f2200add97621b5b688a71ddd1a",
+      "git_blob_sha256": "6f89036c57d6834e594f123d09510d4c39f802947619c59768c711689c31094a",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_combined_frost_activation.py",
+      "raw_sha256": "66a7531101796af4ddf67ff2863b1b193770036e244f82ea0e1367757e01f5c7",
+      "raw_bytes": 8113,
+      "git_blob_sha1": "874ff3383941f411f2e6632b9e8fb9dff0cc67db",
+      "git_blob_sha256": "66a7531101796af4ddf67ff2863b1b193770036e244f82ea0e1367757e01f5c7",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_combined_snow_bridge_v2.py",
+      "raw_sha256": "240881ba70ae73fa46caebc3ff536b7135803220b0c7af66394162a6d5ac49e7",
+      "raw_bytes": 7525,
+      "git_blob_sha1": "54782450d224d0d602f332c36eb5de6d364b0855",
+      "git_blob_sha256": "240881ba70ae73fa46caebc3ff536b7135803220b0c7af66394162a6d5ac49e7",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_r05_observation.py",
+      "raw_sha256": "b6bea42139c85be23c136b5c1e2330fcb0b77779ec59c780b13c17a6216ddd28",
+      "raw_bytes": 18193,
+      "git_blob_sha1": "d5fbfcb35e80c93e069d24439b7800a303ba7f63",
+      "git_blob_sha256": "b6bea42139c85be23c136b5c1e2330fcb0b77779ec59c780b13c17a6216ddd28",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_roads_final.py",
+      "raw_sha256": "f387a49c2a1b9b3996d9b37293ab58e57c34ff05416838caa3866ff6d43bcb55",
+      "raw_bytes": 29362,
+      "git_blob_sha1": "a65298bae1fc3be671c4e42026748e32aa36e704",
+      "git_blob_sha256": "f387a49c2a1b9b3996d9b37293ab58e57c34ff05416838caa3866ff6d43bcb55",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_snow_cap_diagnostics.py",
+      "raw_sha256": "883321e591f3fde15d0b5056a479c1382a5fb54a3ff81ee12deba18b5b7cb70c",
+      "raw_bytes": 22006,
+      "git_blob_sha1": "c67e7ce091a7d5e452ee3dc8aece384d0460dc7a",
+      "git_blob_sha256": "883321e591f3fde15d0b5056a479c1382a5fb54a3ff81ee12deba18b5b7cb70c",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/read_snow_cap_response.py",
+      "raw_sha256": "d7847230ca773e8e49d4565009436518f8e38ec1ed8eba2b8b93ec0bf38124d4",
+      "raw_bytes": 36338,
+      "git_blob_sha1": "e0a659cdddf495029eebef10aa83e2dc59444e93",
+      "git_blob_sha256": "d7847230ca773e8e49d4565009436518f8e38ec1ed8eba2b8b93ec0bf38124d4",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/release-r5-final-source-range-audit-v1.md",
+      "raw_sha256": "2eb4aa0750e9e6f0aef962c8dcadb0cf5b3402492b7639363d84791852f87ccc",
+      "raw_bytes": 7645,
+      "git_blob_sha1": "80fe8748bf9b67224cea481873c4ed8395c4f72d",
+      "git_blob_sha256": "2eb4aa0750e9e6f0aef962c8dcadb0cf5b3402492b7639363d84791852f87ccc",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/release-r5-source-range-audit.md",
+      "raw_sha256": "e489c3001a88587aa9707d71cd6af8e34246b52e010c81d8f9eae6037c91e9d6",
+      "raw_bytes": 6694,
+      "git_blob_sha1": "64b7c4a345e4e387e6920bfbb7e83cc4e66d7e69",
+      "git_blob_sha256": "e489c3001a88587aa9707d71cd6af8e34246b52e010c81d8f9eae6037c91e9d6",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/replay_allocation.py",
+      "raw_sha256": "196f0c82a212c38b3667ee5b1b3cca2b00906c4d39eb2e1f4c85b81fb72fafd3",
+      "raw_bytes": 5752,
+      "git_blob_sha1": "b33d469345dda2d0e325d11f7adbc8e6411bd4a1",
+      "git_blob_sha256": "196f0c82a212c38b3667ee5b1b3cca2b00906c4d39eb2e1f4c85b81fb72fafd3",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/package.md",
+      "raw_sha256": "80dedcd566f603094509f481d8673a7889009d9a152fc007acd896d98d982473",
+      "raw_bytes": 11253,
+      "git_blob_sha1": "31b8877806a5dc11597e0fbb2cfdbb82c939876c",
+      "git_blob_sha256": "80dedcd566f603094509f481d8673a7889009d9a152fc007acd896d98d982473",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/prompts/active/program_execplan.md",
+      "raw_sha256": "90b942f0fbd4c48ae83ed48fe87050aadeeb880759bc711a9bca54880eff004b",
+      "raw_bytes": 113380,
+      "git_blob_sha1": "732aab556eb1bd4791e1beac7e5f05e77e7bfa36",
+      "git_blob_sha256": "90b942f0fbd4c48ae83ed48fe87050aadeeb880759bc711a9bca54880eff004b",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/prompts/launch.md",
+      "raw_sha256": "81ddd612167dca6087c826261c19bacccf5502e37e1fa72622ec1d857e836a82",
+      "raw_bytes": 21880,
+      "git_blob_sha1": "751dcd27f2687684f5c6d7f6266a686876aaa5c8",
+      "git_blob_sha256": "81ddd612167dca6087c826261c19bacccf5502e37e1fa72622ec1d857e836a82",
+      "git_lfs": false
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/tracker.md",
+      "raw_sha256": "416591e07bdd562e21d6a8de6c4db1c81554308f7746f56d10681c8d4f2566b4",
+      "raw_bytes": 74165,
+      "git_blob_sha1": "d8629eb66622836ee9a2b29024b14751071139aa",
+      "git_blob_sha256": "416591e07bdd562e21d6a8de6c4db1c81554308f7746f56d10681c8d4f2566b4",
+      "git_lfs": false
+    },
+    {
+      "path": "tests/wepp/test_wepp_regressions.py",
+      "raw_sha256": "6e4b266b47999bbe663a9f01bef5ddfc39b11373af3a021047d3bf6aadd188e9",
+      "raw_bytes": 4792,
+      "git_blob_sha1": "b0f5b8224085c860fd548b10eb84a515f7caf856",
+      "git_blob_sha256": "6e4b266b47999bbe663a9f01bef5ddfc39b11373af3a021047d3bf6aadd188e9",
+      "git_lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029",
+      "raw_sha256": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+      "raw_bytes": 2771096,
+      "git_blob_sha1": "4d6494f3913d07889de0fb205ca770ef8f111c47",
+      "git_blob_sha256": "d81ade664de4b3af080b79192df29cb63b5d6ae210ea2a2fe1ba1c6593e19897",
+      "git_lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029.json",
+      "raw_sha256": "228f9131627e9b3b04c95bc3ca7e8a5f21f78769a68543f82a3f17af50bf995f",
+      "raw_bytes": 17916,
+      "git_blob_sha1": "f396393b53fe56beb73c6095491b3358655a45fa",
+      "git_blob_sha256": "228f9131627e9b3b04c95bc3ca7e8a5f21f78769a68543f82a3f17af50bf995f",
+      "git_lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029_hill",
+      "raw_sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
+      "raw_bytes": 2705912,
+      "git_blob_sha1": "07d0f7b416cb63fa4277561c34336ca00c33b486",
+      "git_blob_sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
+      "git_lfs": false
+    },
+    {
+      "path": "wepp_runner/bin/wepp_261029_hill.json",
+      "raw_sha256": "2193a8e8657f914171f8b8a12f9d8d4f127535c54f50e0ce02cc36a70f4287f1",
+      "raw_bytes": 17866,
+      "git_blob_sha1": "50f0d735083c4e6d8568e49ede024e73ac78f9fd",
+      "git_blob_sha256": "2193a8e8657f914171f8b8a12f9d8d4f127535c54f50e0ce02cc36a70f4287f1",
+      "git_lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/routes/usersum/weppcloud/wepp-model.md",
+      "raw_sha256": "70ef5e5cb3d7937be12f0ccc1db64cab20d49e5a6c9ddc7acd5732c2a1f1635f",
+      "raw_bytes": 19847,
+      "git_blob_sha1": "eb5eaccc03bf64ad5182b38144994c97b8734ec3",
+      "git_blob_sha256": "70ef5e5cb3d7937be12f0ccc1db64cab20d49e5a6c9ddc7acd5732c2a1f1635f",
+      "git_lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/static/reports/README.md",
+      "raw_sha256": "1f8840ecd30ebba3a5ecac35cfa44616be07f87a39cc37b1e3b301f02f0e8bba",
+      "raw_bytes": 2240,
+      "git_blob_sha1": "3324e186a574abd7ae619449508b6ddb76fc7669",
+      "git_blob_sha256": "1f8840ecd30ebba3a5ecac35cfa44616be07f87a39cc37b1e3b301f02f0e8bba",
+      "git_lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-r5.json",
+      "raw_sha256": "4f8f60e6c88daeae00f13b18b7b43d78169cc32332086f5583944298555942dd",
+      "raw_bytes": 3614,
+      "git_blob_sha1": "a342c06967d824a8e31d459028670964216eaad1",
+      "git_blob_sha256": "4f8f60e6c88daeae00f13b18b7b43d78169cc32332086f5583944298555942dd",
+      "git_lfs": false
+    },
+    {
+      "path": "wepppy/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r5.pdf",
+      "raw_sha256": "4fb75b1b88e0ff9097c47a671f802a85cf81fae537872edbe90422ba519d6cf7",
+      "raw_bytes": 312064,
+      "git_blob_sha1": "43ca58d81cbb01eae8b8bad8973a4827d0de3a3a",
+      "git_blob_sha256": "22a3bce2600590533eddbf37d39bbdc97cd099984357401f4319157ad691bf87",
+      "git_lfs": true
+    }
+  ],
+  "closing_governance_hash_exclusions": [
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/20261102_security_review.md",
+      "content_boundary": "Original source-free final governance/receipt prose; exact bytes bound later in private all124 manifest and independent reviews; omitted here to avoid reciprocal/self hash cycles."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final-public-selection-review-v1.json",
+      "content_boundary": "Original source-free final governance/receipt prose; exact bytes bound later in private all124 manifest and independent reviews; omitted here to avoid reciprocal/self hash cycles."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/final-release-gate-disposition-v1.json",
+      "content_boundary": "Original source-free final governance/receipt prose; exact bytes bound later in private all124 manifest and independent reviews; omitted here to avoid reciprocal/self hash cycles."
+    },
+    {
+      "path": "docs/work-packages/20261101_rock_water_development/artifacts/private-retention-index-v1.json",
+      "content_boundary": "Original source-free final governance/receipt prose; exact bytes bound later in private all124 manifest and independent reviews; omitted here to avoid reciprocal/self hash cycles."
+    }
+  ],
+  "ordinary_content_review": "Existing independent original-analysis, reader-dependency and finite-link reviews reused for unchanged bytes. Current S01 final scientific/correctness reports, bounded synthetic results, durable contracts and living status documents reviewed; confirmed FC/HK correctness HOLD remains explicit. Original independently authored probe/reader listings retain their existing provenance disclosure; no legacy native source, patches, raw traces, build objects or observer-building helpers are selected.",
+  "board_scope": "PROJECT_TRACKER.md uses the exact reviewed isolated blob containing only rock-water addition relative to HEAD; unrelated MOFE audit worktree paragraph is excluded and preserved.",
+  "path_list_sha256": "76d6955209077b2868e94587ee62a01fdbf424827f8134aec8a028d0dbdbff67",
+  "mechanism_reviews": [
+    {
+      "path": "out/rock-water-development-20261101/public-selection-final-independent-implementation-v1/mechanism-v2-review.json",
+      "sha256": "7acd83df24774396175ecb5b697a875cafaaeaadb051e23d687029e92dd13b70"
+    },
+    {
+      "path": "out/rock-water-development-20261101/closeout-security-selection-controls-v2/review.json",
+      "sha256": "7c79ce2c1cde6d914be719b1fca5e2e28a3df8ac773290d629227e5adf77d8dc"
+    }
+  ],
+  "finalization_boundary": "After this file and all other selected sources are final, a private manifest binds exact raw and Git-clean bytes/modes for all124 paths. Independent implementation/security reviews bind that manifest. Actual index and single-parent commit readback must match its complete selected tree and expected changed subset; local LFS pointer and object bytes must match the reviewed PDF. This public record asserts none of those future executions.",
+  "private_retention_boundary": "Completed immutable archive index is a separate selected artifact. Final selected bytes, final manifest/reviews and actual commit receipts belong to the reviewed postcommit durable metadata envelope; no future envelope hash or PASS is asserted here.",
+  "explicit_exclusions": [
+    "wepppy/soils/ssurgo/ssurgo.md",
+    "wepppy/weppcloud/routes/usersum/generated/docs_index.json",
+    "code-quality-report.json",
+    "code-quality-summary.md",
+    "docs/work-packages/20261102_mofe_input_producer_audit/",
+    "all unlisted package artifacts, raw source/patches/traces, observer-build helpers and nonrelease binaries"
+  ],
+  "package_plan": "docs/work-packages/20261101_rock_water_development/prompts/active/program_execplan.md",
+  "native_correctness": "HOLD",
+  "general_release": "HOLD",
+  "package_closure": "HOLD",
+  "defaults_changed": false,
+  "deployment": false,
+  "external_push": false,
+  "staged_by_this_review": false
+}

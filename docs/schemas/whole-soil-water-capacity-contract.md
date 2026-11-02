@@ -164,14 +164,84 @@ including canopy carry transfer, storm depletion, daily/hourly input and effecti
 plane runoff subtraction. Carry may already have been allocated by IDAT, so transfer
 admission requires actual same-day producer/consumer evidence.
 
-The expansion candidate in [ADR-0129](../adrs/ADR-0129-conservative-interception-allocation.md)
-passes a bounded twelve-history panel. Full-domain and accepted-flux evidence,
-shared-consumer coverage and general regressions remain required before promotion.
+The exact expansion allocation and confirmed IDAT, daily/hourly FIN and ROCHEK
+consumers are admitted as a bounded numerical water-ownership repair. A05 records
+30,974,527 executed domain observations with no flagged domains; A06 records
+64,935,267 with no flagged domains, joins actual producers to consumers, and
+retains selected accepted-flux checks and negative relative-coordinate flags.
+These counts are evaluations, not independent states or whole-history closure.
+A07 observes changed storm/depletion versus later carry allocation, but its
+selected event does not enter GRNA/ROCHEK or prove water creation. No additional
+carry fallback or timing repair is admitted from that observation.
 
+Final source `d2e14d96af5942409c9a315dc8594fcc164a702a` combines this repair with
+the separately admitted snow-pack debit and donor-limited freeze-restoration
+repairs (ADR-0130 and ADR-0131). Combined18, 1,394 native tests, 31 watchlist
+cases, two host smokes, six legacy histories, Disturbed, clean and observed
+Roads840 panels, and the 492-history application comparison have completed
+bounded independent review and parent admission. The exact matched pair is
+installed locally with rollback evidence; deployment and final publication
+remain separate. These later decisions supersede the historical release hold,
+not its retained observations.
+
+Roads engine compatibility and capacity/particle arithmetic are accepted; the
+original parameterization screen still fails at 744/840. No threshold was relaxed
+and no field calibration follows. Application changes include 978 of 3,443
+files, outlet volume −1,129.18 m3 and sediment −49.22 kg, with unchanged maximum
+peak. Material storage/lateral timing, liquid/ice partition and channel-area
+consequences remain disclosed. Neither these comparisons nor unchanged outputs
+prove universal thermal validity, cold-snow budgets, whole-system conservation
+or retention defaults. Optional retention has separate bounded P03/P04 and installed-controller
+admission; its validity must not be inferred from this numerical repair.
+
+Current parent decisions and independent evidence are retained in the active
+program: `combined18-final-execution-v3/parent-acceptance-v1.json`,
+`legacy-frost-final-renewal-v1/parent-acceptance-v1.json`,
+`final-roads-parent-disposition-v1/decision.json` (SHA-256
+`fb384407f3d7cf85046e24103ef5fa15e0b415e71d3c9ef5e18579ef4f18c473`), and
+`final-application-parent-disposition-v1/decision.json` (SHA-256
+`615cedebc5ad2c19e3ca18ac930030f4a9f7aef7decd1b2cdf0a50b59d298194`).
+The latter binds actual science, implementation and security reviews. The
+program's N01/A05/A06/A07, combined18, native, legacy, Disturbed, final Roads
+and application review artifacts retain the precise tested scopes and limits.
 
 ## Optional SSURGO retention artifact contract
 
-The parent admission decision of 2026-11-02 accepts development of an explicit experimental option under ADR-0132. Commit this contract and ADR as an ancestor before applying the implementation. The default producer remains unchanged; the installed controller and integration gates below remain required before implementation acceptance.
+### Known native coefficient ownership defect
+
+S01's four heterogeneous histories on source `d2e14d96af5942409c9a315dc8594fcc164a702a`
+confirm that dynamic consumers on OFEs 1/2 use layer-only FC/HK coefficients last
+initialized by OFE 3. For each default/optional policy, 10 of 15 observed layer slots
+differ from their own initialized coefficients; all 15 HK slots execute the
+sub-0.95 power branch. Seven ordinary output files match exactly within each
+plain/observer pair. That parity validates observation neutrality, not correctness
+of coefficient ownership. Finite conductivity/drainage domains do not cure it.
+
+Unrestricted heterogeneous-use readiness is on HOLD. The coefficient ownership
+structure predates revision 5, but inherited source does not prove unchanged
+exposure, output consequences or safety. Prior accepted campaigns remain evidence
+of their actual measured scopes; neither repeated source material nor mathematical
+eligibility establishes a general safe-use class. Management and layer support can
+also affect initialized coefficients. No repaired-model counterfactual has been
+executed, so these observations do not quantify a hydrograph correction.
+
+Keep the existing default and explicit optional API unchanged. Do not promote the
+optional policy to a default, claim universal cancellation, or change existing
+project soils on this evidence. A separately authorized native repair requires
+source-owned correction, independent reviews and affected-consumer validation.
+Local revision 5 artifacts may document the known defect and bounded validation;
+they do not establish general release readiness or close the native correctness
+gate. This limit supplements, rather than erases, the retained P03/P04 evidence.
+
+Actual execution receipt `fde3107595602efc7a51e057363342694ec255e1dcab5cfc14b8939623a78ebc`,
+science disposition `9794141799ccaa81074ab0cad02364d515d3671911c1ee766c789ed94d3e1695`
+and implementation review `ec1114fb243da32c563c09121ca777fa8e819e1f6a7882c8b3a8364bad185ace`
+are retained under `out/rock-water-development-20261101/`. The active program's
+S01 reports identify the exact inputs, observer and source-history evidence.
+
+### Existing bounded artifact admission
+
+The explicit experimental option under ADR-0132 is accepted for canonical local integration following the contract/ADR ancestor and actual installed-controller review. The default producer and formulas remain unchanged. Bounded P03/P04 applicability and independent acquisition association remain mandatory. Broad repository regression passes; the known native correctness and general release HOLD remains separate.
 
 The explicit `ssurgo-volume-inverse-experimental-v1` builder policy follows ADR-0132 and ADR-0127 eligibility after final source selection. It requires a source acquisition receipt SHA256 and the complete requested successful source-profile set. No other source family, default formula, persisted setting or density-changing treatment is admitted by this option.
 
@@ -185,7 +255,24 @@ P03 supplies bounded consumer admission for the fixed six-source project, unchan
 
 Mathematical eligibility is the generic API rule, not a claim of physical validation for every eligible profile. Do not introduce a case-specific source whitelist or tune the inverse to the retained six sources. Independently bound acquisition association remains mandatory for each build.
 
-Installed-module spawn and actual generated-artifact propagation must pass after integration with no research initializer. Bind its 66 soils/193 OFEs and complete companions to the P04 artifacts already consumed by P03. Exact unchanged native inputs permit reuse of that consumer evidence; a companion or a successful job alone is not admission. Focused, stub, broad regression and independent integration outcome reviews remain required. No default migration, automatic rebuild, UI or persisted policy change, density-changing treatment or deployment is authorized.
+Parent decision `out/rock-water-development-20261101/P04-parent-integration-disposition-v1/decision.json`
+(SHA256 `5b426af69fe64e6c7ced5adbe0edbe22e38598ef80ba094028498543075cb855`)
+accepts the canonical local explicit opt-in implementation and installed-controller
+artifact gate. Actual receipt `e44238519b8e9f8cbe76c13deba7cd43ec02b114afd0a982128eb27ac4ef19dc`
+binds exact reproduction of all 66 soils and companions through ordinary installed
+modules. Independent science, implementation and security outcomes pass. Canonical
+validation `a22256d2a08140d78e936d1a8b9f5a882a635eaedbe97c91220c1b07a710c694`
+records 84 focused tests, 346 affected tests, two stub modules and test-stub checks
+passing. Exact unchanged inputs permit reuse of bounded P03 evidence without a
+new native campaign. At that integration checkpoint, broad repository validation
+and final documentation, archive, public selection and release signoff remained
+open. Broad-v2 subsequently passes 12,729 tests with 423 skips and unchanged bound
+code/binaries; parent `c72571780b7552e3840d5c5cfc90cddda623343054a4679e986f593974c504d9`
+accepts that regression evidence. It does not resolve the native ownership HOLD.
+No default adoption, deployment,
+universal physical validation or relaxation of acquisition association follows.
+
+No default migration, automatic rebuild, UI or persisted policy change, density-changing treatment or deployment is authorized.
 
 The accepted bounded evidence and parent decision are indexed in [ADR-0132](../adrs/ADR-0132-optional-ssurgo-retention-builder.md#evidence-and-gates).
 
