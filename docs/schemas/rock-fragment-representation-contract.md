@@ -60,3 +60,13 @@ SIFT mineral output must have the complete7778 OFE header, including initial sat
 Retention preparation and native capacity changes must also meet the
 [whole-soil water capacity contract](whole-soil-water-capacity-contract.md),
 including source/fallback bases and independent conductivity/drainage domains.
+
+## Run-scoped surface-proxy support reporting
+
+Implementation pending: RUSLE's existing cosurffrags parquet proxy reports must
+retain missing/nonfinite/out-of-range/zero/used row counts and known-area support
+as defined in the RUSLE specification. A mean over usable records must not imply
+complete observed footprint. Unknown area is distinct from zero known support;
+finite out-of-range values remain flagged even when existing numeric clipping
+makes the resulting proxy bounded. This change adds provenance only and does not
+admit survey composition as measured Roads armor or revise proxy/default policy.

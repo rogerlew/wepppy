@@ -1213,6 +1213,38 @@ Defaulting policy (scientifically conservative):
     (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
     `surface_rock_cover_percent`, `sfragcov`) and aggregated with area-weighted
     mean when `area` is present (otherwise simple mean)
+- implementation conformance pending for additive proxy-support diagnostics:
+  the cosurffrags source report in both RAP and SBS manifests must include a
+  `support` object whenever a recognized proxy column is successfully queried and its numerical
+  aggregation inputs parse. Existing query/parse-error unavailable reports may
+  omit support; empty/all-NULL numerical columns must retain it.
+  Retain `total_rows`, `missing_cover_rows` (NULL), `nonfinite_cover_rows`, `unparseable_cover_rows`,
+  `out_of_range_cover_rows` (finite outside0–100), `zero_cover_rows`, and
+  `used_rows` (rows included in the existing numerical aggregation).
+  These counts describe parquet records, not independent measurements or area.
+- with an `area` column, also retain `unknown_or_nonpositive_area_rows`,
+  `known_positive_area`, `used_positive_area`, and `known_area_fraction_used`.
+  Area values remain in the source column's units. The fraction is used positive
+  area divided by all finite positive area, or null when that denominator is zero.
+  Unparseable area on rows excluded by the existing aggregation (for example,
+  NULL cover) counts as unknown and must not introduce a new parse failure.
+  Preserve original short-circuit exclusions: area=NULL can exclude malformed
+  cover, and nonfinite cover can exclude malformed area. Count excluded
+  unparseable cover separately; do not relabel it numeric nonfinite.
+  Malformed inputs consumed by the original aggregation retain its existing
+  query/parse-error outcome without partial support.
+  Unknown-area records prevent a claim of complete footprint coverage even when
+  this fraction equals1. Without `area`, these four area fields are null.
+- NULL, nonfinite, finite out-of-range and measured zero remain distinct. Finite
+  out-of-range records retain the existing aggregation/clamping behavior and are
+  counted diagnostically; `used_rows` does not mean scientifically validated.
+  Empty/all-unusable recognized columns retain support diagnostics alongside the
+  existing unavailable reason. Missing files/columns retain existing reasons.
+- this additive metadata must not change proxy precedence, numeric aggregation,
+  clipping, overrides, fallback values, C raster values or existing manifest keys.
+  Old manifests without `support` remain readable; rebuilds may add the metadata.
+  Rationale: excluding missing rows before reporting support concealed uncertainty
+  and could make a conditional mean look like complete observation.
 - this default is a first-order proxy, not a physical equivalence rule
 - `cosurffrags` records fragments `>=2 mm` (wood `>=20 mm`), while common
   RUSLE operational guidance often focuses on larger rock fragments (for
