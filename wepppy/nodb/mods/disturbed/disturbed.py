@@ -571,6 +571,8 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
     replacements = task_args.get('replacements')
     replacement_values = dict(replacements) if isinstance(replacements, dict) else None
 
+    from wepppy.soils.ssurgo.retention import check_treatment_task, finish_treatment_task, write_exclusive
+    retention_context = check_treatment_task(task_args)
     soil_u = WeppSoilUtil(task_args['source_soil_path'])
     if task_args['sol_ver'] == 7778.0:
         new = soil_u.to_7778disturbed(
@@ -591,7 +593,7 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
         )
 
     _publish_disturbed_soil_artifact(
-        new.write,
+        (lambda path: write_exclusive(path, str(new))) if retention_context is not None else new.write,
         task_args['output_path'],
         base_quality=task_args.get('base_quality'),
         quality_report_path=task_args.get('quality_report_path'),
@@ -607,6 +609,8 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
             else None
         ),
     )
+    if retention_context is not None:
+        finish_treatment_task(task_args, retention_context)
     return task_args['disturbed_mukey'], round(time.time() - started, 3)
 
 
@@ -2289,6 +2293,8 @@ class Disturbed(NoDbBase):
 
                     disturbed_fn = f'{disturbed_mukey}.sol'
                     output_path = _join(soils.soils_dir, disturbed_fn)
+                    from wepppy.soils.ssurgo.retention import reject_stale_treatment
+                    reject_stale_treatment(source_soil_path, output_path)
                     if disturbed_mukey not in planned_soil_keys:
                         _h0_max_om = None
                         if man.disturbed_class is not None and 'fire' in man.disturbed_class:

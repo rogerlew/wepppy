@@ -54,6 +54,8 @@ class SoilMultipleOfeSynth(object):
 
     def write(self, dst_fn: str, ksflag: int = 0, *, preserve_input_format: bool = False) -> None:
         """Write the merged soil definition to ``dst_fn``."""
+        from wepppy.soils.ssurgo.retention import prepare_stack, mark_stack_text, finish_stack, write_exclusive
+        retention_context = prepare_stack(self.stack, dst_fn, preserve_input_format)
         assert len(self.stack) > 0
 
         versions = set()
@@ -82,5 +84,12 @@ class SoilMultipleOfeSynth(object):
         text = ''.join(s)
         if not preserve_input_format:
             text = ensure_200mm_boundary(text)
-        with open(dst_fn, 'w') as pf:
-            pf.write(text)
+        if retention_context is not None:
+            text = mark_stack_text(text)
+        if retention_context is not None:
+            write_exclusive(dst_fn,text)
+        else:
+            with open(dst_fn, 'w') as pf:
+                pf.write(text)
+        if retention_context is not None:
+            finish_stack(dst_fn, retention_context)

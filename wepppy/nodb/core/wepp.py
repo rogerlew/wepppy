@@ -648,6 +648,11 @@ def prep_soil(args: Tuple[Any, ...]) -> Tuple[str, float]:
     ) = args[:10]
     preserve_input_format = bool(args[10]) if len(args) > 10 else False
 
+    from wepppy.soils.ssurgo.retention import prepare_stage, finish_stage, write_exclusive
+    retention_context = prepare_stage(
+        src_fn, dst_fn, clip=clip_soils, clip_depth=clip_soils_depth,
+        minimum=clip_soils_minimum, preserve_input_format=preserve_input_format,
+        initial_sat=initial_sat, kslast=kslast)
     soilu = WeppSoilUtil(src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))  # internally uses rosetta
     if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
         # Match legacy Tenerife template processing:
@@ -662,7 +667,12 @@ def prep_soil(args: Tuple[Any, ...]) -> Tuple[str, float]:
         soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
     if clip_soils:
         soilu.clip_soil_depth(clip_soils_depth)
-    soilu.write(dst_fn)
+    if retention_context is not None:
+        write_exclusive(dst_fn,str(soilu))
+    else:
+        soilu.write(dst_fn)
+    if retention_context is not None:
+        finish_stage(dst_fn, retention_context)
 
     return topaz_id, time.time() - t0
 

@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import csv
+from pathlib import Path
+from . import retention as _retention
 from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 
 import os
@@ -490,6 +492,8 @@ class Horizon(HorizonMixin):
 
     def __init__(self, chkey, layer, defaults=None):
         self.chkey = chkey
+        self.retention_source = {k: layer.get(k) for k in _retention.SOURCE_FIELDS}
+        self.retention_branches = {}
 
         if defaults is None:
             defaults = {}
@@ -555,6 +559,7 @@ class Horizon(HorizonMixin):
             self.horizon_build_notes.append(
                 f"  {chkey}::wilt_pt estimated from wfifteenbar_r and rock"
             )
+            self.retention_branches["wp"] = "source-capped-mass"
             self.wilt_pt = (0.01 * float(self.wfifteenbar_r)) / (
                 1.0 - min(50.0, float(rock)) / 100.0
             )  # ERIN_ADJUST_FCWP
@@ -562,6 +567,7 @@ class Horizon(HorizonMixin):
             self.horizon_build_notes.append(
                 f"  {chkey}::wilt_pt estimated from {rosetta_model}"
             )
+            self.retention_branches["wp"] = rosetta_model
             self.wilt_pt = res_dict["wp"]
 
         # field capacity
@@ -569,6 +575,7 @@ class Horizon(HorizonMixin):
             self.horizon_build_notes.append(
                 f"  {chkey}::field_cap estimated from wthirdbar_r and rock"
             )
+            self.retention_branches["fc"] = "source-capped-mass"
             self.field_cap = (0.01 * float(self.wthirdbar_r)) / (
                 1.0 - min(50.0, float(rock)) / 100.0
             )  # ERIN_ADJUST_FCWP
@@ -576,9 +583,11 @@ class Horizon(HorizonMixin):
             self.horizon_build_notes.append(
                 f"  {chkey}::field_cap estimated from {rosetta_model}"
             )
+            self.retention_branches["fc"] = rosetta_model
             self.field_cap = res_dict["fc"]
 
         if not _valid_fc_wp_pair(self.field_cap, self.wilt_pt):
+            self.retention_branches = {"fc": rosetta_model, "wp": rosetta_model}
             self.field_cap, self.wilt_pt = _rosetta_fc_wp(
                 res_dict,
                 context=f"{chkey}::{rosetta_model} fc/wp fallback",
@@ -959,8 +968,13 @@ class WeppSoil:
         horizon_defaults: Optional[Dict[str, Any]] = None,
         res_lyr_ksat_threshold: float = 2.0,
         ksflag: bool = True,
+        retention_policy: Optional[str] = None,
+        retention_source_receipt: Optional[str] = None,
     ) -> None:
 
+        _retention.validate_policy(retention_policy, getattr(ssurgo_c, "source_data", None), retention_source_receipt)
+        self.retention_policy = retention_policy
+        self.retention_source_receipt = retention_source_receipt
         assert mukey in ssurgo_c.mukeys
 
         self.ssurgo_c = ssurgo_c
@@ -1044,6 +1058,7 @@ POSSIBILITY OF SUCH DAMAGE."""
                 if not isfloat(self.majorComponent.albedodry_r):
                     self._compute_albedo()
                 self._analyze_restrictive_layer()
+                _retention.apply_selected(self)
                 self._build_description()
 
                 return 1
@@ -1388,6 +1403,14 @@ Any comments:
         self, wd="./", overwrite=True, fname=None, db_build=False, version="7778"
     ) -> SoilSummary:
         assert version in ["7778", "2006.2", "2006.2ag"]
+        if getattr(self, "retention_policy", None) is not None:
+            if version != "7778" or self.is_urban or self.is_water:
+                raise ValueError("Experimental retention requires selected SSURGO 7778 profile")
+            if db_build or fname is not None and (Path(fname).name != fname):
+                raise ValueError("Experimental retention requires a flat fresh build directory")
+            target = Path(wd) / (fname or f"{self.mukey}.sol")
+            if target.exists() or target.is_symlink() or Path(str(target)+".retention.json").exists() or Path(str(target)+".retention.json").is_symlink():
+                raise FileExistsError("Experimental soil or provenance already exists")
         assert _exists(wd), wd
 
         if version == "7778":
@@ -1412,14 +1435,20 @@ Any comments:
             fname = "%s.sol" % mukey
         fpath = _join(wd, fname)
 
-        if _exists(fpath):
-            if overwrite:
-                os.remove(fpath)
-            else:
-                return
+        if getattr(self, "retention_policy", None) is not None:
+            _retention.write_exclusive(fpath, txt)
+        else:
+            if _exists(fpath):
+                if overwrite:
+                    os.remove(fpath)
+                else:
+                    return
 
-        with open(fpath, "w") as fp:
-            fp.write(txt)
+            with open(fpath, "w") as fp:
+                fp.write(txt)
+
+        if getattr(self, "retention_policy", None) is not None:
+            _retention.write_companion(self, fpath)
 
         return SoilSummary(
             mukey=int(mukey),
@@ -1598,9 +1627,13 @@ Any comments:
             # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
             s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
+        if getattr(self, "retention_policy", None) is not None:
+            s[0] = s[0].replace("7778\n", "7778\n# WEPPPY_RETENTION_POLICY=" + self.retention_policy + "\n", 1)
         return ensure_200mm_boundary("\n".join(s))
 
     def build_file_contents_v2006_2(self, ag=False):
+        if getattr(self, "retention_policy", None) is not None:
+            raise ValueError("Experimental retention does not support legacy writers")
         assert self.valid()
 
         ksflag = self.ksflag
@@ -1935,6 +1968,8 @@ def _build_soil_for_process(
     ksflag: bool,
     verbose: bool,
     logger_name: str,
+    retention_policy: Optional[str] = None,
+    retention_source_receipt: Optional[str] = None,
 ):
     """Worker function that now operates on the in-memory worker_view object."""
     worker_logger = logging.getLogger(logger_name) if logger_name else None
@@ -1948,6 +1983,8 @@ def _build_soil_for_process(
             initial_sat,
             horizon_defaults=horizon_defaults,
             ksflag=ksflag,
+            retention_policy=retention_policy,
+            retention_source_receipt=retention_source_receipt,
         )
         valid = ws.valid()
         logs = "\n".join(ws.log) if verbose else None
@@ -2073,6 +2110,8 @@ class SurgoSoilCollection(object):
         ksflag: bool = True,
         logger: Optional[logging.Logger] = None,
         max_workers: Optional[int] = None,
+        retention_policy: Optional[str] = None,
+        retention_source_receipt: Optional[str] = None,
     ) -> None:
         """Populate `self.weppSoils` / `self.invalidSoils` via concurrent builders.
 
@@ -2082,6 +2121,7 @@ class SurgoSoilCollection(object):
         - Defaults to the host CPU count when ``max_workers`` is not provided.
         """
 
+        _retention.validate_policy(retention_policy, self.source_data, retention_source_receipt)
         cpu_count = os.cpu_count() or 1
         if max_workers is None:
             max_workers = cpu_count
@@ -2124,7 +2164,7 @@ class SurgoSoilCollection(object):
                 pool.submit(
                     _build_soil_for_process,
                     mukey, worker_view, initial_sat, horizon_defaults,
-                    ksflag, verbose, logger_name
+                    ksflag, verbose, logger_name, retention_policy, retention_source_receipt
                 ): mukey for mukey in self.mukeys
             }
             
@@ -2157,6 +2197,11 @@ class SurgoSoilCollection(object):
 
         self.weppSoils = weppSoils
         self.invalidSoils = invalidSoils
+        if retention_policy is not None and (
+            invalidSoils or set(weppSoils) != set(self.mukeys)
+            or any(soil.mukey != key for key, soil in weppSoils.items())
+        ):
+            raise ValueError("Experimental retention requires the exact requested success set")
         if logger:
             logger.info(
                 f"Completed makeWeppSoils: {len(weppSoils)} valid, {len(invalidSoils)} invalid"

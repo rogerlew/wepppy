@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from sqlite3 import Connection
+
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from wepppy.wepp.soils import HorizonMixin
@@ -8,6 +10,11 @@ __version__: str
 ERIN_ADJUST_FCWP: bool
 TRANSIENT_FIELDS: List[str]
 colors: List[str]
+SSURGO_PROJECT_CACHE_FILENAME: str
+STATSGO_PROJECT_CACHE_FILENAME: str
+SURGO_CACHE_METADATA_SUFFIX: str
+
+def surgo_cache_metadata_path(cache_db_path: str) -> str: ...
 
 
 class SsurgoRequestError(Exception): ...
@@ -75,6 +82,10 @@ class SoilSummary:
 
 class WeppSoil:
     mukey: int
+    retention_policy: Optional[str]
+    retention_source_receipt: Optional[str]
+    # Set for an opt-in build only; legacy deserialized instances may lack metadata.
+    retention_decisions: List[Dict[str, Any]]
 
     def __init__(
         self,
@@ -84,6 +95,8 @@ class WeppSoil:
         horizon_defaults: Optional[Dict[str, Any]] = ...,
         res_lyr_ksat_threshold: float = ...,
         ksflag: bool = ...,
+        retention_policy: Optional[str] = ...,
+        retention_source_receipt: Optional[str] = ...,
     ) -> None: ...
     @property
     def short_description(self) -> str: ...
@@ -117,7 +130,7 @@ class WeppSoil:
 
 
 class SurgoCollectionWorkerViewFactory:
-    def __init__(self, db_path: str) -> None: ...
+    def __init__(self, db_path: Optional[str] = ..., conn: Optional[Connection] = ...) -> None: ...
     def build(self, mukeys: Set[int], source_data: str) -> Any: ...
 
 
@@ -125,7 +138,7 @@ class SurgoSoilCollection:
     weppSoils: Dict[int, WeppSoil]
     invalidSoils: Dict[int, Optional[WeppSoil]]
 
-    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = ...) -> None: ...
+    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = ..., cache_db_path: Optional[str] = ...) -> None: ...
     def makeWeppSoils(
         self,
         initial_sat: float = ...,
@@ -134,6 +147,8 @@ class SurgoSoilCollection:
         ksflag: bool = ...,
         logger: Optional[Any] = ...,
         max_workers: Optional[int] = ...,
+        retention_policy: Optional[str] = ...,
+        retention_source_receipt: Optional[str] = ...,
     ) -> None: ...
     def writeWeppSoils(
         self,
