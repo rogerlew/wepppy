@@ -1,0 +1,61 @@
+{
+  "executable": "/opt/venv/bin/python",
+  "argv": [
+    "docs/work-packages/20261102_mofe_input_producer_audit/artifacts/reproduce_rust_audit.py",
+    "docs/work-packages/20261102_mofe_input_producer_audit/artifacts/m1_rust_baseline_v1"
+  ],
+  "pythonpath": null,
+  "extension": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+  "extension_sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+  "source_root": "/workdir/wepppyo3",
+  "source_head": "4d4c075421c4013cba99a0addc76482229e7f3f7",
+  "source_status": " M docs/module-registry.md\n M wepp_interchange/src/calendar.rs\n M wepp_interchange/src/hill_hbp.rs\n",
+  "source_input_sha256": "3ab6d871d6769fe1afa3564b5b07dca2d7fd48583f08bf6ca473353d3baa0096",
+  "results": [
+    {
+      "case": "tiny",
+      "arguments": {
+        "breakpoints": [
+          0,
+          1e-05,
+          1
+        ]
+      },
+      "returned_ofes": 2,
+      "output": "tiny.slp",
+      "sha256": "620337a9ba492c51f4a2f401bc7bbfa3a4d0c6d847b791e3c49e661f2c8f127b"
+    },
+    {
+      "case": "zero_buffer",
+      "arguments": {
+        "apply_buffer": true,
+        "buffer_length": 0
+      },
+      "returned_ofes": 3,
+      "output": "zero_buffer.slp",
+      "sha256": "ddcae42afb96aca7efc53876b25e9d9a82c82186c7e345e99a3ee59cf38cc2f8"
+    },
+    {
+      "case": "negative_buffer",
+      "arguments": {
+        "apply_buffer": true,
+        "buffer_length": -10
+      },
+      "returned_ofes": 3,
+      "output": "negative_buffer.slp",
+      "sha256": "e08f20cb2280f5790985ed666d577149ee580637045b598b636ba08572b8c226"
+    },
+    {
+      "case": "min_length",
+      "arguments": {
+        "target_length": 1,
+        "min_length": 10,
+        "max_ofes": 200
+      },
+      "returned_ofes": 100,
+      "output": "min_length.slp",
+      "sha256": "88899cc7306dd31b50c7dfd9fe5dcc83bf7f67a9f26f04e9f4f5282ec9f16602"
+    }
+  ],
+  "claim": "Native writer readback only; no native WEPP execution or build provenance claim."
+}

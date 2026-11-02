@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "stage": "expanded management parser readback",
+  "error": "IndexError: pop from empty list",
+  "explanation": "Initial harness assumed round-trip success. Revised harness records this explicit failure; prior generated files retained unchanged."
+}

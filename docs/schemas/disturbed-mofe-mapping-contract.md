@@ -2,6 +2,11 @@
 
 ## Scope and authority
 
+Accepted MIPA-01 amendment (2026-11-02): the
+[MOFE input identity contract](mofe-input-identity-contract.md#crop-keyed-pmet-identity)
+extends final segment identity into PMET preparation. It preserves this contract's
+mapping resolution and the uploaded-input exclusions. Implementation conformance is pending.
+
 This contract governs management identifiers assigned by Disturbed.remap_mofe_landuse. The operator approved mapping-aware lookup on 2026-09-07 after the aliquot-shoji incident. Repository implementation conforms as of 2026-09-07 (implementation commit 1ea4b8d52); production rollout is separate.
 
 The earlier SBS build and combined-management generation boundary is defined by

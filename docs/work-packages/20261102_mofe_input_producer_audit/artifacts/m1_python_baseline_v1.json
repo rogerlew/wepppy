@@ -1,0 +1,52 @@
+{
+  "scope": "AST-extracted source-function probe; not end-to-end",
+  "source": "/workdir/wepppy/wepppy/wepp/soils/utils/wepp_soil_util.py",
+  "source_sha256": "9d6babff56f8d6e9e87c4a6abc3b48b9e9e55f98f91c532e0018bf73e1667d17",
+  "kslast_cases": [
+    {
+      "ofe_landuses": [
+        "developed high",
+        "forest"
+      ],
+      "before": [
+        1.0,
+        2.0
+      ],
+      "override": 99.0,
+      "after": [
+        1.0,
+        2.0
+      ]
+    },
+    {
+      "ofe_landuses": [
+        "forest",
+        "developed high"
+      ],
+      "before": [
+        1.0,
+        2.0
+      ],
+      "override": 99.0,
+      "after": [
+        99.0,
+        99.0
+      ]
+    }
+  ],
+  "string_ofe_sort_demonstration": [
+    "1",
+    "10",
+    "11",
+    "12",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ],
+  "sort_scope": "Python sort demonstration; RAP writer not executed"
+}

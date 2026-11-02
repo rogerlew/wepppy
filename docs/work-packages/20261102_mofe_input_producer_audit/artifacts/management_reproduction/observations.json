@@ -1,0 +1,154 @@
+{
+  "created_utc": "2026-11-02T19:35:31.869722+00:00",
+  "command": [
+    "docs/work-packages/20261102_mofe_input_producer_audit/artifacts/reproduce_management_audit.py",
+    "--repo",
+    "/workdir/wepppy",
+    "--output-dir",
+    "docs/work-packages/20261102_mofe_input_producer_audit/artifacts/management_reproduction"
+  ],
+  "repo": "/home/workdir/wepppy",
+  "python_executable": "/workdir/wepppy/.venv/bin/python",
+  "python_version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "git_head": "41c8b53cfe93f9657a0ce53f602e3e134b48d172",
+  "script_sha256": "f4446ed940025d5ef6b3174bde211660778d6ce655ea62b94a5b0c932e2d9896",
+  "source_sha256": {
+    "wepppy/wepp/management/managements.py": "62a3f65a3afc933069e5cfe4703d1ce2290028d2f619901ff2e51966c84a4b6c",
+    "wepppy/wepp/management/pmetpara.py": "49cb06b2b18feaae4be2658788e12731c2a3d6d14f62e048201cc5cf9356fd27",
+    "wepppy/wepp/management/utils/multi_ofe.py": "457bf023417c93c6d7d7c1f2dbd6ae54f062e727e2c5bace0186c2ffa05ca14e",
+    "wepppy/nodb/mods/disturbed/disturbed.py": "fb6128da54d5d7bb3109cba1ffa837aacd4a218e408834f8f9d32b20fcd41cd5",
+    "wepppy/nodb/core/wepp_prep_service.py": "321bba4979627360ccaee6a3ded402e44fb712a4fe9eda5ad3e24fa1d1bd3701",
+    "wepppy/nodb/core/landuse.py": "be886fd308235c4af60397436ff35abce1acf100d23c518061c1efddae26366a",
+    "tests/wepp/management/test_multiple_ofe.py": "57dbfde8143ad94e132be05c7b27be7979cf8a1c18c26ae9aec9f4c69707da45",
+    "tests/wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man": "b3860d9d88cad9527c11c7d1e9dca52749022bf2a7c9c520f214b72c1affc4f2",
+    "wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man": "c1c17d599daaf047b3e341b1ba2273ce983a1e7efafd8154a9f18a7cbe45c865"
+  },
+  "pmet": {
+    "serialized_plants": [
+      "Tah_6892",
+      "OFE2_Tah_6892"
+    ],
+    "collector_result": [
+      "Tah_6892"
+    ],
+    "pmetpara": "1\nTah_6892,0.95,0.8,1,-\n"
+  },
+  "residue": {
+    "ofe2_last_plant_hmax_mutation": 0.123,
+    "plants": [
+      {
+        "index": 1,
+        "name": "L84_Oats",
+        "hmax": 1.0
+      },
+      {
+        "index": 2,
+        "name": "L163_Weed",
+        "hmax": 0.49988
+      },
+      {
+        "index": 3,
+        "name": "L179_weed",
+        "hmax": 0.0
+      },
+      {
+        "index": 4,
+        "name": "OFE2_L84_Oats",
+        "hmax": 1.0
+      },
+      {
+        "index": 5,
+        "name": "OFE2_L163_Weed",
+        "hmax": 0.49988
+      },
+      {
+        "index": 6,
+        "name": "OFE2_L179_weed",
+        "hmax": 0.123
+      }
+    ],
+    "residue_operations": [
+      {
+        "name": "RES_2",
+        "plant_name": "L179_weed",
+        "plant_index": "3"
+      },
+      {
+        "name": "OFE2_RES_2",
+        "plant_name": "L179_weed",
+        "plant_index": "3"
+      }
+    ]
+  },
+  "rotation": {
+    "source_rotation_lengths": [
+      [
+        1,
+        1
+      ],
+      [
+        2
+      ]
+    ],
+    "second_source_yearly_refs": [
+      [
+        [
+          "Year 1"
+        ],
+        [
+          "Year 2"
+        ]
+      ]
+    ],
+    "combined_ofe2_refs": [
+      [
+        [
+          "OFE2_Year 1"
+        ]
+      ],
+      [
+        [
+          "Year 1",
+          "OFE2_Year 1"
+        ]
+      ]
+    ],
+    "expanded_in_memory_ofe2_refs": [
+      [
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ]
+      ],
+      [
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ],
+        [
+          "OFE2_Year 1"
+        ]
+      ]
+    ],
+    "expanded_serialized_readback": {
+      "status": "failed",
+      "error_type": "IndexError",
+      "error": "pop from empty list"
+    }
+  },
+  "scope": "Actual Python writers and serialized/reparsed artifacts; no native execution or broad tests."
+}

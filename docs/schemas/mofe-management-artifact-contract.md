@@ -6,6 +6,10 @@ eligibility amendment has separate validation and release status below.
 
 ## Scope
 
+Accepted MIPA-01 amendment (2026-11-02): the
+[MOFE input identity contract](mofe-input-identity-contract.md) specifies complete
+calendars, residue references and crop-keyed PMET propagation. Implementation conformance is pending; existing accepted obligations below remain.
+
 This contract governs four existing multiple-overland-flow-element (MOFE)
 landuse generation paths:
 

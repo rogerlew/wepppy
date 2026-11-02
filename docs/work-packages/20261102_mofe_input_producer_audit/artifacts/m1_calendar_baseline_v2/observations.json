@@ -1,0 +1,179 @@
+{
+  "scope": "Actual writer/parser boundary; normalization is an isolated experiment, no native execution",
+  "source": "tests/wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man",
+  "source_sha256": "b3860d9d88cad9527c11c7d1e9dca52749022bf2a7c9c520f214b72c1affc4f2",
+  "producer_sha256": "62a3f65a3afc933069e5cfe4703d1ce2290028d2f619901ff2e51966c84a4b6c",
+  "observations": [
+    {
+      "case": "source_roundtrip",
+      "declared_sim_years": 2,
+      "rotation_lengths": [
+        1,
+        1
+      ],
+      "total_emitted_years": 2,
+      "intended_references": [
+        [
+          [
+            "Year 1",
+            "Year 2"
+          ]
+        ],
+        [
+          [
+            "Year 2"
+          ]
+        ]
+      ],
+      "readback": {
+        "status": "parsed",
+        "references": [
+          [
+            [
+              "Year 1",
+              "Year 2"
+            ]
+          ],
+          [
+            [
+              "Year 1"
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "case": "source_expanded_4",
+      "declared_sim_years": 4,
+      "rotation_lengths": [
+        4,
+        4
+      ],
+      "total_emitted_years": 8,
+      "intended_references": [
+        [
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 1",
+            "Year 2"
+          ]
+        ],
+        [
+          [
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ]
+        ]
+      ],
+      "readback": {
+        "status": "failed",
+        "type": "IndexError",
+        "error": "pop from empty list"
+      }
+    },
+    {
+      "case": "normalized_source",
+      "declared_sim_years": 2,
+      "rotation_lengths": [
+        2
+      ],
+      "total_emitted_years": 2,
+      "intended_references": [
+        [
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ]
+        ]
+      ],
+      "readback": {
+        "status": "parsed",
+        "references": [
+          [
+            [
+              "Year 1",
+              "Year 2"
+            ],
+            [
+              "Year 2"
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "case": "normalized_expanded_4",
+      "declared_sim_years": 4,
+      "rotation_lengths": [
+        4
+      ],
+      "total_emitted_years": 4,
+      "intended_references": [
+        [
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ],
+          [
+            "Year 1",
+            "Year 2"
+          ],
+          [
+            "Year 2"
+          ]
+        ]
+      ],
+      "readback": {
+        "status": "parsed",
+        "references": [
+          [
+            [
+              "Year 1",
+              "Year 2"
+            ],
+            [
+              "Year 2"
+            ],
+            [
+              "Year 1",
+              "Year 2"
+            ],
+            [
+              "Year 2"
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "case": "combined_downstream_year_objects",
+      "distinct_objects": 2,
+      "year_count": 2
+    }
+  ]
+}
