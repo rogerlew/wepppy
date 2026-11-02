@@ -20,7 +20,9 @@ the additive-volume fine-earth share is:
     c = rho_r*(1-w)/(rho_f*w + rho_r*(1-w))
 
 Under the additional nonporous-fragment assumption, theta_whole = c*theta_fine.
-The inverse theta_whole/c is a diagnostic, not an approved retention law.
+The inverse theta_whole/c is not a universally validated retention law. The
+explicit experimental SSURGO option below has bounded consumer admission; this
+does not validate the nonporous-fragment assumption for every eligible source.
 Porous fragments, interfaces, density basis and incompatible source estimates
 can invalidate this approximation. An inverse above unity or fine-earth porosity
 identifies assumption/source incompatibility; it does not alone prove the
@@ -104,8 +106,8 @@ not alone demonstrate changed absolute initial water or available storage.
 
 ## Configuration and signed-input failure admission
 
-KSFLAG changes both frost execution and rangeland conductivity in the audited
-native path. Compare retention within each configuration; configuration contrasts
+KSFLAG changes frost execution and conductivity adjustments in the audited
+native paths, including cropland crust/tillage/canopy behavior and rangeland behavior. Compare retention within each configuration; configuration contrasts
 do not isolate frost causality. A failed configured history blocks complete-
 history admission even when the printed unmet withdrawal is numerically small.
 Record the actual signed-input guard, its available relative ST, dry-reference
@@ -115,6 +117,81 @@ under KSFLAG1 is not proof that water was frozen at the failing boundary.
 
 Rationale: the bounded retention/configuration experiment reached a zero-ST
 signed-withdrawal stop after earlier active frost. Its last coarse snapshot had
-zero frozen thickness; retained evidence does not establish the signed-input
-origin. Preserve failed histories and defer consumer/closure claims that depend
-on their completion. See [ADR-0128](../adrs/ADR-0128-retention-frost-consumer-experiment.md).
+zero frozen thickness. Subsequent producer observations attribute the deficit to
+interception allocation against a rounded supply. Preserve the original failed
+history and distinguish repaired completion from consumer/physical closure. See [ADR-0128](../adrs/ADR-0128-retention-frost-consumer-experiment.md).
+
+## Frost policy and legacy compatibility
+
+Treat frost-file parameters, actual frost execution, conductivity adjustment and
+native land-use identity as separate evidence dimensions. A frost.txt sidecar is
+not an activation switch. Verify flags after native overrides and observe calls;
+product labels such as forest, range, disturbed or road do not identify the native
+management code. Do not change land use to activate frost.
+
+The audited2010 Roads/eRMiT binaries execute frost on their retained KSFLAG0 decks.
+The audited modern gate suppresses it. A same-source frost-only bypass establishes
+causality for activation and paired-output differences in the tested native-landuse1
+paths while preserving exact warm and
+already-active KSFLAG1 controls. This does not justify global restoration: energy,
+fine/coarse stock closure, real native-range coverage and field calibration remain
+separate requirements. Preserve existing production policy until those gates and
+an explicit adoption decision are satisfied. Historical changes document an intent
+to suppress nonagricultural frost, but the scientific calibration rationale for
+that suppression and the original Roads/eRMiT calibration assumptions remain
+unverified.
+
+Use complete supported calendars per output family. The legacy eRMiT selected-year
+climate is nonconsecutive; its daily water output retains source years. A current
+two-year consecutive excerpt is an exploratory compatibility fixture, not a full
+reproduction of the original ten-year stage. Do not silently relabel its weather
+or weaken calendar validation to claim full compatibility.
+
+Rationale and source-backed evidence: the active rock-water program's
+[frost lineage](../work-packages/20261101_rock_water_development/artifacts/frost-lineage.md),
+[general comparator map](../work-packages/20261101_rock_water_development/artifacts/general-native-comparator-map.md)
+and [frost-only readback](../work-packages/20261101_rock_water_development/artifacts/F04-science-readback.md).
+The general representation contract remains authoritative when this package closes.
+
+## Interception ownership admission
+
+Interception must not persist more water than its represented primitive supplies
+and carried store own. Distinguish exact accepted-store feasibility from subsequent
+binary64 and REAL flux rounding. Fixing an already-overdrawn consumer expression in
+higher precision alone is insufficient; a small deficit does not justify spending
+dry-reference water or dropping the signed demand. Assess all confirmed consumers,
+including canopy carry transfer, storm depletion, daily/hourly input and effective-
+plane runoff subtraction. Carry may already have been allocated by IDAT, so transfer
+admission requires actual same-day producer/consumer evidence.
+
+The expansion candidate in [ADR-0129](../adrs/ADR-0129-conservative-interception-allocation.md)
+passes a bounded twelve-history panel. Full-domain and accepted-flux evidence,
+shared-consumer coverage and general regressions remain required before promotion.
+
+
+## Optional SSURGO retention artifact contract
+
+The parent admission decision of 2026-11-02 accepts development of an explicit experimental option under ADR-0132. Commit this contract and ADR as an ancestor before applying the implementation. The default producer remains unchanged; the installed controller and integration gates below remain required before implementation acceptance.
+
+The explicit `ssurgo-volume-inverse-experimental-v1` builder policy follows ADR-0132 and ADR-0127 eligibility after final source selection. It requires a source acquisition receipt SHA256 and the complete requested successful source-profile set. No other source family, default formula, persisted setting or density-changing treatment is admitted by this option.
+
+Every opt-in source artifact contains the policy marker and a matching source-v3 companion. Source decisions bind original values, final fallback branches, selected component/horizon IDs, eligibility reasons and emitted row identities, including generated 200 mm splits. Treatment-v3, stack-v3 and stage-v3 companions bind actual parent soil and companion hashes, ordered lineage and actual settings. Final clipping remains nominal serialized support; native remapping is separate evidence.
+
+The marker requires its companion. Missing, mismatched, malformed or foreign identity cannot silently downgrade to ordinary handling. Readback follows portable relative references only within caller-owned project/source root authority, rejects symlink traversal before reads, and preserves whole-project relocation. Source metadata cannot grant arbitrary filesystem authority.
+
+All four opt-in producers require fresh destinations and exclusively create soils and companions. Existing files, dangling links and competing creation reject without overwrite or unlink. Default-source rebuilds reject stale opt-in treatment reuse. Unmarked ordinary inputs preserve their established behavior. Blank density lookup cells use the canonical no-override parser; actual numeric changes and recomputation reject.
+
+P03 supplies bounded consumer admission for the fixed six-source project, unchanged-density treatments and the actual hourly engine: 142 histories, with internal observations on H11/H28/H40 and nonvacuous accepted-root withdrawal on H40. Source-to-native remapping, required consumer domains and accepted withdrawal evidence are specific to those retained inputs and source revision. This does not establish universal physical validity, thermal closure, a full-system water budget, field calibration or source-family transfer.
+
+Mathematical eligibility is the generic API rule, not a claim of physical validation for every eligible profile. Do not introduce a case-specific source whitelist or tune the inverse to the retained six sources. Independently bound acquisition association remains mandatory for each build.
+
+Installed-module spawn and actual generated-artifact propagation must pass after integration with no research initializer. Bind its 66 soils/193 OFEs and complete companions to the P04 artifacts already consumed by P03. Exact unchanged native inputs permit reuse of that consumer evidence; a companion or a successful job alone is not admission. Focused, stub, broad regression and independent integration outcome reviews remain required. No default migration, automatic rebuild, UI or persisted policy change, density-changing treatment or deployment is authorized.
+
+The accepted bounded evidence and parent decision are indexed in [ADR-0132](../adrs/ADR-0132-optional-ssurgo-retention-builder.md#evidence-and-gates).
+
+
+## Acquisition association boundary
+
+`retention_source_receipt` is a caller-supplied SHA256 identifier. The API checks its syntax and internal source/decision/emitted-row/parent consistency; it does not open or independently verify the acquisition receipt, raw source snapshot or cache. A matching hash is not external source authority, institutional attestation or proof that the metadata describes an actual acquisition.
+
+The authorized acquisition/build caller must independently bind the actual receipt to the complete consistent source snapshot, production cache schema/ordered rows/missingness, selected components/horizons and builder input fields. Retain that association evidence with the build. P04 supplies this separate evidence through its frozen P01 tables and finalized-cache/source-record audit; generic companion validation alone does not reproduce that verification. This boundary remains mandatory for every later opted-in build.
