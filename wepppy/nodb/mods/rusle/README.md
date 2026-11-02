@@ -208,6 +208,14 @@ coarse fragments are handled in erodibility/permeability (`K`) logic.
 
 `auto` data-source precedence and normalization for both controls:
 
+The C manifest's cosurffrags source report includes record-support diagnostics
+when the proxy column can be parsed: missing, nonfinite, unparseable, out-of-range,
+measured-zero and used rows. With an area column it also reports known positive
+area, used area and their ratio in the source units. This ratio excludes unknown
+area and must not be read as complete footprint coverage. These diagnostics do
+not change existing proxy values, clipping, source precedence or fallback behavior.
+Older manifests may omit this additive `support` object.
+
 - primary proxy: run-scoped SSURGO surface-fragment fields in
   `soils/soils.parquet` (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
   `surface_rock_cover_percent`, `sfragcov`), area-weighted mean when `area` is

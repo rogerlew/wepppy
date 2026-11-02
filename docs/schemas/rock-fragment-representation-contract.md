@@ -63,10 +63,12 @@ including source/fallback bases and independent conductivity/drainage domains.
 
 ## Run-scoped surface-proxy support reporting
 
-Implementation pending: RUSLE's existing cosurffrags parquet proxy reports must
+Implemented and artifact-verified2026-11-01: RUSLE's cosurffrags parquet proxy reports
 retain missing/nonfinite/out-of-range/zero/used row counts and known-area support
 as defined in the RUSLE specification. A mean over usable records must not imply
 complete observed footprint. Unknown area is distinct from zero known support;
 finite out-of-range values remain flagged even when existing numeric clipping
 makes the resulting proxy bounded. This change adds provenance only and does not
 admit survey composition as measured Roads armor or revise proxy/default policy.
+
+Conformance evidence: [surface validation](../work-packages/20261101_rock_water_development/artifacts/surface-validation.md).

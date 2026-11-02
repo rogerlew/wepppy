@@ -1213,7 +1213,7 @@ Defaulting policy (scientifically conservative):
     (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
     `surface_rock_cover_percent`, `sfragcov`) and aggregated with area-weighted
     mean when `area` is present (otherwise simple mean)
-- implementation conformance pending for additive proxy-support diagnostics:
+- implementation conformance verified (2026-11-01) for additive proxy-support diagnostics:
   the cosurffrags source report in both RAP and SBS manifests must include a
   `support` object whenever a recognized proxy column is successfully queried and its numerical
   aggregation inputs parse. Existing query/parse-error unavailable reports may

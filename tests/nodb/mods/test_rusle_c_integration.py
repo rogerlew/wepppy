@@ -800,3 +800,122 @@ def test_soilgrids_cover_units_reach_rasters_and_manifest(
     empty_meta = json.loads(Path(empty.manifest).read_text())['c'][key]
     assert empty_meta['source'] == 'auto:fallback_0'
     assert empty_meta['effective'] == 0.0
+
+
+def _write_surface_proxy_parquet(path: Path, rows, *, area=True, text=False) -> None:
+    """Use the actual parquet reader boundary, including NULL and malformed fields."""
+    import duckdb
+
+    path.parent.mkdir(exist_ok=True)
+    kind = 'VARCHAR' if text else 'DOUBLE'
+    columns = f'cosurffrags_cover_pct {kind}' + (f', area {kind}' if area else '')
+    with duckdb.connect() as con:
+        con.execute(f'CREATE TABLE proxy ({columns})')
+        if rows:
+            con.executemany('INSERT INTO proxy VALUES (' + ','.join(['?'] * (2 if area else 1)) + ')', rows)
+        destination = str(path).replace("'", "''")
+        con.execute(f"COPY proxy TO '{destination}' (FORMAT PARQUET)")
+
+
+@pytest.mark.parametrize('c_mode', ['observed_rap', 'scenario_sbs'])
+def test_surface_proxy_support_reaches_actual_c_artifacts(tmp_path: Path, c_mode: str) -> None:
+    rows = [(0, 2), (20, 3), (None, 5), (float('inf'), 7),
+            (150, 1), (-10, 1), (50, None), (float('nan'), 9), (10, 0)]
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows)
+    dem = tmp_path / 'dem.tif'
+    _write_raster(dem, np.ones((1, 2)), dtype='float32', nodata=-9999.0)
+    if c_mode == 'observed_rap':
+        rap = tmp_path / 'rap.tif'
+        _write_default_rap_dataset(rap, bare_ground=np.array([[50., 50.]]))
+        kwargs = {'rap': str(rap)}
+        key, bare = 'rock_fraction_of_rap_bare', .5
+    else:
+        landuse, mapping = tmp_path / 'landuse.tif', tmp_path / 'disturbed.json'
+        _write_raster(landuse, np.array([[52, 52]]), dtype='uint8', nodata=0)
+        _write_disturbed_mapping(mapping, {52: {'DisturbedClass': 'shrub'}})
+        kwargs = {'landuse': str(landuse), 'disturbed_mapping_path': str(mapping)}
+        key, bare = 'rock_fraction_of_sbs_bare', .1
+    result = c_integration.run_rusle_c_factor(str(tmp_path), dem=str(dem), c_mode=c_mode, **kwargs)
+    rock = json.loads(Path(result.manifest).read_text())['c'][key]
+    source = rock['sources']['cosurffrags']
+    assert source['row_count'] == 4
+    assert source['support'] == {
+        'total_rows': 9, 'missing_cover_rows': 1, 'nonfinite_cover_rows': 2,
+        'unparseable_cover_rows': 0, 'out_of_range_cover_rows': 2,
+        'zero_cover_rows': 1, 'used_rows': 4,
+        'unknown_or_nonpositive_area_rows': 2, 'known_positive_area': 28.,
+        'used_positive_area': 7., 'known_area_fraction_used': .25,
+    }
+    # Independent legacy numeric contract: only finite cover + positive area.
+    proxy = (20 * 3 + 150 - 10) / 7 / 100
+    assert rock['surface_rock_cover_proxy_0_1'] == pytest.approx(proxy)
+    pixels, nodata = _read_single_band(result.c)
+    assert np.all(pixels != nodata)
+    assert np.allclose(pixels, np.exp(-.04 * 100 * (1 - bare * (1 - min(proxy / bare, 1)))))
+    # Explicit same numerical setting must produce exactly the same C raster.
+    manual = c_integration.run_rusle_c_factor(
+        str(tmp_path), dem=str(dem), c_mode=c_mode, **kwargs, **{key: min(proxy / bare, 1)},
+    )
+    assert np.array_equal(_read_single_band(manual.c)[0], pixels)
+
+
+@pytest.mark.parametrize('rows', [[], [(None, 2.), (None, None)]])
+def test_surface_proxy_empty_and_unknown_support(tmp_path: Path, rows) -> None:
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy is None and report['reason'] == 'cosurffrags_no_weighted_rows'
+    support = report['support']
+    assert support['total_rows'] == support['missing_cover_rows'] == len(rows)
+    assert support['used_rows'] == 0
+    assert support['known_area_fraction_used'] == (0. if rows else None)
+
+
+def test_surface_proxy_unweighted_support(tmp_path: Path) -> None:
+    rows = [(None,), (float('nan'),), (20.,), (0.,), (150.,), (-10.,)]
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows, area=False)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy == .4 and report['row_count'] == 4
+    support = report['support']
+    assert support['total_rows'] == 6 and support['used_rows'] == 4
+    assert support['out_of_range_cover_rows'] == 2 and support['zero_cover_rows'] == 1
+    assert support['missing_cover_rows'] == support['nonfinite_cover_rows'] == 1
+    assert all(support[key] is None for key in ('known_positive_area', 'used_positive_area',
+               'known_area_fraction_used', 'unknown_or_nonpositive_area_rows'))
+
+
+def test_surface_proxy_preserves_excluded_malformed_values(tmp_path: Path) -> None:
+    rows = [(None, 'bad'), ('bad', None), ('nan', 'bad'), ('20', '2')]
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows, text=True)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy == .2 and report['row_count'] == 1
+    support = report['support']
+    assert support['unparseable_cover_rows'] == support['missing_cover_rows'] == support['nonfinite_cover_rows'] == 1
+    assert support['unknown_or_nonpositive_area_rows'] == 3
+    assert support['known_area_fraction_used'] == 1.  # Does not imply a complete footprint.
+
+
+@pytest.mark.parametrize('rows', [[('bad', '2')], [('20', 'bad')]])
+def test_surface_proxy_preserves_consumed_malformed_failure(tmp_path: Path, rows) -> None:
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows, text=True)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy is None and report['reason'] == 'cosurffrags_query_failed'
+    assert 'support' not in report
+
+
+def test_surface_proxy_invalid_area_support(tmp_path: Path) -> None:
+    rows = [(10., float('nan')), (20., float('inf')), (30., -1.), (40., 2.)]
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy == .4 and report['row_count'] == 1
+    assert report['support']['unknown_or_nonpositive_area_rows'] == 3
+    assert report['support']['known_positive_area'] == report['support']['used_positive_area'] == 2.
+
+
+@pytest.mark.parametrize('rows', [[], [(None,), (float('inf'),)]])
+def test_surface_proxy_unweighted_unavailable_support(tmp_path: Path, rows) -> None:
+    _write_surface_proxy_parquet(tmp_path / 'soils/soils.parquet', rows, area=False)
+    proxy, report = c_integration._load_cosurffrags_surface_proxy_from_soils_parquet(str(tmp_path))
+    assert proxy is None and report['reason'] == 'cosurffrags_no_finite_rows'
+    assert report['support']['total_rows'] == len(rows)
+    assert report['support']['used_rows'] == 0
+    assert report['support']['known_area_fraction_used'] is None

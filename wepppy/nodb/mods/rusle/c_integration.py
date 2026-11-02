@@ -190,6 +190,58 @@ def _mean_lookup_bare_0_1(*, bare_lookup_0_1: np.ndarray, valid_mask: np.ndarray
     return float(np.nanmean(bare_0_1))
 
 
+def _cosurffrags_support(rows: list[tuple[Any, Any]], *, has_area: bool) -> dict[str, Any]:
+    """Describe record support without changing the existing value-selection path."""
+    report: dict[str, Any] = {
+        "total_rows": len(rows), "missing_cover_rows": 0,
+        "nonfinite_cover_rows": 0, "unparseable_cover_rows": 0,
+        "out_of_range_cover_rows": 0, "zero_cover_rows": 0, "used_rows": 0,
+        "unknown_or_nonpositive_area_rows": 0 if has_area else None,
+        "known_positive_area": 0.0 if has_area else None,
+        "used_positive_area": 0.0 if has_area else None,
+        "known_area_fraction_used": None,
+    }
+    for cover, area in rows:
+        cover_number = None
+        if cover is None:
+            report["missing_cover_rows"] += 1
+        else:
+            try:
+                cover_number = float(cover)
+            except (TypeError, ValueError, OverflowError):
+                # Only reached after legacy aggregation parsed successfully; this
+                # field was excluded by its original short-circuit conditions.
+                report["unparseable_cover_rows"] += 1
+            else:
+                if not np.isfinite(cover_number):
+                    report["nonfinite_cover_rows"] += 1
+                    cover_number = None
+                elif not 0.0 <= cover_number <= 100.0:
+                    report["out_of_range_cover_rows"] += 1
+                elif cover_number == 0.0:
+                    report["zero_cover_rows"] += 1
+        if has_area:
+            try:
+                area_number = float(area) if area is not None else None
+            except (TypeError, ValueError, OverflowError):
+                # Unknown support on records the numeric aggregation excluded.
+                area_number = None
+            if area_number is None or not np.isfinite(area_number) or area_number <= 0.0:
+                report["unknown_or_nonpositive_area_rows"] += 1
+                continue
+            report["known_positive_area"] += area_number
+            if cover_number is not None:
+                report["used_positive_area"] += area_number
+                report["used_rows"] += 1
+        elif cover_number is not None:
+            report["used_rows"] += 1
+    if has_area and report["known_positive_area"] > 0.0:
+        report["known_area_fraction_used"] = (
+            report["used_positive_area"] / report["known_positive_area"]
+        )
+    return report
+
+
 def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float | None, dict[str, Any]]:
     soils_parquet = pick_existing_parquet_path(wd, "soils/soils.parquet")
     if soils_parquet is None:
@@ -219,7 +271,7 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
             column_expr = f'"{selected_column}"'
             if "area" in column_names:
                 rows = con.execute(
-                    f"SELECT {column_expr}, area FROM read_parquet(?) WHERE {column_expr} IS NOT NULL",
+                    f"SELECT {column_expr}, area FROM read_parquet(?)",
                     [str(soils_parquet)],
                 ).fetchall()
                 weighted_rows = [
@@ -231,11 +283,13 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
                     and np.isfinite(float(area))
                     and float(area) > 0.0
                 ]
+                support = _cosurffrags_support(rows, has_area=True)
                 if not weighted_rows:
                     return None, {
                         "status": "unavailable",
                         "reason": "cosurffrags_no_weighted_rows",
                         "column": selected_column,
+                        "support": support,
                     }
                 total_area = float(sum(area for _value, area in weighted_rows))
                 if total_area <= 0.0:
@@ -243,13 +297,14 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
                         "status": "unavailable",
                         "reason": "cosurffrags_nonpositive_total_area",
                         "column": selected_column,
+                        "support": support,
                     }
                 cover_pct = float(sum(value * area for value, area in weighted_rows) / total_area)
                 row_count = len(weighted_rows)
                 aggregation = "area_weighted_mean"
             else:
                 rows = con.execute(
-                    f"SELECT {column_expr} FROM read_parquet(?) WHERE {column_expr} IS NOT NULL",
+                    f"SELECT {column_expr} FROM read_parquet(?)",
                     [str(soils_parquet)],
                 ).fetchall()
                 values = [
@@ -257,11 +312,13 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
                     for (cover_pct,) in rows
                     if cover_pct is not None and np.isfinite(float(cover_pct))
                 ]
+                support = _cosurffrags_support([(value, None) for (value,) in rows], has_area=False)
                 if not values:
                     return None, {
                         "status": "unavailable",
                         "reason": "cosurffrags_no_finite_rows",
                         "column": selected_column,
+                        "support": support,
                     }
                 cover_pct = float(np.mean(values))
                 row_count = len(values)
@@ -281,6 +338,7 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
         "aggregation": aggregation,
         "cover_pct": cover_pct,
         "row_count": int(row_count),
+        "support": support,
         "surface_rock_cover_proxy_0_1": surface_proxy_0_1,
     }
 
