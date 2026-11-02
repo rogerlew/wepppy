@@ -1,0 +1,13 @@
+INFO:wctl2:docker compose exec weppcloud python -c 'from pathlib import Path; from tempfile import TemporaryDirectory; from copy import deepcopy; from wepppy.wepp.management import read_management; from wepppy.wepp.management.pmetpara import pmetpara_prep; from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
+with TemporaryDirectory(prefix="mipa-qa-desc-") as directory:
+ p=Path(directory)/"p1.man"
+ p.write_text(str(read_management("tests/wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man")))
+ pmetpara_prep(directory,0.5,0.8)
+ first=read_management(str(p)); second=deepcopy(first)
+ second.plants[0].description[0]="Same parameters, different source label"
+ p.write_text(str(ManagementMultipleOfeSynth([first,second]).build()))
+ pmetpara_prep(directory,0.5,0.8)
+ result=read_management(str(p)); assert result.nofe==2
+ before=p.read_bytes(); pmetpara_prep(directory,0.5,0.8); assert p.read_bytes()==before
+ print("description-only synthesis, actual readback and repeat-byte preservation passed")'
+description-only synthesis, actual readback and repeat-byte preservation passed

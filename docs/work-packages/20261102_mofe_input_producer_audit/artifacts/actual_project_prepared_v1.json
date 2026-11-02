@@ -1,0 +1,2853 @@
+{
+  "source_unchanged": true,
+  "clone": "/wc1/runs/mi/mipa-awake-20261102",
+  "uid": 1000,
+  "gid": 993,
+  "intent": {
+    "102": {
+      "1": "52",
+      "2": "52",
+      "3": "52"
+    },
+    "103": {
+      "1": "52"
+    },
+    "112": {
+      "1": "42",
+      "2": "42"
+    },
+    "113": {
+      "1": "71",
+      "2": "42"
+    },
+    "121": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "52",
+      "5": "52"
+    },
+    "122": {
+      "1": "42",
+      "2": "42"
+    },
+    "123": {
+      "1": "42"
+    },
+    "132": {
+      "1": "42"
+    },
+    "133": {
+      "1": "52",
+      "2": "42"
+    },
+    "142": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42"
+    },
+    "143": {
+      "1": "21"
+    },
+    "151": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42",
+      "8": "42",
+      "9": "42"
+    },
+    "152": {
+      "1": "42",
+      "2": "42"
+    },
+    "153": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42"
+    },
+    "161": {
+      "1": "52",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42"
+    },
+    "162": {
+      "1": "42"
+    },
+    "163": {
+      "1": "52",
+      "2": "42",
+      "3": "42"
+    },
+    "172": {
+      "1": "42",
+      "2": "42"
+    },
+    "173": {
+      "1": "42",
+      "2": "42",
+      "3": "21"
+    },
+    "181": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42"
+    },
+    "182": {
+      "1": "42",
+      "2": "42"
+    },
+    "183": {
+      "1": "42"
+    },
+    "192": {
+      "1": "42"
+    },
+    "193": {
+      "1": "52",
+      "2": "42",
+      "3": "21"
+    },
+    "201": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42"
+    },
+    "202": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42"
+    },
+    "203": {
+      "1": "42"
+    },
+    "212": {
+      "1": "42",
+      "2": "42"
+    },
+    "213": {
+      "1": "52",
+      "2": "42"
+    },
+    "22": {
+      "1": "42",
+      "2": "42"
+    },
+    "222": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42"
+    },
+    "223": {
+      "1": "42",
+      "2": "42"
+    },
+    "23": {
+      "1": "71",
+      "2": "71",
+      "3": "42",
+      "4": "52",
+      "5": "52"
+    },
+    "232": {
+      "1": "42",
+      "2": "42"
+    },
+    "233": {
+      "1": "52",
+      "2": "52",
+      "3": "52"
+    },
+    "241": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42"
+    },
+    "242": {
+      "1": "42",
+      "2": "42"
+    },
+    "243": {
+      "1": "42"
+    },
+    "252": {
+      "1": "42",
+      "2": "42"
+    },
+    "253": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42"
+    },
+    "261": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42",
+      "8": "42",
+      "9": "42"
+    },
+    "262": {
+      "1": "42",
+      "2": "42"
+    },
+    "263": {
+      "1": "42"
+    },
+    "271": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42"
+    },
+    "272": {
+      "1": "42"
+    },
+    "273": {
+      "1": "52",
+      "2": "52"
+    },
+    "281": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42",
+      "8": "42"
+    },
+    "282": {
+      "1": "42"
+    },
+    "283": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42"
+    },
+    "291": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42"
+    },
+    "292": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42"
+    },
+    "293": {
+      "1": "42",
+      "2": "42"
+    },
+    "301": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42",
+      "7": "42"
+    },
+    "302": {
+      "1": "42"
+    },
+    "32": {
+      "1": "42",
+      "2": "42"
+    },
+    "33": {
+      "1": "71",
+      "2": "71",
+      "3": "42"
+    },
+    "42": {
+      "1": "52",
+      "2": "42",
+      "3": "42",
+      "4": "42"
+    },
+    "43": {
+      "1": "42",
+      "2": "42",
+      "3": "42"
+    },
+    "51": {
+      "1": "42",
+      "2": "52",
+      "3": "52",
+      "4": "52",
+      "5": "52",
+      "6": "42",
+      "7": "52",
+      "8": "42",
+      "9": "52",
+      "10": "52",
+      "11": "42"
+    },
+    "52": {
+      "1": "42"
+    },
+    "53": {
+      "1": "42"
+    },
+    "61": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "42"
+    },
+    "62": {
+      "1": "42",
+      "2": "42"
+    },
+    "63": {
+      "1": "42"
+    },
+    "71": {
+      "1": "71",
+      "2": "71",
+      "3": "52",
+      "4": "42",
+      "5": "71"
+    },
+    "72": {
+      "1": "71"
+    },
+    "73": {
+      "1": "42",
+      "2": "52"
+    },
+    "82": {
+      "1": "52",
+      "2": "42"
+    },
+    "83": {
+      "1": "71",
+      "2": "71",
+      "3": "52",
+      "4": "52"
+    },
+    "91": {
+      "1": "42",
+      "2": "42",
+      "3": "42",
+      "4": "42",
+      "5": "42",
+      "6": "52"
+    },
+    "92": {
+      "1": "52",
+      "2": "52"
+    },
+    "93": {
+      "1": "42",
+      "2": "52"
+    }
+  },
+  "wepp_bin_configured_not_executed": "wepp_260803",
+  "hills": [
+    {
+      "file": "p1.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p1.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p1.sol": "4b478e9625ccf4203328b25d771cca9342cdd11dbb932d7d8aa7a29463462688",
+        "p1.slp": "1a4a59b7ae250e0bdf7cb07fcac69aeb68ff2221b43e31499885d1d3a4a8ae3f"
+      }
+    },
+    {
+      "file": "p10.man",
+      "management_ofes": 6,
+      "soil_ofes": 6,
+      "slope_ofes": 6,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p10.man": "647485ac5b7b8c02d7a2166b0a8cd7c644aa23123be3b2a48806b4387309fbd8",
+        "p10.sol": "470c9ce2bc7ac3968ed4008ed23c6e21596ec0ff6b2686efa14bb164fd2d9ee8",
+        "p10.slp": "6f02ddf5fb323f3f4db7240919b70227bfd9e1fefc10a2983b3083d7c7ecb7f2"
+      }
+    },
+    {
+      "file": "p11.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p11.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p11.sol": "235d8b84d2a7cb7ad5b7d735a37fdcb00b930737b67963ec05e32173e6b15d13",
+        "p11.slp": "983ac81df1ff06e446c3ba801ff54ebddc302af01802bf6172a51503d5a419fe"
+      }
+    },
+    {
+      "file": "p12.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p12.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p12.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p12.slp": "ed5df0a07bec0669b835bbb71d46ad636cff69c85203e22c16d1397fd43db9b7"
+      }
+    },
+    {
+      "file": "p13.man",
+      "management_ofes": 5,
+      "soil_ofes": 5,
+      "slope_ofes": 5,
+      "plants": [
+        "Tah_7670",
+        "P20a5e6e",
+        "P3d4234f",
+        "P73006b2",
+        "Pa237df3"
+      ],
+      "identities": {
+        "P20a5e6e": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_7670",
+          "rawp": 0.8
+        },
+        "P3d4234f": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_9591",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pa237df3": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_7670",
+          "rawp": 0.8
+        },
+        "Tah_7670": {
+          "kcb": 0.95,
+          "original": "Tah_7670",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p13.man": "004890730d3e97ee59c4d856816c4666eabe8b6c4b3622fae60dbe8dcb63e230",
+        "p13.sol": "16e5c2fae559cf9250c2a4237b658baa064ba1aaa352f2c3178a33640521d625",
+        "p13.slp": "a4f284634a24eb4f2594bc212af4ec72e44125c7fbd87300353032f38fa26862"
+      }
+    },
+    {
+      "file": "p14.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_7670"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p14.man": "855d7d06e3dc08660934a9f9697ad5369ab616ff1be0ce5d0345db4be0f7eadc",
+        "p14.sol": "695f5dd2e8c2e9c56595b9d80807e811b2a2759a56d59b1e74f33fa10faa62ca",
+        "p14.slp": "332ddc993b53fff004afdbfc83cb846b8152c266e65a6d1f4ef7e078c3d1e846"
+      }
+    },
+    {
+      "file": "p15.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P1e736f0"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p15.man": "b8b8e5145aff7998f69b043b3a22c51a5915e86891d209a713065f777377762b",
+        "p15.sol": "472be508a9a1f75d82f6a1c645ed41542d1d73ebb0c07de1515b910f57490b86",
+        "p15.slp": "b2164a3116756f89c7d5ae6812716841d88e27fd77c8e38f4bb17dac321428ab"
+      }
+    },
+    {
+      "file": "p16.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_9591",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p16.man": "197bfdb896b4a6a32b3afce2c4a5ebe5a09e6a519008ed307687edaaa6a2494a",
+        "p16.sol": "2263fc87485fa82aca92e5b7a4a3d821c79eccf2c3e0e258b15716692c02567c",
+        "p16.slp": "3e624cf5bd84f40d845deb77b0cac5ef937b5c11042eb1176b64df9ad7af6c6f"
+      }
+    },
+    {
+      "file": "p17.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_7670",
+        "P20a5e6e",
+        "P3d4234f",
+        "Pd06e875"
+      ],
+      "identities": {
+        "P20a5e6e": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_7670",
+          "rawp": 0.8
+        },
+        "P3d4234f": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_9591",
+          "rawp": 0.8
+        },
+        "Pd06e875": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_7670": {
+          "kcb": 0.95,
+          "original": "Tah_7670",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p17.man": "66969906991dc97e221b89b3dfb9117dfe2d5ceb4020ba3d846c050e5e276907",
+        "p17.sol": "a6d60aaaebea2393ea28282d0805203226b03da8fa90d0c1caea6b161d5f0b44",
+        "p17.slp": "339fe2df9a807bf3ca1e3bf3b7cc567b202a23b9ab3bccd55d488d0623744b99"
+      }
+    },
+    {
+      "file": "p18.man",
+      "management_ofes": 6,
+      "soil_ofes": 6,
+      "slope_ofes": 6,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "Pb7a113a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb7a113a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_9591",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p18.man": "65cefe6c3700c50a3e100e13756eaaedea12d936eb2a7ec45b30d25e456f6f00",
+        "p18.sol": "ebc98d2cf4e77c3215929c6f31ad2db5efbb7fdbbaddd26238d1f46c904f89b3",
+        "p18.slp": "a807a5590d315bc04f68e08a3d44514756659b9466a59f52991e97368e1cbae6"
+      }
+    },
+    {
+      "file": "p19.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_9591",
+        "P1e736f0"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p19.man": "de01b61533879ab22c8f3fb2f59212f0203627346a497fde24cccaf59966edd9",
+        "p19.sol": "72dcc36ef47775ac827f9c1861dd1ab197f5a55b7051560967abf169448f1076",
+        "p19.slp": "97f662e2d0d5f70bff4f82b6f66304e2a9c3204ecbc35745fb0b9318f0d15df2"
+      }
+    },
+    {
+      "file": "p2.man",
+      "management_ofes": 5,
+      "soil_ofes": 5,
+      "slope_ofes": 5,
+      "plants": [
+        "Tah_7670",
+        "P20a5e6e",
+        "P3f56086",
+        "Pd06e875",
+        "P4c37e8a"
+      ],
+      "identities": {
+        "P20a5e6e": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_7670",
+          "rawp": 0.8
+        },
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P4c37e8a": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_9591",
+          "rawp": 0.8
+        },
+        "Pd06e875": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_7670": {
+          "kcb": 0.95,
+          "original": "Tah_7670",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p2.man": "5ab8e3e80ce32be7f9a1e2ebdbd45e03dab4475294220585a44c0162bea11fc2",
+        "p2.sol": "e8ce28913d57e0fb08c2760114b5f4c8d348c947db43ddb51826496e1f5d4171",
+        "p2.slp": "77614ca6ed49d9ea568e8ae21de3cf33bd7d2425f592d751b576c5809b522ee8"
+      }
+    },
+    {
+      "file": "p20.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P1e736f0"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p20.man": "b8b8e5145aff7998f69b043b3a22c51a5915e86891d209a713065f777377762b",
+        "p20.sol": "472be508a9a1f75d82f6a1c645ed41542d1d73ebb0c07de1515b910f57490b86",
+        "p20.slp": "896b00c01e6dfd5a7ec92cc7aac51810f0bcfabdae1b16076cc4f69eaa940142"
+      }
+    },
+    {
+      "file": "p21.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_9591",
+        "P1e736f0",
+        "P3d4234f"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "P3d4234f": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p21.man": "90f5be368914e850fd956083d2fc109e9a61356250c70a47da93b0c76758190e",
+        "p21.sol": "b85880c0709dea5c715a3bf54cb72a45fecab21b8e1a494ad8fda34d22b2844d",
+        "p21.slp": "ca387360f4ed990d9f1317055c1ebdd3897fc2475817b664a5a7eb80871b9927"
+      }
+    },
+    {
+      "file": "p22.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_9591"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p22.man": "b3af0ff1cb056c1b15b102a933d4aeb37a630a96431e56ce0ebbbb7d56522f65",
+        "p22.sol": "4f648ab562bb34a0ed46c4916a6e7b692ba377b3f38b56bcae65fd6e05f36e45",
+        "p22.slp": "13bbcd9c81e0573c484f41c2681b0e27637f1c513c541b6d4ec8de5929ca81eb"
+      }
+    },
+    {
+      "file": "p23.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p23.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p23.sol": "ccdad810d39ca8d6c1aa451351b028c5bc3e139d0c993bcef500f846a2c79def",
+        "p23.slp": "428b9a8fc0b255069cd2db77cab1ba1cd6ebadc14333bcbe1b8382fe0c6dc2b1"
+      }
+    },
+    {
+      "file": "p24.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_7670",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_7670": {
+          "kcb": 0.95,
+          "original": "Tah_7670",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p24.man": "e7f844e4218826cb39ebff86f9feab870c878857c11580792feed3f675efaf69",
+        "p24.sol": "89fef0e19eb800954ddffd81ee7da28249ba2e390e184be83e09bfad411af26d",
+        "p24.slp": "97e94339edb4e4dfd1eca69c29402d00491c60554ac69624ce425f15b1b61b8c"
+      }
+    },
+    {
+      "file": "p25.man",
+      "management_ofes": 5,
+      "soil_ofes": 5,
+      "slope_ofes": 5,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "Pd06e875",
+        "P4c37e8a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P4c37e8a": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_9591",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd06e875": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p25.man": "e95de3477faf6e0aebdf386eea036b8073f7a8bad143a8c306c796004ef50bbe",
+        "p25.sol": "e0bc12952999f7ba15109dc48fb6278e70c7314ee67955b83d8e6b413ea463ba",
+        "p25.slp": "87fcf3ee6c3712300ef3555de7728d1b20bcdbda8f9f669ee4fac1e14660bfb2"
+      }
+    },
+    {
+      "file": "p26.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p26.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p26.sol": "256121ee187cda19e42188c50d421fcdfe1a5c971382f32e12616a005e4a9094",
+        "p26.slp": "e672d61698bc6ee724b6068b6fa159d40bcc4631a65235eace5bbf872bd18ce4"
+      }
+    },
+    {
+      "file": "p27.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p27.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p27.sol": "82c40f27b1822889d9429dba9955c602d43ea2f1f2f7fb6e52682320eff60f7b",
+        "p27.slp": "4d795cce041e0458502a8cd2416a5365656a3fd12b34ee9550ace4b7071e6ecd"
+      }
+    },
+    {
+      "file": "p28.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p28.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p28.sol": "ecf2eae847c9973cf479ffeb729fa1d5c7a46c6fff3fb35e0ae5bdaf4a6e2602",
+        "p28.slp": "ebbc33d1cb896c96c6f3a0be3c42404ea2ef526962c402e3570af641b5052478"
+      }
+    },
+    {
+      "file": "p29.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_9591",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p29.man": "197bfdb896b4a6a32b3afce2c4a5ebe5a09e6a519008ed307687edaaa6a2494a",
+        "p29.sol": "7943d2036740a0ee2df1eaab90721ed0959ee333538eb365899bfaeca9e947e0",
+        "p29.slp": "2fc7acb999eb06fc2da7a1f4048936266521156b66420c2ecb74a86a1509e13e"
+      }
+    },
+    {
+      "file": "p3.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p3.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p3.sol": "256121ee187cda19e42188c50d421fcdfe1a5c971382f32e12616a005e4a9094",
+        "p3.slp": "8056f8ef7e3f4fb503a9120e665ce4a15889dc067b6beb8cb301e331bdf8d645"
+      }
+    },
+    {
+      "file": "p30.man",
+      "management_ofes": 6,
+      "soil_ofes": 6,
+      "slope_ofes": 6,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p30.man": "647485ac5b7b8c02d7a2166b0a8cd7c644aa23123be3b2a48806b4387309fbd8",
+        "p30.sol": "8aaac8465b37d594f30aab3d8790a63cae8731b9beb3dab5810616d6dfc43738",
+        "p30.slp": "94bd020792b8f6c5126da7a94a3d640f3438933e46ba3ffcf4bcca1a002381cf"
+      }
+    },
+    {
+      "file": "p31.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "For_2276"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p31.man": "0fe824bc77ec31628bf5c90420d22a5d93d0dd9f93b46039032a5d0242834914",
+        "p31.sol": "3b7de3fb5b6045ca81fb57c57d608ce257cb3ff94a8b92382e22881cb6d46a96",
+        "p31.slp": "358df7ffdcec1bb8ee5dd2f8e0ba946883f7ba2ba412e4dac8f17cbcc983d23e"
+      }
+    },
+    {
+      "file": "p32.man",
+      "management_ofes": 9,
+      "soil_ofes": 9,
+      "slope_ofes": 9,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2",
+        "Pd826a91",
+        "Pd6a4e25"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd6a4e25": {
+          "kcb": 0.95,
+          "original": "OFE9_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd826a91": {
+          "kcb": 0.95,
+          "original": "OFE8_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p32.man": "9d5e750c3ea365b8a6d225d9d0f90d492ec52ce0b005793f219319f8f3bb1b71",
+        "p32.sol": "9d00a62fc709a82fb48abf3c34adaa0c46db014fe1c14c9fe5defaf6ba818944",
+        "p32.slp": "64835faa48a973a918d3c39b5dd527731d9730f7bbb00e1dfc93ed2c0d38a6ae"
+      }
+    },
+    {
+      "file": "p33.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p33.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p33.sol": "2397e4b68652259b8f2be1fbe1967731076ae882dc01f0c9b6116ebb70789181",
+        "p33.slp": "7024aaf037d13a9de7ccf2883e6a5a73745320d3819da82888768e7ea7809079"
+      }
+    },
+    {
+      "file": "p34.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p34.man": "662a194d50b0e04c9ab4e8471bc173f0621920e0ee7571819889704eb84e3567",
+        "p34.sol": "dbd86f303fdf239a99f4e4554863e2b1e9962fe7a4702e22a06de407176caa1f",
+        "p34.slp": "0a07407b3587ba42ce60692a842a9a4f54e07530500e356c16960ebbe1326e0c"
+      }
+    },
+    {
+      "file": "p35.man",
+      "management_ofes": 5,
+      "soil_ofes": 5,
+      "slope_ofes": 5,
+      "plants": [
+        "Tah_9591",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p35.man": "cf33bf67e152e2272f2d6405ec4f7e9ca5537cd625da03aafd5fbe71aba033a0",
+        "p35.sol": "d606786b76976c3dad0a904cac7edbe424c46f4b78b593b64b2c696805ce140c",
+        "p35.slp": "5d34c41fb3f94da2b131ded065db2c7b27b545f3ba34d0ef7fd7f0b8a0f7ed18"
+      }
+    },
+    {
+      "file": "p36.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p36.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p36.sol": "ecf2eae847c9973cf479ffeb729fa1d5c7a46c6fff3fb35e0ae5bdaf4a6e2602",
+        "p36.slp": "4dc036b8d88559a3d2ba3f1c3bdf3ac1eb875fc0e758dc29dacf2445ba9a9392"
+      }
+    },
+    {
+      "file": "p37.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_9591",
+        "P90377a9",
+        "P3f56086"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p37.man": "49ea716e303966d5fe3f941d8919c94a6ad0f8d701983fc3f9a9ec815ce29378",
+        "p37.sol": "6748de565820d1a8ad1002aa451e1aff44a403410d3d256e2ac972215e4cc302",
+        "p37.slp": "40a23a81fb9ceb7180b23a08a11418a74f1d9db14ae62665e211a104bdc00be4"
+      }
+    },
+    {
+      "file": "p38.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p38.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p38.sol": "235d8b84d2a7cb7ad5b7d735a37fdcb00b930737b67963ec05e32173e6b15d13",
+        "p38.slp": "594c2fdc2013400b274c64a5181ea14218393e5fcdca87ff7dd0e129ea0c9cba"
+      }
+    },
+    {
+      "file": "p39.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P972c75d"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "P972c75d": {
+          "kcb": 0.95,
+          "original": "OFE3_For_2276",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p39.man": "0faa55d0270106db914a23370d34226de35844ba641beed0849f30e612f2fd70",
+        "p39.sol": "ae032d1ced00b44c1059b86b6a33bc5295da28142977296779491a9b9fbf51e2",
+        "p39.slp": "7218710dd4495355ce86b296077c84c1605e6b72ca6ae96d284c044965b0cbb2"
+      }
+    },
+    {
+      "file": "p4.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_7670",
+        "P20a5e6e",
+        "P3f56086"
+      ],
+      "identities": {
+        "P20a5e6e": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_7670",
+          "rawp": 0.8
+        },
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_7670": {
+          "kcb": 0.95,
+          "original": "Tah_7670",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p4.man": "4400c3037f5a1518bff8ff6721b7467b2fc25efa1306956330bef3a47503ec9b",
+        "p4.sol": "5295f428461a993212d807d1e0f078078e621a321d5f6f947db560ae4e4a6923",
+        "p4.slp": "f3b809477705126ba7bf1d3b522bdfd35833af57199580a6311df08068637311"
+      }
+    },
+    {
+      "file": "p40.man",
+      "management_ofes": 7,
+      "soil_ofes": 7,
+      "slope_ofes": 7,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p40.man": "2eb9f96955143b75f9fb7dc16bb8173a2210f497d537fdb07714f3b0ba4382bb",
+        "p40.sol": "3417a0ad699bf69d6278f7890ca5b741dbb49ae8670247ae720e46c77109741b",
+        "p40.slp": "2c53185f086f9e74de87452519887e8d59bdbab7433e3f91f0aed34d1d45bc2f"
+      }
+    },
+    {
+      "file": "p41.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p41.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p41.sol": "ccdad810d39ca8d6c1aa451351b028c5bc3e139d0c993bcef500f846a2c79def",
+        "p41.slp": "e6d1dc70dfc1c828afbbd47f00d42df8de9e27ba4f2809d0956c9353cad16283"
+      }
+    },
+    {
+      "file": "p42.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p42.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p42.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p42.slp": "5b4efdf2989723a78b721406439be17544764084a8eb5228e2d10b86c4586801"
+      }
+    },
+    {
+      "file": "p43.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p43.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p43.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p43.slp": "b094f5bc3f752dce91469e3af3c8d6303438a211b55847005cf44e01d391987f"
+      }
+    },
+    {
+      "file": "p44.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_9591",
+        "P90377a9",
+        "P972c75d"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "P972c75d": {
+          "kcb": 0.95,
+          "original": "OFE3_For_2276",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p44.man": "1c9edd19606ca690616d6ae7657fd495f602c84b43cd623f7adc11bc28b25630",
+        "p44.sol": "535900106e6fd11a8db5a769df7ddb4d0d46f7b61fb8b03aa4468b060d298dea",
+        "p44.slp": "8d585be86dea70d773d6a6e884c1ca7d9bf0727786beb1e8ffbde2f6425357c2"
+      }
+    },
+    {
+      "file": "p45.man",
+      "management_ofes": 7,
+      "soil_ofes": 7,
+      "slope_ofes": 7,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p45.man": "2eb9f96955143b75f9fb7dc16bb8173a2210f497d537fdb07714f3b0ba4382bb",
+        "p45.sol": "3ced37aded560ec7f691972077dd20faa19374cd4a00cfb003af03ec4f43e7cb",
+        "p45.slp": "44ed0468b7678bf04ec8d61f00b291fe95229702496175bb0c2c0162de600585"
+      }
+    },
+    {
+      "file": "p46.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p46.man": "662a194d50b0e04c9ab4e8471bc173f0621920e0ee7571819889704eb84e3567",
+        "p46.sol": "7f9834490e932068be5c7514f8a01223118d4a098122ab33adae230c195e847b",
+        "p46.slp": "8b5842756f5c44be7380fc110e2c5df8a8c6b3fb41a1c6b46ab507174bb29faa"
+      }
+    },
+    {
+      "file": "p47.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p47.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p47.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p47.slp": "0da96a7790b2da57ca6b0be859815982ce4c3123ee78a3cfd6ec465569090ec3"
+      }
+    },
+    {
+      "file": "p48.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p48.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p48.sol": "d633285c73f92d3a215370fc0a07969becfdb2d446e03ec49d2f1ec76ca8d99a",
+        "p48.slp": "b205c60aa10d8e17969915bfd963cdf6085cad48cff89fa01df5e390928a2726"
+      }
+    },
+    {
+      "file": "p49.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_9591",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p49.man": "197bfdb896b4a6a32b3afce2c4a5ebe5a09e6a519008ed307687edaaa6a2494a",
+        "p49.sol": "96082448698dffd0eedcc9672dfff81827128644e028afdab4e4941de3eee4a2",
+        "p49.slp": "c9833b0260a0152463e4d760c5e128ecc481cd5eb8296dceed0091e18596c182"
+      }
+    },
+    {
+      "file": "p5.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_9591",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p5.man": "371323a180d3e192ce26b332050b38a7fe12aaade66a6658197d85317168e1dc",
+        "p5.sol": "64dc9b00090f8facf113167a2cccd24b1971da52085a6a7ab61c7e392da2e71e",
+        "p5.slp": "2208b93b9ede17c0fc0d946964fa9740e1acd87f16bc40e99039e5792fa51735"
+      }
+    },
+    {
+      "file": "p50.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p50.man": "662a194d50b0e04c9ab4e8471bc173f0621920e0ee7571819889704eb84e3567",
+        "p50.sol": "7f9834490e932068be5c7514f8a01223118d4a098122ab33adae230c195e847b",
+        "p50.slp": "fa27b5ff80c9bd607419e3fa675798dfed9a527d34352fb3ce0c8bcb87196063"
+      }
+    },
+    {
+      "file": "p51.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p51.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p51.sol": "d633285c73f92d3a215370fc0a07969becfdb2d446e03ec49d2f1ec76ca8d99a",
+        "p51.slp": "d025a39481dee3801404a7f73ac00674c3534ff9a8f648479cc218682c60b847"
+      }
+    },
+    {
+      "file": "p52.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p52.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p52.sol": "2397e4b68652259b8f2be1fbe1967731076ae882dc01f0c9b6116ebb70789181",
+        "p52.slp": "2ebfefdca04a7570771f75c8aa2fbab3fc44ea98b76770f3b9bbfb9e427186b9"
+      }
+    },
+    {
+      "file": "p53.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_9591",
+        "P1e736f0",
+        "P3d4234f"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "P3d4234f": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p53.man": "90f5be368914e850fd956083d2fc109e9a61356250c70a47da93b0c76758190e",
+        "p53.sol": "9b3506a2cec7eb0a2c5674500bbe5a1a097541575167e22b90c0e0e3b7b329a8",
+        "p53.slp": "8e9ec5ad0846902bb4890b7707283bb8f0868c4de4b51cce777d22a6e5cb9427"
+      }
+    },
+    {
+      "file": "p54.man",
+      "management_ofes": 6,
+      "soil_ofes": 6,
+      "slope_ofes": 6,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p54.man": "647485ac5b7b8c02d7a2166b0a8cd7c644aa23123be3b2a48806b4387309fbd8",
+        "p54.sol": "0726b5de77708e342a297a79c0b64775ba58552d4e43ac6ea8beaa910d951e75",
+        "p54.slp": "e68f93e69f5793542166afb08bf7ca8f87f3b980d74e680ee0e7765befc9f8cd"
+      }
+    },
+    {
+      "file": "p55.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p55.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p55.sol": "2397e4b68652259b8f2be1fbe1967731076ae882dc01f0c9b6116ebb70789181",
+        "p55.slp": "45a08fe9a949310c816a1b7033c984b574f8bbca5b5c44a167c4483631ba9876"
+      }
+    },
+    {
+      "file": "p56.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p56.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p56.sol": "b127783b4a852bbc63e0d36edf69cdfdf6f038949b826988ff3829be2344de1b",
+        "p56.slp": "b0de7d0ba2cf83e52cb3363337e9947a4c32f7df8622e41a71d10ac9e55a45e4"
+      }
+    },
+    {
+      "file": "p57.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p57.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p57.sol": "d633285c73f92d3a215370fc0a07969becfdb2d446e03ec49d2f1ec76ca8d99a",
+        "p57.slp": "867a2fa74ad866c31d5578b1dcfa08ef2d48935c19e9ceca534d8a3b19871339"
+      }
+    },
+    {
+      "file": "p58.man",
+      "management_ofes": 5,
+      "soil_ofes": 5,
+      "slope_ofes": 5,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p58.man": "e64c26efbe0bf0e2e70ffbfb25a36c27363acfc0065a1052250161e33eab6c82",
+        "p58.sol": "4036f20209ecd5ca9f51974661425479bb64e4378bc8d8f2af5265f106474c27",
+        "p58.slp": "ae8e81ad0833d30f75013abd109e2066a2bc03103e5167a60d81cba58ee8e96d"
+      }
+    },
+    {
+      "file": "p59.man",
+      "management_ofes": 9,
+      "soil_ofes": 9,
+      "slope_ofes": 9,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2",
+        "Pd826a91",
+        "Pd6a4e25"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd6a4e25": {
+          "kcb": 0.95,
+          "original": "OFE9_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd826a91": {
+          "kcb": 0.95,
+          "original": "OFE8_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p59.man": "9d5e750c3ea365b8a6d225d9d0f90d492ec52ce0b005793f219319f8f3bb1b71",
+        "p59.sol": "6eab1ab2bb876d0c966323cc2173f8c10b9ee6ecf4e6911edcc1d858c029f575",
+        "p59.slp": "db9bea1575448bcf5389bb152a52f314611f5b619599a6184a6cff48d03ccd7d"
+      }
+    },
+    {
+      "file": "p6.man",
+      "management_ofes": 3,
+      "soil_ofes": 3,
+      "slope_ofes": 3,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p6.man": "0d05053bf06cf20a5177e6c3f28d9d6411211088a3a3bb66bb873b3804df5fe7",
+        "p6.sol": "7b88c32ddfa290c9e139e8cd29ea1b1cdb948f80b953ff25cc438ea67e019868",
+        "p6.slp": "08ed1972fc68859be2bcd61537fc44456250074688100b09cf8fce8a506b9590"
+      }
+    },
+    {
+      "file": "p60.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p60.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p60.sol": "64ca9bde529afdafadfa6ac61b241ccc76d02acd7b6a33a15921d683703380d2",
+        "p60.slp": "ae3ae7a3afcdd6073a165c4e64d39d097e443b3777bf6cb8176b2aae6eabd7e0"
+      }
+    },
+    {
+      "file": "p61.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p61.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p61.sol": "5c414f7a180188cd2a5b623c73b1b64b05812e29a4d137b3f4952f31800af549",
+        "p61.slp": "afeffefa26658f31975025fed79e388606c0f78f90632684c1114be7320ad03a"
+      }
+    },
+    {
+      "file": "p62.man",
+      "management_ofes": 7,
+      "soil_ofes": 7,
+      "slope_ofes": 7,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p62.man": "2eb9f96955143b75f9fb7dc16bb8173a2210f497d537fdb07714f3b0ba4382bb",
+        "p62.sol": "59e692b1992dfa29d1e3a0413eaed066ec0ca347272b895b5ffa3bc99b13d77b",
+        "p62.slp": "403317e289657ffab28d112db597fb3767bf35c9bc351a0c1d74a74279286c79"
+      }
+    },
+    {
+      "file": "p63.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p63.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p63.sol": "b127783b4a852bbc63e0d36edf69cdfdf6f038949b826988ff3829be2344de1b",
+        "p63.slp": "d7952af5b33083cc99c6a05994e016aa657744cd3dd079b5b2049591db0c0210"
+      }
+    },
+    {
+      "file": "p64.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_9591",
+        "P1e736f0"
+      ],
+      "identities": {
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_9591": {
+          "kcb": 0.95,
+          "original": "Tah_9591",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p64.man": "de01b61533879ab22c8f3fb2f59212f0203627346a497fde24cccaf59966edd9",
+        "p64.sol": "58a2afa7fe65ef13f853627a47f765a65c7ae639a20f9e53088414e4a6f53ea3",
+        "p64.slp": "29103922e180d0062cb6a3ff00efc63fd604a464d16e79725057f6b3f1a4e96c"
+      }
+    },
+    {
+      "file": "p65.man",
+      "management_ofes": 8,
+      "soil_ofes": 8,
+      "slope_ofes": 8,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2",
+        "Pd826a91"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pd826a91": {
+          "kcb": 0.95,
+          "original": "OFE8_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p65.man": "54315fae3ea11e1f5544914b9adcf4fe00e1d9dc592d438c7978d65624b3ab30",
+        "p65.sol": "53a50a78c38ab096e514e9ac3e6a24c6fa15d39a5c0838dc4fdc28c1bd4b85cd",
+        "p65.slp": "22c47e7bc97490c1607c9d5bb0e2967e60e67ca8236d4dd30cc527678e06dc21"
+      }
+    },
+    {
+      "file": "p66.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p66.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p66.sol": "b127783b4a852bbc63e0d36edf69cdfdf6f038949b826988ff3829be2344de1b",
+        "p66.slp": "c28a8d4c179fee01cacaa57925d298efae552c2b04898abc31c73a93eafaa819"
+      }
+    },
+    {
+      "file": "p67.man",
+      "management_ofes": 7,
+      "soil_ofes": 7,
+      "slope_ofes": 7,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p67.man": "2eb9f96955143b75f9fb7dc16bb8173a2210f497d537fdb07714f3b0ba4382bb",
+        "p67.sol": "59e692b1992dfa29d1e3a0413eaed066ec0ca347272b895b5ffa3bc99b13d77b",
+        "p67.slp": "4119403950cbbd61e822e60817f0a2032d0e1cef159cba3985e5d76e9839a6c2"
+      }
+    },
+    {
+      "file": "p68.man",
+      "management_ofes": 6,
+      "soil_ofes": 6,
+      "slope_ofes": 6,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p68.man": "647485ac5b7b8c02d7a2166b0a8cd7c644aa23123be3b2a48806b4387309fbd8",
+        "p68.sol": "0726b5de77708e342a297a79c0b64775ba58552d4e43ac6ea8beaa910d951e75",
+        "p68.slp": "bab316d12001b116b8148dae1968173592b6d3d6e0b612a4d30d329cc50be8fa"
+      }
+    },
+    {
+      "file": "p69.man",
+      "management_ofes": 4,
+      "soil_ofes": 4,
+      "slope_ofes": 4,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p69.man": "662a194d50b0e04c9ab4e8471bc173f0621920e0ee7571819889704eb84e3567",
+        "p69.sol": "fdf4b75b6ec57e9274873d4b807582278287586507ea0c03248c8a7ff8194f89",
+        "p69.slp": "816b45e865b800f04a1f61109e7e480b55522b108df029cff406f0a77bf2fc1a"
+      }
+    },
+    {
+      "file": "p7.man",
+      "management_ofes": 11,
+      "soil_ofes": 11,
+      "slope_ofes": 11,
+      "plants": [
+        "Tah_4899",
+        "P1e736f0",
+        "P3d4234f",
+        "Pd06e875",
+        "P4c37e8a",
+        "P5bfe43a",
+        "Pf284723",
+        "Pd826a91",
+        "P19a19c6",
+        "P7efa13f",
+        "P283f269"
+      ],
+      "identities": {
+        "P19a19c6": {
+          "kcb": 0.95,
+          "original": "OFE9_Tah_9591",
+          "rawp": 0.8
+        },
+        "P1e736f0": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_9591",
+          "rawp": 0.8
+        },
+        "P283f269": {
+          "kcb": 0.95,
+          "original": "OFE11_Tah_4899",
+          "rawp": 0.8
+        },
+        "P3d4234f": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_9591",
+          "rawp": 0.8
+        },
+        "P4c37e8a": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_9591",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P7efa13f": {
+          "kcb": 0.95,
+          "original": "OFE10_Tah_9591",
+          "rawp": 0.8
+        },
+        "Pd06e875": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_9591",
+          "rawp": 0.8
+        },
+        "Pd826a91": {
+          "kcb": 0.95,
+          "original": "OFE8_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pf284723": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_9591",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p7.man": "89e3b342292c12cf64b9ee220842197449162c0c39257b3ced99192349f73e44",
+        "p7.sol": "674006f29da6160d99f521f8297977ed272798249898fe220709cf1c37164b33",
+        "p7.slp": "ea8627593f7bc0ae596757fa8de46ed9aaa627c1a5680cb560607ed938f04d58"
+      }
+    },
+    {
+      "file": "p70.man",
+      "management_ofes": 2,
+      "soil_ofes": 2,
+      "slope_ofes": 2,
+      "plants": [
+        "Tah_4899",
+        "P90377a9"
+      ],
+      "identities": {
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p70.man": "09e320ee914bd94bc0cb6b0f8698882219bc95b5d7e1663985b5eebaa2395efe",
+        "p70.sol": "2397e4b68652259b8f2be1fbe1967731076ae882dc01f0c9b6116ebb70789181",
+        "p70.slp": "63ca5043bdde165387f6bdf0b391a78e0a6c74bf768087827b74a59b1f681807"
+      }
+    },
+    {
+      "file": "p71.man",
+      "management_ofes": 7,
+      "soil_ofes": 7,
+      "slope_ofes": 7,
+      "plants": [
+        "Tah_4899",
+        "P90377a9",
+        "P3f56086",
+        "P73006b2",
+        "Pcff71da",
+        "P5bfe43a",
+        "Pb6f17d2"
+      ],
+      "identities": {
+        "P3f56086": {
+          "kcb": 0.95,
+          "original": "OFE3_Tah_4899",
+          "rawp": 0.8
+        },
+        "P5bfe43a": {
+          "kcb": 0.95,
+          "original": "OFE6_Tah_4899",
+          "rawp": 0.8
+        },
+        "P73006b2": {
+          "kcb": 0.95,
+          "original": "OFE4_Tah_4899",
+          "rawp": 0.8
+        },
+        "P90377a9": {
+          "kcb": 0.95,
+          "original": "OFE2_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pb6f17d2": {
+          "kcb": 0.95,
+          "original": "OFE7_Tah_4899",
+          "rawp": 0.8
+        },
+        "Pcff71da": {
+          "kcb": 0.95,
+          "original": "OFE5_Tah_4899",
+          "rawp": 0.8
+        },
+        "Tah_4899": {
+          "kcb": 0.95,
+          "original": "Tah_4899",
+          "rawp": 0.8
+        }
+      },
+      "years": 35,
+      "sha256": {
+        "p71.man": "2eb9f96955143b75f9fb7dc16bb8173a2210f497d537fdb07714f3b0ba4382bb",
+        "p71.sol": "3417a0ad699bf69d6278f7890ca5b741dbb49ae8670247ae720e46c77109741b",
+        "p71.slp": "46e00bf04482a2b043cb0db6fe5cab058efbf4c668d8f3b560a8013dba474edf"
+      }
+    },
+    {
+      "file": "p72.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p72.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p72.sol": "f3cfe0053c222b94984131eede2178a3091cdc31bffa872dffeded982c61130f",
+        "p72.slp": "5331c2440d82d635821fc7c3360e032b92ce02da9bb3d6b9a0e5c34905aa1103"
+      }
+    },
+    {
+      "file": "p8.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p8.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p8.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p8.slp": "92f6feef9aba78f5d1383aaf6a4ff287d9c8414454bdfb4c8b449c7ffc0712a5"
+      }
+    },
+    {
+      "file": "p9.man",
+      "management_ofes": 1,
+      "soil_ofes": 1,
+      "slope_ofes": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "identities": null,
+      "years": 35,
+      "sha256": {
+        "p9.man": "3a9e6c33c998b9185318711f771c395b1085a09b5ddd1106a96bbcababb46787",
+        "p9.sol": "bd8a1ac9f0e60e679ef7f16af0656c1fe7651bcd189a277f0edc0bd58a0e02a1",
+        "p9.slp": "7e5565f617133bb3502aa4faf812f7f22138c3dbb761ff7c549012f86428b15a"
+      }
+    }
+  ],
+  "pmetpara": "24\nFor_2276,0.95,0.8,1,silt_loam-developed_low_intensity\nP19a19c6,0.95,0.8,2,silt_loam-shrub\nP1e736f0,0.95,0.8,3,silt_loam-shrub\nP20a5e6e,0.95,0.8,4,silt_loam-tall_grass\nP283f269,0.95,0.8,5,silt_loam-forest\nP3d4234f,0.95,0.8,6,silt_loam-shrub\nP3f56086,0.95,0.8,7,silt_loam-forest\nP4c37e8a,0.95,0.8,8,silt_loam-shrub\nP5bfe43a,0.95,0.8,9,silt_loam-forest\nP73006b2,0.95,0.8,10,silt_loam-forest\nP7efa13f,0.95,0.8,11,silt_loam-shrub\nP90377a9,0.95,0.8,12,silt_loam-forest\nP972c75d,0.95,0.8,13,silt_loam-developed_low_intensity\nPa237df3,0.95,0.8,14,silt_loam-tall_grass\nPb6f17d2,0.95,0.8,15,silt_loam-forest\nPb7a113a,0.95,0.8,16,silt_loam-shrub\nPcff71da,0.95,0.8,17,silt_loam-forest\nPd06e875,0.95,0.8,18,silt_loam-shrub\nPd6a4e25,0.95,0.8,19,silt_loam-forest\nPd826a91,0.95,0.8,20,silt_loam-forest\nPf284723,0.95,0.8,21,silt_loam-shrub\nTah_4899,0.95,0.8,22,silt_loam-forest\nTah_7670,0.95,0.8,23,silt_loam-tall_grass\nTah_9591,0.95,0.8,24,silt_loam-shrub\n",
+  "repeated_pmet_byte_identical": true,
+  "native_acceptance": "HOLD; no model run"
+}

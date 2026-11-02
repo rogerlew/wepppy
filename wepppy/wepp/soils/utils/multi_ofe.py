@@ -61,6 +61,9 @@ class SoilMultipleOfeSynth(object):
         versions = set()
         for fn in self.stack:
             lines = read_soil_lines(fn)
+            records = [line for line in lines if line.strip() and not line.lstrip().startswith('#')]
+            if len(records) < 3 or int(records[2].split()[0]) != 1:
+                raise ValueError("Each soil stack member must contain exactly one OFE.")
             for L in lines:
                 if L.strip() and not L.lstrip().startswith('#'):
                     versions.add(L)

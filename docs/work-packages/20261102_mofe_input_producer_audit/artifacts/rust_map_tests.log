@@ -1,0 +1,12 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running unittests src/lib.rs (target/debug/deps/watershed_abstraction_rust-533faf651ab6d853)
+
+running 5 tests
+test tests::equal_boundaries_must_not_gain_cells ... ok
+test tests::percentile_matches_linear_interpolation_behavior ... ok
+test tests::repair_path_produces_contiguous_ids_for_flat_discha ... ok
+test tests::segment_counts_match_expected_distribution ... ok
+test tests::single_ofe_assigns_all_cells_to_one ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

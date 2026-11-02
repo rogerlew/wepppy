@@ -1,0 +1,49 @@
+{
+  "extension": "/workdir/wepppyo3/target/debug/libwepp_interchange_rust.so",
+  "sha256": "dfb30d5734debd07618899189d24ace75b06ee226cfdc1c99c065cd7dc46389e",
+  "observations": [
+    {
+      "case": "zero",
+      "status": "rejected",
+      "error": "/workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/rust_candidate_v1/source.slp: enabled buffer length must be finite and > 0",
+      "output_exists": false
+    },
+    {
+      "case": "negative",
+      "status": "rejected",
+      "error": "/workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/rust_candidate_v1/source.slp: enabled buffer length must be finite and > 0",
+      "output_exists": false
+    },
+    {
+      "case": "nonfinite",
+      "status": "rejected",
+      "error": "/workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/rust_candidate_v1/source.slp: enabled buffer length must be finite and > 0",
+      "output_exists": false
+    },
+    {
+      "case": "normal",
+      "status": "written",
+      "count": 3,
+      "content": "97.5\n3\n100.0 10.0\n2 15.00\n  0.0000, 0.1000 1.0000, 0.1000\n2 42.50\n  0.0000, 0.1000 1.0000, 0.1000\n2 42.50\n  0.0000, 0.1000 1.0000, 0.1000"
+    },
+    {
+      "case": "equal",
+      "status": "written",
+      "count": 1,
+      "content": "97.5\n1\n100.0 10.0\n2 100.00\n  0.0000, 0.1000 1.0000, 0.1000"
+    },
+    {
+      "case": "overlong",
+      "status": "written",
+      "count": 1,
+      "content": "97.5\n1\n100.0 10.0\n2 100.00\n  0.0000, 0.1000 1.0000, 0.1000"
+    },
+    {
+      "case": "tiny",
+      "status": "rejected",
+      "error": "/workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/rust_candidate_v1/source.slp: OFE length must remain positive at serialized precision",
+      "output_exists": false
+    }
+  ],
+  "scope": "Isolated freshly built Python extension, not installed release; no native WEPP execution"
+}

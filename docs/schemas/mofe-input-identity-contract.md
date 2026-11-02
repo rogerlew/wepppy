@@ -72,13 +72,19 @@ Use deterministic generated aliases of at most eight characters from letters,
 digits and underscore, beginning with a letter. Alias any identity that cannot
 round-trip through both the native fixed-width name reader and list-directed
 PMET token reader (including whitespace, separators, quotes and control bytes).
+Keep distinct physical plant definitions distinct even when original names and
+coefficient pairs agree; descriptive comments alone do not change that identity.
 Check uniqueness against all retained native keys, and rewrite only generated
 management copies. Keep full original identity and coefficient-context provenance
 in machine-readable ordinary generated comments, and validate/recover it when
 reparsing; the current management parser's discarded comments cannot be assumed
 to preserve that mapping. Repeated preparation, direct repeated PMET calls and
 archive/restore must resolve the same original mapping keys and reproduce stable
-aliases/references without accumulating aliases or scenarios. Changing a mapping
+aliases/references without accumulating aliases or scenarios. Provenance follows
+plant scenarios through subsequent MOFE/rotation synthesis, including renamed,
+added and pruned plants. Mixed prepared/unprepared stacks may have provenance only
+for their prepared plants; every generated alias must retain its original record.
+Changing a mapping
 value must still address the original source name, not a previous generated alias.
 Missing or contradictory provenance on an already-aliased generated deck is an
 explicit rebuild error; unchanged legacy unaliased decks remain supported.
@@ -156,7 +162,10 @@ keeps its established create/no-op behavior; it is not reclassified as corruptio
 No new route envelope, queue, transaction protocol, hidden directory or archive
 exclusion is introduced. Existing normal project browse/download paths expose
 `landuse/hill_*.mofe.man`, `soils/*`, slope/cover intermediates and `wepp/runs/*`,
-with ordinary job diagnostics and completion status. File existence does not
+with ordinary job diagnostics and completion status. Failed PMET replacement
+attempts remain at `wepp/runs/<filename>.mipa-<uuid>.tmp` and are included in
+normal browse/archive/restore. Retry replaces the intended destination only;
+attempt files are evidence, not completed inputs. File existence does not
 override a failed preparation. Failures retain useful partial records; successful
 retry regenerates from durable intent, not hand-edited derived files.
 

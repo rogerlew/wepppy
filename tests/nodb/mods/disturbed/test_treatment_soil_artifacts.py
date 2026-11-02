@@ -73,7 +73,7 @@ def _generate(soil_case, monkeypatch, treatment, version, mofe):
         slope = root / "watershed/slope_files/hillslopes/hill_101.mofe.slp"
         slope.parent.mkdir(parents=True)
         # Slope is copied verbatim by preparation; it is not a model execution fixture.
-        slope.write_text("slope copy boundary\n")
+        slope.write_text("97.5\n5\n180 1\n" + "2 20\n0 0.2 1 0.2\n" * 5)
         (root / "landuse").mkdir()
         man = get_management_summary("144", "disturbed").get_management()
         ManagementMultipleOfeSynth([man] * 5).write(str(root / "landuse/hill_101.mofe.man"))

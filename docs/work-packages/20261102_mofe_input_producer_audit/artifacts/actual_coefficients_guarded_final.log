@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/readback_actual_coefficients.py
+{"elements_checked": 235, "table_rows": 24, "distinct_pairs": [[0.95, 0.8]]}

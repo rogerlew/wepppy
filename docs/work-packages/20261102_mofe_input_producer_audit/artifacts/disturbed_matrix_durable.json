@@ -1,0 +1,7 @@
+{
+  "source": "/tmp/mipa-disturbed-final-20261102/disturbed_matrix0",
+  "durable": "/wc1/holdouts/mipa-disturbed-producer-20261102/disturbed_matrix0",
+  "bytes": 5873301289,
+  "input_entries_verified": 1056,
+  "output_entries_verified": 768
+}

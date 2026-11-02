@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from math import lcm
 from typing import Dict, Iterable, List, Optional
 from wepppy.wepp.management.managements import SectionType
 
@@ -128,7 +129,7 @@ class ManagementMultipleOfeSynth(object):
         original_name = scenario.name
         scenario.name = "__SCENARIO__"
         try:
-            return str(scenario)
+            return repr(getattr(scenario, '_pmet_identity', None)) + str(scenario)
         finally:
             scenario.name = original_name
 
@@ -255,6 +256,7 @@ class ManagementMultipleOfeSynth(object):
         self,
         *,
         enforce_yearly_scenario_limit: bool = True,
+        sim_years: Optional[int] = None,
     ) -> 'Management':
         """Return the synthesized management graph.
 
@@ -269,23 +271,18 @@ class ManagementMultipleOfeSynth(object):
         if not self.stack:
             raise ValueError("Management stack cannot be empty.")
 
-        # Preserve historical single-stack behavior while still enforcing
-        # yearly scenario validity and WEPP limits.
-        if len(self.stack) == 1:
-            mf = deepcopy(self.stack[0])
-            self._compact_yearly_scenarios(
-                mf,
-                enforce_yearly_scenario_limit=enforce_yearly_scenario_limit,
-            )
-            mf.setroot()
-            return mf
-
-        # Start with a deep copy of the first management file as our base.
-        mf = deepcopy(self.stack[0])
+        if any(man.nofe != 1 for man in self.stack):
+            raise ValueError("Each MOFE management stack member must contain exactly one OFE.")
+        periods = [sum(len(rot.years) for rot in man.man.loops) for man in self.stack]
+        years = sim_years if sim_years is not None else lcm(*periods)
+        if not 1 <= years <= 10000:
+            raise ValueError("Combined management period exceeds native 10000-year limit; specify simulation years.")
+        aligned = [man.build_multiple_year_man(years) for man in self.stack]
+        mf = aligned[0]
 
         # --- Iterate through the rest of the stack to merge them into the base ---
         for i in range(1, len(self.stack)):
-            other = deepcopy(self.stack[i])
+            other = aligned[i]
             new_ofe_num = i + 1
             prefix = f'OFE{new_ofe_num}_'
 
@@ -324,6 +321,10 @@ class ManagementMultipleOfeSynth(object):
             def update_ref(ref, section_name):
                 if isinstance(ref, ScenarioReference) and ref.loop_name in name_maps.get(section_name, {}):
                     ref.loop_name = name_maps[section_name][ref.loop_name]
+
+            for operation in other.ops:
+                if hasattr(operation, 'data') and hasattr(operation.data, 'iresad'):
+                    update_ref(operation.data.iresad, 'plants')
 
             for ini_loop in other.inis:
                 if hasattr(ini_loop, 'data') and hasattr(ini_loop.data, 'iresd'):
@@ -393,9 +394,11 @@ class ManagementMultipleOfeSynth(object):
         self,
         *,
         enforce_yearly_scenario_limit: bool = True,
+        sim_years: Optional[int] = None,
     ) -> str:
         """Return the synthesized management file text."""
         management = self.build(
+            sim_years=sim_years,
             enforce_yearly_scenario_limit=enforce_yearly_scenario_limit,
         )
         rendered = str(management)
@@ -409,9 +412,9 @@ class ManagementMultipleOfeSynth(object):
         lines = rendered.splitlines(keepends=True)
         return ''.join(lines[:3]) + self.description + '\n' + ''.join(lines[3:])
 
-    def write(self, dst_fn: str) -> None:
+    def write(self, dst_fn: str, *, sim_years: Optional[int] = None) -> None:
         """Merge the stack and write the synthesized management to ``dst_fn``."""
-        rendered = self.render()
+        rendered = self.render(sim_years=sim_years)
 
         # Write the complete, synthesized management file.
         with open(dst_fn, 'w') as pf:

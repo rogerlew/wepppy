@@ -23,10 +23,12 @@ class ManagementMultipleOfeSynth:
         self,
         *,
         enforce_yearly_scenario_limit: bool = ...,
+        sim_years: int | None = ...,
     ) -> Management: ...
     def render(
         self,
         *,
         enforce_yearly_scenario_limit: bool = ...,
+        sim_years: int | None = ...,
     ) -> str: ...
-    def write(self, dst_fn: str) -> None: ...
+    def write(self, dst_fn: str, *, sim_years: int | None = ...) -> None: ...

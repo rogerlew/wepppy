@@ -1,9 +1,10 @@
 # MOFE input producer findings
 
-**Audit opened:** 2026-11-02 19:32 UTC.  
-**Scope:** Read-only Python/Rust producers and native input consumers.  
-**Status:** Four parallel reports reconciled; S01 native dependency incorporated;
-no production repair implemented.
+**Audit opened:** 2026-11-02 19:32 UTC.
+**Scope:** Original read-only audit plus approved bounded producer repair execution.
+**Status:** M2/M3 producer source repairs implemented. The original findings below
+retain baseline line references; see [execution disposition](20261102_producer_execution.md)
+for repaired boundaries and validation. NATIVE-01/02/03 remain HOLD.
 
 ## Seed finding: incomplete PMET crop discovery
 

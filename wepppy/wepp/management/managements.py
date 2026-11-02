@@ -2170,8 +2170,11 @@ class ManagementLoop(object):
 # Initial Condition Scenario indices used for each OFE
 {ofeindx}
 {0.nrots} # number of times the rotation is repeated (nrots)
-{0.loops}
-""".format(self, ofeindx=pad(self.ofeindx, 2))
+{nyears} # number of years in each rotation
+{years}
+""".format(self, ofeindx=pad(self.ofeindx, 2),
+           nyears=self.loops[0].nyears,
+           years="\n".join(str(rotation.years) for rotation in self.loops))
 
     def __repr__(self):
         return """\
@@ -2418,6 +2421,12 @@ class Management(object):
         with open(_join(self.man_dir, self.man_fn)) as fp:
             lines = fp.readlines()
 
+        prefix = '# MIPA-01 plant identities: '
+        records = [line[len(prefix):] for line in lines if line.startswith(prefix)]
+        if len(records) > 1:
+            raise ValueError("Duplicate PMET identity provenance; rebuild managements.")
+        self._pmet_plant_names = json.loads(records[0]) if records else None
+
         desc_indxs = []
         for i, L in enumerate(lines):
             if "#landuse" in L or " # landuse" in L:
@@ -2465,6 +2474,25 @@ class Management(object):
 
         # Read Management Section
         self.man = ManagementLoop(lines, self)
+        provenance = self._pmet_plant_names
+        if provenance is not None:
+            if (not isinstance(provenance, dict)
+                    or not set(provenance).issubset({plant.name for plant in self.plants})
+                    or any(not isinstance(record, dict)
+                           or set(record) != {'original', 'kcb', 'rawp'}
+                           or not isinstance(record['original'], str) or not record['original']
+                           or not isinstance(record['kcb'], (int, float))
+                           or not isinstance(record['rawp'], (int, float))
+                           or not math.isfinite(record['kcb']) or not math.isfinite(record['rawp'])
+                           for record in provenance.values())):
+                raise ValueError("Inconsistent PMET identity provenance; rebuild managements.")
+        for plant in self.plants:
+            record = (provenance or {}).get(plant.name)
+            if record is not None:
+                plant._pmet_identity = record
+            elif plant.description[2].startswith('MIPA01 alias'):
+                raise ValueError("Missing PMET identity provenance; rebuild managements.")
+
         if self._strict_upload:
             lines.check_tokens()
             if lines:
@@ -2747,62 +2775,34 @@ class Management(object):
             The desired number of simulation years in the returned management.
         """
 
-        # first we build the ManagementLoop
-        _man = deepcopy(self.man)
-
-        if sim_years == _man.nrots * len(_man.loops[-1].years):
-            return self
-
-        # clear the existing loops
-        _man.loops = Loops()
-
-        # iterate over the number of rotations
-        # the loops repeat over:
-        #    - number of rotations
-        #    - simulation years
-        #    - ofes or channels
-        # from slowest to fastest
-        for i in range(self.man.nrots):
-
-            # copy the appropriate ManagementLoopMan
-            _man.loops.append(deepcopy(self.man.loops[i]))
-
-            # determine number of years in rotation
-            yrs = len(_man.loops[-1].years)
-
-            # clear the ManagementLoopManLoop
-            _man.loops[-1].years = Loops()
-
-            # iterate over the specified number of years and fill
-            # in the apropriate plant and yearly indexes for each
-            # year and ofe
-            for j in range(sim_years):
-                _man.loops[-1].years.append(Loops())
-                for k in range(self.nofe):
-                    assert len(_man.loops) > 0
-                    assert len(_man.loops[-1].years) > 0
-                    assert len(self.man.loops) > i
-                    assert len(self.man.loops[i].years) == yrs, (len(self.man.loops[i].years), yrs)
-
-                    if len(self.man.loops[i].years[j % yrs]) > k:
-                        man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][k])
-                    else:
-                        man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][0])
-
-                    man_loop_man_loop._year = j+1
-                    man_loop_man_loop._ofe = k+1
-
-                    _man.loops[-1].years[-1].append(man_loop_man_loop)
-
-        # now we just need to create a copy of self
-        # and copy over the new ManagementLoop and set sim_years
+        if not isinstance(sim_years, int) or not 1 <= sim_years <= 10000:
+            raise ValueError("Management simulation years must be between 1 and 10000.")
+        timeline = [year for rotation in self.man.loops for year in rotation.years]
+        if not timeline or any(len(year) != self.nofe for year in timeline):
+            raise ValueError("Management calendar is empty or has inconsistent OFE counts.")
         mf = deepcopy(self)
-        mf.man = _man
+        rotation = mf.man.loops[0]
+        # Reuse the copied graph as the deepcopy memo so copying a year does not
+        # recursively copy the complete parent management for every simulated year.
+        memo = {id(self): mf, id(self.man): mf.man}
+        for source_rotation in self.man.loops:
+            memo[id(source_rotation)] = rotation
+        rotation.years = Loops()
+        for index in range(sim_years):
+            year = deepcopy(timeline[index % len(timeline)], dict(memo))
+            for ofe, data in enumerate(year, start=1):
+                data._year = index + 1
+                data._ofe = ofe
+                data.parent = rotation
+            rotation.years.append(year)
+        mf.man.loops = Loops()
+        mf.man.loops.append(rotation)
         mf.sim_years = sim_years
+        mf.setroot()
         return mf
 
     def __str__(self):
-        return """\
+        rendered = """\
 {0.datver}
 {0.nofe} # number of ofes or channels
 {0.sim_years} # sim_years
@@ -2847,6 +2847,17 @@ class Management(object):
 #############################
 {0.man}
 """.format(self)
+
+        # Provenance travels with each scenario through synthesis renames/copies.
+        # A mixed source stack can include ordinary plants with no PMET context yet.
+        provenance = {plant.name: plant._pmet_identity for plant in self.plants
+                      if hasattr(plant, '_pmet_identity')}
+        if provenance:
+            lines = rendered.splitlines(keepends=True)
+            rendered = (''.join(lines[:3]) + '# MIPA-01 plant identities: '
+                        + json.dumps(provenance, sort_keys=True, ensure_ascii=True) + '\n'
+                        + ''.join(lines[3:]))
+        return rendered
 
     def __repr__(self):
         return """\
@@ -3337,7 +3348,7 @@ def get_plant_loop_names(runs_dir: str) -> List[str]:
     auto-generated warm-up runs that should not influence user selections.
     """
     plant_loops = set()
-    man_fns = glob(_join(runs_dir, '*.man'))
+    man_fns = sorted(glob(_join(runs_dir, '*.man')))
 
     for man_fn in man_fns:
         _fn = _split(man_fn)[-1]
@@ -3350,6 +3361,6 @@ def get_plant_loop_names(runs_dir: str) -> List[str]:
                          Description='-',
                          Color=(0, 0, 0, 0))
 
-        plant_loops.add(man.plants[0].name)
+        plant_loops.update(plant.name for plant in man.plants)
 
-    return list(plant_loops)
+    return sorted(plant_loops)

@@ -111,3 +111,26 @@ def test_prep_transformed_cover_handles_two_digit_fire_year(
 
     tree_values = [float(value) for value in output[1].split()]
     assert tree_values == [20.0, 25.0, 30.0, 35.0, 10.0, 20.0]
+
+
+@pytest.mark.parametrize('transformed', [False, True])
+def test_twelve_ofe_cover_blocks_follow_numeric_identity(tmp_path, monkeypatch, transformed):
+    rap = object.__new__(RAP_TS)
+    rap.wd = str(tmp_path)
+    rap.logger = logging.getLogger('tests.rap.identity')
+    bands = [RAP_Band.TREE, RAP_Band.SHRUB, RAP_Band.PERENNIAL_FORB_AND_GRASS,
+             RAP_Band.ANNUAL_FORB_AND_GRASS, RAP_Band.LITTER, RAP_Band.BARE_GROUND]
+    rap.data = {band: {'2024': {'101': {str(i): float(i + offset) for i in range(1, 13)}}}
+                for offset, band in enumerate(bands)}
+    monkeypatch.setattr(Wepp, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(_multi_ofe=True)))
+    monkeypatch.setattr(Disturbed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(fire_date='2024-01-01' if transformed else None)))
+    reveg = SimpleNamespace(cover_transform={})
+    monkeypatch.setattr(Revegetation, 'getInstance', classmethod(lambda cls, wd: reveg))
+    monkeypatch.setattr(Revegetation, 'tryGetInstance', classmethod(lambda cls, wd: reveg))
+    monkeypatch.setattr(Landuse, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(managements={}, identify_burn_class=lambda top, ofe: 'forest')))
+    translator = SimpleNamespace(iter_wepp_sub_ids=lambda: [1], top=lambda wepp: 101)
+    monkeypatch.setattr(Watershed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(translator_factory=lambda: translator)))
+    rap.prep_cover(str(tmp_path))
+    rows = (tmp_path / 'p1.cov').read_text().splitlines()[1:]
+    assert len(rows) == 12 * 6
+    assert [float(rows[i * 6]) for i in range(12)] == list(range(1, 13))

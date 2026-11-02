@@ -127,6 +127,12 @@ Explicit custom roughness overrides remain authoritative.
 | Normalized 4-class SBS map | The validated burn-severity map used by the run | Raster classes | Confirms the classes actually entering the disturbed workflow |
 | Hillslope runoff and sediment response | The simulated hydrologic and erosion response from the chosen disturbed parameterization | Model outputs such as runoff depth, sediment yield, or delivery | Compare across unburned and burned scenarios to understand the size and location of disturbance effects |
 
+For multiple-OFE inputs, PMET coefficients follow each element's final landuse
+class and staged soil texture. Generated crop identifiers may be shortened;
+the management header retains their original names. See
+[MOFE input preparation and recovery](../../../../docs/dev-notes/mofe-input-preparation.md)
+for file inspection, rebuild guidance and the separate native-model acceptance limits.
+
 ## Interpreting Results
 
 The [RRINIT Technical Brief, revision 1 (PDF)](/weppcloud/static/reports/wepppy/technical-briefs/20261009-rrinit/20261009-rrinit-r1.pdf)

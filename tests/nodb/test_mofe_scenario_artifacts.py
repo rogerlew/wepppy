@@ -140,18 +140,15 @@ def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, f
             expected = cover if index == 0 and attr == field else getattr(before.inis[index].data, attr)
             assert getattr(combined.inis[index].data, attr) == pytest.approx(expected)
 
-    # Exercise the real MOFE preparation management reader/writer; unrelated
-    # slope/soil preparation is isolated.
+    # Exercise real preparation with matching slope, soil and management decks.
     import wepppy.nodb.core.wepp as wepp
-    monkeypatch.setattr(wepp, 'copy_input_file', lambda *args: None)
-    class Soil:
-        obj = {'ofes': []}
-        def __init__(self, path): pass
-        def modify_initial_sat(self, value): pass
-        def write(self, path): pass
-    monkeypatch.setattr(wepp, 'WeppSoilUtil', Soil)
+    from wepppy.wepp.soils.utils.multi_ofe import SoilMultipleOfeSynth
+    slope = root / 'watershed/slope_files/hillslopes/hill_101.mofe.slp'
+    slope.parent.mkdir(parents=True, exist_ok=True)
+    slope.write_text('97.5\n2\n180 1\n' + '2 50\n0 0.2 1 0.2\n' * 2)
     (root / 'soils').mkdir()
-    (root / 'soils/hill_101.mofe.sol').touch()
+    soil_source = str(Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
+    SoilMultipleOfeSynth([soil_source, soil_source]).write(str(root / 'soils/hill_101.mofe.sol'))
     runs = root / 'wepp/runs'
     runs.mkdir(parents=True)
     wepp.prep_multi_ofe_hillslope(('101', 1, str(root), str(runs), 2,
@@ -268,15 +265,13 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
         expected = get_management_summary(target, 'c3s-disturbed').get_management()
         assert combined.inis[1].data.inrcov == pytest.approx(expected.inis[0].data.inrcov)
 
-    monkeypatch.setattr(wepp, 'copy_input_file', lambda *args: None)
-    class Soil:
-        obj = {'ofes': []}
-        def __init__(self, path): pass
-        def modify_initial_sat(self, value): pass
-        def write(self, path): pass
-    monkeypatch.setattr(wepp, 'WeppSoilUtil', Soil)
+    from wepppy.wepp.soils.utils.multi_ofe import SoilMultipleOfeSynth
+    slope = root / 'watershed/slope_files/hillslopes/hill_101.mofe.slp'
+    slope.parent.mkdir(parents=True, exist_ok=True)
+    slope.write_text('97.5\n2\n180 1\n' + '2 50\n0 0.2 1 0.2\n' * 2)
     (root / 'soils').mkdir()
-    (root / 'soils/hill_101.mofe.sol').touch()
+    soil_source = str(Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
+    SoilMultipleOfeSynth([soil_source, soil_source]).write(str(root / 'soils/hill_101.mofe.sol'))
     runs = root / 'wepp/runs'
     runs.mkdir(parents=True)
     wepp.prep_multi_ofe_hillslope(('101', 1, str(root), str(runs), 2,

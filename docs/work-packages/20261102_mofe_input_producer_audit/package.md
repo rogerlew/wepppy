@@ -1,13 +1,14 @@
 # MOFE input producer audit and repair
 
-**Status:** Open — M1 execution started; renewed baselines and proposed contract checkpoint prepared; implementation not started.  
-**Started:** 2026-11-02 19:32 UTC.  
+**Status:** Open — approved M2/M3 producer repairs implemented; M4 producer readback complete, native acceptance HOLD.
+**Started:** 2026-11-02 19:32 UTC.
 **Owner:** WEPPcloud maintainer; Codex coordinates the requested audit.
 
 ## Purpose and scope
 
-The subsequent user request to execute this package starts M1. The
-[MIPA-01 checkpoint](artifacts/20261102_contract_decision.md) records proposed
+The user approved execution and MIPA-01; ancestor `4579b11ce` precedes repairs.
+The [execution report](artifacts/20261102_producer_execution.md) records current
+validation and limits. The [MIPA-01 checkpoint](artifacts/20261102_contract_decision.md) records accepted
 calendar, crop-identity and slope compatibility decisions, renewed failing
 baselines, and the contract-first ratification/ancestor gates. Native repair,
 deployment and existing-project regeneration remain separately authorized work.

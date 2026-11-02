@@ -842,3 +842,28 @@ def test_archive_capture_serializes_activation_and_saved_overrides(archive_rq_en
     project.restore_archive_rq(runid, archive.name)
     assert Ron.load_detached(str(wd)).developer_mode is False
     assert Wepp.load_detached(str(wd)).soil_anisotropy_upper == 10
+
+
+def test_pmet_identity_and_failed_attempt_survive_archive_restore(archive_rq_environment):
+    from wepppy.wepp.management import read_management
+    from wepppy.wepp.management.pmetpara import pmetpara_prep
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'demo'
+    runs = root / 'wepp/runs'
+    runs.mkdir(parents=True)
+    fixture = Path('tests/wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man')
+    (runs / 'p1.man').write_text(str(read_management(str(fixture))))
+    pmetpara_prep(str(runs), 0.5, 0.8)
+    (runs / 'p1.man.mipa-test.tmp').write_text('failed preparation evidence')
+    expected = {str(path.relative_to(root)): path.read_bytes() for path in runs.iterdir()}
+    project.archive_rq('demo', comment='MIPA-01 identity')
+    archive = next((root / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as z:
+        for relative, content in expected.items():
+            assert z.read(relative) == content
+    (runs / 'p1.man').write_text('partial later attempt')
+    project.restore_archive_rq('demo', archive.name)
+    for relative, content in expected.items():
+        assert (root / relative).read_bytes() == content
+    pmetpara_prep(str(runs), 0.5, 0.8)
+    assert (runs / 'p1.man').read_bytes() == expected['wepp/runs/p1.man']

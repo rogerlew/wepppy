@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose exec weppcloud python -c 'import json,hashlib,subprocess; from pathlib import Path; import wepppyo3.wepp_interchange.wepp_interchange_rust as native
+repo=Path("/workdir/wepppy"); evidence=repo/"docs/work-packages/20261102_mofe_input_producer_audit/artifacts"; path="tests/disturbed/analysis_results_current.provenance.json"
+old=json.loads(subprocess.check_output(["git","show","4579b11ce:"+path],cwd=repo)); current=json.loads((repo/path).read_text()); matrix=Path(current["evidence_root"]); sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+assert [c["id"] for c in current["cases"]]==[c["id"] for c in old["cases"]]
+changes={"inputs":[],"outputs":[]}; totals={"inputs":0,"outputs":0}
+for before,case in zip(old["cases"],current["cases"]):
+ for section,directory in [("inputs","runs"),("outputs","output")]:
+  assert set(case[section])==set(before[section])
+  for name,digest in case[section].items():
+   assert sha(matrix/directory/name)==digest,(case["id"],name)
+   totals[section]+=1
+   if digest!=before[section][name]:changes[section].append({"case":case["id"],"file":name,"old":before[section][name],"new":digest})
+comparison=json.loads((evidence/"disturbed_matrix_comparison.json").read_text()); assert changes["inputs"]==comparison["changed_inputs"];assert changes["outputs"]==comparison["changed_outputs"]==[]
+assert all(sha(repo/name)==digest for name,digest in current["sources"].items());assert sha(repo/"tests/disturbed/analysis_results_current.md")==current["report_sha256"]
+actual=json.loads((evidence/"actual_project_coefficients_v2.json").read_text());assert all(sha(repo/name)==digest for name,digest in actual["source_sha256"].items());assert str(Path(native.__file__))==actual["installed_rust"]["path"];assert sha(Path(native.__file__))==actual["installed_rust"]["sha256"]==current["native_sha256"]
+print(json.dumps({"cases":len(current["cases"]),"verified_files":totals,"changed_inputs":len(changes["inputs"]),"changed_outputs":len(changes["outputs"]),"report_and_listed_source_hashes_match":True,"actual_source_and_extension_hashes_match":True}))'
+{"cases": 96, "verified_files": {"inputs": 1056, "outputs": 768}, "changed_inputs": 192, "changed_outputs": 0, "report_and_listed_source_hashes_match": true, "actual_source_and_extension_hashes_match": true}

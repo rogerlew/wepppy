@@ -1,0 +1,627 @@
+INFO:wctl2:docker compose exec weppcloud env WEPPPY_NCPU=2 python /workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/prepare_actual_clone.py
+2026-11-02 23:55:02 [INFO] wepppy.run.mipa-awake-20261102.landuse: Prepared multi-OFE landuse assignments for 72 hillslopes (235 OFE segments)
+2026-11-02 23:55:04 [INFO] wepppy.run.mipa-awake-20261102.landuse:   Submitting MOFE management synthesis tasks to ProcessPoolExecutor
+2026-11-02 23:55:09 [INFO] wepppy.run.mipa-awake-20261102.landuse:   Waiting on MOFE management synthesis tasks (pending=2, 5.0s since last completion).
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (1/72) Completed MOFE management synthesis for 22 in 0.008s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (2/72) Completed MOFE management synthesis for 23 in 0.01s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (3/72) Completed MOFE management synthesis for 32 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (4/72) Completed MOFE management synthesis for 33 in 0.007s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (5/72) Completed MOFE management synthesis for 42 in 0.009s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (6/72) Completed MOFE management synthesis for 43 in 0.008s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (7/72) Completed MOFE management synthesis for 51 in 0.021s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (8/72) Completed MOFE management synthesis for 52 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (9/72) Completed MOFE management synthesis for 53 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (10/72) Completed MOFE management synthesis for 61 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (11/72) Completed MOFE management synthesis for 62 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (12/72) Completed MOFE management synthesis for 63 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (13/72) Completed MOFE management synthesis for 71 in 0.011s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (14/72) Completed MOFE management synthesis for 72 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (15/72) Completed MOFE management synthesis for 73 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (16/72) Completed MOFE management synthesis for 82 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (17/72) Completed MOFE management synthesis for 83 in 0.009s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (18/72) Completed MOFE management synthesis for 91 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (19/72) Completed MOFE management synthesis for 92 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (20/72) Completed MOFE management synthesis for 93 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (21/72) Completed MOFE management synthesis for 102 in 0.007s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (22/72) Completed MOFE management synthesis for 103 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (23/72) Completed MOFE management synthesis for 112 in 0.005s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (24/72) Completed MOFE management synthesis for 113 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (25/72) Completed MOFE management synthesis for 121 in 0.01s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (26/72) Completed MOFE management synthesis for 122 in 0.005s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (27/72) Completed MOFE management synthesis for 123 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (28/72) Completed MOFE management synthesis for 132 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (29/72) Completed MOFE management synthesis for 133 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (30/72) Completed MOFE management synthesis for 142 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (31/72) Completed MOFE management synthesis for 143 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (32/72) Completed MOFE management synthesis for 151 in 0.015s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (33/72) Completed MOFE management synthesis for 152 in 0.005s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (34/72) Completed MOFE management synthesis for 153 in 0.009s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (35/72) Completed MOFE management synthesis for 161 in 0.01s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (36/72) Completed MOFE management synthesis for 162 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (37/72) Completed MOFE management synthesis for 163 in 0.008s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (38/72) Completed MOFE management synthesis for 172 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (39/72) Completed MOFE management synthesis for 173 in 0.008s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (40/72) Completed MOFE management synthesis for 181 in 0.014s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (41/72) Completed MOFE management synthesis for 182 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (42/72) Completed MOFE management synthesis for 183 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (43/72) Completed MOFE management synthesis for 192 in 0.003s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (44/72) Completed MOFE management synthesis for 193 in 0.007s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (45/72) Completed MOFE management synthesis for 201 in 0.015s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (46/72) Completed MOFE management synthesis for 202 in 0.009s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (47/72) Completed MOFE management synthesis for 203 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (48/72) Completed MOFE management synthesis for 212 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (49/72) Completed MOFE management synthesis for 213 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (50/72) Completed MOFE management synthesis for 222 in 0.008s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (51/72) Completed MOFE management synthesis for 223 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (52/72) Completed MOFE management synthesis for 232 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (53/72) Completed MOFE management synthesis for 233 in 0.007s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (54/72) Completed MOFE management synthesis for 241 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (55/72) Completed MOFE management synthesis for 242 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (56/72) Completed MOFE management synthesis for 243 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (57/72) Completed MOFE management synthesis for 252 in 0.004s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (58/72) Completed MOFE management synthesis for 253 in 0.01s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (59/72) Completed MOFE management synthesis for 261 in 0.015s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (60/72) Completed MOFE management synthesis for 262 in 0.005s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (61/72) Completed MOFE management synthesis for 263 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (62/72) Completed MOFE management synthesis for 271 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (63/72) Completed MOFE management synthesis for 272 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (64/72) Completed MOFE management synthesis for 273 in 0.005s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (65/72) Completed MOFE management synthesis for 281 in 0.015s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (66/72) Completed MOFE management synthesis for 282 in 0.002s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (67/72) Completed MOFE management synthesis for 283 in 0.014s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (68/72) Completed MOFE management synthesis for 291 in 0.012s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (69/72) Completed MOFE management synthesis for 292 in 0.009s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (70/72) Completed MOFE management synthesis for 293 in 0.006s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (71/72) Completed MOFE management synthesis for 301 in 0.014s
+2026-11-02 23:55:14 [INFO] wepppy.run.mipa-awake-20261102.landuse:   (72/72) Completed MOFE management synthesis for 302 in 0.003s
+2026-11-02 23:55:15 [INFO] wepppy.run.mipa-awake-20261102.wepp:     Prepping _prep_multi_ofe... 
+2026-11-02 23:55:15 [INFO] wepppy.run.mipa-awake-20261102.wepp:   Using max_workers=2 for multi OFE prep
+2026-11-02 23:55:16 [INFO] wepppy.run.mipa-awake-20261102.wepp:   Submitting multi OFE prep tasks to ProcessPoolExecutor
+2026-11-02 23:55:21 [INFO] wepppy.run.mipa-awake-20261102.wepp:   Waiting on multi OFE prep tasks (pending=72, 5.0s since last completion).
+2026-11-02 23:55:25 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (1/72) Completed multi OFE prep for 302 in 0.026182174682617188s
+2026-11-02 23:55:25 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (2/72) Completed multi OFE prep for 142 in 0.03521394729614258s
+2026-11-02 23:55:25 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (3/72) Completed multi OFE prep for 102 in 0.025567293167114258s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (4/72) Completed multi OFE prep for 291 in 0.032259225845336914s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (5/72) Completed multi OFE prep for 52 in 0.016476154327392578s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (6/72) Completed multi OFE prep for 152 in 0.02063894271850586s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (7/72) Completed multi OFE prep for 233 in 0.023013591766357422s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (8/72) Completed multi OFE prep for 242 in 0.020528316497802734s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (9/72) Completed multi OFE prep for 151 in 0.04675555229187012s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (10/72) Completed multi OFE prep for 113 in 0.02346634864807129s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (11/72) Completed multi OFE prep for 162 in 0.016202688217163086s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (12/72) Completed multi OFE prep for 22 in 0.02173137664794922s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (13/72) Completed multi OFE prep for 63 in 0.017582416534423828s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (14/72) Completed multi OFE prep for 223 in 0.020762205123901367s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (15/72) Completed multi OFE prep for 183 in 0.01703786849975586s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (16/72) Completed multi OFE prep for 262 in 0.020224332809448242s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (17/72) Completed multi OFE prep for 172 in 0.020865917205810547s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (18/72) Completed multi OFE prep for 271 in 0.04034304618835449s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (19/72) Completed multi OFE prep for 43 in 0.026702165603637695s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (20/72) Completed multi OFE prep for 93 in 0.02052450180053711s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (21/72) Completed multi OFE prep for 181 in 0.03685569763183594s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (22/72) Completed multi OFE prep for 42 in 0.03129839897155762s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (23/72) Completed multi OFE prep for 252 in 0.02125692367553711s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (24/72) Completed multi OFE prep for 72 in 0.016895771026611328s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (25/72) Completed multi OFE prep for 122 in 0.017799854278564453s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (26/72) Completed multi OFE prep for 112 in 0.018468856811523438s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (27/72) Completed multi OFE prep for 23 in 0.028873443603515625s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (28/72) Completed multi OFE prep for 132 in 0.013545036315917969s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (29/72) Completed multi OFE prep for 73 in 0.017497539520263672s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (30/72) Completed multi OFE prep for 272 in 0.013558387756347656s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (31/72) Completed multi OFE prep for 83 in 0.02421402931213379s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (32/72) Completed multi OFE prep for 202 in 0.025612831115722656s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (33/72) Completed multi OFE prep for 123 in 0.014981508255004883s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (34/72) Completed multi OFE prep for 283 in 0.037886857986450195s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (35/72) Completed multi OFE prep for 263 in 0.016634464263916016s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (36/72) Completed multi OFE prep for 222 in 0.023447751998901367s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (37/72) Completed multi OFE prep for 241 in 0.030780315399169922s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (38/72) Completed multi OFE prep for 62 in 0.021398544311523438s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (39/72) Completed multi OFE prep for 282 in 0.017608642578125s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (40/72) Completed multi OFE prep for 232 in 0.020607471466064453s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (41/72) Completed multi OFE prep for 182 in 0.019570112228393555s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (42/72) Completed multi OFE prep for 82 in 0.021021127700805664s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (43/72) Completed multi OFE prep for 71 in 0.030806779861450195s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (44/72) Completed multi OFE prep for 203 in 0.018589258193969727s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (45/72) Completed multi OFE prep for 153 in 0.029079198837280273s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (46/72) Completed multi OFE prep for 163 in 0.025532960891723633s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (47/72) Completed multi OFE prep for 161 in 0.031133174896240234s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (48/72) Completed multi OFE prep for 53 in 0.0168609619140625s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (49/72) Completed multi OFE prep for 192 in 0.021752357482910156s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (50/72) Completed multi OFE prep for 301 in 0.037767887115478516s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (51/72) Completed multi OFE prep for 293 in 0.019859790802001953s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (52/72) Completed multi OFE prep for 292 in 0.029575347900390625s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (53/72) Completed multi OFE prep for 212 in 0.021129846572875977s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (54/72) Completed multi OFE prep for 143 in 0.016667842864990234s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (55/72) Completed multi OFE prep for 253 in 0.03129291534423828s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (56/72) Completed multi OFE prep for 261 in 0.04721689224243164s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (57/72) Completed multi OFE prep for 133 in 0.022835731506347656s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (58/72) Completed multi OFE prep for 103 in 0.012278318405151367s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (59/72) Completed multi OFE prep for 33 in 0.02003002166748047s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (60/72) Completed multi OFE prep for 91 in 0.029923200607299805s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (61/72) Completed multi OFE prep for 281 in 0.03818941116333008s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (62/72) Completed multi OFE prep for 32 in 0.017098188400268555s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (63/72) Completed multi OFE prep for 193 in 0.01893329620361328s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (64/72) Completed multi OFE prep for 213 in 0.015123128890991211s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (65/72) Completed multi OFE prep for 243 in 0.012467384338378906s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (66/72) Completed multi OFE prep for 173 in 0.02142930030822754s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (67/72) Completed multi OFE prep for 92 in 0.014966011047363281s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (68/72) Completed multi OFE prep for 201 in 0.03826165199279785s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (69/72) Completed multi OFE prep for 61 in 0.03261899948120117s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (70/72) Completed multi OFE prep for 273 in 0.024188995361328125s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (71/72) Completed multi OFE prep for 51 in 0.05501818656921387s
+2026-11-02 23:55:26 [INFO] wepppy.run.mipa-awake-20261102.wepp:   (72/72) Completed multi OFE prep for 121 in 0.03304004669189453s
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.wepp: nodb.Wepp._prep_pmet::disturbed routine
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed: Preparing PMET from staged managements and final element assignments
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:27 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.wepp: nodb.Wepp._prep_pmet::disturbed routine
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed: Preparing PMET from staged managements and final element assignments
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for unclassified disturbed_class or developed
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-tall grass from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-forest from land_soil_lookup
+2026-11-02 23:55:29 [INFO] wepppy.run.mipa-awake-20261102.disturbed:       setting kcb and rawp for silt loam-shrub from land_soil_lookup
+{"hills": 72, "ofes": 235, "repeat_equal": true}

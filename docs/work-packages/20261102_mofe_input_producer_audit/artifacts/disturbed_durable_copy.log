@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/preserve_disturbed_matrix.py
+{"source": "/tmp/mipa-disturbed-final-20261102/disturbed_matrix0", "durable": "/wc1/holdouts/mipa-disturbed-producer-20261102/disturbed_matrix0", "bytes": 5873301289, "input_entries_verified": 1056, "output_entries_verified": 768}

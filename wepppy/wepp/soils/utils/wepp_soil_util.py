@@ -491,13 +491,11 @@ class WeppSoilUtil(object):
             self.obj['ofes'][i]['sat'] = initial_sat
 
     def modify_kslast(self, kslast: float, pars: Optional[Dict[str, Any]] = None) -> None:
-        """Update the restrictive layer hydraulic conductivity."""
-        luse = self.obj['ofes'][0]['luse']
-
-        if luse is not None and not getattr(self, '_preserve_input_format', False):
-            if 'developed' in luse.lower():
-                return
-
+        """Update the restrictive layer hydraulic conductivity per eligible OFE."""
+        if (not getattr(self, '_preserve_input_format', False)
+                and all(ofe['luse'] is not None and 'developed' in ofe['luse'].lower()
+                        for ofe in self.obj['ofes'])):
+            return
         self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
 
         if pars is not None:
@@ -505,10 +503,14 @@ class WeppSoilUtil(object):
         else:
             self.obj['header'][-1] += f'(kslast={kslast})'
 
-        for i in range(len(self.obj['ofes'])):
-            self.obj['ofes'][i]['res_lyr']['kslast'] = kslast
+        for ofe in self.obj['ofes']:
+            luse = ofe['luse']
+            if (not getattr(self, '_preserve_input_format', False)
+                    and luse is not None and 'developed' in luse.lower()):
+                continue
+            ofe['res_lyr']['kslast'] = kslast
 
-        self.obj['res_lyr']['kslast'] = kslast
+        self.obj['res_lyr'] = self.obj['ofes'][-1]['res_lyr']
 
     def clip_soil_depth(self, max_depth: float) -> None:
         """Limit the cumulative soil depth to ``max_depth`` while preserving ordering."""
@@ -745,7 +747,9 @@ class WeppSoilUtil(object):
                 _stext = ofe['stext']
                 _lkeff = ofe['lkeff']
                 _uksat = ofe['uksat']
-                _texid_enum = self.simple_texture_enum
+                from wepppy.wepp.soils.utils import simple_texture_enum
+                _texid_enum = simple_texture_enum(clay=ofe['horizons'][0]['clay'],
+                                                  sand=ofe['horizons'][0]['sand'])
                 s.append(
                     f"{_ksatadj}\t {_quote_wepp_text(_luse)}\t {_burn_code}\t "
                     f"{_quote_wepp_text(_stext)}\t {_texid_enum}\t {_uksat}\t {_lkeff}"
@@ -860,7 +864,9 @@ class WeppSoilUtil(object):
                 _stext = ofe['stext']
                 _lkeff = ofe['lkeff']
                 _uksat = ofe['uksat']
-                _texid_enum = self.simple_texture_enum
+                from wepppy.wepp.soils.utils import simple_texture_enum
+                _texid_enum = simple_texture_enum(clay=ofe['horizons'][0]['clay'],
+                                                  sand=ofe['horizons'][0]['sand'])
                 s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t burn_code:{_burn_code}\t stext:'{_stext}'\t texid_enum:{_texid_enum}\t uksat:{_uksat}\t lkeff:{_lkeff}")
 
             L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])

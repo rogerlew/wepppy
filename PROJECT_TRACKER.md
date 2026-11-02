@@ -17,6 +17,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+M2/M3 implemented: [MOFE input producer audit](docs/work-packages/20261102_mofe_input_producer_audit/package.md) — approved contract ancestor `4579b11ce`; Python producer repairs and paired Rust commit `5e3540f` validated locally. Supported actual-project fork readback covers 72 hills/235 elements with unchanged source. Independent reviews pass; extended validation is running. Native PMET capacity/observation, 9005 consumer and S01 FC/HK ownership remain HOLD. No deployment or existing-project regeneration.
+
 Active repair: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — checkpoint `2b998e08d` committed; implementation and independent reviews complete; split validation 12533 passed/371 skipped. Implementation commit and push authorized; no deployment.
 
 Completed locally: [Malformed request side-effect repair](docs/work-packages/20261030_malformed_request_side_effects/package.md) — both frameworks and confirmed consumers repaired; independent correctness/security/QA approved. 4,017 route tests and 71 real persistence tests pass. Split broad coverage: 12,451 passed / 368 executed skips plus one collection skip; plain full command hit an unrelated active test lock. Docs checkpoints and implementation committed; no deployment.

@@ -1,0 +1,3079 @@
+{
+  "checks": [
+    {
+      "topaz": "102",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "102",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "102",
+      "ofe": 3,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3d4234f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "103",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "112",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "112",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "113",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "113",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "121",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "121",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "121",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "121",
+      "ofe": 4,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd06e875"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "121",
+      "ofe": 5,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P4c37e8a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "122",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "122",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "123",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "132",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "133",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "133",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "142",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "143",
+      "ofe": 1,
+      "class": "developed low intensity",
+      "texture": "silt loam",
+      "crop_keys": [
+        "For_2276"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 8,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd826a91"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "151",
+      "ofe": 9,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd6a4e25"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "152",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "152",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "153",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "153",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "153",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "153",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "161",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "161",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "161",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "161",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "161",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "162",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "163",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "163",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "163",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "172",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "172",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "173",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "173",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "173",
+      "ofe": 3,
+      "class": "developed low intensity",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P972c75d"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "181",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "182",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "182",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "183",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "192",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "193",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "193",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "193",
+      "ofe": 3,
+      "class": "developed low intensity",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P972c75d"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "201",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "202",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "202",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "202",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "202",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "203",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "212",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "212",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "213",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "213",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "22",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "22",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "222",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "222",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "222",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "222",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "223",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "223",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "23",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "23",
+      "ofe": 2,
+      "class": "tall grass",
+      "texture": "loam",
+      "crop_keys": [
+        "P20a5e6e"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "23",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "23",
+      "ofe": 4,
+      "class": "shrub",
+      "texture": "loam",
+      "crop_keys": [
+        "Pd06e875"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "23",
+      "ofe": 5,
+      "class": "shrub",
+      "texture": "loam",
+      "crop_keys": [
+        "P4c37e8a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "232",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "232",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "233",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "233",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "233",
+      "ofe": 3,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3d4234f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "241",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "242",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "242",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "243",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "252",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "252",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "253",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "253",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "253",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "253",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "253",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 8,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd826a91"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "261",
+      "ofe": 9,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd6a4e25"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "262",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "262",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "263",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "271",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "272",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "273",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "273",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "281",
+      "ofe": 8,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd826a91"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "282",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "283",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "291",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "292",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "292",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "292",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "292",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "293",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "293",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "301",
+      "ofe": 7,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb6f17d2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "302",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "32",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "32",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "33",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "33",
+      "ofe": 2,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P20a5e6e"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "33",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "42",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "42",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "42",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "42",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "43",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "43",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "43",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 3,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3d4234f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 4,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd06e875"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 5,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P4c37e8a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 7,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pf284723"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 8,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd826a91"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 9,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P19a19c6"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 10,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P7efa13f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "51",
+      "ofe": 11,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P283f269"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "52",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "53",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "61",
+      "ofe": 6,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P5bfe43a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "62",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "62",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "63",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "71",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "71",
+      "ofe": 2,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P20a5e6e"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "71",
+      "ofe": 3,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3d4234f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "71",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "71",
+      "ofe": 5,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pa237df3"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "72",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "73",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "73",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "82",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "82",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "83",
+      "ofe": 1,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_7670"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "83",
+      "ofe": 2,
+      "class": "tall grass",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P20a5e6e"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "83",
+      "ofe": 3,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3d4234f"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "83",
+      "ofe": 4,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pd06e875"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 2,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P90377a9"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 3,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P3f56086"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 4,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P73006b2"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 5,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pcff71da"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "91",
+      "ofe": 6,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Pb7a113a"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "92",
+      "ofe": 1,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_9591"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "92",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "93",
+      "ofe": 1,
+      "class": "forest",
+      "texture": "silt loam",
+      "crop_keys": [
+        "Tah_4899"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    },
+    {
+      "topaz": "93",
+      "ofe": 2,
+      "class": "shrub",
+      "texture": "silt loam",
+      "crop_keys": [
+        "P1e736f0"
+      ],
+      "expected": [
+        0.95,
+        0.8
+      ]
+    }
+  ],
+  "table_rows": 24,
+  "distinct_pairs": [
+    [
+      0.95,
+      0.8
+    ]
+  ],
+  "source_sha256": {
+    "wepppy/wepp/management/managements.py": "c83275c7b2dd5331f991086158b3a2605a056c9431551d388128391872842664",
+    "wepppy/wepp/management/pmetpara.py": "6e5ed8973c92c356a2527eb06ba2f9bd697df97b3c77abe60ff3cc07ae1fad3f",
+    "wepppy/wepp/management/utils/multi_ofe.py": "834787b7d53d778686f3aae834133072a3dfeab48ca225351c175a3c9e1dc8e4",
+    "wepppy/nodb/core/wepp.py": "92f8cf62ac36ee9721404f55589827b23464d703398c567c80714da27c7207aa",
+    "wepppy/nodb/mods/disturbed/disturbed.py": "e6e9d54d4c6880d22a102f1dc84aebad8f67ff2944ee634786356166cf25063e",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "367e94103f75d8746f99fb5c440fe84059534d1efb50ec2d3431fcbfb76243ba"
+  },
+  "installed_rust": {
+    "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+    "sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad"
+  },
+  "scope": "Serialized producer/year-reference lookup only; native execution remains HOLD"
+}

@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python /workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts/refresh_disturbed_report.py
+{"fresh_cases": 96, "outputs_equal": 768, "changed_input_files": 192, "report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947"}

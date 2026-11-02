@@ -1,0 +1,22 @@
+warning: variable does not need to be mutable
+    --> wepp_interchange/src/totalwatsed.rs:1248:13
+     |
+1248 |         let mut row = finish_row(&[2020, 1, 1, 1, 1, 2020], &day, None, 1.0, 0.0, 0.0);
+     |             ----^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `wepp_interchange_rust` (lib test) generated 1 warning (run `cargo fix --lib -p wepp_interchange_rust --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+     Running unittests src/lib.rs (target/debug/deps/wepp_interchange_rust-21d9402b6fd86182)
+
+running 4 tests
+test mofe::tests::short_representable_segment_keeps_normalized_endpoints ... ok
+test mofe::tests::explicit_breakpoints_preserve_length_and_accept_target_width ... ok
+test mofe::tests::explicit_breakpoints_validate_boundaries_and_limit ... ok
+test mofe::tests::invalid_buffers_and_tiny_segments_preserve_destination ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 110 filtered out; finished in 0.01s
+

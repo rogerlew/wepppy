@@ -1,0 +1,1197 @@
+{
+  "wepp_bin": "wepp_260803",
+  "multi_ofe": true,
+  "landuse_assignment_count": 72,
+  "hills": [
+    {
+      "topaz": "102",
+      "nofe": 3,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591",
+        "OFE3_Tah_9591"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "52",
+        "3": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "103",
+      "nofe": 1,
+      "plants": [
+        "Tah_9591"
+      ],
+      "assignments": {
+        "1": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "112",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "113",
+      "nofe": 2,
+      "plants": [
+        "Tah_7670",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "121",
+      "nofe": 5,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_9591",
+        "OFE5_Tah_9591"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "52",
+        "5": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 5
+    },
+    {
+      "topaz": "122",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "123",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "132",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "133",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "142",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 6
+    },
+    {
+      "topaz": "143",
+      "nofe": 1,
+      "plants": [
+        "For_2276"
+      ],
+      "assignments": {
+        "1": "21"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "151",
+      "nofe": 9,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899",
+        "OFE8_Tah_4899",
+        "OFE9_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42",
+        "8": "42",
+        "9": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 9
+    },
+    {
+      "topaz": "152",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "153",
+      "nofe": 4,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "161",
+      "nofe": 5,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 5
+    },
+    {
+      "topaz": "162",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "163",
+      "nofe": 3,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42",
+        "3": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "172",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "173",
+      "nofe": 3,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_For_2276"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "21"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "181",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 7
+    },
+    {
+      "topaz": "182",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "183",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "192",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "193",
+      "nofe": 3,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899",
+        "OFE3_For_2276"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42",
+        "3": "21"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "201",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 7
+    },
+    {
+      "topaz": "202",
+      "nofe": 4,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "203",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "212",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "213",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "22",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "222",
+      "nofe": 4,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "223",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "23",
+      "nofe": 5,
+      "plants": [
+        "Tah_7670",
+        "OFE2_Tah_7670",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_9591",
+        "OFE5_Tah_9591"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "42",
+        "4": "52",
+        "5": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 5
+    },
+    {
+      "topaz": "232",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "233",
+      "nofe": 3,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591",
+        "OFE3_Tah_9591"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "52",
+        "3": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "241",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 6
+    },
+    {
+      "topaz": "242",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "243",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "252",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "253",
+      "nofe": 5,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 5
+    },
+    {
+      "topaz": "261",
+      "nofe": 9,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899",
+        "OFE8_Tah_4899",
+        "OFE9_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42",
+        "8": "42",
+        "9": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 9
+    },
+    {
+      "topaz": "262",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "263",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "271",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 7
+    },
+    {
+      "topaz": "272",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "273",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "281",
+      "nofe": 8,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899",
+        "OFE8_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42",
+        "8": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 8
+    },
+    {
+      "topaz": "282",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "283",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 7
+    },
+    {
+      "topaz": "291",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 6
+    },
+    {
+      "topaz": "292",
+      "nofe": 4,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "293",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "301",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42",
+        "7": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 7
+    },
+    {
+      "topaz": "302",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "32",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "33",
+      "nofe": 3,
+      "plants": [
+        "Tah_7670",
+        "OFE2_Tah_7670",
+        "OFE3_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "42",
+      "nofe": 4,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42",
+        "3": "42",
+        "4": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "43",
+      "nofe": 3,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 3
+    },
+    {
+      "topaz": "51",
+      "nofe": 11,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_9591",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_9591",
+        "OFE5_Tah_9591",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_9591",
+        "OFE8_Tah_4899",
+        "OFE9_Tah_9591",
+        "OFE10_Tah_9591",
+        "OFE11_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "52",
+        "3": "52",
+        "4": "52",
+        "5": "52",
+        "6": "42",
+        "7": "52",
+        "8": "42",
+        "9": "52",
+        "10": "52",
+        "11": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 11
+    },
+    {
+      "topaz": "52",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "53",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "61",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 6
+    },
+    {
+      "topaz": "62",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "63",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "71",
+      "nofe": 5,
+      "plants": [
+        "Tah_7670",
+        "OFE2_Tah_7670",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_7670"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "52",
+        "4": "42",
+        "5": "71"
+      },
+      "soil_exists": true,
+      "soil_ofes": 5
+    },
+    {
+      "topaz": "72",
+      "nofe": 1,
+      "plants": [
+        "Tah_7670"
+      ],
+      "assignments": {
+        "1": "71"
+      },
+      "soil_exists": true,
+      "soil_ofes": 1
+    },
+    {
+      "topaz": "73",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_9591"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "82",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "42"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "83",
+      "nofe": 4,
+      "plants": [
+        "Tah_7670",
+        "OFE2_Tah_7670",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_9591"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "52",
+        "4": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 4
+    },
+    {
+      "topaz": "91",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_9591"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "42",
+        "3": "42",
+        "4": "42",
+        "5": "42",
+        "6": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 6
+    },
+    {
+      "topaz": "92",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591"
+      ],
+      "assignments": {
+        "1": "52",
+        "2": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    },
+    {
+      "topaz": "93",
+      "nofe": 2,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_9591"
+      ],
+      "assignments": {
+        "1": "42",
+        "2": "52"
+      },
+      "soil_exists": true,
+      "soil_ofes": 2
+    }
+  ]
+}

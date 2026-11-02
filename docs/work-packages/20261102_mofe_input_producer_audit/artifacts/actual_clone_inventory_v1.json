@@ -1,0 +1,229 @@
+{
+  "wepp_bin": "wepp_260803",
+  "multi_ofe": true,
+  "landuse_assignment_count": 11,
+  "hills": [
+    {
+      "topaz": "22",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_9591",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "70",
+        "3": "120",
+        "4": "120",
+        "5": "100",
+        "6": "100"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "23",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_4899"
+      ],
+      "assignments": {
+        "1": "120",
+        "2": "100"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "31",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_9591",
+        "OFE7_Tah_9591"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "71",
+        "4": "71",
+        "5": "71",
+        "6": "120",
+        "7": "120"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "33",
+      "nofe": 4,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_9591"
+      ],
+      "assignments": {
+        "1": "120",
+        "2": "120",
+        "3": "120",
+        "4": "120"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "42",
+      "nofe": 4,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591",
+        "OFE3_Tah_9591",
+        "OFE4_Tah_9591"
+      ],
+      "assignments": {
+        "1": "120",
+        "2": "120",
+        "3": "120",
+        "4": "120"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "51",
+      "nofe": 6,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "71",
+        "4": "71",
+        "5": "71",
+        "6": "71"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "52",
+      "nofe": 7,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "71",
+        "4": "71",
+        "5": "71",
+        "6": "90",
+        "7": "90"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "53",
+      "nofe": 1,
+      "plants": [
+        "Tah_4899"
+      ],
+      "assignments": {
+        "1": "71"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "61",
+      "nofe": 9,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899",
+        "OFE8_Tah_4899",
+        "OFE9_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "71",
+        "4": "71",
+        "5": "71",
+        "6": "71",
+        "7": "90",
+        "8": "90",
+        "9": "90"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "62",
+      "nofe": 8,
+      "plants": [
+        "Tah_4899",
+        "OFE2_Tah_4899",
+        "OFE3_Tah_4899",
+        "OFE4_Tah_4899",
+        "OFE5_Tah_4899",
+        "OFE6_Tah_4899",
+        "OFE7_Tah_4899",
+        "OFE8_Tah_4899"
+      ],
+      "assignments": {
+        "1": "71",
+        "2": "71",
+        "3": "71",
+        "4": "90",
+        "5": "70",
+        "6": "70",
+        "7": "70",
+        "8": "70"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    },
+    {
+      "topaz": "63",
+      "nofe": 2,
+      "plants": [
+        "Tah_9591",
+        "OFE2_Tah_9591"
+      ],
+      "assignments": {
+        "1": "120",
+        "2": "120"
+      },
+      "soil_exists": false,
+      "soil_ofes": null
+    }
+  ]
+}

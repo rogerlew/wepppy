@@ -233,7 +233,11 @@ def test_real_soil_workers_propagate_mean_to_every_ofe(mapped_wepp, multi_ofe, d
     if multi_ofe:
         slope=wd/'watershed/slope_files/hillslopes/hill_11.mofe.slp';slope.parent.mkdir(parents=True)
         slope.write_text('97.5\n2\n0 30\n2 30\n0,0.1 1,0.1\n2 30\n0,0.1 1,0.1\n')
-        (wd/'landuse').mkdir();(wd/'landuse/hill_11.mofe.man').write_bytes((fixture/'p118.man').read_bytes())
+        from wepppy.wepp.management import read_management
+        from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
+        (wd/'landuse').mkdir()
+        management = read_management(str(fixture/'p118.man'))
+        ManagementMultipleOfeSynth([management, management]).write(str(wd/'landuse/hill_11.mofe.man'))
         prep_multi_ofe_hillslope(('11',1,w.wd,str(runs),2,value,.5,False,300,False,1,False,1,pars))
     else:
         prep_soil(('11',str(source),str(runs/'p1.sol'),value,pars,.5,False,1,False,1))

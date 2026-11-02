@@ -2016,37 +2016,36 @@ class Disturbed(NoDbBase):
         return lookup
 
     def pmetpara_prep(self) -> None:
-        func_name = inspect.currentframe().f_code.co_name
-        self.logger.info(f'{self.class_name}.{func_name}()')
-
-        from wepppy.nodb.core import Wepp
+        """Bind staged crop identities to the existing per-segment lookup policy."""
+        from wepppy.nodb.core import Wepp, Watershed
         from wepppy.runtime_paths.wepp_inputs import materialize_input_file
-        _land_soil_replacements_d = self.land_soil_replacements_d
+        from wepppy.wepp.management.pmetpara import _write_prepared_pmet
 
+        self.logger.info('Preparing PMET from staged managements and final element assignments')
+        _land_soil_replacements_d = self.land_soil_replacements_d
         wd = self.wd
         landuse = self.landuse_instance
         soils = self.soils_instance
         wepp = Wepp.getInstance(wd)
-
-        self.logger.info('  Identifying landuse for pmetpara.txt')
-        domlc_d = {}
-        for topaz_id, dom in landuse.domlc_d.items():
+        translator = Watershed.getInstance(wd).translator_factory()
+        soil_texture_d = {}
+        contexts = {}
+        for topaz_id, scalar_dom in landuse.domlc_d.items():
             if (int(topaz_id) - 4) % 10 == 0:
                 continue
-            domlc_d[topaz_id] = dom
-
-        n = len(domlc_d)
-        soil_texture_d: Dict[str, Tuple[Any, Any]] = {}
-
-        with open(_join(wepp.runs_dir, 'pmetpara.txt'), 'w') as fp:
-            fp.write('{n}\n'.format(n=n))
-
-            for i, (topaz_id, dom) in enumerate(domlc_d.items()):
-                self.logger.info(f'    pmetpara.txt gen for topaz_id: {topaz_id}, dom: {dom}')
-
-                man_summary = landuse.managements[dom]
-                man = man_summary.get_management()
-
+            filename = f'p{translator.wepp(top=int(topaz_id))}.man'
+            if wepp.multi_ofe:
+                assignments = getattr(landuse, 'domlc_mofe_d', None)
+                if not assignments or not assignments.get(str(topaz_id)):
+                    raise ValueError(f'Missing MOFE landuse for {topaz_id}; rebuild landuse.')
+                segments = assignments[str(topaz_id)]
+                prepared = WeppSoilUtil(_join(wepp.runs_dir, filename.replace('.man', '.sol')))
+                ofes = prepared.obj['ofes']
+                if set(segments) != {str(i) for i in range(1, len(ofes) + 1)}:
+                    raise ValueError(f'MOFE soil/landuse counts disagree for {topaz_id}; rebuild inputs.')
+                segment_inputs = [(segments[str(i + 1)], ofe['horizons'][0]['clay'],
+                                   ofe['horizons'][0]['sand']) for i, ofe in enumerate(ofes)]
+            else:
                 mukey = soils.domsoil_d[topaz_id]
                 if mukey in soil_texture_d:
                     clay, sand = soil_texture_d[mukey]
@@ -2079,9 +2078,11 @@ class Disturbed(NoDbBase):
 
                 assert isfloat(clay), clay
                 assert isfloat(sand), sand
-
+                segment_inputs = [(scalar_dom, clay, sand)]
+            contexts[filename] = []
+            for dom, clay, sand in segment_inputs:
                 texid = simple_texture(clay=clay, sand=sand)
-                disturbed_class = man_summary.disturbed_class
+                disturbed_class = landuse.managements[dom].disturbed_class
 
                 if disturbed_class is not None:
                     lookup_class = lookup_disturbed_class(disturbed_class)
@@ -2109,8 +2110,15 @@ class Disturbed(NoDbBase):
                     rawb = replacements['pmet_rawp']
 
                 description = f'{texid}-{disturbed_class}'.replace(' ', '_')
-                plant_name = man.plants[0].name
-                fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
+                contexts[filename].append((kcb, rawb, description))
+
+        def resolve(path, ofe, original):
+            if path.name not in contexts or ofe >= len(contexts[path.name]):
+                raise ValueError(f'Management/assignment mismatch for {path.name}; rebuild inputs.')
+            return contexts[path.name][ofe]
+
+        _write_prepared_pmet(wepp.runs_dir, resolve, filenames=set(contexts),
+                             expected_ofes={name: len(rows) for name, rows in contexts.items()})
 
     def _resolve_source_soil_path(
         self,

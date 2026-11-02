@@ -4,8 +4,8 @@
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current. The 2026-11-02 execution request starts M1; the former audit-only session
-restriction is superseded. The proposed contract decisions and required ancestor
-commit remain approval gates before production implementation.
+restriction is superseded. The user ratified MIPA-01 with “approved. proceed”; contract ancestor
+`4579b11ce` precedes all production implementation. Native acceptance stays HOLD.
 
 ## Purpose / Big Picture
 
@@ -31,12 +31,29 @@ selected by each element and rotation, not only successful model completion.
 - [x] (2026-11-02 22:49 UTC) M1 renewed management and installed-Rust reproductions through the running Compose application container; existing focused suites pass 21 tests despite reproduced failures.
 - [x] (2026-11-02 UTC) Draft MIPA-01 canonical identity contract and compatibility/regression checkpoint.
 - [x] (2026-11-02 UTC) Two independent contract reviews pass after bounded-calendar, token-safe-alias and idempotence clarifications; documentation and baseline integrity checks pass.
-- [ ] M1: operator ratification and standalone ancestor commit.
-- [ ] Future M2: repair PMET producer coverage and identity.
-- [ ] Future M3: repair other confirmed producers within the accepted scope.
-- [ ] Future M4: prove generated/consumed artifacts and independent review.
+- [x] M1: operator approved; standalone contract ancestor `4579b11ce` committed before implementation.
+- [x] M2: implement all-crop PMET coverage, native-safe aliases, per-OFE Disturbed context and retry/archive identity.
+- [x] M3: implement calendar/residue, per-OFE soil/cover and paired Rust slope/map repairs; source and actual-writer tests pass.
+- [x] M4 producer portion: supported actual-project fork, 72 hills/235 elements prepared and reparsed; original source unchanged; PMET retry byte-identical.
+- [ ] M4 full acceptance: native capacity, adapter mapping, FC/HK ownership, 9005 consumer and fresh native outputs/reports remain HOLD.
+- [x] Final independent correctness, QA and security review: no unresolved source findings; final focused suite 306 passed.
+- [ ] Extended-test and benchmark-refresh disposition recorded in execution report.
 
 ## Surprises & Discoveries
+
+Implementation review found PMET publication must replace hardlinked generated
+destinations rather than truncate them, and reject symlinks. Visible temporary
+attempts preserve failed writes and survive the canonical archive/restore path.
+Secondary synthesis also exposed stale provenance: scenario-carried identity now
+survives MOFE/rotation rename/copy/dedup and mixed prepared/unprepared inputs.
+Safe duplicate native plant labels remain supported without rewriting when their
+coefficient context is identical; ambiguous graphs requiring rewriting fail.
+
+The first actual-project candidate (calm-amalgamation) lacks its MOFE soil files;
+retain that failed selection and use the complete awake-versatility fork instead.
+An evidence-script attribute typo failed after preparation; its log is retained,
+and the corrected readback succeeded. No source project was regenerated.
+
 
 
 Renewed actual-writer evidence under Python 3.12.16 reproduces the original
@@ -63,6 +80,15 @@ PURK/PERC consumers used another OFE's values under both retention policies;
 can conceal the error, so repeated-material parity alone is insufficient.
 
 ## Decision Log
+
+2026-11-02 implementation: accepted MIPA-01 and ancestor `4579b11ce` authorize
+bounded producer repairs and copied-project validation. Keep no-N landuse
+synthesis at the full reusable common period because it has no simulation horizon;
+explicit `build/render/write(sim_years=N)` can handle coprime long source cycles
+without constructing that period. No parameter values or fallback policy changed.
+Do not impose one audited binary's scenario capacity on all supported engines;
+selected native capacity remains an explicit acceptance prerequisite.
+
 
 
 2026-11-02 execution: honor the user's request to execute this package by starting
@@ -91,20 +117,20 @@ repair, a new restriction, default changes or existing-project regeneration.
 ## Outcomes & Retrospective
 
 
-M1 execution has renewed failing evidence and a concrete proposed canonical
-contract in `docs/schemas/mofe-input-identity-contract.md`, with compatibility,
-state/error and regression decisions in `artifacts/20261102_contract_decision.md`.
-The package is not implemented or closed. Review, ratification and ancestor commit
-must precede M2/M3; native and actual-project acceptance remain separate blockers.
+M2/M3 producer repairs are implemented. See
+`artifacts/20261102_producer_execution.md` for source coverage, exact checks,
+copied-project evidence and limitations. A supported fork of awake-versatility
+prepared 72 hills/235 elements with matching slope/soil/management counts; direct
+serialized year-to-crop joins match every intended lookup and repeat preparation
+is stable. Actual-project coefficients are uniform, so discriminating mixed-pair
+proof comes from the real Disturbed writer regression, not that project alone.
 
-
-Four audit reports are reconciled in the findings register. Fifteen entries
-comprise eleven producer findings, one inherited API ambiguity and three native
-dependencies. NATIVE-03 reuses S01 runtime evidence; the original PMET native
-findings retain their static confidence and execution limits. Real Python
-writer and installed Rust extension reproductions are retained. No repair is implemented.
-Later revisions must name retained failures, direct native evidence and the highest
-supported claim rather than declaring completion from a broad green test suite.
+The package remains open for native acceptance. NATIVE-01/02/03, selected 9005
+consumer validation and fresh output/report consequences are not resolved by
+correct producer files. The installed Rust release was not replaced. Broad
+pytest reached a report-source freshness pin affected by this writer change;
+a fresh 96-case rerun now matches all 768 retained outputs, and its report/provenance
+refresh passes 16 contract/Usersum tests. No historical output was relabeled.
 
 ## Context and Orientation
 

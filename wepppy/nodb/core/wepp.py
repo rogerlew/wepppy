@@ -773,6 +773,13 @@ def prep_multi_ofe_hillslope(
             Color=(0, 0, 0, 255),
         )
         man = man.build_multiple_year_man(sim_years)
+        with open(slope_dst_fn) as slope_file:
+            records = [line for line in slope_file if line.strip() and not line.lstrip().startswith('#')]
+        if len(records) < 2:
+            raise ValueError(f'Missing staged slope header for hillslope {topaz_id}.')
+        slope_ofes = int(records[1].split()[0])
+        if slope_ofes != man.nofe or man.nofe != len(soilu.obj['ofes']):
+            raise ValueError(f'Staged slope/soil/management OFE counts disagree for hillslope {topaz_id}; rebuild inputs.')
 
         man_dst_fn = _join(runs_dir, f'p{wepp_id}.man')
         with open(man_dst_fn, 'w') as pf:

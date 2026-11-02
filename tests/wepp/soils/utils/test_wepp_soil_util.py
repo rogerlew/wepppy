@@ -1082,3 +1082,22 @@ def test_over9000_wrappers_forward_expected_version(
     assert captured["h0_max_om"] == 0.15
     assert captured["hostname"] == "dev.wepp.cloud"
     assert captured["version"] == expected_version
+
+
+@pytest.mark.parametrize('reverse', [False, True])
+def test_kslast_mixed_landuse_readback(make_soil_util, workspace_tmp_dir, wepp_soil_util_module, reverse):
+    soil = make_soil_util(luse='forest')
+    first = soil.obj['ofes'][0]
+    first['res_lyr']['kslast'] = 1.0
+    developed = deepcopy(first)
+    developed['luse'] = 'developed high intensity'
+    developed['res_lyr']['kslast'] = 2.0
+    soil.obj['ofes'] = [first, developed][::(-1 if reverse else 1)]
+    soil.obj['ntemp'] = 2
+    soil.modify_kslast(99.0)
+    assert [ofe['res_lyr']['kslast'] for ofe in soil.obj['ofes']] == ([2.0, 99.0] if reverse else [99.0, 2.0])
+    assert soil.obj['res_lyr'] is soil.obj['ofes'][-1]['res_lyr']
+    path = workspace_tmp_dir / 'mixed.sol'
+    soil.write(str(path))
+    parsed = wepp_soil_util_module.WeppSoilUtil(str(path))
+    assert [ofe['res_lyr']['kslast'] for ofe in parsed.obj['ofes']] == ([2.0, 99.0] if reverse else [99.0, 2.0])

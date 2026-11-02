@@ -66,6 +66,19 @@ __all__ = [
 ]
 
 
+def _ordered_cover_ofes(data, years, topaz_id):
+    bands = (RAP_Band.TREE, RAP_Band.SHRUB, RAP_Band.PERENNIAL_FORB_AND_GRASS,
+             RAP_Band.ANNUAL_FORB_AND_GRASS, RAP_Band.LITTER, RAP_Band.BARE_GROUND)
+    ids = sorted(data[RAP_Band.TREE][years[0]][topaz_id], key=int)
+    if [int(key) for key in ids] != list(range(1, len(ids) + 1)) or not ids:
+        raise ValueError(f'Invalid RAP OFE identities for {topaz_id}; rebuild cover.')
+    for band in bands:
+        for year in years:
+            if set(data[band][year][topaz_id]) != set(ids):
+                raise ValueError(f'RAP OFE identities disagree for {topaz_id}; rebuild cover.')
+    return ids
+
+
 def _parse_fire_year(fire_date: str) -> int:
     """Parse fire-date strings used by Disturbed into a four-digit year."""
     normalized = str(fire_date).strip().replace('-', ' ').replace('/', ' ').replace('.', ' ')
@@ -358,7 +371,7 @@ class RAP_TS(NoDbBase):
                 fp.write('\n')
 
                 if self.multi_ofe:
-                    for fp_id in sorted(data[RAP_Band.TREE][years[0]][str(topaz_id)]):
+                    for fp_id in _ordered_cover_ofes(data, years, topaz_id):
                         self.logger.info(f'  topaz_id={topaz_id}, fp_id={fp_id}\n')
 
                         for band in [RAP_Band.TREE,
@@ -432,7 +445,7 @@ class RAP_TS(NoDbBase):
                 fp.write('\n')
 
                 if self.multi_ofe:
-                    for mofe_id in sorted(data[RAP_Band.TREE][years[0]][str(topaz_id)]):
+                    for mofe_id in _ordered_cover_ofes(data, years, topaz_id):
 
                         burn_class = landuse.identify_burn_class(topaz_id, mofe_id)
 

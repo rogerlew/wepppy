@@ -1,6 +1,6 @@
 # Disturbed Parameterization: Current Canonical Results
 
-Reviewed: **2026-10-10**. Model: **wepp_261010**, hourly hillslope mode.
+Reviewed: **2026-11-02**. Model: **wepp_261010**, hourly hillslope mode.
 Parameterization: **adopted low-severity forest RRINIT of 6 cm**, including
 young, deciduous and mixed forest through the shared burned templates.
 See [ADR-0083](../../docs/adrs/ADR-0083-low-severity-forest-initial-random-roughness.md).
@@ -63,7 +63,10 @@ establish that natural sediment production is absent.
 The 100-year synthetic McKenzie Bridge climate, four canonical soils and
 87.9 m steep profile are common across these cases. All 96 cases were freshly
 generated and run with the released 261010 hillslope binary in the development
-container. Standard outputs match the validated candidate matrix byte-for-byte.
+container. After the MOFE producer repairs, all 768 standard outputs again match the
+2026-10-10 validated matrix byte-for-byte. These single-OFE controls do not
+establish heterogeneous MOFE native correctness; its capacity, PMET adapter and
+FC/HK ownership acceptance remains on hold.
 Prepared inputs and output hashes are retained; no cross-build PASS reuse or
 parameter changes are included. Historical 261009 reports remain archived.
 

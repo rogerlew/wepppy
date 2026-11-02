@@ -1,0 +1,450 @@
+Command: ['wctl', 'run-pytest', 'tests/nodb', 'tests/omni', 'tests/profile_recorder', 'tests/query_engine', 'tests/roads', 'tests/rq', 'tests/runtime_paths', 'tests/sbs_map', 'tests/scripts', 'tests/services', 'tests/shape_converter', 'tests/smoke', 'tests/soils', 'tests/test_0_imports.py', 'tests/test_2_validate_managements.py', 'tests/test_all_your_base.py', 'tests/test_all_your_base_dateutils.py', 'tests/test_all_your_base_hydro.py', 'tests/test_all_your_base_objective_functions.py', 'tests/test_all_your_base_stats.py', 'tests/test_imports.py', 'tests/test_managements_module.py', 'tests/test_nodb_core_import_hygiene.py', 'tests/test_observability_correlation.py', 'tests/test_raster_freshness.py', 'tests/test_redis_settings.py', 'tests/test_webclients_elevation.py', 'tests/test_wepp_top_translator.py', 'tests/tools', 'tests/topo', 'tests/wepp', 'tests/wepp_runner', 'tests/weppcloud', '--maxfail=1', '--ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py']
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb tests/omni tests/profile_recorder tests/query_engine tests/roads tests/rq tests/runtime_paths tests/sbs_map tests/scripts tests/services tests/shape_converter tests/smoke tests/soils tests/test_0_imports.py tests/test_2_validate_managements.py tests/test_all_your_base.py tests/test_all_your_base_dateutils.py tests/test_all_your_base_hydro.py tests/test_all_your_base_objective_functions.py tests/test_all_your_base_stats.py tests/test_imports.py tests/test_managements_module.py tests/test_nodb_core_import_hygiene.py tests/test_observability_correlation.py tests/test_raster_freshness.py tests/test_redis_settings.py tests/test_webclients_elevation.py tests/test_wepp_top_translator.py tests/tools tests/topo tests/wepp tests/wepp_runner tests/weppcloud --maxfail=1 --ignore=tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 10304 items / 1 skipped
+
+tests/nodb/mods/baer/test_baer_prep_timestamps.py .                      [  0%]
+tests/nodb/mods/baer/test_landuse_remap_locking.py .                     [  0%]
+tests/nodb/mods/baer/test_sbs_classify_comprehensive.py ................ [  0%]
+...........                                                              [  0%]
+tests/nodb/mods/baer/test_sbs_coverage_mask.py .....                     [  0%]
+tests/nodb/mods/baer/test_sbs_display_transport_contract.py .            [  0%]
+tests/nodb/mods/baer/test_sbs_map_classify_validation.py ............    [  0%]
+tests/nodb/mods/baer/test_sbs_map_extended.py .......................... [  0%]
+..................                                                       [  0%]
+tests/nodb/mods/baer/test_sbs_native_required.py ....................    [  1%]
+tests/nodb/mods/baer/test_sbs_rattlesnake_gdal.py .                      [  1%]
+tests/nodb/mods/disturbed/test_disturbed_lookup_live_e2e.py s            [  1%]
+tests/nodb/mods/disturbed/test_esdac_runtime_gate.py ...............     [  1%]
+tests/nodb/mods/disturbed/test_landuse_remap.py ..................       [  1%]
+tests/nodb/mods/disturbed/test_lookup_contract.py ...................... [  1%]
+.........                                                                [  1%]
+tests/nodb/mods/disturbed/test_modify_soils_mofe.py ...............      [  1%]
+tests/nodb/mods/disturbed/test_modify_soils_single_ofe.py .......        [  1%]
+tests/nodb/mods/disturbed/test_pmetpara_prep.py ...                      [  1%]
+tests/nodb/mods/disturbed/test_sbs_validation.py .....ssssssssssssssssss [  2%]
+s                                                                        [  2%]
+tests/nodb/mods/disturbed/test_trigger_routing.py .....                  [  2%]
+tests/nodb/mods/geneva/test_fixture_manifest.py .....                    [  2%]
+tests/nodb/mods/geneva/test_geneva_cache_freshness.py ............       [  2%]
+tests/nodb/mods/geneva/test_geneva_cn_table_service.py .....             [  2%]
+tests/nodb/mods/geneva/test_geneva_collaborators.py .................... [  2%]
+                                                                         [  2%]
+tests/nodb/mods/geneva/test_geneva_facade.py ......                      [  2%]
+tests/nodb/mods/geneva/test_geneva_guardrails.py ..                      [  2%]
+tests/nodb/mods/geneva/test_geneva_hru_event_measure_service.py ........ [  2%]
+                                                                         [  2%]
+tests/nodb/mods/geneva/test_geneva_hru_map_geometry_service.py ...       [  2%]
+tests/nodb/mods/geneva/test_geneva_report_payload_service.py ......      [  2%]
+tests/nodb/mods/geneva/test_geneva_schema_contracts.py ............      [  3%]
+tests/nodb/mods/geneva/test_geneva_wp09_end_to_end.py .......            [  3%]
+tests/nodb/mods/openet/test_openet_ts.py ............                    [  3%]
+tests/nodb/mods/path_ce/test_config_schema.py .............              [  3%]
+tests/nodb/mods/path_ce/test_controller_stages.py ........               [  3%]
+tests/nodb/mods/path_ce/test_data_prep_parity.py .....                   [  3%]
+tests/nodb/mods/path_ce/test_preconditions.py .............              [  3%]
+tests/nodb/mods/path_ce/test_presets.py ...............                  [  3%]
+tests/nodb/mods/path_ce/test_report_render_integration.py ..             [  3%]
+tests/nodb/mods/path_ce/test_report_service.py ..........                [  3%]
+tests/nodb/mods/path_ce/test_solver_parity.py ....                       [  3%]
+tests/nodb/mods/path_ce/test_solver_seam.py ..............               [  4%]
+tests/nodb/mods/path_ce/test_threshold_sweep.py ......                   [  4%]
+tests/nodb/mods/polaris/test_polaris.py .....                            [  4%]
+tests/nodb/mods/test_ag_fields_backend_contract.py ..................... [  4%]
+.............                                                            [  4%]
+tests/nodb/mods/test_ag_fields_concept1_inputs.py .....                  [  4%]
+tests/nodb/mods/test_ag_fields_concept1_integration.py ....              [  4%]
+tests/nodb/mods/test_ag_fields_concept1_planner.py .........             [  4%]
+tests/nodb/mods/test_ag_fields_corpus_execution.py ....                  [  4%]
+tests/nodb/mods/test_ag_fields_hybrid_integration.py ......              [  4%]
+tests/nodb/mods/test_ag_fields_management_corpus.py .                    [  4%]
+tests/nodb/mods/test_ag_fields_rasterize_crs.py ...                      [  4%]
+tests/nodb/mods/test_ag_fields_routing_schemes.py ..................     [  4%]
+tests/nodb/mods/test_ag_fields_watershed_integration.py ................ [  5%]
+...........                                                              [  5%]
+tests/nodb/mods/test_ag_fields_wepp_runner.py ...                        [  5%]
+tests/nodb/mods/test_ash_multi_year_model_alex_static.py ......          [  5%]
+tests/nodb/mods/test_ash_transport_run_ash.py ..............             [  5%]
+tests/nodb/mods/test_ash_water_provenance.py ...........                 [  5%]
+tests/nodb/mods/test_ashpost_no_data.py ...                              [  5%]
+tests/nodb/mods/test_features_export_cache_key.py ....                   [  5%]
+tests/nodb/mods/test_features_export_carrier_layer_materializer.py ..... [  5%]
+...                                                                      [  5%]
+tests/nodb/mods/test_features_export_catalog_loader.py ....              [  5%]
+tests/nodb/mods/test_features_export_dependency_tracker.py ............. [  5%]
+...                                                                      [  5%]
+tests/nodb/mods/test_features_export_duckdb_materializer.py .....        [  5%]
+tests/nodb/mods/test_features_export_exporters.py ...................    [  6%]
+tests/nodb/mods/test_features_export_freshness.py ..........             [  6%]
+tests/nodb/mods/test_features_export_identity_columns.py ..              [  6%]
+tests/nodb/mods/test_features_export_manifest.py ..                      [  6%]
+tests/nodb/mods/test_features_export_openfilegdb.py ......               [  6%]
+tests/nodb/mods/test_features_export_planner.py .......................  [  6%]
+tests/nodb/mods/test_features_export_profiles.py ..                      [  6%]
+tests/nodb/mods/test_features_export_service.py ........................ [  6%]
+.......................................................                  [  7%]
+tests/nodb/mods/test_features_export_water_weighting.py ................ [  7%]
+...........                                                              [  7%]
+tests/nodb/mods/test_observed_channel_interchange_reuse.py .             [  7%]
+tests/nodb/mods/test_observed_processing.py sss                          [  7%]
+tests/nodb/mods/test_omni.py ........................................... [  8%]
+........................................                                 [  8%]
+tests/nodb/mods/test_omni_artifact_export_service.py ........            [  8%]
+tests/nodb/mods/test_omni_build_router_service.py ....................   [  8%]
+tests/nodb/mods/test_omni_contrast_build_service.py ..........           [  8%]
+tests/nodb/mods/test_omni_documentation.py ...                           [  8%]
+tests/nodb/mods/test_omni_facade_contracts.py .............              [  8%]
+tests/nodb/mods/test_omni_input_parser_service.py ......                 [  8%]
+tests/nodb/mods/test_omni_mode_build_services.py ....................... [  9%]
+.............                                                            [  9%]
+tests/nodb/mods/test_omni_run_orchestration_service.py ........          [  9%]
+tests/nodb/mods/test_omni_sbs_freshness.py ...........                   [  9%]
+tests/nodb/mods/test_omni_scaling_service.py .......                     [  9%]
+tests/nodb/mods/test_omni_state_contrast_mixin.py .....                  [  9%]
+tests/nodb/mods/test_omni_station_catalog_service.py ...........         [  9%]
+tests/nodb/mods/test_postfire_debris_flow_dnbr.py ...................... [  9%]
+.......................                                                  [ 10%]
+tests/nodb/mods/test_postfire_debris_flow_encoding.py .........          [ 10%]
+tests/nodb/mods/test_postfire_debris_flow_freshness.py ................. [ 10%]
+............................                                             [ 10%]
+tests/nodb/mods/test_postfire_debris_flow_integration.py ............... [ 10%]
+........................................                                 [ 11%]
+tests/nodb/mods/test_postfire_debris_flow_kf.py .................        [ 11%]
+tests/nodb/mods/test_postfire_debris_flow_m3_integration.py ............ [ 11%]
+.                                                                        [ 11%]
+tests/nodb/mods/test_postfire_debris_flow_m3_terrain.py ......           [ 11%]
+tests/nodb/mods/test_postfire_debris_flow_observability.py ............. [ 11%]
+.............                                                            [ 11%]
+tests/nodb/mods/test_postfire_debris_flow_production.py ................ [ 11%]
+........................................                                 [ 12%]
+tests/nodb/mods/test_postfire_debris_flow_production_soils.py .......... [ 12%]
+............................                                             [ 12%]
+tests/nodb/mods/test_postfire_debris_flow_publication.py ..............  [ 12%]
+tests/nodb/mods/test_postfire_debris_flow_rainfall.py .................. [ 13%]
+.......                                                                  [ 13%]
+tests/nodb/mods/test_postfire_debris_flow_report.py ..................   [ 13%]
+tests/nodb/mods/test_postfire_debris_flow_results.py ................... [ 13%]
+.......................                                                  [ 13%]
+tests/nodb/mods/test_postfire_debris_flow_run_preparation.py ........    [ 13%]
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py ................ [ 13%]
+....................................................                     [ 14%]
+tests/nodb/mods/test_postfire_debris_flow_soil_thickness.py ............ [ 14%]
+.......................                                                  [ 14%]
+tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py ........ [ 14%]
+......                                                                   [ 14%]
+tests/nodb/mods/test_postfire_debris_flow_source_preparation.py ........ [ 15%]
+........                                                                 [ 15%]
+tests/nodb/mods/test_postfire_debris_flow_source_transport.py .......... [ 15%]
+..                                                                       [ 15%]
+tests/nodb/mods/test_postfire_debris_flow_staley2017.py ................ [ 15%]
+........................................................................ [ 16%]
+.........................................................                [ 16%]
+tests/nodb/mods/test_postfire_debris_flow_wallow_fixtures.py .....       [ 16%]
+tests/nodb/mods/test_rap_endpoint_url.py .                               [ 16%]
+tests/nodb/mods/test_rap_ts_cover_transform.py .....                     [ 16%]
+tests/nodb/mods/test_roads_controller.py ............................... [ 17%]
+..................                                                       [ 17%]
+tests/nodb/mods/test_roads_detachment_view.py ..................         [ 17%]
+tests/nodb/mods/test_roads_monotonic_segments.py ...............         [ 17%]
+tests/nodb/mods/test_roads_segment_loss_summary.py ..................... [ 17%]
+........                                                                 [ 17%]
+tests/nodb/mods/test_rusle_c_formula.py ......                           [ 17%]
+tests/nodb/mods/test_rusle_c_integration.py ............................ [ 18%]
+....................                                                     [ 18%]
+tests/nodb/mods/test_rusle_c_lookup.py ............                      [ 18%]
+tests/nodb/mods/test_rusle_controller.py ...........                     [ 18%]
+tests/nodb/mods/test_rusle_k_compare.py ..                               [ 18%]
+tests/nodb/mods/test_rusle_k_epic.py ...                                 [ 18%]
+tests/nodb/mods/test_rusle_k_integration.py ............                 [ 18%]
+tests/nodb/mods/test_rusle_k_nomograph.py .....                          [ 18%]
+tests/nodb/mods/test_rusle_k_reference_harness.py ....                   [ 18%]
+tests/nodb/mods/test_rusle_ls_integration.py ...                         [ 18%]
+tests/nodb/mods/test_rusle_r_modes.py ......                             [ 18%]
+tests/nodb/mods/test_swat_interchange.py ........                        [ 18%]
+tests/nodb/mods/test_treatments_build.py .......                         [ 19%]
+tests/nodb/test_base_boundary_characterization.py ...................... [ 19%]
+................................................                         [ 19%]
+tests/nodb/test_base_file_handler_cleanup.py ............                [ 19%]
+tests/nodb/test_base_misc.py ........................................... [ 20%]
+                                                                         [ 20%]
+tests/nodb/test_base_unit.py ....................                        [ 20%]
+tests/nodb/test_batch_climate_rap_contention.py ........................ [ 20%]
+................                                                         [ 20%]
+tests/nodb/test_batch_daymet_multiple_contention.py .................... [ 21%]
+...............                                                          [ 21%]
+tests/nodb/test_batch_receipt_transaction.py ......                      [ 21%]
+tests/nodb/test_batch_runner.py ....                                     [ 21%]
+tests/nodb/test_batch_runner_grouped_updates.py .....                    [ 21%]
+tests/nodb/test_batch_runner_watar.py ...........                        [ 21%]
+tests/nodb/test_build_climate_race_conditions.py .......                 [ 21%]
+tests/nodb/test_catalog_producer_refresh.py ...                          [ 21%]
+tests/nodb/test_cli_parquet_lineage.py .........................         [ 21%]
+tests/nodb/test_climate_artifact_export_service.py ............          [ 21%]
+tests/nodb/test_climate_build_helpers.py ............................... [ 22%]
+.........                                                                [ 22%]
+tests/nodb/test_climate_build_router_services.py ...........             [ 22%]
+tests/nodb/test_climate_catalog.py ..................................... [ 22%]
+........................                                                 [ 22%]
+tests/nodb/test_climate_edde_build.py .....................              [ 23%]
+tests/nodb/test_climate_facade_collaborators.py ................         [ 23%]
+tests/nodb/test_climate_gridmet_multiple_build_service.py ............   [ 23%]
+tests/nodb/test_climate_input_parser_service.py ........................ [ 23%]
+................                                                         [ 23%]
+tests/nodb/test_climate_multiple_build.py ......                         [ 23%]
+tests/nodb/test_climate_observed_year_bounds.py .....                    [ 23%]
+tests/nodb/test_climate_prism_build.py ......                            [ 23%]
+tests/nodb/test_climate_scaling_service.py ..........                    [ 24%]
+tests/nodb/test_climate_station_catalog_service.py .......               [ 24%]
+tests/nodb/test_climate_type_hints.py ....                               [ 24%]
+tests/nodb/test_climate_user_defined_station_meta_service.py ...         [ 24%]
+tests/nodb/test_config_sanitization.py ................                  [ 24%]
+tests/nodb/test_defaults_cfg_compatibility.py ...........                [ 24%]
+tests/nodb/test_derived_file_signature.py ........                       [ 24%]
+tests/nodb/test_disturbed_management_overrides.py .........              [ 24%]
+tests/nodb/test_failed_mutation_consumers.py ......                      [ 24%]
+tests/nodb/test_failed_mutation_matrix.py ...................s..s....... [ 24%]
+......                                                                   [ 25%]
+tests/nodb/test_failed_mutation_state.py .....                           [ 25%]
+tests/nodb/test_failed_prelock_state.py ..........                       [ 25%]
+tests/nodb/test_geojson_crs_inference.py ...                             [ 25%]
+tests/nodb/test_hydration_snapshot.py ......                             [ 25%]
+tests/nodb/test_initial_read_retry.py ..................                 [ 25%]
+tests/nodb/test_iter_nodb_mods_subclasses.py .                           [ 25%]
+tests/nodb/test_kslast_map.py ............................F
+
+=================================== FAILURES ===================================
+________ test_real_soil_workers_propagate_mean_to_every_ofe[False-True] ________
+
+mapped_wepp = namespace(wd='/tmp/pytest-of-unknown/pytest-316/test_real_soil_workers_propaga1', kslast_map='/tmp/pytest-of-unknown/p...ta='/tmp/pytest-of-unknown/pytest-316/test_real_soil_workers_propaga1/key.tif'), logger=<Logger kslast-test (WARNING)>)
+multi_ofe = True, developed = False
+
+    @pytest.mark.parametrize('multi_ofe', [False,True])
+    @pytest.mark.parametrize('developed', [False,True])
+    def test_real_soil_workers_propagate_mean_to_every_ofe(mapped_wepp, multi_ofe, developed):
+        import copy
+        from wepppy.nodb.core.kslast_map import prepare_kslast_map, kslast_provenance
+        from wepppy.nodb.core.wepp import prep_soil, prep_multi_ofe_hillslope
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+        w=mapped_wepp;wd=Path(w.wd);runs=wd/'wepp/runs';runs.mkdir(parents=True)
+        fixture=Path(__file__).parents[1]/'omni/fixtures/honeyed_marathoner_sediment_inversion/run_root/wepp/runs'
+        soil=WeppSoilUtil(str(fixture/'p118.sol'))
+        soil.obj['ofes'][0]['luse']='developed' if developed else 'forest'
+        soil.obj['ofes']=[copy.deepcopy(soil.obj['ofes'][0]) for _ in range(2)]
+        soil.obj['ntemp']=2
+        source=wd/'soils/hill_11.mofe.sol';soil.write(str(source))
+        original=WeppSoilUtil(str(source))
+        records=prepare_kslast_map(w,['11','21']);value=records['11']['mean'];pars=kslast_provenance(w.kslast_map,records['11'])
+        if multi_ofe:
+            slope=wd/'watershed/slope_files/hillslopes/hill_11.mofe.slp';slope.parent.mkdir(parents=True)
+            slope.write_text('97.5\n2\n0 30\n2 30\n0,0.1 1,0.1\n2 30\n0,0.1 1,0.1\n')
+            (wd/'landuse').mkdir();(wd/'landuse/hill_11.mofe.man').write_bytes((fixture/'p118.man').read_bytes())
+>           prep_multi_ofe_hillslope(('11',1,w.wd,str(runs),2,value,.5,False,300,False,1,False,1,pars))
+
+tests/nodb/test_kslast_map.py:237: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = ('11', 1, '/tmp/pytest-of-unknown/pytest-316/test_real_soil_workers_propaga1', '/tmp/pytest-of-unknown/pytest-316/test_real_soil_workers_propaga1/wepp/runs', 2, 0.01008, ...)
+
+    def prep_multi_ofe_hillslope(
+        args: Tuple[Any, ...]
+    ) -> Tuple[str, float]:
+        t0 = time.time()
+        (
+            topaz_id,
+            wepp_id,
+            wd,
+            runs_dir,
+            sim_years,
+            kslast,
+            initial_sat,
+            clip_hillslopes,
+            clip_hillslope_length,
+            clip_soils,
+            clip_soils_depth,
+            clip_soils_minimum,
+            clip_soils_minimum_depth,
+        ) = args[:13]
+        modify_kslast_pars = args[13] if len(args) > 13 else None
+    
+        slope_relpath = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
+        slope_dst_fn = _join(runs_dir, f'p{wepp_id}.slp')
+        if clip_hillslopes:
+            slope_src_fn = materialize_input_file(wd, slope_relpath, purpose='wepp-prep-multi-ofe-slope')
+            clip_slope_file_length(slope_src_fn, slope_dst_fn, clip_hillslope_length)
+        else:
+            copy_input_file(wd, slope_relpath, slope_dst_fn)
+    
+        soil_dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
+        with with_input_file_path(
+            wd,
+            f'soils/hill_{topaz_id}.mofe.sol',
+            purpose='wepp-prep-multi-ofe-soils',
+            tolerate_mixed=True,
+            mixed_prefer='archive',
+            allow_materialize_fallback=True,
+        ) as soil_src_fn:
+            preserve_input_format = bool(args[15]) if len(args) > 15 else False
+            soilu = WeppSoilUtil(soil_src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))
+            if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
+                soilu.recompute_wepp_parameters()
+                soilu = soilu.to7778()
+            soilu.modify_initial_sat(initial_sat)
+    
+            if kslast is not None:
+                soilu.modify_kslast(kslast, pars=modify_kslast_pars)
+    
+            if clip_soils_minimum:
+                soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
+    
+            if clip_soils:
+                soilu.clip_soil_depth(clip_soils_depth)
+    
+            anisotropy = args[16] if len(args) > 16 else (None, None)
+            if any(value is not None for value in anisotropy):
+                soilu.modify_anisotropy(*anisotropy, developer_mode=args[17] if len(args) > 17 else False)
+            soilu.write(soil_dst_fn)
+    
+        man_fn = f'hill_{topaz_id}.mofe.man'
+        with with_input_file_path(
+            wd,
+            f'landuse/{man_fn}',
+            purpose='wepp-prep-multi-ofe-management',
+            tolerate_mixed=True,
+            mixed_prefer='archive',
+            allow_materialize_fallback=True,
+        ) as man_src:
+            man = Management(
+                Key=f'hill_{topaz_id}',
+                ManagementFile=Path(man_src).name,
+                ManagementDir=str(Path(man_src).parent),
+                Description=f'hill_{topaz_id} Multiple OFE',
+                NativeScenarioReferences=bool(args[14]) if len(args) > 14 else False,
+                Color=(0, 0, 0, 255),
+            )
+            man = man.build_multiple_year_man(sim_years)
+            with open(slope_dst_fn) as slope_file:
+                records = [line for line in slope_file if line.strip() and not line.lstrip().startswith('#')]
+            if len(records) < 2:
+                raise ValueError(f'Missing staged slope header for hillslope {topaz_id}.')
+            slope_ofes = int(records[1].split()[0])
+            if slope_ofes != man.nofe or man.nofe != len(soilu.obj['ofes']):
+>               raise ValueError(f'Staged slope/soil/management OFE counts disagree for hillslope {topaz_id}; rebuild inputs.')
+E               ValueError: Staged slope/soil/management OFE counts disagree for hillslope 11; rebuild inputs.
+
+wepppy/nodb/core/wepp.py:782: ValueError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/baer/test_baer_prep_timestamps.py::test_modify_burn_class_updates_landuse_and_sbs_timestamps
+  /workdir/wepppy/tests/nodb/mods/baer/test_baer_prep_timestamps.py:32: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+tests/nodb/mods/baer/test_landuse_remap_locking.py::test_remap_landuse_rebuilds_managements_after_unlock
+  /workdir/wepppy/tests/nodb/mods/baer/test_landuse_remap_locking.py:64: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+tests/nodb/mods/geneva/test_geneva_cache_freshness.py::test_canonical_archive_preserves_geneva_failed_and_accepted_work
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[daymet-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-working]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_observed_attempt_browser_archive_restore[prism-failed]
+tests/nodb/test_batch_daymet_multiple_contention.py::test_unknown_commit_recovery_records_remain_visible_and_archivable
+tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:309: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/test_features_export_water_weighting.py::test_et_only_selection_rejects_hidden_infinite_components
+  /opt/venv/lib/python3.12/site-packages/numpy/core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+    return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_dnbr
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_rejects_mutation_and_preserves_accepted[dem_mask_after_auto]
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:304: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = DatasetReader(path, driver=driver, sharing=sharing, **kwargs)
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = writer(
+
+tests/nodb/mods/test_postfire_debris_flow_kf.py: 2 warnings
+tests/nodb/mods/test_postfire_debris_flow_production.py: 9 warnings
+tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py: 11 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=2825183) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_m3_task_retains_failure_and_preserves_previous_result
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:585: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:592: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_run_at = datetime.utcnow().isoformat()
+
+tests/nodb/mods/test_swat_interchange.py::test_run_swat_persists_interchange_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_status_partial_from_skipped
+tests/nodb/mods/test_swat_interchange.py::test_interchange_error_clears_summary
+tests/nodb/mods/test_swat_interchange.py::test_interchange_failed_status_from_version_manifest
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback
+tests/nodb/mods/test_swat_interchange.py::test_interchange_manifest_fallback_skips_historical_run
+  /workdir/wepppy/wepppy/nodb/mods/swat/swat.py:748: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_swat_interchange_at = datetime.utcnow().isoformat()
+
+tests/nodb/test_batch_daymet_multiple_contention.py: 365 warnings
+tests/nodb/test_climate_edde_build.py: 3294 warnings
+tests/nodb/test_climate_prism_build.py: 1464 warnings
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_kslast_map.py::test_real_soil_workers_propagate_mean_to_every_ofe[False-True]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+==== 1 failed, 2627 passed, 26 skipped, 5180 warnings in 812.92s (0:13:32) =====
