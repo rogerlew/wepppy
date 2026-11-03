@@ -1,5 +1,17 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+## Current scope correction — 2026-11-03
+
+The operator clarified that this is a default settings harness supporting explicit
+user overrides of key runoff/sediment drivers toward observations or expectations.
+The five-fallback-only proposal is insufficient and is withdrawn from approval
+pending revision. Its reviews remain evidence for that earlier scope only.
+The authoritative requirement and rationale are recorded in
+[Roads settings contract](../../../../schemas/roads-settings-contract.md#operator-clarification-default-settings-and-user-overrides).
+Existing studies remain retained; controls, override precedence and layout need
+revision and review. No production wiring or human approval is implied.
+
+
 ## Current direction — operator amendment, 2026-11-03
 
 Resolve known and newly identified defects, then develop sensitivity analysis and
@@ -298,6 +310,8 @@ workflow backed by generated-input and native/report readback. This execution
 requires explicit human specification/layout approval before production wiring.
 ## Progress
 
+- [ ] Revise the five-field proposal into explicit runoff/erosion driver overrides under the clarified default-settings objective; characterize controls, revise layout and repeat appropriate reviews before human approval.
+
 - [x] (2026-11-03) Verified handoff HEAD and clean worktree; opened bounded issue register and assigned independent current-r7 particle investigation, controls inventory, sensitivity harness and disposable-project lanes.
 - [x] (2026-11-03) Complete current-source particle disposition and bounded resolver/buffer-peer conformance repair; 59 controller tests and independent generated-input review pass. Broad sanity remains pending.
 - [x] (2026-11-03) Execute and independently review 47 profile contrasts and four project contexts, with emitted/native/report readbacks and all failure retention.
@@ -517,6 +531,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Operator clarification: default fallbacks were mistaken for sufficient user adjustment controls. Feature precedence can make fallback edits ineffective; geometry and traffic do not provide adequate control of runoff/erosion drivers.
+
 - Revised study adapters exposed bounded evidence-plumbing failures: an unused helper hash drift stopped the project sequence, an inherited reader expected yearly LOSS text absent from canonical abbreviated reports, and native-generated `chntyp.txt` was initially treated as invariant input. Preserve failed checks and additive reviewed continuations; none establishes a production physics defect. Freeze relevant helpers before declaration and classify native-produced sidecars by actual source consumers.
 
 - 2026-11-03 revised execution: production Roads still uses legacy soil templates; conditioned generated U12 is research injection, so control studies must keep separate lanes. Fresh exact-r7 observation explains the retained particle flag, preserving strict failure and all output hashes.
@@ -638,6 +654,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: supersede five-fallback-only scope with explicit driver overrides to support adjustment toward observations or user expectations. Do not gate controls on field calibration; preserve evidence limits and require revised specification/layout review.
+
 - 2026-11-03: disposition R-01 as an explained numerical finding after independent exact-state review; retain strict predicate failure and historical counts. Use existing production controls for the first sensitivity lane and keep generated-policy adoption separate.
 
 - 2026-11-03 operator amendment: correctness and sensitivity replace legacy-fit search as the governing objective. Narrow benchmark gains do not justify disproportionate regression risk. Historical scores and rejections remain unchanged; controls do not imply calibrated defaults.
@@ -756,6 +774,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The prior approval request is withdrawn: the reviewed five-field proposal does not satisfy the clarified user-override objective. Studies and defect fixes remain valid; revised controls and workflow remain outstanding.
 
 Current revised execution: R-01 and R-09/R-11 have source-supported dispositions; R-08 and R-10 are repaired with regressions. The 47-profile/four-project sensitivity study and independent proposal reviews are complete. Repository sanity passed (12,863 passed, 423 skipped), with 21 final helper tests covering the late delta. Specification/layout approval is absent; the program remains active.
 

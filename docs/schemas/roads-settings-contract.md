@@ -1,5 +1,45 @@
 # Roads settings editor contract
 
+## Operator clarification: default settings and user overrides
+
+Operator direction, 2026-11-03, supersedes the five-fallback-only proposal:
+this is a **default settings harness**, not a calibration harness. Users need
+explicit overrides of key model drivers so they can increase or decrease Roads
+runoff and sediment toward observed data or their expectations. Observations and
+user expectations are distinct comparison targets; matching either does not by
+itself establish physical validity or field calibration.
+
+Defaults provide a reproducible starting point, not a restriction on custom inputs.
+The editor must expose effective runoff and erosion drivers, with clear units,
+role/scope, validation and precedence. An intentional override must affect its
+selected scope even when feature values or templates supply the baseline; a
+fallback that is unused cannot satisfy this requirement. Preserve original source
+values and make override enable/disable/reset explicit. Exact parameter keys,
+precedence, bounds and native propagation remain to be specified and reviewed.
+Do not silently reinterpret the existing fallback fields as overrides.
+
+Characterize the native runoff/infiltration and erosion/detachment drivers before
+selecting controls. Lack of a field-calibrated interval is not a reason to exclude
+an otherwise useful, supported driver. Separate input validity from tested values
+and calibration claims. Explain response direction and coupling honestly; no
+universal monotonic response or independent runoff/sediment adjustment is promised.
+Geometry/traffic fallbacks alone are insufficient: width changes footprint and
+traffic response is nonmonotonic. Do not require users to misstate physical geometry
+to adjust runoff or erosion behavior.
+
+Acceptance requires save/reload/reset and visible effective-input provenance,
+plus controlled rerun comparisons demonstrating increased and decreased runoff
+and sediment through the selected overrides in declared representative contexts.
+Retain baseline/custom results and distinguish total exports from area-normalized
+quantities. Automatic optimization, new-default adoption and deployment are not
+implied. Existing study results remain valid within their original scope.
+
+The prior five-field specification/static layout and their reviews are historical
+proposal evidence, not approval or sufficient coverage of this corrected objective.
+Revise the concrete specification/layout and obtain independent review and explicit
+human approval before production persistence/application/UI wiring.
+
+
 Status: **proposed; explicit human specification/layout approval absent**.
 Implementation conformance is pending. This document records the reviewable proposal;
 it does not authorize production view or persistence/application implementation.

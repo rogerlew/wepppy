@@ -1,5 +1,17 @@
 # Roads parameterization program tracker
 
+## Current scope correction — 2026-11-03
+
+The operator clarified that this is a default settings harness supporting explicit
+user overrides of key runoff/sediment drivers toward observations or expectations.
+The five-fallback-only proposal is insufficient and is withdrawn from approval
+pending revision. Its reviews remain evidence for that earlier scope only.
+The authoritative requirement and rationale are recorded in
+[Roads settings contract](../../schemas/roads-settings-contract.md#operator-clarification-default-settings-and-user-overrides).
+Existing studies remain retained; controls, override precedence and layout need
+revision and review. No production wiring or human approval is implied.
+
+
 ## Current direction — operator amendment, 2026-11-03
 
 Resolve known and newly identified defects, then develop sensitivity analysis and

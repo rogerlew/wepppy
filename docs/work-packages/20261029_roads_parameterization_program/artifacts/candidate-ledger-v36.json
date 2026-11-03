@@ -1,0 +1,15 @@
+{
+  "version": 36,
+  "predecessor": {
+    "path": "candidate-ledger-v35.json",
+    "sha256": "7d62a112d4aa3e13b6bd64adff4d47ee66098ee77d23d4c1515f92eb0d440b7d"
+  },
+  "status": "operator_clarified_default_settings_and_explicit_driver_overrides",
+  "prior_five_field_approval_request": "withdrawn_pending_revision",
+  "canonical_requirement": "docs/schemas/roads-settings-contract.md#operator-clarification-default-settings-and-user-overrides",
+  "historical_evidence_reclassified": false,
+  "human_specification_approval": "absent",
+  "human_layout_approval": "absent",
+  "production_settings_wiring_started": false,
+  "program_complete": false
+}

@@ -1,5 +1,20 @@
 # ADR-0135: Expose supported Roads fallback controls
 
+## Operator clarification: default settings and user overrides
+
+Operator direction, 2026-11-03: this is a default settings harness, not a
+calibration harness. Users need explicit key-driver overrides to increase/decrease
+Roads runoff and sediment toward observations or user expectations. The former
+five-fallback-only proposal is insufficient and requires revision; its reviews
+apply only to that earlier scope. Lack of field calibration does not exclude useful
+controls. Preserve source values, explicit override precedence and honest response
+limits. See the authoritative [requirement and rationale](../schemas/roads-settings-contract.md#operator-clarification-default-settings-and-user-overrides).
+Specification/layout review and human approval remain required before wiring.
+The earlier proposed decision below is retained for context and is superseded
+where it restricts controls to five fallbacks.
+
+
+
 Status: **proposed; human specification/layout approval absent; implementation pending**.
 
 ## Decision provenance
