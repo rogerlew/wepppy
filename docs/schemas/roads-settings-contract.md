@@ -40,6 +40,61 @@ Revise the concrete specification/layout and obtain independent review and expli
 human approval before production persistence/application/UI wiring.
 
 
+## Dedicated parameterization view and visibility
+
+Operator direction, 2026-11-03: provide this specificity in its **own Roads
+parameterization view**, linked from the existing Roads panel. The view combines
+inspection and override editing; do not squeeze it into the five-field inline
+editor or require CSV/native-file inspection. This supersedes the earlier inline
+presentation proposal. Exact route and revised layout remain to be reviewed.
+
+Display conductivity, interrill erodibility Ki, rill erodibility Kr and critical
+shear with plain-language meaning and units, separately for road, fill and
+forest/buffer roles. Additional supported drivers follow the same presentation.
+For each parameter show:
+
+- Source baseline value and its template/source identity, including the resolved
+  surface, texture and design that selected it.
+- Applied adjustments and their arithmetic, including traffic effects; distinguish
+  road-only adjustments from unchanged fill/buffer values.
+- Override state, scope and requested value or factor, followed by the resolved
+  input value. Expose precedence explicitly; no apparently active unused override.
+- Prepared value read from the actual emitted input, tied to the preparation/run
+  identity. Distinguish saved intent, a preview and executed evidence. Native
+  conversions or clamps must be explained where established; do not label a
+  baseline conductivity as instantaneous infiltration or invent runtime values.
+- Default/custom status, applicability, validity bounds, tested values and known
+  response coupling. Explain low/no traffic soil aliases and separate management
+  effects. Read values from content, never infer critical shear from a filename.
+
+Mixed projects must not display a single project value as though every segment
+uses it. Group identical parameterizations with segment counts and allow inspection
+of the member segments and their source differences. Show nonapplicable roles
+explicitly. Put artifact paths/hashes and detailed provenance in expandable details;
+keep physical values and adjustment explanations directly visible.
+
+For example, the current gravel/loam ordinary-ditch template has road Ki 2,000,000;
+low traffic divides it by four, giving 500,000 kg s/m4 before any user override.
+Show that chain alongside fill Ki 2,000,000 and buffer Ki 120,000, which do not
+receive the road traffic reduction. This is an illustrative current template
+example, not a hard-coded project value or new scientific default.
+
+Keep baseline/custom runoff and sediment comparisons in this view, clearly labeled
+by run and settings snapshot, with total and area-normalized quantities. Edited
+settings must not relabel old output as current. Explain unavailable comparisons
+before execution; no fabricated results. Existing run authorization, readonly,
+CSRF, lifecycle invalidation and save/reload/reset obligations remain applicable.
+The dedicated view must preserve clear navigation back to Roads preparation/run
+status; moving the editor does not create a second settings authority.
+
+Acceptance includes a mixed-template project, traffic-adjustment arithmetic,
+role-specific overrides and no-use cases, saved-versus-prepared discrepancies,
+stale outputs and reset. Verify displayed values against actual prepared artifacts
+and retain run-bound provenance through reload/fork/restore. Revise the static
+layout and obtain appropriate independent review and human specification/layout
+approval before production wiring. This direction establishes purpose and view
+placement; it does not approve the obsolete layout or an unseen replacement.
+
 Status: **proposed; explicit human specification/layout approval absent**.
 Implementation conformance is pending. This document records the reviewable proposal;
 it does not authorize production view or persistence/application implementation.

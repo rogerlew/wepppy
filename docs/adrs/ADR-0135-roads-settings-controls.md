@@ -28,6 +28,11 @@ Status: **proposed; human specification/layout approval absent; implementation p
 - Authorized work now: defect disposition, bounded sensitivity, proposed specification
   and static layout. No production view/persistence/application wiring yet.
 
+Operator further requires a dedicated parameterization view with role-specific
+source values, adjustment arithmetic, overrides and prepared-input readback; see
+[view requirements](../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility).
+The inline-editor placement below is superseded and awaits a revised proposal.
+
 ## Proposed decision and exact delta
 
 Expose five already supported Roads fallback settings in the existing panel:

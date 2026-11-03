@@ -1,0 +1,14 @@
+{
+  "version": 37,
+  "predecessor": {
+    "path": "candidate-ledger-v36.json",
+    "sha256": "69f57f2c7d7a23b3b3f5b00abe9d1b1cff27b05fca770437e13d73b6259fe45d"
+  },
+  "status": "dedicated_parameterization_view_required",
+  "canonical_requirement": "docs/schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility",
+  "contract_sha256": "67f04b316886ee4a7130526fbfd4f95552d7cfd4f98910716035529c4b15dc9d",
+  "prior_inline_layout": "superseded",
+  "replacement_layout_approval": "absent",
+  "production_settings_wiring_started": false,
+  "program_complete": false
+}

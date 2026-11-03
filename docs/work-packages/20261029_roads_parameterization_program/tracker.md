@@ -2,6 +2,10 @@
 
 ## Current scope correction — 2026-11-03
 
+Further operator direction: give parameterization its own view, with role-specific
+values, source baselines, adjustment arithmetic, overrides and actual prepared
+values. See [dedicated view requirements](../../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility). The inline layout is superseded.
+
 The operator clarified that this is a default settings harness supporting explicit
 user overrides of key runoff/sediment drivers toward observations or expectations.
 The five-fallback-only proposal is insufficient and is withdrawn from approval

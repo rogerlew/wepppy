@@ -2,6 +2,10 @@
 
 ## Current scope correction — 2026-11-03
 
+Further operator direction: give parameterization its own view, with role-specific
+values, source baselines, adjustment arithmetic, overrides and actual prepared
+values. See [dedicated view requirements](../../../../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility). The inline layout is superseded.
+
 The operator clarified that this is a default settings harness supporting explicit
 user overrides of key runoff/sediment drivers toward observations or expectations.
 The five-fallback-only proposal is insufficient and is withdrawn from approval
@@ -310,6 +314,8 @@ workflow backed by generated-input and native/report readback. This execution
 requires explicit human specification/layout approval before production wiring.
 ## Progress
 
+- [ ] Design and review the dedicated Roads parameterization view with source-to-prepared-value visibility and baseline/custom result comparisons.
+
 - [ ] Revise the five-field proposal into explicit runoff/erosion driver overrides under the clarified default-settings objective; characterize controls, revise layout and repeat appropriate reviews before human approval.
 
 - [x] (2026-11-03) Verified handoff HEAD and clean worktree; opened bounded issue register and assigned independent current-r7 particle investigation, controls inventory, sensitivity harness and disposable-project lanes.
@@ -531,6 +537,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- A five-field inline editor also lacks room and scope for the required role-specific parameter provenance; dedicated inspection/editing is now an explicit user requirement.
+
 - Operator clarification: default fallbacks were mistaken for sufficient user adjustment controls. Feature precedence can make fallback edits ineffective; geometry and traffic do not provide adequate control of runoff/erosion drivers.
 
 - Revised study adapters exposed bounded evidence-plumbing failures: an unused helper hash drift stopped the project sequence, an inherited reader expected yearly LOSS text absent from canonical abbreviated reports, and native-generated `chntyp.txt` was initially treated as invariant input. Preserve failed checks and additive reviewed continuations; none establishes a production physics defect. Freeze relevant helpers before declaration and classify native-produced sidecars by actual source consumers.
@@ -654,6 +662,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: operator requires parameter specificity and visibility in its own view. Replace inline-editor placement; retain one settings authority and explicit source/adjustment/override/prepared evidence.
+
 - 2026-11-03: supersede five-fallback-only scope with explicit driver overrides to support adjustment toward observations or user expectations. Do not gate controls on field calibration; preserve evidence limits and require revised specification/layout review.
 
 - 2026-11-03: disposition R-01 as an explained numerical finding after independent exact-state review; retain strict predicate failure and historical counts. Use existing production controls for the first sensitivity lane and keep generated-policy adoption separate.
@@ -774,6 +784,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The replacement proposal must be a dedicated parameterization view. The former inline static layout is not an approval candidate.
 
 The prior approval request is withdrawn: the reviewed five-field proposal does not satisfy the clarified user-override objective. Studies and defect fixes remain valid; revised controls and workflow remain outstanding.
 
