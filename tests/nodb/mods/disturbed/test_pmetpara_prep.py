@@ -182,7 +182,7 @@ def test_mofe_uses_each_staged_soil_and_final_landuse(disturbed_factory, monkeyp
     runs.mkdir(parents=True, exist_ok=True)
     source = read_management(str(CORN))
     ManagementMultipleOfeSynth([source, source], deduplicate_scenarios=True).write(str(runs / 'p1.man'))
-    soil = WeppSoilUtil('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol')
+    soil = WeppSoilUtil(str(Path(__file__).resolve().parents[3] / 'wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
     soil.obj['ofes'].append(deepcopy(soil.obj['ofes'][0]))
     soil.obj['ntemp'] = 2
     textures = [(10.0, 80.0), (40.0, 20.0)]

@@ -132,3 +132,27 @@ coefficient fixture remains necessary. These receipts strengthen final-source
 producer evidence without proving heterogeneous native behavior. No new QA
 blocker remains; any extended-suite outcome belongs in the final validation
 inventory rather than being inferred from this benchmark.
+
+## Final guarded preparation evidence
+
+Final packaging found multiprocessing bootstrap tracebacks in the earlier probe
+execution. Successful artifact receipts alone did not establish a clean normal
+workflow. The probe now places orchestration inside `main()` behind the Python
+main guard; QA inspected both preparation and coefficient-readback scripts.
+This is a harness correction, with production sources unchanged from the reviewed
+implementation committed as `390bc4f59`.
+
+The clean rerun is retained separately as `actual_project_prepared_v3.json`,
+`actual_project_coefficients_v3.json` and `actual_preparation_guarded_final.log`;
+earlier versions and logs remain historical evidence. QA verified no
+`Traceback`/`RuntimeError` in the guarded log, all receipt source hashes against
+the current tree, 72 hillslopes/235 agreeing OFEs, unchanged source status,
+byte-identical repeated PMET preparation, and 235 coefficient checks with 24
+table rows. Independent container readback verified all **216 staged management,
+soil and slope hashes**, plus exact PMET table content, against the v3 receipt;
+command/output is retained in `m2_qa_guarded_final.log`.
+
+Use v3 for the clean preparation claim. The uniform coefficients, installed-Rust
+versus candidate distinction and absence of native execution remain unchanged.
+QA's bounded source/evidence verdict remains **PASS**; this rerun does not release
+the native acceptance HOLD or substitute for the final broad-suite disposition.

@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose exec weppcloud python -c 'from pathlib import Path;import hashlib,json
+r=Path("/workdir/wepppy/docs/work-packages/20261102_mofe_input_producer_audit/artifacts");d=json.loads((r/"actual_project_prepared_v3.json").read_text());runs=Path(d["clone"])/"wepp/runs"
+for hill in d["hills"]:
+ for name,digest in hill["sha256"].items():
+  assert hashlib.sha256((runs/name).read_bytes()).hexdigest()==digest,name
+assert (runs/"pmetpara.txt").read_text()==d["pmetpara"]
+log=(r/"actual_preparation_guarded_final.log").read_text();assert "Traceback" not in log and "RuntimeError" not in log
+print(json.dumps({"prepared_artifact_hashes_verified":sum(len(h["sha256"]) for h in d["hills"]),"pmet_table_matches":True,"guarded_log_has_no_bootstrap_failure":True}))'
+{"prepared_artifact_hashes_verified": 216, "pmet_table_matches": true, "guarded_log_has_no_bootstrap_failure": true}

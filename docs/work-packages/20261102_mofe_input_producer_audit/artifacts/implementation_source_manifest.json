@@ -53,5 +53,20 @@
   "rust_note": "Candidate built with pre-existing unrelated calendar/HBP edits present; only MOFE/map changes were committed. Installed release unchanged.",
   "rust_map_source_sha256": "3f5d6031a1038f3ea3c31622bfba1a3b407d750e183a1facb5b802d8405b96a0",
   "final_focused_tests": "306 passed; final_focused.log",
-  "native_acceptance": "HOLD; source/candidate evidence only"
+  "native_acceptance": "HOLD; source/candidate evidence only",
+  "test_source_sha256": {
+    "tests/nodb/mods/disturbed/test_pmetpara_prep.py": "cf7a4e1019a5250fc389ff28e1a658c2f3179ccdd616159f2f7537a897487f17",
+    "tests/nodb/mods/disturbed/test_treatment_soil_artifacts.py": "34f38221c737634ed532eb50a15acfd44e41c3fce229c71d1854df03fae59429",
+    "tests/nodb/mods/test_rap_ts_cover_transform.py": "b2d9da0d56c552afdbbad4d5a479f12710b9a48e3ed4f7683f03f3980fa25c72",
+    "tests/nodb/test_kslast_map.py": "e7fcfc6235f0d1c13649c1aee3bf69120a17cb3f7a157a7ccee2393c487f4509",
+    "tests/nodb/test_mofe_scenario_artifacts.py": "25dbefd0152d7f517b6cecd8873ec63dd1a5f78d2b31035a9653c0382d72e39f",
+    "tests/nodb/test_wepp_multi_ofe_management_propagation.py": "8e3a872eb66c06e3136f9dba66b7e0d7c8a8c32974daeacf98e34ddd0eeacd86",
+    "tests/rq/test_project_rq_archive.py": "75393c87490b2c160ee6f9625645777dca2afda23d9f2877bc4b537c02a16539",
+    "tests/wepp/management/test_mofe_input_identity.py": "40655b39835cc1c2e57ae170f71aa397163645970278d4e9a1c0c18043ce0014",
+    "tests/wepp/soils/test_mofe_identity.py": "b2b0846224078c401e75a2e2dc18be6111c414bda7e28f1bfeac304c59d4defc",
+    "tests/wepp/soils/utils/test_wepp_soil_util.py": "b0e3eaba60febb682dbaada6ebe3e39d556c97477e94b7982f41a1958a25a7f1",
+    "tests/wepp/test_single_input.py": "a2aba208497d593da0de1923675197e44efc944cb97c9ed2fef76fd041f16b9d"
+  },
+  "implementation_commit": "390bc4f59",
+  "validation": "Producer acceptance PASS; segmented broad validation, not one uninterrupted full-suite pass."
 }

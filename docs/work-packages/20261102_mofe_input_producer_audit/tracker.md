@@ -1,8 +1,9 @@
 # MOFE input producer audit tracker
 
 **Started:** 2026-11-02 19:32 UTC.
-**Phase:** Approved M2/M3 producer implementation; M4 producer validation and final review. Native acceptance HOLD.
+**Phase:** Approved M2/M3 producer implementation; M4 producer validation complete; native acceptance HOLD.
 **Contract ancestor:** `4579b11ce` (before production edits).
+**WEPPpy implementation commit:** `390bc4f59` (local; producer validation complete).
 **Paired Rust commit:** `5e3540f684c8606f4140afcd72ed5a21df5ab85f`, pushed and verified on upstream main.
 
 ## Task board
@@ -17,7 +18,7 @@
 - [x] Reconcile secondary synthesis provenance and distinct plant-definition review findings.
 - [x] Copied actual-project producer preparation: 72 hillslopes, 235 elements; matching counts, year/crop lookup and repeat bytes; original unchanged.
 - [x] Final correctness, QA and security reviews pass with no unresolved source findings.
-- [ ] Final extended-test and benchmark-refresh disposition.
+- [x] Final extended-test and benchmark-refresh disposition: terminal continuation 2529 passed; all exercised failures resolved in targeted reruns.
 - [ ] Full M4 native acceptance: NATIVE-01/02/03, 9005 consumer, fresh outputs/reports.
 
 ## Decisions and evidence
@@ -63,8 +64,12 @@ it with a real matching five-OFE deck and rerun affected tests. The final fresh 
 report/provenance and 16 report/Usersum checks now pass. Full clean-suite status
 must still be reported honestly, including any remaining failures.
 
-Complete producer review/validation disposition before handoff. Native repairs,
-selected-binary capacity/adapter checks, FC/HK ownership repair, 9005 readback,
-fresh native histories and report refresh remain the next bounded work. Deployment
-and existing-project regeneration require their own authorization; this package
-must not claim unrestricted heterogeneous native correctness.
+Producer review and validation are complete. Terminal continuation: 2529 passed;
+all earlier fixture/freshness failures are resolved. This is segmented validation,
+not one uninterrupted green full-suite invocation. See the execution report for
+per-selection counts and overlap qualifications.
+
+Native repairs, selected-binary capacity/adapter checks, FC/HK ownership repair,
+9005 readback, full job/browse/output histories and a paired release remain next.
+Deployment and existing-project regeneration require their own authorization;
+the package stays open and must not claim unrestricted heterogeneous correctness.

@@ -1,6 +1,7 @@
 # MIPA-01 producer implementation evidence
 
 User approval: “approved. proceed”. Contract ancestor: `4579b11ce`.
+WEPPpy implementation: `390bc4f59` (local). Paired Rust: `5e3540f` (published).
 Producer source repairs are implemented; native acceptance and package closure
 remain HOLD. See the [canonical contract](../../../schemas/mofe-input-identity-contract.md)
 and [operator/developer guide](../../../dev-notes/mofe-input-preparation.md).
@@ -67,7 +68,8 @@ This is source/candidate producer validation, not production release validation.
 
 ## Validation and review
 
-Final results are appended after the outstanding gates finish. Retained interim
+Validation is complete for the authorized producer scope. Final results are
+summarized below; the intervening entries retain the execution history. Retained interim
 checks: focused management/soils/Disturbed/RAP/staging/archive suites passed 295,
 then 304 tests; 149 management/Disturbed tests passed after scenario provenance;
 new definition-aware tests pass before continuing the broader treatment suite.
@@ -160,3 +162,52 @@ Source/document `git diff --check` passes when excluding retained raw console
 logs. Those logs intentionally preserve original trailing whitespace and terminal
 blank lines; they are evidence, not formatted source. No diagnostic text was
 removed to make a formatting check green.
+
+Committed-code observability confirms PMET helper length 33→160 lines (red
+observe-only band) and file SLOC 35→201 (green). The bounded graph pipeline and
+reviewed private-helper reuse explain the growth; the rationale above remains
+applicable. Cyclomatic complexity is unavailable because Radon is not installed.
+Final broad-exception enforcement still passes with zero net new broad handlers.
+
+A later continuation passed 4,407 tests before exposing working-directory
+coupling in a new test fixture. All newly added fixture paths now resolve from
+`__file__`; identity tests deliberately change into a temporary directory. The
+next WEPP segment passed 516 tests before a legacy rotation-boundary fixture
+looked for the old year-count comment. Its locator now matches the canonical
+serializer label; the 1000/1001 boundary assertions remain unchanged. These
+follow-up repairs change tests only, leaving reviewed producer source hashes
+and native benchmark evidence intact. Focused Disturbed/archive path checks
+passed 4 tests. Remaining terminal coverage is recorded below.
+
+## Final disposition
+
+**Producer source acceptance: PASS.** Correctness, QA and security findings are
+closed. WEPPpy source commit `390bc4f59` and published Rust source commit `5e3540f`
+contain the repairs. Follow-up test changes remove working-directory assumptions
+and align a fixture's rotation label; producer source hashes did not change.
+
+The terminal continuation passed **2,529 tests** (`broad_terminal_final.log`),
+including the corrected 1000/1001 rotation boundary, WEPP runner and WEPPcloud.
+Combined with the retained earlier passing segments and targeted reruns of each
+failed fixture, no exercised regression remains unresolved. Validation was split
+at failures; this is not a claim of one uninterrupted green `pytest tests` run.
+No single aggregate pass count is quoted because several selections overlap.
+
+Final decisive gates:
+
+- 306 focused management/soil/Disturbed/RAP/staging/archive tests pass.
+- 257 identity/treatment and 90 scenario-artifact checks pass, with the snapshot
+  qualification above; final identity cases also pass from a temporary cwd.
+- 99 benchmark tests pass; all 768 fresh native output files equal the retained
+  single-OFE baseline. Report/Usersum checks pass 16, final freshness checks 10.
+- 4 Rust slope tests and 5 Rust map tests pass; isolated candidate binding readback
+  succeeds. Installed release extensions remain unchanged.
+- Stubtest, test-stub checks, documentation lint, relative-link checks and source
+  whitespace checks pass. Raw console whitespace is retained deliberately.
+
+**Package/native acceptance: HOLD.** NATIVE-01 capacity, NATIVE-02 adapter lookup,
+NATIVE-03 FC/HK ownership, selected 9005 consumption, full job/browse/output/report
+validation and a paired release remain open. No native engine repair, production
+deployment or existing-project regeneration is claimed. The next work requires
+that separately scoped authority and selected-binary evidence; do not close the
+package or infer unrestricted heterogeneous correctness from producer acceptance.

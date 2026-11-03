@@ -1,0 +1,583 @@
+Command: ['wctl', 'run-pytest', 'tests/nodb/test_kslast_map.py', 'tests/nodb/test_landuse_build_event_contracts.py', 'tests/nodb/test_landuse_catalog.py', 'tests/nodb/test_landuse_coverage_area_source.py', 'tests/nodb/test_landuse_custom_mapping.py', 'tests/nodb/test_landuse_grouped_updates.py', 'tests/nodb/test_landuse_modify.py', 'tests/nodb/test_landuse_modify_mapping.py', 'tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py', 'tests/nodb/test_landuse_mofe_freshness.py', 'tests/nodb/test_landuse_mofe_process_pool.py', 'tests/nodb/test_landuse_mofe_value_types.py', 'tests/nodb/test_landuse_raster_wait.py', 'tests/nodb/test_locale_capability_authority.py', 'tests/nodb/test_lock_race_conditions.py', 'tests/nodb/test_locked.py', 'tests/nodb/test_manual_mutation_state.py', 'tests/nodb/test_persistence_events.py', 'tests/nodb/test_prism_temperature_artifact_retention.py', 'tests/nodb/test_project_config_builder_snapshot.py', 'tests/nodb/test_project_config_capabilities.py', 'tests/nodb/test_project_config_preset_snapshot.py', 'tests/nodb/test_project_config_reader_foundation.py', 'tests/nodb/test_project_config_registry_serializer.py', 'tests/nodb/test_project_config_serialization.py', 'tests/nodb/test_project_config_update.py', 'tests/nodb/test_project_developer_mode.py', 'tests/nodb/test_rap_report.py', 'tests/nodb/test_redis_prep_snapshots.py', 'tests/nodb/test_ron_fetch_dem_copernicus.py', 'tests/nodb/test_ron_fetch_dem_rate_limit.py', 'tests/nodb/test_ron_map.py', 'tests/nodb/test_root_dir_materialization.py', 'tests/nodb/test_single_input_artifacts.py', 'tests/nodb/test_single_input_policy.py', 'tests/nodb/test_single_input_sources.py', 'tests/nodb/test_soil_anisotropy.py', 'tests/nodb/test_soils_gridded_root_creation.py', 'tests/nodb/test_soils_parquet_area_fallback.py', 'tests/nodb/test_soils_report.py', 'tests/nodb/test_soils_ssurgo_cache.py', 'tests/nodb/test_tenerife_climate_catalog_service.py', 'tests/nodb/test_type_hints.py', 'tests/nodb/test_unitizer_conversions.py', 'tests/nodb/test_unitizer_numeric_apis.py', 'tests/nodb/test_unitizer_preferences.py', 'tests/nodb/test_user_defined_cli_parquet.py', 'tests/nodb/test_watershed_grouped_updates.py', 'tests/nodb/test_watershed_lookup_loaders.py', 'tests/nodb/test_watershed_mofe_map.py', 'tests/nodb/test_watershed_runtime_contract.py', 'tests/nodb/test_watershed_skip_flowpaths.py', 'tests/nodb/test_watershed_topaz_conditioning_contract.py', 'tests/nodb/test_wbt_boundary_touch_behavior.py', 'tests/nodb/test_wepp_binary_policy.py', 'tests/nodb/test_wepp_bootstrap_tokens.py', 'tests/nodb/test_wepp_clean.py', 'tests/nodb/test_wepp_grouped_mutation_recovery.py', 'tests/nodb/test_wepp_has_run_interchange.py', 'tests/nodb/test_wepp_input_parser.py', 'tests/nodb/test_wepp_job_hint_grouped_updates.py', 'tests/nodb/test_wepp_multi_ofe_management_propagation.py', 'tests/nodb/test_wepp_multi_ofe_years.py', 'tests/nodb/test_wepp_nodb_post_utils.py', 'tests/nodb/test_wepp_prep_service.py', 'tests/nodb/test_wepp_run_payload_grouped_updates.py', 'tests/nodb/test_wepp_run_service.py', 'tests/nodb/trigger_lock_scenarios.py', 'tests/omni', 'tests/profile_recorder', 'tests/query_engine', 'tests/roads', 'tests/rq', 'tests/runtime_paths', 'tests/sbs_map', 'tests/scripts', 'tests/services', 'tests/shape_converter', 'tests/smoke', 'tests/soils', 'tests/test_0_imports.py', 'tests/test_2_validate_managements.py', 'tests/test_all_your_base.py', 'tests/test_all_your_base_dateutils.py', 'tests/test_all_your_base_hydro.py', 'tests/test_all_your_base_objective_functions.py', 'tests/test_all_your_base_stats.py', 'tests/test_imports.py', 'tests/test_managements_module.py', 'tests/test_nodb_core_import_hygiene.py', 'tests/test_observability_correlation.py', 'tests/test_raster_freshness.py', 'tests/test_redis_settings.py', 'tests/test_webclients_elevation.py', 'tests/test_wepp_top_translator.py', 'tests/tools', 'tests/topo', 'tests/wepp', 'tests/wepp_runner', 'tests/weppcloud', '--maxfail=1']
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_kslast_map.py tests/nodb/test_landuse_build_event_contracts.py tests/nodb/test_landuse_catalog.py tests/nodb/test_landuse_coverage_area_source.py tests/nodb/test_landuse_custom_mapping.py tests/nodb/test_landuse_grouped_updates.py tests/nodb/test_landuse_modify.py tests/nodb/test_landuse_modify_mapping.py tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py tests/nodb/test_landuse_mofe_freshness.py tests/nodb/test_landuse_mofe_process_pool.py tests/nodb/test_landuse_mofe_value_types.py tests/nodb/test_landuse_raster_wait.py tests/nodb/test_locale_capability_authority.py tests/nodb/test_lock_race_conditions.py tests/nodb/test_locked.py tests/nodb/test_manual_mutation_state.py tests/nodb/test_persistence_events.py tests/nodb/test_prism_temperature_artifact_retention.py tests/nodb/test_project_config_builder_snapshot.py tests/nodb/test_project_config_capabilities.py tests/nodb/test_project_config_preset_snapshot.py tests/nodb/test_project_config_reader_foundation.py tests/nodb/test_project_config_registry_serializer.py tests/nodb/test_project_config_serialization.py tests/nodb/test_project_config_update.py tests/nodb/test_project_developer_mode.py tests/nodb/test_rap_report.py tests/nodb/test_redis_prep_snapshots.py tests/nodb/test_ron_fetch_dem_copernicus.py tests/nodb/test_ron_fetch_dem_rate_limit.py tests/nodb/test_ron_map.py tests/nodb/test_root_dir_materialization.py tests/nodb/test_single_input_artifacts.py tests/nodb/test_single_input_policy.py tests/nodb/test_single_input_sources.py tests/nodb/test_soil_anisotropy.py tests/nodb/test_soils_gridded_root_creation.py tests/nodb/test_soils_parquet_area_fallback.py tests/nodb/test_soils_report.py tests/nodb/test_soils_ssurgo_cache.py tests/nodb/test_tenerife_climate_catalog_service.py tests/nodb/test_type_hints.py tests/nodb/test_unitizer_conversions.py tests/nodb/test_unitizer_numeric_apis.py tests/nodb/test_unitizer_preferences.py tests/nodb/test_user_defined_cli_parquet.py tests/nodb/test_watershed_grouped_updates.py tests/nodb/test_watershed_lookup_loaders.py tests/nodb/test_watershed_mofe_map.py tests/nodb/test_watershed_runtime_contract.py tests/nodb/test_watershed_skip_flowpaths.py tests/nodb/test_watershed_topaz_conditioning_contract.py tests/nodb/test_wbt_boundary_touch_behavior.py tests/nodb/test_wepp_binary_policy.py tests/nodb/test_wepp_bootstrap_tokens.py tests/nodb/test_wepp_clean.py tests/nodb/test_wepp_grouped_mutation_recovery.py tests/nodb/test_wepp_has_run_interchange.py tests/nodb/test_wepp_input_parser.py tests/nodb/test_wepp_job_hint_grouped_updates.py tests/nodb/test_wepp_multi_ofe_management_propagation.py tests/nodb/test_wepp_multi_ofe_years.py tests/nodb/test_wepp_nodb_post_utils.py tests/nodb/test_wepp_prep_service.py tests/nodb/test_wepp_run_payload_grouped_updates.py tests/nodb/test_wepp_run_service.py tests/nodb/trigger_lock_scenarios.py tests/omni tests/profile_recorder tests/query_engine tests/roads tests/rq tests/runtime_paths tests/sbs_map tests/scripts tests/services tests/shape_converter tests/smoke tests/soils tests/test_0_imports.py tests/test_2_validate_managements.py tests/test_all_your_base.py tests/test_all_your_base_dateutils.py tests/test_all_your_base_hydro.py tests/test_all_your_base_objective_functions.py tests/test_all_your_base_stats.py tests/test_imports.py tests/test_managements_module.py tests/test_nodb_core_import_hygiene.py tests/test_observability_correlation.py tests/test_raster_freshness.py tests/test_redis_settings.py tests/test_webclients_elevation.py tests/test_wepp_top_translator.py tests/tools tests/topo tests/wepp tests/wepp_runner tests/weppcloud --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 7590 items / 1 skipped
+
+tests/nodb/test_kslast_map.py ................................           [  0%]
+tests/nodb/test_landuse_build_event_contracts.py ....                    [  0%]
+tests/nodb/test_landuse_catalog.py .....                                 [  0%]
+tests/nodb/test_landuse_coverage_area_source.py ........                 [  0%]
+tests/nodb/test_landuse_custom_mapping.py ..........                     [  0%]
+tests/nodb/test_landuse_grouped_updates.py ...........                   [  0%]
+tests/nodb/test_landuse_modify.py ......                                 [  1%]
+tests/nodb/test_landuse_modify_mapping.py .                              [  1%]
+tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py .....            [  1%]
+tests/nodb/test_landuse_mofe_freshness.py .......                        [  1%]
+tests/nodb/test_landuse_mofe_process_pool.py .......                     [  1%]
+tests/nodb/test_landuse_mofe_value_types.py .                            [  1%]
+tests/nodb/test_landuse_raster_wait.py ..                                [  1%]
+tests/nodb/test_locale_capability_authority.py ......................... [  1%]
+......................................................                   [  2%]
+tests/nodb/test_lock_race_conditions.py .................                [  2%]
+tests/nodb/test_locked.py ......                                         [  2%]
+tests/nodb/test_manual_mutation_state.py ...........                     [  2%]
+tests/nodb/test_persistence_events.py ...........                        [  2%]
+tests/nodb/test_prism_temperature_artifact_retention.py ..               [  2%]
+tests/nodb/test_project_config_builder_snapshot.py ..................... [  3%]
+.....                                                                    [  3%]
+tests/nodb/test_project_config_capabilities.py ......................... [  3%]
+..............                                                           [  3%]
+tests/nodb/test_project_config_preset_snapshot.py ..................     [  4%]
+tests/nodb/test_project_config_reader_foundation.py .................... [  4%]
+.........................                                                [  4%]
+tests/nodb/test_project_config_registry_serializer.py .................. [  4%]
+........................................                                 [  5%]
+tests/nodb/test_project_config_serialization.py .......................  [  5%]
+tests/nodb/test_project_config_update.py ............................... [  6%]
+...............................................                          [  6%]
+tests/nodb/test_project_developer_mode.py ..........                     [  6%]
+tests/nodb/test_rap_report.py .                                          [  6%]
+tests/nodb/test_redis_prep_snapshots.py ssssssssssssssssssssssssssssssss [  7%]
+ssssssssssssssssssss                                                     [  7%]
+tests/nodb/test_ron_fetch_dem_copernicus.py ......                       [  7%]
+tests/nodb/test_ron_fetch_dem_rate_limit.py ......                       [  7%]
+tests/nodb/test_ron_map.py ...ss.........s                               [  7%]
+tests/nodb/test_root_dir_materialization.py .......                      [  8%]
+tests/nodb/test_single_input_artifacts.py .............................. [  8%]
+..                                                                       [  8%]
+tests/nodb/test_single_input_policy.py .........................         [  8%]
+tests/nodb/test_single_input_sources.py .................                [  8%]
+tests/nodb/test_soil_anisotropy.py ..................................... [  9%]
+..                                                                       [  9%]
+tests/nodb/test_soils_gridded_root_creation.py ......................... [  9%]
+                                                                         [  9%]
+tests/nodb/test_soils_parquet_area_fallback.py ..                        [  9%]
+tests/nodb/test_soils_report.py .                                        [  9%]
+tests/nodb/test_soils_ssurgo_cache.py .....                              [  9%]
+tests/nodb/test_tenerife_climate_catalog_service.py ...                  [  9%]
+tests/nodb/test_type_hints.py .....                                      [ 10%]
+tests/nodb/test_unitizer_conversions.py .........                        [ 10%]
+tests/nodb/test_unitizer_numeric_apis.py .............................   [ 10%]
+tests/nodb/test_unitizer_preferences.py ....                             [ 10%]
+tests/nodb/test_user_defined_cli_parquet.py ...                          [ 10%]
+tests/nodb/test_watershed_grouped_updates.py ....                        [ 10%]
+tests/nodb/test_watershed_lookup_loaders.py .......                      [ 10%]
+tests/nodb/test_watershed_mofe_map.py .......                            [ 10%]
+tests/nodb/test_watershed_runtime_contract.py ............               [ 11%]
+tests/nodb/test_watershed_skip_flowpaths.py .                            [ 11%]
+tests/nodb/test_watershed_topaz_conditioning_contract.py ........        [ 11%]
+tests/nodb/test_wbt_boundary_touch_behavior.py ........                  [ 11%]
+tests/nodb/test_wepp_binary_policy.py ...............                    [ 11%]
+tests/nodb/test_wepp_bootstrap_tokens.py .....                           [ 11%]
+tests/nodb/test_wepp_clean.py .............                              [ 11%]
+tests/nodb/test_wepp_grouped_mutation_recovery.py ...........            [ 11%]
+tests/nodb/test_wepp_has_run_interchange.py ..                           [ 11%]
+tests/nodb/test_wepp_input_parser.py ................................... [ 12%]
+................................................                         [ 12%]
+tests/nodb/test_wepp_job_hint_grouped_updates.py .....                   [ 13%]
+tests/nodb/test_wepp_multi_ofe_management_propagation.py .......         [ 13%]
+tests/nodb/test_wepp_multi_ofe_years.py ..                               [ 13%]
+tests/nodb/test_wepp_nodb_post_utils.py ......                           [ 13%]
+tests/nodb/test_wepp_prep_service.py ...                                 [ 13%]
+tests/nodb/test_wepp_run_payload_grouped_updates.py .................... [ 13%]
+...                                                                      [ 13%]
+tests/nodb/test_wepp_run_service.py .......                              [ 13%]
+tests/omni/test_honeyed_marathoner_sediment_inversion_fixture.py ....    [ 13%]
+tests/profile_recorder/test_assembler.py ..                              [ 13%]
+tests/profile_recorder/test_expectations.py ....                         [ 13%]
+tests/profile_recorder/test_playback_session.py .......                  [ 13%]
+tests/profile_recorder/test_profile_recorder.py .........                [ 14%]
+tests/profile_recorder/test_sbs_seed.py .....                            [ 14%]
+tests/query_engine/test_activate.py ..............                       [ 14%]
+tests/query_engine/test_benchmarks.py ss                                 [ 14%]
+tests/query_engine/test_catalog_refresh.py ............................. [ 14%]
+.............                                                            [ 14%]
+tests/query_engine/test_context.py ...............                       [ 15%]
+tests/query_engine/test_core.py .........................                [ 15%]
+tests/query_engine/test_formatter.py .                                   [ 15%]
+tests/query_engine/test_mcp_auth.py .........                            [ 15%]
+tests/query_engine/test_mcp_openapi_contract.py ..                       [ 15%]
+tests/query_engine/test_mcp_router.py .................................. [ 15%]
+..........                                                               [ 16%]
+tests/query_engine/test_server_routes.py ............................... [ 16%]
+......                                                                   [ 16%]
+tests/query_engine/test_storm_event_analyzer.py ..........               [ 16%]
+tests/roads/test_roads_contracts.py ...........                          [ 16%]
+tests/roads/test_roads_matrix.py ....................................... [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 20%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+.............................................                            [ 23%]
+tests/roads/test_roads_project.py sssss                                  [ 23%]
+tests/roads/test_roads_publication.py ...                                [ 23%]
+tests/rq/test_ag_fields_rq.py ..............                             [ 23%]
+tests/rq/test_batch_deferred_recovery.py ..                              [ 23%]
+tests/rq/test_batch_rq_delete_batch.py .....                             [ 24%]
+tests/rq/test_batch_rq_retry_selection.py .............................. [ 24%]
+...........                                                              [ 24%]
+tests/rq/test_batch_task_boundary.py ssssssssssssssssssssssssss          [ 24%]
+tests/rq/test_bootstrap_autocommit_rq.py ......................          [ 25%]
+tests/rq/test_bootstrap_enable_rq.py ...                                 [ 25%]
+tests/rq/test_cancel_job.py ..........                                   [ 25%]
+tests/rq/test_climate_rehydration.py ..........                          [ 25%]
+tests/rq/test_culvert_rq_helpers.py ....                                 [ 25%]
+tests/rq/test_culvert_rq_manifest.py ....                                [ 25%]
+tests/rq/test_culvert_rq_nodir_guards.py .....                           [ 25%]
+tests/rq/test_culvert_rq_pipeline.py ..                                  [ 25%]
+tests/rq/test_deferred_surface_contract.py ............................. [ 26%]
+........................................................................ [ 27%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+...................................................................      [ 29%]
+tests/rq/test_dependency_graph_tools.py ...................              [ 30%]
+tests/rq/test_directory_lock_cleanup.py .................                [ 30%]
+tests/rq/test_ermit_export_rq.py .                                       [ 30%]
+tests/rq/test_exception_logging.py ..                                    [ 30%]
+tests/rq/test_features_export_rq.py ...                                  [ 30%]
+tests/rq/test_fork_failure.py ..................                         [ 30%]
+tests/rq/test_geneva_rq.py ......                                        [ 30%]
+tests/rq/test_job_dependencies.py ..................                     [ 30%]
+tests/rq/test_job_id.py .                                                [ 30%]
+tests/rq/test_job_info.py ......................                         [ 31%]
+tests/rq/test_job_listings.py .....                                      [ 31%]
+tests/rq/test_job_queue_rank.py ...................                      [ 31%]
+tests/rq/test_jobinfo_payloads.py ............                           [ 31%]
+tests/rq/test_land_and_soil_rq_guards.py ....                            [ 31%]
+tests/rq/test_legacy_arc_export_regression.py .                          [ 31%]
+tests/rq/test_migrations_rq.py ...                                       [ 31%]
+tests/rq/test_omni_rq.py ............................                    [ 32%]
+tests/rq/test_optional_discord_imports.py ...                            [ 32%]
+tests/rq/test_path_ce_rq.py ....                                         [ 32%]
+tests/rq/test_project_config_update_rq.py ....                           [ 32%]
+tests/rq/test_project_rq_archive.py .................................... [ 32%]
+...................                                                      [ 33%]
+tests/rq/test_project_rq_archive_helpers.py ...                          [ 33%]
+tests/rq/test_project_rq_ash.py ...                                      [ 33%]
+tests/rq/test_project_rq_debris_flow.py ....                             [ 33%]
+tests/rq/test_project_rq_delete_run.py .......                           [ 33%]
+tests/rq/test_project_rq_fork.py ....................................... [ 33%]
+........................................................................ [ 34%]
+..                                                                       [ 34%]
+tests/rq/test_project_rq_fork_nfs.py sss                                 [ 34%]
+tests/rq/test_project_rq_mutation_guards.py ............................ [ 35%]
+.....................................                                    [ 35%]
+tests/rq/test_project_rq_readonly.py ......                              [ 35%]
+tests/rq/test_query_catalog_disclosure.py ..............                 [ 35%]
+tests/rq/test_query_catalog_inventory.py ssssssssssssssssssssssssss      [ 36%]
+tests/rq/test_query_catalog_pilot.py sssssssssssssssssssssssss           [ 36%]
+tests/rq/test_query_catalog_rq.py sssssssssssssssssssssssssssssssssssss. [ 37%]
+s                                                                        [ 37%]
+tests/rq/test_roads_rq.py ........                                       [ 37%]
+tests/rq/test_rq212_historical.py ss                                     [ 37%]
+tests/rq/test_rq212_lifecycle.py sssssssssssss                           [ 37%]
+tests/rq/test_rq212_metadata.py ssssssss                                 [ 37%]
+tests/rq/test_rq_package_exports.py .                                    [ 37%]
+tests/rq/test_rq_worker_runid.py .......                                 [ 37%]
+tests/rq/test_run_catalog_rq.py sssssssssssssssssssssssssss..            [ 38%]
+tests/rq/test_run_sync_rq.py ..............................              [ 38%]
+tests/rq/test_specialized_admission_contract.py ........................ [ 38%]
+..................................................                       [ 39%]
+tests/rq/test_submission_recovery.py ..........                          [ 39%]
+tests/rq/test_watershed_timeout.py ..................................... [ 40%]
+................................                                         [ 40%]
+tests/rq/test_wbt_controlled_failure_integration.py .................... [ 40%]
+...................                                                      [ 40%]
+tests/rq/test_webhook_http.py ...............................            [ 41%]
+tests/rq/test_webhook_settlement.py ...........                          [ 41%]
+tests/rq/test_webhook_tracking.py ssssssssssssssssssssssssssssssssssssss [ 41%]
+ssssssssssssss                                                           [ 42%]
+tests/rq/test_wepp_prep_read_retry.py .......                            [ 42%]
+tests/rq/test_wepp_rq_dss_helpers.py ....                                [ 42%]
+tests/rq/test_wepp_rq_pipeline.py .............................          [ 42%]
+tests/rq/test_wepp_rq_stage_helpers.py ........                          [ 42%]
+tests/rq/test_wepp_rq_stage_post.py ..........                           [ 42%]
+tests/rq/test_wepp_singleflight_tracking.py .................            [ 43%]
+tests/rq/test_weppcloudr_backends.py ..................................  [ 43%]
+tests/rq/test_weppcloudr_control_plane.py ........................       [ 43%]
+tests/rq/test_weppcloudr_rq.py ..................                        [ 44%]
+tests/runtime_paths/test_fs_parquet_contract.py ..........               [ 44%]
+tests/runtime_paths/test_materialize_and_sidecars_contract.py ........   [ 44%]
+tests/runtime_paths/test_mutations_thaw_freeze_contract.py ............  [ 44%]
+tests/runtime_paths/test_projections_contract.py .....                   [ 44%]
+tests/runtime_paths/test_wepp_inputs_compat.py ......                    [ 44%]
+tests/sbs_map/test_sbs_map.py .....                                      [ 44%]
+tests/scripts/test_build_source_overlay.py .........                     [ 44%]
+tests/scripts/test_compose_deploy_contract.py .........................  [ 45%]
+tests/scripts/test_deploy_production_execution.py ...................... [ 45%]
+...............                                                          [ 45%]
+tests/scripts/test_deploy_production_plan.py ..........                  [ 45%]
+tests/scripts/test_install_cap_secret.py .                               [ 45%]
+tests/services/test_wmesque_catalog.py ................................. [ 46%]
+.                                                                        [ 46%]
+tests/services/test_wmesque_priority.py ...................              [ 46%]
+tests/services/test_wmesque_retrieve.py ..s                              [ 46%]
+tests/shape_converter/integration/test_abuse_controls_api.py ....        [ 46%]
+tests/shape_converter/integration/test_convert_api.py .................. [ 46%]
+.                                                                        [ 46%]
+tests/shape_converter/integration/test_inspect_api.py .........          [ 47%]
+tests/shape_converter/integration/test_runtime_hardening_api.py ..       [ 47%]
+tests/shape_converter/integration/test_ui_flow.py ....                   [ 47%]
+tests/shape_converter/unit/test_abuse_controls.py ........               [ 47%]
+tests/shape_converter/unit/test_app_bootstrap.py ...                     [ 47%]
+tests/shape_converter/unit/test_archive_validation.py ................   [ 47%]
+tests/shape_converter/unit/test_cleanup_lifecycle.py .........           [ 47%]
+tests/shape_converter/unit/test_convert_endpoint.py .................... [ 47%]
+.............................                                            [ 48%]
+tests/shape_converter/unit/test_crs_transform.py ........                [ 48%]
+tests/shape_converter/unit/test_health_routes.py ......                  [ 48%]
+tests/shape_converter/unit/test_inspect_endpoint.py .................... [ 48%]
+                                                                         [ 48%]
+tests/shape_converter/unit/test_output_serialization.py ....             [ 48%]
+tests/shape_converter/unit/test_runtime_hardening.py ......              [ 48%]
+tests/shape_converter/unit/test_ui_endpoints.py .....                    [ 48%]
+tests/soils/test_direct_writer_boundaries.py .......                     [ 48%]
+tests/soils/test_horizon_boundary.py ................................... [ 49%]
+....                                                                     [ 49%]
+tests/soils/test_ssurgo.py sssss...                                      [ 49%]
+tests/soils/test_ssurgo_cache.py ....                                    [ 49%]
+tests/soils/test_ssurgo_fallback.py ...............                      [ 49%]
+tests/soils/test_ssurgo_fc_wp_sanitization.py ......                     [ 49%]
+tests/soils/test_ssurgo_masked_valid_fixtures.py ....                    [ 49%]
+tests/soils/test_ssurgo_reclaimed_fairpoint.py ...                       [ 49%]
+tests/soils/test_ssurgo_request_errors.py ..                             [ 50%]
+tests/soils/test_ssurgo_retention.py ................................... [ 50%]
+.................................................                        [ 51%]
+tests/soils/test_ssurgo_serialization.py ........                        [ 51%]
+tests/soils/test_tenerife_soil_catalog.py .....                          [ 51%]
+tests/soils/test_wepppyo3_nodata_guard.py .                              [ 51%]
+tests/test_0_imports.py .....s....                                       [ 51%]
+tests/test_2_validate_managements.py ..........                          [ 51%]
+tests/test_all_your_base.py ...........                                  [ 51%]
+tests/test_all_your_base_dateutils.py ...............                    [ 51%]
+tests/test_all_your_base_hydro.py .....                                  [ 51%]
+tests/test_all_your_base_objective_functions.py ..........               [ 52%]
+tests/test_all_your_base_stats.py ....                                   [ 52%]
+tests/test_imports.py .                                                  [ 52%]
+tests/test_managements_module.py ...............                         [ 52%]
+tests/test_nodb_core_import_hygiene.py .                                 [ 52%]
+tests/test_observability_correlation.py ...............                  [ 52%]
+tests/test_raster_freshness.py ..........................                [ 52%]
+tests/test_redis_settings.py .................                           [ 53%]
+tests/test_webclients_elevation.py .....s                                [ 53%]
+tests/test_wepp_top_translator.py ............                           [ 53%]
+tests/tools/test_ablation_protocol.py .................                  [ 53%]
+tests/tools/test_ag_fields_authoritative_inventory.py .                  [ 53%]
+tests/tools/test_check_broad_exceptions.py ...............               [ 53%]
+tests/tools/test_check_test_isolation.py ...........................     [ 54%]
+tests/tools/test_code_quality_observability.py ......                    [ 54%]
+tests/tools/test_endpoint_inventory_guard.py .                           [ 54%]
+tests/tools/test_forest_workflow_bootstrap.py ..                         [ 54%]
+tests/tools/test_gridmet_admission_probe.py ............................ [ 54%]
+.                                                                        [ 54%]
+tests/tools/test_hillslope_daily_closure_audit.py .....                  [ 54%]
+tests/tools/test_hillslope_mofe_daily_closure_audit.py .........         [ 54%]
+tests/tools/test_hillslope_mofe_scireview_compare.py ..                  [ 54%]
+tests/tools/test_migrate_nodb_map_object_paths.py ...                    [ 54%]
+tests/tools/test_migrations_nodir_bulk_retired_modes.py ..               [ 54%]
+tests/tools/test_migrations_parquet_backfill.py ...............          [ 55%]
+tests/tools/test_migrations_runner.py ....                               [ 55%]
+tests/tools/test_migrations_unroll_root_resources_batch.py ............. [ 55%]
+.............                                                            [ 55%]
+tests/tools/test_query_catalog_pilot_cli.py .........................    [ 55%]
+tests/tools/test_repair_forked_run_identity.py ................          [ 56%]
+tests/tools/test_roads_buffer_drainage.py ...............                [ 56%]
+tests/tools/test_roads_buffer_reconciliation.py ..                       [ 56%]
+tests/tools/test_roads_drainage_runtime.py .......                       [ 56%]
+tests/tools/test_roads_drainage_validation.py ...........                [ 56%]
+tests/tools/test_roads_engineered_surface.py .........                   [ 56%]
+tests/tools/test_roads_ofe_budget.py ................                    [ 56%]
+tests/tools/test_roads_parameterization_score.py .......                 [ 56%]
+tests/tools/test_roads_parameterization_screen.py .......                [ 57%]
+tests/tools/test_roads_prepared_soil_hydraulics.py .......               [ 57%]
+tests/tools/test_roads_soil_benchmark.py ....                            [ 57%]
+tests/tools/test_route_contract_checklist_guard.py .                     [ 57%]
+tests/tools/test_run_pytest_sharded.py ............                      [ 57%]
+tests/tools/test_scheduler_env_ints.py ...                               [ 57%]
+tests/tools/test_scheduler_runtime.py ...........................        [ 57%]
+tests/tools/test_ssurgo_empirical_study.py .......                       [ 57%]
+tests/tools/test_ssurgo_masked_valid_evaluation.py .............         [ 58%]
+tests/tools/test_ssurgo_padded_shadow_evaluator.py ...                   [ 58%]
+tests/tools/test_totalwatsed3_daily_closure_audit.py ....                [ 58%]
+tests/tools/test_verify_lfs_materialized.py ...                          [ 58%]
+tests/topo/test_osm_roads_cache.py ........                              [ 58%]
+tests/topo/test_osm_roads_contracts.py .....                             [ 58%]
+tests/topo/test_osm_roads_postgres_integration.py ss                     [ 58%]
+tests/topo/test_osm_roads_service.py ......                              [ 58%]
+tests/topo/test_peridot_runner_wait.py ......................            [ 58%]
+tests/topo/test_peridot_sub_fields_schema.py ....                        [ 58%]
+tests/topo/test_terrain_processor_helpers.py ........................... [ 59%]
+.......                                                                  [ 59%]
+tests/topo/test_terrain_processor_runtime.py .................           [ 59%]
+tests/topo/test_terrain_processor_wbt_integration.py ..ss                [ 59%]
+tests/topo/test_topaz_subprocess_guards.py ...                           [ 59%]
+tests/topo/test_topaz_vrt_read.py .                                      [ 59%]
+tests/topo/test_watershed_abstraction_mofe_map.py ..                     [ 59%]
+tests/topo/test_watershed_abstraction_slope_file.py .................... [ 59%]
+..............                                                           [ 60%]
+tests/topo/test_watershed_abstraction_support.py ..                      [ 60%]
+tests/topo/test_watershed_feature_save_geojson.py ..                     [ 60%]
+tests/topo/test_wbt_topaz_conditioning_dispatch.py ...............       [ 60%]
+tests/topo/test_wbt_topaz_conditioning_integration.py .                  [ 60%]
+tests/wepp/interchange/test_ag_fields_interchange.py ................... [ 60%]
+..                                                                       [ 60%]
+tests/wepp/interchange/test_calendar_utils.py .                          [ 60%]
+tests/wepp/interchange/test_catalog_scan_rust.py .                       [ 60%]
+tests/wepp/interchange/test_hec_ras_boundary.py .                        [ 60%]
+tests/wepp/interchange/test_hill_interchange_cleanup.py ....             [ 60%]
+tests/wepp/interchange/test_hill_interchange_import_smoke.py .           [ 60%]
+tests/wepp/interchange/test_hill_wat_accounting.py ........              [ 60%]
+tests/wepp/interchange/test_interchange_documentation.py ......          [ 60%]
+tests/wepp/interchange/test_module_loader.py .                           [ 60%]
+tests/wepp/interchange/test_native_only_interchange_facades.py ....      [ 60%]
+tests/wepp/interchange/test_roads_accounting.py ...........              [ 61%]
+tests/wepp/interchange/test_roads_lifecycle.py ....................      [ 61%]
+tests/wepp/interchange/test_rust_interchange.py ......                   [ 61%]
+tests/wepp/interchange/test_totalwatsed3.py .....                        [ 61%]
+tests/wepp/interchange/test_utils_phase7.py ...                          [ 61%]
+tests/wepp/interchange/test_versioning.py ....                           [ 61%]
+tests/wepp/interchange/test_watershed_chan_interchange.py .              [ 61%]
+tests/wepp/interchange/test_watershed_chan_peak_interchange.py .         [ 61%]
+tests/wepp/interchange/test_watershed_chanwb_interchange.py .            [ 61%]
+tests/wepp/interchange/test_watershed_ebe_interchange.py .....           [ 61%]
+tests/wepp/interchange/test_watershed_interchange_pass_family.py ....    [ 61%]
+tests/wepp/interchange/test_watershed_loss_interchange.py ..             [ 61%]
+tests/wepp/interchange/test_watershed_pass_interchange.py s              [ 61%]
+tests/wepp/interchange/test_watershed_totalwatsed_export.py ...          [ 61%]
+tests/wepp/management/test_management_map_loading.py .....               [ 61%]
+tests/wepp/management/test_management_setitem_types.py ....              [ 61%]
+tests/wepp/management/test_mofe_input_identity.py .F
+
+=================================== FAILURES ===================================
+____________ test_mixed_calendars_preserve_downstream_years[False] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-319/test_mixed_calendars_preserve_0')
+deduplicate = False
+
+    @pytest.mark.parametrize('deduplicate', [False, True])
+    def test_mixed_calendars_preserve_downstream_years(tmp_path, deduplicate):
+        first = read_management(str(OATS))
+>       second = read_management(str(CORN))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/workdir/wepppy/tests/wepp/management/test_mofe_input_identity.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/workdir/wepppy/wepppy/wepp/management/managements.py:3338: in read_management
+    return Management(Key=None,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'Management' object has no attribute 'plants'") raised in repr()] Management object at 0x79b014d7e240>
+kwargs = {'Color': (0, 0, 0, 0), 'Description': '-', 'Key': None, 'ManagementDir': 'wepppy/wepp/management/data/Agriculture', ...}
+color = (0, 0, 0, 0), components = [0, 0, 0, 0]
+
+    def __init__(self, **kwargs: Any) -> None:
+        self._strict_upload = bool(kwargs.get("StrictUpload", False))
+        self._native_scenario_references = bool(kwargs.get("NativeScenarioReferences", False) or self._strict_upload or kwargs.get("Key") == "single-user-defined")
+        self._input_max_ofes = int(kwargs.get("InputMaxOfes", 1))
+        self.key: Optional[int] = kwargs["Key"]
+        self.man_fn: str = kwargs["ManagementFile"]
+        self.man_dir: str = kwargs.get("ManagementDir", _management_dir)
+        self.desc: Optional[str] = kwargs.get("Description")
+        color = kwargs.get(
+            "Color",
+            [
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
+                255,
+            ],
+        )
+        if isinstance(color, str):
+            hex_value = color.lstrip('#')
+            if len(hex_value) == 6:
+                components = [int(hex_value[i:i + 2], 16) for i in range(0, 6, 2)]
+                components.append(255)
+            elif len(hex_value) == 8:
+                components = [int(hex_value[i:i + 2], 16) for i in range(0, 8, 2)]
+            else:
+                raise ValueError(
+                    "Hex color strings must be in #RRGGBB or #RRGGBBAA format."
+                )
+        else:
+            components = [int(component) for component in color]
+    
+        if len(components) != 4:
+            raise ValueError("Color must contain four RGBA components.")
+    
+        self.color = cast(tuple[int, int, int, int], tuple(components))
+        self.nofe: Optional[int] = None
+    
+        if not _exists(_join(self.man_dir, self.man_fn)):
+>           raise Exception("management file '%s' does not exist"
+                            % _join(self.man_dir, self.man_fn))
+E           Exception: management file 'wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man' does not exist
+
+/workdir/wepppy/wepppy/wepp/management/managements.py:2372: Exception
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/query_engine/test_mcp_openapi_contract.py: 1 warning
+tests/query_engine/test_mcp_router.py: 85 warnings
+tests/query_engine/test_server_routes.py: 16 warnings
+tests/shape_converter/integration/test_abuse_controls_api.py: 8 warnings
+tests/shape_converter/integration/test_convert_api.py: 8 warnings
+tests/shape_converter/integration/test_inspect_api.py: 4 warnings
+tests/shape_converter/integration/test_runtime_hardening_api.py: 4 warnings
+tests/shape_converter/integration/test_ui_flow.py: 8 warnings
+tests/shape_converter/unit/test_app_bootstrap.py: 4 warnings
+tests/shape_converter/unit/test_cleanup_lifecycle.py: 14 warnings
+tests/shape_converter/unit/test_convert_endpoint.py: 86 warnings
+tests/shape_converter/unit/test_health_routes.py: 10 warnings
+tests/shape_converter/unit/test_inspect_endpoint.py: 38 warnings
+tests/shape_converter/unit/test_ui_endpoints.py: 10 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_prism_temperature_artifact_retention.py: 2 warnings
+tests/rq/test_project_rq_archive.py: 40 warnings
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:309: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_refreshes_cli_parquet
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+tests/nodb/test_user_defined_cli_parquet.py::test_set_user_defined_cli_delegates_station_meta_builder
+  /workdir/wepppy/wepppy/climates/cligen/cligen.py:1436: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+    nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
+
+tests/nodb/test_watershed_lookup_loaders.py::test_hillslope_width_falls_back_when_lookup_missing_topaz_id
+  /workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:1349: DeprecationWarning: Call to deprecated method _deprecated_width_of.
+    return self._deprecated_width_of(topaz_id_str)
+
+tests/profile_recorder/test_assembler.py::test_config_slug_prefers_event_metadata
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:66: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import MARKER
+
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:345: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import capture_event_seed
+
+tests/query_engine/test_catalog_refresh.py: 2 warnings
+tests/services/test_wmesque_catalog.py: 2 warnings
+tests/soils/test_ssurgo_reclaimed_fairpoint.py: 3 warnings
+tests/soils/test_ssurgo_retention.py: 3 warnings
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3060461) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/query_engine/test_mcp_router.py::test_validate_query_invalid_json
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-True]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-True]
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+  /opt/venv/lib/python3.12/site-packages/starlette/templating.py:162: DeprecationWarning: The `name` is not the first parameter anymore. The first parameter should be the `Request` instance.
+  Replace `TemplateResponse(name, {"request": request})` by `TemplateResponse(request, name)`.
+    warnings.warn(
+
+tests/rq/test_ag_fields_rq.py: 5 warnings
+tests/rq/test_bootstrap_autocommit_rq.py: 5 warnings
+tests/rq/test_exception_logging.py: 2 warnings
+tests/rq/test_features_export_rq.py: 1 warning
+tests/rq/test_land_and_soil_rq_guards.py: 2 warnings
+tests/rq/test_omni_rq.py: 12 warnings
+tests/rq/test_path_ce_rq.py: 3 warnings
+tests/rq/test_project_config_update_rq.py: 1 warning
+tests/rq/test_project_rq_archive.py: 7 warnings
+tests/rq/test_project_rq_ash.py: 2 warnings
+tests/rq/test_project_rq_debris_flow.py: 2 warnings
+tests/rq/test_project_rq_fork.py: 2 warnings
+tests/rq/test_project_rq_mutation_guards.py: 22 warnings
+tests/rq/test_project_rq_readonly.py: 2 warnings
+tests/rq/test_roads_rq.py: 2 warnings
+tests/rq/test_run_sync_rq.py: 1 warning
+tests/rq/test_weppcloudr_rq.py: 8 warnings
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/rq/test_fork_failure.py: 18 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:348: DeprecationWarning: Passing a string or function for `on_failure` is deprecated, pass `Callback` instead
+    warnings.warn(
+
+tests/rq/test_fork_failure.py: 10 warnings
+tests/rq/test_wbt_controlled_failure_integration.py: 13 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:853: DeprecationWarning: job.exc_info is deprecated, use job.latest_result() instead.
+    warnings.warn('job.exc_info is deprecated, use job.latest_result() instead.', DeprecationWarning)
+
+tests/rq/test_fork_failure.py: 8 warnings
+tests/rq/test_wbt_controlled_failure_integration.py: 18 warnings
+  /opt/venv/lib/python3.12/site-packages/rq/job.py:905: DeprecationWarning: job.result is deprecated, use job.return_value instead.
+    warnings.warn('job.result is deprecated, use job.return_value instead.', DeprecationWarning)
+
+tests/rq/test_fork_failure.py::test_actual_work_horse_death_reports_fork_failure
+  /opt/venv/lib/python3.12/site-packages/rq/worker/worker_classes.py:63: DeprecationWarning: This process (pid=3060461) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    child_pid = os.fork()
+
+tests/rq/test_wepp_rq_dss_helpers.py::test_write_dss_channel_geojson_writes_filtered_channels_with_metadata
+  /workdir/wepppy/wepppy/rq/wepp_rq_dss.py:208: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+
+tests/test_imports.py::test_imports_in_directory
+  /usr/local/lib/python3.12/importlib/__init__.py:90: DeprecationWarning: wepppy.webservices.wmesque is deprecated; use wepppy.webservices.wmesque2 instead.
+    return _bootstrap._gcd_import(name[level:], package, level)
+
+tests/topo/test_terrain_processor_helpers.py: 5 warnings
+tests/topo/test_terrain_processor_runtime.py: 17 warnings
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: The given matrix is equal to Affine.identity or its flipped counterpart. GDAL may ignore this matrix and save no geotransform without raising an error. This behavior is somewhat driver-specific.
+    dataset = writer(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/wepp/management/test_mofe_input_identity.py::test_mixed_calendars_preserve_downstream_years[False]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+==== 1 failed, 4407 passed, 296 skipped, 554 warnings in 1018.06s (0:16:58) ====

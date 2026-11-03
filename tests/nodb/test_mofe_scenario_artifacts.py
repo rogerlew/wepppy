@@ -147,7 +147,7 @@ def test_cover_reaches_combined_and_prepared_management(scenario, monkeypatch, f
     slope.parent.mkdir(parents=True, exist_ok=True)
     slope.write_text('97.5\n2\n180 1\n' + '2 50\n0 0.2 1 0.2\n' * 2)
     (root / 'soils').mkdir()
-    soil_source = str(Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
+    soil_source = str((Path(__file__).resolve().parents[1] / 'wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
     SoilMultipleOfeSynth([soil_source, soil_source]).write(str(root / 'soils/hill_101.mofe.sol'))
     runs = root / 'wepp/runs'
     runs.mkdir(parents=True)
@@ -270,7 +270,7 @@ def test_omni_mixed_segments_reach_combined_and_prepared_inputs(
     slope.parent.mkdir(parents=True, exist_ok=True)
     slope.write_text('97.5\n2\n180 1\n' + '2 50\n0 0.2 1 0.2\n' * 2)
     (root / 'soils').mkdir()
-    soil_source = str(Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
+    soil_source = str((Path(__file__).resolve().parents[1] / 'wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
     SoilMultipleOfeSynth([soil_source, soil_source]).write(str(root / 'soils/hill_101.mofe.sol'))
     runs = root / 'wepp/runs'
     runs.mkdir(parents=True)

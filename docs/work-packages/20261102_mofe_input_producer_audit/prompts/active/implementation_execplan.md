@@ -32,12 +32,13 @@ selected by each element and rotation, not only successful model completion.
 - [x] (2026-11-02 UTC) Draft MIPA-01 canonical identity contract and compatibility/regression checkpoint.
 - [x] (2026-11-02 UTC) Two independent contract reviews pass after bounded-calendar, token-safe-alias and idempotence clarifications; documentation and baseline integrity checks pass.
 - [x] M1: operator approved; standalone contract ancestor `4579b11ce` committed before implementation.
+- [x] Implementation committed locally as `390bc4f59`; paired Rust `5e3540f` pushed and verified upstream.
 - [x] M2: implement all-crop PMET coverage, native-safe aliases, per-OFE Disturbed context and retry/archive identity.
 - [x] M3: implement calendar/residue, per-OFE soil/cover and paired Rust slope/map repairs; source and actual-writer tests pass.
 - [x] M4 producer portion: supported actual-project fork, 72 hills/235 elements prepared and reparsed; original source unchanged; PMET retry byte-identical.
 - [ ] M4 full acceptance: native capacity, adapter mapping, FC/HK ownership, 9005 consumer and fresh native outputs/reports remain HOLD.
 - [x] Final independent correctness, QA and security review: no unresolved source findings; final focused suite 306 passed.
-- [ ] Extended-test and benchmark-refresh disposition recorded in execution report.
+- [x] Extended regression and benchmark refresh complete: terminal continuation 2529 passed; prior failures fixed and retested. Segmented validation, not one uninterrupted full-suite pass.
 
 ## Surprises & Discoveries
 

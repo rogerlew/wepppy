@@ -851,7 +851,7 @@ def test_pmet_identity_and_failed_attempt_survive_archive_restore(archive_rq_env
     root = tmp_path / 'demo'
     runs = root / 'wepp/runs'
     runs.mkdir(parents=True)
-    fixture = Path('tests/wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man')
+    fixture = (Path(__file__).resolve().parents[1] / 'wepp/management/fixtures/ag_fields_rotation_synth/oats_spring_conventional.man')
     (runs / 'p1.man').write_text(str(read_management(str(fixture))))
     pmetpara_prep(str(runs), 0.5, 0.8)
     (runs / 'p1.man.mipa-test.tmp').write_text('failed preparation evidence')

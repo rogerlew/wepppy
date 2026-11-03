@@ -9,7 +9,13 @@ from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
 pytestmark = pytest.mark.unit
 FIXTURES = Path(__file__).parent / 'fixtures/ag_fields_rotation_synth'
 OATS = FIXTURES / 'oats_spring_conventional.man'
-CORN = Path('wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man')
+CORN = Path(__file__).resolve().parents[3] / 'wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man'
+
+
+@pytest.fixture(autouse=True)
+def independent_working_directory(tmp_path, monkeypatch):
+    # Native/model tests elsewhere may change cwd; fixture inputs are file-relative.
+    monkeypatch.chdir(tmp_path)
 
 
 def timeline(man, ofe=0):

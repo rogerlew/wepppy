@@ -10,7 +10,7 @@ pytestmark = pytest.mark.integration
 
 @pytest.mark.parametrize('reverse', [False, True])
 def test_9005_texture_is_per_ofe_in_real_serializers(tmp_path, reverse):
-    source = Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol')
+    source = (Path(__file__).resolve().parents[2] / 'wepp_runner/fixtures/hillslope_smoke/runs/p1.sol')
     soil = WeppSoilUtil(str(source)).to_over9000(replacements={}, version=9005)
     second = deepcopy(soil.obj['ofes'][0])
     soil.obj['ofes'].append(second)
@@ -31,7 +31,7 @@ def test_9005_texture_is_per_ofe_in_real_serializers(tmp_path, reverse):
 
 def test_multi_ofe_source_cannot_be_one_stack_member(tmp_path):
     from wepppy.wepp.soils.utils.multi_ofe import SoilMultipleOfeSynth
-    source = str(Path('tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
+    source = str((Path(__file__).resolve().parents[2] / 'wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'))
     stacked = tmp_path / 'two.sol'
     SoilMultipleOfeSynth([source, source]).write(str(stacked))
     assert len(WeppSoilUtil(str(stacked)).obj['ofes']) == 2

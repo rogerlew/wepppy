@@ -234,9 +234,9 @@ def test_management_rotation_boundary(tmp_path, count):
     text = canonical_management(model)
     text = text.replace('1 # sim_years', '1000 # sim_years', 1)
     text = text.replace('1 # number of times the rotation is repeated', f'{count} # number of times the rotation is repeated', 1)
-    prefix, schedule = text.split('1 # number of years in a single rotation\n', 1)
+    prefix, schedule = text.split('1 # number of years in each rotation\n', 1)
     source = tmp_path / 'rotations.man'
-    source.write_text(prefix + '1 # number of years in a single rotation\n' + schedule * count)
+    source.write_text(prefix + '1 # number of years in each rotation\n' + schedule * count)
     if count == 1001:
         with pytest.raises(SingleInputError): read_uploaded_management(source)
     else:
