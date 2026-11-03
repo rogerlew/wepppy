@@ -107,3 +107,33 @@ this review in both standalone ancestor checkpoints before production edits.
 The dedicated final security review remains required after implementation,
 correctness and QA; it must verify actual parser, linked-file, failure, archive,
 service-identity and exact-artifact evidence. No deployment is authorized here.
+
+## Final checkpoint byte confirmation
+
+Before production edits, independently reread the final mirrored contract at
+WEPPpy ancestor `c8f6ea854` and native ancestor `ee9e73f8b`. Both contract files
+now have SHA256
+`c3b2f8b1bcdaec079e1a9574001dc9e562467cb2c004a4e54ef8c8b9bb4a164f`.
+This confirmation supplements, and does not overwrite, the earlier hash above.
+
+The two intervening explanations do not weaken the reviewed security boundary:
+
+- The preexisting `avsat >= avpor*avcpm` .99 adjustment is now explicitly
+  retained, making the later reference .99 factor produce .9801 at that
+  boundary. Direct inspection of bound reference `infpar.for:616–632`
+  confirms that ordering; no new cap or parameter is introduced.
+- Removal is restricted to **provably unreachable** CO2 and annual-only
+  branches in the isolated specialized routine, avoiding unrelated management
+  schema adoption. The reference guards the CO2 work with `cc_run==0`, whereas
+  this routine is dispatched only with RAP enabled; the named annual cases
+  occur within the perennial-only active-growth gate. Final correctness review
+  must verify the actual removed blocks and guard ancestry.
+
+The exact-row parser, checked storage arithmetic/allocation, regular-file
+publication, visible retirement and unchanged/absent no-op requirements remain
+intact. Native tracked working-tree diff was empty, and WEPPpy tracked dirty
+paths at this check were only the four recorded unrelated preexisting files.
+No implementation approval is inferred from this source-status observation.
+
+**PASS remains valid for the final contract bytes above.** No new security
+finding; implementation, QA and final security evidence are still required.
