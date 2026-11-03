@@ -11,7 +11,10 @@ checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](artifacts/resumption-r7-seed-results.md) and
 [ledger v25](artifacts/candidate-ledger-v25.json) retain the current checkpoint.
-The full 840-case replay is being staged; no parameter acceptance is claimed.
+The full 840-case replay is running. A separately reviewed copied-project lane
+has 344 current prepared inputs for 66 hillslopes/193 OFEs, excludes the withheld
+materials, and is ready for baseline execution (ledger v26). No parameter
+acceptance is claimed.
 
 
 ## Current: rock-cover audit separates surface protection from profile fragments

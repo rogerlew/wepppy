@@ -1,0 +1,27 @@
+{
+  "version": 26,
+  "predecessor": {
+    "path": "candidate-ledger-v25.json",
+    "sha256": "86f96846095f637e0c5dddf819ffdef08e992592f2972d7c1cd3ad691897d1b8"
+  },
+  "status": "r7_full_panel_running_current_project_ready",
+  "panel_declaration_sha256": "68fa8f4507821db21e104a625da0f6ba6401136bc6408594c4051344a51f6b04",
+  "panel_review_receipt_sha256": "655d1a96e3fca72a32e0e21590bff9714b1880ff80e19717327fe77294003456",
+  "current_project_declaration_sha256": "d5178b116fae71c4c4e15f07febc1c96f52f2b78c500affa1b8885b8c6b0e0fa",
+  "current_project_prepared_inputs": 344,
+  "current_project_hillslopes": 66,
+  "current_project_ofes": 193,
+  "current_project_active_source_materials": [
+    "2711184",
+    "67225",
+    "67141",
+    "2711195",
+    "2711253",
+    "2711198"
+  ],
+  "current_project_source_is_retained_material": true,
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "ui_human_gate_preserved": true,
+  "scientific_acceptance": false
+}
