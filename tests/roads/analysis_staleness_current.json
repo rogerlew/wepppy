@@ -4,14 +4,6 @@
   "provenance_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
   "published_report_sha256": "263174f8f56c94a9fb2773572d16f65593453df4816a6d38b7a069e97a924d7a",
   "reviewed_source_deltas": {
-    "tests/roads/test_roads_publication.py": {
-      "recorded": "bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c",
-      "current": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
-    },
-    "wepppy/nodb/mods/roads/roads.py": {
-      "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df"
-    },
     "tests/roads/roads_analysis.py": {
       "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
       "current": "e096957eb27244d3ac0a341dffad3f5acb3201bacdbe24dd9aa2d63c2eea1a23"
@@ -19,6 +11,26 @@
     "wepppy/wepp/soils/horizon_boundary.py": {
       "recorded": null,
       "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
+    },
+    "tests/roads/test_roads_publication.py": {
+      "recorded": "bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c",
+      "current": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
+    },
+    "tests/roads/roads_sensitivity.py": {
+      "recorded": null,
+      "current": "1dc93d62f312601ee54019369603f795684a2b5362d77b23df5129b3874adeaa"
+    },
+    "wepppy/nodb/mods/roads/roads.py": {
+      "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
+      "current": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d"
+    },
+    "tests/roads/roads_matrix.py": {
+      "recorded": "4288f063a083f845599326a82154304b3a217620de4f1ee1e314346208a751a9",
+      "current": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e"
+    },
+    "tests/roads/test_roads_sensitivity.py": {
+      "recorded": null,
+      "current": "f1447e075a9e3bb4d4b3e3a24f4897f7aa4d92c77f21fe853be54f0f432cafb2"
     }
   },
   "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale. The generated-soil boundary change adds the shared normalizer to execution-source hashing; historical reports remain unchanged and explicitly stale.",
@@ -48,6 +60,38 @@
       "scope": "Exclude generated tc_out.txt from shared Roads input staging to preserve the baseline diagnostic. The tc.txt input, model parameters and historical report remain unchanged. Five fresh public-controller contexts independently validate the repair; this does not refresh the historical published matrix/report.",
       "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/resumption-r7-tc-isolation-review.md",
       "outcome_evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/resumption-r7-current-roads-v2-outcome-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "path": "tests/roads/roads_matrix.py",
+      "previous_reviewed_sha256": "4288f063a083f845599326a82154304b3a217620de4f1ee1e314346208a751a9",
+      "current_sha256": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e",
+      "scope": "Additive separate sensitivity tooling and tests; default matrix preparation byte parity independently verified. Historical published report remains stale, not refreshed.",
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised-sensitivity-harness-quality-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "path": "tests/roads/roads_sensitivity.py",
+      "previous_reviewed_sha256": null,
+      "current_sha256": "1dc93d62f312601ee54019369603f795684a2b5362d77b23df5129b3874adeaa",
+      "scope": "Additive separate sensitivity tooling and tests; default matrix preparation byte parity independently verified. Historical published report remains stale, not refreshed.",
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised-sensitivity-harness-quality-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "path": "tests/roads/test_roads_sensitivity.py",
+      "previous_reviewed_sha256": null,
+      "current_sha256": "f1447e075a9e3bb4d4b3e3a24f4897f7aa4d92c77f21fe853be54f0f432cafb2",
+      "scope": "Additive separate sensitivity tooling and tests; default matrix preparation byte parity independently verified. Historical published report remains stale, not refreshed.",
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised-sensitivity-harness-quality-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df",
+      "current_sha256": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d",
+      "scope": "Bounded optional-attribute conformance repair; finite policies unchanged.",
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised-input-resolution-correctness-review.md"
     }
   ]
 }

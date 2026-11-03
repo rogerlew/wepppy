@@ -47,6 +47,18 @@ runner refuses existing destinations and verifies source and copied baseline
 hashes. It changes only the scratch project. Project checks require the full
 local fixture; portable profile tests do not.
 
+Paired studies can reuse `roads_sensitivity.prepare`, `execute`, `summarize`, and
+`paired_events` with an independently declared panel. Preparation uses canonical
+Roads builders; geometry contrasts accept width, fill length and fill slope,
+and traffic selects the existing templates. The caller must bind source and
+binary identities and review the declaration before native execution. Each
+capsule has an exclusive directory, input readback, complete runtime inventory,
+retained failures, native tables and production segment-summary metrics. The
+runner invokes the explicitly hashed installed watershed executable in hillslope
+mode once, with a 300-second timeout; it retains stdout/stderr and never retries.
+This helper does not adopt generated-soil policies or change project defaults.
+Run its deterministic safeguards with
+`wctl run-pytest tests/roads/test_roads_sensitivity.py -q`.
 ## Interpret results
 
 Detachment is native mean annual full-profile detachment, including non-road

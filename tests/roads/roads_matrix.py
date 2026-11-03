@@ -127,7 +127,7 @@ def read_management(path, template, order):
         schedule_sha256=hashlib.sha256(json.dumps(scheduled).encode()).hexdigest())
 
 
-def prepare(roads, root: Path, case: Case, identifier: int):
+def prepare(roads, root: Path, case: Case, identifier: int, *, requested_overrides=None, wepp_bin=None):
     """Return requested and emitted evidence; no controller defaults are changed."""
     from wepp_runner import make_hillslope_run
     from wepppy.wepp.soils.utils import WeppSoilUtil
@@ -143,6 +143,13 @@ def prepare(roads, root: Path, case: Case, identifier: int):
             requested["road_slope_pct"] *= value
         else:
             requested[key] = value
+    if requested_overrides:
+        if case.control != "core" or not set(requested_overrides) <= {"width_m", "fill_length_m", "fill_slope_pct"}:
+            raise ValueError("Sensitivity overrides require a core case and supported geometry fields")
+        for key, value in requested_overrides.items():
+            if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
+                raise ValueError(f"Invalid sensitivity geometry: {key}")
+        requested.update(requested_overrides)
     geometry = {k: v for k, v in requested.items() if k != "rfg_pct"}
     geometry["road_slope_pct"] = roads._clamp_percent_slope(geometry["road_slope_pct"])
     effective_grade = geometry["road_slope_pct"]
@@ -208,7 +215,7 @@ def prepare(roads, root: Path, case: Case, identifier: int):
             assert math.isclose(ofe["ki"], float(original_road[5]) / divisor)
             assert math.isclose(ofe["kr"], float(original_road[6]) / divisor)
     shutil.copy2(DATA / "site.cli", stem.with_suffix(".cli"))
-    make_hillslope_run(identifier, fixture["simulation_years"], str(runs), reveg=False, wepp_bin=fixture["binary"])
+    make_hillslope_run(identifier, fixture["simulation_years"], str(runs), reveg=False, wepp_bin=wepp_bin or fixture["binary"])
     lines = slope.read_text().splitlines()
     emitted = dict(width_m=float(lines[2].split()[1]),
         lengths_m=[float(lines[3 + 2*i].split()[1]) for i in range(int(lines[1]))],

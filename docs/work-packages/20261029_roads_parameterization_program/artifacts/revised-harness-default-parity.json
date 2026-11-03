@@ -1,0 +1,121 @@
+{
+  "starting_revision": "e0308765c",
+  "current_matrix_sha256": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e",
+  "root": "/tmp/roads-default-parity-review-cspogsjm",
+  "rows": [
+    {
+      "arrangement": "bare_direct",
+      "identical": true,
+      "evidence": {
+        "inputs": {
+          "wepp/roads/runs/p1.sol": "d680a5e0cdb0dac8b5e554c473a31c8a01476e33fc5b8bc20365286843ce25bc",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.man": "3c3791f687ee47ba73d70cb5efa03e6f7a1c627df59cb84db0098eacaf42ad92",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.slp": "6d36a89900dc429aaf563169c8be391dd4c93cf84f647959d5afc7742f31672a"
+        },
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            2.62
+          ],
+          "slope_lines": [
+            "0.00, 0.292432 1.00, 0.292432"
+          ]
+        },
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 2.6204628679344433,
+          "road_slope_pct": 29.24324538598616,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null
+      }
+    },
+    {
+      "arrangement": "rutted",
+      "identical": true,
+      "evidence": {
+        "inputs": {
+          "wepp/roads/runs/p1.sol": "1327a579b1d5d018f2525a9684e1bf9cb30c6a13c7e044ee3c67f3fb2055eee4",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.slp": "247eb07c74c03f9479540cd1f2313582c0e370ac5ec90599462aa844a97e98d6"
+        },
+        "emitted": {
+          "width_m": 4.0,
+          "lengths_m": [
+            2.62,
+            30.0,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.292432 1.00, 0.292432",
+            "0.00, 0.292432 0.05, 0.100000 1.00, 0.100000",
+            "0.00, 0.100000 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 2.6204628679344433,
+          "road_slope_pct": 29.24324538598616,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": null
+      }
+    },
+    {
+      "arrangement": "unrutted_three",
+      "identical": true,
+      "evidence": {
+        "inputs": {
+          "wepp/roads/runs/p1.sol": "40b6fbd5005a135400ba1957271aab3c753837aee5cc286bbd507c127b7c11a0",
+          "wepp/roads/runs/p1.run": "72cdea40afe4508a76107c4ae22d7d5a431bb1e86be7d64483cdafd42085d504",
+          "wepp/roads/runs/p1.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+          "wepp/roads/runs/p1.cli": "da318b3d84cb4f60f8699cf02779f3312bb86dde6bc849890a07dd58be9d28d8",
+          "wepp/roads/runs/p1.slp": "b232cea2533ae54bdd4e6979b805b2b93c9050f0eca3829a3e3441bb79a1b329"
+        },
+        "emitted": {
+          "width_m": 1.837,
+          "lengths_m": [
+            30.0,
+            5.707,
+            30.0
+          ],
+          "slope_lines": [
+            "0.00, 0.100000 1.00, 0.100000",
+            "0.00, 0.100000 0.05, 0.087117 1.00, 0.087117",
+            "0.00, 0.087117 0.05, 0.100000 1.00, 0.100000"
+          ]
+        },
+        "requested": {
+          "width_m": 4.0,
+          "road_length_m": 2.6204628679344433,
+          "road_slope_pct": 29.24324538598616,
+          "fill_length_m": 30.0,
+          "fill_slope_pct": 10.0,
+          "buffer_length_m": 30.0,
+          "buffer_slope_pct": 10.0,
+          "rfg_pct": 15.0
+        },
+        "parity": {
+          "sim_length_m": 5.7071545632560525,
+          "sim_width_m": 1.8366160151369118,
+          "road_slope_fraction": 0.08711674007050009,
+          "road_slope_pct": 8.711674007050009,
+          "geometry_scale": 2.1779185017625022
+        }
+      }
+    }
+  ],
+  "native_calls": 0
+}
