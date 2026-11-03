@@ -52,9 +52,12 @@ demonstrated sediment remedy. No further numeric batch is justified by the
 reviewed evidence yet; dataset locations have been requested from the operator.
 This is an evidence gap, not a new routine permission gate. No parameter is
 accepted, six withheld materials remain unused, defaults are unchanged, and the
-human configuration specification/layout gate remains intact. The broad
-postrepair repository suite is still running.
-See additive ledger v29 and the retention results for exact evidence bindings.
+human configuration specification/layout gate remains intact. Repository validation
+covers all 13,267 collected tests across two segments: 12,845 passed and 422
+runtime skips, plus one collection skip. The initial stale-publication metadata
+failure was corrected and independently reviewed; historical reports remain stale.
+See additive ledger v30 and the final validation receipt for exact coverage and
+ledger v29 for the retention evidence. This is not an uninterrupted suite pass.
 
 
 
@@ -215,11 +218,11 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Acquire the seven-material source cohort and prepare canonical paired retention inputs.
 - [x] Independently review prepared artifacts and all sixteen retention/observer histories; reject the lane as a rescue candidate.
 - [ ] Obtain qualifying role-specific surface evidence before defining another supported intervention.
-- [ ] Complete the postrepair full repository test run and final clean-worktree checkpoint.
+- [x] Complete postrepair repository validation with exact combined coverage and retain the reviewed publication-metadata correction in the final checkpoint.
 
 - [x] Reconcile later source/producer repairs and declare the bounded r4/r7 engine comparison.
-- [ ] Validate and independently review 18 seed pairs before full-panel expansion.
-- [ ] Renew frozen 840 development engine evidence and separate current full-preparation evidence.
+- [x] Validate and independently review 18 seed pairs before full-panel expansion.
+- [x] Renew frozen 840 development engine evidence and separate current full-preparation evidence.
 
 - [x] Execute the user-authorized rock-cover provenance/consumer audit declared in `out/roads-parameterization-program-20261031/rock-cover-audit-r4/declaration.md`; retain all nine contrasts and both modes, independent review and no behavioral changes.
 
@@ -418,6 +421,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The broad suite identified stale-publication source metadata still naming the pre-repair Roads hash. The reviewed receipt now records the baseline-isolation fix while retaining the original stale report and provenance. Three publication tests pass; remaining-suite coverage is recorded separately.
+
 - The retention input contrast reaches native initialization, yet does not recover either target and worsens the opposite control. Actual lower-layer response is therefore insufficient evidence for a Roads remedy. Native adds 200 mm bottom support; all observed frost opportunities were skipped by KSFLAG.
 
 - Fresh Roads context exposed linked `tc_out.txt` being rewritten in baseline runs; unit regression reproduces it. Baseline v1 export failure was missing harness cleanup, not changed native output.
@@ -530,6 +535,8 @@ still described 261026 and a pending native decision; the explicit release amend
 and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
+
+- Preserve the historical publication as stale after the conformance repair. Resume the exact remaining collected test IDs after the metadata-only correction; retain the initial failure and report combined coverage rather than an uninterrupted full-suite pass.
 
 - Reject the paired retention rescue lane without a full840 expansion. Require measured surface/overlap/persistence and faithful consumer semantics before a distinct surface intervention; do not substitute profile RFG, residue or land use. Existing autonomy continues, with an actual evidence prerequisite.
 
@@ -644,12 +651,10 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-The requested resumption now has reviewed current-engine panel evidence, successful current preparation/controller workflows, a repaired baseline-isolation defect, and a completed rejected retention experiment. Scientific acceptance remains unmet. The next study needs physical source support or a separately justified native-policy question; no tuning UI or default adoption follows. Full postrepair tests remain in progress.
+The requested resumption now has reviewed current-engine panel evidence, successful current preparation/controller workflows, a repaired baseline-isolation defect, and a completed rejected retention experiment. Scientific acceptance remains unmet. The next study needs physical source support or a separately justified native-policy question; no tuning UI or default adoption follows. Postrepair repository validation covers all 13,267 collected tests across two segments after correcting reviewed stale-publication metadata; 12,845 pass, 422 runtime skips and one collection skip. Ledger v30 binds the evidence. The package remains active with scientific acceptance unmet.
 
-The r7 release reconciliation is complete for fixed panel magnitude; it does not resolve the scientific acceptance failures. Current full preparation succeeds under the bounded public-controller scope. Roads isolation repair and supported retention preparation are the next gates.
-
-Resumption checkpoint: declared comparison only; r7 Roads magnitude/physical
-results and current full-preparation acceptance remain unestablished.
+Earlier checkpoints below retain historical outcomes and proposed next steps;
+the current resumption status above supersedes those next-step instructions.
 
 The rock audit retains all 36 histories and verifies the exact 977-member native build. Three input tables and source-function controls reproduce. It identifies a concrete RUSLE units defect but no selected-case activation or field armor estimate. Surface-data/consumer evidence is required before a Roads cover sensitivity; capacity analysis remains independently justified.
 

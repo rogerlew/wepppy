@@ -10,7 +10,7 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b"
+      "current": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df"
     },
     "tests/roads/roads_analysis.py": {
       "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
@@ -38,6 +38,16 @@
       "current_sha256": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b",
       "scope": "Apply shared generated-soil 200 mm normalization to four soil assembly paths. Legacy matrix templates already terminate at 200 mm, so insertion is a no-op; historical routing evidence remains stale.",
       "evidence": "docs/work-packages/20261029_soil_200mm_boundary_consistency/package.md"
+    },
+    {
+      "date": "2026-11-03",
+      "commit": "56d16dc7c",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "5beb3be8d69728c90a0a4b910656cbec80776fe7533a0970b5c071b9e4124f6b",
+      "current_sha256": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df",
+      "scope": "Exclude generated tc_out.txt from shared Roads input staging to preserve the baseline diagnostic. The tc.txt input, model parameters and historical report remain unchanged. Five fresh public-controller contexts independently validate the repair; this does not refresh the historical published matrix/report.",
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/resumption-r7-tc-isolation-review.md",
+      "outcome_evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/resumption-r7-current-roads-v2-outcome-review.md"
     }
   ]
 }

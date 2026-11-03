@@ -1,0 +1,35 @@
+{
+  "version": 30,
+  "predecessor": {
+    "path": "candidate-ledger-v29.json",
+    "sha256": "c202e4f09f5f69ab7fc875f9f4e0e2e00a264e35e2813dedf30c326e3f166ff5"
+  },
+  "status": "resumption_checkpoint_validated_scientific_acceptance_unmet",
+  "validation": {
+    "path": "resumption-r7-final-validation.json",
+    "sha256": "9a1d36841b97765550ffef964e998ec0a1ef5568fcb2f3136ca93b02e445b3a7"
+  },
+  "evidence": {
+    "resumption-r7-publication-metadata-review.md": "bd11bf5014f5af0e35610a60e1221a607dab03761c7daf13ac465df6fafa2ba3",
+    "resumption-r7-role-erosion-followup.md": "a86aa77c87e340c8165abbca34c6772b93a09788a0f55ffaf161ae8c58e16cce"
+  },
+  "magnitude": {
+    "meaningful_pass": 713,
+    "meaningful_total": 766,
+    "small_pass": 31,
+    "small_total": 74,
+    "recoveries": 0,
+    "regressions": 0
+  },
+  "strict_event_particle_pass": 839,
+  "strict_event_particle_total": 840,
+  "retention_rescue_candidate": "rejected",
+  "current_preparation_and_five_roads_contexts": "passed_bounded_controller_and_artifact_validation",
+  "scientific_acceptance": false,
+  "next_prerequisite": "Qualifying role-specific surface/overlap/persistence evidence and faithful native consumer, or a separately justified native-policy research question. Dataset location requested; no answer received at this checkpoint.",
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "deployment_performed": false,
+  "ui_human_gate_preserved": true,
+  "full_program_complete": false
+}

@@ -1,0 +1,48 @@
+{
+  "status": "passed_combined_coverage_after_reviewed_metadata_correction",
+  "production_commit": "56d16dc7c",
+  "source_sha256": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df",
+  "publication_metadata_sha256": "8d2430dcbc0e2310fb3bf469445aa2c75f208561db4253e617090b4e10420a17",
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261103/tc-isolation-validation",
+  "initial_segment": {
+    "command": "wctl run-pytest tests --maxfail=1",
+    "collected": 13251,
+    "passed": 7230,
+    "runtime_skipped": 188,
+    "collection_skipped": 1,
+    "failed": 1,
+    "failure": "tests/roads/test_roads_publication.py::test_published_results_and_sources_are_current_or_explicitly_stale",
+    "resolution": "Reviewed stale-publication source receipt updated; historical report remains stale. Three publication tests pass."
+  },
+  "continuation": {
+    "command": "wctl run-pytest @/wc1/runs/ro/roads-parameterization-program-20261103/tc-isolation-validation/remainder-nodeids.txt --maxfail=1",
+    "passed": 5615,
+    "skipped": 234,
+    "failed": 0,
+    "selected": 5849,
+    "includes_original_failed_test": true,
+    "additional_collected_tests": 16
+  },
+  "coverage": {
+    "current_collection": 13267,
+    "completed_prefix": 7418,
+    "continuation": 5849,
+    "passed": 12845,
+    "runtime_skipped": 422,
+    "collection_skipped": 1,
+    "unexecuted_collected": 0,
+    "uninterrupted_full_suite_pass": false,
+    "method": "Current collection preserves the completed 7418-node prefix. The 16 new research-helper tests are in tests/tools, after the failed Roads node. Ordered continuation begins at that failed node, with no omissions or overlap with the successful prefix. Production source is unchanged; only reviewed publication metadata was corrected."
+  },
+  "files": {
+    "roads-r7-postfix-broad-pytest.log": "3e30e8b826cbc4a13b8c7bcf9df7b0c42e4b57f82e52881377e3a5d951e8e391",
+    "roads-r7-publication-tests.log": "02724e319f20c8c61e1387bed4371bb2996c781898cdd7875973610f332e046c",
+    "roads-r7-remainder-collection.log": "04a2715c11b333a42d20d4ac0a5d455e43527380692d3350031dc0a0bd3ca904",
+    "roads-r7-remainder-pytest.log": "6a2513794da93fb7699424903b9ac3a83a29298aa383baabe5b8108f1d6f36c3",
+    "roads-r7-final-exceptions.log": "78edd2d449f7e4d2c84fe5edb4a1260cf7f50fd5256556bb721187c288347b97",
+    "roads-retention-native-tests.log": "26a657341abe56601c8f1cb5122a1723144ad2940671a5fe6c22ba917cd4d585",
+    "collected-nodeids.txt": "3255f070e04b72d62e48e978ef7c68024cfb8f8d8f702e13b0d7708236217834",
+    "remainder-nodeids.txt": "8fcee7cd3a4e21a40bb8c4f69ca9933878a7ba8fcb27d21dba8585f0c4ab68ba"
+  },
+  "prior_interrupted_attempt": "roads-r7-broad-pytest.log remains retained separately; interruption-induced StopRequested is not counted in final coverage."
+}

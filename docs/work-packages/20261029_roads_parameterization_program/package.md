@@ -52,9 +52,12 @@ demonstrated sediment remedy. No further numeric batch is justified by the
 reviewed evidence yet; dataset locations have been requested from the operator.
 This is an evidence gap, not a new routine permission gate. No parameter is
 accepted, six withheld materials remain unused, defaults are unchanged, and the
-human configuration specification/layout gate remains intact. The broad
-postrepair repository suite is still running.
-See additive ledger v29 and the retention results for exact evidence bindings.
+human configuration specification/layout gate remains intact. Repository validation
+covers all 13,267 collected tests across two segments: 12,845 passed and 422
+runtime skips, plus one collection skip. The initial stale-publication metadata
+failure was corrected and independently reviewed; historical reports remain stale.
+See additive ledger v30 and the final validation receipt for exact coverage and
+ledger v29 for the retention evidence. This is not an uninterrupted suite pass.
 
 
 
