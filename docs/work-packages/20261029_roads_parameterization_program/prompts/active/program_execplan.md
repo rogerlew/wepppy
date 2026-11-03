@@ -261,7 +261,7 @@ requires explicit human specification/layout approval before production wiring.
 ## Progress
 
 - [x] (2026-11-03) Verified handoff HEAD and clean worktree; opened bounded issue register and assigned independent current-r7 particle investigation, controls inventory, sensitivity harness and disposable-project lanes.
-- [ ] Complete current-source particle disposition and peer-consumer defect reproduction/repair.
+- [x] (2026-11-03) Complete current-source particle disposition and bounded resolver/buffer-peer conformance repair; 59 controller tests and independent generated-input review pass. Broad sanity remains pending.
 - [ ] Execute preregistered, independently reviewed sensitivity contrasts and validate emitted/native/artifact effects.
 - [ ] Commit reviewed concrete specification/layout proposal; obtain explicit human approval before production wiring.
 - [x] Record the operator-approved pivot in the canonical adjudication contract.

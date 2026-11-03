@@ -1,0 +1,31 @@
+{
+  "version": 33,
+  "predecessor": {
+    "path": "candidate-ledger-v32.json",
+    "sha256": "4e6658d68ba678cbbc736119e45ba05df42eab5bac952119e9c46d162853997b"
+  },
+  "status": "bounded_input_resolution_conformance_repaired",
+  "evidence": {
+    "revised-control-inventory.md": "50665740cab0132120af42b5d97c0d34a02b627b6f8390e5a2f90df05f10ca7d",
+    "revised-input-resolution-findings.md": "efb4fd2d6076039c2624b4ccb73983008aafbcea1d95b9e0fc16e9b2cacca515",
+    "revised-input-resolution-correctness-review.md": "de8d6d249e5e4d2afa603e93f4a5a59062449065b887fc9cb757aa67ce684865",
+    "revised-input-resolution-reproduction.json": "bb7ed2c4200790a3a1bf44e3fa73ae3229fef7865397539f6f6df00c3599f60c",
+    "revised-input-resolution-repaired.json": "5a9d61bfebd1e563b0dfd9257931362bcf725edc349f9fe72799daebc7718301",
+    "revised-input-resolution-before.log": "4914f82065fb865c0a8f89a90806f18dc18ded2a15a0fe06b49bf20a5ceefb5a",
+    "revised-input-resolution-after.log": "b994b0ac824d2b2a797835e9d746ea223c901b2af1332d744c85ffc3b6bb0485",
+    "reproduce_resolution_inputs.py": "b0df82037ac8ef688b2679e372e6c9b82a06b6410b8e39b97ef28cc46e358919"
+  },
+  "production_source_sha256": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d",
+  "scope": "Truthful fallback provenance and nonfinite optional feature attributes use existing invalid fallback, including buffer peer. Valid finite policies unchanged.",
+  "tests": {
+    "before": "5 failed, 3 passed",
+    "after": "59 passed full Roads controller module",
+    "independent": "9 focused passed"
+  },
+  "repository_sanity": "pending source stabilization and stale-publication review",
+  "historical_results_reclassified": false,
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "human_ui_approval": "absent",
+  "program_complete": false
+}

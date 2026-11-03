@@ -2040,27 +2040,36 @@ class Roads(NoDbBase):
         )
 
         resolved_texture = self._normalize_soil_texture(texture_raw, default_texture)
+        texture_source = (
+            "segment_property" if texture_raw and texture_raw.strip().lower() in SOIL_TEXTURE_ALIASES
+            else "roads_default"
+        )
 
         rfg_pct = self._coerce_float(rfg_raw)
-        if rfg_pct is None:
+        rfg_source = "segment_property"
+        if rfg_pct is None or not np.isfinite(rfg_pct):
             rfg_pct = default_rfg
+            rfg_source = "roads_default"
         rfg_pct = max(0.0, min(100.0, float(rfg_pct)))
 
         road_width_m = self._coerce_float(width_raw)
-        if road_width_m is None:
+        width_source = "segment_property"
+        if road_width_m is None or not np.isfinite(road_width_m):
             road_width_m = default_width
+            width_source = "roads_default"
         if not (0.3 <= float(road_width_m) <= 100.0):
             road_width_m = default_width
+            width_source = "roads_default"
 
         fill_length_m = self._coerce_float(fill_length_raw)
         fill_length_source = "segment_property"
-        if fill_length_m is None or fill_length_m <= 0:
+        if fill_length_m is None or not np.isfinite(fill_length_m) or fill_length_m <= 0:
             fill_length_m = default_fill_length_m
             fill_length_source = "roads_default"
 
         fill_slope_pct = self._coerce_float(fill_slope_raw)
         fill_slope_source = "segment_property"
-        if fill_slope_pct is None or fill_slope_pct <= 0:
+        if fill_slope_pct is None or not np.isfinite(fill_slope_pct) or fill_slope_pct <= 0:
             fill_slope_pct = default_fill_slope_pct
             fill_slope_source = "roads_default"
         fill_slope_pct = self._clamp_fill_slope_pct(float(fill_slope_pct))
@@ -2077,9 +2086,9 @@ class Roads(NoDbBase):
             "resolution_sources": {
                 "surface": surface_source,
                 "traffic": traffic_source,
-                "soil_texture": "segment_property" if texture_raw else "roads_default",
-                "rfg_pct": "segment_property" if rfg_raw else "roads_default",
-                "road_width_m": "segment_property" if width_raw else "roads_default",
+                "soil_texture": texture_source,
+                "rfg_pct": rfg_source,
+                "road_width_m": width_source,
                 "fill_length_m": fill_length_source,
                 "fill_slope_pct": fill_slope_source,
             },
@@ -2470,7 +2479,7 @@ class Roads(NoDbBase):
 
         buffer_length_source = "segment_property"
         buffer_length_m = self._coerce_float(buffer_length_raw)
-        if buffer_length_m is None or buffer_length_m <= 0:
+        if buffer_length_m is None or not np.isfinite(buffer_length_m) or buffer_length_m <= 0:
             segment_length_m = self._as_float_or_none(road_profile.get("segment_length_m"))
             if segment_length_m is None or segment_length_m <= 0:
                 buffer_length_m = 30.0
@@ -2480,7 +2489,7 @@ class Roads(NoDbBase):
 
         buffer_slope_source = "segment_property"
         buffer_slope_pct = self._coerce_float(buffer_slope_raw)
-        if buffer_slope_pct is None or buffer_slope_pct <= 0:
+        if buffer_slope_pct is None or not np.isfinite(buffer_slope_pct) or buffer_slope_pct <= 0:
             road_slope_pct = self._as_float_or_none(road_profile.get("slope_pct"))
             if road_slope_pct is None or road_slope_pct <= 0:
                 buffer_slope_pct = 6.0

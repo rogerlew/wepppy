@@ -1,6 +1,6 @@
 # Revised Roads issue register
 
-Status: active investigation, 2026-11-03. Authority:
+Status: active defect/sensitivity execution, 2026-11-03. Authority:
 [adjudication contract](../../../schemas/roads-parameterization-adjudication-contract.md).
 Historical results and strict predicates remain unchanged. This register covers
 retained findings and consumers touched by the bounded control study, not an
@@ -14,7 +14,11 @@ exhaustive audit of WEPP physics.
 | R-04 legacy-model differences | r7 seed/panel and retention results; 713/766 meaningful, 31/74 small comparisons | Different engines/material conventions / annual comparison | Characterization only under revised authority. Retention rescue remains rejected; do not repeat wide sweeps or relabel historical failures. |
 | R-05 empirical uncertainty | Rock-cover audit and next-mechanism feasibility findings | Missing role-specific surface measurements and isolated native consumer | Surface armor/frost controls unsupported for this proposal; profile fragments, residue and land use are not interchangeable armor. This does not block general sensitivity. No field-calibration claim. |
 | R-06 unsupported full-upload configuration | Current-roads-v2 full-upload unrutted negative control; validation-suite contract | Unrutted geometry parity / upstream landuse OFE nonpositive for OSUNUM 6 on Topaz 271/272 | Expected explicit rejection, no current receipt. Positive subset excludes only declared feature; not full-upload success. Keep negative and positive evidence separate. |
-| R-07 policy/preparation distinction | Existing `roads.py` template builders versus retained `builder_bridge.py` generated `erosion_road_cap` injection | Production soil assembly / study conditioned generated inputs | Open inventory verification: distinguish existing production controls from research generated-policy lanes. No implicit generated-policy adoption or claim that study baseline is untouched generated soil. |
+| R-07 policy/preparation distinction | Existing `roads.py` template builders versus retained `builder_bridge.py` generated `erosion_road_cap` injection | Production soil assembly / study conditioned generated inputs | Inventory verified in `revised-control-inventory.md`: production templates remain current; generated lanes are explicitly conditioned research. Initial editor preserves installed production policy. No implicit adoption or untouched-generated-soil claim. |
+
+
+| R-08 confirmed invalid-attribute/provenance defect | `revised-input-resolution-findings.md`, before/after JSON and regression logs: invalid width/texture/RFG sources mislabeled; nonfinite RFG/fill/buffer became maxima | Shared segment resolver and channel-associated buffer helper / segment detail, soil/slope writers and default counts | Repaired locally as independently classified conformance: truthful sources and existing invalid-value fallback. Valid finite policies unchanged. 59 controller tests pass, including real generated soil/slope readback; broad gate and final review pending. |
+| R-09 research capsule role incompatibility | `revised-sensitivity-protocol.md`: retained generated outunrut seed soil order bare/bare/forest differs from canonical landuse/road/fill forest/bare/bare | Research capsule rebuilding / potential role reassignment if blindly spliced | Do not splice these capsules with canonical geometry. Historical fixed-input evidence remains frozen; no claim of canonical full-preparation parity. Separate exact-compatible rutted generated underprediction lane declared. This exclusion does not certify the incompatible capsules for future preparation studies. |
 
 New confirmed defects enter this register with affected peer consumers, minimal
 repair, exact reproduction and retained regression evidence before closure.

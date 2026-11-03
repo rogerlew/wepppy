@@ -331,6 +331,8 @@ Common API error messages (current behavior):
 - `"Roads upload exceeds max_upload_mb limit (... MB)."`
 - parameter-validation messages from `set_params` (for example numeric/range/enum validation failures).
 
+Input-resolution conformance note (2026-11-03): numeric upload attributes containing NaN or infinity use the existing invalid-value fallback, just like unparsable text. This covers optional RFG, width, rutted fill and channel-associated buffer attributes. Required unrutted fill/buffer attributes still reject nonfinite values. Resolution-source metadata identifies the value actually used: invalid texture/RFG/width falling back to configured defaults reports `roads_default`. Existing finite-value clipping, aliases and defaults are unchanged; no parameterization policy is adopted.
+
 ## TaskEnum and Preflight Contract
 
 `TaskEnum` updates (`wepppy/nodb/redis_prep.py`):

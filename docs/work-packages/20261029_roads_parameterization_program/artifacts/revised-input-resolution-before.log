@@ -1,0 +1,147 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_roads_controller.py -k 'segment_invalid_numeric or segment_finite_aliases or unrutted_required_geometry_still' -q
+FFFFF...                                                                 [100%]
+=================================== FAILURES ===================================
+____ test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[bad] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-360/test_segment_invalid_numeric_a0')
+invalid = 'bad'
+
+    @pytest.mark.parametrize("invalid", ["bad", "nan", "inf", "-inf"])
+    def test_segment_invalid_numeric_attributes_use_defaults_in_artifacts(tmp_path, invalid):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+    
+        controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+        params = controller._default_params()
+        params.update(rfg_pct_default=12., road_width_m_default=6.,
+                      fill_length_default_m=42., fill_slope_default_pct=14.)
+        resolved = controller._resolve_segment_run_inputs(
+            properties={"RFG_PCT": invalid, "WIDTH_M": invalid,
+                        "FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": invalid,
+                        "SOIL_TEXTURE": "peat"}, params=params,
+            segment_id="invalid", design="outslope_rutted",
+            warning_counts=Counter(), warning_examples=[], warning_limit=10)
+        expected = dict(rfg_pct=12., road_width_m=6., fill_length_m=42., fill_slope_pct=14., soil_texture="loam")
+        for key, value in expected.items():
+            assert resolved[key] == value
+>           assert resolved["resolution_sources"][key] == "roads_default"
+E           AssertionError: assert 'segment_property' == 'roads_default'
+E             
+E             - roads_default
+E             + segment_property
+
+tests/nodb/mods/test_roads_controller.py:3520: AssertionError
+____ test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[nan] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-360/test_segment_invalid_numeric_a1')
+invalid = 'nan'
+
+    @pytest.mark.parametrize("invalid", ["bad", "nan", "inf", "-inf"])
+    def test_segment_invalid_numeric_attributes_use_defaults_in_artifacts(tmp_path, invalid):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+    
+        controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+        params = controller._default_params()
+        params.update(rfg_pct_default=12., road_width_m_default=6.,
+                      fill_length_default_m=42., fill_slope_default_pct=14.)
+        resolved = controller._resolve_segment_run_inputs(
+            properties={"RFG_PCT": invalid, "WIDTH_M": invalid,
+                        "FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": invalid,
+                        "SOIL_TEXTURE": "peat"}, params=params,
+            segment_id="invalid", design="outslope_rutted",
+            warning_counts=Counter(), warning_examples=[], warning_limit=10)
+        expected = dict(rfg_pct=12., road_width_m=6., fill_length_m=42., fill_slope_pct=14., soil_texture="loam")
+        for key, value in expected.items():
+>           assert resolved[key] == value
+E           assert 100.0 == 12.0
+
+tests/nodb/mods/test_roads_controller.py:3519: AssertionError
+____ test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[inf] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-360/test_segment_invalid_numeric_a2')
+invalid = 'inf'
+
+    @pytest.mark.parametrize("invalid", ["bad", "nan", "inf", "-inf"])
+    def test_segment_invalid_numeric_attributes_use_defaults_in_artifacts(tmp_path, invalid):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+    
+        controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+        params = controller._default_params()
+        params.update(rfg_pct_default=12., road_width_m_default=6.,
+                      fill_length_default_m=42., fill_slope_default_pct=14.)
+        resolved = controller._resolve_segment_run_inputs(
+            properties={"RFG_PCT": invalid, "WIDTH_M": invalid,
+                        "FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": invalid,
+                        "SOIL_TEXTURE": "peat"}, params=params,
+            segment_id="invalid", design="outslope_rutted",
+            warning_counts=Counter(), warning_examples=[], warning_limit=10)
+        expected = dict(rfg_pct=12., road_width_m=6., fill_length_m=42., fill_slope_pct=14., soil_texture="loam")
+        for key, value in expected.items():
+>           assert resolved[key] == value
+E           assert 100.0 == 12.0
+
+tests/nodb/mods/test_roads_controller.py:3519: AssertionError
+___ test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[-inf] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-360/test_segment_invalid_numeric_a3')
+invalid = '-inf'
+
+    @pytest.mark.parametrize("invalid", ["bad", "nan", "inf", "-inf"])
+    def test_segment_invalid_numeric_attributes_use_defaults_in_artifacts(tmp_path, invalid):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+    
+        controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+        params = controller._default_params()
+        params.update(rfg_pct_default=12., road_width_m_default=6.,
+                      fill_length_default_m=42., fill_slope_default_pct=14.)
+        resolved = controller._resolve_segment_run_inputs(
+            properties={"RFG_PCT": invalid, "WIDTH_M": invalid,
+                        "FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": invalid,
+                        "SOIL_TEXTURE": "peat"}, params=params,
+            segment_id="invalid", design="outslope_rutted",
+            warning_counts=Counter(), warning_examples=[], warning_limit=10)
+        expected = dict(rfg_pct=12., road_width_m=6., fill_length_m=42., fill_slope_pct=14., soil_texture="loam")
+        for key, value in expected.items():
+>           assert resolved[key] == value
+E           assert 0.0 == 12.0
+
+tests/nodb/mods/test_roads_controller.py:3519: AssertionError
+_________ test_segment_finite_aliases_clipping_and_fallback_provenance _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-360/test_segment_finite_aliases_cl0')
+
+    def test_segment_finite_aliases_clipping_and_fallback_provenance(tmp_path):
+        controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+        def resolve(properties):
+            return controller._resolve_segment_run_inputs(
+                properties=properties, params=controller._default_params(), segment_id="finite",
+                design="outslope_rutted", warning_counts=Counter(), warning_examples=[], warning_limit=10)
+        valid = resolve({"SOIL_TEXTURE": "sandy loam", "RFG_PCT": 0, "WIDTH_M": .3})
+        assert (valid["soil_texture"], valid["rfg_pct"], valid["road_width_m"]) == ("sand", 0., .3)
+        assert all(valid["resolution_sources"][key] == "segment_property"
+                   for key in ("soil_texture", "rfg_pct", "road_width_m"))
+        clipped = resolve({"RFG_PCT": 120, "WIDTH_M": 999, "FILL_LENGTH_M": 999, "FILL_SLOPE_PCT": 999})
+        assert (clipped["rfg_pct"], clipped["road_width_m"], clipped["fill_length_m"], clipped["fill_slope_pct"]) == (100., 4., 999., 150.)
+>       assert clipped["resolution_sources"]["road_width_m"] == "roads_default"
+E       AssertionError: assert 'segment_property' == 'roads_default'
+E         
+E         - roads_default
+E         + segment_property
+
+tests/nodb/mods/test_roads_controller.py:3558: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_roads_controller.py::test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[bad]
+FAILED tests/nodb/mods/test_roads_controller.py::test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[nan]
+FAILED tests/nodb/mods/test_roads_controller.py::test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[inf]
+FAILED tests/nodb/mods/test_roads_controller.py::test_segment_invalid_numeric_attributes_use_defaults_in_artifacts[-inf]
+FAILED tests/nodb/mods/test_roads_controller.py::test_segment_finite_aliases_clipping_and_fallback_provenance
+5 failed, 3 passed, 50 deselected, 2 warnings in 10.34s

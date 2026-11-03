@@ -89,6 +89,8 @@ Important mapping behavior:
 - If mapping is set but a value is missing or invalid, the selected fallback value is used.
 - Changing mapping or fallback choices clears stale prepared and run summaries. If you change them, prepare again before running.
 
+Numeric upload attributes must be finite numbers. Optional width, rock-fragment and rutted fill/buffer values containing NaN or infinity use the existing invalid-value fallback; segment details identify when configured defaults were used. Required unrutted fill/buffer values remain mandatory and invalid values are rejected. Correct the source attributes and prepare/run again to replace old results; existing saved outputs are not rewritten automatically.
+
 ## Prepare And Run Are Different Steps
 
 Do not treat **Prepare Segment Candidates** and **Run WEPPcloud Roads** as interchangeable.

@@ -3498,3 +3498,84 @@ def test_combine_target_hillslope_pass_rejects_distinct_climate_tokens(
         )
 
     assert road_pass_path.read_text(encoding="utf-8").splitlines()[0] == "p900003.cli"
+
+
+@pytest.mark.parametrize("invalid", ["bad", "nan", "inf", "-inf"])
+def test_segment_invalid_numeric_attributes_use_defaults_in_artifacts(tmp_path, invalid):
+    from wepppy.wepp.soils.utils import WeppSoilUtil
+
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    params = controller._default_params()
+    params.update(rfg_pct_default=12., road_width_m_default=6.,
+                  fill_length_default_m=42., fill_slope_default_pct=14.)
+    resolved = controller._resolve_segment_run_inputs(
+        properties={"RFG_PCT": invalid, "WIDTH_M": invalid,
+                    "FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": invalid,
+                    "SOIL_TEXTURE": "peat"}, params=params,
+        segment_id="invalid", design="outslope_rutted",
+        warning_counts=Counter(), warning_examples=[], warning_limit=10)
+    expected = dict(rfg_pct=12., road_width_m=6., fill_length_m=42., fill_slope_pct=14., soil_texture="loam")
+    for key, value in expected.items():
+        assert resolved[key] == value
+        assert resolved["resolution_sources"][key] == "roads_default"
+    buffer = controller._derive_buffer_profile_from_feature_or_defaults(
+        properties={"BUFFER_LENGTH_M": invalid, "BUFFER_SLOPE_PCT": invalid},
+        road_profile={"segment_length_m": 18., "slope_pct": 8.})
+    assert buffer == dict(buffer_length_m=18., buffer_slope_pct=4., buffer_slope_fraction=.04,
+                          buffer_length_source="derived_default", buffer_slope_source="derived_default")
+    fill = controller._derive_fill_profile_from_inputs(
+        fill_length_m=resolved["fill_length_m"], fill_slope_pct=resolved["fill_slope_pct"])
+    slope = tmp_path / "resolved.slp"
+    controller._write_routed_three_ofe_slope_file(
+        slope, width_m=resolved["road_width_m"], road_length_m=18., road_slope_pct=8.,
+        fill_length_m=fill["fill_length_m"], fill_slope_pct=fill["fill_slope_pct"],
+        buffer_length_m=buffer["buffer_length_m"], buffer_slope_pct=buffer["buffer_slope_pct"])
+    lines = slope.read_text().splitlines()
+    assert float(lines[2].split()[1]) == 6.
+    assert [float(lines[i].split()[1]) for i in (3, 5, 7)] == [18., 42., 18.]
+    assert "0.140000" in lines[6] and "0.040000" in lines[8]
+    soil = tmp_path / "resolved.sol"
+    controller._build_routed_three_ofe_soil_file(
+        template_path=controller._resolve_legacy_soil_template_path(
+            design="outslope_rutted", surface="gravel", soil_texture=resolved["soil_texture"]),
+        output_path=soil, traffic="low", surface="gravel", rfg_pct=resolved["rfg_pct"])
+    ofes = WeppSoilUtil(str(soil)).obj["ofes"]
+    assert [ofe["horizons"][0]["rfg"] for ofe in ofes] == [65., 38.5, 12.]
+
+
+def test_segment_finite_aliases_clipping_and_fallback_provenance(tmp_path):
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    def resolve(properties):
+        return controller._resolve_segment_run_inputs(
+            properties=properties, params=controller._default_params(), segment_id="finite",
+            design="outslope_rutted", warning_counts=Counter(), warning_examples=[], warning_limit=10)
+    valid = resolve({"SOIL_TEXTURE": "sandy loam", "RFG_PCT": 0, "WIDTH_M": .3})
+    assert (valid["soil_texture"], valid["rfg_pct"], valid["road_width_m"]) == ("sand", 0., .3)
+    assert all(valid["resolution_sources"][key] == "segment_property"
+               for key in ("soil_texture", "rfg_pct", "road_width_m"))
+    clipped = resolve({"RFG_PCT": 120, "WIDTH_M": 999, "FILL_LENGTH_M": 999, "FILL_SLOPE_PCT": 999})
+    assert (clipped["rfg_pct"], clipped["road_width_m"], clipped["fill_length_m"], clipped["fill_slope_pct"]) == (100., 4., 999., 150.)
+    assert clipped["resolution_sources"]["road_width_m"] == "roads_default"
+    assert clipped["resolution_sources"]["rfg_pct"] == "segment_property"
+    assert controller._derive_fill_profile_from_inputs(fill_length_m=999., fill_slope_pct=999.)["fill_length_m"] == 100.
+
+
+@pytest.mark.parametrize("invalid", ["nan", "inf", "-inf"])
+def test_unrutted_required_geometry_still_rejects_nonfinite(invalid):
+    controller = object.__new__(Roads)
+    fill, buffer, invalid_fields = controller._resolve_outslope_unrutted_required_profiles(
+        properties={"FILL_LENGTH_M": invalid, "FILL_SLOPE_PCT": 10,
+                    "BUFFER_LENGTH_M": 30, "BUFFER_SLOPE_PCT": invalid})
+    assert fill is None and buffer is None
+    assert set(invalid_fields) == {"fill_length_m", "buffer_slope_pct"}
+
+
+def test_buffer_finite_aliases_and_clipping_are_preserved():
+    controller = object.__new__(Roads)
+    for length, slope, expected_length, expected_slope in ((12., 7., 12., 7.), (999., 999., 300., 100.)):
+        result = controller._derive_buffer_profile_from_feature_or_defaults(
+            properties={"buffer_len_m": length, "buffer_slope": slope},
+            road_profile={"segment_length_m": 18., "slope_pct": 8.})
+        assert result["buffer_length_m"] == expected_length
+        assert result["buffer_slope_pct"] == expected_slope
+        assert result["buffer_length_source"] == result["buffer_slope_source"] == "segment_property"

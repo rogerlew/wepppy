@@ -36,6 +36,12 @@ independent review; strict particle failure remains unchanged. See
 [disposition](artifacts/revised-r7-particle-disposition.md) and
 [review](artifacts/revised-r7-particle-independent-review.md).
 
+R-08 resolver conformance repair passes 59 controller tests and independent
+correctness review, including generated soil/slope readback. See
+[findings](artifacts/revised-input-resolution-findings.md) and
+[ledger v33](artifacts/candidate-ledger-v33.json). Broad sanity remains pending
+source stabilization and stale-publication review.
+
 No defaults adopted, deployment performed, reserved material consumed or historical
 experiment reclassified. New evidence/decisions append from ledger v32 onward.
 

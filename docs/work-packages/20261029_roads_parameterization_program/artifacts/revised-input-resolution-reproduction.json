@@ -1,0 +1,237 @@
+{
+  "source_sha256": "7aa5cd95f17b493e1f3543b607b2d67b717edced1fb8c574c5c516ebb2fa74df",
+  "scope": "pure production resolver and fill derivation; no controller writes or native execution",
+  "cases": [
+    {
+      "case": "invalid_fallback",
+      "requested": {
+        "WIDTH_M": 999,
+        "SOIL_TEXTURE": "peat",
+        "RFG_PCT": "bad"
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 20.0,
+        "road_width_m": 4.0,
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "segment_property",
+          "rfg_pct": "segment_property",
+          "road_width_m": "segment_property",
+          "fill_length_m": "roads_default",
+          "fill_slope_pct": "roads_default"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "fill_slope_fraction": 0.1
+      },
+      "warnings": {}
+    },
+    {
+      "case": "valid_alias_zero",
+      "requested": {
+        "WIDTH_M": 6,
+        "SOIL_TEXTURE": "sandy loam",
+        "RFG_PCT": 0
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "sand",
+        "rfg_pct": 0.0,
+        "road_width_m": 6.0,
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "segment_property",
+          "rfg_pct": "segment_property",
+          "road_width_m": "segment_property",
+          "fill_length_m": "roads_default",
+          "fill_slope_pct": "roads_default"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "fill_slope_fraction": 0.1
+      },
+      "warnings": {}
+    },
+    {
+      "case": "finite_clipping",
+      "requested": {
+        "RFG_PCT": 120,
+        "FILL_LENGTH_M": 999,
+        "FILL_SLOPE_PCT": 999
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 100.0,
+        "road_width_m": 4.0,
+        "fill_length_m": 999.0,
+        "fill_slope_pct": 150.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "roads_default",
+          "rfg_pct": "segment_property",
+          "road_width_m": "roads_default",
+          "fill_length_m": "segment_property",
+          "fill_slope_pct": "segment_property"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 100.0,
+        "fill_slope_pct": 150.0,
+        "fill_slope_fraction": 1.5
+      },
+      "warnings": {}
+    },
+    {
+      "case": "nonfinite_nan",
+      "requested": {
+        "WIDTH_M": "nan",
+        "RFG_PCT": "nan",
+        "FILL_LENGTH_M": "nan",
+        "FILL_SLOPE_PCT": "nan"
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 100.0,
+        "road_width_m": 4.0,
+        "fill_length_m": "nan",
+        "fill_slope_pct": 150.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "roads_default",
+          "rfg_pct": "segment_property",
+          "road_width_m": "segment_property",
+          "fill_length_m": "segment_property",
+          "fill_slope_pct": "segment_property"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 100.0,
+        "fill_slope_pct": 150.0,
+        "fill_slope_fraction": 1.5
+      },
+      "warnings": {}
+    },
+    {
+      "case": "nonfinite_inf",
+      "requested": {
+        "WIDTH_M": "inf",
+        "RFG_PCT": "inf",
+        "FILL_LENGTH_M": "inf",
+        "FILL_SLOPE_PCT": "inf"
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 100.0,
+        "road_width_m": 4.0,
+        "fill_length_m": "inf",
+        "fill_slope_pct": 150.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "roads_default",
+          "rfg_pct": "segment_property",
+          "road_width_m": "segment_property",
+          "fill_length_m": "segment_property",
+          "fill_slope_pct": "segment_property"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 100.0,
+        "fill_slope_pct": 150.0,
+        "fill_slope_fraction": 1.5
+      },
+      "warnings": {}
+    },
+    {
+      "case": "invalid_fill",
+      "requested": {
+        "FILL_LENGTH_M": "bad",
+        "FILL_SLOPE_PCT": "bad"
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 20.0,
+        "road_width_m": 4.0,
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "roads_default",
+          "rfg_pct": "roads_default",
+          "road_width_m": "roads_default",
+          "fill_length_m": "roads_default",
+          "fill_slope_pct": "roads_default"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "fill_slope_fraction": 0.1
+      },
+      "warnings": {}
+    },
+    {
+      "case": "invalid_categories",
+      "requested": {
+        "SURFACE": "bad",
+        "TRAFFIC": "bad"
+      },
+      "resolved": {
+        "design": "outslope_rutted",
+        "surface": "gravel",
+        "traffic": "low",
+        "soil_texture": "loam",
+        "rfg_pct": 20.0,
+        "road_width_m": 4.0,
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "resolution_sources": {
+          "surface": "roads_default",
+          "traffic": "roads_default",
+          "soil_texture": "roads_default",
+          "rfg_pct": "roads_default",
+          "road_width_m": "roads_default",
+          "fill_length_m": "roads_default",
+          "fill_slope_pct": "roads_default"
+        }
+      },
+      "effective_fill": {
+        "fill_length_m": 30.0,
+        "fill_slope_pct": 10.0,
+        "fill_slope_fraction": 0.1
+      },
+      "warnings": {}
+    }
+  ]
+}
