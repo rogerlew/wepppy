@@ -1,5 +1,20 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+## Active resumption: revision 7 reconciliation, 2026-11-03 UTC
+
+Executing the operator's resumption prompt under the existing scientific and human
+UI gates. [Protocol and reconciliation](../../artifacts/resumption-r7-20261103.md) separate
+fixed-input engine effects from current full preparation and later parameter lanes.
+The current installed release is r7; the r4 results below remain historical.
+First declare 18 ordinary-mode seed cases on exact r4/r7 binaries. Experimental
+roughness mode 1 is retained evidence, not an ordinary r7 runtime option. No model
+execution or parameter acceptance has yet occurred in this resumption. The fresh
+`engine-seeds-v3` declaration binds 36 calls after two retained staging attempts;
+independent final review precedes launch. Calendar completeness now supplements
+the unchanged strict EVENT particle predicates; non-EVENT sediment is reported
+explicitly outside their coverage.
+
+
 This living plan follows docs/prompt_templates/codex_exec_plans.md. The current
 turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
@@ -145,6 +160,10 @@ The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
 This execution stops at the explicit human specification/layout gate.
 
 ## Progress
+
+- [x] Reconcile later source/producer repairs and declare the bounded r4/r7 engine comparison.
+- [ ] Validate and independently review 18 seed pairs before full-panel expansion.
+- [ ] Renew frozen 840 development engine evidence and separate current full-preparation evidence.
 
 - [x] Execute the user-authorized rock-cover provenance/consumer audit declared in `out/roads-parameterization-program-20261031/rock-cover-audit-r4/declaration.md`; retain all nine contrasts and both modes, independent review and no behavioral changes.
 
@@ -343,6 +362,9 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+The 36-history packet uses a custom roughness binary for mode 1. Its 18 mode-0
+outputs are exact-r4 controls, suitable for the first release-engine comparison.
+
 - Rock audit: all 108 initial OFE scenarios are cropland and per-case management is identical across four histories. RFG also enters consolidation/erosion; it cannot isolate surface armor. RUSLE C source units fail synthetic low-value SoilGrids controls, while the selected native capsules contain no RUSLE products. See the rock audit for source and input bindings.
 
 - Physical review: dry offsets cancel at fixed absolute stock. The native UL ceiling omits the coarse-fragment factor used in initial water and infiltration; 102/304 distinct snapshots exceed the documented effective diagnostic, while none exceeds native capacity. The suspected RFG unit issue is disproved for the selected preparation path.
@@ -449,6 +471,11 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+2026-11-03: preserve v23/r4 as historical evidence; begin with exact-input engine
+comparisons, not parameter tuning. Mode 1 requires private source intervention and
+cannot be represented by an ignored presence file on r7. No withheld outcomes,
+production defaults or UI wiring are included.
+
 - Decision (2026-10-31, operator-authorized audit): do not transplant RUSLE auto cover or replace RFG. Separate the demonstrated RUSLE units correction from a Roads surface measurement/overlap/persistence contract and from capacity reconciliation. Rationale: different quantities, missing surface evidence and multiple native consumers would confound tuning. No behavior/default change is accepted.
 
 - Physical review: accept only the read-only capacity-basis diagnosis. Advance the linked shared-consumer contract/scalar gate; do not combine it with daily porosity refresh or present it as a B1/B2/B3 remedy. Rationale: primary generated targets lack diagnostic excess and B2/B3 have no relevant rock factor; silently lowering a limit can delete water.
@@ -552,6 +579,9 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Resumption checkpoint: declared comparison only; r7 Roads magnitude/physical
+results and current full-preparation acceptance remain unestablished.
 
 The rock audit retains all 36 histories and verifies the exact 977-member native build. Three input tables and source-function controls reproduce. It identifies a concrete RUSLE units defect but no selected-case activation or field armor estimate. Surface-data/consumer evidence is required before a Roads cover sensitivity; capacity analysis remains independently justified.
 

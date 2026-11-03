@@ -1,5 +1,20 @@
 # Roads parameterization and configuration view
 
+## Active resumption: revision 7 reconciliation, 2026-11-03 UTC
+
+Executing the operator's resumption prompt under the existing scientific and human
+UI gates. [Protocol and reconciliation](artifacts/resumption-r7-20261103.md) separate
+fixed-input engine effects from current full preparation and later parameter lanes.
+The current installed release is r7; the r4 results below remain historical.
+First declare 18 ordinary-mode seed cases on exact r4/r7 binaries. Experimental
+roughness mode 1 is retained evidence, not an ordinary r7 runtime option. No model
+execution or parameter acceptance has yet occurred in this resumption. The fresh
+`engine-seeds-v3` declaration binds 36 calls after two retained staging attempts;
+independent final review precedes launch. Calendar completeness now supplements
+the unchanged strict EVENT particle predicates; non-EVENT sediment is reported
+explicitly outside their coverage.
+
+
 ## Current: rock-cover audit separates surface protection from profile fragments
 
 The [rock-cover audit](artifacts/rock-cover-audit-r4/findings.md) directly reads all 36 retained histories (354 soil horizons, 108 initial management OFEs). All four histories per contrast have identical management bytes and use cropland scenarios. Explicit rangeland rock fields are absent, not measured zero. Profile RFG differs between lanes; it affects both water and a potential consolidation/erosion pathway. It is not a surface-area cover control.

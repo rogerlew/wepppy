@@ -1,0 +1,865 @@
+{
+  "kind": "read-only retained native outputs; no model execution",
+  "cases": 18,
+  "days": 105192,
+  "events": 1677,
+  "positive_terminal_days": 753,
+  "positive_terminal_non_event_days": 31,
+  "cases_with_positive_non_event_dates": 8,
+  "passed": 18,
+  "helper_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+  "particle_reader_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435",
+  "native_writer_sha256": "64b894bd2fcbde426d0714f64ec145117cea656eec115314b95a32e48a5709a8",
+  "climate_manifest": {
+    "path": "/wc1/runs/ro/roads-drainage-validation-20261029-v2/inputs/manifest.json",
+    "sha256": "29d582c680f5c6a78c3803799576a3d488e5ae8176dba2d9887dc62df856ee58"
+  },
+  "declaration": {
+    "path": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v1/declaration.json",
+    "sha256": "6cf343c22b48f648349903952d847d1e3182bc21453a41b13b86bebe98d001e6"
+  },
+  "rows": [
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "c7fa594491c9a59c0e9f3f8d6f676a97ffcba70cb65469fef19ebfd4741c6cc5",
+      "pass_sha256": "3cb9001ba4ca888d9690d320f47ac3647127e66d2230fcc51230cab7e8540a2b",
+      "element_sha256": "81d8fd86dcbb2ea4b9b077c52af3fbb10b318e1f551957a4ee8f262448a8c734",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 0,
+      "positive_terminal_days": 0,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_paved_dry_legacy",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "c4d5e74ddb6398452ada1744d8a248bad409eeb71cf70ef3ec2830d96bdcaf99",
+      "pass_sha256": "ec1f83d813a92b12522f5e35454ba2394cc7d6e09eb0353798a781b689831aa2",
+      "element_sha256": "a24b347a11b3a395f460bb8fe5d3b2fea298b9c7b5dba9d8feb385f41823854f",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 2,
+      "positive_terminal_days": 4,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0004-08-20",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.424",
+          "runoff_mm_token": "0.134"
+        },
+        {
+          "date": "0008-08-21",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.007",
+          "runoff_mm_token": "0.035"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "5ac4c030a137b3a7be014c6b14857a5525b8f090b7662ae37361f3eb6a6565b7",
+      "pass_sha256": "4031a39bd0abe92564286bfe52f75c215654c0fb0a15fbddb6b8f45606dc5f02",
+      "element_sha256": "1003f7624e87b735246b84ee6c4b9741d222a26038fb6a2c33bc39d7ef12ac34",
+      "climate_sha256": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 3,
+      "positive_terminal_days": 2,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0005-11-16",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.078",
+          "runoff_mm_token": "0.124"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_gravel_less_runon",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "flagstaff",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/flagstaff-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "ba5ee442cf822b68fb2e09c6d50c2fc239a2d1be8c640165c0bf740e3f51d8b1",
+      "pass_sha256": "b82c979930d5da8b248c1289cc678b909a03e5a7a24ba47284ddec6a5b0c3edc",
+      "element_sha256": "a3600aa49e5646410421d489c88258eb0a708f1a8717870c117b15ba7eee6d84",
+      "climate_sha256": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 18,
+      "positive_terminal_days": 7,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "1415f33d1caeb9009ece33f0287892f2f623aade96c9e3db00c51c7403182300",
+      "pass_sha256": "812c484f07539635337c198368ccf4df5978ac605f0f65278db10e6ab59bf621",
+      "element_sha256": "8768900a678063848abae783a0a2846f80bb7f4f0ab70f29be5a206043521333",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 0,
+      "positive_terminal_days": 0,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_gravel_dry_legacy",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718494",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718494-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "cc91bfbdb4e8583171c4c7c2384f29938a2118f4b6c3ba7a107bac278b9ffc32",
+      "pass_sha256": "f0c57c8adfb40408f33cd6b23861e29e5aa50b925b8ae215f9e302b59d585a01",
+      "element_sha256": "0969e48a1ed3983f043604424824c91ea3d270b04259305db8b77d5225a1bd76",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 4,
+      "positive_terminal_days": 5,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0008-05-09",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.309",
+          "runoff_mm_token": "0.250"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "d0491a4ae34b8f2bbdb27a53fd1679c2a61f0870c3a8dc52a2509353834df3ad",
+      "pass_sha256": "76d50876d924ce2b4a125ff96dfd0ab825715bc82dac130ff51125c2d3ad9145",
+      "element_sha256": "17a5293dd253e52ddade5415a9db1b4f43e3a6a57a09a1c20d22e252b16a0de6",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 100,
+      "positive_terminal_days": 80,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "passing_same_signature",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "8870a396d39c18dbeeaf880adfaabff411e21c5d51dea78ab043791744df83a2",
+      "pass_sha256": "341405c96c218aae79487de988dd28571a3fe7554579be11bc56a498d67002b6",
+      "element_sha256": "204a7c339568a38c00330b0c156377535cf936752146cd9d974a37f8cf521593",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 201,
+      "positive_terminal_days": 163,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "2001-11-29",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.005",
+          "runoff_mm_token": "0.200"
+        },
+        {
+          "date": "2005-12-31",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.005",
+          "runoff_mm_token": "0.305"
+        },
+        {
+          "date": "2008-01-05",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.005",
+          "runoff_mm_token": "0.240"
+        },
+        {
+          "date": "2008-01-06",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.008",
+          "runoff_mm_token": "0.361"
+        },
+        {
+          "date": "2011-03-16",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.027",
+          "runoff_mm_token": "0.446"
+        },
+        {
+          "date": "2012-11-24",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.005",
+          "runoff_mm_token": "0.184"
+        },
+        {
+          "date": "2012-12-03",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.015",
+          "runoff_mm_token": "0.371"
+        },
+        {
+          "date": "2014-10-17",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.010",
+          "runoff_mm_token": "0.017"
+        },
+        {
+          "date": "2015-02-08",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.008",
+          "runoff_mm_token": "0.285"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "d6d08509fd77c02ffd9a210543797234ed868e9b900cdecf1acb296a3e78ae05",
+      "pass_sha256": "64a725060f4fdc84365d7bfd91a5ae62835c2a9eb6a95f2b597104f258af7516",
+      "element_sha256": "8ca4702c84baf4ed2d28605c461e87b36e0d04e4ee2291ac5617c64f57a2ba63",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 277,
+      "positive_terminal_days": 229,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "4f6d14866c4785d38ea7c9c73563d92fd4e79520033d2acca820f9ee834613f4",
+      "pass_sha256": "4f2807b1da343cbecbbaa4c340d3937590c61a9354513e46a065d3f14f65f2c5",
+      "element_sha256": "a683940183fa7af25901c1c0420f6b1b0c764b270b1ccf1ad1e8265778553ad9",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 32,
+      "positive_terminal_days": 26,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "8ed133e3242c38a27714837c264819803882fb30f9552e6ba824ef5842248eff",
+      "pass_sha256": "9e3bade6c5e435bbe070cab931125dbef7df469cfe3141b7c7b409bab111a2fc",
+      "element_sha256": "ac074f6ca6e27371f2e724933bc4c0b82809b16d41766bd46b333d9d931ab338",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 304,
+      "positive_terminal_days": 33,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_not_less_supply",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-2711184-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "b05b9af414eecd114876fe70cebd6f39158128c4452f36cc13ecf2205431a9c8",
+      "pass_sha256": "3e694925ff7c9a884b688d6d23d48c3fa5424bd2b3bd962169ebac12f1782e1f",
+      "element_sha256": "1f04e4bad37a18374295a5edea2cd3a6c74164214df70c34826515636474ee24",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 48,
+      "positive_terminal_days": 2,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+      "record_sha256": "9e8aa8e4da8e079eb80f94519b2dab7e2f60302fc28719c74acc717a8ed07f7b",
+      "pass_sha256": "4e4360b33842a1f7e33d4c8db24aa56e7a1eb174fa300e6d834a3d3204559544",
+      "element_sha256": "bc56626bc89ccf217a5d18759ad051c64fb815744a4cbf54354302a7b780342a",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 0,
+      "positive_terminal_days": 0,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "small_passing_control",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "none",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-1718465-outunrut-paved-none-erosion_road_cap-project/record.json",
+      "record_sha256": "2d309153794133504688894b0f17243316e0abb714e61633280bfb3b77d248a2",
+      "pass_sha256": "9cb374c5951c7d0ab9e5ed7f35c28386c2e0a34cf51708c40559a4d8c0269637",
+      "element_sha256": "ac47b35969ee94aaa25675587b1b445f0aae4857e4dfe1121dd790dd1dbdf75f",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 2,
+      "positive_terminal_days": 5,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0004-08-20",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.187",
+          "runoff_mm_token": "0.116"
+        },
+        {
+          "date": "0008-08-15",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.018",
+          "runoff_mm_token": "0.108"
+        },
+        {
+          "date": "0008-08-21",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.005",
+          "runoff_mm_token": "0.026"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "70e02990922cd91a6cdec4ca5d2519d90ac16cc5dadd517e96d4aa24d48ac0e8",
+      "pass_sha256": "9e3bade6c5e435bbe070cab931125dbef7df469cfe3141b7c7b409bab111a2fc",
+      "element_sha256": "ac074f6ca6e27371f2e724933bc4c0b82809b16d41766bd46b333d9d931ab338",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 304,
+      "positive_terminal_days": 33,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "meaningful_high",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "record_sha256": "fb542910bd466191a90e12bd3c2f28b044de5d25794b5d33da0ac0b9d3014933",
+      "pass_sha256": "dfc93edfc73bf5cc84c655fca791bdbc97fefd8b473f68d67b46e91d35421227",
+      "element_sha256": "ad123f73c05bed3ff1d67a2b5394d8ca2410d2cbb400efe1780eaa0a3f5eac11",
+      "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+      "first": "2000-01-01",
+      "last": "2015-12-31",
+      "calendar_days": 5844,
+      "event_days": 377,
+      "positive_terminal_days": 150,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "2001-11-29",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.011",
+          "runoff_mm_token": "0.958"
+        },
+        {
+          "date": "2004-08-26",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.014",
+          "runoff_mm_token": "0.834"
+        },
+        {
+          "date": "2012-11-24",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.018",
+          "runoff_mm_token": "0.064"
+        },
+        {
+          "date": "2012-12-26",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.008",
+          "runoff_mm_token": "0.439"
+        },
+        {
+          "date": "2014-10-17",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.003",
+          "runoff_mm_token": "0.409"
+        },
+        {
+          "date": "2015-02-08",
+          "pass_label": "SUBEVENT",
+          "sedleave_kg_m_token": "0.021",
+          "runoff_mm_token": "0.565"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "legacy",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/legacy-soil-anchors-r4/cases/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "8c312eef2984f518f54e433bbacb2b5fee4241719e87d4a1addb54ba6720c2f7",
+      "pass_sha256": "db1f1723a531c680264c5a22bb6a6b8ff4e71949c136ca970ee3299de239c5c2",
+      "element_sha256": "06b0878ef62b5dec92438202a84d17ee1a34138c4c157a113ac8cab90604136f",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 4,
+      "positive_terminal_days": 12,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0001-05-05",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.101",
+          "runoff_mm_token": "0.022"
+        },
+        {
+          "date": "0002-06-17",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.214",
+          "runoff_mm_token": "0.059"
+        },
+        {
+          "date": "0004-05-25",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "7.159",
+          "runoff_mm_token": "0.435"
+        },
+        {
+          "date": "0004-06-03",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.174",
+          "runoff_mm_token": "0.033"
+        },
+        {
+          "date": "0005-09-05",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.073",
+          "runoff_mm_token": "0.006"
+        },
+        {
+          "date": "0008-08-15",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.589",
+          "runoff_mm_token": "0.238"
+        },
+        {
+          "date": "0012-07-08",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "2.703",
+          "runoff_mm_token": "0.400"
+        },
+        {
+          "date": "0016-07-01",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.048",
+          "runoff_mm_token": "0.003"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    },
+    {
+      "stratum": "underprediction_other_geometry",
+      "lane": "modern",
+      "passed": true,
+      "audit_version": 1,
+      "case": {
+        "climate": "denver",
+        "soil": "2711184",
+        "design": "outrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "record": "/workdir/wepppy/out/roads-parameterization-program-20261031/param-sign-u12-combined/roads/denver-2711184-outrut-gravel-high-erosion_road_cap-project/record.json",
+      "record_sha256": "e446486c9fc4d91194cb8404210a8d5a7abd66e8d6ea1249b268f954df753d1c",
+      "pass_sha256": "dedc8bb05fc2b5cabc77345b180ea53299b9a592e769f7db8ddebb8bc5507b0f",
+      "element_sha256": "a2b5282d3420bdaa71349e2e7417f7d0168f4a0135ad390c3ff50f44ca319e8c",
+      "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+      "first": "0001-01-01",
+      "last": "0016-12-31",
+      "calendar_days": 5844,
+      "event_days": 1,
+      "positive_terminal_days": 2,
+      "terminal_ofe": 3,
+      "positive_terminal_non_event_dates": [
+        {
+          "date": "0008-05-09",
+          "pass_label": "NO EVENT",
+          "sedleave_kg_m_token": "0.067",
+          "runoff_mm_token": "0.013"
+        }
+      ],
+      "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+      "event_classification_source": {
+        "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+        "path": "src/wshpas.for",
+        "line": 161,
+        "condition": "runoff(nplane).ge.0.001",
+        "runoff_units": "m"
+      },
+      "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa"
+    }
+  ]
+}

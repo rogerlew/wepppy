@@ -1,0 +1,31 @@
+{
+  "version": 24,
+  "predecessor": {
+    "path": "candidate-ledger-v23.json",
+    "sha256": "0c7123d02aad63e0e7aa66b78e2702e9e06728c6c2cd24b809962a771868a5af"
+  },
+  "status": "r7_resumption_declared_no_execution",
+  "protocol": "resumption-r7-20261103.md",
+  "historical_baseline_engine": "261029 revision4",
+  "candidate_engine": "261029 revision7",
+  "historical_meaningful_passed": 713,
+  "historical_meaningful_total": 766,
+  "historical_small_passed": 31,
+  "historical_small_total": 74,
+  "seed_model_calls": 36,
+  "mode1_rebase_not_included": true,
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "ui_human_gate_preserved": true,
+  "baseline_variant": "conditioned U12 erosion_road_cap; not unmodified generated soils",
+  "declaration": {
+    "path": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/declaration.json",
+    "sha256": "c60b95c568980858c2b8f0fd0c6e0cf646900c73c0ca0f91bfc711007dbd384f"
+  },
+  "staging_attempts": {
+    "v1": "rejected audit integration gaps; no native calls",
+    "v2": "failed auxiliary host/service path lookup; no declaration or native calls",
+    "v3": "36 calls declared and staged; execution pending final reviews"
+  },
+  "particle_audit_scope": "Existing strict EVENT predicates; complete daily PASS calendar; positive non-EVENT sediment reported outside EVENT particle closure"
+}
