@@ -1,0 +1,94 @@
+{
+  "approval_record": "Operator authorized local revision and publication; exact PDF approved by independent technical/visual AI reviews. Final provenance and publication reviews are retained separately.",
+  "artifact_revision": 7,
+  "binary_sha256": {
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "completed_actual_byte_gates": {
+    "actual_project_calendar_years": 35,
+    "actual_project_hills": 72,
+    "actual_project_ofes": 235,
+    "actual_project_outputs": 576,
+    "actual_project_unique_finite_water_rows": 3004240,
+    "browse_evidence_test": 1,
+    "compiled_reference_candidate_checks_overlaps_full_suite": 295,
+    "configured_native_cover_values": 2940,
+    "configured_native_soil_headers": 14,
+    "configured_observer_exact_output_files": 24,
+    "exact_revision6_control_cases": 6,
+    "focused_python_tests": 75,
+    "focused_reader_module_total_overlaps_full_suite": 27,
+    "hillslope_watchlist": 31,
+    "installed_pair_application": true,
+    "installed_report_readback": true,
+    "mode_checks_overlaps_full_suite": 10,
+    "native_host_smokes": 2,
+    "native_tests": 1750,
+    "no_RAP_9005_histories": 4,
+    "original_project_unchanged_file_hashes": 1536,
+    "post_vendor_host_smokes": 2,
+    "post_vendor_tests": 8,
+    "python_broad_segmented": {
+      "catalog_rerun": "24 passed without code changes",
+      "continuation_command": "wctl run-pytest tests --maxfail=1 -p docs.work-packages.20261102_mofe_input_producer_audit.artifacts.resume_mipa03_pytest_v3",
+      "continuation_summary": "206 passed, 1 skipped, 13001 deselected, 10 warnings in 61.52s (0:01:01)",
+      "counts_overlap_do_not_sum": true,
+      "first_segment": "1 failed, 6440 passed, 182 skipped; obsolete prep-service test double repaired",
+      "fixture_module_rerun": "3 passed",
+      "second_segment": "1 failed, 6138 passed, 242 skipped, 6622 deselected; catalog compare returned busy under its database-wide advisory lock",
+      "uninterrupted_full_suite_pass": false
+    },
+    "specialized_16_year_histories": 8,
+    "subsequent_producer_reader_cases": 2,
+    "water_rows_per_history": 17532
+  },
+  "deployment": false,
+  "document_date": "2026-11-02",
+  "document_revision": 7,
+  "evidence_register_sha256": "37ffc0431df28724f66f9723dc0a81d51b8e3c14afb6164df0f9b73cd1ee8a61",
+  "figures": 0,
+  "known_limitations": [
+    "Reference fire anniversary, differing canopy comparison/assignment, crop-wide root-depth mutation and logarithm domain behavior deliberately preserved; no field-calibration claim.",
+    "RAP supports continuous daily/hourly hillslope simulation; single-event RAP is explicitly rejected. Routing consumes matched passes without RAP reapplied.",
+    "No new FC/HK refresh schedule, retention default, thermal recalibration or full water-conservation claim.",
+    "Prior Roads screen remains unmet:744/840 passed,96failed. Historical counts are not fresh revision7 campaign results.",
+    "No deployment, executable-default switch, Windows release, installed Rust promotion or bulk project regeneration. Regenerate matched hill/watershed outputs.",
+    "Inherited graphics BIGOUT F10.5 disturbance-age field overflows at10000days;734107asterisk cells in configured72hill graphics,solelythatfield. Formats preserved; installed water reports/interchange do not consume that field.",
+    "Optional InterceptionStorage is not emitted by this native water writer and remains null in interchange; dense diagnostic traces require isolated directories and can exceed NFS timeouts."
+  ],
+  "legacy_source_attached": false,
+  "model_port_commit": "0d99afdfe",
+  "model_source_identity": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+  "pages": 4,
+  "pdf_filename": "wepp_261029_release-notes-r7.pdf",
+  "pdf_sha256": "0cdd7c74ac7c2277a144e27d9a8053578eb6e63b6819b857bd45691b9fe69b3c",
+  "preserve_issued_earlier_pdfs": true,
+  "public_attachments": [
+    "wepp_261029_release-notes-r7.pdf",
+    "publication-manifest-r7.json"
+  ],
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r7.pdf",
+  "publication_status": "local undeployed compatibility revision",
+  "release_tag": "261029",
+  "review_receipts": {
+    "configured_artifacts_qa": "61f7528b299007e17084647be603e7015dec23f9f5d0f51d05b551d3b497b8d6",
+    "implementation_correctness": "9b74f7149fc834d1257c8b3aaf0a5f1edb5e53cfb918bb4954255f723e2ef6a2",
+    "implementation_security": "befd2caedb28b75c2b1b7121ee8dc4137e0ad8545af7b87b790597b0a4986253",
+    "pdf_correctness": "062c4f7d7309fff275fdf81b1c1c6ee3e0de8522e02a4fda9b5ae94e35483f56",
+    "pdf_visual_qa": "1bf21095f0c2212de4294634698489b0f74a6d724d479dd3b13b126174e96d70"
+  },
+  "schema": "wepp-release-notes-v1",
+  "sidecar_sha256": {
+    "wepp_261029": "6a3ae6193cad7a8d5cb75b1387289a2bf8606ed86f8b7ce26766d4a0b7dfd5a7",
+    "wepp_261029_hill": "02ade6aa19fab0bfc6f0cfb983a06efd1ecd82b5bc7174202ff747c14e7f10c0"
+  },
+  "source_comparison_baseline": "b581352b68ba9f384fe79afc6655a861520edbaa",
+  "source_freeze_sha256": "410ebd9c33291881d5ede896c16e818ac01df1bf8c50c982909956dca3bd39d4",
+  "specialized_reference": {
+    "contract": "docs/contracts/specialized-revegetation-consumer.md",
+    "decision": "ADR-0134",
+    "historical_binary_sha256": "2c79a5ecb392a6ed7f70102ff7b6caac888d0cb9df1ce303c93eb10d447740a0",
+    "model_source_commit": "2e5928702edd5526a119216bd6be5997729ec72e"
+  }
+}

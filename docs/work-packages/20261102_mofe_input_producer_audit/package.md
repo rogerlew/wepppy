@@ -1,10 +1,41 @@
 # MOFE input producer audit and repair
 
-**Status:** Open — producer repairs and bounded MIPA-02 native ownership/PMET acceptance pass; undeployed 261029 revision 6 delivered locally. Specialized 9005/RAP consumer acceptance remains HOLD.
+**Status:** Closed — authorized producer/native repairs and reference-preserving 9005/RAP acceptance complete; local revision 7 delivered and native release pushed. Explicit inherited limitations remain documented.
 **Started:** 2026-11-02 19:32 UTC.
 **Owner:** WEPPcloud maintainer; Codex coordinates the requested audit.
 
-## Purpose and scope
+## Current execution and acceptance
+
+The operator authorized MIPA-01 producer repair, MIPA-02 native ownership repair,
+and MIPA-03 specialized 9005/RAP compatibility. The final scientific choice is
+“preserve reference. that is anurag's domain”, recorded in
+[ADR-0134](../../adrs/ADR-0134-specialized-revegetation-reference-port.md).
+The [specialized consumer contract](../../schemas/specialized-revegetation-consumer-contract.md)
+is the durable authority; the [MIPA-03 execution report](artifacts/20261103_specialized_consumer_execution.md)
+records exact artifacts, consumer tests, complete configured workflow and residuals.
+
+Native 1,750 tests, 31 watchlist cases, exact ordinary controls/observer parity,
+actual matched routing and a 72-hill/235-OFE/35-year configured workflow pass.
+Independent correctness, QA and security reviews pass. Security triage is **high**
+for input file publication; the dedicated
+[security review](artifacts/mipa03_implementation_security.md) records findings,
+closure and actual service-identity evidence. The reviewed PDF/manifest were delivered with exact HTTPS bytes/MIME verified;
+segmented broad Python validation is complete. No deployment or executable-default switch.
+
+The inherited disturbance-age graphics overflow is explicitly retained under
+reference/output-format preservation. All emitted water values and other graphics
+fields are finite; no claim that all graphics cells are numeric is made. Reference
+canopy, root-depth and logarithm behavior remains the scientific owner's domain.
+Installed Rust promotion, Windows, field calibration, unresolved historical Roads
+magnitude and bulk existing-project regeneration remain outside this package.
+
+## Historical scaffold and earlier authority
+
+The remainder preserves original audit planning and earlier milestone context.
+Statements restricting native edits or marking findings open below describe the
+original scope; the current execution section and milestone reports supersede them.
+
+### Original purpose and scope
 
 The user approved execution and MIPA-01; ancestor `4579b11ce` precedes repairs.
 The [execution report](artifacts/20261102_producer_execution.md) records current
@@ -56,7 +87,7 @@ The finding remains open and native repair requires separate authorization.
 
 - [Audit findings and coverage](artifacts/audit_findings.md), separating confirmed
   source defects, reproduced behavior, risks, and unexamined surfaces.
-- [Living implementation plan](prompts/active/implementation_execplan.md) with
+- [Living implementation plan](prompts/completed/implementation_execplan.md) with
   bounded repair milestones and generated-artifact acceptance.
 - [Tracker](tracker.md) with decisions, outstanding validation and handoff.
 - Future repairs and independent correctness review after implementation is

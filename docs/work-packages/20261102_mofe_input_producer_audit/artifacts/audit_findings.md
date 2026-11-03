@@ -7,7 +7,9 @@ retain baseline line references; see [execution disposition](20261102_producer_e
 for repaired boundaries and validation. Current selected-release disposition: NATIVE-01/02 conformance verified for
 261029 revision6; NATIVE-03 corrected at native `b581352b6` with bounded dynamic
 acceptance. Historical rows below retain the original audit checkout evidence.
-Specialized9005/RAP consumer acceptance remains HOLD; see MIPA-02 release evidence.
+Specialized 9005/RAP consumer acceptance now passes under MIPA-03; see the
+[execution report](20261103_specialized_consumer_execution.md). Original findings
+remain historical baseline evidence; publication closeout is tracked separately.
 
 ## Seed finding: incomplete PMET crop discovery
 
@@ -115,3 +117,19 @@ These findings justify the work package. They do not authorize changing binaries
 model physics, native capacities, existing project inputs or retained rock/water
 evidence. Rock/water local closeout is complete; its native correctness and package
 closure remain blocked. The current handoff is an audit and implementation scaffold.
+
+## MIPA-03 final consumer disposition
+
+SOIL-02 and COVER-01 are closed for the selected local revision-7 pair under
+[the specialized contract](../../../schemas/specialized-revegetation-consumer-contract.md).
+Actual writer-to-native bindings, compiled reference consumers, mode transitions,
+full daily/hourly histories, strict malformed-input failures, configured complete
+preparation/execution, interchange/report readback and observer neutrality pass.
+The [execution report](20261103_specialized_consumer_execution.md) retains exact
+hashes, commands, failed attempts and final replacements. This supersedes the
+MIPA-02 consumer HOLD without altering the earlier historical evidence.
+
+The operator preserves reference scientific semantics (ADR-0134). The inherited
+BIGOUT disturbance-age format overflow is a disclosed residual outside this port;
+no format change or reconstruction from overflow cells is authorized. Installed
+Rust promotion and unrelated Roads/field/conservation validation are excluded.

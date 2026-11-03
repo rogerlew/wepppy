@@ -1,12 +1,12 @@
 """Observe representative actual prepared decks without parallel trace collisions."""
 from pathlib import Path
-import hashlib,json,shutil,subprocess,math
+import hashlib,json,shutil,subprocess,math,os
 import numpy as np
 from wepp_runner.wepp_runner import get_linux_wepp_bin_role_paths
 from wepppy.wepp.soils.utils import WeppSoilUtil
 
 SOURCE=Path('/wc1/runs/mi/mipa-rap-20261103/wepp')
-ROOT=Path('/wc1/holdouts/mipa-native-r7-20261103/configured-observation-v1')
+ROOT=Path(os.environ.get('MIPA_OBSERVE_ROOT','/wc1/holdouts/mipa-native-r7-20261103/configured-observation-v1'))
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
     ROOT.mkdir(exist_ok=False)
@@ -26,7 +26,9 @@ def main():
         (case/'stdout').write_bytes(r.stdout);(case/'stderr').write_bytes(r.stderr)
         assert r.returncode==0 and b'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in r.stdout,name
         outputs={p.name:sha(p) for p in (case/'output').iterdir()}
-        assert len(outputs)==7
+        expected={line.removeprefix('../output/') for line in (runs/(name+'.run')).read_text().splitlines()
+                  if line.startswith('../output/')}
+        assert set(outputs)==expected
         assert all(sha(SOURCE/'output'/k)==v for k,v in outputs.items()),name
         rows=[line.split() for line in (runs/'wepp_rap_read.csv').read_text().splitlines()]
         assert list(map(int,rows[0][3:6]))==[2005,152,1],rows[0]
@@ -48,6 +50,7 @@ def main():
         receipt['cases'][name]={'ofes':counts[name],'cover_bands':len(bands),'native_soil_values':native,
             'read_sha256':sha(runs/'wepp_rap_read.csv'),'dynamic_sha256':sha(runs/'wepp_rap_dynamic.csv'),
             'outputs':outputs,'observer_neutral':True}
+        (ROOT/'attempt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     (ROOT/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('PASS actual consumed cover states and observer-neutral configured outputs')
 if __name__=='__main__':main()

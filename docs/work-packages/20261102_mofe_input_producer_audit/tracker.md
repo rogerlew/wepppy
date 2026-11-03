@@ -1,7 +1,7 @@
 # MOFE input producer audit tracker
 
 **Started:** 2026-11-02 19:32 UTC.
-**Phase:** Producer and bounded MIPA-02 native/release work complete locally; complete configured project validation passes; segmented broad WEPPpy validation complete after a repaired test-isolation failure; specialized 9005/RAP native acceptance HOLD.
+**Phase:** Closed — MIPA-03 native/configured acceptance, segmented broad Python validation, independent publication reviews and HTTPS delivery pass; native release `547b9e7eb` pushed.
 **Contract ancestor:** `4579b11ce` (before production edits).
 **WEPPpy implementation commit:** `390bc4f59` (local; producer validation complete).
 **Paired Rust commit:** `5e3540f684c8606f4140afcd72ed5a21df5ab85f`, pushed and verified on upstream main.
@@ -21,7 +21,7 @@
 - [x] Final extended-test and benchmark-refresh disposition: terminal continuation 2529 passed; all exercised failures resolved in targeted reruns.
 - [x] MIPA-02: selected 261029 PMET capacity/index conformance and FC/HK correction; actual native outputs/interchange/report readback.
 - [x] Revision6 matched pair locally vendored; three-page report independently reviewed and local HTTPS bytes verified.
-- [ ] Full M4: specialized 9005/revegetation/RAP consumer compatibility; installed Rust promotion remains excluded.
+- [x] Full M4: specialized 9005/revegetation/RAP consumer compatibility; installed Rust promotion remains excluded.
 
 ## Decisions and evidence
 
@@ -29,8 +29,8 @@ The [execution report](artifacts/20261102_producer_execution.md) records repaire
 boundaries, exact commands/results and residual acceptance limits. The
 [approved checkpoint](artifacts/20261102_contract_decision.md) and
 [canonical contract](../../schemas/mofe-input-identity-contract.md) preserve
-normative behavior and rationale. The [active ExecPlan](prompts/active/implementation_execplan.md)
-remains open for native acceptance.
+normative behavior and rationale. The [completed ExecPlan](prompts/completed/implementation_execplan.md)
+records final native acceptance and historical stages.
 
 No new coefficients, defaults, fallback policies or native capacity limits were
 introduced. No-N landuse synthesis preserves the complete reusable common period;
@@ -188,3 +188,24 @@ checkpoint ancestors and native port `0d99afdfe` recorded in active plan.
 320 native focused / 75 Python focused tests pass; eight development histories
 complete with observation parity. Final build, broad suite and disposable
 configured-project validation in progress. No closure or deployment claim yet.
+
+Native full gate v1: 1,748 passed, one isolated-build setup error. Corrected
+capacity-independent RAP module dependency at `e0abe0581`; targeted seven cases
+pass. Clean matched rebuild and full gate renewal precede vendoring.
+
+## Final MIPA-03 closure
+
+The [execution report](artifacts/20261103_specialized_consumer_execution.md) and
+[machine-readable evidence](artifacts/mipa03_release_evidence.json) record the
+final matched pair, native 1,750-test/31-watchlist gates, subsequent two writer
+cases, configured 72-hill/235-OFE/35-year artifacts and exact observed readback.
+Broad Python segments passed 6,440 and 6,138 before explicitly resolved failures;
+final continuation passed 206/one skip. The fixture and catalog modules pass 3
+and 24 tests respectively; counts overlap and are not summed.
+
+Security and QA approve exact PDF `0cdd7c74…` and manifest `7c7d8052…`; HTTPS
+status/MIME/hashes match, all earlier public attachments unchanged. Native final
+release `547b9e7eb` is pushed. SOIL-02/COVER-01 close under ADR-0134 and the durable
+specialized consumer contract. Reference science and graphics-age overflow remain
+explicitly preserved; no broader physical-validity, deployment, default-switch,
+Windows or installed Rust claim. Earlier pending/HOLD entries above are historical.

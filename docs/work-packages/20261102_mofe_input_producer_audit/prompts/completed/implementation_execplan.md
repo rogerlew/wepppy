@@ -5,7 +5,9 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current. The 2026-11-02 execution request starts M1; the former audit-only session
 restriction is superseded. The user ratified MIPA-01 with “approved. proceed”; contract ancestor
-`4579b11ce` precedes all production implementation. Bounded MIPA-02 acceptance is recorded below; specialized 9005/RAP acceptance remains HOLD.
+`4579b11ce` precedes all production implementation. Bounded MIPA-02 acceptance is recorded below. MIPA-03 specialized consumers and
+configured artifacts, segmented broad validation and publication now pass.
+Final local revision 7 is delivered; native release `547b9e7eb` is pushed.
 
 ## Purpose / Big Picture
 
@@ -21,7 +23,8 @@ selected by each element and rotation, not only successful model completion.
 
 ## Progress
 
-- [ ] (2026-11-03 UTC) MIPA-03 authorized continuation: complete specialized 9005/revegetation/RAP consumers and revise undeployed 261029 after reviewed contract ancestors; implementation pending reference-semantic reconciliation.
+- [x] (2026-11-03 UTC) MIPA-03 reference-preserving implementation, reviewed checkpoints and local matched pair; native 1,750 tests plus two subsequent producer-reader cases pass.
+- [x] Final reviewed PDF/manifest publication and exact HTTPS readback; terminal ordered continuation 206 passed/one skip; native release `547b9e7eb` committed/pushed and WEPPpy closing record prepared.
 - [x] (2026-11-03 UTC) Verify selected native default branch and clean tracked source at `4f0728984`; preserve exact revision-6 native/vendored pairs and sidecars in `/wc1/holdouts/mipa-native-r7-20261103/baseline-r6/manifest.json`.
 - [x] (2026-11-02 19:32 UTC) Establish audit/scaffold authority and dispatch four agents.
 - [x] (2026-11-02 19:32 UTC) Create package, tracker and initial findings register.
@@ -32,7 +35,7 @@ selected by each element and rotation, not only successful model completion.
 - [x] MIPA-02: reviewed ancestors, native correction, selected-source discrepancy validation and local revision 6 matched release/report delivery.
 - [x] Complete configured copied-project rerun and r5 comparison after identifying omitted UI/baseflow companions in partial preparation.
 - [x] Broad WEPPpy sanity: 9899 passes before test-isolation failure, repaired ordered sequence 43 passes, terminal continuation 3623 passes/7 skips; local source-control handoff.
-- [ ] Separate remaining9005/revegetation/RAP native support decision and compatible-consumer validation.
+- [x] Operator preserves reference science (ADR-0134); actual specialized consumer validation passes.
 - [x] (2026-11-02 22:49 UTC) M1 renewed management and installed-Rust reproductions through the running Compose application container; existing focused suites pass 21 tests despite reproduced failures.
 - [x] (2026-11-02 UTC) Draft MIPA-01 canonical identity contract and compatibility/regression checkpoint.
 - [x] (2026-11-02 UTC) Two independent contract reviews pass after bounded-calendar, token-safe-alias and idempotence clarifications; documentation and baseline integrity checks pass.
@@ -42,11 +45,27 @@ selected by each element and rotation, not only successful model completion.
 - [x] M3: implement calendar/residue, per-OFE soil/cover and paired Rust slope/map repairs; source and actual-writer tests pass.
 - [x] M4 producer portion: supported actual-project fork, 72 hills/235 elements prepared and reparsed; original source unchanged; PMET retry byte-identical.
 - [x] M4 bounded native acceptance: selected 261029 capacity/mapping, FC/HK repair and fresh copied-project outputs/reports.
-- [ ] M4 complete compatibility:9005/revegetation/RAP native consumer remains HOLD.
+- [x] M4 specialized consumer compatibility: compiled reference comparisons, histories, configured 72-hill execution/interchange/report and observed readback pass.
 - [x] Final independent correctness, QA and security review: no unresolved source findings; final focused suite 306 passed.
 - [x] Extended regression and benchmark refresh complete: terminal continuation 2529 passed; prior failures fixed and retested. Segmented validation, not one uninterrupted full-suite pass.
 
 ## Surprises & Discoveries
+
+MIPA-03 final validation: canonical revegetation prep enables eight outputs per
+hill (576 total), including graphics. All 3,004,240 water rows are unique, finite
+and complete. The inherited graphics disturbance-age F10.5 field overflows at
+10,000 days (734,107 cells, solely that field); independent source/formatter
+review confirms exact reference/r6 inheritance. Preserve the required format
+and disclose this residual. Dense diagnostic NFS tracing exceeded 300 seconds;
+isolated same-identity local probes match all 24 normal NFS outputs.
+The broad Python run stopped after 6,440 passes/182 skips on an outdated test
+double missing runs_dir; the fixture now tests stale-flag retirement and all
+three module tests pass. First ordered continuation stopped after 6,138 passes
+on an unrelated PostgreSQL compare busy response under its database-wide advisory
+lock. All 24 catalog module tests pass without code changes; a final ordered
+continuation from the catalog test passed 206/one skip. Both failed segments remain retained.
+The first configured audit mislabeled its water-column inventory through local
+variable reuse; corrected v3 and independent all-artifact QA agree.
 
 MIPA-03 (2026-11-03 UTC): selected source still misbinds 9005 texture to `lkeff`
 and consumes two restrictive records. Compiling the actual source reader blocks
@@ -62,8 +81,8 @@ The independently bound specialized reference is source `2e5928702` in
 SHA256 `2c79a5ecb392a6ed7f70102ff7b6caac888d0cb9df1ce303c93eb10d447740a0`.
 Its 9005 conductivity is a distinct ground-cover interpolation, not an extension
 of the 9003 minimum. Reference canopy logic has unresolved recurring fire-day
-and transformed-forest comparison/assignment semantics. A focused operator
-question is pending; no numerical interpretation is invented. Independent
+and transformed-forest comparison/assignment semantics. The operator resolved the focused question by directing preservation of the
+reference; no numerical interpretation is invented. Independent
 producer review also reproduces stale fire flags and date/fallback mismatches.
 The broad regression stopped after 9,899 passes at an order-dependent test fixture:
 `test_managements_module.py` replaced/deleted the canonical management module,
@@ -169,6 +188,23 @@ close COR-S01-01. This update authorizes documentation/planning only, not native
 repair, a new restriction, default changes or existing-project regeneration.
 
 ## Outcomes & Retrospective
+
+Final outcome (2026-11-03 UTC): all authorized package acceptance is complete.
+The reference-preserving port, producer reconciliation, matched local revision 7,
+complete configured artifacts and reviewed PDF/manifest delivery pass. Native
+release/evidence `547b9e7eb` is pushed; the closing WEPPpy commit retains local
+vendor and publication artifacts. See `artifacts/20261103_specialized_consumer_execution.md`
+for exact source/artifact identities, three broad-test segments and failed-attempt
+dispositions. The terminal continuation passes 206 tests/one skip; no uninterrupted
+full-suite claim. Native 1,750 tests, 31 watchlist and subsequent two actual-writer
+cases pass. SOIL-02/COVER-01 close within the durable support matrix.
+
+The deliberate residuals are reference scientific quirks, inherited graphics-age
+serialization overflow, optional unemitted storage and isolated diagnostic trace
+I/O costs. These do not authorize scientific retuning or output-format changes.
+No deployment/default change, Windows release or installed Rust promotion occurred.
+The reference and original project are unchanged. All earlier interim outcomes
+below are retained as historical stages, superseded by this final outcome.
 
 MIPA-03 interim outcome (2026-11-03 UTC): selected/reference provenance, retained
 revision-6 rollback pair, actual compiled reader failures and independent producer
@@ -540,3 +576,18 @@ MIPA-03 discovery: cover tokens must parse directly to native REAL; a legal
 parser and BAND observer use stored REAL values. Historical reference fixtures
 need narrow `-text` attributes to preserve provenance hashes across checkout.
 Final release acceptance remains pending; development passes are not final-pair claims.
+
+MIPA-03 gate discovery: full native invocation v1 completed 1,748 passes and
+one setup error. The new capacity-independent `rap_state.o` inherited the generic
+watershed include-copy prerequisite, breaking a legitimate hill-only isolated
+build and risking parallel include-copy races. Native `e0abe0581` adds the same
+explicit module recipe pattern as `wepp_calendar.o`; no numerical source or flags
+change. All seven affected writer-ablation tests now pass. Canonical rebuild v2
+and a renewed complete native gate are required before vendoring. Original
+failure/build logs remain in the revision-7 evidence root.
+
+Final MIPA-03 checkpoint: publication security/QA and HTTPS receipt bind the exact
+approved artifacts; prior r1–r6 publications and r6 rollback pair are unchanged.
+The independent reviews close every source finding. Preserve the inherited
+scientific/graphics limitations as documented scope dispositions, not future
+permission to retune them. The plan is complete and moves to `prompts/completed/`.

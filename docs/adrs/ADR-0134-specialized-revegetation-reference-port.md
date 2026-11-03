@@ -1,6 +1,6 @@
 # ADR-0134: Preserve specialized revegetation reference semantics
 
-Status: accepted operator scientific choice; implementation and validation pending.
+Status: accepted; implemented and validated in local undeployed revision 7.
 
 ## Decision provenance
 
@@ -55,3 +55,5 @@ heterogeneous correctness, field validity or full water conservation. Rollback
 uses retained matched revision-6 binaries/sidecars and prior reports; old passes
 must never be mixed with new watershed execution. No default switch, deployment,
 Windows release, installed Rust promotion or existing-project regeneration.
+
+Implementation evidence: [MIPA-03 execution](../work-packages/20261102_mofe_input_producer_audit/artifacts/20261103_specialized_consumer_execution.md). The reference graphics disturbance-age F10.5 overflow is also retained and disclosed; changing its output format is outside this port.

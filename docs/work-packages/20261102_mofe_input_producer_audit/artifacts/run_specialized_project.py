@@ -1,6 +1,6 @@
 """Execute and read the completely prepared disposable specialized project."""
 from pathlib import Path
-import hashlib,json,os,shutil
+import hashlib,json,os,shutil,sys
 import pyarrow.parquet as pq
 from wepppy.nodb.core import Wepp, Climate
 from wepp_runner.wepp_runner import get_linux_wepp_bin_role_paths
@@ -11,7 +11,9 @@ WD=Path('/wc1/runs/mi/mipa-rap-20261103')
 EVIDENCE=Path('/wc1/holdouts/mipa-native-r7-20261103/configured-execution-v1')
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
-    EVIDENCE.mkdir(exist_ok=False)
+    readback_only='--readback-only' in sys.argv
+    if not readback_only:
+        EVIDENCE.mkdir(exist_ok=False)
     w=Wepp.getInstance(str(WD)); c=Climate.getInstance(str(WD))
     runs=Path(w.runs_dir);output=Path(w.output_dir)
     settings={k:getattr(w,k) for k in ('run_frost','run_baseflow','run_wepp_ui','run_pmet','run_snow','multi_ofe')}
@@ -20,15 +22,21 @@ def main():
     assert len(list(runs.glob('p*.cov')))==72
     assert (runs/'firedate.txt').read_text()=='6 1 2005\n'
     assert all((runs/name).exists() for name in ['gwcoeff.txt','wepp_ui.txt','cancov.txt','simfire.txt'])
-    (EVIDENCE/'inputs.json').write_text(json.dumps(inputs,indent=2)+'\n')
+    if readback_only:
+        assert inputs==json.loads((EVIDENCE/'inputs.json').read_text())
+    else:
+        (EVIDENCE/'inputs.json').write_text(json.dumps(inputs,indent=2)+'\n')
     (EVIDENCE/'context.json').write_text(json.dumps({'uid':os.getuid(),'gid':os.getgid(),
         'groups':os.getgroups(),'settings':settings,'roles':roles,'wd':str(WD)},indent=2)+'\n')
-    if output.exists():
-        output.rename(EVIDENCE/'prior-output')
-    output.mkdir()
-    w.run_hillslopes(max_workers=4)
+    if not readback_only:
+        if output.exists():
+            output.rename(EVIDENCE/'prior-output')
+        output.mkdir()
+        w.run_hillslopes(max_workers=4)
     outputs={p.name:sha(p) for p in output.iterdir() if p.is_file()}
-    assert len(outputs)==504,len(outputs)
+    expected={line.removeprefix('../output/') for card in runs.glob('p*.run')
+              for line in card.read_text().splitlines() if line.startswith('../output/')}
+    assert set(outputs)==expected,(set(outputs)-expected,expected-set(outputs))
     logs={p.name:sha(p) for p in runs.glob('p*.err')}
     assert len(logs)==72,len(logs)
     for p in runs.glob('p*.err'):

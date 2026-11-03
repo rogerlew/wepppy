@@ -165,3 +165,82 @@ browse/download, ordinary-mode and combined-routing controls, and final
 correctness/QA findings closure. This is an implementation security PASS, not
 production deployment or package-closeout approval. Reference sources remain
 untouched; this reviewer edited only the review artifact.
+
+## Final local workflow security review
+
+Rechecked after independent source correctness and native QA closures. The
+reviewed parser, publisher, cover writers and MAIN transition retain the hashes
+bound above. The local vendored pair matches both sidecars and the executed
+service context:
+
+| Role | SHA-256 |
+| --- | --- |
+| Watershed | `4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825` |
+| Hillslope | `210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936` |
+
+Both identify committed native source
+`e0abe0581f77c6f66917e90daf8f8f429e9315c8`. The last Makefile-only correction
+retains model/compiler behavior and rebuilt identical bytes. Retained final gates
+show 1,750 native passes, 31 watchlist passes, artifact-policy/provenance passes,
+eight post-vendor runner tests and both role smoke passes. The installed
+9005/RAP application pair completes hillslope and watershed execution. Independent
+mode/history QA closes the actual MAIN combined routing transition and final
+history integrity checks; these are no longer outstanding security prerequisites.
+
+The complete configured fork uses UID1000, GID993, supplementary group993 and
+umask022 in the ordinary WEPPcloud container with the recorded `/wc1` NFS mount,
+repository mounts and saved configuration. Canonical preparation covers 72
+hillslopes, 235 OFEs and 35 calendar years. Execution and installed interchange /
+HillslopeWatbalReport readback complete on the same NFS fork. This is actual
+service-identity workflow evidence, beyond the earlier component tests.
+
+This reviewer independently checked that all 576 output filenames equal the
+prepared run-card declarations and retained receipt, all 72 execution-log hashes
+match, and H1/H72 water/loss samples match their retained hashes. All 75 current
+specialized files (72 covers plus three activation/date files) are regular files
+owned by UID1000:GID993 with mode0644. The normalized fire date and all 235 cover
+OFE blocks are present. The independent checks and evidence hashes are retained
+in `/wc1/holdouts/mipa-native-r7-20261103/security-workflow-v1/receipt.json`,
+SHA-256 `e8b4f5ae76fd59df7d22b7206426537c5ab167b5efc873faedcfce868cb4efd5`.
+
+The new browse route regression uses real publication helpers, lists the visible
+retired directory and failed temporary file, and downloads their exact bytes as
+attachments. `browse-evidence-v1.log` reports one pass. Existing fixture auth and
+run resolution are supplied as doubles: this verifies artifact reachability
+through the existing route, not a live authentication flow. No production auth,
+route or run-access change is introduced. Together with the earlier canonical
+archive/restore regression this closes the visible retained-evidence boundary.
+
+The initial execution log's 504-versus-576 assertion remains retained failed
+validation evidence. Readback v2 instead checks the actual run-card declarations:
+revegetation preparation requests an eighth graphics output per hill. All 576
+files remain in the inventory. Correctness review confirms the inherited F10.5
+formatter cannot represent disturbance ages at or above 10,000 days; the all-file
+audit confines 734,107 star cells to “Days since last disturbance.” This is a
+recorded serialization limitation, not an authorization to normalize, suppress or
+change the reference field. Water/interchange validation is a separate claim.
+
+One additional **Low evidence-quality finding (I05)** arose during this review:
+`finite_water_columns` in the initial audit receipt was accidentally populated
+with final graphics-row tokens because a local variable was reused. The water
+finite checks themselves had executed before the reassignment. The parent fixed
+the variable binding and reran the all-file audit, retaining the original receipt.
+**Closed:** `configured-execution-v1/artifact-audit-v3.json`, SHA-256
+`d817c9a7247698a3c77c675c0c523537d9bd994df1df844a4d733574e63598e3`,
+now lists the 22 checked water fields. It confirms 3,004,240 unique daily rows
+across all 235 OFEs, finite/non-null values in those fields, and explicitly
+all-null optional `InterceptionStorage`, which this native writer does not emit.
+The rerun checks every non-star graphics token with numeric finite conversion,
+retains the inherited star-field limit, and confirms the source project files
+remain unchanged. No audit exclusion silently turns a missing field into a value.
+
+**PASS for the bounded local workflow security gate.** No unresolved medium/high
+security finding remains, and I01–I05 are closed. The sole-writer preparation
+assumption and recorded inherited numerical/serialization limitations remain
+explicit. Configured-project observer neutrality and final publication/disclosure
+review are still separate pending gates at this snapshot. A local `/tmp`
+observer replay does not replace the already completed ordinary NFS service
+workflow; retain its earlier NFS timeout and partial trace as failed diagnostic
+evidence. This approval does not authorize deployment, a default-executable
+switch, expanded upload support, altered runtime identity or changed reference
+science. This reviewer changed no production code or binary.

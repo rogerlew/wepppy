@@ -87,3 +87,18 @@ and existing permissions are preserved. A failed preparation must be resolved
 before execution. No existing project is automatically regenerated or switched
 to a new executable. Reference fire/canopy/root quirks are deliberate compatibility
 exceptions; see ADR-0134 rather than inferring a scientific correction.
+
+For read/dynamic diagnostics, run one isolated hillslope deck at a time with
+`wepp_observe.on`. `wepp_rap_read.csv` records stored native bands and dates;
+`wepp_rap_dynamic.csv` records soil binding, hydraulic feedback and growth states.
+These shared run-directory trace names do not identify concurrent processes;
+use separate directories for concurrent observed probes. Keep normal project
+execution unobserved and compare ordinary output hashes against isolated probes.
+
+Revegetation preparation also enables the established `.grph.dat` output. Its
+legacy `F10.5` disturbance-age field prints asterisks once the age reaches 10,000
+days; this writer is unchanged from the bound reference and revision 6. Do not
+treat that field as recoverable numeric data. Water interchange and water-balance
+reports use `.wat` outputs instead. Dense RAP tracing on NFS can exceed diagnostic
+timeouts; retain failed attempts and use isolated local-disk probes for read-state
+checks, comparing their ordinary output hashes to the complete normal workflow.

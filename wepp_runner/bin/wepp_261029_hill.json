@@ -1,16 +1,16 @@
 {
-  "artifact_revision": 6,
+  "artifact_revision": 7,
   "binary_name": "wepp_261029_hill",
   "binary_role": "hillslope",
   "build": {
-    "build_log_sha256": "062c5f1949e7b7d9d65fd7e8b4c5ce8d522548a27fd0e283c80c070456a23a39",
+    "build_log_sha256": "e9e332a4410df86289be7342ab1325685c6535529c594a6c04284fc1aa6f3198",
     "canonical_builder": "tools/build_wepp_dated_release.sh",
     "command": "TARGET_TAG=261029 tools/build_wepp_dated_release.sh",
     "path_prefix": "/usr/bin:/bin",
-    "source_commit": "b581352b68ba9f384fe79afc6655a861520edbaa",
+    "source_commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
     "source_preceded_build": true
   },
-  "built_utc": "2026-11-03T00:43:58Z",
+  "built_utc": "2026-11-03T03:31:31Z",
   "capacity": {
     "ofes": 32
   },
@@ -36,15 +36,17 @@
     "single_user_defined_inputs_supported": true
   },
   "known_limitations": [
-    "No specialized9005 soil/revegetation or RAP cancov.txt/.cov reader support; SOIL-02/COVER-01 native acceptance remains separate HOLD.",
-    "Ownership observers record first stage/OFE/layer consumers, not all-time tracing. Drain/lateral probes cover expressions, not complete tile-drain control flow.",
-    "No new tillage/density refresh schedule, retention default, frost recalibration or missing-density generalization.",
-    "Prior Roads screen remains unmet:744/840 passed (96failed). Other scientific limitations remain unresolved; prior counts are not fresh revision6 campaign evidence.",
-    "No deployment, default switch, Windows release or universal physical-validity claim. Regenerate matched hill/watershed outputs; do not reuse old PASS files."
+    "Reference fire anniversary, differing canopy comparison/assignment, crop-wide root-depth mutation and logarithm domain behavior deliberately preserved; no field-calibration claim.",
+    "RAP supports continuous daily/hourly hillslope simulation; single-event RAP is explicitly rejected. Routing consumes matched passes without RAP reapplied.",
+    "No new FC/HK refresh schedule, retention default, thermal recalibration or full water-conservation claim.",
+    "Prior Roads screen remains unmet:744/840 passed,96failed. Historical counts are not fresh revision7 campaign results.",
+    "No deployment, executable-default switch, Windows release, installed Rust promotion or bulk project regeneration. Regenerate matched hill/watershed outputs.",
+    "Inherited graphics BIGOUT F10.5 disturbance-age field overflows at10000days;734107asterisk cells in configured72hill graphics,solelythatfield. Formats preserved; installed water reports/interchange do not consume that field.",
+    "Optional InterceptionStorage is not emitted by this native water writer and remains null in interchange; dense diagnostic traces require isolated directories and can exceed NFS timeouts."
   ],
   "matched_pair_sha256": {
-    "wepp_261029": "611a145b02955d1e71d6dfadb3a0810c09b5ad883bd375093f7f5f27131f248a",
-    "wepp_261029_hill": "ef8a23f494b595fba48208c196b3f673f6834feea90d3a024179c7028eecea31"
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
   },
   "math_runtime": {
     "architecture": "x86_64",
@@ -55,34 +57,51 @@
     "sine_cosine": "deterministic Fortran kernel; 1e-4 absolute error budget",
     "toolchain": "GNU Fortran/GCC 13.3.0 Ubuntu 13.3.0-6ubuntu2~24.04.1"
   },
-  "release_status": "local_undeployed_bounded_ownership_repair",
+  "release_status": "local_undeployed_specialized_reference_compatibility",
   "release_tag": "261029",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "ef8a23f494b595fba48208c196b3f673f6834feea90d3a024179c7028eecea31",
+  "sha256": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936",
   "source_branch": "wepp_260430_negmeltfix_comparator",
-  "source_commit": "b581352b68ba9f384fe79afc6655a861520edbaa",
+  "source_commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
   "source_repo": "wepp-in-the-woods/wepp-forest",
+  "specialized_reference": {
+    "contract": "docs/contracts/specialized-revegetation-consumer.md",
+    "decision": "ADR-0134",
+    "historical_binary_sha256": "2c79a5ecb392a6ed7f70102ff7b6caac888d0cb9df1ce303c93eb10d447740a0",
+    "model_source_commit": "2e5928702edd5526a119216bd6be5997729ec72e"
+  },
   "supersedes": {
-    "artifact_revision": 5,
-    "sha256": "a031713759b3bed0412a9a2b7413d1fbabe9869f66d7611d7c4684042589a933",
-    "source_commit": "d2e14d96af5942409c9a315dc8594fcc164a702a"
+    "artifact_revision": 6,
+    "sha256": "ef8a23f494b595fba48208c196b3f673f6834feea90d3a024179c7028eecea31",
+    "source_commit": "b581352b68ba9f384fe79afc6655a861520edbaa"
   },
   "validation": {
-    "application": "actual runner pair and72-hill copied project execute; final post-vendor validation recorded separately",
+    "additional_combined_mode": "10 mode tests pass; includes actual final watershed hillslope-to-routing execution",
+    "application": "Installed matched9005/RAP hill-to-watershed runners pass; complete72hill235OFE35year configured preparation/execution/interchange/report;576declaredoutputs,3004240unique finite raw water rows; sourceproject unchanged",
     "artifact_policy": "pass",
-    "controls": "six single/repeated-material cases preserve exact outputs",
+    "configured_observation": "3isolated local-disk service-identity probes(1,11,2OFEs);84bandrows/2940values/14soilheaders;all24ordinaryoutputs exactagainstnormal NFS workflow; retainedNFSdiagnostic attempt timedout300s",
+    "controls": "6 ordinary daily/hourly cases exact against revision6",
     "hillslope_watchlist": "31 passed, 0 failed",
     "host_smoke": "both roles pass",
-    "native_pytest": "1416 passed; four additional guarded-HK sentinel cases pass separately",
-    "ownership": "four full16year histories; first-consumer wrong-owner samples20/30 to0/30; exact seven-output observer parity",
-    "pmet": "both role capacities; three distinct pairs and48 actual crop-year mappings; reordered table exact parity"
+    "native_pytest": "1750 passed",
+    "post_vendor": "8runner/output tests;bothsmokes;provenance pass",
+    "reference_consumers": "295 compiled-reference/candidate suite checks plus27 reader checks;2reader cases added after1750full-suite pass",
+    "specialized": "8 complete 16-year daily/hourly histories; 17532 finite water rows each; exact observer parity"
   },
   "validation_evidence": {
-    "actual-project-v1/receipt.json": "1bfc088b43d3179013e947c3e7504119b19afbb7b12f562c91ce2bcd599e6d13",
-    "application-pair-v1/receipt.json": "5bb04811fdac08b086145d2525998dcbab9667bf4c6589128d0365d33d34f308",
-    "controls-bound-v1/receipt.json": "23de4d3ba4c2c7e7862219811b9883f134707d11d5db9bec605dde490f537ba7",
-    "ownership-comparison.json": "4b19e88457ad0d5c4804c601be278c9cc45bf9aeee5948c353521c6117004351",
-    "pmet-comparison.json": "31a2d4956c9173a216c25f9db05b5a9a719b366fcf6673d88d3a5099c75a13fa"
+    "application-pair-v1/receipt.json": "bc769d844617b94628b5198ed4ccf8e6b40ff108ced9141ba2b898ef1fa500c7",
+    "configured-execution-v1/artifact-audit-v3.json": "d817c9a7247698a3c77c675c0c523537d9bd994df1df844a4d733574e63598e3",
+    "configured-execution-v1/receipt.json": "e58d7b252d2eb56c7f543b2bce371c26e53fbb2e7ada0e0a2272280c81a73c99",
+    "configured-independent-qa/audit.json": "14a54d716c8e09ee82be8f0a2ecd277f5f79161c85588bae19a9adf18f0028c9",
+    "configured-observation-v2/receipt.json": "1af2a13e20d9c496536824a950d6108a10f07dd68aaf89b96f8508d35286a728",
+    "controls-final-v1/receipt.json": "94036c98dd606a5184c5213f0072e4ca2c2f074c46e870427ee869b02f6fe99f",
+    "histories-9005-no-rap-v1/receipt.json": "a8dbc6d45df659564fc4c6ae704b64bfb17ac8f14bacd325d933be6d8dc17af5",
+    "histories-final-v1/receipt.json": "5b9e5395c818756d61ac6d28369bab3382950be2145e8fab0a309bc76f0e8720",
+    "mode-history-qa/pytest-v2.log": "d0049780027dcffc77de0aa6056382f5280ff00c2f5fe5010e91936414fec52b",
+    "native-producer-reader-v2.log": "5e2257f134a9eff941160ff04d6d4342ab37b1554ae911447c7f93865220689a",
+    "native-pytest-v2.log": "2835df8721dc72e0b9e7d08474bef5e27b80677e2383c2d9ad1d972e13745d39",
+    "post-vendor-tests.log": "3740287ced814b98529d9f66f24050828025bb9fd26b9a15d2ea648e904a0572",
+    "watchlist-v2.log": "62cc24e203d804656187db46e6b0ba3af4f635a16b91600913cbed9ae1ffbabc"
   },
   "wepp_banner_version": "2020.500"
 }

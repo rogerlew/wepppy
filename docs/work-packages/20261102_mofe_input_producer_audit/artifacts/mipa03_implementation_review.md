@@ -135,3 +135,32 @@ requires clean builds, complete configured-fork execution, archive restoration,
 ordinary controls, final binary/source binding and required gates. Security review
 remains independent. Source changes after these identities require corresponding
 review renewal; passing focused tests does not authorize a scientific revision.
+
+## Subsequent combined-transition evidence closure
+
+The final-binary actual MAIN version2→3 test now closes the transition evidence
+gap recorded above. `mipa03_native_mode_history_qa.md` records ten separately
+executed mode tests, including fresh RAP hillslope simulation and routing within
+one final watershed invocation, with no channel cover file. It binds watershed
+SHA-256 `4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825`.
+The receipt/evidence review is retained in
+`mipa03_draft_disclosure_correctness.md`. This closes R1's integration coverage
+request; it does not approve the pending release disclosure or other release gates.
+
+## Capacity-independent module build correction
+
+Reviewed native commit `e0abe0581f77c6f66917e90daf8f8f429e9315c8`: **PASS for
+the narrow Makefile correction**. It adds an explicit `rap_state.o` recipe using
+the same `$(FC) $(FFLAGS_F90) -c $< -o $@` command as the prior implicit rule.
+It avoids that rule's `prepare_watershed_includes` prerequisite during hill-only
+builds. The RAP module uses only intrinsic modules and no capacity includes;
+its shared object is capacity-independent. Consumer dependencies on `rap_state.o`
+remain intact. No model source or compiler flag changed.
+
+Independent private `make -n -B rap_state.o FC=/usr/bin/gfortran` checks on the
+parent and corrected commits show identical compiler commands, with watershed
+include copying present only before the fix. Evidence is retained under
+`/tmp/mipa03-make-rule-review-6i6clr3_/`. No shared make invocation was run.
+The parent's earlier full-suite result (1,748 passed and one build error) remains
+failed evidence; the canonical pair rebuild and full-suite rerun must complete,
+with new source/build identity and verified binary hashes, before release.
