@@ -46,8 +46,13 @@ correctness, security and UX/QA proposal reviews pass. The
 records exact deltas and compatibility/validation obligations. Production settings
 wiring has not started. Neither defaults nor generated-soil policy are adopted.
 
-The full repository sanity run is active; the late calendar guard has a separate
-21-test focused pass and the publication gate passes three tests. Human approval
+Repository sanity passed: **12,863 passed, 423 skipped**. The late calendar
+guard has a separate 21-test focused pass; the publication gate passes three
+tests. This combines the broad launch suite with focused coverage of the final
+delta, not a full-suite pass against one immutable final tree; see the
+[validation receipt](../../artifacts/revised-validation.json) and
+[ledger v35](../../artifacts/candidate-ledger-v35.json). Reviewed proposal
+checkpoint: `8b02c5fb1`; ratification awaits approval. Human approval
 of both specification and layout is **absent**. The package remains active; after
 approval, ratify the contract-first ancestor and implement/validate the actual
 browser-to-native-to-report workflow, including reset/reload/fork/restore and real
@@ -297,7 +302,7 @@ requires explicit human specification/layout approval before production wiring.
 - [x] (2026-11-03) Complete current-source particle disposition and bounded resolver/buffer-peer conformance repair; 59 controller tests and independent generated-input review pass. Broad sanity remains pending.
 - [x] (2026-11-03) Execute and independently review 47 profile contrasts and four project contexts, with emitted/native/report readbacks and all failure retention.
 - [x] (2026-11-03) Prepare the concrete specification/layout and complete scientific, correctness, security and UX/QA reviews.
-- [ ] Finish broad sanity and commit the final scoped proposal checkpoint.
+- [x] Finish broad sanity and commit the reviewed proposal checkpoint (`8b02c5fb1`); retain final validation in ledger v35.
 - [ ] Obtain explicit human specification/layout approval, ratify the ancestor, then implement and validate the actual workflow.
 - [x] Record the operator-approved pivot in the canonical adjudication contract.
 - [x] Disposition known findings and repair confirmed bounded resolver/calendar-context defects.
@@ -752,7 +757,7 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-Current revised execution: R-01 and R-09/R-11 have source-supported dispositions; R-08 and R-10 are repaired with regressions. The 47-profile/four-project sensitivity study and independent proposal reviews are complete. Full repository sanity is running. Specification/layout approval is absent; the program remains active.
+Current revised execution: R-01 and R-09/R-11 have source-supported dispositions; R-08 and R-10 are repaired with regressions. The 47-profile/four-project sensitivity study and independent proposal reviews are complete. Repository sanity passed (12,863 passed, 423 skipped), with 21 final helper tests covering the late delta. Specification/layout approval is absent; the program remains active.
 
 The new direction is documented; defect disposition, sensitivity harness work and
 the approved user workflow remain open. Previous experiments constrain proposed
@@ -1679,3 +1684,5 @@ Rock-audit completion amendment: current status and living sections now record t
 Revision note (2026-11-03): activated the revised defect/sensitivity sequence, corrected the current purpose, and recorded exact-r7 particle disposition without rewriting historical experiments.
 
 Revision note (2026-11-03): recorded completed bounded studies, source-supported report limits and reviewed five-field proposal; broad sanity and explicit human approval remain open.
+
+Revision note (2026-11-03 final validation): recorded completed broad sanity and final focused delta, with source-version qualification and additive ledger v35. Explicit specification/layout approval remains absent.

@@ -46,8 +46,13 @@ correctness, security and UX/QA proposal reviews pass. The
 records exact deltas and compatibility/validation obligations. Production settings
 wiring has not started. Neither defaults nor generated-soil policy are adopted.
 
-The full repository sanity run is active; the late calendar guard has a separate
-21-test focused pass and the publication gate passes three tests. Human approval
+Repository sanity passed: **12,863 passed, 423 skipped**. The late calendar
+guard has a separate 21-test focused pass; the publication gate passes three
+tests. This combines the broad launch suite with focused coverage of the final
+delta, not a full-suite pass against one immutable final tree; see the
+[validation receipt](artifacts/revised-validation.json) and
+[ledger v35](artifacts/candidate-ledger-v35.json). Reviewed proposal
+checkpoint: `8b02c5fb1`; ratification awaits approval. Human approval
 of both specification and layout is **absent**. The package remains active; after
 approval, ratify the contract-first ancestor and implement/validate the actual
 browser-to-native-to-report workflow, including reset/reload/fork/restore and real
@@ -73,8 +78,8 @@ R-08 resolver conformance repair passes 59 controller tests and independent
 correctness review, including generated soil/slope readback. See
 [findings](artifacts/revised-input-resolution-findings.md) and
 [ledger v33](artifacts/candidate-ledger-v33.json). The tested sensitivity tooling and reviewed stale-publication receipt are committed
-in `fe6afa041`; the full repository sanity run is active. Profile and project
-studies execute reviewed declarations with failed adapter checks retained and
+in `fe6afa041`; repository sanity is now complete as recorded above. Profile and project
+studies executed reviewed declarations with failed adapter checks retained and
 explicit additive continuations. Historical publication remains stale.
 
 No defaults adopted, deployment performed, reserved material consumed or historical
@@ -1001,3 +1006,5 @@ Roads/downstream, particle, native/watchlist, Disturbed and fresh Cedar gates;
 resolve the two strict fraction-sum flags and any real wet/dry boundary
 failures. Only then revisit release promotion and parameter comparisons.
 See ADR-0122 and ADR-0123 for numerical/caller contracts and rationale.
+
+Revision note (2026-11-03 final validation): recorded completed broad sanity and final focused delta, with source-version qualification and additive ledger v35. Explicit specification/layout approval remains absent.

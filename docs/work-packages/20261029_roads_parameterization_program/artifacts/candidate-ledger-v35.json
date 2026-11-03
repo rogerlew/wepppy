@@ -1,0 +1,39 @@
+{
+  "version": 35,
+  "predecessor": {
+    "path": "candidate-ledger-v34.json",
+    "sha256": "fd8fb586bb5a7aaa7e1995b8e8674feb628600d7e34579327d4db58898bb6f5e"
+  },
+  "status": "preapproval_work_complete_human_gate_pending",
+  "reviewed_proposal_commit": "8b02c5fb1434046f99776c119523b86d69529b8b",
+  "evidence": {
+    "revised-validation.json": "a88a2e872e6d7df11f6d951ecef54ea5f93537d1825bf5fac6babe4e49695465",
+    "revised-settings-correctness-review.md": "aa9f0eff238a14ca85d2524e18bfdc93ef892d52a7a5470d478620a7874d6625",
+    "revised-settings-security-review.md": "d992b83585d02c3f9bf5c4bc781c39a23b178f58e8fadfb4852ff65b22d4372f",
+    "revised-settings-ux-qa-review.md": "d42c9eac03d98eec2ff5329f8117b4919f3a7b38630df439972c28fa81eeaf13",
+    "revised-sensitivity-science-review.md": "2af21faeb1abffc6816ad82c4aa5a0fcecadfc90d4222ccb815cc65e8400f56f",
+    "revised-settings-layout-draft.html": "e6acb4990e7c79adae37560a8db3d8de11bd1f46cc1a423440a7887ea048b910",
+    "revised-issue-register.md": "49cedb3df3dec08d66ea9c42056fbb5030056b3f7c74db96f7472e04b2c4c019"
+  },
+  "canonical_proposal": {
+    "docs/schemas/roads-settings-contract.md": "7bd11c84814707480656f7b26ab9abd5b63962bd7c2836424a069ffb07a291ca",
+    "docs/adrs/ADR-0135-roads-settings-controls.md": "1693bcac4ff41f8c75bcfb8a7761fe429dbe5e69bf39b040276a75e484511bc4"
+  },
+  "validation": {
+    "broad_passed": 12863,
+    "broad_skipped": 423,
+    "final_helper_passed": 21,
+    "publication_passed": 3,
+    "qualification": "Broad launch suite plus final focused delta; not a broad pass against one final immutable tree. See revised-validation.json.",
+    "unrelated_worktree_cleanup": "Removed only added _pmet_plant_names:null from man42_5.man.json after testing; restored exact committed bytes. Producer not traced."
+  },
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "deployment_performed": false,
+  "historical_results_reclassified": false,
+  "production_settings_wiring_started": false,
+  "human_specification_approval": "absent",
+  "human_layout_approval": "absent",
+  "accepted_implementation_ancestor": null,
+  "program_complete": false
+}

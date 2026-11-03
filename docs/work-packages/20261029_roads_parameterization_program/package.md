@@ -46,8 +46,13 @@ correctness, security and UX/QA proposal reviews pass. The
 records exact deltas and compatibility/validation obligations. Production settings
 wiring has not started. Neither defaults nor generated-soil policy are adopted.
 
-The full repository sanity run is active; the late calendar guard has a separate
-21-test focused pass and the publication gate passes three tests. Human approval
+Repository sanity passed: **12,863 passed, 423 skipped**. The late calendar
+guard has a separate 21-test focused pass; the publication gate passes three
+tests. This combines the broad launch suite with focused coverage of the final
+delta, not a full-suite pass against one immutable final tree; see the
+[validation receipt](artifacts/revised-validation.json) and
+[ledger v35](artifacts/candidate-ledger-v35.json). Reviewed proposal
+checkpoint: `8b02c5fb1`; ratification awaits approval. Human approval
 of both specification and layout is **absent**. The package remains active; after
 approval, ratify the contract-first ancestor and implement/validate the actual
 browser-to-native-to-report workflow, including reset/reload/fork/restore and real
@@ -398,3 +403,5 @@ name. The matched final pair is vendored; source and scientific gates passed.
 application and publication delivery. This fixes native geometry/recession defects;
 Roads parameterization acceptance remains unmet at 713/766 meaningful and 31/74
 small references. No parameter defaults or UI are promoted.
+
+Revision note (2026-11-03 final validation): recorded completed broad sanity and final focused delta, with source-version qualification and additive ledger v35. Explicit specification/layout approval remains absent.

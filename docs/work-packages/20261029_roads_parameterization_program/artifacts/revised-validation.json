@@ -1,0 +1,159 @@
+{
+  "status": "passed_full_launch_suite_and_final_focused_helper_delta",
+  "raw_root": "/wc1/runs/ro/roads-parameterization-program-20261103/revised-validation-v1",
+  "full_suite": {
+    "command": [
+      "wctl",
+      "run-pytest",
+      "tests",
+      "--maxfail=1",
+      "--junitxml=/wc1/runs/ro/roads-parameterization-program-20261103/revised-validation-v1/pytest.xml"
+    ],
+    "returncode": 0,
+    "started_utc": "2026-11-03T16:55:57.644580+00:00",
+    "finished_utc": "2026-11-03T17:58:07.865879+00:00",
+    "launch_head": "6cf8dcad63aa75054a9bd8dcc75a539c405573df",
+    "completion_head": "8b02c5fb1434046f99776c119523b86d69529b8b",
+    "collected": 13285,
+    "passed": 12863,
+    "runtime_skipped": 422,
+    "collection_skipped": 1,
+    "warnings": 5835,
+    "pytest_seconds": 3716.64,
+    "unexecuted_collected": 0,
+    "uninterrupted_invocation": true,
+    "all_final_source_bytes_certified_by_broad_run": false,
+    "qualification": "Helper/test/calendar-context guard and reviewed stale-publication metadata changed after collection. Separate final focused checks certify that bounded delta; this is not an uninterrupted full-suite pass against one final immutable source tree. Production Roads, native pair and existing matrix source bytes remained unchanged."
+  },
+  "junit": {
+    "testcase_children": 13286,
+    "unique_testcase_keys": 13286,
+    "testsuite_tests_attribute": 13301,
+    "qualification": "Aggregate tests attribute differs from actual child count. Receipt counts use the 13286 unique testcase children and matching pytest collected/final summary; no duplicate or failed testcase is present."
+  },
+  "final_focused": {
+    "command": "wctl run-pytest tests/roads/test_roads_sensitivity.py tests/roads/test_roads_contracts.py -q --maxfail=1",
+    "passed": 21,
+    "warnings": 2,
+    "seconds": 10.69,
+    "log": "final-helper-focused.log",
+    "review": "revised-calendar-context-quality-review.md",
+    "commit": "431e12dd2"
+  },
+  "publication": {
+    "command": "wctl run-pytest tests/roads/test_roads_publication.py -q",
+    "passed": 3,
+    "warnings": 2,
+    "seconds": 9.28,
+    "evidence": "publication-parent-receipt.json",
+    "raw_stdout_retained": false,
+    "also_passed_in_full_suite": true,
+    "historical_report_refreshed": false
+  },
+  "source_snapshot_delta": {
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_revised_profile_outputs.py": {
+      "launch": null,
+      "completion": "c4580e2d669c1b0f72948068815158b81a2bf679f3ff55369178afb9146b4313"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/review_revised_sensitivity_outputs.py": {
+      "launch": null,
+      "completion": "9b6fe3be64f0432c2d5119247ac34f510403010e770fdcad14660a8f5e774c7e"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised_project_sensitivity_readback.py": {
+      "launch": null,
+      "completion": "a0b61647cdf67b6cbbe42da1ba6989df1044a4fc93068ac6386a948991acc85c"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised_sensitivity.py": {
+      "launch": "73cf22708073fc8075850fd264bdea8fd3c1917ce739ec9f1136dc90171d5fd0",
+      "completion": "4efc1a758ae69274d48d9455bbcb5a88cb4642e0b74d44b0a675daca69a3787c"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised_sensitivity_continue.py": {
+      "launch": null,
+      "completion": "b3a631bb01dfc08b3c8713e23211eb7a7fcb7a4080846676dde89d3bf0f86a01"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised_sensitivity_generated_continue.py": {
+      "launch": null,
+      "completion": "c18fe5a62ff44bd8bb4a81be11e96e64c1c088e9cd2cdf068ede916f2df75730"
+    },
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/summarize_revised_sensitivity.py": {
+      "launch": null,
+      "completion": "cc415cd40e9bcdbefc582e5382fd2412941cb9ab3afb7f4740da450555daa5dc"
+    },
+    "tests/roads/analysis_staleness_current.json": {
+      "launch": "13d4a55ab9b3fa3a988e6adeef1cdaf71a486f73d9e3256df09b78b28e827c5f",
+      "completion": "003d87a01009b882a91a52397841b753ee7113544e80ec98e1b63751165c0e4a"
+    },
+    "tests/roads/roads_sensitivity.py": {
+      "launch": "1dc93d62f312601ee54019369603f795684a2b5362d77b23df5129b3874adeaa",
+      "completion": "1f2ee6564fa5e01a63dde1503b120a483943b9a759fd29ac778dcc7b26354246"
+    },
+    "tests/roads/test_roads_sensitivity.py": {
+      "launch": "f1447e075a9e3bb4d4b3e3a24f4897f7aa4d92c77f21fe853be54f0f432cafb2",
+      "completion": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db"
+    }
+  },
+  "production_source_drift": [],
+  "artifact_scripts_qualification": "Added/changed isolated study helpers are bound by separate scientific/QA evidence, not certified by this broad pytest invocation.",
+  "broad_exception_checks": {
+    "scope": [
+      "wepppy",
+      "services"
+    ],
+    "task_base": "e0308765c",
+    "canonical_base": "origin/master",
+    "returncodes": [
+      0,
+      0
+    ],
+    "roads_unsuppressed_before": 18,
+    "roads_unsuppressed_after": 18
+  },
+  "code_quality": {
+    "mode": "observe-only",
+    "checkpoint": "fe6afa041",
+    "bases": [
+      "e0308765c",
+      "origin/master"
+    ],
+    "returncodes": [
+      0,
+      0
+    ],
+    "python_cyclomatic_complexity_available": false,
+    "reason": "radon unavailable",
+    "task_delta": {
+      "roads_sloc": "+9 (5416 to 5425)",
+      "controller_tests_sloc": "+72",
+      "matrix_prepare_function_lines": "97 to 104",
+      "new_helper_sloc": 187,
+      "new_helper_max_function_lines": 56
+    },
+    "rationale": "Small local validity/source-label correction avoids unrelated facade refactor. Added tests reproduce actual malformed-input and generated-artifact failures. Additive matrix arguments reuse canonical formulas. Later reviewed calendar guard addresses a confirmed study-context defect; final21 focused tests cover it and this earlier telemetry does not include that late guard."
+  },
+  "not_required": {
+    "npm": "No production frontend source changed; HTML is a static proposal artifact.",
+    "stubtest": "No production public API/stub surface changed.",
+    "rq_graph": "No queue wiring changed."
+  },
+  "files_sha256": {
+    "broad-exceptions-origin.log": "78edd2d449f7e4d2c84fe5edb4a1260cf7f50fd5256556bb721187c288347b97",
+    "broad-exceptions-task.log": "2f0e762cb764a1ed1f80d9caf97e10b4503ef6af96236aa95060cd7d08c86233",
+    "code-quality-origin.json": "633f95ff768b945fd4373c9e361ba8ced8648e3ca03ba25ff9a8e20386773378",
+    "code-quality-origin.log": "cfbd865581adb0c95c9d04ada47625829543ba529743020579aded19172eaf37",
+    "code-quality-origin.md": "afbc4419eb086139c14de250e58584a648b7a13c4205d27df5a3849b58fe7d3c",
+    "code-quality-task.json": "0393a96670f31c4af863b8dc7f93eb755d108d430ee280df8fb31aba44aa62d1",
+    "code-quality-task.log": "b4e7a0493161f8eb31c90f67dda2d8fc029d7be8ffc52e2391528f3f8fd7d1f9",
+    "code-quality-task.md": "1bf7b391aa971b15b7abf6ad6d243c04a08d8e3644e6624fa50f5e1bc86735ec",
+    "completion.json": "419c96f915f680b7a897f388979b2a3dc875c69627756b3521c6f3aaf5667300",
+    "final-helper-focused.log": "3c8ba430706d91d8be43c30f3c54bc80b68c61d87a054e70f54be83463b38f27",
+    "late-helper-notice.json": "76f088d85a0236cb89e777fe4eb8d6435e15904ec4971f244ed9d819dfa30984",
+    "launch.json": "e3f1b1351e8b13d755542b8ddd346db742d55715c39ae366bac7f55fc9f09b05",
+    "publication-parent-receipt.json": "9eb6a2b3d793479c4e3bbab3b5c54bcc394386f53ea68ae78ce5f0239d67eb71",
+    "pytest.log": "7ed285d24214a15dbab00ef4d0acd35914b6ab49b620db5fdf0b94891d57367b",
+    "pytest.xml": "d59863b63fd04d104dabb7c4d3075d745ef5df6a7efaa04b5429a6984193a34f",
+    "run_validation.py": "3ffb4d3fafc3c0f9024cf2a224bb642dd6c6a1b58a45b1911c4bd2c5503e82a9"
+  },
+  "program_complete": false,
+  "human_specification_layout_approval": "absent",
+  "production_wiring": "not_implemented"
+}

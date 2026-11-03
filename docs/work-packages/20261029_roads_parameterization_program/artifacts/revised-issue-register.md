@@ -24,6 +24,14 @@ exhaustive audit of WEPP physics.
 | R-10 confirmed study-context defect and adapter failures | `revised-sensitivity-results.md` and `revised-calendar-context-quality-review.md`: G native years 1–16 paired with a stale site ancestor calendar; native outputs still exact | Sensitivity fixture/context setup / owned EBE/WAT readers; wrong leap-year labels during postprocessing | Repaired in maintained helper `431e12dd2`: actual discovered climate and cached dates must match the bound native CLI. Real-filesystem regression and 21 focused helper/contract tests pass. All 47 final contexts independently pass calendar/strict audits. Preserve failed trees, abbreviated-LOSS reader failure and additive continuations. |
 | R-11 report support/precision limitation, explained | `revised-sensitivity-science-review.md`, exact G LOSS/PASS/ELEMENT/non-EVENT reconciliation | Native EVENT payload threshold / canonical PASS-class summary versus terminal sediment diagnostics | Current r7 can emit positive terminal sediment without an EVENT particle payload. Retain both metrics and per-date exclusions. Exact G support difference plus existing print precision reconciles the values; no changed bound, native regression, historical reclassification or universal mass-closure claim. |
 
+
+The older rock audit's RUSLE unit finding is historical: the current
+[rock representation contract](../../../schemas/rock-fragment-representation-contract.md)
+and [ADR-0125](../../../adrs/ADR-0125-rock-fragment-unit-and-basis-repairs.md)
+record the separately implemented and locally validated dimensional repair.
+Do not reopen its completed package or treat repaired units as validation of a
+surface-armor proxy. R-05 concerns that remaining physical interpretation limit.
+
 New confirmed defects enter this register with affected peer consumers, minimal
 repair, exact reproduction and retained regression evidence before closure.
 The six reserved materials remain unused: 1718472, 53975, 1718476, 665770,
