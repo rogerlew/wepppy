@@ -1,0 +1,5518 @@
+{
+  "cases": {
+    "B2": {
+      "expected_initialization_keys_per_observed_arm": [
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        }
+      ],
+      "expected_selected_trace_rows_per_observed_arm": 60,
+      "ofes": [
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 1,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "road"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 2,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "fill"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 3,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "buffer"
+        }
+      ],
+      "seed_inputs": {
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_less_runon/modern/r7/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_less_runon/modern/r7/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_less_runon/modern/r7/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_less_runon/modern/r7/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "soil_inputs": {
+        "default": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/default/B2/runs/p1.sol",
+          "sha256": "a05d9c478a97dbed6f432ad8ceeee774686a7314e5484defd9aede2076fc9399"
+        },
+        "optional": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/optional/B2/runs/p1.sol",
+          "sha256": "2a0eee17e253d976295c41843a1e8b7b5c54851d0d8f0fa32a8f70da02812157"
+        }
+      }
+    },
+    "B3": {
+      "expected_initialization_keys_per_observed_arm": [
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        }
+      ],
+      "expected_selected_trace_rows_per_observed_arm": 60,
+      "ofes": [
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 1,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "road"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 2,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "fill"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.1851",
+                "0.0823"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.1751",
+                "0.0778"
+              ],
+              "source_horizon": 8
+            }
+          ],
+          "e": 3,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    50
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    50
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    50,
+                    200
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    50,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    230
+                  ],
+                  "overlap_mm": "30.0",
+                  "property_weight": "0.15",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    230
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "170.0",
+                  "property_weight": "0.85",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    230,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    230,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    760
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    760
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    760,
+                    860
+                  ],
+                  "overlap_mm": "60.0",
+                  "property_weight": "0.3",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    760,
+                    860
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    860,
+                    990
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    860,
+                    990
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    990,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 8,
+                  "source_interval_mm": [
+                    990,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "buffer"
+        }
+      ],
+      "seed_inputs": {
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_dry_legacy/modern/r7/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_dry_legacy/modern/r7/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_dry_legacy/modern/r7/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/small_gravel_dry_legacy/modern/r7/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "soil_inputs": {
+        "default": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/default/B3/runs/p1.sol",
+          "sha256": "b76c7f95dd7247b7273c1c75d60006200511879a94404ed7d936191169cf3be7"
+        },
+        "optional": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/optional/B3/runs/p1.sol",
+          "sha256": "d28d9cf537bb0c2ea6f211066b3e22a20692cd8b5cea992f15a4c2722968f819"
+        }
+      }
+    },
+    "B4": {
+      "expected_initialization_keys_per_observed_arm": [
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        }
+      ],
+      "expected_selected_trace_rows_per_observed_arm": 24,
+      "ofes": [
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.2615",
+                "0.1385"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2023",
+                "0.1071"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 3
+            }
+          ],
+          "e": 1,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "road"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.2615",
+                "0.1385"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2023",
+                "0.1071"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 3
+            }
+          ],
+          "e": 2,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "fill"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.2615",
+                "0.1385"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2023",
+                "0.1071"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.314",
+                "0.198"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.3374",
+                "0.2127"
+              ],
+              "source_horizon": 3
+            }
+          ],
+          "e": 3,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    150
+                  ],
+                  "overlap_mm": "150.0",
+                  "property_weight": "0.75",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    150
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    150,
+                    200
+                  ],
+                  "overlap_mm": "50.0",
+                  "property_weight": "0.25",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    150,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    600
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    400
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "buffer"
+        }
+      ],
+      "seed_inputs": {
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/passing_same_signature/modern/r7/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/passing_same_signature/modern/r7/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/passing_same_signature/modern/r7/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/passing_same_signature/modern/r7/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "soil_inputs": {
+        "default": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/default/B4/runs/p1.sol",
+          "sha256": "f6a1ccb253b222ca7fb1ae4a57fec0471cf7a6bf5571b97ec40285caf32ba57f"
+        },
+        "optional": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/optional/B4/runs/p1.sol",
+          "sha256": "2332225c30c1e38063b12d798c596ec3e7230188405b6e5b4bd2ff32ff61c7ce"
+        }
+      }
+    },
+    "B5": {
+      "expected_initialization_keys_per_observed_arm": [
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 1,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 2,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 1,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 2,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 3,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 4,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 5,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 6,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 7,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 8,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 9,
+          "tag": "WBH_HK_RATIO"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_FCUL"
+        },
+        {
+          "c": 0,
+          "e": 3,
+          "s": 10,
+          "tag": "WBH_HK_RATIO"
+        }
+      ],
+      "expected_selected_trace_rows_per_observed_arm": 60,
+      "ofes": [
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.3141",
+                "0.1424"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2809",
+                "0.1273"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 3
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1263"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2763",
+                "0.1219"
+              ],
+              "source_horizon": 4
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2788",
+                "0.1024"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2496",
+                "0.0916"
+              ],
+              "source_horizon": 5
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2929",
+                "0.0943"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2315",
+                "0.0745"
+              ],
+              "source_horizon": 6
+            }
+          ],
+          "e": 1,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    360
+                  ],
+                  "overlap_mm": "160.0",
+                  "property_weight": "0.8",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    360
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "190.0",
+                  "property_weight": "0.95",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "90.0",
+                  "property_weight": "0.45",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "110.0",
+                  "property_weight": "0.55",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "70.0",
+                  "property_weight": "0.35",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "road"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.3141",
+                "0.1424"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2809",
+                "0.1273"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 3
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1263"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2763",
+                "0.1219"
+              ],
+              "source_horizon": 4
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2788",
+                "0.1024"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2496",
+                "0.0916"
+              ],
+              "source_horizon": 5
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2929",
+                "0.0943"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2315",
+                "0.0745"
+              ],
+              "source_horizon": 6
+            }
+          ],
+          "e": 2,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    360
+                  ],
+                  "overlap_mm": "160.0",
+                  "property_weight": "0.8",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    360
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "190.0",
+                  "property_weight": "0.95",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "90.0",
+                  "property_weight": "0.45",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "110.0",
+                  "property_weight": "0.55",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "70.0",
+                  "property_weight": "0.35",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "fill"
+        },
+        {
+          "changed_source_horizons": [
+            {
+              "default_fc_wp_tokens": [
+                "0.3141",
+                "0.1424"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2809",
+                "0.1273"
+              ],
+              "source_horizon": 1
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 2
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1253"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2762",
+                "0.1208"
+              ],
+              "source_horizon": 3
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2863",
+                "0.1263"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2763",
+                "0.1219"
+              ],
+              "source_horizon": 4
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2788",
+                "0.1024"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2496",
+                "0.0916"
+              ],
+              "source_horizon": 5
+            },
+            {
+              "default_fc_wp_tokens": [
+                "0.2929",
+                "0.0943"
+              ],
+              "optional_fc_wp_tokens": [
+                "0.2315",
+                "0.0745"
+              ],
+              "source_horizon": 6
+            }
+          ],
+          "e": 3,
+          "layers": [
+            {
+              "depth_bounds_mm": [
+                0,
+                100
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 1,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                100,
+                200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                0,
+                200
+              ],
+              "s": 2,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    0,
+                    180
+                  ],
+                  "overlap_mm": "180.0",
+                  "property_weight": "0.9",
+                  "source_horizon": 1,
+                  "source_interval_mm": [
+                    0,
+                    180
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    180,
+                    200
+                  ],
+                  "overlap_mm": "20.0",
+                  "property_weight": "0.1",
+                  "source_horizon": 2,
+                  "source_interval_mm": [
+                    180,
+                    200
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                200,
+                400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                200,
+                400
+              ],
+              "s": 3,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    200,
+                    360
+                  ],
+                  "overlap_mm": "160.0",
+                  "property_weight": "0.8",
+                  "source_horizon": 3,
+                  "source_interval_mm": [
+                    200,
+                    360
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "40.0",
+                  "property_weight": "0.2",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                400,
+                600
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                400,
+                600
+              ],
+              "s": 4,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                600,
+                800
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                600,
+                800
+              ],
+              "s": 5,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    360,
+                    610
+                  ],
+                  "overlap_mm": "10.0",
+                  "property_weight": "0.05",
+                  "source_horizon": 4,
+                  "source_interval_mm": [
+                    360,
+                    610
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "190.0",
+                  "property_weight": "0.95",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                800,
+                1000
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                800,
+                1000
+              ],
+              "s": 6,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1000,
+                1200
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1000,
+                1200
+              ],
+              "s": 7,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    610,
+                    1090
+                  ],
+                  "overlap_mm": "90.0",
+                  "property_weight": "0.45",
+                  "source_horizon": 5,
+                  "source_interval_mm": [
+                    610,
+                    1090
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "110.0",
+                  "property_weight": "0.55",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1200,
+                1400
+              ],
+              "has_changed_fc_wp_input_support": true,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1200,
+                1400
+              ],
+              "s": 8,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1090,
+                    1270
+                  ],
+                  "overlap_mm": "70.0",
+                  "property_weight": "0.35",
+                  "source_horizon": 6,
+                  "source_interval_mm": [
+                    1090,
+                    1270
+                  ]
+                },
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "130.0",
+                  "property_weight": "0.65",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1400,
+                1600
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 0,
+              "property_average_interval_mm": [
+                1400,
+                1600
+              ],
+              "s": 9,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200",
+                  "property_weight": "1",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            },
+            {
+              "depth_bounds_mm": [
+                1600,
+                1800
+              ],
+              "has_changed_fc_wp_input_support": false,
+              "native_extension_overlap_mm": 200,
+              "property_average_interval_mm": [
+                1600,
+                1800
+              ],
+              "s": 10,
+              "source_support": [
+                {
+                  "native_interval_mm": [
+                    1270,
+                    1800
+                  ],
+                  "overlap_mm": "200.0",
+                  "property_weight": "1.0",
+                  "source_horizon": 7,
+                  "source_interval_mm": [
+                    1270,
+                    1600
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "buffer"
+        }
+      ],
+      "seed_inputs": {
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/underprediction_less_supply/modern/r7/runs/p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/underprediction_less_supply/modern/r7/runs/p1.run": "ec6b7ad96ccf3263c78ea0385e1ccc1e518eb4d637e7020f16d5e75b77dbb8ac",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/underprediction_less_supply/modern/r7/runs/p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/underprediction_less_supply/modern/r7/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "soil_inputs": {
+        "default": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/default/B5/runs/p1.sol",
+          "sha256": "f9e160f34cddfe0e8c4912240ea050baa5b05029a045c4fc45d2ecc93a61f937"
+        },
+        "optional": {
+          "path": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/optional/B5/runs/p1.sol",
+          "sha256": "a3c06904d40c70da243c642423f8ea4a3c0f8fafe558afc96f57625a5bd056cf"
+        }
+      }
+    }
+  },
+  "coefficient_status": "no native numeric prediction; scon corrections and trace rounding remain in effect",
+  "depth_status": "source-derived initialization coordinates; observer does not emit DG/depth",
+  "expected_selected_trace_rows_all_eight_observed_arms": 408,
+  "helper_sha256": "29d967c45d94f1fbc64c4aebfd01c33d8c01ac5ff31eda8d59046e417f23e732",
+  "native_calls": 0,
+  "native_source_commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+  "native_source_sha256": {
+    "/workdir/wepp-forest-release-20261009/src/contin.for": "37a1bbfbc8f49bd1504398446c1d7c21c73970897a4ef3b0c46a489e2c7c852e",
+    "/workdir/wepp-forest-release-20261009/src/infile.for": "9cb326755f96a4134d362028a5147a682344dbdc0bfd60c30fd4fbbe3e5fea7f",
+    "/workdir/wepp-forest-release-20261009/src/inidat.for": "8379728b55894f7a09c0f654eb30ec618379e6a24d58245fefa11ce5202cf28f",
+    "/workdir/wepp-forest-release-20261009/src/input.for": "e2cdccc6137c0ff5913facdfa7957afbc6c77b1e4acd45b8588df0ccc104b501",
+    "/workdir/wepp-forest-release-20261009/src/pmxnsl.inc": "126d631016a2c557dbaad79cf4da25d71bda1b75335625cdea39245f95af8c8d",
+    "/workdir/wepp-forest-release-20261009/src/scon.for": "31f9165146283c3f64470a63f67e1a5f1e815b478a5fb638101c4fe751c76f71",
+    "/workdir/wepp-forest-release-20261009/src/soil.for": "74347fdfde6c9e3669a9df57c94750c5b5309e877e84364aec4e60c809aa134e",
+    "/workdir/wepp-forest-release-20261009/src/tilage.for": "22922a276bb3ce157fc0b180c40993d63ba4b31301836d68c3fcabb2ca3b1420",
+    "/workdir/wepp-forest-release-20261009/src/watbal.for": "f8cf77e9530d13e8d6427abfafca1db312a7507274714d26fc9bbc0fd6edb980",
+    "/workdir/wepp-forest-release-20261009/src/watbal_hourly.for": "3b1ef717359c5c92475ddc7396ed68533237274d9433f83fb7d89dff69c27162",
+    "/workdir/wepp-forest-release-20261009/src/wepp_observe.for": "cf09555683b7ca16571fffccc5fa12f8e90bff861c2152b4dfc6c47db4473ba1"
+  },
+  "preparation_bindings": {
+    "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/case-readback.json": "6c5e0797fa5795c74416087b9ba227272226d7d94feb69c89b618c20cb448fa2",
+    "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/declaration.json": "5be61161a62c428867735328cd9b085da64473e13d26d92f8b8aae88bb87da7b",
+    "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1/preparation-result.json": "e24ade55e77907dc75ebc4d4e45378d53cf48483ec86366991830cec6f1e68ab"
+  },
+  "schema": "roads-retention-initial-layer-map-v1"
+}

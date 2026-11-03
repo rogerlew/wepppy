@@ -1,0 +1,214 @@
+{
+  "binary_sha256": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+  "cases": {
+    "B2": {
+      "case": {
+        "climate": "flagstaff",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718494",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_sha256": "a05d9c478a97dbed6f432ad8ceeee774686a7314e5484defd9aede2076fc9399",
+      "frozen_default_drift": [],
+      "full_depth_mm": [
+        1600.0,
+        1600.0,
+        1600.0
+      ],
+      "optional_sha256": "2a0eee17e253d976295c41843a1e8b7b5c54851d0d8f0fa32a8f70da02812157",
+      "paired_fc_wp_differences": 6
+    },
+    "B3": {
+      "case": {
+        "climate": "denver",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718494",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_sha256": "b76c7f95dd7247b7273c1c75d60006200511879a94404ed7d936191169cf3be7",
+      "frozen_default_drift": [],
+      "full_depth_mm": [
+        1600.0,
+        1600.0,
+        1600.0
+      ],
+      "optional_sha256": "d28d9cf537bb0c2ea6f211066b3e22a20692cd8b5cea992f15a4c2722968f819",
+      "paired_fc_wp_differences": 6
+    },
+    "B4": {
+      "case": {
+        "climate": "site",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718465",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_sha256": "f6a1ccb253b222ca7fb1ae4a57fec0471cf7a6bf5571b97ec40285caf32ba57f",
+      "frozen_default_drift": [],
+      "full_depth_mm": [
+        400.0,
+        400.0,
+        400.0
+      ],
+      "optional_sha256": "2332225c30c1e38063b12d798c596ec3e7230188405b6e5b4bd2ff32ff61c7ce",
+      "paired_fc_wp_differences": 18
+    },
+    "B5": {
+      "case": {
+        "climate": "site",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "2711184",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_sha256": "f9e160f34cddfe0e8c4912240ea050baa5b05029a045c4fc45d2ecc93a61f937",
+      "frozen_default_drift": [
+        {
+          "after": 0.1958,
+          "before": 0.188,
+          "path": [
+            "ofes",
+            0,
+            "horizons",
+            6,
+            "fc"
+          ]
+        },
+        {
+          "after": 21.3038,
+          "before": 59.8734,
+          "path": [
+            "ofes",
+            0,
+            "horizons",
+            6,
+            "ksat"
+          ]
+        },
+        {
+          "after": 0.0815,
+          "before": 0.09,
+          "path": [
+            "ofes",
+            0,
+            "horizons",
+            6,
+            "wp"
+          ]
+        },
+        {
+          "after": 0.1958,
+          "before": 0.188,
+          "path": [
+            "ofes",
+            1,
+            "horizons",
+            6,
+            "fc"
+          ]
+        },
+        {
+          "after": 21.3038,
+          "before": 59.8734,
+          "path": [
+            "ofes",
+            1,
+            "horizons",
+            6,
+            "ksat"
+          ]
+        },
+        {
+          "after": 0.0815,
+          "before": 0.09,
+          "path": [
+            "ofes",
+            1,
+            "horizons",
+            6,
+            "wp"
+          ]
+        },
+        {
+          "after": 0.1958,
+          "before": 0.188,
+          "path": [
+            "ofes",
+            2,
+            "horizons",
+            6,
+            "fc"
+          ]
+        },
+        {
+          "after": 21.3038,
+          "before": 59.8734,
+          "path": [
+            "ofes",
+            2,
+            "horizons",
+            6,
+            "ksat"
+          ]
+        },
+        {
+          "after": 0.0815,
+          "before": 0.09,
+          "path": [
+            "ofes",
+            2,
+            "horizons",
+            6,
+            "wp"
+          ]
+        }
+      ],
+      "full_depth_mm": [
+        1600.0,
+        1600.0,
+        1600.0
+      ],
+      "optional_sha256": "a3c06904d40c70da243c642423f8ea4a3c0f8fafe558afc96f57625a5bd056cf",
+      "paired_fc_wp_differences": 36
+    }
+  },
+  "companion_schemas": {
+    "ssurgo-retention-source-v3": 8,
+    "ssurgo-retention-stack-v3": 8,
+    "ssurgo-retention-stage-v3": 8,
+    "ssurgo-retention-treatment-v3": 24
+  },
+  "declaration_sha256": "631e70e5ddbe6573bd694c18c900b798d621b4c138fd93ed31f591511425e814",
+  "dependency_count": 83,
+  "driver_snapshot_sha256": "6c427d5fbc1ff65060a78ce678b11446bc8652c7e34ebf176f43ce37a55ac76f",
+  "gid": 993,
+  "limits": "Concrete staging review only; execution requires separate reviewed-declaration receipt; initialization and scientific outcomes remain unclaimed.",
+  "marker_only_pairs": 8,
+  "native_calls_by_reviewer": 0,
+  "no_execution_start": true,
+  "observer_calls": 8,
+  "ordinary_calls": 8,
+  "passed": true,
+  "preparation_file_count": 100,
+  "preparation_outcome_review_sha256": "fd835f0e92752175e6c159376e3cbdafbaf2dba5f8fd51cada1ce36bd924b138",
+  "preparation_result_sha256": "e24ade55e77907dc75ebc4d4e45378d53cf48483ec86366991830cec6f1e68ab",
+  "protocol_snapshot_sha256": "241d62afef0e06e0cabb4f6229768ee2d699248fe99f78eb37fa2c88a0db543e",
+  "reference_file_count": 91,
+  "reviewer": "mipa_contract_scope",
+  "schema": "roads-retention-native-staging-review-v1",
+  "staged_file_bindings": 344,
+  "staged_task_count": 16,
+  "timeout_seconds": 300,
+  "uid": 1000,
+  "workers": 1
+}

@@ -1,0 +1,34 @@
+{
+  "version": 29,
+  "predecessor": {
+    "path": "candidate-ledger-v28.json",
+    "sha256": "247161f0186a32179a90c8d416bee5e1d0fde4db426194f67d243fb921880cdf"
+  },
+  "status": "retention_rescue_rejected_next_mechanism_needs_source_support",
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1",
+  "declaration_sha256": "631e70e5ddbe6573bd694c18c900b798d621b4c138fd93ed31f591511425e814",
+  "results_sha256": "e4c1e59db6a661b83214b289bcdf9e3a735f51631ef9792db81a6fc5ca455fdc",
+  "ordinary_calls": 8,
+  "observer_calls": 8,
+  "ordinary_audit_passes": 8,
+  "exact_output_comparisons": 56,
+  "initialized_trace_rows": 408,
+  "magnitude_recoveries": 0,
+  "magnitude_regressions": 0,
+  "candidate_promoted": false,
+  "b5_fresh_default_drift_separate": true,
+  "evidence": {
+    "resumption-r7-retention-native-science-review.md": "66ec903ecd308b6beb44119b5f979401a0853d45fe4a8d2b6015022c7f8612fa",
+    "resumption-r7-retention-native-science-readback.json": "943cd9d7ec5753742afac5af11a6a2b8ebfcdf034608f2df2e224d5170be2915",
+    "resumption-r7-retention-observer-outcome.md": "173bc2d3603d74e09b75262dd9b4172e29c5ba393ea0ec6359e6c67ca1902aac",
+    "resumption-r7-retention-observer-outcome.json": "35e5fda0405eafd6205d2466fdaca143b279ea518e5667a0dd9058d3dff4afa0",
+    "resumption-r7-retention-results.md": "0609d6cf40d9da1894438f526147ab2550210a7a4b6592568f39d885d22fccb3",
+    "resumption-r7-next-mechanism-feasibility.md": "0d34bf467e5f997b8cd7b391c561ff77c7a84456dcb6cffc7d00d2c5a1e2e791"
+  },
+  "next_prerequisite": "Role-specific measured surface support/overlap/persistence and faithful native consumer; or separately justified native-policy research. No ready additional installed-r7 parameter trial in reviewed evidence.",
+  "postrepair_full_repository_tests": "running",
+  "scientific_acceptance": false,
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "ui_human_gate_preserved": true
+}

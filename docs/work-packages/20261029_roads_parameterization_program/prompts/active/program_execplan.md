@@ -10,7 +10,7 @@ Completed all 36 exact-input seed calls: native/physical/calendar/strict EVENT
 checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](../../artifacts/resumption-r7-seed-results.md) and
-[ledger v25](../../artifacts/candidate-ledger-v25.json) retain the current checkpoint.
+[ledger v25](../../artifacts/candidate-ledger-v25.json) retain the seed checkpoint.
 The complete fixed-input r7 panel preserves all r4 magnitude classifications:
 713/766 meaningful and 31/74 small-load cases pass, with zero recoveries or
 regressions. Annual sediment changes in 218/840 cases. All 840 native/calendar
@@ -30,16 +30,32 @@ passed independent native/calendar/accounting/report readback after the minimal
 source files remain unchanged. This is bounded public-controller compatibility,
 not RQ/browser/deployment parity or generated-soil scientific acceptance.
 
-The fresh seven-development-material SDA acquisition passed full source/cache
-association. Paired preparation passed using canonical source, treatment, stack
-and stage companions; independent outcome review is underway. B2/B3/B4 fresh
-default semantics reproduce frozen U12 exactly. B5 has separately retained deep
-fallback FC/WP/K drift in both arms, so only its fresh paired comparison is
-causal for the policy. Geometry remains frozen, including B2/B3 depth 1600 mm.
-The next declared diagnostic is eight ordinary histories plus eight exact
-installed-observer replicas; it remains gated on final preparation/declaration
-review. No withheld data, accepted parameter, changed default or UI approval.
-See additive ledger v28 for exact evidence bindings.
+The source-associated retention trial is complete and rejected as a rescue
+candidate for the tested configuration. All eight ordinary histories pass the
+native/physical/calendar/strict EVENT checks, and all eight observer replicas
+preserve seven outputs exactly. Independent trace review verifies all 408
+initialized rows and the B2/B3 deeper FC/UL response. Both small-load targets
+remain failures; the passing control moves slightly toward its upper limit,
+and the fresh B5 control underpredicts more. No wider sweep or policy adoption.
+
+B2/B3/B4 fresh defaults reproduce the frozen r7 outputs exactly. B5's separate
+deep fallback FC/WP/K drift remains distinct from its paired policy response.
+All geometry and non-retention fields remain unchanged within pairs. The
+retained native extension and suppressed frost consumers are explicit limits,
+not new physical or closure claims.
+
+The next concrete prerequisite is a qualifying role-specific surface dataset
+with overlap, provenance and persistence, plus a supported native consumer.
+The inspected upload/profile data do not supply it. Frost-policy development is
+a separate scientific option, not an isolated installed-r7 input adjustment or
+demonstrated sediment remedy. No further numeric batch is justified by the
+reviewed evidence yet; dataset locations have been requested from the operator.
+This is an evidence gap, not a new routine permission gate. No parameter is
+accepted, six withheld materials remain unused, defaults are unchanged, and the
+human configuration specification/layout gate remains intact. The broad
+postrepair repository suite is still running.
+See additive ledger v29 and the retention results for exact evidence bindings.
+
 
 
 
@@ -49,7 +65,10 @@ turn is authorized through scientific acceptance and a concrete UI specification
 and static layout proposal. Human approval is required before product implementation.
 
 
-## Current: rock-cover audit separates surface protection from profile fragments
+## Historical revision 4: rock-cover audit
+
+This retained checkpoint predates the completed unit/basis repairs and r7
+reconciliation above. Its old next-study instructions are historical.
 
 The [rock-cover audit](../../artifacts/rock-cover-audit-r4/findings.md) directly reads all 36 retained histories (354 soil horizons, 108 initial management OFEs). All four histories per contrast have identical management bytes and use cropland scenarios. Explicit rangeland rock fields are absent, not measured zero. Profile RFG differs between lanes; it affects both water and a potential consolidation/erosion pathway. It is not a surface-area cover control.
 
@@ -194,7 +213,9 @@ This execution stops at the explicit human specification/layout gate.
 - [x] Completed fresh full-preparation public-controller baseline and artifact readback.
 - [x] Repair confirmed Roads baseline diagnostic isolation and independently validate all five contexts.
 - [x] Acquire the seven-material source cohort and prepare canonical paired retention inputs.
-- [ ] Independently review prepared artifacts, declare and run the bounded retention/observer trial.
+- [x] Independently review prepared artifacts and all sixteen retention/observer histories; reject the lane as a rescue candidate.
+- [ ] Obtain qualifying role-specific surface evidence before defining another supported intervention.
+- [ ] Complete the postrepair full repository test run and final clean-worktree checkpoint.
 
 - [x] Reconcile later source/producer repairs and declare the bounded r4/r7 engine comparison.
 - [ ] Validate and independently review 18 seed pairs before full-panel expansion.
@@ -397,6 +418,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The retention input contrast reaches native initialization, yet does not recover either target and worsens the opposite control. Actual lower-layer response is therefore insufficient evidence for a Roads remedy. Native adds 200 mm bottom support; all observed frost opportunities were skipped by KSFLAG.
+
 - Fresh Roads context exposed linked `tc_out.txt` being rewritten in baseline runs; unit regression reproduces it. Baseline v1 export failure was missing harness cleanup, not changed native output.
 
 The 36-history packet uses a custom roughness binary for mode 1. Its 18 mode-0
@@ -508,6 +531,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Reject the paired retention rescue lane without a full840 expansion. Require measured surface/overlap/persistence and faithful consumer semantics before a distinct surface intervention; do not substitute profile RFG, residue or land use. Existing autonomy continues, with an actual evidence prerequisite.
+
 - Keep strict particle failure visible despite identical historical r4 audit operands. Treat `tc_out.txt` exclusion as unchanged-contract conformance; preserve failed roots and redeclare fresh execution.
 
 2026-11-03: preserve v23/r4 as historical evidence; begin with exact-input engine
@@ -618,6 +643,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The requested resumption now has reviewed current-engine panel evidence, successful current preparation/controller workflows, a repaired baseline-isolation defect, and a completed rejected retention experiment. Scientific acceptance remains unmet. The next study needs physical source support or a separately justified native-policy question; no tuning UI or default adoption follows. Full postrepair tests remain in progress.
 
 The r7 release reconciliation is complete for fixed panel magnitude; it does not resolve the scientific acceptance failures. Current full preparation succeeds under the bounded public-controller scope. Roads isolation repair and supported retention preparation are the next gates.
 

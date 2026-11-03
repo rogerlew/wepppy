@@ -1,0 +1,3156 @@
+{
+  "acceptance_sha256": "16d6980c4188ea511540cd63161af852c6a7d164856f07665224b8cb8d3f2db4",
+  "audit_readbacks": {
+    "B2/default/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 233,
+          "max_delta_kg_m": 0.040000000000000036,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 604,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 29.564799201783874,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 29.564799201783874,
+              "positive_daily_net_kg_yr": 29.564799201783874
+            },
+            {
+              "boundary_kg_yr": 32.34239242003052,
+              "negative_daily_net_kg_yr": -0.43105229381131915,
+              "net_kg_yr": 2.7775932182466914,
+              "positive_daily_net_kg_yr": 3.2086455120580117
+            },
+            {
+              "boundary_kg_yr": 18.187712722001358,
+              "negative_daily_net_kg_yr": -16.277612245049937,
+              "net_kg_yr": -14.15467969802919,
+              "positive_daily_net_kg_yr": 2.1229325470207483
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 0.83518200966623,
+          "report_delta_kg_yr": -0.002694076836316839,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009267624316943363,
+          "max_surface_transfer_delta_m3": 3.775155986929235e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": 0.025760447230005964,
+              "deep_percolation_m3_yr": 20.858010897337618,
+              "et_m3_yr": 65.93487959734321,
+              "first_reported_stock_m3": 132.01338581898446,
+              "last_reported_stock_m3": 83.27447537865615,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 52.679137905442836,
+              "precipitation_m3_yr": 142.31859611236078,
+              "rain_melt_m3_yr": 140.75409181197264,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 4.396107114963045
+            },
+            {
+              "apparent_soil_residual_m3": 0.21422084514817943,
+              "deep_percolation_m3_yr": 7.83987113717797,
+              "et_m3_yr": 117.44412675996021,
+              "first_reported_stock_m3": 102.84500816972714,
+              "last_reported_stock_m3": 62.24715394489748,
+              "lateral_in_m3_yr": 52.679675373771666,
+              "lateral_out_m3_yr": 30.13037348722479,
+              "precipitation_m3_yr": 116.14214004169435,
+              "rain_melt_m3_yr": 114.86600837882756,
+              "surface_in_m3_yr": 4.396106710048682,
+              "surface_out_m3_yr": 19.413549150514758
+            },
+            {
+              "apparent_soil_residual_m3": 0.24698593162535554,
+              "deep_percolation_m3_yr": 4.888742851628819,
+              "et_m3_yr": 1011.7575045688219,
+              "first_reported_stock_m3": 943.678096165731,
+              "last_reported_stock_m3": 302.54194066845093,
+              "lateral_in_m3_yr": 30.138915596649774,
+              "lateral_out_m3_yr": 46.33554065910759,
+              "precipitation_m3_yr": 1006.9040674949505,
+              "rain_melt_m3_yr": 995.2363919606335,
+              "surface_in_m3_yr": 19.413549666644226,
+              "surface_out_m3_yr": 21.747876067409024
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "flagstaff",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+        "element_sha256": "0c22e390c7fc4195faab7730754b5c5a47959c436fb798993ceb9ddf2406c0f1",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 18,
+        "first": "0001-01-01",
+        "last": "0016-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "707376f3a4b2ecca7667898335765612420dcd8ba91a0ddeb65192015f3eee30",
+        "passed": true,
+        "positive_terminal_days": 7,
+        "positive_terminal_non_event_dates": [],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B2/record.json",
+        "record_sha256": "4ad288692ff43a421edc3fbe9220ef62e8f16b7043cafe76d17d072ea0bb9887",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "flagstaff",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "0c22e390c7fc4195faab7730754b5c5a47959c436fb798993ceb9ddf2406c0f1",
+        "events": 18,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "707376f3a4b2ecca7667898335765612420dcd8ba91a0ddeb65192015f3eee30",
+        "passed": true,
+        "positive_events": 8,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B2/record.json",
+        "record_sha256": "4ad288692ff43a421edc3fbe9220ef62e8f16b7043cafe76d17d072ea0bb9887",
+        "structure_valid": true
+      },
+      "record_sha256": "4ad288692ff43a421edc3fbe9220ef62e8f16b7043cafe76d17d072ea0bb9887"
+    },
+    "B2/optional/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 233,
+          "max_delta_kg_m": 0.03699999999999992,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 604,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 29.564799201783874,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 29.564799201783874,
+              "positive_daily_net_kg_yr": 29.564799201783874
+            },
+            {
+              "boundary_kg_yr": 32.3396983431942,
+              "negative_daily_net_kg_yr": -0.43105229381131915,
+              "net_kg_yr": 2.774899141410371,
+              "positive_daily_net_kg_yr": 3.2059514352216905
+            },
+            {
+              "boundary_kg_yr": 18.08533780222117,
+              "negative_daily_net_kg_yr": -16.37459901115748,
+              "net_kg_yr": -14.254360540973058,
+              "positive_daily_net_kg_yr": 2.120238470184428
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 0.8351819234557712,
+          "report_delta_kg_yr": -0.01885853785424274,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009440045234467842,
+          "max_surface_transfer_delta_m3": 2.7371820650046175e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": -0.028257433943259455,
+              "deep_percolation_m3_yr": 20.873825187691647,
+              "et_m3_yr": 65.93472872904039,
+              "first_reported_stock_m3": 131.95062460500552,
+              "last_reported_stock_m3": 81.47853910172067,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 52.77856011701052,
+              "precipitation_m3_yr": 142.31859611236078,
+              "rain_melt_m3_yr": 140.75409181197264,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 4.39664361622607
+            },
+            {
+              "apparent_soil_residual_m3": 0.11927875621702178,
+              "deep_percolation_m3_yr": 7.8437582370452485,
+              "et_m3_yr": 117.54015982286778,
+              "first_reported_stock_m3": 102.44708655521814,
+              "last_reported_stock_m3": 60.76775229887647,
+              "lateral_in_m3_yr": 52.77435412425379,
+              "lateral_out_m3_yr": 30.240072793699856,
+              "precipitation_m3_yr": 116.14214004169435,
+              "rain_melt_m3_yr": 114.8663777367618,
+              "surface_in_m3_yr": 4.396643706006177,
+              "surface_out_m3_yr": 19.397911269072964
+            },
+            {
+              "apparent_soil_residual_m3": 1.0193552007706368,
+              "deep_percolation_m3_yr": 4.981507818721863,
+              "et_m3_yr": 1010.990048827428,
+              "first_reported_stock_m3": 943.8830356683006,
+              "last_reported_stock_m3": 296.39375559136136,
+              "lateral_in_m3_yr": 30.239250561449506,
+              "lateral_out_m3_yr": 47.482988394849144,
+              "precipitation_m3_yr": 1006.9040674949505,
+              "rain_melt_m3_yr": 995.2363919606335,
+              "surface_in_m3_yr": 19.39791194800339,
+              "surface_out_m3_yr": 21.696872233366037
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "flagstaff",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "19dde5e82b65f1256c8a7e7a38d152a6b93b0e388bac69ab292aa87427a50bfc",
+        "element_sha256": "15404c48b456cc313b1d821d3bd32be29acc3ba84be9d405b2c7f54b73ed0311",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 18,
+        "first": "0001-01-01",
+        "last": "0016-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "9933d749f6f431e1c677409adf3dd6981e28102c236524bd9d86b43fb533fb44",
+        "passed": true,
+        "positive_terminal_days": 7,
+        "positive_terminal_non_event_dates": [],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B2/record.json",
+        "record_sha256": "3c3107fb7d64f9cac762d64642cfc404803c3660a6f584a0a16a6f384430c222",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "flagstaff",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "15404c48b456cc313b1d821d3bd32be29acc3ba84be9d405b2c7f54b73ed0311",
+        "events": 18,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "9933d749f6f431e1c677409adf3dd6981e28102c236524bd9d86b43fb533fb44",
+        "passed": true,
+        "positive_events": 8,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B2/record.json",
+        "record_sha256": "3c3107fb7d64f9cac762d64642cfc404803c3660a6f584a0a16a6f384430c222",
+        "structure_valid": true
+      },
+      "record_sha256": "3c3107fb7d64f9cac762d64642cfc404803c3660a6f584a0a16a6f384430c222"
+    },
+    "B3/default/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 225,
+          "max_delta_kg_m": 0.021999999999999992,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 592,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 19.8822870520471,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 19.8822870520471,
+              "positive_daily_net_kg_yr": 19.8822870520471
+            },
+            {
+              "boundary_kg_yr": 75.89483855599168,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 56.012551503944614,
+              "positive_daily_net_kg_yr": 56.012551503944614
+            },
+            {
+              "boundary_kg_yr": 8.152276506706578,
+              "negative_daily_net_kg_yr": -67.74256204928514,
+              "net_kg_yr": -67.74256204928514,
+              "positive_daily_net_kg_yr": 0.0
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 0.8190075051298598,
+          "report_delta_kg_yr": 0.005388153672642559,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009284866408695802,
+          "max_surface_transfer_delta_m3": 1.5560987804974502e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": -0.00974951756841461,
+              "deep_percolation_m3_yr": 20.46250406842278,
+              "et_m3_yr": 45.456468775569554,
+              "first_reported_stock_m3": 132.0495942116646,
+              "last_reported_stock_m3": 83.31792544987233,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 27.732007953727503,
+              "precipitation_m3_yr": 93.37993603907995,
+              "rain_melt_m3_yr": 93.28971679398525,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 2.7522834427285834
+            },
+            {
+              "apparent_soil_residual_m3": -0.08621295515047037,
+              "deep_percolation_m3_yr": 6.683806778628303,
+              "et_m3_yr": 70.62665428013317,
+              "first_reported_stock_m3": 102.87061698650247,
+              "last_reported_stock_m3": 61.70345906566739,
+              "lateral_in_m3_yr": 27.72745388624338,
+              "lateral_out_m3_yr": 14.78687554014778,
+              "precipitation_m3_yr": 76.20469780332105,
+              "rain_melt_m3_yr": 75.82462848896793,
+              "surface_in_m3_yr": 2.752283445264518,
+              "surface_out_m3_yr": 17.145794216954826
+            },
+            {
+              "apparent_soil_residual_m3": 0.3451056979226334,
+              "deep_percolation_m3_yr": 4.03309401532776,
+              "et_m3_yr": 695.9425289292561,
+              "first_reported_stock_m3": 943.7976442088967,
+              "last_reported_stock_m3": 296.2058943806725,
+              "lateral_in_m3_yr": 14.77912683635125,
+              "lateral_out_m3_yr": 26.371017450447198,
+              "precipitation_m3_yr": 660.6630474764929,
+              "rain_melt_m3_yr": 657.2996913692168,
+              "surface_in_m3_yr": 17.145794588593418,
+              "surface_out_m3_yr": 3.2086497297592196
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "denver",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "element_sha256": "7f07549bb4a0905d8b583dc1373abe75aa3b62b9341e2db34d96725befc53a6e",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 4,
+        "first": "0001-01-01",
+        "last": "0016-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "f40e41984b5ad582545b2de9aa7e05ad7ba96f06b1e5f9c3e399713ec6d8ab49",
+        "passed": true,
+        "positive_terminal_days": 5,
+        "positive_terminal_non_event_dates": [
+          {
+            "date": "0008-05-09",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.250",
+            "sedleave_kg_m_token": "0.309"
+          }
+        ],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B3/record.json",
+        "record_sha256": "94091987805df50ccc3be595e3c89a2ae590065f7b8b811f051cc6c65e7ffa7e",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "denver",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "7f07549bb4a0905d8b583dc1373abe75aa3b62b9341e2db34d96725befc53a6e",
+        "events": 4,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "f40e41984b5ad582545b2de9aa7e05ad7ba96f06b1e5f9c3e399713ec6d8ab49",
+        "passed": true,
+        "positive_events": 4,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B3/record.json",
+        "record_sha256": "94091987805df50ccc3be595e3c89a2ae590065f7b8b811f051cc6c65e7ffa7e",
+        "structure_valid": true
+      },
+      "record_sha256": "94091987805df50ccc3be595e3c89a2ae590065f7b8b811f051cc6c65e7ffa7e"
+    },
+    "B3/optional/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 225,
+          "max_delta_kg_m": 0.010000000000000009,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 592,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 19.8822870520471,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 19.8822870520471,
+              "positive_daily_net_kg_yr": 19.8822870520471
+            },
+            {
+              "boundary_kg_yr": 75.86789778762848,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 55.98561073558142,
+              "positive_daily_net_kg_yr": 55.98561073558142
+            },
+            {
+              "boundary_kg_yr": 8.041819356417426,
+              "negative_daily_net_kg_yr": -67.82607843121109,
+              "net_kg_yr": -67.82607843121109,
+              "positive_daily_net_kg_yr": 0.0
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 0.819007418919401,
+          "report_delta_kg_yr": -0.018858537854246293,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009284866408695802,
+          "max_surface_transfer_delta_m3": 2.7570104723650957e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": 0.04773946540640504,
+              "deep_percolation_m3_yr": 20.476868562806533,
+              "et_m3_yr": 45.456468775569554,
+              "first_reported_stock_m3": 131.98683299768567,
+              "last_reported_stock_m3": 81.52440306578218,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 27.82614977469598,
+              "precipitation_m3_yr": 93.37993603907995,
+              "rain_melt_m3_yr": 93.28971679398525,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 2.752279214946133
+            },
+            {
+              "apparent_soil_residual_m3": -0.08320624151553438,
+              "deep_percolation_m3_yr": 6.675875763052451,
+              "et_m3_yr": 70.65669539211964,
+              "first_reported_stock_m3": 102.4746652809762,
+              "last_reported_stock_m3": 60.23193705557724,
+              "lateral_in_m3_yr": 27.82644181262491,
+              "lateral_out_m3_yr": 14.956903309218607,
+              "precipitation_m3_yr": 76.20469780332105,
+              "rain_melt_m3_yr": 75.82450536965652,
+              "surface_in_m3_yr": 2.7522791511091738,
+              "surface_out_m3_yr": 17.144422189728004
+            },
+            {
+              "apparent_soil_residual_m3": 0.3498374831275736,
+              "deep_percolation_m3_yr": 4.064637055140143,
+              "et_m3_yr": 695.5315825308753,
+              "first_reported_stock_m3": 944.0025837114663,
+              "last_reported_stock_m3": 290.1601790548677,
+              "lateral_in_m3_yr": 14.958448901099688,
+              "lateral_out_m3_yr": 27.3241996160446,
+              "precipitation_m3_yr": 660.6630474764929,
+              "rain_melt_m3_yr": 657.2996913692168,
+              "surface_in_m3_yr": 17.14442297247931,
+              "surface_out_m3_yr": 3.1914502358956804
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "denver",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "acdc96e8ee655fd4db96bb61afd7d24783eac21abc90f065e1c532de00a99ea8",
+        "element_sha256": "88902b2283c28ae3efb4c380f14f9895853e053c9e70a755975387a2d66a81e6",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 4,
+        "first": "0001-01-01",
+        "last": "0016-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "f2e76e151fae7259883d2293dac67994d12ec627c1aff2afd0958b5ea7854bf6",
+        "passed": true,
+        "positive_terminal_days": 5,
+        "positive_terminal_non_event_dates": [
+          {
+            "date": "0008-05-09",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.244",
+            "sedleave_kg_m_token": "0.293"
+          }
+        ],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B3/record.json",
+        "record_sha256": "c60daf23ac6a3b284345b6fe713ae2b5179c36932d3a7f093e958866f5f0127a",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "denver",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718494",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "88902b2283c28ae3efb4c380f14f9895853e053c9e70a755975387a2d66a81e6",
+        "events": 4,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "f2e76e151fae7259883d2293dac67994d12ec627c1aff2afd0958b5ea7854bf6",
+        "passed": true,
+        "positive_events": 4,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B3/record.json",
+        "record_sha256": "c60daf23ac6a3b284345b6fe713ae2b5179c36932d3a7f093e958866f5f0127a",
+        "structure_valid": true
+      },
+      "record_sha256": "c60daf23ac6a3b284345b6fe713ae2b5179c36932d3a7f093e958866f5f0127a"
+    },
+    "B4/default/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 749,
+          "max_delta_kg_m": 0.05000000000000002,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 1089,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 76.8808706780851,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 76.8808706780851,
+              "positive_daily_net_kg_yr": 76.8808706780851
+            },
+            {
+              "boundary_kg_yr": 78.257543941445,
+              "negative_daily_net_kg_yr": -1.7942551729896175,
+              "net_kg_yr": 1.3766732633599,
+              "positive_daily_net_kg_yr": 3.1709284363495174
+            },
+            {
+              "boundary_kg_yr": 180.55433549338002,
+              "negative_daily_net_kg_yr": -19.542833370670674,
+              "net_kg_yr": 102.29679155193503,
+              "positive_daily_net_kg_yr": 121.83962492260571
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 1.4886579767678603,
+          "report_delta_kg_yr": 0.029634845199495885,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.00947021889503441,
+          "max_surface_transfer_delta_m3": 2.0130142118546246e-05,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": 0.02609084083041502,
+              "deep_percolation_m3_yr": 3.259081064672645,
+              "et_m3_yr": 72.19078464265631,
+              "first_reported_stock_m3": 30.39332481571858,
+              "last_reported_stock_m3": 50.67243860944836,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 365.74927221886156,
+              "precipitation_m3_yr": 510.98490696651385,
+              "rain_melt_m3_yr": 510.9846052299086,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 68.21325180031008
+            },
+            {
+              "apparent_soil_residual_m3": 0.3831310333975737,
+              "deep_percolation_m3_yr": 2.6596429402770987,
+              "et_m3_yr": 82.95619148365198,
+              "first_reported_stock_m3": 24.663260463625953,
+              "last_reported_stock_m3": 25.898393395789967,
+              "lateral_in_m3_yr": 365.7507846735953,
+              "lateral_out_m3_yr": 646.0972734752635,
+              "precipitation_m3_yr": 417.00018300660315,
+              "rain_melt_m3_yr": 413.7257018000803,
+              "surface_in_m3_yr": 68.21324663736586,
+              "surface_out_m3_yr": 115.63675175385912
+            },
+            {
+              "apparent_soil_residual_m3": 3.7900857717907996,
+              "deep_percolation_m3_yr": 15.994804229757424,
+              "et_m3_yr": 816.8109375359212,
+              "first_reported_stock_m3": 215.11816453061294,
+              "last_reported_stock_m3": 378.2841651598187,
+              "lateral_in_m3_yr": 646.0931297156743,
+              "lateral_out_m3_yr": 3018.4109026539254,
+              "precipitation_m3_yr": 3615.2182167880696,
+              "rain_melt_m3_yr": 3586.889600130785,
+              "surface_in_m3_yr": 115.63675550884038,
+              "surface_out_m3_yr": 484.8169743212238
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718465",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "element_sha256": "a445c6084a82c4186c8c3022b6e6cd2d9ab40311552236c9dc39f8585a3d629c",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 201,
+        "first": "2000-01-01",
+        "last": "2015-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "fdbabf1a13f45eabf152e0fd02ee84ed9af22cfbf6ed9ba174acc969d2c29076",
+        "passed": true,
+        "positive_terminal_days": 163,
+        "positive_terminal_non_event_dates": [
+          {
+            "date": "2001-11-29",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.200",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2005-12-31",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.305",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2008-01-05",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.240",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2008-01-06",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.361",
+            "sedleave_kg_m_token": "0.008"
+          },
+          {
+            "date": "2011-03-16",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.446",
+            "sedleave_kg_m_token": "0.027"
+          },
+          {
+            "date": "2012-11-24",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.184",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2012-12-03",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.371",
+            "sedleave_kg_m_token": "0.015"
+          },
+          {
+            "date": "2014-10-17",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.017",
+            "sedleave_kg_m_token": "0.010"
+          },
+          {
+            "date": "2015-02-08",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.285",
+            "sedleave_kg_m_token": "0.008"
+          }
+        ],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B4/record.json",
+        "record_sha256": "01f8bb17d3329bce32ae9c96254610282ef35186afb473c7d77962984c8bab2b",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718465",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "a445c6084a82c4186c8c3022b6e6cd2d9ab40311552236c9dc39f8585a3d629c",
+        "events": 201,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "fdbabf1a13f45eabf152e0fd02ee84ed9af22cfbf6ed9ba174acc969d2c29076",
+        "passed": true,
+        "positive_events": 162,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B4/record.json",
+        "record_sha256": "01f8bb17d3329bce32ae9c96254610282ef35186afb473c7d77962984c8bab2b",
+        "structure_valid": true
+      },
+      "record_sha256": "01f8bb17d3329bce32ae9c96254610282ef35186afb473c7d77962984c8bab2b"
+    },
+    "B4/optional/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 846,
+          "max_delta_kg_m": 0.050000000000000044,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 1180,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 80.57175594384455,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 80.57175594384455,
+              "positive_daily_net_kg_yr": 80.57175594384455
+            },
+            {
+              "boundary_kg_yr": 80.90851554838463,
+              "negative_daily_net_kg_yr": -2.3007416182179186,
+              "net_kg_yr": 0.3367596045400937,
+              "positive_daily_net_kg_yr": 2.63750122275801
+            },
+            {
+              "boundary_kg_yr": 182.29740320647957,
+              "negative_daily_net_kg_yr": -20.049319815898976,
+              "net_kg_yr": 101.38888765809497,
+              "positive_daily_net_kg_yr": 121.43820747399394
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 1.6112402401348587,
+          "report_delta_kg_yr": 0.005388153672612361,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.00945728732622031,
+          "max_surface_transfer_delta_m3": 1.0905623032186895e-05,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": -0.0007492747531419736,
+              "deep_percolation_m3_yr": 3.259081064672645,
+              "et_m3_yr": 70.11770329341493,
+              "first_reported_stock_m3": 30.39332481571858,
+              "last_reported_stock_m3": 50.30311300411083,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 371.3476932004238,
+              "precipitation_m3_yr": 510.98490696651385,
+              "rain_melt_m3_yr": 510.9846052299086,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 64.71267252554651
+            },
+            {
+              "apparent_soil_residual_m3": 0.3569691585931472,
+              "deep_percolation_m3_yr": 2.6596429402770987,
+              "et_m3_yr": 81.97874727029011,
+              "first_reported_stock_m3": 24.661290554643234,
+              "last_reported_stock_m3": 25.742770586155267,
+              "lateral_in_m3_yr": 371.3460649003839,
+              "lateral_out_m3_yr": 637.197840287904,
+              "precipitation_m3_yr": 417.00018300660315,
+              "rain_melt_m3_yr": 413.72520932283464,
+              "surface_in_m3_yr": 64.71266916194848,
+              "surface_out_m3_yr": 127.6192169529446
+            },
+            {
+              "apparent_soil_residual_m3": 2.960650325700744,
+              "deep_percolation_m3_yr": 15.990759122221121,
+              "et_m3_yr": 812.4965340495324,
+              "first_reported_stock_m3": 215.11816453061294,
+              "last_reported_stock_m3": 372.92158150924615,
+              "lateral_in_m3_yr": 637.1622504552533,
+              "lateral_out_m3_yr": 3047.886967046949,
+              "precipitation_m3_yr": 3615.2182167880696,
+              "rain_melt_m3_yr": 3586.889600130785,
+              "surface_in_m3_yr": 127.619218389155,
+              "surface_out_m3_yr": 463.0978042360749
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718465",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "element_sha256": "720146189679eb82279e905ef7c1155189d3501ce87e5ed1a547d324ff9ec50b",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 192,
+        "first": "2000-01-01",
+        "last": "2015-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "fb2d6ac22ab0d7eab442aa653e6320ab856f3f2f549f3d51f5f57bd2e5ce2849",
+        "passed": true,
+        "positive_terminal_days": 150,
+        "positive_terminal_non_event_dates": [
+          {
+            "date": "2001-11-29",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.191",
+            "sedleave_kg_m_token": "0.006"
+          },
+          {
+            "date": "2005-12-31",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.281",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2008-01-05",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.264",
+            "sedleave_kg_m_token": "0.006"
+          },
+          {
+            "date": "2008-01-06",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.370",
+            "sedleave_kg_m_token": "0.008"
+          },
+          {
+            "date": "2011-03-16",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.600",
+            "sedleave_kg_m_token": "0.032"
+          },
+          {
+            "date": "2012-11-24",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.184",
+            "sedleave_kg_m_token": "0.005"
+          },
+          {
+            "date": "2012-12-03",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.249",
+            "sedleave_kg_m_token": "0.013"
+          },
+          {
+            "date": "2015-02-08",
+            "pass_label": "SUBEVENT",
+            "runoff_mm_token": "0.342",
+            "sedleave_kg_m_token": "0.009"
+          }
+        ],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B4/record.json",
+        "record_sha256": "23a99562436e476d5dbe0a3804859ea89e69a8d04e3f75a21b858fb44f282646",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "1718465",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "720146189679eb82279e905ef7c1155189d3501ce87e5ed1a547d324ff9ec50b",
+        "events": 192,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "fb2d6ac22ab0d7eab442aa653e6320ab856f3f2f549f3d51f5f57bd2e5ce2849",
+        "passed": true,
+        "positive_events": 156,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B4/record.json",
+        "record_sha256": "23a99562436e476d5dbe0a3804859ea89e69a8d04e3f75a21b858fb44f282646",
+        "structure_valid": true
+      },
+      "record_sha256": "23a99562436e476d5dbe0a3804859ea89e69a8d04e3f75a21b858fb44f282646"
+    },
+    "B5/default/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 802,
+          "max_delta_kg_m": 0.045,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 1137,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 9.561278692102325,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 9.561278692102325,
+              "positive_daily_net_kg_yr": 9.561278692102325
+            },
+            {
+              "boundary_kg_yr": 12.425082369111278,
+              "negative_daily_net_kg_yr": -0.005388153672641491,
+              "net_kg_yr": 2.8638036770089528,
+              "positive_daily_net_kg_yr": 2.8691918306815944
+            },
+            {
+              "boundary_kg_yr": 6.015873575504226,
+              "negative_daily_net_kg_yr": -6.829484780073092,
+              "net_kg_yr": -6.409208793607056,
+              "positive_daily_net_kg_yr": 0.42027598646603637
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 1.553141287765794,
+          "report_delta_kg_yr": 0.024246691526886188,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009465908372096266,
+          "max_surface_transfer_delta_m3": 9.901271184276084e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": -0.018287162176131806,
+              "deep_percolation_m3_yr": 21.58318559082131,
+              "et_m3_yr": 82.63962156033092,
+              "first_reported_stock_m3": 173.56372336588018,
+              "last_reported_stock_m3": 222.9254181603071,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 383.7990051016122,
+              "precipitation_m3_yr": 510.98490696651385,
+              "rain_melt_m3_yr": 510.9846052299086,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 19.583954850173907
+            },
+            {
+              "apparent_soil_residual_m3": 0.37583055829733963,
+              "deep_percolation_m3_yr": 16.389008824693406,
+              "et_m3_yr": 108.11316038607201,
+              "first_reported_stock_m3": 141.18928651832772,
+              "last_reported_stock_m3": 120.66283491840898,
+              "lateral_in_m3_yr": 383.7990907732536,
+              "lateral_out_m3_yr": 573.5273039836804,
+              "precipitation_m3_yr": 417.00018300660315,
+              "rain_melt_m3_yr": 413.73074969184864,
+              "surface_in_m3_yr": 19.583953504440494,
+              "surface_out_m3_yr": 120.13116660832729
+            },
+            {
+              "apparent_soil_residual_m3": 2.3885633312243018,
+              "deep_percolation_m3_yr": 132.722821475171,
+              "et_m3_yr": 1332.2967626999205,
+              "first_reported_stock_m3": 1228.748944240119,
+              "last_reported_stock_m3": 1683.441387274657,
+              "lateral_in_m3_yr": 573.4943783236199,
+              "lateral_out_m3_yr": 2668.996522525352,
+              "precipitation_m3_yr": 3615.2182167880696,
+              "rain_melt_m3_yr": 3586.889600130785,
+              "surface_in_m3_yr": 120.13117200433027,
+              "surface_out_m3_yr": 115.7950716921084
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "2711184",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "element_sha256": "47ca80f0c28d96c854d9c36408085f75185f15bb89e95ae4345b4d1141dcbd57",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 42,
+        "first": "2000-01-01",
+        "last": "2015-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "7d6cf4bda096fcf9d97fa371f057f276048b0cb0d12f34fbbd01de94bb2f8722",
+        "passed": true,
+        "positive_terminal_days": 31,
+        "positive_terminal_non_event_dates": [],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B5/record.json",
+        "record_sha256": "5bf544f1d5f11714b37ad2d0cfd85a3dbaead1638ca40d5dc489f336d659255e",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "2711184",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "47ca80f0c28d96c854d9c36408085f75185f15bb89e95ae4345b4d1141dcbd57",
+        "events": 42,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "7d6cf4bda096fcf9d97fa371f057f276048b0cb0d12f34fbbd01de94bb2f8722",
+        "passed": true,
+        "positive_events": 33,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/default/B5/record.json",
+        "record_sha256": "5bf544f1d5f11714b37ad2d0cfd85a3dbaead1638ca40d5dc489f336d659255e",
+        "structure_valid": true
+      },
+      "record_sha256": "5bf544f1d5f11714b37ad2d0cfd85a3dbaead1638ca40d5dc489f336d659255e"
+    },
+    "B5/optional/ordinary": {
+      "audit": {
+        "ebe": {
+          "dates": 894,
+          "max_delta_kg_m": 0.04600000000000004,
+          "mismatches": []
+        },
+        "invalid_water_rows": [],
+        "physical_pass": true,
+        "sediment": {
+          "dates": 1224,
+          "negative_fluxes": [],
+          "ofes": [
+            {
+              "boundary_kg_yr": 8.731503026515536,
+              "negative_daily_net_kg_yr": 0.0,
+              "net_kg_yr": 8.731503026515536,
+              "positive_daily_net_kg_yr": 8.731503026515536
+            },
+            {
+              "boundary_kg_yr": 11.495625860580619,
+              "negative_daily_net_kg_yr": -0.0053881536726414925,
+              "net_kg_yr": 2.764122834065085,
+              "positive_daily_net_kg_yr": 2.7695109877377266
+            },
+            {
+              "boundary_kg_yr": 5.3181076748971545,
+              "negative_daily_net_kg_yr": -6.533136328077808,
+              "net_kg_yr": -6.1775181856834696,
+              "positive_daily_net_kg_yr": 0.35561814239433875
+            }
+          ],
+          "physical_budget_valid": true,
+          "report_bound_kg_yr": 1.6703329835673055,
+          "report_delta_kg_yr": -0.02694076836320569,
+          "report_reconciled": true
+        },
+        "water": {
+          "days": 5844,
+          "max_lateral_transfer_delta_m3": 0.009478839940910255,
+          "max_surface_transfer_delta_m3": 9.590913538914947e-06,
+          "ofes": [
+            {
+              "apparent_soil_residual_m3": 0.12401649676729366,
+              "deep_percolation_m3_yr": 21.58318559082131,
+              "et_m3_yr": 81.44353765546329,
+              "first_reported_stock_m3": 173.5613094730348,
+              "last_reported_stock_m3": 221.45052963180225,
+              "lateral_in_m3_yr": 0.0,
+              "lateral_out_m3_yr": 387.0767698489836,
+              "precipitation_m3_yr": 510.98490696651385,
+              "rain_melt_m3_yr": 510.9846052299086,
+              "surface_in_m3_yr": 0.0,
+              "surface_out_m3_yr": 17.585560562018482
+            },
+            {
+              "apparent_soil_residual_m3": 0.3412442213246252,
+              "deep_percolation_m3_yr": 16.397295305998824,
+              "et_m3_yr": 108.82663679575029,
+              "first_reported_stock_m3": 141.17352724646597,
+              "last_reported_stock_m3": 116.20493089051877,
+              "lateral_in_m3_yr": 387.0751725308242,
+              "lateral_out_m3_yr": 561.4797100033148,
+              "precipitation_m3_yr": 417.00018300660315,
+              "rain_melt_m3_yr": 413.73124216909434,
+              "surface_in_m3_yr": 17.585559321169804,
+              "surface_out_m3_yr": 133.01595839706124
+            },
+            {
+              "apparent_soil_residual_m3": 3.8484467309232473,
+              "deep_percolation_m3_yr": 132.66897727114227,
+              "et_m3_yr": 1330.0221477000446,
+              "first_reported_stock_m3": 1228.7660225319999,
+              "last_reported_stock_m3": 1678.0788036240845,
+              "lateral_in_m3_yr": 561.4701934462906,
+              "lateral_out_m3_yr": 2691.818457444341,
+              "precipitation_m3_yr": 3615.2182167880696,
+              "rain_melt_m3_yr": 3586.889600130785,
+              "surface_in_m3_yr": 133.01596394124243,
+              "surface_out_m3_yr": 96.40612180230696
+            }
+          ],
+          "residual_days": 5843,
+          "residual_is_complete_water_closure": false
+        }
+      },
+      "calendar": {
+        "audit_version": 1,
+        "calendar_days": 5844,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "2711184",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "climate_sha256": "cbb83d2bf24f4ca43db87ff7de5d6d56d2f2a49033ad80b68a5b98dd46b1aea2",
+        "element_sha256": "d26180c96c799f1eb4a3156b368bb7ef0b9c777e5d4398eff08ad5f005f1aa2e",
+        "event_classification_source": {
+          "commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+          "condition": "runoff(nplane).ge.0.001",
+          "line": 161,
+          "path": "src/wshpas.for",
+          "runoff_units": "m"
+        },
+        "event_days": 41,
+        "first": "2000-01-01",
+        "last": "2015-12-31",
+        "particle_audit_scope": "Existing strict criteria apply to EVENT rows only; positive terminal sediment on NO EVENT/SUBEVENT dates has no EVENT particle payload and is not certified by that audit.",
+        "pass_sha256": "b037016f4d0e044efbdfe65a3ebcf35b22b426f0462c120ab9b77b04f6c6ea70",
+        "passed": true,
+        "positive_terminal_days": 30,
+        "positive_terminal_non_event_dates": [],
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B5/record.json",
+        "record_sha256": "66236bccd5d16a868c5a546415575323bc5c3c93bbece3a0272bd66d704f088c",
+        "script_sha256": "187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa",
+        "terminal_ofe": 3
+      },
+      "particle": {
+        "audit_version": 2,
+        "case": {
+          "climate": "site",
+          "design": "outunrut",
+          "runtime": "project",
+          "soil": "2711184",
+          "surface": "gravel",
+          "traffic": "high",
+          "variant": "erosion_road_cap"
+        },
+        "element_sha256": "d26180c96c799f1eb4a3156b368bb7ef0b9c777e5d4398eff08ad5f005f1aa2e",
+        "events": 41,
+        "flags": [],
+        "numeric_unavailable_diagnostics": [],
+        "particle_required_fields_available": true,
+        "pass_sha256": "b037016f4d0e044efbdfe65a3ebcf35b22b426f0462c120ab9b77b04f6c6ea70",
+        "passed": true,
+        "positive_events": 31,
+        "record": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-native-v1/cases/ordinary/optional/B5/record.json",
+        "record_sha256": "66236bccd5d16a868c5a546415575323bc5c3c93bbece3a0272bd66d704f088c",
+        "structure_valid": true
+      },
+      "record_sha256": "66236bccd5d16a868c5a546415575323bc5c3c93bbece3a0272bd66d704f088c"
+    }
+  },
+  "checked_native_output_files": 112,
+  "contrasts": {
+    "B2": {
+      "annual_export": [
+        {
+          "default_kg": 0.08621045876226387,
+          "delta_kg": 0.0,
+          "optional_kg": 0.08621045876226387,
+          "year": 1
+        },
+        {
+          "default_kg": 27.58734680392444,
+          "delta_kg": -1.0776307345283023,
+          "optional_kg": 26.509716069396138,
+          "year": 2
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 3
+        },
+        {
+          "default_kg": 123.3671664887996,
+          "delta_kg": -0.043105229381126264,
+          "optional_kg": 123.32406125941847,
+          "year": 4
+        },
+        {
+          "default_kg": 83.32240839372803,
+          "delta_kg": 0.0,
+          "optional_kg": 83.32240839372803,
+          "year": 5
+        },
+        {
+          "default_kg": 30.389186713698013,
+          "delta_kg": 0.0,
+          "optional_kg": 30.389186713698013,
+          "year": 6
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 7
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 8
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 9
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 10
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 11
+        },
+        {
+          "default_kg": 26.251084693109348,
+          "delta_kg": -0.5172627525735827,
+          "optional_kg": 25.733821940535766,
+          "year": 12
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 13
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 14
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 15
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 16
+        }
+      ],
+      "baseline_sediment": {
+        "dates": 604,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 29.564799201783874,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 29.564799201783874,
+            "positive_daily_net_kg_yr": 29.564799201783874
+          },
+          {
+            "boundary_kg_yr": 32.34239242003052,
+            "negative_daily_net_kg_yr": -0.43105229381131915,
+            "net_kg_yr": 2.7775932182466914,
+            "positive_daily_net_kg_yr": 3.2086455120580117
+          },
+          {
+            "boundary_kg_yr": 18.187712722001358,
+            "negative_daily_net_kg_yr": -16.277612245049937,
+            "net_kg_yr": -14.15467969802919,
+            "positive_daily_net_kg_yr": 2.1229325470207483
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 0.83518200966623,
+        "report_delta_kg_yr": -0.002694076836316839,
+        "report_reconciled": true
+      },
+      "baseline_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009267624316943363,
+        "max_surface_transfer_delta_m3": 3.775155986929235e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": 0.025760447230005964,
+            "deep_percolation_m3_yr": 20.858010897337618,
+            "et_m3_yr": 65.93487959734321,
+            "first_reported_stock_m3": 132.01338581898446,
+            "last_reported_stock_m3": 83.27447537865615,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 52.679137905442836,
+            "precipitation_m3_yr": 142.31859611236078,
+            "rain_melt_m3_yr": 140.75409181197264,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 4.396107114963045
+          },
+          {
+            "apparent_soil_residual_m3": 0.21422084514817943,
+            "deep_percolation_m3_yr": 7.83987113717797,
+            "et_m3_yr": 117.44412675996021,
+            "first_reported_stock_m3": 102.84500816972714,
+            "last_reported_stock_m3": 62.24715394489748,
+            "lateral_in_m3_yr": 52.679675373771666,
+            "lateral_out_m3_yr": 30.13037348722479,
+            "precipitation_m3_yr": 116.14214004169435,
+            "rain_melt_m3_yr": 114.86600837882756,
+            "surface_in_m3_yr": 4.396106710048682,
+            "surface_out_m3_yr": 19.413549150514758
+          },
+          {
+            "apparent_soil_residual_m3": 0.24698593162535554,
+            "deep_percolation_m3_yr": 4.888742851628819,
+            "et_m3_yr": 1011.7575045688219,
+            "first_reported_stock_m3": 943.678096165731,
+            "last_reported_stock_m3": 302.54194066845093,
+            "lateral_in_m3_yr": 30.138915596649774,
+            "lateral_out_m3_yr": 46.33554065910759,
+            "precipitation_m3_yr": 1006.9040674949505,
+            "rain_melt_m3_yr": 995.2363919606335,
+            "surface_in_m3_yr": 19.413549666644226,
+            "surface_out_m3_yr": 21.747876067409024
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "case": {
+        "climate": "flagstaff",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718494",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_class": "small_exceedance",
+      "default_kg_yr": 18.190406798837675,
+      "default_log10_ratio": 1.5113690986548372,
+      "default_ratio": 32.46153846153846,
+      "delta_export_kg_yr": -0.08621045876226319,
+      "fresh_default_vs_frozen_r7": {
+        "changed_outputs": [],
+        "delta_export_kg_yr": 0.0,
+        "frozen_export_kg_yr": 18.190406798837675,
+        "sediment_ofe_deltas": [
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          }
+        ],
+        "water_ofe_deltas": [
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          }
+        ]
+      },
+      "optional_class": "small_exceedance",
+      "optional_kg_yr": 18.10419634007541,
+      "optional_log10_ratio": 1.5093059380910636,
+      "optional_ratio": 32.30769230769231,
+      "optional_sediment": {
+        "dates": 604,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 29.564799201783874,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 29.564799201783874,
+            "positive_daily_net_kg_yr": 29.564799201783874
+          },
+          {
+            "boundary_kg_yr": 32.3396983431942,
+            "negative_daily_net_kg_yr": -0.43105229381131915,
+            "net_kg_yr": 2.774899141410371,
+            "positive_daily_net_kg_yr": 3.2059514352216905
+          },
+          {
+            "boundary_kg_yr": 18.08533780222117,
+            "negative_daily_net_kg_yr": -16.37459901115748,
+            "net_kg_yr": -14.254360540973058,
+            "positive_daily_net_kg_yr": 2.120238470184428
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 0.8351819234557712,
+        "report_delta_kg_yr": -0.01885853785424274,
+        "report_reconciled": true
+      },
+      "optional_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009440045234467842,
+        "max_surface_transfer_delta_m3": 2.7371820650046175e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": -0.028257433943259455,
+            "deep_percolation_m3_yr": 20.873825187691647,
+            "et_m3_yr": 65.93472872904039,
+            "first_reported_stock_m3": 131.95062460500552,
+            "last_reported_stock_m3": 81.47853910172067,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 52.77856011701052,
+            "precipitation_m3_yr": 142.31859611236078,
+            "rain_melt_m3_yr": 140.75409181197264,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 4.39664361622607
+          },
+          {
+            "apparent_soil_residual_m3": 0.11927875621702178,
+            "deep_percolation_m3_yr": 7.8437582370452485,
+            "et_m3_yr": 117.54015982286778,
+            "first_reported_stock_m3": 102.44708655521814,
+            "last_reported_stock_m3": 60.76775229887647,
+            "lateral_in_m3_yr": 52.77435412425379,
+            "lateral_out_m3_yr": 30.240072793699856,
+            "precipitation_m3_yr": 116.14214004169435,
+            "rain_melt_m3_yr": 114.8663777367618,
+            "surface_in_m3_yr": 4.396643706006177,
+            "surface_out_m3_yr": 19.397911269072964
+          },
+          {
+            "apparent_soil_residual_m3": 1.0193552007706368,
+            "deep_percolation_m3_yr": 4.981507818721863,
+            "et_m3_yr": 1010.990048827428,
+            "first_reported_stock_m3": 943.8830356683006,
+            "last_reported_stock_m3": 296.39375559136136,
+            "lateral_in_m3_yr": 30.239250561449506,
+            "lateral_out_m3_yr": 47.482988394849144,
+            "precipitation_m3_yr": 1006.9040674949505,
+            "rain_melt_m3_yr": 995.2363919606335,
+            "surface_in_m3_yr": 19.39791194800339,
+            "surface_out_m3_yr": 21.696872233366037
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "paired_changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.soil.dat",
+        "H1.wat.dat"
+      ],
+      "percent_change": -0.4739336492890958,
+      "recovery": false,
+      "reference_kg_yr": 0.5603679819547152,
+      "regression": false,
+      "sediment_ofe_deltas": [
+        {
+          "boundary_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": -0.0026940768363203915,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": -0.0026940768363203915,
+          "positive_daily_net_kg_yr": -0.0026940768363212797
+        },
+        {
+          "boundary_kg_yr": -0.10237491978018909,
+          "negative_daily_net_kg_yr": -0.0969867661075412,
+          "net_kg_yr": -0.0996808429438687,
+          "positive_daily_net_kg_yr": -0.0026940768363203915
+        }
+      ],
+      "small_load_limit_kg_yr": 5.6036798195471516,
+      "water_ofe_deltas": [
+        {
+          "apparent_soil_residual_m3": -0.05401788117326542,
+          "deep_percolation_m3_yr": 0.01581429035402948,
+          "et_m3_yr": -0.00015086830282484698,
+          "first_reported_stock_m3": -0.06276121397894485,
+          "last_reported_stock_m3": -1.7959362769354783,
+          "lateral_in_m3_yr": 0.0,
+          "lateral_out_m3_yr": 0.09942221156768483,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 0.0,
+          "surface_out_m3_yr": 0.0005365012630251798
+        },
+        {
+          "apparent_soil_residual_m3": -0.09494208893115766,
+          "deep_percolation_m3_yr": 0.0038870998672786428,
+          "et_m3_yr": 0.09603306290756564,
+          "first_reported_stock_m3": -0.3979216145090021,
+          "last_reported_stock_m3": -1.4794016460210102,
+          "lateral_in_m3_yr": 0.09467875048212449,
+          "lateral_out_m3_yr": 0.10969930647506487,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0003693579342467501,
+          "surface_in_m3_yr": 0.0005369959574954564,
+          "surface_out_m3_yr": -0.01563788144179412
+        },
+        {
+          "apparent_soil_residual_m3": 0.7723692691452813,
+          "deep_percolation_m3_yr": 0.0927649670930446,
+          "et_m3_yr": -0.7674557413938601,
+          "first_reported_stock_m3": 0.20493950256968674,
+          "last_reported_stock_m3": -6.148185077089579,
+          "lateral_in_m3_yr": 0.10033496479973181,
+          "lateral_out_m3_yr": 1.147447735741551,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": -0.01563771864083563,
+          "surface_out_m3_yr": -0.05100383404298725
+        }
+      ]
+    },
+    "B3": {
+      "annual_export": [
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 1
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 2
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 3
+        },
+        {
+          "default_kg": 9.655571381373553,
+          "delta_kg": -0.6034732113358476,
+          "optional_kg": 9.052098170037706,
+          "year": 4
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 5
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 6
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 7
+        },
+        {
+          "default_kg": 26.207979463728215,
+          "delta_kg": -1.0776307345282987,
+          "optional_kg": 25.130348729199916,
+          "year": 8
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 9
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 10
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 11
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 12
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 13
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 14
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 15
+        },
+        {
+          "default_kg": 94.52976803282233,
+          "delta_kg": 0.0,
+          "optional_kg": 94.52976803282233,
+          "year": 16
+        }
+      ],
+      "baseline_sediment": {
+        "dates": 592,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 19.8822870520471,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 19.8822870520471,
+            "positive_daily_net_kg_yr": 19.8822870520471
+          },
+          {
+            "boundary_kg_yr": 75.89483855599168,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 56.012551503944614,
+            "positive_daily_net_kg_yr": 56.012551503944614
+          },
+          {
+            "boundary_kg_yr": 8.152276506706578,
+            "negative_daily_net_kg_yr": -67.74256204928514,
+            "net_kg_yr": -67.74256204928514,
+            "positive_daily_net_kg_yr": 0.0
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 0.8190075051298598,
+        "report_delta_kg_yr": 0.005388153672642559,
+        "report_reconciled": true
+      },
+      "baseline_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009284866408695802,
+        "max_surface_transfer_delta_m3": 1.5560987804974502e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": -0.00974951756841461,
+            "deep_percolation_m3_yr": 20.46250406842278,
+            "et_m3_yr": 45.456468775569554,
+            "first_reported_stock_m3": 132.0495942116646,
+            "last_reported_stock_m3": 83.31792544987233,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 27.732007953727503,
+            "precipitation_m3_yr": 93.37993603907995,
+            "rain_melt_m3_yr": 93.28971679398525,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 2.7522834427285834
+          },
+          {
+            "apparent_soil_residual_m3": -0.08621295515047037,
+            "deep_percolation_m3_yr": 6.683806778628303,
+            "et_m3_yr": 70.62665428013317,
+            "first_reported_stock_m3": 102.87061698650247,
+            "last_reported_stock_m3": 61.70345906566739,
+            "lateral_in_m3_yr": 27.72745388624338,
+            "lateral_out_m3_yr": 14.78687554014778,
+            "precipitation_m3_yr": 76.20469780332105,
+            "rain_melt_m3_yr": 75.82462848896793,
+            "surface_in_m3_yr": 2.752283445264518,
+            "surface_out_m3_yr": 17.145794216954826
+          },
+          {
+            "apparent_soil_residual_m3": 0.3451056979226334,
+            "deep_percolation_m3_yr": 4.03309401532776,
+            "et_m3_yr": 695.9425289292561,
+            "first_reported_stock_m3": 943.7976442088967,
+            "last_reported_stock_m3": 296.2058943806725,
+            "lateral_in_m3_yr": 14.77912683635125,
+            "lateral_out_m3_yr": 26.371017450447198,
+            "precipitation_m3_yr": 660.6630474764929,
+            "rain_melt_m3_yr": 657.2996913692168,
+            "surface_in_m3_yr": 17.145794588593418,
+            "surface_out_m3_yr": 3.2086497297592196
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "case": {
+        "climate": "denver",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718494",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_class": "small_exceedance",
+      "default_kg_yr": 8.146888353033935,
+      "default_log10_ratio": null,
+      "default_ratio": null,
+      "delta_export_kg_yr": -0.08621045876226319,
+      "fresh_default_vs_frozen_r7": {
+        "changed_outputs": [],
+        "delta_export_kg_yr": 0.0,
+        "frozen_export_kg_yr": 8.146888353033935,
+        "sediment_ofe_deltas": [
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          }
+        ],
+        "water_ofe_deltas": [
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          }
+        ]
+      },
+      "optional_class": "small_exceedance",
+      "optional_kg_yr": 8.060677894271672,
+      "optional_log10_ratio": null,
+      "optional_ratio": null,
+      "optional_sediment": {
+        "dates": 592,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 19.8822870520471,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 19.8822870520471,
+            "positive_daily_net_kg_yr": 19.8822870520471
+          },
+          {
+            "boundary_kg_yr": 75.86789778762848,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 55.98561073558142,
+            "positive_daily_net_kg_yr": 55.98561073558142
+          },
+          {
+            "boundary_kg_yr": 8.041819356417426,
+            "negative_daily_net_kg_yr": -67.82607843121109,
+            "net_kg_yr": -67.82607843121109,
+            "positive_daily_net_kg_yr": 0.0
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 0.819007418919401,
+        "report_delta_kg_yr": -0.018858537854246293,
+        "report_reconciled": true
+      },
+      "optional_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009284866408695802,
+        "max_surface_transfer_delta_m3": 2.7570104723650957e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": 0.04773946540640504,
+            "deep_percolation_m3_yr": 20.476868562806533,
+            "et_m3_yr": 45.456468775569554,
+            "first_reported_stock_m3": 131.98683299768567,
+            "last_reported_stock_m3": 81.52440306578218,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 27.82614977469598,
+            "precipitation_m3_yr": 93.37993603907995,
+            "rain_melt_m3_yr": 93.28971679398525,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 2.752279214946133
+          },
+          {
+            "apparent_soil_residual_m3": -0.08320624151553438,
+            "deep_percolation_m3_yr": 6.675875763052451,
+            "et_m3_yr": 70.65669539211964,
+            "first_reported_stock_m3": 102.4746652809762,
+            "last_reported_stock_m3": 60.23193705557724,
+            "lateral_in_m3_yr": 27.82644181262491,
+            "lateral_out_m3_yr": 14.956903309218607,
+            "precipitation_m3_yr": 76.20469780332105,
+            "rain_melt_m3_yr": 75.82450536965652,
+            "surface_in_m3_yr": 2.7522791511091738,
+            "surface_out_m3_yr": 17.144422189728004
+          },
+          {
+            "apparent_soil_residual_m3": 0.3498374831275736,
+            "deep_percolation_m3_yr": 4.064637055140143,
+            "et_m3_yr": 695.5315825308753,
+            "first_reported_stock_m3": 944.0025837114663,
+            "last_reported_stock_m3": 290.1601790548677,
+            "lateral_in_m3_yr": 14.958448901099688,
+            "lateral_out_m3_yr": 27.3241996160446,
+            "precipitation_m3_yr": 660.6630474764929,
+            "rain_melt_m3_yr": 657.2996913692168,
+            "surface_in_m3_yr": 17.14442297247931,
+            "surface_out_m3_yr": 3.1914502358956804
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "paired_changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.soil.dat",
+        "H1.wat.dat"
+      ],
+      "percent_change": -1.05820105820105,
+      "recovery": false,
+      "reference_kg_yr": 0.0,
+      "regression": false,
+      "sediment_ofe_deltas": [
+        {
+          "boundary_kg_yr": 0.0,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": 0.0,
+          "positive_daily_net_kg_yr": 0.0
+        },
+        {
+          "boundary_kg_yr": -0.026940768363203915,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": -0.02694076836319681,
+          "positive_daily_net_kg_yr": -0.02694076836319681
+        },
+        {
+          "boundary_kg_yr": -0.11045715028915204,
+          "negative_daily_net_kg_yr": -0.08351638192594635,
+          "net_kg_yr": -0.08351638192594635,
+          "positive_daily_net_kg_yr": 0.0
+        }
+      ],
+      "small_load_limit_kg_yr": 1,
+      "water_ofe_deltas": [
+        {
+          "apparent_soil_residual_m3": 0.05748898297481965,
+          "deep_percolation_m3_yr": 0.014364494383752202,
+          "et_m3_yr": 0.0,
+          "first_reported_stock_m3": -0.06276121397894485,
+          "last_reported_stock_m3": -1.7935223840901529,
+          "lateral_in_m3_yr": 0.0,
+          "lateral_out_m3_yr": 0.09414182096847767,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 0.0,
+          "surface_out_m3_yr": -4.227782450350048e-06
+        },
+        {
+          "apparent_soil_residual_m3": 0.003006713634935987,
+          "deep_percolation_m3_yr": -0.007931015575851852,
+          "et_m3_yr": 0.03004111198647763,
+          "first_reported_stock_m3": -0.39595170552627224,
+          "last_reported_stock_m3": -1.4715220100901476,
+          "lateral_in_m3_yr": 0.09898792638152898,
+          "lateral_out_m3_yr": 0.17002776907082762,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": -0.00012311931141084642,
+          "surface_in_m3_yr": -4.294155344197748e-06,
+          "surface_out_m3_yr": -0.001372027226821615
+        },
+        {
+          "apparent_soil_residual_m3": 0.00473178520494022,
+          "deep_percolation_m3_yr": 0.03154303981238371,
+          "et_m3_yr": -0.4109463983808155,
+          "first_reported_stock_m3": 0.20493950256957305,
+          "last_reported_stock_m3": -6.045715325804792,
+          "lateral_in_m3_yr": 0.1793220647484386,
+          "lateral_out_m3_yr": 0.9531821655974007,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": -0.0013716161141097416,
+          "surface_out_m3_yr": -0.01719949386353914
+        }
+      ]
+    },
+    "B4": {
+      "annual_export": [
+        {
+          "default_kg": 1.2500516520528262,
+          "delta_kg": -0.6034732113358472,
+          "optional_kg": 0.646578440716979,
+          "year": 1
+        },
+        {
+          "default_kg": 123.88442924137318,
+          "delta_kg": -24.52687551786407,
+          "optional_kg": 99.35755372350911,
+          "year": 2
+        },
+        {
+          "default_kg": 55.648851131041326,
+          "delta_kg": -4.094996791207535,
+          "optional_kg": 51.55385433983379,
+          "year": 3
+        },
+        {
+          "default_kg": 129.61742474906373,
+          "delta_kg": -8.707256334988642,
+          "optional_kg": 120.91016841407509,
+          "year": 4
+        },
+        {
+          "default_kg": 50.99348635787908,
+          "delta_kg": -9.353834775705629,
+          "optional_kg": 41.63965158217345,
+          "year": 5
+        },
+        {
+          "default_kg": 207.07752194695783,
+          "delta_kg": -28.923608914739532,
+          "optional_kg": 178.1539130322183,
+          "year": 6
+        },
+        {
+          "default_kg": 389.19711608224026,
+          "delta_kg": 164.10160825396923,
+          "optional_kg": 553.2987243362095,
+          "year": 7
+        },
+        {
+          "default_kg": 142.85073016907123,
+          "delta_kg": -6.508889636550919,
+          "optional_kg": 136.3418405325203,
+          "year": 8
+        },
+        {
+          "default_kg": 25.86313762867916,
+          "delta_kg": 0.9483150463849057,
+          "optional_kg": 26.811452675064064,
+          "year": 9
+        },
+        {
+          "default_kg": 74.05478407678466,
+          "delta_kg": 32.50134295337348,
+          "optional_kg": 106.55612703015814,
+          "year": 10
+        },
+        {
+          "default_kg": 51.33832819292814,
+          "delta_kg": -0.47415752319245996,
+          "optional_kg": 50.86417066973568,
+          "year": 11
+        },
+        {
+          "default_kg": 150.95451329272402,
+          "delta_kg": -2.5863137628678885,
+          "optional_kg": 148.36819952985613,
+          "year": 12
+        },
+        {
+          "default_kg": 457.6051151100966,
+          "delta_kg": -6.896836700981112,
+          "optional_kg": 450.7082784091155,
+          "year": 13
+        },
+        {
+          "default_kg": 188.24053670740315,
+          "delta_kg": -18.492143404505583,
+          "optional_kg": 169.74839330289757,
+          "year": 14
+        },
+        {
+          "default_kg": 148.4975152179995,
+          "delta_kg": -2.4138928453433834,
+          "optional_kg": 146.08362237265612,
+          "year": 15
+        },
+        {
+          "default_kg": 691.5803001908807,
+          "delta_kg": -55.64885113104128,
+          "optional_kg": 635.9314490598395,
+          "year": 16
+        }
+      ],
+      "baseline_sediment": {
+        "dates": 1089,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 76.8808706780851,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 76.8808706780851,
+            "positive_daily_net_kg_yr": 76.8808706780851
+          },
+          {
+            "boundary_kg_yr": 78.257543941445,
+            "negative_daily_net_kg_yr": -1.7942551729896175,
+            "net_kg_yr": 1.3766732633599,
+            "positive_daily_net_kg_yr": 3.1709284363495174
+          },
+          {
+            "boundary_kg_yr": 180.55433549338002,
+            "negative_daily_net_kg_yr": -19.542833370670674,
+            "net_kg_yr": 102.29679155193503,
+            "positive_daily_net_kg_yr": 121.83962492260571
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 1.4886579767678603,
+        "report_delta_kg_yr": 0.029634845199495885,
+        "report_reconciled": true
+      },
+      "baseline_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.00947021889503441,
+        "max_surface_transfer_delta_m3": 2.0130142118546246e-05,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": 0.02609084083041502,
+            "deep_percolation_m3_yr": 3.259081064672645,
+            "et_m3_yr": 72.19078464265631,
+            "first_reported_stock_m3": 30.39332481571858,
+            "last_reported_stock_m3": 50.67243860944836,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 365.74927221886156,
+            "precipitation_m3_yr": 510.98490696651385,
+            "rain_melt_m3_yr": 510.9846052299086,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 68.21325180031008
+          },
+          {
+            "apparent_soil_residual_m3": 0.3831310333975737,
+            "deep_percolation_m3_yr": 2.6596429402770987,
+            "et_m3_yr": 82.95619148365198,
+            "first_reported_stock_m3": 24.663260463625953,
+            "last_reported_stock_m3": 25.898393395789967,
+            "lateral_in_m3_yr": 365.7507846735953,
+            "lateral_out_m3_yr": 646.0972734752635,
+            "precipitation_m3_yr": 417.00018300660315,
+            "rain_melt_m3_yr": 413.7257018000803,
+            "surface_in_m3_yr": 68.21324663736586,
+            "surface_out_m3_yr": 115.63675175385912
+          },
+          {
+            "apparent_soil_residual_m3": 3.7900857717907996,
+            "deep_percolation_m3_yr": 15.994804229757424,
+            "et_m3_yr": 816.8109375359212,
+            "first_reported_stock_m3": 215.11816453061294,
+            "last_reported_stock_m3": 378.2841651598187,
+            "lateral_in_m3_yr": 646.0931297156743,
+            "lateral_out_m3_yr": 3018.4109026539254,
+            "precipitation_m3_yr": 3615.2182167880696,
+            "rain_melt_m3_yr": 3586.889600130785,
+            "surface_in_m3_yr": 115.63675550884038,
+            "surface_out_m3_yr": 484.8169743212238
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "case": {
+        "climate": "site",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "1718465",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_class": "meaningful_pass",
+      "default_kg_yr": 180.52470064818053,
+      "default_log10_ratio": 0.9508338302917215,
+      "default_ratio": 8.929637526652453,
+      "delta_export_kg_yr": 1.7673144046264326,
+      "fresh_default_vs_frozen_r7": {
+        "changed_outputs": [],
+        "delta_export_kg_yr": 0.0,
+        "frozen_export_kg_yr": 180.52470064818053,
+        "sediment_ofe_deltas": [
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          },
+          {
+            "boundary_kg_yr": 0.0,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.0,
+            "positive_daily_net_kg_yr": 0.0
+          }
+        ],
+        "water_ofe_deltas": [
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          },
+          {
+            "apparent_soil_residual_m3": 0.0,
+            "deep_percolation_m3_yr": 0.0,
+            "et_m3_yr": 0.0,
+            "first_reported_stock_m3": 0.0,
+            "last_reported_stock_m3": 0.0,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 0.0,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.0
+          }
+        ]
+      },
+      "optional_class": "meaningful_pass",
+      "optional_kg_yr": 182.29201505280696,
+      "optional_log10_ratio": 0.9550648424318172,
+      "optional_ratio": 9.017057569296377,
+      "optional_sediment": {
+        "dates": 1180,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 80.57175594384455,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 80.57175594384455,
+            "positive_daily_net_kg_yr": 80.57175594384455
+          },
+          {
+            "boundary_kg_yr": 80.90851554838463,
+            "negative_daily_net_kg_yr": -2.3007416182179186,
+            "net_kg_yr": 0.3367596045400937,
+            "positive_daily_net_kg_yr": 2.63750122275801
+          },
+          {
+            "boundary_kg_yr": 182.29740320647957,
+            "negative_daily_net_kg_yr": -20.049319815898976,
+            "net_kg_yr": 101.38888765809497,
+            "positive_daily_net_kg_yr": 121.43820747399394
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 1.6112402401348587,
+        "report_delta_kg_yr": 0.005388153672612361,
+        "report_reconciled": true
+      },
+      "optional_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.00945728732622031,
+        "max_surface_transfer_delta_m3": 1.0905623032186895e-05,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": -0.0007492747531419736,
+            "deep_percolation_m3_yr": 3.259081064672645,
+            "et_m3_yr": 70.11770329341493,
+            "first_reported_stock_m3": 30.39332481571858,
+            "last_reported_stock_m3": 50.30311300411083,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 371.3476932004238,
+            "precipitation_m3_yr": 510.98490696651385,
+            "rain_melt_m3_yr": 510.9846052299086,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 64.71267252554651
+          },
+          {
+            "apparent_soil_residual_m3": 0.3569691585931472,
+            "deep_percolation_m3_yr": 2.6596429402770987,
+            "et_m3_yr": 81.97874727029011,
+            "first_reported_stock_m3": 24.661290554643234,
+            "last_reported_stock_m3": 25.742770586155267,
+            "lateral_in_m3_yr": 371.3460649003839,
+            "lateral_out_m3_yr": 637.197840287904,
+            "precipitation_m3_yr": 417.00018300660315,
+            "rain_melt_m3_yr": 413.72520932283464,
+            "surface_in_m3_yr": 64.71266916194848,
+            "surface_out_m3_yr": 127.6192169529446
+          },
+          {
+            "apparent_soil_residual_m3": 2.960650325700744,
+            "deep_percolation_m3_yr": 15.990759122221121,
+            "et_m3_yr": 812.4965340495324,
+            "first_reported_stock_m3": 215.11816453061294,
+            "last_reported_stock_m3": 372.92158150924615,
+            "lateral_in_m3_yr": 637.1622504552533,
+            "lateral_out_m3_yr": 3047.886967046949,
+            "precipitation_m3_yr": 3615.2182167880696,
+            "rain_melt_m3_yr": 3586.889600130785,
+            "surface_in_m3_yr": 127.619218389155,
+            "surface_out_m3_yr": 463.0978042360749
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "paired_changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.soil.dat",
+        "H1.wat.dat"
+      ],
+      "percent_change": 0.9789875835721238,
+      "recovery": false,
+      "reference_kg_yr": 20.216352579750875,
+      "regression": false,
+      "sediment_ofe_deltas": [
+        {
+          "boundary_kg_yr": 3.690885265759448,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": 3.690885265759448,
+          "positive_daily_net_kg_yr": 3.690885265759448
+        },
+        {
+          "boundary_kg_yr": 2.6509716069396347,
+          "negative_daily_net_kg_yr": -0.5064864452283011,
+          "net_kg_yr": -1.0399136588198061,
+          "positive_daily_net_kg_yr": -0.5334272135915072
+        },
+        {
+          "boundary_kg_yr": 1.743067713099549,
+          "negative_daily_net_kg_yr": -0.5064864452283011,
+          "net_kg_yr": -0.9079038938400572,
+          "positive_daily_net_kg_yr": -0.40141744861176676
+        }
+      ],
+      "small_load_limit_kg_yr": null,
+      "water_ofe_deltas": [
+        {
+          "apparent_soil_residual_m3": -0.026840115583556992,
+          "deep_percolation_m3_yr": 0.0,
+          "et_m3_yr": -2.0730813492413773,
+          "first_reported_stock_m3": 0.0,
+          "last_reported_stock_m3": -0.36932560533753644,
+          "lateral_in_m3_yr": 0.0,
+          "lateral_out_m3_yr": 5.598420981562242,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 0.0,
+          "surface_out_m3_yr": -3.5005792747635667
+        },
+        {
+          "apparent_soil_residual_m3": -0.0261618748044265,
+          "deep_percolation_m3_yr": 0.0,
+          "et_m3_yr": -0.9774442133618635,
+          "first_reported_stock_m3": -0.001969908982719204,
+          "last_reported_stock_m3": -0.15562280963469988,
+          "lateral_in_m3_yr": 5.595280226788589,
+          "lateral_out_m3_yr": -8.899433187359477,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": -0.0004924772456433857,
+          "surface_in_m3_yr": -3.500577475417373,
+          "surface_out_m3_yr": 11.982465199085482
+        },
+        {
+          "apparent_soil_residual_m3": -0.8294354460900557,
+          "deep_percolation_m3_yr": -0.00404510753630305,
+          "et_m3_yr": -4.3144034863887555,
+          "first_reported_stock_m3": 0.0,
+          "last_reported_stock_m3": -5.36258365057256,
+          "lateral_in_m3_yr": -8.930879260420966,
+          "lateral_out_m3_yr": 29.476064393023535,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 11.982462880314614,
+          "surface_out_m3_yr": -21.719170085148903
+        }
+      ]
+    },
+    "B5": {
+      "annual_export": [
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 1
+        },
+        {
+          "default_kg": 4.569154314399985,
+          "delta_kg": -3.534628809252819,
+          "optional_kg": 1.0345255051471665,
+          "year": 2
+        },
+        {
+          "default_kg": 1.1207359639094303,
+          "delta_kg": -0.21552614690565963,
+          "optional_kg": 0.9052098170037707,
+          "year": 3
+        },
+        {
+          "default_kg": 3.060471286060367,
+          "delta_kg": -0.17242091752452726,
+          "optional_kg": 2.88805036853584,
+          "year": 4
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 5
+        },
+        {
+          "default_kg": 2.5001033041056524,
+          "delta_kg": -0.1293156881433961,
+          "optional_kg": 2.3707876159622563,
+          "year": 6
+        },
+        {
+          "default_kg": 11.465991015381094,
+          "delta_kg": -1.5948934871018814,
+          "optional_kg": 9.871097528279213,
+          "year": 7
+        },
+        {
+          "default_kg": 1.853524863388673,
+          "delta_kg": -0.21552614690565952,
+          "optional_kg": 1.6379987164830134,
+          "year": 8
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 9
+        },
+        {
+          "default_kg": 1.7242091752452775,
+          "delta_kg": -0.17242091752452793,
+          "optional_kg": 1.5517882577207496,
+          "year": 10
+        },
+        {
+          "default_kg": 0.0,
+          "delta_kg": 0.0,
+          "optional_kg": 0.0,
+          "year": 11
+        },
+        {
+          "default_kg": 4.957101378830172,
+          "delta_kg": -0.5172627525735836,
+          "optional_kg": 4.439838626256589,
+          "year": 12
+        },
+        {
+          "default_kg": 12.672937438052788,
+          "delta_kg": -1.551788257720748,
+          "optional_kg": 11.12114918033204,
+          "year": 13
+        },
+        {
+          "default_kg": 38.96712736054327,
+          "delta_kg": -1.853524863388678,
+          "optional_kg": 37.113602497154595,
+          "year": 14
+        },
+        {
+          "default_kg": 3.448418350490555,
+          "delta_kg": -0.17242091752452815,
+          "optional_kg": 3.275997432966027,
+          "year": 15
+        },
+        {
+          "default_kg": 9.871097528279213,
+          "delta_kg": -0.9483150463849039,
+          "optional_kg": 8.92278248189431,
+          "year": 16
+        }
+      ],
+      "baseline_sediment": {
+        "dates": 1137,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 9.561278692102325,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 9.561278692102325,
+            "positive_daily_net_kg_yr": 9.561278692102325
+          },
+          {
+            "boundary_kg_yr": 12.425082369111278,
+            "negative_daily_net_kg_yr": -0.005388153672641491,
+            "net_kg_yr": 2.8638036770089528,
+            "positive_daily_net_kg_yr": 2.8691918306815944
+          },
+          {
+            "boundary_kg_yr": 6.015873575504226,
+            "negative_daily_net_kg_yr": -6.829484780073092,
+            "net_kg_yr": -6.409208793607056,
+            "positive_daily_net_kg_yr": 0.42027598646603637
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 1.553141287765794,
+        "report_delta_kg_yr": 0.024246691526886188,
+        "report_reconciled": true
+      },
+      "baseline_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009465908372096266,
+        "max_surface_transfer_delta_m3": 9.901271184276084e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": -0.018287162176131806,
+            "deep_percolation_m3_yr": 21.58318559082131,
+            "et_m3_yr": 82.63962156033092,
+            "first_reported_stock_m3": 173.56372336588018,
+            "last_reported_stock_m3": 222.9254181603071,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 383.7990051016122,
+            "precipitation_m3_yr": 510.98490696651385,
+            "rain_melt_m3_yr": 510.9846052299086,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 19.583954850173907
+          },
+          {
+            "apparent_soil_residual_m3": 0.37583055829733963,
+            "deep_percolation_m3_yr": 16.389008824693406,
+            "et_m3_yr": 108.11316038607201,
+            "first_reported_stock_m3": 141.18928651832772,
+            "last_reported_stock_m3": 120.66283491840898,
+            "lateral_in_m3_yr": 383.7990907732536,
+            "lateral_out_m3_yr": 573.5273039836804,
+            "precipitation_m3_yr": 417.00018300660315,
+            "rain_melt_m3_yr": 413.73074969184864,
+            "surface_in_m3_yr": 19.583953504440494,
+            "surface_out_m3_yr": 120.13116660832729
+          },
+          {
+            "apparent_soil_residual_m3": 2.3885633312243018,
+            "deep_percolation_m3_yr": 132.722821475171,
+            "et_m3_yr": 1332.2967626999205,
+            "first_reported_stock_m3": 1228.748944240119,
+            "last_reported_stock_m3": 1683.441387274657,
+            "lateral_in_m3_yr": 573.4943783236199,
+            "lateral_out_m3_yr": 2668.996522525352,
+            "precipitation_m3_yr": 3615.2182167880696,
+            "rain_melt_m3_yr": 3586.889600130785,
+            "surface_in_m3_yr": 120.13117200433027,
+            "surface_out_m3_yr": 115.7950716921084
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "case": {
+        "climate": "site",
+        "design": "outunrut",
+        "runtime": "project",
+        "soil": "2711184",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap"
+      },
+      "default_class": "meaningful_low",
+      "default_kg_yr": 5.9916268839773394,
+      "default_log10_ratio": -1.283984158502442,
+      "default_ratio": 0.05200149644594089,
+      "delta_export_kg_yr": -0.6465784407169792,
+      "fresh_default_vs_frozen_r7": {
+        "changed_outputs": [
+          "H1.ebe.dat",
+          "H1.element.dat",
+          "H1.loss.dat",
+          "H1.pass.dat",
+          "H1.plot.dat",
+          "H1.soil.dat",
+          "H1.wat.dat"
+        ],
+        "delta_export_kg_yr": 0.2586313762867922,
+        "frozen_export_kg_yr": 5.732995507690547,
+        "sediment_ofe_deltas": [
+          {
+            "boundary_kg_yr": 0.2101379932330154,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 0.2101379932330154,
+            "positive_daily_net_kg_yr": 0.2101379932330154
+          },
+          {
+            "boundary_kg_yr": 0.26671360679575074,
+            "negative_daily_net_kg_yr": 0.002694076836320749,
+            "net_kg_yr": 0.056575613562736216,
+            "positive_daily_net_kg_yr": 0.053881536726414936
+          },
+          {
+            "boundary_kg_yr": 0.29365437515896087,
+            "negative_daily_net_kg_yr": 0.032328922035845586,
+            "net_kg_yr": 0.026940768363203915,
+            "positive_daily_net_kg_yr": -0.005388153672641449
+          }
+        ],
+        "water_ofe_deltas": [
+          {
+            "apparent_soil_residual_m3": 0.05004786025010021,
+            "deep_percolation_m3_yr": 0.34068452159728224,
+            "et_m3_yr": -0.035604919468809726,
+            "first_reported_stock_m3": 0.16173082063801303,
+            "last_reported_stock_m3": 10.40387816343005,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": -1.5661638517196934,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 0.6078647187840325
+          },
+          {
+            "apparent_soil_residual_m3": -0.0023962653932476097,
+            "deep_percolation_m3_yr": 0.6263885972705694,
+            "et_m3_yr": 20.168666880932932,
+            "first_reported_stock_m3": 1.0164730350823277,
+            "last_reported_stock_m3": 25.350758698594433,
+            "lateral_in_m3_yr": -1.560167914313297,
+            "lateral_out_m3_yr": -20.640336962980996,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0023392669170334557,
+            "surface_in_m3_yr": 0.6078651175443,
+            "surface_out_m3_yr": -2.6889547156167026
+          },
+          {
+            "apparent_soil_residual_m3": -1.2396799190267087,
+            "deep_percolation_m3_yr": 18.78437914114005,
+            "et_m3_yr": 184.57790907476556,
+            "first_reported_stock_m3": -0.5123487564242168,
+            "last_reported_stock_m3": 32.670772367979,
+            "lateral_in_m3_yr": -20.696754973049906,
+            "lateral_out_m3_yr": -263.0099645373739,
+            "precipitation_m3_yr": 0.0,
+            "rain_melt_m3_yr": 0.0,
+            "surface_in_m3_yr": -2.6889540017927374,
+            "surface_out_m3_yr": 34.29752390844702
+          }
+        ]
+      },
+      "optional_class": "meaningful_low",
+      "optional_kg_yr": 5.34504844326036,
+      "optional_log10_ratio": -1.3335772735943021,
+      "optional_ratio": 0.04638982416760194,
+      "optional_sediment": {
+        "dates": 1224,
+        "negative_fluxes": [],
+        "ofes": [
+          {
+            "boundary_kg_yr": 8.731503026515536,
+            "negative_daily_net_kg_yr": 0.0,
+            "net_kg_yr": 8.731503026515536,
+            "positive_daily_net_kg_yr": 8.731503026515536
+          },
+          {
+            "boundary_kg_yr": 11.495625860580619,
+            "negative_daily_net_kg_yr": -0.0053881536726414925,
+            "net_kg_yr": 2.764122834065085,
+            "positive_daily_net_kg_yr": 2.7695109877377266
+          },
+          {
+            "boundary_kg_yr": 5.3181076748971545,
+            "negative_daily_net_kg_yr": -6.533136328077808,
+            "net_kg_yr": -6.1775181856834696,
+            "positive_daily_net_kg_yr": 0.35561814239433875
+          }
+        ],
+        "physical_budget_valid": true,
+        "report_bound_kg_yr": 1.6703329835673055,
+        "report_delta_kg_yr": -0.02694076836320569,
+        "report_reconciled": true
+      },
+      "optional_water": {
+        "days": 5844,
+        "max_lateral_transfer_delta_m3": 0.009478839940910255,
+        "max_surface_transfer_delta_m3": 9.590913538914947e-06,
+        "ofes": [
+          {
+            "apparent_soil_residual_m3": 0.12401649676729366,
+            "deep_percolation_m3_yr": 21.58318559082131,
+            "et_m3_yr": 81.44353765546329,
+            "first_reported_stock_m3": 173.5613094730348,
+            "last_reported_stock_m3": 221.45052963180225,
+            "lateral_in_m3_yr": 0.0,
+            "lateral_out_m3_yr": 387.0767698489836,
+            "precipitation_m3_yr": 510.98490696651385,
+            "rain_melt_m3_yr": 510.9846052299086,
+            "surface_in_m3_yr": 0.0,
+            "surface_out_m3_yr": 17.585560562018482
+          },
+          {
+            "apparent_soil_residual_m3": 0.3412442213246252,
+            "deep_percolation_m3_yr": 16.397295305998824,
+            "et_m3_yr": 108.82663679575029,
+            "first_reported_stock_m3": 141.17352724646597,
+            "last_reported_stock_m3": 116.20493089051877,
+            "lateral_in_m3_yr": 387.0751725308242,
+            "lateral_out_m3_yr": 561.4797100033148,
+            "precipitation_m3_yr": 417.00018300660315,
+            "rain_melt_m3_yr": 413.73124216909434,
+            "surface_in_m3_yr": 17.585559321169804,
+            "surface_out_m3_yr": 133.01595839706124
+          },
+          {
+            "apparent_soil_residual_m3": 3.8484467309232473,
+            "deep_percolation_m3_yr": 132.66897727114227,
+            "et_m3_yr": 1330.0221477000446,
+            "first_reported_stock_m3": 1228.7660225319999,
+            "last_reported_stock_m3": 1678.0788036240845,
+            "lateral_in_m3_yr": 561.4701934462906,
+            "lateral_out_m3_yr": 2691.818457444341,
+            "precipitation_m3_yr": 3615.2182167880696,
+            "rain_melt_m3_yr": 3586.889600130785,
+            "surface_in_m3_yr": 133.01596394124243,
+            "surface_out_m3_yr": 96.40612180230696
+          }
+        ],
+        "residual_days": 5843,
+        "residual_is_complete_water_closure": false
+      },
+      "paired_changed_outputs": [
+        "H1.ebe.dat",
+        "H1.element.dat",
+        "H1.loss.dat",
+        "H1.pass.dat",
+        "H1.plot.dat",
+        "H1.soil.dat",
+        "H1.wat.dat"
+      ],
+      "percent_change": -10.791366906474822,
+      "recovery": false,
+      "reference_kg_yr": 115.22027813576567,
+      "regression": false,
+      "sediment_ofe_deltas": [
+        {
+          "boundary_kg_yr": -0.829775665586789,
+          "negative_daily_net_kg_yr": 0.0,
+          "net_kg_yr": -0.829775665586789,
+          "positive_daily_net_kg_yr": -0.829775665586789
+        },
+        {
+          "boundary_kg_yr": -0.9294565085306594,
+          "negative_daily_net_kg_yr": -1.734723475976807e-18,
+          "net_kg_yr": -0.09968084294386781,
+          "positive_daily_net_kg_yr": -0.09968084294386781
+        },
+        {
+          "boundary_kg_yr": -0.6977659006070711,
+          "negative_daily_net_kg_yr": 0.2963484519952839,
+          "net_kg_yr": 0.23169060792358653,
+          "positive_daily_net_kg_yr": -0.06465784407169761
+        }
+      ],
+      "small_load_limit_kg_yr": null,
+      "water_ofe_deltas": [
+        {
+          "apparent_soil_residual_m3": 0.14230365894342548,
+          "deep_percolation_m3_yr": 0.0,
+          "et_m3_yr": -1.1960839048676348,
+          "first_reported_stock_m3": -0.002413892845368082,
+          "last_reported_stock_m3": -1.4748885285048345,
+          "lateral_in_m3_yr": 0.0,
+          "lateral_out_m3_yr": 3.277764747371407,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 0.0,
+          "surface_out_m3_yr": -1.9983942881554242
+        },
+        {
+          "apparent_soil_residual_m3": -0.03458633697271446,
+          "deep_percolation_m3_yr": 0.008286481305418647,
+          "et_m3_yr": 0.7134764096782789,
+          "first_reported_stock_m3": -0.015759271861753632,
+          "last_reported_stock_m3": -4.4579040278902085,
+          "lateral_in_m3_yr": 3.27608175757058,
+          "lateral_out_m3_yr": -12.047593980365605,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0004924772457002291,
+          "surface_in_m3_yr": -1.9983941832706904,
+          "surface_out_m3_yr": 12.88479178873395
+        },
+        {
+          "apparent_soil_residual_m3": 1.4598833996989455,
+          "deep_percolation_m3_yr": -0.05384420402873502,
+          "et_m3_yr": -2.2746149998758938,
+          "first_reported_stock_m3": 0.017078291880807228,
+          "last_reported_stock_m3": -5.36258365057256,
+          "lateral_in_m3_yr": -12.024184877329276,
+          "lateral_out_m3_yr": 22.821934918989427,
+          "precipitation_m3_yr": 0.0,
+          "rain_melt_m3_yr": 0.0,
+          "surface_in_m3_yr": 12.884791936912166,
+          "surface_out_m3_yr": -19.388949889801438
+        }
+      ]
+    }
+  },
+  "converter_calls": 0,
+  "declaration_sha256": "631e70e5ddbe6573bd694c18c900b798d621b4c138fd93ed31f591511425e814",
+  "distinct_materials": 3,
+  "exact_observer_output_pairs": 56,
+  "execution_review_sha256": "b1fd1acb8305b63df4406c6adce81a27d778bea18904fa7b9fd5341ea7ed7984",
+  "limits": [
+    "Selected four diagnostic cases, not representative 95/90 panel acceptance.",
+    "Existing particle criteria cover EVENT payloads; positive non-EVENT sediment dates remain explicit.",
+    "Reported soil-stock residual is incomplete water closure; no observed dynamic PERC/ET branch attribution.",
+    "Trace hashes/parity are verified here; source-supported initialized-layer mapping is a separate review.",
+    "Local scratch execution is not production-mount or complete-controller parity."
+  ],
+  "native_calls": 0,
+  "observer_trace_hashes": {
+    "B2/default/observed": {
+      "bytes": 15236838,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "ad97a8ce9c451c195a712f3d9bbf2d544cb9437db16e01fbdce38783af516681"
+    },
+    "B2/optional/observed": {
+      "bytes": 15236838,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "2e0d045e39564fb07ea2f4101305740ed216969598a099903a2af40b1c4caa09"
+    },
+    "B3/default/observed": {
+      "bytes": 10067655,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "0dbb2f7a57fa2d52f71f7f6002466ce5c98a40a40168947e6a2f7cd13e3a8dbf"
+    },
+    "B3/optional/observed": {
+      "bytes": 10067655,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "bdd3f1fec08b783f18b9b5b8350e3029f60aae3174ddbb918b60de162ed4b1da"
+    },
+    "B4/default/observed": {
+      "bytes": 10107520,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "88fd096a205b8f760e34f7a64c4ef5f7b1f663856b940044dccfb430cffdb6e2"
+    },
+    "B4/optional/observed": {
+      "bytes": 10215034,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "27058bd32454bae8a7143bc91390b33f806b9c93f9eb29e861e78c64980defaf"
+    },
+    "B5/default/observed": {
+      "bytes": 10085566,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "1912f51f4f7335cf9a971aa1f2eeb1cb503d2a949ef0f63a7b083b894fffc76d"
+    },
+    "B5/optional/observed": {
+      "bytes": 10185620,
+      "interpretation": "Hash/retention only; initialized-layer interpretation is independently assigned.",
+      "sha256": "82f8b21c9c31f6e07b41c184b18e0bf4bf9d28300014abdbffc91a7916672496"
+    }
+  },
+  "ordinary_native_physical_calendar_particle_pass": 8,
+  "output_hashes": {
+    "B2/default/observed": {
+      "H1.ebe.dat": "36c095ec65f04926ef25340706f6b9b616f413420e2a57db58cfe73348349553",
+      "H1.element.dat": "0c22e390c7fc4195faab7730754b5c5a47959c436fb798993ceb9ddf2406c0f1",
+      "H1.loss.dat": "9603480fcf242c2aa9cbd114010306e29de6cc1ebccf22250a36a04483271afc",
+      "H1.pass.dat": "707376f3a4b2ecca7667898335765612420dcd8ba91a0ddeb65192015f3eee30",
+      "H1.plot.dat": "e5026f76bb0b0348d97da328ca9e69b81764f213e862bb2c30b645da32c318d6",
+      "H1.soil.dat": "fb15e4a29f2677b3f3d67fd7d92bafc1142b5caa996f601a471dc01ece1584ec",
+      "H1.wat.dat": "bc5e53dfd43def9db8f09dddc89bbf2d19454bdf9be66846502d4ed69f56762d"
+    },
+    "B2/default/ordinary": {
+      "H1.ebe.dat": "36c095ec65f04926ef25340706f6b9b616f413420e2a57db58cfe73348349553",
+      "H1.element.dat": "0c22e390c7fc4195faab7730754b5c5a47959c436fb798993ceb9ddf2406c0f1",
+      "H1.loss.dat": "9603480fcf242c2aa9cbd114010306e29de6cc1ebccf22250a36a04483271afc",
+      "H1.pass.dat": "707376f3a4b2ecca7667898335765612420dcd8ba91a0ddeb65192015f3eee30",
+      "H1.plot.dat": "e5026f76bb0b0348d97da328ca9e69b81764f213e862bb2c30b645da32c318d6",
+      "H1.soil.dat": "fb15e4a29f2677b3f3d67fd7d92bafc1142b5caa996f601a471dc01ece1584ec",
+      "H1.wat.dat": "bc5e53dfd43def9db8f09dddc89bbf2d19454bdf9be66846502d4ed69f56762d"
+    },
+    "B2/optional/observed": {
+      "H1.ebe.dat": "0941b8adbb8c4977328a244359c86023377adb0d29fcf0902dc5e8fccee347ae",
+      "H1.element.dat": "15404c48b456cc313b1d821d3bd32be29acc3ba84be9d405b2c7f54b73ed0311",
+      "H1.loss.dat": "1e95d4fadb49752d92c467865927b7d78c8a36f3b33cf610670e07260d199cdf",
+      "H1.pass.dat": "9933d749f6f431e1c677409adf3dd6981e28102c236524bd9d86b43fb533fb44",
+      "H1.plot.dat": "6dc4c074f18d595fc96ea9e8b5c97c18aaaf65c061579f5559be6f2e01cbab51",
+      "H1.soil.dat": "82f227cc8355280713892910b48f3c22406e971f1a401fd9c595e4296da73c75",
+      "H1.wat.dat": "4510d09b8a1fd5f7ccd7ca3d6abc0411d019b655a1110c685a6825b879d7bc7b"
+    },
+    "B2/optional/ordinary": {
+      "H1.ebe.dat": "0941b8adbb8c4977328a244359c86023377adb0d29fcf0902dc5e8fccee347ae",
+      "H1.element.dat": "15404c48b456cc313b1d821d3bd32be29acc3ba84be9d405b2c7f54b73ed0311",
+      "H1.loss.dat": "1e95d4fadb49752d92c467865927b7d78c8a36f3b33cf610670e07260d199cdf",
+      "H1.pass.dat": "9933d749f6f431e1c677409adf3dd6981e28102c236524bd9d86b43fb533fb44",
+      "H1.plot.dat": "6dc4c074f18d595fc96ea9e8b5c97c18aaaf65c061579f5559be6f2e01cbab51",
+      "H1.soil.dat": "82f227cc8355280713892910b48f3c22406e971f1a401fd9c595e4296da73c75",
+      "H1.wat.dat": "4510d09b8a1fd5f7ccd7ca3d6abc0411d019b655a1110c685a6825b879d7bc7b"
+    },
+    "B3/default/observed": {
+      "H1.ebe.dat": "f44558fe0913ccad1b62b198b1b828d410974338b795a9ea87ae28e92613fe99",
+      "H1.element.dat": "7f07549bb4a0905d8b583dc1373abe75aa3b62b9341e2db34d96725befc53a6e",
+      "H1.loss.dat": "b759e85c4f29fb1d7a1a55a77b3db2fcc9f934e62761c68f212604fe1d83e7e5",
+      "H1.pass.dat": "f40e41984b5ad582545b2de9aa7e05ad7ba96f06b1e5f9c3e399713ec6d8ab49",
+      "H1.plot.dat": "9c883ca5a9fc5f9015aed04c6f15eb71a0a5c4dbd3dd0c088920d208d2af9bff",
+      "H1.soil.dat": "c216fe752e856593e2c0f20aa76cbfbaaa3d9a7ef0a769725e642a648e19389a",
+      "H1.wat.dat": "a17d769f185635f94db6f1397e477cfe6df431145c06ee47455d27823fe27a86"
+    },
+    "B3/default/ordinary": {
+      "H1.ebe.dat": "f44558fe0913ccad1b62b198b1b828d410974338b795a9ea87ae28e92613fe99",
+      "H1.element.dat": "7f07549bb4a0905d8b583dc1373abe75aa3b62b9341e2db34d96725befc53a6e",
+      "H1.loss.dat": "b759e85c4f29fb1d7a1a55a77b3db2fcc9f934e62761c68f212604fe1d83e7e5",
+      "H1.pass.dat": "f40e41984b5ad582545b2de9aa7e05ad7ba96f06b1e5f9c3e399713ec6d8ab49",
+      "H1.plot.dat": "9c883ca5a9fc5f9015aed04c6f15eb71a0a5c4dbd3dd0c088920d208d2af9bff",
+      "H1.soil.dat": "c216fe752e856593e2c0f20aa76cbfbaaa3d9a7ef0a769725e642a648e19389a",
+      "H1.wat.dat": "a17d769f185635f94db6f1397e477cfe6df431145c06ee47455d27823fe27a86"
+    },
+    "B3/optional/observed": {
+      "H1.ebe.dat": "02d462cf047c4d2134096cbedef0870423ec112cee642894bcbff099eb930000",
+      "H1.element.dat": "88902b2283c28ae3efb4c380f14f9895853e053c9e70a755975387a2d66a81e6",
+      "H1.loss.dat": "c24505139bebdaa30271a7afdba16332685e1a713b173d6000952c4563c10c54",
+      "H1.pass.dat": "f2e76e151fae7259883d2293dac67994d12ec627c1aff2afd0958b5ea7854bf6",
+      "H1.plot.dat": "0c730a76eab9ed862db3b00873e5c7ca8a098e0e664b5ecea6d964de8e916b16",
+      "H1.soil.dat": "f536b612a0766ae6acf941b3949072cd2439596a4a8a2f0bd2d65e8095a14b6b",
+      "H1.wat.dat": "202c7db612857087d4e7872e41a0a3dab5eec08120a298f219ef180ada91ea8f"
+    },
+    "B3/optional/ordinary": {
+      "H1.ebe.dat": "02d462cf047c4d2134096cbedef0870423ec112cee642894bcbff099eb930000",
+      "H1.element.dat": "88902b2283c28ae3efb4c380f14f9895853e053c9e70a755975387a2d66a81e6",
+      "H1.loss.dat": "c24505139bebdaa30271a7afdba16332685e1a713b173d6000952c4563c10c54",
+      "H1.pass.dat": "f2e76e151fae7259883d2293dac67994d12ec627c1aff2afd0958b5ea7854bf6",
+      "H1.plot.dat": "0c730a76eab9ed862db3b00873e5c7ca8a098e0e664b5ecea6d964de8e916b16",
+      "H1.soil.dat": "f536b612a0766ae6acf941b3949072cd2439596a4a8a2f0bd2d65e8095a14b6b",
+      "H1.wat.dat": "202c7db612857087d4e7872e41a0a3dab5eec08120a298f219ef180ada91ea8f"
+    },
+    "B4/default/observed": {
+      "H1.ebe.dat": "6999ae08eb17bc00485aa6578f75ee9d96dab70d8574ecacffbb91b4f7ab99ad",
+      "H1.element.dat": "a445c6084a82c4186c8c3022b6e6cd2d9ab40311552236c9dc39f8585a3d629c",
+      "H1.loss.dat": "e2a69a713810a946a226841d340704cf8d77311ec8f3d464deba77e6c067eb62",
+      "H1.pass.dat": "fdbabf1a13f45eabf152e0fd02ee84ed9af22cfbf6ed9ba174acc969d2c29076",
+      "H1.plot.dat": "a582026307b68c0a44e87aa8d141dfcd2ba3d6e4fb82e5e512218f27cb8f3468",
+      "H1.soil.dat": "307499de18a15098a0b1d46b9f623258d2ef9a41bc2e708d1a1d0fd7c12097dd",
+      "H1.wat.dat": "4cf644044d0c1de46b63c741f23c0bcc931b5fa9473ed952920078e077fb2f35"
+    },
+    "B4/default/ordinary": {
+      "H1.ebe.dat": "6999ae08eb17bc00485aa6578f75ee9d96dab70d8574ecacffbb91b4f7ab99ad",
+      "H1.element.dat": "a445c6084a82c4186c8c3022b6e6cd2d9ab40311552236c9dc39f8585a3d629c",
+      "H1.loss.dat": "e2a69a713810a946a226841d340704cf8d77311ec8f3d464deba77e6c067eb62",
+      "H1.pass.dat": "fdbabf1a13f45eabf152e0fd02ee84ed9af22cfbf6ed9ba174acc969d2c29076",
+      "H1.plot.dat": "a582026307b68c0a44e87aa8d141dfcd2ba3d6e4fb82e5e512218f27cb8f3468",
+      "H1.soil.dat": "307499de18a15098a0b1d46b9f623258d2ef9a41bc2e708d1a1d0fd7c12097dd",
+      "H1.wat.dat": "4cf644044d0c1de46b63c741f23c0bcc931b5fa9473ed952920078e077fb2f35"
+    },
+    "B4/optional/observed": {
+      "H1.ebe.dat": "4ec419e11a66d6e50da1e5f354ce20b726f3775fa01fa969fd12905adf45eb0e",
+      "H1.element.dat": "720146189679eb82279e905ef7c1155189d3501ce87e5ed1a547d324ff9ec50b",
+      "H1.loss.dat": "a1839bb8050b483492d8fdaef23e3ca441bb4d3dc76168faa69c0b6575659fc0",
+      "H1.pass.dat": "fb2d6ac22ab0d7eab442aa653e6320ab856f3f2f549f3d51f5f57bd2e5ce2849",
+      "H1.plot.dat": "ee59de9ef65233409a4e5bc13115dab4389e2d4fbe21ae1859c382982877a8e0",
+      "H1.soil.dat": "3c1b3ae5cdb57ba2d8f1f5af1f1c1c5908dc5f8531bb0be6ec02e31c68dc8b9f",
+      "H1.wat.dat": "84b48dec0aa5cce3042ac615b55c497f8df3eeb81e091fa1febbaac76c393eb6"
+    },
+    "B4/optional/ordinary": {
+      "H1.ebe.dat": "4ec419e11a66d6e50da1e5f354ce20b726f3775fa01fa969fd12905adf45eb0e",
+      "H1.element.dat": "720146189679eb82279e905ef7c1155189d3501ce87e5ed1a547d324ff9ec50b",
+      "H1.loss.dat": "a1839bb8050b483492d8fdaef23e3ca441bb4d3dc76168faa69c0b6575659fc0",
+      "H1.pass.dat": "fb2d6ac22ab0d7eab442aa653e6320ab856f3f2f549f3d51f5f57bd2e5ce2849",
+      "H1.plot.dat": "ee59de9ef65233409a4e5bc13115dab4389e2d4fbe21ae1859c382982877a8e0",
+      "H1.soil.dat": "3c1b3ae5cdb57ba2d8f1f5af1f1c1c5908dc5f8531bb0be6ec02e31c68dc8b9f",
+      "H1.wat.dat": "84b48dec0aa5cce3042ac615b55c497f8df3eeb81e091fa1febbaac76c393eb6"
+    },
+    "B5/default/observed": {
+      "H1.ebe.dat": "e7c259a43d70dc470f20d6281ddfd8ea43c39177dfa108b9c8c3744ecee51333",
+      "H1.element.dat": "47ca80f0c28d96c854d9c36408085f75185f15bb89e95ae4345b4d1141dcbd57",
+      "H1.loss.dat": "f0a63d93a4289eaa89c2605480142d47ba0a00674caa14618ec99481a308c13b",
+      "H1.pass.dat": "7d6cf4bda096fcf9d97fa371f057f276048b0cb0d12f34fbbd01de94bb2f8722",
+      "H1.plot.dat": "2334c48d964467f4d1c3790e9c92cf884ac54268b458c5274991e0720a95a0ba",
+      "H1.soil.dat": "6a00baf4ed890daacc42f2e58d867e0b2a5cf00f1398b9e199a989c6be7b1fc3",
+      "H1.wat.dat": "6e9029696ff449554772fa81af127f7cb05aa3f1e9399684cfe75f7192423d18"
+    },
+    "B5/default/ordinary": {
+      "H1.ebe.dat": "e7c259a43d70dc470f20d6281ddfd8ea43c39177dfa108b9c8c3744ecee51333",
+      "H1.element.dat": "47ca80f0c28d96c854d9c36408085f75185f15bb89e95ae4345b4d1141dcbd57",
+      "H1.loss.dat": "f0a63d93a4289eaa89c2605480142d47ba0a00674caa14618ec99481a308c13b",
+      "H1.pass.dat": "7d6cf4bda096fcf9d97fa371f057f276048b0cb0d12f34fbbd01de94bb2f8722",
+      "H1.plot.dat": "2334c48d964467f4d1c3790e9c92cf884ac54268b458c5274991e0720a95a0ba",
+      "H1.soil.dat": "6a00baf4ed890daacc42f2e58d867e0b2a5cf00f1398b9e199a989c6be7b1fc3",
+      "H1.wat.dat": "6e9029696ff449554772fa81af127f7cb05aa3f1e9399684cfe75f7192423d18"
+    },
+    "B5/optional/observed": {
+      "H1.ebe.dat": "a00425eaa6262119fed6ac0a3f3854e3d75e81435199f093229c9c8ec71a7e46",
+      "H1.element.dat": "d26180c96c799f1eb4a3156b368bb7ef0b9c777e5d4398eff08ad5f005f1aa2e",
+      "H1.loss.dat": "b238cd20f789c3584adf1cd5ea29f53e77d99cad3c30ef6326294495c62733cf",
+      "H1.pass.dat": "b037016f4d0e044efbdfe65a3ebcf35b22b426f0462c120ab9b77b04f6c6ea70",
+      "H1.plot.dat": "f7a8703373436529fa2c83ebd4736683071e747897981968bca00d36c78a7b42",
+      "H1.soil.dat": "8d04e3c739a36f219c5d8a1d5ccbea2706e5ea09655dcb27b4c6d4368ecd626c",
+      "H1.wat.dat": "d232eed0ac7c1cc8a7002d06ce448b065a71bbebfc613ce9931ac9e67e28af36"
+    },
+    "B5/optional/ordinary": {
+      "H1.ebe.dat": "a00425eaa6262119fed6ac0a3f3854e3d75e81435199f093229c9c8ec71a7e46",
+      "H1.element.dat": "d26180c96c799f1eb4a3156b368bb7ef0b9c777e5d4398eff08ad5f005f1aa2e",
+      "H1.loss.dat": "b238cd20f789c3584adf1cd5ea29f53e77d99cad3c30ef6326294495c62733cf",
+      "H1.pass.dat": "b037016f4d0e044efbdfe65a3ebcf35b22b426f0462c120ab9b77b04f6c6ea70",
+      "H1.plot.dat": "f7a8703373436529fa2c83ebd4736683071e747897981968bca00d36c78a7b42",
+      "H1.soil.dat": "8d04e3c739a36f219c5d8a1d5ccbea2706e5ea09655dcb27b4c6d4368ecd626c",
+      "H1.wat.dat": "d232eed0ac7c1cc8a7002d06ce448b065a71bbebfc613ce9931ac9e67e28af36"
+    }
+  },
+  "readback_pass": true,
+  "reader_sha256": "5f8212d53674345fc4759eae6c1e6ba876bd23c43d6af3298f156e6a406828fd",
+  "results_sha256": "e4c1e59db6a661b83214b289bcdf9e3a735f51631ef9792db81a6fc5ca455fdc",
+  "scientific_acceptance": false,
+  "selected_seed_counts": {
+    "default": {
+      "meaningful_low": 1,
+      "meaningful_pass": 1,
+      "small_exceedance": 2
+    },
+    "optional": {
+      "meaningful_low": 1,
+      "meaningful_pass": 1,
+      "small_exceedance": 2
+    }
+  }
+}

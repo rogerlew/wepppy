@@ -10,7 +10,7 @@ Completed all 36 exact-input seed calls: native/physical/calendar/strict EVENT
 checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](artifacts/resumption-r7-seed-results.md) and
-[ledger v25](artifacts/candidate-ledger-v25.json) retain the current checkpoint.
+[ledger v25](artifacts/candidate-ledger-v25.json) retain the seed checkpoint.
 The complete fixed-input r7 panel preserves all r4 magnitude classifications:
 713/766 meaningful and 31/74 small-load cases pass, with zero recoveries or
 regressions. Annual sediment changes in 218/840 cases. All 840 native/calendar
@@ -30,21 +30,40 @@ passed independent native/calendar/accounting/report readback after the minimal
 source files remain unchanged. This is bounded public-controller compatibility,
 not RQ/browser/deployment parity or generated-soil scientific acceptance.
 
-The fresh seven-development-material SDA acquisition passed full source/cache
-association. Paired preparation passed using canonical source, treatment, stack
-and stage companions; independent outcome review is underway. B2/B3/B4 fresh
-default semantics reproduce frozen U12 exactly. B5 has separately retained deep
-fallback FC/WP/K drift in both arms, so only its fresh paired comparison is
-causal for the policy. Geometry remains frozen, including B2/B3 depth 1600 mm.
-The next declared diagnostic is eight ordinary histories plus eight exact
-installed-observer replicas; it remains gated on final preparation/declaration
-review. No withheld data, accepted parameter, changed default or UI approval.
-See additive ledger v28 for exact evidence bindings.
+The source-associated retention trial is complete and rejected as a rescue
+candidate for the tested configuration. All eight ordinary histories pass the
+native/physical/calendar/strict EVENT checks, and all eight observer replicas
+preserve seven outputs exactly. Independent trace review verifies all 408
+initialized rows and the B2/B3 deeper FC/UL response. Both small-load targets
+remain failures; the passing control moves slightly toward its upper limit,
+and the fresh B5 control underpredicts more. No wider sweep or policy adoption.
+
+B2/B3/B4 fresh defaults reproduce the frozen r7 outputs exactly. B5's separate
+deep fallback FC/WP/K drift remains distinct from its paired policy response.
+All geometry and non-retention fields remain unchanged within pairs. The
+retained native extension and suppressed frost consumers are explicit limits,
+not new physical or closure claims.
+
+The next concrete prerequisite is a qualifying role-specific surface dataset
+with overlap, provenance and persistence, plus a supported native consumer.
+The inspected upload/profile data do not supply it. Frost-policy development is
+a separate scientific option, not an isolated installed-r7 input adjustment or
+demonstrated sediment remedy. No further numeric batch is justified by the
+reviewed evidence yet; dataset locations have been requested from the operator.
+This is an evidence gap, not a new routine permission gate. No parameter is
+accepted, six withheld materials remain unused, defaults are unchanged, and the
+human configuration specification/layout gate remains intact. The broad
+postrepair repository suite is still running.
+See additive ledger v29 and the retention results for exact evidence bindings.
 
 
 
 
-## Current: rock-cover audit separates surface protection from profile fragments
+
+## Historical revision 4: rock-cover audit
+
+This retained checkpoint predates the completed unit/basis repairs and r7
+reconciliation above. Its old next-study instructions are historical.
 
 The [rock-cover audit](artifacts/rock-cover-audit-r4/findings.md) directly reads all 36 retained histories (354 soil horizons, 108 initial management OFEs). All four histories per contrast have identical management bytes and use cropland scenarios. Explicit rangeland rock fields are absent, not measured zero. Profile RFG differs between lanes; it affects both water and a potential consolidation/erosion pathway. It is not a surface-area cover control.
 
