@@ -4,7 +4,10 @@
 **Scope:** Original read-only audit plus approved bounded producer repair execution.
 **Status:** M2/M3 producer source repairs implemented. The original findings below
 retain baseline line references; see [execution disposition](20261102_producer_execution.md)
-for repaired boundaries and validation. NATIVE-01/02/03 remain HOLD.
+for repaired boundaries and validation. Current selected-release disposition: NATIVE-01/02 conformance verified for
+261029 revision6; NATIVE-03 corrected at native `b581352b6` with bounded dynamic
+acceptance. Historical rows below retain the original audit checkout evidence.
+Specialized9005/RAP consumer acceptance remains HOLD; see MIPA-02 release evidence.
 
 ## Seed finding: incomplete PMET crop discovery
 

@@ -17,7 +17,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-M2/M3 implemented: [MOFE input producer audit](docs/work-packages/20261102_mofe_input_producer_audit/package.md) — approved contract ancestor `4579b11ce`; Python producer repairs and paired Rust commit `5e3540f` validated locally. Supported actual-project fork readback covers 72 hills/235 elements with unchanged source. Independent reviews and segmented regression checks pass; source implementation `390bc4f59`. Native PMET capacity/observation, 9005 consumer and S01 FC/HK ownership remain HOLD. No deployment or existing-project regeneration.
+Local revision 6 complete: [MOFE input producer audit](docs/work-packages/20261102_mofe_input_producer_audit/package.md) — producer repairs plus contract-first native FC/HK ownership correction (`b581352b6`); native release/report commit `8931daed2` pushed. Selected PMET capacity/indexing verified. Native 1,416 tests, 31 watchlist, observer/control parity, 48 PMET crop-year mappings and copied 72-hill output/report readback pass. Broad WEPPpy validation completed in segments after a test-isolation repair: initial 9899 passes, terminal continuation 3623 passes/7 skips (overlapping counts). Specialized 9005/revegetation/RAP consumer acceptance remains HOLD; installed Rust promotion excluded. No deployment/default switch or existing source-project regeneration.
 
 Active repair: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — checkpoint `2b998e08d` committed; implementation and independent reviews complete; split validation 12533 passed/371 skipped. Implementation commit and push authorized; no deployment.
 

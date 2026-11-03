@@ -1,0 +1,19 @@
+INFO:wctl2:docker compose exec weppcloud python -c 'from pathlib import Path;import hashlib,json,struct;from wepppy.wepp.management import read_management
+r=Path("/wc1/holdouts/mipa-native-r6-20261102");p=json.loads((r/"pmet-plain-v3/receipt.json").read_text());o=json.loads((r/"pmet-observed-v3/receipt.json").read_text());sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+assert p["outputs"]==o["outputs"]; observed_inputs=dict(o["inputs"]);observed_inputs.pop("mipa_observe.on");assert p["inputs"]==observed_inputs
+for role,receipt in [("plain",p),("observed",o)]:
+ case=r/f"pmet-{role}-v3"
+ assert sha(Path(receipt["binary"]))==receipt["binary_sha256"]
+ for kind,folder in [("inputs","runs"),("outputs","output")]:
+  for name,digest in receipt[kind].items():assert sha(case/folder/name)==digest
+runs=r/"pmet-observed-v3/runs";man=read_management(str(runs/"p11.man"));calendar=[y for rot in man.man.loops for y in rot.years];years={year.name:year for year in man.years}
+rows={f[0]:tuple(map(float,f[1:3])) for f in (l.split(",") for l in (runs/"pmetpara.txt").read_text().splitlines()[1:])}
+records=[list(map(int,l.split())) for l in (runs/"mipa-crops.txt").read_text().splitlines()];assert records==o["mapped_crop_transitions"]
+for ofe,plant,year,day,kcb,rawp in records:
+ expected=years[calendar[year-2000][ofe-1].manindx[0].loop_name].data.itype.loop_name
+ assert man.plants[plant-1].name==expected,(ofe,plant,year)
+ decoded=tuple(struct.unpack("f",struct.pack("i",v))[0] for v in (kcb,rawp))
+ assert decoded==rows[expected]
+assert len(records)==48;assert len(set(rows.values()))==3
+print(json.dumps({"actual_native_records_matched_to_staged_year_crop_references":len(records),"distinct_coefficient_pairs":len(set(rows.values())),"plain_observer_exact_output_files":len(p["outputs"]),"all_retained_input_output_binary_hashes_match":True}))'
+{"actual_native_records_matched_to_staged_year_crop_references": 48, "distinct_coefficient_pairs": 3, "plain_observer_exact_output_files": 7, "all_retained_input_output_binary_hashes_match": true}

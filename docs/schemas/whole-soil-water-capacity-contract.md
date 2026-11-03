@@ -209,6 +209,9 @@ and application review artifacts retain the precise tested scopes and limits.
 
 ### Known native coefficient ownership defect
 
+The following records revision 5/S01 history. Current bounded revision 6
+conformance is recorded under "Revision 6 ownership correction" below.
+
 S01's four heterogeneous histories on source `d2e14d96af5942409c9a315dc8594fcc164a702a`
 confirm that dynamic consumers on OFEs 1/2 use layer-only FC/HK coefficients last
 initialized by OFE 3. For each default/optional policy, 10 of 15 observed layer slots
@@ -239,13 +242,19 @@ and implementation review `ec1114fb243da32c563c09121ca777fa8e819e1f6a7882c8b3a83
 are retained under `out/rock-water-development-20261101/`. The active program's
 S01 reports identify the exact inputs, observer and source-history evidence.
 
-### Authorized ownership correction
+### Revision 6 ownership correction
 
 MIPA-02 authorizes the bounded per-layer/per-OFE FC/HK repair under the
 [native coefficient contract](native-mofe-coefficient-contract.md). Preserve the
 existing formulas, initialization schedule, retention defaults and guard behavior.
-Implementation and exact final-pair conformance remain pending; the historical
-S01 finding and revision-5 HOLD above are not erased by authorization.
+Native source `b581352b6` implements the ownership correction in local undeployed
+revision 6. Four default/optional daily/hourly histories change first observed
+wrong-owner consumer states from 20/30 to 0/30 per history, with 15 actual unsaturated
+HK powers and exact ordinary plain/observer output parity. Single/repeated-material
+controls retain exact outputs. Historical S01 and revision 5 claims remain history.
+This closes the bounded FC/HK ownership defect, not 9005/RAP compatibility, later
+density/tillage validation, field calibration or universal physical validity.
+Final release verification is recorded in the revision 6 release evidence.
 
 ### Existing bounded artifact admission
 

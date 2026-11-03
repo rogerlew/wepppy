@@ -1,6 +1,8 @@
 # Native MOFE coefficient ownership contract
 
-Status: MIPA-02 approved intent; implementation and release conformance pending.
+Status: MIPA-02 implemented at native `b581352b6`; bounded ownership and PMET
+conformance validated. Final local revision 6 release verification is recorded in
+the release evidence. Specialized 9005/RAP native acceptance remains HOLD.
 
 ## Scope and authority
 

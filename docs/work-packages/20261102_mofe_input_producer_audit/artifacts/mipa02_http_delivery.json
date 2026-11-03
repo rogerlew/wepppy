@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "endpoint": "https://forest.tail305ec9.ts.net/weppcloud/static/reports/wepp/release-notes/wepp_261029/",
+  "pdf_sha256": "247176029b2537f3a1676cd5fa6ff2797793839dc361240cfcdbe24ae938aa66",
+  "manifest_sha256": "cb6472c40c736481bb6ed06177232a159fe325cc1e216aa85e2c004d4671e641",
+  "pdf_content_type": "application/pdf",
+  "manifest_content_type": "application/json",
+  "deployment": false
+}

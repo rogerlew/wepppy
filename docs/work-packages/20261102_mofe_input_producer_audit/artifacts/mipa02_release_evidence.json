@@ -1,0 +1,155 @@
+{
+  "source_commit": "b581352b6",
+  "scope": "Bounded local undeployed revision 6. Required native gates pass; complete configured application and HTTP delivery pass. Broad WEPPpy coverage is segmented after a repaired test-only module-identity failure, not one uninterrupted green invocation.",
+  "evidence": {
+    "build-r6-v1.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/build-r6-v1.log",
+      "sha256": "062c5f1949e7b7d9d65fd7e8b4c5ce8d522548a27fd0e283c80c070456a23a39"
+    },
+    "native-pytest-v1.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/native-pytest-v1.log",
+      "sha256": "36cbeb741ac3dbe88f755c1cf8bf8eb96177bee3f5b76c270a185ea904369d02"
+    },
+    "after-unit-v4.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/after-unit-v4.log",
+      "sha256": "f4aca14410deb9c576a23e81c83fe8c90f5a125a6a066dc9953591e7b8ed248f"
+    },
+    "guard-sentinel.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/guard-sentinel.log",
+      "sha256": "a6b3c82a8018c695957f210243279b5dbe270eb94186dfb802a295c457d207e7"
+    },
+    "watchlist.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/watchlist.log",
+      "sha256": "35eae996a749a0d00c6b86684e831b62598153baca6040d1a26041b4b505757b"
+    },
+    "artifact-policy.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/artifact-policy.log",
+      "sha256": "ca05681c1857b6b8ddf5a0117c70f7b2e890a81b418c9e590a7dce8649a7e352"
+    },
+    "smoke-hill.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/smoke-hill.log",
+      "sha256": "2b31f4730ed508d8360d3c08919a9fc7508c394d1e9016f075d15e11c49ffe6a"
+    },
+    "smoke-watershed.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/smoke-watershed.log",
+      "sha256": "d8cd7675249111681937b6cdf7f49394a55544534481fa141a5e5877588fc0cf"
+    },
+    "post-vendor-provenance.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/post-vendor-provenance.log",
+      "sha256": "ebb88117daa94639d8f39513feff3370ffd2f5aeb478a6d7af67cf34089f3795"
+    },
+    "post-vendor-smoke-hill.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/post-vendor-smoke-hill.log",
+      "sha256": "ca4245507eacb913d8028488dfedec3c1e065130ae49205ff01c073a5cde9c6d"
+    },
+    "post-vendor-smoke-watershed.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/post-vendor-smoke-watershed.log",
+      "sha256": "dd742f8a6d2d36e224d8f252404ef61d18423e6c5bd61b549ba1f9249d9e8334"
+    },
+    "post-vendor-tests.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/post-vendor-tests.log",
+      "sha256": "e5efcdc38d31bca062cb70956e9b63523f12930da4ae8b75cd269cfdac942876"
+    },
+    "ownership-comparison.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/ownership-comparison.json",
+      "sha256": "4b19e88457ad0d5c4804c601be278c9cc45bf9aeee5948c353521c6117004351"
+    },
+    "pmet-comparison.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/pmet-comparison.json",
+      "sha256": "31a2d4956c9173a216c25f9db05b5a9a719b366fcf6673d88d3a5099c75a13fa"
+    },
+    "controls-bound-v1/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/controls-bound-v1/receipt.json",
+      "sha256": "23de4d3ba4c2c7e7862219811b9883f134707d11d5db9bec605dde490f537ba7"
+    },
+    "application-pair-v2/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/application-pair-v2/receipt.json",
+      "sha256": "1cd3330c819cde3efdbe49d86d81aa98f04dfbb40b5981687e73bf887f4ff972"
+    },
+    "actual-project-v1/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-v1/receipt.json",
+      "sha256": "1bfc088b43d3179013e947c3e7504119b19afbb7b12f562c91ce2bcd599e6d13"
+    },
+    "actual-project-v1/readback.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-v1/readback.json",
+      "sha256": "d2b665d0d28d10d855e358323596e910e82246ded3a7bc31e3ab63dec442653d"
+    },
+    "actual-project-r5-v1/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-r5-v1/receipt.json",
+      "sha256": "13174cdf7e9ed1562dd7cc2f5a47695c94988273b2a8b163b8023cb02fb0c18b"
+    },
+    "actual-project-full-v1/settings.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-full-v1/settings.json",
+      "sha256": "70f81a44ed4940b9b6731ea1c335e6b88a63ce86094560ece24e103c09aa18b3"
+    },
+    "actual-project-full-v1/inputs.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-full-v1/inputs.json",
+      "sha256": "c0e25e361dfe20af0a0edc96e51917a6639f95c259a764d0759f7ae7296770ee"
+    },
+    "actual-project-full-v1/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-full-v1/receipt.json",
+      "sha256": "7bfb76923261862af25ee18e4ca80bc0834317fa772af1d2a3fb9c9a9d4ace57"
+    },
+    "actual-project-full-v1/readback.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-full-v1/readback.json",
+      "sha256": "6d5a29dd1c12a92178854dcb372925e71cffd926ea01ca3951dad66c544cfb29"
+    },
+    "actual-project-full-r5-v1/receipt.json": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/actual-project-full-r5-v1/receipt.json",
+      "sha256": "b6fb666e6908bbf2feb823cd4c6f115a752fb7250c2ca357937ccb832e951991"
+    },
+    "wepppy-pytest-v1.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/wepppy-pytest-v1.log",
+      "sha256": "db46002d84c8c4eddf49c41e53c343dc9822a5d73fe0c455a1b9df0bc5eab5db"
+    },
+    "alias-target-before.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/alias-target-before.log",
+      "sha256": "64be8723b657a9176af1838178c399cb041498da080555e24e4a59986875ed5d"
+    },
+    "alias-order-before.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/alias-order-before.log",
+      "sha256": "72ae9a7f9205d2813f9a818755d4fb60f8112c19b2655a4dcb33b8e37d0d8ec1"
+    },
+    "alias-order-after.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/alias-order-after.log",
+      "sha256": "0199fe8d3313cc71eff95dc5664636086c6c8bc6aa322aeae054ead5ddf6de50"
+    },
+    "alias-order-qa.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/alias-order-qa.log",
+      "sha256": "27ee949b5f2808455cb209135da4aff0e9da24b32b6f0d907cf90fbae20e92f7"
+    },
+    "test-stubs-final.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/test-stubs-final.log",
+      "sha256": "ee775a79bf72d0202e3135c0d4e59ad4f41917f6c8f5360c8ee45ffa249bc0cc"
+    },
+    "wepppy-pytest-continuation-v1.log": {
+      "path": "/wc1/holdouts/mipa-native-r6-20261102/wepppy-pytest-continuation-v1.log",
+      "sha256": "43b09edb5d8af8838bcb284e3c32e935e2439ce7094eb89cef832070ce92d545"
+    }
+  },
+  "actual_project_context_correction": "v1 partial preparation omitted enabled UI/baseflow companions. Full-v1 uses complete canonical preparation with 363 model inputs; all 72 logs confirm consumption. Full configured r5/r6 outputs match exactly. Partial and full contexts differ in 433/504 outputs and must not be conflated.",
+  "full_context_review": {
+    "path": "mipa02_full_context_qa.md",
+    "sha256": "1ea311303a7921d29c95623ff477c85cc6e7edfa4ab5b2976a174d51ef9b14f3"
+  },
+  "native_application_supplement_commit": "4f07289846faa6039ec0a128bd66402b43e3a7b2",
+  "test_isolation_review": {
+    "path": "mipa02_test_isolation_qa.md",
+    "sha256": "342283ea564442651e7fa589f5b1f46cf9597e8e897fa618e3ed2903e91532a9"
+  },
+  "wepppy_broad_validation": {
+    "initial": {
+      "passed": 9899,
+      "skipped": 422,
+      "failed": 1
+    },
+    "ordered_after_fix": {
+      "passed": 43
+    },
+    "continuation": {
+      "passed": 3623,
+      "skipped": 7
+    },
+    "counts_overlap": true
+  }
+}

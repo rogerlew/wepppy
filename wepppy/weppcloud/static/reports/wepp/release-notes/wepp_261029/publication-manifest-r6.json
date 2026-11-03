@@ -1,0 +1,70 @@
+{
+  "schema": "wepp-release-notes-v1",
+  "release_tag": "261029",
+  "artifact_revision": 6,
+  "document_revision": 6,
+  "document_date": "2026-11-02",
+  "publication_status": "approved local bounded revision; no deployment",
+  "approval_record": "Operator requested contract-first repair and revision of undeployed261029; independent final scientific/disclosure and security reviews accept these exact PDF bytes.",
+  "pdf_filename": "wepp_261029_release-notes-r6.pdf",
+  "pdf_sha256": "247176029b2537f3a1676cd5fa6ff2797793839dc361240cfcdbe24ae938aa66",
+  "public_path": "/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-r6.pdf",
+  "pages": 3,
+  "figures": 0,
+  "model_source_identity": "b581352b68ba9f384fe79afc6655a861520edbaa",
+  "source_comparison_baseline": "d2e14d96af5942409c9a315dc8594fcc164a702a",
+  "binary_sha256": {
+    "wepp_261029": "611a145b02955d1e71d6dfadb3a0810c09b5ad883bd375093f7f5f27131f248a",
+    "wepp_261029_hill": "ef8a23f494b595fba48208c196b3f673f6834feea90d3a024179c7028eecea31"
+  },
+  "sidecar_sha256": {
+    "wepp_261029": "71a15f61d762187b07f14a3b860a70f4f1bb010a3b1a4464ce7a11d8c122e55c",
+    "wepp_261029_hill": "289f7530b6a9343d6ade2fd2deb3d6e669eeb1414eee8d14ba46a33c068eb809"
+  },
+  "known_limitations": [
+    "No specialized9005 soil/revegetation or RAP cancov.txt/.cov reader support; SOIL-02/COVER-01 native acceptance remains separate HOLD.",
+    "Ownership observers record first stage/OFE/layer consumers, not all-time tracing. Drain/lateral probes cover expressions, not complete tile-drain control flow.",
+    "No new tillage/density refresh schedule, retention default, frost recalibration or missing-density generalization.",
+    "Prior Roads screen remains unmet:744/840 passed (96failed). Other scientific limitations remain unresolved; prior counts are not fresh revision6 campaign evidence.",
+    "No deployment, default switch, Windows release or universal physical-validity claim. Regenerate matched hill/watershed outputs; do not reuse old PASS files."
+  ],
+  "completed_actual_byte_gates": {
+    "native_tests": 1416,
+    "additional_HK_guard_cases": 4,
+    "focused_probes_total": 26,
+    "hillslope_watchlist": 31,
+    "native_host_smokes": 2,
+    "post_vendor_host_smokes": 2,
+    "post_vendor_tests": 8,
+    "ownership_histories_per_revision": 4,
+    "plain_observer_output_files_per_history": 7,
+    "first_consumer_wrong_owner_before_per_history": 20,
+    "first_consumer_wrong_owner_after_per_history": 0,
+    "first_consumer_samples_per_history": 30,
+    "actual_HK_power_samples_per_history": 15,
+    "exact_control_cases": 6,
+    "PMET_ofe_year_records": 48,
+    "PMET_distinct_pairs": 3,
+    "PMET_reversed_table_exact_parity": true,
+    "actual_project_hills": 72,
+    "actual_project_ofes": 235,
+    "actual_project_years": 35,
+    "actual_project_outputs": 504,
+    "installed_report_readback": true,
+    "installed_pair_application": true
+  },
+  "review_receipts": {
+    "correctness": "bb6a0c6297a186e2f2677b369804a0265edb13934b895d6b154f4c6452e61637",
+    "security": "940220c2f7be2d7e1214fe8eb2ee9454936f2763bd78e88b577d28d72a14172c",
+    "disclosure_qa": "091b6e8a45a3a27122872701222ce39f431b830d1457dcb5e86bac198d6314c2"
+  },
+  "source_freeze_sha256": "85393018b2dad263132b1bd1c8083214344dab0dcefc1e27ca1da4d119c9a8ff",
+  "evidence_register_sha256": "835171b9e5ad1e0dc2130b3e63b6e040a2a577a4138f4e380faba547367ba246",
+  "preserve_issued_earlier_pdfs": true,
+  "public_attachments": [
+    "wepp_261029_release-notes-r6.pdf",
+    "publication-manifest-r6.json"
+  ],
+  "legacy_source_attached": false,
+  "deployment": false
+}

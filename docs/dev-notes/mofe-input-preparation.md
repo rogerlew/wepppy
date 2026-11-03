@@ -1,9 +1,13 @@
 # MOFE input preparation and recovery
 
 The [MOFE identity contract](../schemas/mofe-input-identity-contract.md) governs
-generated slope, soil, management, cover and PMET inputs. Source repairs do not
-resolve the native capacity, adapter-index or FC/HK ownership dependencies listed
-there. Unrestricted heterogeneous native acceptance remains on hold.
+generated slope, soil, management, cover and PMET inputs. Local undeployed
+`wepp_261029` revision 6 repairs per-layer/per-OFE FC/HK ownership and verifies
+its existing PMET capacities (32 hill, 15000 watershed) and mapped crop selection.
+See the [native coefficient contract](../schemas/native-mofe-coefficient-contract.md).
+The older audit checkout has different PMET code; its six-slot limit is not a
+universal producer limit. Selected 261029 lacks specialized 9005/revegetation and
+RAP cover readers, whose native acceptance remains separate and on hold.
 
 ## Users and operators
 
@@ -54,3 +58,12 @@ silently. The installed release extension is not replaced by source validation.
 Run management, soils, Disturbed PMET, RAP, staging and archive regression suites;
 use actual generated files and reparse them. Native selected coefficients, native
 water operands and fresh output/report readback require separate acceptance.
+
+## Revision 6 regeneration
+
+Existing saved outputs do not change. On an authorized rerun, regenerate every
+contributing hillslope PASS and watershed output with the matched revision 6 pair.
+Inspect per-OFE runoff, storage, ET and drainage: correct ownership can change
+heterogeneous histories materially. Do not treat the ownership correction as
+new retention defaults, thermal calibration or universal physical validation.
+No deployment or bulk regeneration accompanies the local release revision.

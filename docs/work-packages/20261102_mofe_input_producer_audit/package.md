@@ -1,6 +1,6 @@
 # MOFE input producer audit and repair
 
-**Status:** Open — approved M2/M3 producer repairs implemented; M4 producer readback complete, native acceptance HOLD.
+**Status:** Open — producer repairs and bounded MIPA-02 native ownership/PMET acceptance pass; undeployed 261029 revision 6 delivered locally. Specialized 9005/RAP consumer acceptance remains HOLD.
 **Started:** 2026-11-02 19:32 UTC.
 **Owner:** WEPPcloud maintainer; Codex coordinates the requested audit.
 
@@ -11,7 +11,7 @@ The [execution report](artifacts/20261102_producer_execution.md) records current
 validation and limits. The [MIPA-01 checkpoint](artifacts/20261102_contract_decision.md) records accepted
 calendar, crop-identity and slope compatibility decisions, renewed failing
 baselines, and the contract-first ratification/ancestor gates. The operator now
-authorizes MIPA-02 native correction and revision6 of undeployed 261029 under the
+authorizes MIPA-02 native correction and revision 6 of undeployed 261029 under the
 [native checkpoint](artifacts/20261102_native_contract_decision.md). Deployment
 and existing-project regeneration remain separately authorized work.
 The audit-only scope described below is the original session's provenance.

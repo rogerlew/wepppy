@@ -1,6 +1,7 @@
 # ADR-0133: Per-OFE native water coefficient ownership
 
-Status: Accepted intent; implementation and exact release validation pending.
+Status: Accepted; native ownership implemented at `b581352b6`, with bounded
+consumer, full-history and application readback evidence. Deployment excluded.
 
 ## Decision and provenance
 

@@ -48,6 +48,8 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0133`: [Native MOFE coefficient ownership](ADR-0133-native-mofe-coefficient-ownership.md) (Accepted ownership correction; no parameter retuning or deployment).
+
 - `ADR-0125`: [Rock fragment unit and basis repairs](ADR-0125-rock-fragment-unit-and-basis-repairs.md) (Development checkpoint; no native physics or deployment).
 
 - `ADR-0121`: [Bounded deposition endpoint search](ADR-0121-depend-bounded-root-search.md) (Proposed; shared native numerical repair).

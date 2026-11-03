@@ -5,7 +5,7 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current. The 2026-11-02 execution request starts M1; the former audit-only session
 restriction is superseded. The user ratified MIPA-01 with “approved. proceed”; contract ancestor
-`4579b11ce` precedes all production implementation. Native acceptance stays HOLD pending the authorized MIPA-02 extension below.
+`4579b11ce` precedes all production implementation. Bounded MIPA-02 acceptance is recorded below; specialized 9005/RAP acceptance remains HOLD.
 
 ## Purpose / Big Picture
 
@@ -28,7 +28,10 @@ selected by each element and rotation, not only successful model completion.
 - [x] (2026-11-02 19:38 UTC) Validate documentation, register package on the project board and reconcile independent scaffold review.
 - [x] (2026-11-02 UTC) Incorporate S01 as NATIVE-03 with bound runtime evidence and separate native acceptance; no repair or rerun.
 - [x] Native authority: user authorized MIPA-02 contract-first repair and revision of undeployed 261029.
-- [ ] MIPA-02: independent contract reviews and standalone ancestor; native repair, discrepancy validation and revision-6 release gates.
+- [x] MIPA-02: reviewed ancestors, native correction, selected-source discrepancy validation and local revision 6 matched release/report delivery.
+- [x] Complete configured copied-project rerun and r5 comparison after identifying omitted UI/baseflow companions in partial preparation.
+- [x] Broad WEPPpy sanity: 9899 passes before test-isolation failure, repaired ordered sequence 43 passes, terminal continuation 3623 passes/7 skips; local source-control handoff.
+- [ ] Separate remaining9005/revegetation/RAP native support decision and compatible-consumer validation.
 - [x] (2026-11-02 22:49 UTC) M1 renewed management and installed-Rust reproductions through the running Compose application container; existing focused suites pass 21 tests despite reproduced failures.
 - [x] (2026-11-02 UTC) Draft MIPA-01 canonical identity contract and compatibility/regression checkpoint.
 - [x] (2026-11-02 UTC) Two independent contract reviews pass after bounded-calendar, token-safe-alias and idempotence clarifications; documentation and baseline integrity checks pass.
@@ -37,11 +40,27 @@ selected by each element and rotation, not only successful model completion.
 - [x] M2: implement all-crop PMET coverage, native-safe aliases, per-OFE Disturbed context and retry/archive identity.
 - [x] M3: implement calendar/residue, per-OFE soil/cover and paired Rust slope/map repairs; source and actual-writer tests pass.
 - [x] M4 producer portion: supported actual-project fork, 72 hills/235 elements prepared and reparsed; original source unchanged; PMET retry byte-identical.
-- [ ] M4 full acceptance: native capacity, adapter mapping, FC/HK ownership, 9005 consumer and fresh native outputs/reports remain HOLD.
+- [x] M4 bounded native acceptance: selected 261029 capacity/mapping, FC/HK repair and fresh copied-project outputs/reports.
+- [ ] M4 complete compatibility:9005/revegetation/RAP native consumer remains HOLD.
 - [x] Final independent correctness, QA and security review: no unresolved source findings; final focused suite 306 passed.
 - [x] Extended regression and benchmark refresh complete: terminal continuation 2529 passed; prior failures fixed and retested. Segmented validation, not one uninterrupted full-suite pass.
 
 ## Surprises & Discoveries
+
+The broad regression stopped after 9,899 passes at an order-dependent test fixture:
+`test_managements_module.py` replaced/deleted the canonical management module,
+splitting class identities. The PMET suite passes alone; the two-module order
+reproduces failure and passes all 43 tests after normal-import fixture repair.
+The continuation reran the affected fixture and all later test paths successfully
+(3623 passed, 7 skipped).
+
+The initial actual-project native run used partial preparation and omitted enabled
+baseflow/UI companion files. Preserve its exact results as limited evidence;
+complete configured-workflow acceptance requires canonical `prep_hillslopes` and
+fresh execution/readback. The complete rerun passes: 363 model inputs, 72 successful installed-name runs,
+confirmed UI/baseflow consumption, 504 outputs and installed report readback.
+Full configured r5/r6 outputs are exact; 433 outputs differ between partial and
+full configurations, so the two comparisons must remain distinct.
 
 Implementation review found PMET publication must replace hardlinked generated
 destinations rather than truncate them, and reject symlinks. Visible temporary
@@ -65,7 +84,7 @@ shows `build_multiple_year_man` expands every stored rotation to N years,
 rather than emitting N years total. The management serializer emits a year-count
 record for every rotation while the parser consumes that count once before all
 rotations. These are additional MAN-03 mechanisms requiring independent regression
-coverage; native temporal acceptance is still pending.
+coverage; later MIPA-02 full-history evidence supplies bounded native acceptance.
 
 
 The reported first-OFE symptom is not a first-OFE-only native PMET implementation.
@@ -82,6 +101,11 @@ PURK/PERC consumers used another OFE's values under both retention policies;
 can conceal the error, so repeated-material parity alone is insufficient.
 
 ## Decision Log
+
+2026-11-03 UTC: retain partial-preparation inputs/outputs before complete copied-project
+preparation. Use the installed revision 6 name and all saved configuration flags,
+then compare retained revision 5 with those identical inputs. No original project
+mutation or model/configuration change is authorized by this validation.
 
 2026-11-02 implementation: accepted MIPA-01 and ancestor `4579b11ce` authorize
 bounded producer repairs and copied-project validation. Keep no-N landuse
@@ -127,9 +151,10 @@ serialized year-to-crop joins match every intended lookup and repeat preparation
 is stable. Actual-project coefficients are uniform, so discriminating mixed-pair
 proof comes from the real Disturbed writer regression, not that project alone.
 
-The package remains open for native acceptance. NATIVE-01/02/03, selected 9005
-consumer validation and fresh output/report consequences are not resolved by
-correct producer files. The installed Rust release was not replaced. Broad
+MIPA-02 resolves NATIVE-01/02/03 with selected-source conformance, the FC/HK
+ownership repair and discriminating native histories. The package remains open
+for specialized 9005/RAP native acceptance; correct producer files alone cannot
+resolve that missing consumer support. The installed Rust release was not replaced. Broad
 pytest reached a report-source freshness pin affected by this writer change;
 a fresh 96-case rerun now matches all 768 retained outputs, and its report/provenance
 refresh passes 16 contract/Usersum tests. No historical output was relabeled.
@@ -386,7 +411,7 @@ watershed includes, and run native smoke, watchlist, pytest and artifact-policy
 gates from that default-branch checkout. Test actual final binaries and the
 canonical WEPPpy selection/preparation/readers with committed fixtures; supplement
 with the retained copied project. Vendor only after required gates pass. Create
-revision-6 authoring files and a reviewed PDF/manifest, preserving revision5.
+revision-6 authoring files and a reviewed PDF/manifest, preserving revision 5.
 Update binary lifecycle and native change-log, obtain final independent correctness,
 QA/security and release-disclosure reviews, and commit the bounded result. Required
 native push follows native AGENTS. Do not deploy or change executable defaults.
@@ -398,3 +423,32 @@ claim precedes dynamic evidence and exact final-pair validation.
 
 Outcome at extension start: contracts prepared; no native implementation edits.
 Revision 2026-11-02: added operator-authorized MIPA-02 native/release execution.
+
+
+MIPA-02 initial progress snapshot: both independent checkpoint reviews PASS; standalone
+ancestors `a42b9d640`/`0a8727057` precede native `b581352b6`. Four before failures
+prove cross-OFE interference in compiled real PURK/PERC; 22 after checks pass.
+Research observer builds, final matched release build and full histories started.
+Discovery: selected 261029 lacks 9005 extended-header and RAP cover consumers.
+The canonical contract explicitly retains SOIL-02/COVER-01 HOLD and separates any
+reader addition from this FC/HK correction. No existing source scenario limit
+or native PMET arithmetic changed. At that checkpoint, outcomes were pending full-history evidence; the final
+outcome below supersedes that status.
+
+
+MIPA-02 outcome: locally vendored revision 6 and reviewed three-page report are
+complete; current tracker binds exact binaries, PDF and evidence. Independent
+reviews pass after correcting the historical Roads count (744 passed, 96 failed).
+Full histories prove corrected first-consumer ownership and quantify numerical
+changes; no all-time ownership/thermal/field-validation claim. The actual copied
+project generated 504 outputs with installed interchange/report readback.
+Complete canonical preparation supersedes the initial partial-context evidence: all
+72 executions consume enabled UI/baseflow companions, and retained r5 matches all
+504 r6 outputs on identical 363 model inputs. Native
+suite 1,416 and post-vendor gates pass. Broad WEPPpy validation completes in segments: initial 9899 passes/422 skips,
+then a fixture-only module-identity repair and 3623 passes/7 skips through every
+remaining path. The independent reproducing order passes 43 tests. These counts
+overlap; no uninterrupted full-suite green claim.
+The optional reader-scope preference received no response during independent work;
+retain the stated separate compatible-engine requirement, with 9005/RAP native
+acceptance HOLD. Do not silently port new physics or relabel unsupported inputs.

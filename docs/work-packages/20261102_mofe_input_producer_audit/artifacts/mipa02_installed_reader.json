@@ -1,0 +1,7 @@
+{
+  "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+  "sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad",
+  "replaced": false,
+  "paired_source_fix": "5e3540f684c8606f4140afcd72ed5a21df5ab85f",
+  "source_fix_installed": false
+}

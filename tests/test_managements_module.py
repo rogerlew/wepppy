@@ -1,7 +1,5 @@
-import importlib.util
+import importlib
 import shutil
-import sys
-import types
 from pathlib import Path
 
 import pytest
@@ -11,42 +9,9 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture(scope="module")
 def managements_module():
-    """
-    Load the `wepppy.wepp.management.managements` module without triggering the
-    heavy `wepppy.wepp` package import side effects.
-    """
-    repo_root = Path(__file__).resolve().parent.parent
-    package_root = repo_root / "wepppy"
-
-    created_modules: dict[str, None] = {}
-
-    def ensure_package(name: str, path: Path) -> None:
-        if name in sys.modules:
-            return
-        module = types.ModuleType(name)
-        module.__path__ = [str(path)]
-        sys.modules[name] = module
-        created_modules[name] = None
-
-    ensure_package("wepppy", package_root)
-    ensure_package("wepppy.wepp", package_root / "wepp")
-    ensure_package("wepppy.wepp.management", package_root / "wepp/management")
-
-    spec = importlib.util.spec_from_file_location(
-        "wepppy.wepp.management.managements",
-        package_root / "wepp/management/managements.py",
-    )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["wepppy.wepp.management.managements"] = module
-    created_modules["wepppy.wepp.management.managements"] = None
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-
-    try:
-        yield module
-    finally:
-        for name in list(created_modules):
-            sys.modules.pop(name, None)
+    # Preserve the canonical class identities held by synthesis/PMET consumers.
+    # Replacing this entry in sys.modules leaks incompatible enums into later tests.
+    return importlib.import_module("wepppy.wepp.management.managements")
 
 
 def test_get_management_basic_metadata(managements_module):

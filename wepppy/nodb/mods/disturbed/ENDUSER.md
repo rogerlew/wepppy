@@ -132,6 +132,9 @@ class and staged soil texture. Generated crop identifiers may be shortened;
 the management header retains their original names. See
 [MOFE input preparation and recovery](../../../../docs/dev-notes/mofe-input-preparation.md)
 for file inspection, rebuild guidance and the separate native-model acceptance limits.
+Local undeployed `wepp_261029` revision 6 corrects native per-element FC/HK
+ownership; heterogeneous results can change after an authorized matched-pair
+rerun. It does not add specialized 9005/revegetation or RAP cover-reader support.
 
 ## Interpreting Results
 
