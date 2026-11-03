@@ -418,8 +418,8 @@ WEPP models subsurface flow impedance via a restrictive layer below the soil pro
 ```
 slflag  ui_bdrkth  kslast
 
-slflag: 1 if restrictive layer exists, 0 otherwise
-ui_bdrkth: 10000 mm (fixed thickness, effectively infinite)
+slflag: native lower-boundary flag; current non-AG writer emits 1 even when no restrictive horizon is detected
+ui_bdrkth: 10000 mm (imposed lower-layer thickness, not observed depth to bedrock)
 kslast: current non-AG rule writes 0.01 if no restrictive layer; otherwise writes (res_lyr_ksat_um_s * 3.6) / 1000 in mm/h
 ```
 
@@ -446,6 +446,23 @@ The historical behavior in `ssurgo.py` has changed multiple times; key milestone
 | 2026-05-22 | `569a1a29124c` | Unit-audit comments added (`ksat_r` tracked as `um/s`, WEPP output in `mm/h`), with behavior retained (`0.01` default and `/1000` restrictive-layer rule). |
 
 **Purpose:** Restrictive layers limit drainage depth and promote lateral subsurface flow, affecting hydrograph shape and baseflow.
+
+**Provenance interpretation:** Detection uses horizon conductivity, not geological
+restriction type. A low-conductivity mineral horizon can trigger the same
+truncation and `/1000` bedrock-proxy rule as a lithic horizon. The header's
+`reskind` comes from component restriction metadata; `N/A` is not proof of absent
+geological restriction. Likewise, `res_lyr_i None` means no threshold-triggered
+horizon was detected, not a verified freely draining substrate. These distinctions
+must be retained when evaluating generated soils. The native hourly and daily
+drainage branches combine bottom-soil and lower-boundary conductivity differently.
+Do not treat the historical attenuation as an accidental unit conversion or
+remove it solely to match a sediment benchmark.
+
+Terminal-depth padding in the 7778 writer (minimum 210 mm before rounding upward
+to a 200 mm multiple, hence at least 400 mm) is separate from inserting a 200 mm
+horizon boundary. Boundary insertion preserves existing total profile depth; it
+does not cause this older padding or the restrictive-horizon truncation.
+
 
 ### Gridded Dominant MUKEY Fallback Provenance
 
