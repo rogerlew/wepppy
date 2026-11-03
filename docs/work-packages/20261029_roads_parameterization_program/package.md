@@ -24,14 +24,23 @@ fresh interchange, reports and exports. Its 470 raw outputs exactly reproduce
 the v1 native outputs; v1 failed export because the harness omitted canonical
 cleanup. Both attempts remain retained. This is not RQ/browser/deployment parity.
 
-The first Roads context in `current-roads-v1` exposed a baseline `tc_out.txt`
-symlink overwrite. A minimal conformance repair preserves the existing lifecycle
-contract; the regression failed before repair and all 50 controller tests pass
-afterward. Fresh five-context validation and independent review are underway.
-Optional source-associated retention is a distinct supported hypothesis; its
-actual Roads role/companion API compatibility must pass before behavioral runs.
-Six withheld materials, production defaults and the explicit human UI gate remain
-untouched. See ledger v27 and the additive result/review artifacts.
+All four positive Roads contexts and the exact full-upload negative control
+passed independent native/calendar/accounting/report readback after the minimal
+`tc_out.txt` isolation repair. All 907 baseline files per context and all 3,537
+source files remain unchanged. This is bounded public-controller compatibility,
+not RQ/browser/deployment parity or generated-soil scientific acceptance.
+
+The fresh seven-development-material SDA acquisition passed full source/cache
+association. Paired preparation passed using canonical source, treatment, stack
+and stage companions; independent outcome review is underway. B2/B3/B4 fresh
+default semantics reproduce frozen U12 exactly. B5 has separately retained deep
+fallback FC/WP/K drift in both arms, so only its fresh paired comparison is
+causal for the policy. Geometry remains frozen, including B2/B3 depth 1600 mm.
+The next declared diagnostic is eight ordinary histories plus eight exact
+installed-observer replicas; it remains gated on final preparation/declaration
+review. No withheld data, accepted parameter, changed default or UI approval.
+See additive ledger v28 for exact evidence bindings.
+
 
 
 

@@ -348,8 +348,10 @@ def acquire(root=ROOT):
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, old_handler)
         collection._disconnect()
-    artifacts = {str(path.relative_to(root)): sha(path) for folder in ('requests', 'normalized')
-                 for path in sorted((root / folder).iterdir()) if path.is_file()}
+    # The final receipt is written last. Bind every earlier cohort artifact,
+    # including cache metadata, review/start receipts and any failed WAL files.
+    artifacts = {str(path.relative_to(root)): sha(path)
+                 for path in sorted(root.rglob('*')) if path.is_file()}
     success = error_class is None and association is not None and association['passed']
     result = dict(schema='roads-retention-acquisition-v1', passed=success, source_association_valid=success,
         finished_utc=now(), error_class=error_class, declaration_sha256=sha(declaration_path),

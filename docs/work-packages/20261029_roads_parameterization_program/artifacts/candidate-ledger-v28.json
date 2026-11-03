@@ -1,0 +1,48 @@
+{
+  "version": 28,
+  "predecessor": {
+    "path": "candidate-ledger-v27.json",
+    "sha256": "62040420309a400f120e97110eed2424899cb98ec2b46831c9b3b5440939fd2f"
+  },
+  "status": "current_roads_pass_retention_prepared_native_not_started",
+  "roads": {
+    "root": "/wc1/runs/ro/roads-parameterization-program-20261103/current-roads-v2",
+    "declaration_sha256": "d66eb2edd76242fce7515ff9179c089180b37fb4977b2cfd30153b10bddd4196",
+    "results_sha256": "1bee95d0c774348707a582d77fa863d07bb9044eef01926c458d9749166943e9",
+    "independent_readback_sha256": "a6091e643bbe3939a4f05a35d4d9f7a2cf28052be4a4810be44783d0b4609677",
+    "positive_contexts": 4,
+    "expected_negative_contexts": 1,
+    "baseline_files_preserved_each": 907,
+    "source_files_preserved": 3537,
+    "rq_browser_parity": false
+  },
+  "retention": {
+    "acquisition_root": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-source-v1",
+    "acquisition_sha256": "495953db4f2850caf14d1d6f1095b41293e3a5fd807a6e717b19d9c2b4e9fa7c",
+    "preparation_root": "/wc1/runs/ro/roads-parameterization-program-20261103/retention-preparation-v1",
+    "declaration_sha256": "5be61161a62c428867735328cd9b085da64473e13d26d92f8b8aae88bb87da7b",
+    "preparation_result_sha256": "e24ade55e77907dc75ebc4d4e45378d53cf48483ec86366991830cec6f1e68ab",
+    "cases": [
+      "B2",
+      "B3",
+      "B4",
+      "B5"
+    ],
+    "independent_preparation_outcome_pending": true,
+    "fresh_default_exact_semantics": [
+      "B2",
+      "B3",
+      "B4"
+    ],
+    "fresh_default_drift": {
+      "B5": "Deep fallback FC/WP/K in all roles; unchanged by optional policy"
+    },
+    "planned_ordinary_calls": 8,
+    "planned_observer_calls": 8,
+    "native_calls": 0
+  },
+  "scientific_acceptance": false,
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "ui_human_gate_preserved": true
+}

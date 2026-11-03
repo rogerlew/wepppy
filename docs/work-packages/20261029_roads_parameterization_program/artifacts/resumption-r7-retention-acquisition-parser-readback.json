@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "helper_sha256": "f08f8c0011436cdaef7c6324ca474616c4fd91c68bce20e9878fec943095af27",
+  "retained_raw_root": "/workdir/wepppy/out/rock-water-development-20261101/P01-source-tables-v2",
+  "tables": {
+    "component": {
+      "raw_rows": 16,
+      "reduced_rows": 16,
+      "fields": 18,
+      "empty_xml_values": 21,
+      "raw_sha256": "a39d5e464d225d9f86649c76e060d2b00f5fe6449cdf629addcf2c26307bf86c",
+      "query_sha256": "a7bb0ebdd7b590754a9028ab80601a81c130399a2ef87d247bdc290a79335659",
+      "owned_extraction_parity": true
+    },
+    "chorizon": {
+      "raw_rows": 91,
+      "reduced_rows": 91,
+      "fields": 21,
+      "empty_xml_values": 256,
+      "raw_sha256": "ba7ea680b26c7df3721beea72aab3238276876286a0a79677397bb52283c39ab",
+      "query_sha256": "05e32f5beac3bea0215f2cd1c46d4a93bba065be8bc52de9c922dddefa8383d2",
+      "owned_extraction_parity": true
+    },
+    "corestrictions": {
+      "raw_rows": 15,
+      "reduced_rows": 15,
+      "fields": 2,
+      "empty_xml_values": 0,
+      "raw_sha256": "83617d5ef24438f067db36de99e9864fc62e649a4c16a085db197b6834fb89c3",
+      "query_sha256": "88b2ffbf20a4e1ffcca218191e94bf2933d0acad25436cdbfb33b191ee3c5891",
+      "owned_extraction_parity": true
+    },
+    "chfrags": {
+      "raw_rows": 172,
+      "reduced_rows": 62,
+      "fields": 2,
+      "empty_xml_values": 0,
+      "raw_sha256": "7084f3ca753345650468db84e27854fc6ab758b1f782fd3ebba24abcf9ecde5e",
+      "query_sha256": "8c3c4ea08c4f551cbba1e68d23c415440b10643c684b41d31a8cf11a62b4bed5",
+      "owned_extraction_parity": true
+    },
+    "chtexturegrp": {
+      "raw_rows": 196,
+      "reduced_rows": 91,
+      "fields": 2,
+      "empty_xml_values": 0,
+      "raw_sha256": "97651ee3333b2c312989868b25da6d0e79121fc2208438ff16a8bdb3b3e06532",
+      "query_sha256": "2baad6e9e6fd416e02ae4aba4cba093653cbbaf7867b0ccdb59ba14aed94c0ad",
+      "owned_extraction_parity": true
+    }
+  },
+  "network_requests": 0,
+  "real_acquisition_root_created": false,
+  "header_receipts_opened": false
+}

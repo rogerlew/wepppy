@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "acquisition_sha256": "495953db4f2850caf14d1d6f1095b41293e3a5fd807a6e717b19d9c2b4e9fa7c",
+  "cache_sha256": "498d67c9454cb508409177d7a944879398e039fc201c624f9eacf87c895b467b",
+  "bound_files_verified": 26,
+  "cache_counts": {
+    "component": 12,
+    "chorizon": 53,
+    "corestrictions": 7,
+    "chfrags": 33,
+    "chtexturegrp": 53
+  },
+  "source_builds": 0,
+  "native_calls": 0,
+  "review_scope": "Parent independent hash/integrity/cohort and raw request status readback; full typed-row association remains separately retained"
+}
