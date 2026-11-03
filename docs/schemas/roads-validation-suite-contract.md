@@ -2,6 +2,10 @@
 
 Status: operator-requested, implementation pending (2026-10-23).
 
+Program-level correctness adjudication, sensitivity studies and end-user controls
+follow [Roads adjudication](roads-parameterization-adjudication-contract.md).
+Historical comparison statistics retain their original definitions.
+
 ## Purpose and scope
 
 Provide a reproducible Roads parameter comparison based on the clogging-starch

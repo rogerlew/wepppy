@@ -1,5 +1,25 @@
 # Roads parameterization program tracker
 
+## Current direction — operator amendment, 2026-11-03
+
+Resolve known and newly identified defects, then develop sensitivity analysis and
+a parameterization harness supporting end-user controls. The canonical authority is
+[Roads adjudication contract](../../schemas/roads-parameterization-adjudication-contract.md).
+Legacy agreement is characterization, not the closure gate. Historical failed
+experiments remain failed under their original criteria; no parameter/default is
+promoted by this amendment. Prior instructions to continue searching until legacy
+magnitude thresholds pass, or to require a surface dataset before any further
+progress, are superseded. Surface research remains optional when supported.
+The explicit human specification/layout gate and deployment boundaries remain.
+
+Next: inventory and disposition known findings (including the strict particle flag),
+repair confirmed defects, then specify a bounded sensitivity harness and proposed
+controls using existing builders and retained evidence. No new numerical sweep or
+production UI change follows from this documentation checkpoint.
+
+The retained r7 checkpoint below predates this amendment; its evidence remains
+valid, while its next-step and closure recommendations are superseded above.
+
 ## Baseline isolation conformance repair
 
 The first fresh r7 Roads context completed native execution but changed exactly

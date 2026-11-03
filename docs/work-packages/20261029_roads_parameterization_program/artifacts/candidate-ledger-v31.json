@@ -1,0 +1,27 @@
+{
+  "version": 31,
+  "predecessor": {
+    "path": "candidate-ledger-v30.json",
+    "sha256": "b42b375bc7b683910a4376cbc1af970a901d92fc07d37f299f5b6666004f1cb7"
+  },
+  "status": "operator_pivot_defects_then_sensitivity_and_user_controls",
+  "authority": {
+    "path": "docs/schemas/roads-parameterization-adjudication-contract.md",
+    "sha256": "0e694ed9e3a43cd047c1dd2ebd41a8f197940ec5566d17cc2773a275c4935f69",
+    "operator_date": "2026-11-03"
+  },
+  "historical_results_reclassified": false,
+  "new_model_calls": 0,
+  "production_changes": false,
+  "next_steps": [
+    "Register known findings and distinguish defects from numerical flags, legacy differences and empirical uncertainty.",
+    "Resolve confirmed defects and retain regression evidence.",
+    "Specify and validate a bounded sensitivity/parameterization harness using canonical builders.",
+    "Prepare controls specification/layout for explicit human approval before production wiring."
+  ],
+  "legacy_agreement_is_closure_gate": false,
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "human_ui_gate_preserved": true,
+  "program_complete": false
+}

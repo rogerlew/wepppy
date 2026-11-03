@@ -1,5 +1,25 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+## Current direction — operator amendment, 2026-11-03
+
+Resolve known and newly identified defects, then develop sensitivity analysis and
+a parameterization harness supporting end-user controls. The canonical authority is
+[Roads adjudication contract](../../../../schemas/roads-parameterization-adjudication-contract.md).
+Legacy agreement is characterization, not the closure gate. Historical failed
+experiments remain failed under their original criteria; no parameter/default is
+promoted by this amendment. Prior instructions to continue searching until legacy
+magnitude thresholds pass, or to require a surface dataset before any further
+progress, are superseded. Surface research remains optional when supported.
+The explicit human specification/layout gate and deployment boundaries remain.
+
+Next: inventory and disposition known findings (including the strict particle flag),
+repair confirmed defects, then specify a bounded sensitivity harness and proposed
+controls using existing builders and retained evidence. No new numerical sweep or
+production UI change follows from this documentation checkpoint.
+
+The retained r7 checkpoint below predates this amendment; its evidence remains
+valid, while its next-step and closure recommendations are superseded above.
+
 ## Active resumption: revision 7 reconciliation, 2026-11-03 UTC
 
 Executing the operator's resumption prompt under the existing scientific and human
@@ -212,12 +232,17 @@ This execution stops at the explicit human specification/layout gate.
 
 ## Progress
 
+- [x] Record the operator-approved pivot in the canonical adjudication contract.
+- [ ] Register and disposition known findings; resolve confirmed supported-path defects.
+- [ ] Define and validate the sensitivity harness and evidence-backed candidate controls.
+- [ ] Prepare the configuration specification/layout for human review.
+
 - [x] Completed and independently scored all 840 r7 cases; no magnitude classification changes.
 - [x] Completed fresh full-preparation public-controller baseline and artifact readback.
 - [x] Repair confirmed Roads baseline diagnostic isolation and independently validate all five contexts.
 - [x] Acquire the seven-material source cohort and prepare canonical paired retention inputs.
 - [x] Independently review prepared artifacts and all sixteen retention/observer histories; reject the lane as a rescue candidate.
-- [ ] Obtain qualifying role-specific surface evidence before defining another supported intervention.
+- Superseded prerequisite: role-specific surface evidence is required for a surface intervention, not for defect resolution or the general sensitivity harness.
 - [x] Complete postrepair repository validation with exact combined coverage and retain the reviewed publication-metadata correction in the final checkpoint.
 
 - [x] Reconcile later source/producer repairs and declare the bounded r4/r7 engine comparison.
@@ -421,6 +446,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- The retained experiments constrain candidate remedies but do not establish the legacy comparator as physical truth. The operator identified regression risk from further narrow agreement-driven searches; the new adjudication separates defects, sensitivity and empirical uncertainty.
+
 - The broad suite identified stale-publication source metadata still naming the pre-repair Roads hash. The reviewed receipt now records the baseline-isolation fix while retaining the original stale report and provenance. Three publication tests pass; remaining-suite coverage is recorded separately.
 
 - The retention input contrast reaches native initialization, yet does not recover either target and worsens the opposite control. Actual lower-layer response is therefore insufficient evidence for a Roads remedy. Native adds 200 mm bottom support; all observed frost opportunities were skipped by KSFLAG.
@@ -536,6 +563,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03 operator amendment: correctness and sensitivity replace legacy-fit search as the governing objective. Narrow benchmark gains do not justify disproportionate regression risk. Historical scores and rejections remain unchanged; controls do not imply calibrated defaults.
+
 - Preserve the historical publication as stale after the conformance repair. Resume the exact remaining collected test IDs after the metadata-only correction; retain the initial failure and report combined coverage rather than an uninterrupted full-suite pass.
 
 - Reject the paired retention rescue lane without a full840 expansion. Require measured surface/overlap/persistence and faithful consumer semantics before a distinct surface intervention; do not substitute profile RFG, residue or land use. Existing autonomy continues, with an actual evidence prerequisite.
@@ -650,6 +679,10 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The new direction is documented; defect disposition, sensitivity harness work and
+the approved user workflow remain open. Previous experiments constrain proposed
+interventions rather than requiring further pursuit of legacy agreement.
 
 The requested resumption now has reviewed current-engine panel evidence, successful current preparation/controller workflows, a repaired baseline-isolation defect, and a completed rejected retention experiment. Scientific acceptance remains unmet. The next study needs physical source support or a separately justified native-policy question; no tuning UI or default adoption follows. Postrepair repository validation covers all 13,267 collected tests across two segments after correcting reviewed stale-publication metadata; 12,845 pass, 422 runtime skips and one collection skip. Ledger v30 binds the evidence. The package remains active with scientific acceptance unmet.
 
