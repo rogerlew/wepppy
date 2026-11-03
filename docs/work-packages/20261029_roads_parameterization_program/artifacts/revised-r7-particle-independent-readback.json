@@ -1,0 +1,13 @@
+{
+  "retention_files": 824,
+  "declaration_sha256": "6ba6bc25b859fae41d53985279bccdc0d3fdab83b7fc8d9b9d97688b8b5dd789",
+  "result_sha256": "720974c4780c4225b37438c4cc8a7b51d8d8bf2a3d0cb15965d55be76175690a",
+  "archive_matches_git": true,
+  "input_output_hashes_match": true,
+  "normalization_excess": 2.727057517697422e-08,
+  "derived_bound": 2.9802335177470655e-07,
+  "print_decomposition_exact": true,
+  "strict_audit_passed": false,
+  "flag_count": 1,
+  "reviewed_disposition_sha256": "43fdeee5722838c75905d9d57afdd88207d5245618d00ca768f2ac88ec72f3cc"
+}

@@ -20,6 +20,34 @@ production UI change follows from this documentation checkpoint.
 The retained r7 checkpoint below predates this amendment; its evidence remains
 valid, while its next-step and closure recommendations are superseded above.
 
+## Revised execution sequence — 2026-11-03
+
+Execute the defect/sensitivity/control objective from the current adjudication
+contract on existing branch HEAD `e0308765c6da2e8ec73c88208abcb0d98bd684e8`;
+the worktree was verified clean. Historical sections below retain original
+results and decisions, not authority to resume legacy-fit closure.
+
+First maintain `artifacts/revised-issue-register.md`, obtain a current-r7
+source-supported disposition of the retained EVENT particle flag, and inspect
+existing preparation consumers for confirmed defects and aliases. Independent
+particle investigation and control inventory work have separate artifact ownership.
+Repair only confirmed supported-path defects under their canonical contracts.
+
+Next build the control inventory and declare a small sensitivity panel before
+execution. Reuse `tests/roads` and canonical production builders; preserve all six
+reserved materials. Bind requested, effective, emitted and consumed values,
+full runtime sidecars and water/sediment/event/role diagnostics. Review each batch
+for information gained, including no-ops and adverse responses. Current controller
+evidence is bounded and cannot certify browser/RQ/deployment parity.
+
+Then prepare a concrete canonical field/behavior specification, proposed ADR and
+static layout with scientific, correctness, QA, security and UX review. Commit
+the reviewed proposal checkpoint and present both artifacts for explicit human
+approval. Approval remains absent. Only after approval may the contract-first
+ancestor be finalized and production persistence/application/view wiring begin.
+The final milestone requires actual browser-to-native-to-report workflow evidence,
+including reset/reload/fork/restore, invalid states and baseline isolation.
+
 ## Active resumption: revision 7 reconciliation, 2026-11-03 UTC
 
 Executing the operator's resumption prompt under the existing scientific and human
@@ -223,15 +251,19 @@ the native binary. Independent review recommends the scoped native release
 handoff; do not claim one clean original suite or closure of the order defect.
 
 ## Purpose / Big Picture
-
-Produce a physically defensible generated-soil Roads parameterization within an
-order of magnitude of FSWEPP2 Roads/WEPP2010, using the released 261029 engine.
-Then present the exact supported configuration fields and layout for human review.
-The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
-This execution stops at the explicit human specification/layout gate.
-
+Resolve confirmed supported-path defects and provide reproducible sensitivity
+analysis for interpretable Roads controls using the released 261029 engine.
+Legacy comparisons describe differences; they do not establish field truth or
+require further fitting. Prepare exact supported configuration fields and a static
+layout for human review. The eventual product is a run-scoped edit/save/reset
+workflow backed by generated-input and native/report readback. This execution
+requires explicit human specification/layout approval before production wiring.
 ## Progress
 
+- [x] (2026-11-03) Verified handoff HEAD and clean worktree; opened bounded issue register and assigned independent current-r7 particle investigation, controls inventory, sensitivity harness and disposable-project lanes.
+- [ ] Complete current-source particle disposition and peer-consumer defect reproduction/repair.
+- [ ] Execute preregistered, independently reviewed sensitivity contrasts and validate emitted/native/artifact effects.
+- [ ] Commit reviewed concrete specification/layout proposal; obtain explicit human approval before production wiring.
 - [x] Record the operator-approved pivot in the canonical adjudication contract.
 - [ ] Register and disposition known findings; resolve confirmed supported-path defects.
 - [ ] Define and validate the sensitivity harness and evidence-backed candidate controls.
@@ -340,7 +372,6 @@ This execution stops at the explicit human specification/layout gate.
 - [ ] Present concrete specification/layout for human approval; do not implement.
 
 - [x] Execute the authorized consumed-storage study: retained readback, exact initialization-only producer observation across 36 histories, independent reviews and source-free reproduction. See the current findings and ledger v21; no annual-causality or physical-validation claim.
-
 ## Context and Orientation
 
 Work in /workdir/wepppy on the existing master branch. Large native artifacts
@@ -445,6 +476,8 @@ regressions when substantive executable/harness changes are complete, not after
 every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
+
+- 2026-11-03 revised execution: production Roads still uses legacy soil templates; conditioned generated U12 is research injection, so control studies must keep separate lanes. Fresh exact-r7 observation explains the retained particle flag, preserving strict failure and all output hashes.
 
 - The retained experiments constrain candidate remedies but do not establish the legacy comparator as physical truth. The operator identified regression risk from further narrow agreement-driven searches; the new adjudication separates defects, sensitivity and empirical uncertainty.
 
@@ -563,6 +596,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: disposition R-01 as an explained numerical finding after independent exact-state review; retain strict predicate failure and historical counts. Use existing production controls for the first sensitivity lane and keep generated-policy adoption separate.
+
 - 2026-11-03 operator amendment: correctness and sensitivity replace legacy-fit search as the governing objective. Narrow benchmark gains do not justify disproportionate regression risk. Historical scores and rejections remain unchanged; controls do not imply calibrated defaults.
 
 - Preserve the historical publication as stale after the conformance repair. Resume the exact remaining collected test IDs after the metadata-only correction; retain the initial failure and report combined coverage rather than an uninterrupted full-suite pass.
@@ -679,6 +714,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Current revised execution: R-01 has a reviewed source-supported disposition, with no native behavior change. Control inventory, bounded study and resolver defect repair are in progress. Specification/layout approval is absent; the program remains active.
 
 The new direction is documented; defect disposition, sensitivity harness work and
 the approved user workflow remain open. Previous experiments constrain proposed
@@ -1601,3 +1638,5 @@ Rock-audit completion amendment: current status and living sections now record t
 - Surprises & Discoveries: sparse ELEMENT dates and native 1 mm EVENT classification require distinct calendar and particle-coverage statements; 31 positive non-EVENT dates exist in retained seed history. r7 changes legacy controls but preserves all nine conditioned U12 annual exports.
 - Decision Log: retain r7 as an experimental engine baseline for the full unchanged development replay, without parameter/default adoption or isolated FC/HK causality claims. Preserve rejected unexecuted staging attempts.
 - Outcomes & Retrospective: pre-execution review closed auxiliary staging and header-only PASS false-acceptance gaps; committed focused tests pass (15). The independent current-producer/full-project contrast and scientific acceptance remain open.
+
+Revision note (2026-11-03): activated the revised defect/sensitivity sequence, corrected the current purpose, and recorded exact-r7 particle disposition without rewriting historical experiments.

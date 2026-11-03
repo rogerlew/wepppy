@@ -20,6 +20,25 @@ production UI change follows from this documentation checkpoint.
 The retained r7 checkpoint below predates this amendment; its evidence remains
 valid, while its next-step and closure recommendations are superseded above.
 
+## Revised execution in progress — 2026-11-03
+
+Starting HEAD and clean worktree verified at `e0308765c`. Execute the revised
+handoff through the concrete reviewed specification/layout gate; no human approval
+exists yet. The [issue register](artifacts/revised-issue-register.md) distinguishes
+retained numerical flags, repaired defects, legacy differences, empirical gaps
+and workflow evidence limits. Current-source particle observation, canonical
+control inventory, bounded harness design and workflow-layout preparation are
+active with separate artifact ownership. Production legacy-template assembly and
+research generated-policy injection must remain explicit separate lanes.
+
+R-01 is now an explained numerical finding after fresh exact-r7 observation and
+independent review; strict particle failure remains unchanged. See
+[disposition](artifacts/revised-r7-particle-disposition.md) and
+[review](artifacts/revised-r7-particle-independent-review.md).
+
+No defaults adopted, deployment performed, reserved material consumed or historical
+experiment reclassified. New evidence/decisions append from ledger v32 onward.
+
 ## Baseline isolation conformance repair
 
 The first fresh r7 Roads context completed native execution but changed exactly

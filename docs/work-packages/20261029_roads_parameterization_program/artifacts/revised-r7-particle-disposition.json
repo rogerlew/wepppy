@@ -1,0 +1,236 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261103/particle-observation-r7-v3",
+  "result": {
+    "declaration_sha256": "6ba6bc25b859fae41d53985279bccdc0d3fdab83b7fc8d9b9d97688b8b5dd789",
+    "source_archive_sha256": "323a96dc36194c3893b17da261dc2a3585fe260d28ed2da1e6ee02922eb39215",
+    "results": [
+      {
+        "lane": "ordinary",
+        "returncode": 0,
+        "binary_sha256": "36d03001191ecb4e63a1f1626b4ad71625ea81792a302e49b490573339680559",
+        "outputs": {
+          "H1.plot.dat": "9584f4160538d39105c6689c46f99fde4d10149683209d1f6a284a9be87506c0",
+          "H1.wat.dat": "03100681f7fd47de1d0654dc196f04b11637ffdba5f6d98791f5e1b4747c3b1e",
+          "H1.element.dat": "67c73c38afe15d95d2ccf00cdb5fe406daf51c7a2a5fedcc4861bf67c11f09a7",
+          "H1.loss.dat": "c40f42a7b2fbb323eb94391d1fdb701d1a94856dc18f1e3ce4e4c4276036c293",
+          "H1.pass.dat": "ba225e37a1ae8e33a50bf2cc01f696c344ca70afc70582ed74f2eeb81f79c2e1",
+          "H1.soil.dat": "a08d20dd475e1b131b84a0f877f57326414e69bb801170f10f3f9595ddd59e56",
+          "H1.ebe.dat": "74f483c7b796db9509e698f1187fa6ccd5cbe06a1bc060118d92d2816537531c"
+        },
+        "exact_output_parity": true,
+        "build_command": [
+          "make",
+          "-j4",
+          "wepp",
+          "FC=/usr/bin/gfortran"
+        ],
+        "logs": {
+          "stdout": "5eb0695a8cc51fa7962e11d949ece6d174d4529ba529a6c6ace264b62def297e",
+          "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "lane": "observer",
+        "returncode": 0,
+        "binary_sha256": "82820fc963bcbe54927508edff7f43a191a068606377f9676f24f75342c5cd6c",
+        "outputs": {
+          "H1.element.dat": "67c73c38afe15d95d2ccf00cdb5fe406daf51c7a2a5fedcc4861bf67c11f09a7",
+          "H1.loss.dat": "c40f42a7b2fbb323eb94391d1fdb701d1a94856dc18f1e3ce4e4c4276036c293",
+          "H1.pass.dat": "ba225e37a1ae8e33a50bf2cc01f696c344ca70afc70582ed74f2eeb81f79c2e1",
+          "H1.plot.dat": "9584f4160538d39105c6689c46f99fde4d10149683209d1f6a284a9be87506c0",
+          "H1.ebe.dat": "74f483c7b796db9509e698f1187fa6ccd5cbe06a1bc060118d92d2816537531c",
+          "H1.soil.dat": "a08d20dd475e1b131b84a0f877f57326414e69bb801170f10f3f9595ddd59e56",
+          "H1.wat.dat": "03100681f7fd47de1d0654dc196f04b11637ffdba5f6d98791f5e1b4747c3b1e"
+        },
+        "exact_output_parity": true,
+        "build_command": [
+          "make",
+          "-j4",
+          "wepp",
+          "FC=/usr/bin/gfortran"
+        ],
+        "logs": {
+          "stdout": "c7bbd8f5bb508a96de7d15132e6fb267bd9a7a5175181003d4f25be54a8c6963",
+          "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ],
+    "trace_sha256": "93745771157e9f62afd6182ee3e50f97f4422b477b0396750e5148111de7bcac",
+    "final_fractions": [
+      0.9998350143432617,
+      0.0001650129270274192,
+      9.534633824657968e-14,
+      9.534633824657968e-14,
+      9.534633824657968e-14
+    ],
+    "fraction_sum": 1.0000000272705751,
+    "fraction_excess": 2.727057517697422e-08,
+    "bulk_avsole_kg_m": 7.249361999583925e-09,
+    "width_m": 43.105229381131934,
+    "implied_excess_mass_kg": 8.521656915806603e-15,
+    "class_normalization": {
+      "key": [
+        "2003",
+        "29",
+        "3",
+        "3"
+      ],
+      "class_loads": [
+        0.01048634946346283,
+        1.7306687141172006e-06,
+        1.0000000036274937e-15,
+        1.0000000036274937e-15,
+        1.0000000036274937e-15
+      ],
+      "native_sequential_sum": 0.010488079860806465,
+      "exact_class_sum": 0.010488080132179946,
+      "native_fractions": [
+        0.9998350143432617,
+        0.0001650129270274192,
+        9.534633824657968e-14,
+        9.534633824657968e-14,
+        9.534633824657968e-14
+      ],
+      "normalization_error": 2.727057517697422e-08,
+      "derived_normalization_bound": 2.9802335177470655e-07,
+      "exact_native_replay": true
+    },
+    "prior_certificate_helper_sha256": "0f19763f46ed04809d07bb78832bbdbbcc660f47fa8b4239b66654781a99ab96",
+    "strict_audit_unchanged": true,
+    "exact_case_arithmetic_disposition": "source-derived floating-point normalization residual; no implementation correction or general tolerance waiver"
+  },
+  "strict_audit": {
+    "case": {
+      "climate": "site",
+      "soil": "2711250",
+      "design": "outunrut",
+      "surface": "paved",
+      "traffic": "low",
+      "variant": "erosion_road_cap",
+      "runtime": "project"
+    },
+    "record": "/wc1/runs/ro/roads-parameterization-program-20261103/panel840-v1/cases/site-2711250-outunrut-paved-low-erosion_road_cap-project/record.json",
+    "record_sha256": "933ccbba92f5002527fa737b0ea3965a9f15e585cc8dac0606b4a089ad53be84",
+    "pass_sha256": "ba225e37a1ae8e33a50bf2cc01f696c344ca70afc70582ed74f2eeb81f79c2e1",
+    "element_sha256": "67c73c38afe15d95d2ccf00cdb5fe406daf51c7a2a5fedcc4861bf67c11f09a7",
+    "events": 163,
+    "positive_events": 145,
+    "flags": [
+      {
+        "year": 2003,
+        "julian": 29,
+        "causes": [
+          "fraction_sum"
+        ],
+        "fraction_sum": "1.000005010000286038",
+        "fraction_bound": "0.0000050050000000015",
+        "class_mass_kg": "3.124909087608893863656E-7",
+        "bulk_mass_kg": "0E-18",
+        "mass_bound_kg": "0.02155261470825554057500518752",
+        "pass_tokens": [
+          "EVENT",
+          "2003",
+          "29",
+          "0.46080E+05",
+          "0.94687E-01",
+          "0.73975E-02",
+          "0.14610E-01",
+          "0.18312E+01",
+          "0.15248E-01",
+          "0.26040E+02",
+          "0.00000E+00",
+          "0.00000E+00",
+          "0.39739E-04",
+          "0.84944E-05",
+          "-.81819E-05",
+          "0.17062E-06",
+          "0.28159E-10",
+          "0.16271E-19",
+          "0.16271E-19",
+          "0.16271E-19",
+          "0.99984E+00",
+          "0.16501E-03",
+          "0.95346E-13",
+          "0.95346E-13",
+          "0.95346E-13",
+          "0.49495E+00",
+          "0.00000E+00"
+        ],
+        "element_tokens": [
+          "3",
+          "29",
+          "1",
+          "4",
+          "44.700",
+          "0.853",
+          "0.000",
+          "0.067",
+          "12.800",
+          "3.865",
+          "40.000",
+          "1048.43",
+          "5.000",
+          "6.000",
+          "99.900",
+          "55.609",
+          "55.609",
+          "19.998",
+          "0.162",
+          "0.081",
+          "0.019",
+          "3.000",
+          "0.150",
+          "0.000",
+          "0.853",
+          "0.000"
+        ]
+      }
+    ],
+    "passed": false,
+    "audit_version": 2,
+    "numeric_unavailable_diagnostics": [],
+    "particle_required_fields_available": true,
+    "structure_valid": true
+  },
+  "rounding": [
+    {
+      "token": "0.99984E+00",
+      "native": 0.9998350143432617,
+      "rounding_error": 4.98565673828125e-06,
+      "half_last_place": 5e-06
+    },
+    {
+      "token": "0.16501E-03",
+      "native": 0.0001650129270274192,
+      "rounding_error": -2.92702741920948e-09,
+      "half_last_place": 5e-09
+    },
+    {
+      "token": "0.95346E-13",
+      "native": 9.534633824657968e-14,
+      "rounding_error": -3.382465796760457e-19,
+      "half_last_place": 5e-19
+    },
+    {
+      "token": "0.95346E-13",
+      "native": 9.534633824657968e-14,
+      "rounding_error": -3.382465796760457e-19,
+      "half_last_place": 5e-19
+    },
+    {
+      "token": "0.95346E-13",
+      "native": 9.534633824657968e-14,
+      "rounding_error": -3.382465796760457e-19,
+      "half_last_place": 5e-19
+    }
+  ],
+  "printed_excess": 5.010000286038e-06,
+  "native_excess": 2.727057517697422e-08,
+  "sum_print_rounding_error": 4.982729710861026e-06,
+  "exact_print_decomposition": true,
+  "retention_files_verified": 824,
+  "retention_manifest_sha256": "48a8fef1b7ad9795d90152b2d4c0b5a76e5b45fc5f2b8deb6842fb310df62016",
+  "raw_result_sha256": "720974c4780c4225b37438c4cc8a7b51d8d8bf2a3d0cb15965d55be76175690a",
+  "helper_sha256": "852101334d7c72e7c5bb27f59d330ce5d179b96f222397aff088c220d80b087b",
+  "audit_sha256": "5b65979bffa56d11c9d7738504e090cd0f5080989bf136a0f4537131e4b73435"
+}

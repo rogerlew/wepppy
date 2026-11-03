@@ -1,0 +1,29 @@
+{
+  "version": 32,
+  "predecessor": {
+    "path": "candidate-ledger-v31.json",
+    "sha256": "633cbff89df505683fe520f50bea359b5d5da3022a9c473a34d125f705e1441d"
+  },
+  "status": "r7_particle_finding_explained_sensitivity_in_progress",
+  "evidence": {
+    "revised-r7-particle-disposition.md": "c15445c52dbe5988af65b0c598228190031e035241b54087f6c3281305e0052f",
+    "revised-r7-particle-disposition.json": "43fdeee5722838c75905d9d57afdd88207d5245618d00ca768f2ac88ec72f3cc",
+    "revised-r7-particle-independent-review.md": "b4cffcced147e889e93977e6248da2f5854705f4df8d2e703cfa3869b1e536b8",
+    "revised-r7-particle-independent-readback.json": "95bd97dee76e5fd73340ad0408aa1f92f557afd513d1f5a9f83890443186d1ed",
+    "observe_r7_particle.py": "852101334d7c72e7c5bb27f59d330ce5d179b96f222397aff088c220d80b087b",
+    "review_revised_r7_particle.py": "a087bfaae03c826b22bae78549947b056e9642e9dfed5102f238627dfd407fd2"
+  },
+  "disposition": "Exact current-r7 normalization and serialization explanation; unchanged strict flag remains false. No behavioral repair.",
+  "new_model_calls": 4,
+  "failed_attempts_retained": [
+    "particle-observation-r7-v1 build failed before execution",
+    "particle-observation-r7-v2 ordinary and observer outputs matched but calendar observation missing"
+  ],
+  "successful_evidence_root": "/wc1/runs/ro/roads-parameterization-program-20261103/particle-observation-r7-v3",
+  "historical_results_reclassified": false,
+  "production_changes": false,
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "human_ui_approval": "absent",
+  "program_complete": false
+}
