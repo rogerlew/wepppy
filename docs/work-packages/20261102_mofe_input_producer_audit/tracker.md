@@ -1,7 +1,7 @@
 # MOFE input producer audit tracker
 
 **Started:** 2026-11-02 19:32 UTC.
-**Phase:** Approved M2/M3 producer implementation; M4 producer validation complete; native acceptance HOLD.
+**Phase:** M2/M3 producer complete; MIPA-02 native contract checkpoint in progress; native acceptance HOLD.
 **Contract ancestor:** `4579b11ce` (before production edits).
 **WEPPpy implementation commit:** `390bc4f59` (local; producer validation complete).
 **Paired Rust commit:** `5e3540f684c8606f4140afcd72ed5a21df5ab85f`, pushed and verified on upstream main.
@@ -73,3 +73,12 @@ Native repairs, selected-binary capacity/adapter checks, FC/HK ownership repair,
 9005 readback, full job/browse/output histories and a paired release remain next.
 Deployment and existing-project regeneration require their own authorization;
 the package stays open and must not claim unrestricted heterogeneous correctness.
+
+## MIPA-02 authorized extension
+
+User authorized native contract-first repair and revision of undeployed 261029.
+See [native checkpoint](artifacts/20261102_native_contract_decision.md). The selected
+default-branch release already has ntype-sized PMET arrays and no kernel adapters;
+FC/HK remain layer-only. Two independent contract reviews and ancestor commits
+precede implementation. Revision6, exact pair validation and release notes remain
+pending. No deployment or default switch.

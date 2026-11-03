@@ -10,8 +10,10 @@ The user approved execution and MIPA-01; ancestor `4579b11ce` precedes repairs.
 The [execution report](artifacts/20261102_producer_execution.md) records current
 validation and limits. The [MIPA-01 checkpoint](artifacts/20261102_contract_decision.md) records accepted
 calendar, crop-identity and slope compatibility decisions, renewed failing
-baselines, and the contract-first ratification/ancestor gates. Native repair,
-deployment and existing-project regeneration remain separately authorized work.
+baselines, and the contract-first ratification/ancestor gates. The operator now
+authorizes MIPA-02 native correction and revision6 of undeployed 261029 under the
+[native checkpoint](artifacts/20261102_native_contract_decision.md). Deployment
+and existing-project regeneration remain separately authorized work.
 The audit-only scope described below is the original session's provenance.
 
 Multiple overland flow elements (MOFEs) represent successive parts of a hillslope.

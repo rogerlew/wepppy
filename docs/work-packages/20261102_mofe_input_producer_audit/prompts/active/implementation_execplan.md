@@ -5,7 +5,7 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current. The 2026-11-02 execution request starts M1; the former audit-only session
 restriction is superseded. The user ratified MIPA-01 with “approved. proceed”; contract ancestor
-`4579b11ce` precedes all production implementation. Native acceptance stays HOLD.
+`4579b11ce` precedes all production implementation. Native acceptance stays HOLD pending the authorized MIPA-02 extension below.
 
 ## Purpose / Big Picture
 
@@ -27,7 +27,8 @@ selected by each element and rotation, not only successful model completion.
 - [x] (2026-11-02 UTC) Reconcile all four audit lanes and bound additional repair milestones.
 - [x] (2026-11-02 19:38 UTC) Validate documentation, register package on the project board and reconcile independent scaffold review.
 - [x] (2026-11-02 UTC) Incorporate S01 as NATIVE-03 with bound runtime evidence and separate native acceptance; no repair or rerun.
-- [ ] Future native dependency: obtain separate authority and resolve COR-S01-01 before unrestricted heterogeneous-use acceptance.
+- [x] Native authority: user authorized MIPA-02 contract-first repair and revision of undeployed 261029.
+- [ ] MIPA-02: independent contract reviews and standalone ancestor; native repair, discrepancy validation and revision-6 release gates.
 - [x] (2026-11-02 22:49 UTC) M1 renewed management and installed-Rust reproductions through the running Compose application container; existing focused suites pass 21 tests despite reproduced failures.
 - [x] (2026-11-02 UTC) Draft MIPA-01 canonical identity contract and compatibility/regression checkpoint.
 - [x] (2026-11-02 UTC) Two independent contract reviews pass after bounded-calendar, token-safe-alias and idempotence clarifications; documentation and baseline integrity checks pass.
@@ -352,3 +353,48 @@ Revision 2026-11-02, execution M1: renewed container baselines, recorded passing
 existing suites versus failed direct reproductions, and prepared proposed durable
 contracts and compatibility decisions. Production implementation awaits the
 required reviewed and ratified ancestor checkpoint.
+
+
+## MIPA-02 native execution extension
+
+The 2026-11-02 request supersedes earlier exclusions of native repair only for
+the bounded coefficient/release scope in
+`artifacts/20261102_native_contract_decision.md`. Execute this active plan.
+Deployment and existing-project mutation remain excluded. The release worktree
+is `/workdir/wepp-forest-release-20261009`, on the verified remote-default branch;
+the older audit worktree has different code. Current release PMET already uses
+ntype (hill32/watershed15000) and has direct EVAPPM calls, so verify conformance
+before proposing PMET changes.
+
+First obtain two independent read-only reviews of MIPA-02 and the canonical
+contracts in both repositories; disposition findings and commit a standalone
+contract ancestor in each before source edits. Preserve the revision-5 matched
+pair, sidecars and hashes in a fresh evidence directory. Add committed native
+reproductions with distinct and repeated materials, unequal layers and PMET role
+boundaries, using the existing S01 observations as historical failing evidence.
+
+Then change cwater.inc FC/HK dimensions and every active reference in daily/hourly
+water balance, PURK, PERC and DRAIN. Keep arithmetic and initialization timing
+unchanged. Update native source specifications. Test compiled actual consumers
+and full histories with observation off/on, recording dynamic operands and
+runoff/drainage/storage/ET consequences for both policies. Use separate lanes for
+any newly confirmed producer discrepancy; amend contracts before changing intent.
+
+Finally commit tested source, build with `TARGET_TAG=261029
+ tools/build_wepp_dated_release.sh` (one shell command without a newline), restore
+watershed includes, and run native smoke, watchlist, pytest and artifact-policy
+gates from that default-branch checkout. Test actual final binaries and the
+canonical WEPPpy selection/preparation/readers with committed fixtures; supplement
+with the retained copied project. Vendor only after required gates pass. Create
+revision-6 authoring files and a reviewed PDF/manifest, preserving revision5.
+Update binary lifecycle and native change-log, obtain final independent correctness,
+QA/security and release-disclosure reviews, and commit the bounded result. Required
+native push follows native AGENTS. Do not deploy or change executable defaults.
+
+Decision: ownership is corrected without changing physical formulas or refreshing
+coefficients on a newly invented schedule. The existing PMET release implementation
+is verified rather than replaced based on obsolete audit source. No conformance
+claim precedes dynamic evidence and exact final-pair validation.
+
+Outcome at extension start: contracts prepared; no native implementation edits.
+Revision 2026-11-02: added operator-authorized MIPA-02 native/release execution.

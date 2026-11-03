@@ -184,14 +184,17 @@ Include real failure/retry and archive/restore byte retention, and inspect norma
 browse/download under representative worker identity, mounts and configuration.
 
 Bind the exact Python modules, Rust extension and selected native executable.
-Select a 9005-capable consumer for soil/cover acceptance. Unresolved PMET capacity
-and adapter observation issues prohibit broader native claims. The existing
+Select a 9005-capable consumer for soil/cover acceptance. Selected-release PMET capacity
+and index conformance must be verified under the
+[native coefficient contract](native-mofe-coefficient-contract.md). The existing
 [FC/HK ownership HOLD](whole-soil-water-capacity-contract.md#known-native-coefficient-ownership-defect)
 is unchanged. Producer validation cannot close that native defect.
 
 Users receive corrections only after supported regeneration/preparation/rerun.
 Operators must inspect intended per-segment selections and retain baseline inputs
 and reports before any separately authorized recovery. Deployment, bulk existing
-project regeneration and native-engine repair are excluded. Developers must retain
+project regeneration are excluded. Native-engine repair is separately authorized
+under MIPA-02 and the native coefficient contract; producer acceptance alone
+does not establish native conformance. Developers must retain
 before/after discriminating artifacts and independent correctness review; a green
 unit suite is not end-to-end acceptance.

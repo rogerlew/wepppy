@@ -239,6 +239,14 @@ and implementation review `ec1114fb243da32c563c09121ca777fa8e819e1f6a7882c8b3a83
 are retained under `out/rock-water-development-20261101/`. The active program's
 S01 reports identify the exact inputs, observer and source-history evidence.
 
+### Authorized ownership correction
+
+MIPA-02 authorizes the bounded per-layer/per-OFE FC/HK repair under the
+[native coefficient contract](native-mofe-coefficient-contract.md). Preserve the
+existing formulas, initialization schedule, retention defaults and guard behavior.
+Implementation and exact final-pair conformance remain pending; the historical
+S01 finding and revision-5 HOLD above are not erased by authorization.
+
 ### Existing bounded artifact admission
 
 The explicit experimental option under ADR-0132 is accepted for canonical local integration following the contract/ADR ancestor and actual installed-controller review. The default producer and formulas remain unchanged. Bounded P03/P04 applicability and independent acquisition association remain mandatory. Broad repository regression passes; the known native correctness and general release HOLD remains separate.
