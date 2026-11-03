@@ -89,3 +89,13 @@ notes are included. No deployment, Windows release, default switch, bulk project
 regeneration or installed Rust replacement is authorized. Unrelated scientific
 limitations from revision 5 remain explicit. A bounded ownership correction does
 not establish unrestricted scientific validity or erase retained failure counts.
+
+## MIPA-03 specialized consumer continuation
+
+The operator now authorizes the separately reviewed specialized port under the
+[specialized consumer contract](specialized-revegetation-consumer-contract.md).
+The earlier revision-6 support limitation remains historical; future conformance
+requires fresh exact-artifact evidence. Preserve this contract's PMET and FC/HK
+invariants. Reference 9005 layer-conductivity feedback changes `ssc(1:2)` without
+inventing a new FC/HK initialization schedule. The specialized crop-wide root-depth
+mutation is explicitly preserved under ADR-0134; it does not weaken FC/HK ownership.

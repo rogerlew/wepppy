@@ -1,8 +1,9 @@
 # MIPA-03 decision preparation: specialized consumer compatibility
 
-Status: proposed decision boundary, 2026-11-03 UTC. Not a ratified checkpoint
-or implementation ancestor. The operator authorized the continuation through
-the handoff; a material scientific interpretation remains unresolved.
+Status: operator-resolved and independently reviewed MIPA-03 checkpoint,
+2026-11-03 UTC. Standalone ancestor commits are required before production edits.
+The original decision preparation below is retained as historical context; the
+operator resolution and final review disposition supersede its pending status.
 
 ## Verified starting point
 
@@ -90,3 +91,42 @@ implementation and release are incomplete. No canonical numerical amendment has
 been ratified and no production source has changed. Independent discovery reviews
 are not substitutes for the required contract, implementation, QA and security
 reviews. The active plan and tracker retain the pending work.
+
+## Operator resolution and checkpoint amendment
+
+On 2026-11-03 UTC the operator answered: “preserve reference. that is anurag's
+ domain”. This resolves the pending scientific choice in favor of exact reference
+semantics, including identified quirks. Prior proposed alternatives above remain
+historical decision context. Starting WEPPpy revision for this amendment is
+`ea5d4cdbd`; native remains `4f0728984`.
+
+Normative delta: the new durable specialized consumer contract in both repositories,
+ADR-0134, and cross-links/exceptions in MOFE identity/coefficient contracts.
+Source scope: native soil header/restrictive reads, 9005 hydraulic lane, isolated
+reference growth, RAP state/reader and its activation/initialization/management/
+residue integration, build/spec/test/observer/release support. WEPPpy scope is
+RAP year-key fallback, normalized executable fire date, exact calendar checks and
+stale specialized flag retirement, with tests and guidance. No upload expansion,
+config default switch, deployment or installed Rust replacement.
+
+Compatibility plan: additive 9005/continuous RAP support; retain every ordinary
+control and matched output contract. Reference numerical quirks stay specialized.
+Run-data fields and saved date text remain unchanged; executable files convey
+correct current identities. Failed/superseded flags remain visible and archivable.
+Malformed activated inputs fail explicitly. Retain exact r6 rollback artifacts.
+
+Security impact: high for added native file parsing and changed run-file lifecycle;
+dedicated review required. Bound allocation and record counts, validate numeric/
+calendar inputs before indexing, preserve normal project authorization and worker
+identity, and test real paths/failure/archive restoration. No network or privilege
+addition. Two independent read-only contract reviews and standalone commits in both
+repositories remain prerequisites to production changes; discovery is not approval.
+
+## Final preimplementation review disposition
+
+Both independent contract reviews PASS: `mipa03_contract_correctness.md` and
+`mipa03_contract_security.md`. The two security findings were resolved by explicit
+physical-record/token/overflow/allocation requirements and concrete visible,
+hardlink-safe flag retirement. Correctness confirms preservation of both saturation
+adjustments, pre-INITGR state and reference fire/root quirks. No production source
+edits preceded this checkpoint. Final implementation/release reviews remain required.

@@ -198,3 +198,16 @@ under MIPA-02 and the native coefficient contract; producer acceptance alone
 does not establish native conformance. Developers must retain
 before/after discriminating artifacts and independent correctness review; a green
 unit suite is not end-to-end acceptance.
+
+## MIPA-03 specialized reference compatibility exception
+
+The operator's 2026-11-03 direction to preserve Anurag's reference authorizes the
+[specialized consumer contract](specialized-revegetation-consumer-contract.md)
+and [ADR-0134](../adrs/ADR-0134-specialized-revegetation-reference-port.md).
+It supersedes the separate-consumer exclusion only for this newly reviewed port;
+implementation conformance remains pending. Producer identity/order and FC/HK
+ownership remain required. The reference's crop-wide `rdmax` mutation in RAP
+GROW is explicitly preserved as a specialized compatibility exception; it does
+not imply independent root parameters per OFE or unrestricted heterogeneous validity.
+Protocol date/calendar/flag reconciliation follows that contract without changing
+saved user text, transform formulas, single-OFE fallback or ordinary defaults.

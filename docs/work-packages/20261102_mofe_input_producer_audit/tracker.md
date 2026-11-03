@@ -170,3 +170,11 @@ semantics for review. There is no inferred answer from elapsed time. Production
 implementation, canonical ratification, rebuild, new histories, native gates,
 configured fork validation and revision-7 publication remain pending. SOIL-02 and
 COVER-01 are not closed. No production code or installed artifact changed.
+
+### Scientific choice resolved
+
+The operator answered on 2026-11-03 UTC: “preserve reference. that is anurag's
+ domain”. The pending-question disposition above is superseded. MIPA-03 now
+proceeds under the proposed specialized consumer contract and ADR-0134, with
+independent checkpoint reviews underway. Preserve the bound reference's reachable
+specialized numerical sequence and quirks; no scientific correction is inferred.

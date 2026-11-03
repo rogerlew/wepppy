@@ -488,3 +488,41 @@ overlap; no uninterrupted full-suite green claim.
 The optional reader-scope preference received no response during independent work;
 retain the stated separate compatible-engine requirement, with 9005/RAP native
 acceptance HOLD. Do not silently port new physics or relabel unsupported inputs.
+
+## MIPA-03 authorized reference-preserving execution
+
+Operator resolution on 2026-11-03 UTC: “preserve reference. that is anurag's
+ domain”. Execute the durable specialized consumer contract and ADR-0134;
+the earlier pending-question status is historical. Use selected native default
+branch `wepp_260430_negmeltfix_comparator` starting at `4f0728984`, WEPPpy
+starting at `ea5d4cdbd`. No branch switch.
+
+1. Finish two independent contract reviews, disposition findings, lint and commit
+   standalone ancestors in both repositories before production edits.
+2. Port exact reference 9005 reads/hydraulics and isolated reachable RAP growth;
+   add current-hill capacity-safe cover parsing and bounded integration sites.
+   Keep ordinary GROW intact; do not import the unrelated CO2 input subsystem.
+   Remove only demonstrably unreachable reference code when dependencies differ.
+3. Reconcile producer date/calendar/year-key/flag transitions under the contract;
+   preserve transform formulas, saved text and archive-visible failed evidence.
+4. Commit deterministic native/protocol fixtures; compare actual consumers with
+   reference source and exercise unequal layers, OFEs 2/10, dates, transformed/
+   observed modes, malformed inputs and ordinary controls. Observe dynamic use
+   and prove off/on ordinary-output neutrality. Retain every failed attempt.
+5. Run complete canonical preparation/execution on supported disposable specialized
+   forks; bind identity/mounts/settings and installed module/binary provenance;
+   read fresh interchange/reports. Quantify bounded numerical consequences.
+6. Commit tested native source, build final matched Linux pair with canonical
+   dated tool/system compiler, restore watershed includes and run every native
+   gate. Vendor only after gates, then exact-artifact WEPPpy validation.
+7. Preserve r6, issue reviewed/visually inspected r7 publication, verify served
+   bytes/MIME, complete independent implementation/QA/security reviews and broad
+   WEPPpy gates. Commit scoped results and push native as required. Close only
+   demonstrated acceptance; no deployment/default switch/Rust promotion.
+
+Progress: scientific choice resolved; canonical checkpoint reviews underway.
+Discoveries: isolated reference GROW requires removal of unreachable CO2 and
+annual-only branches rather than importing unrelated management parameters.
+Decision: preserve the full reachable specialized numerical sequence, including
+known reference quirks and explicit failures; document, do not retune.
+Outcome: implementation/release validation pending; no fresh result inferred from r6.
