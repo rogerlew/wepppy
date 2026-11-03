@@ -1,0 +1,75 @@
+{
+  "scope": "Independent read-only prelaunch source/declaration readback, no native invocation",
+  "passed": true,
+  "declaration": "/wc1/runs/ro/roads-parameterization-program-20261103/current-roads-v1/declaration-v2.json",
+  "declaration_sha256": "738ccec3e4a113cd63edc6108d33616bb4e34026db86b3603110b7174fdda2be",
+  "predecessor_sha256": "f03e604629f73bd5a0bc897e8dd40bf4d5a405b4b6145304f188d9ead54fc60a",
+  "driver_sha256": "29da25d48eacbd1ae0296e34d23ef04ba40e4484a6ca65e19467371d858f4136",
+  "protocol_sha256": "c7299ddddc93632ea8bc3d9845b34392c96b00ddda193595bfce59543487233d",
+  "dependencies_verified": 1176,
+  "source_files_verified": 3537,
+  "previous_source_files_unchanged": 3303,
+  "legacy_templates_verified": 18,
+  "management_reader_bound": true,
+  "baseline_output_bindings_verified": 494,
+  "baseline_completion_sha256": "ae9aa5360a901e689a4a545f63614518a22b6f081a03d4a9eca16fb057af3037",
+  "baseline_readback_sha256": "7cc96450086f02474dd723c2b01b3dd15bf2ec913d98c30180c29935e3f07de6",
+  "source_features": 55,
+  "positive_unrutted_features": 54,
+  "excluded_feature_sha256": "b30f47d5562e899813769eb37c84be30f9a242d429c8aa6f87c534d791902b22",
+  "vrt_sources": {
+    "dem/dem.vrt": [
+      "dem/dtm_UM1.tif"
+    ]
+  },
+  "prior_failed_history_rows": 0,
+  "cases": [
+    {
+      "name": "inslope_bd",
+      "design": "inslope_bd",
+      "negative": false,
+      "exclude_infeasible_unrutted": false
+    },
+    {
+      "name": "inslope_rd",
+      "design": "inslope_rd",
+      "negative": false,
+      "exclude_infeasible_unrutted": false
+    },
+    {
+      "name": "outslope_rutted",
+      "design": "outslope_rutted",
+      "negative": false,
+      "exclude_infeasible_unrutted": false
+    },
+    {
+      "name": "outslope_unrutted",
+      "design": "outslope_unrutted",
+      "negative": false,
+      "exclude_infeasible_unrutted": true
+    },
+    {
+      "name": "outslope_unrutted_negative",
+      "design": "outslope_unrutted",
+      "negative": true,
+      "exclude_infeasible_unrutted": false
+    }
+  ],
+  "binaries": {
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "uid": 1000,
+  "gid": 993,
+  "context_concurrency": 1,
+  "execution_started": false,
+  "closed_findings": [
+    "R7-ROADS-01",
+    "R7-ROADS-02"
+  ],
+  "limitations": [
+    "Public-controller source/declaration approval only; output/native readback remains pending",
+    "No browser/RQ/query-catalog or deployment parity",
+    "No generated-soil parameter or global scientific acceptance"
+  ]
+}

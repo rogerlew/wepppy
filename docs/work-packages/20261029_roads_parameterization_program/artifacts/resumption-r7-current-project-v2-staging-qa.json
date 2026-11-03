@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "declaration": "/wc1/runs/ro/roads-parameterization-program-20261103/current-project-v2/baseline-execution-declaration.json",
+  "declaration_sha256": "12b5ddf989d98dfc928fdd6709b8a15859702d392a58dca9ca959d026ebc761c",
+  "inputs_verified": 344,
+  "inputs_exact_v1": true,
+  "flags": {
+    "wepp_bin": "wepp_261029",
+    "run_baseflow": true,
+    "run_wepp_ui": true,
+    "run_pmet": true,
+    "run_snow": true,
+    "run_frost": false,
+    "multi_ofe": true,
+    "run_wepp_watershed": true,
+    "delete_after_interchange": false
+  },
+  "nodb_files_verified": 12,
+  "dependencies_verified": 1153,
+  "binaries": {
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "directories": {
+    "wepp/runs": 344,
+    "wepp/output": 0,
+    "wepp/plots": 0,
+    "wepp/stats": 0,
+    "wepp/flowpaths/runs": 0,
+    "wepp/flowpaths/output": 0
+  },
+  "source_entries_verified": 3374,
+  "source_unchanged": true,
+  "native_execution_started": false,
+  "uid": 1000,
+  "gid": 993,
+  "workers": 4,
+  "prepared_sha256": "6398c1727e6d47b777b9cc73f2538139fcc0d9842322f2df8753b98c14525ac4",
+  "scope": "Public-controller lane only; not RQ or catalog parity"
+}

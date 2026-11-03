@@ -352,6 +352,9 @@ wctl run-pytest tests --maxfail=1
 - The [preparation lifecycle contract](../../../../docs/schemas/roads-preparation-lifecycle-contract.md) defines publication, retention, and consumer admission. The shared implementation is `wepppy/wepp/interchange/_roads_lifecycle.py`.
 - Warning diagnostics are summarized in prepare/run outputs when mapped fields are missing or invalid.
 - Roads requires baseline WEPP outputs and does not replace the baseline `wepp/output/` dataset tree.
+- Workspace staging retains `tc.txt` as an input but excludes the generated
+  `tc_out.txt` diagnostic, so Roads execution preserves a baseline diagnostic
+  still present in `wepp/runs/` after public-controller execution.
 
 Project-page rendering reads saved upload and mapping inputs through `query_inputs()`.
 It does not acquire the Roads lifecycle lock or inspect result artifacts, so an

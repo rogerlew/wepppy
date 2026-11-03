@@ -20,6 +20,24 @@ from wepppy.nodb.mods.roads.roads import Roads
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
 
+def test_roads_workspace_preserves_baseline_time_of_concentration(tmp_path):
+    baseline = tmp_path / "baseline"
+    baseline.mkdir()
+    (baseline / "tc.txt").write_text("baseline input\n")
+    (baseline / "tc_out.txt").write_text("baseline diagnostic\n")
+    roads = tmp_path / "roads"
+    controller = SimpleNamespace(
+        wepp_instance=SimpleNamespace(runs_dir=str(baseline)),
+        roads_runs_dir=str(roads),
+        _safe_link_or_copy=Roads._safe_link_or_copy,
+    )
+    Roads._prepare_roads_runs_workspace(controller)
+    assert (roads / "tc.txt").read_text() == "baseline input\n"
+    # The native watershed creates this diagnostic in its working directory.
+    (roads / "tc_out.txt").write_text("roads diagnostic\n")
+    assert (baseline / "tc_out.txt").read_text() == "baseline diagnostic\n"
+
+
 @pytest.mark.parametrize("marker", ["", "WEPP_PASS_COMPONENTS 3\r\n"])
 def test_pass_climate_rewrite_preserves_version_and_payload(tmp_path, marker):
     path = tmp_path / "H1.pass.dat"

@@ -1,0 +1,42 @@
+{
+  "score_readback_pass": true,
+  "scientific_acceptance": false,
+  "artifact_sha256": {
+    "declaration.json": "68fa8f4507821db21e104a625da0f6ba6401136bc6408594c4051344a51f6b04",
+    "summary.json": "c9a8a0e9249e6597d05d0e9a82d35208765496e70d1c472d3d12ec898dacd4e5",
+    "results.json": "9fb20c75ecccaddfc812ef9e001e1da58ce5543b9f726acd9242f04ce26e7bc3",
+    "score.json": "b9ccda56893dc28967500c0c2c0332be0bce8150e389bb7edcb3d5bbbcd34631",
+    "execution-review.json": "655d1a96e3fca72a32e0e21590bff9714b1880ff80e19717327fe77294003456",
+    "execution-review-verified.json": "7de9bde92a45a581ce5c7ab0bce2ef35b84e9113f42929b1c85340b9ade22bb8"
+  },
+  "reader_sha256": "e08745719fc779b28810a9c65e39773d3f56475cc10ae267dd4f8fc5b4ad6d6e",
+  "cases": 840,
+  "unique_references": 480,
+  "strata_and_intersection_groups_checked": 7422,
+  "loss_reports_reparsed": 840,
+  "native_output_hashes_checked": 5880,
+  "changed_outputs": 5270,
+  "unchanged_annual_exports": 622,
+  "magnitude_recoveries": 0,
+  "magnitude_regressions": 0,
+  "load_strata": {
+    "meaningful": {
+      "cases": 766,
+      "passing": 713,
+      "raw_fraction": 0.9308093994778068,
+      "materials": 7,
+      "equal_material_fraction": 0.930711206412141
+    },
+    "small": {
+      "cases": 74,
+      "passing": 31,
+      "raw_fraction": 0.4189189189189189,
+      "materials": 7,
+      "equal_material_fraction": 0.41245421245421243
+    }
+  },
+  "physical_failures": [
+    "site|2711250|outunrut|paved|low|erosion_road_cap|project"
+  ],
+  "scope": "Artifact and independent scoring arithmetic; no native execution or renewed physical closure audit"
+}

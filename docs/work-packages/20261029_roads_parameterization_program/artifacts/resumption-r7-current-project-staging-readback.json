@@ -1,0 +1,32 @@
+{
+  "scope": "Independent current-project pre-execution binding readback; no native invocation",
+  "declaration_sha256": "d5178b116fae71c4c4e15f07febc1c96f52f2b78c500affa1b8885b8c6b0e0fa",
+  "prepared_files": 334,
+  "declared_files": 344,
+  "dependencies": 1153,
+  "bound_nodb_files": 12,
+  "source_files": 3374,
+  "hillslope_runs": 66,
+  "watershed_run": true,
+  "flags": {
+    "wepp_bin": "wepp_261029",
+    "run_baseflow": true,
+    "run_wepp_ui": true,
+    "run_pmet": true,
+    "run_snow": true,
+    "run_frost": false,
+    "multi_ofe": true,
+    "run_wepp_watershed": true,
+    "delete_after_interchange": false
+  },
+  "empty_outputs": true,
+  "no_execution_started": true,
+  "uid": 1000,
+  "gid": 993,
+  "workers": 4,
+  "binary_hashes": {
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "helper_sha256": "0d0a2804e5f4346513228aa09d0cf6f4a6ef15130bbfff9c6e61954468b8ac5c"
+}

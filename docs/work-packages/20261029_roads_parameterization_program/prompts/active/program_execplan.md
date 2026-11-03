@@ -11,10 +11,28 @@ checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](../../artifacts/resumption-r7-seed-results.md) and
 [ledger v25](../../artifacts/candidate-ledger-v25.json) retain the current checkpoint.
-The full 840-case replay is running. A separately reviewed copied-project lane
-has 344 current prepared inputs for 66 hillslopes/193 OFEs, excludes the withheld
-materials, and is ready for baseline execution (ledger v26). No parameter
-acceptance is claimed.
+The complete fixed-input r7 panel preserves all r4 magnitude classifications:
+713/766 meaningful and 31/74 small-load cases pass, with zero recoveries or
+regressions. Annual sediment changes in 218/840 cases. All 840 native/calendar
+and general physical checks pass; the strict EVENT particle audit retains one
+failure (839/840 pass), reproduced with identical audit operands on r4. No
+bound is relaxed and no scientific acceptance is claimed.
+
+Current full preparation and public-controller baseline execution succeeded in
+`current-project-v2`: 66 hills, 193 OFEs, 344 inputs, complete 2000–2015 calendars,
+fresh interchange, reports and exports. Its 470 raw outputs exactly reproduce
+the v1 native outputs; v1 failed export because the harness omitted canonical
+cleanup. Both attempts remain retained. This is not RQ/browser/deployment parity.
+
+The first Roads context in `current-roads-v1` exposed a baseline `tc_out.txt`
+symlink overwrite. A minimal conformance repair preserves the existing lifecycle
+contract; the regression failed before repair and all 50 controller tests pass
+afterward. Fresh five-context validation and independent review are underway.
+Optional source-associated retention is a distinct supported hypothesis; its
+actual Roads role/companion API compatibility must pass before behavioral runs.
+Six withheld materials, production defaults and the explicit human UI gate remain
+untouched. See ledger v27 and the additive result/review artifacts.
+
 
 
 This living plan follows docs/prompt_templates/codex_exec_plans.md. The current
@@ -162,6 +180,10 @@ The eventual product is a run-scoped edit/save/reset workflow, not a CSV editor.
 This execution stops at the explicit human specification/layout gate.
 
 ## Progress
+
+- [x] Completed and independently scored all 840 r7 cases; no magnitude classification changes.
+- [x] Completed fresh full-preparation public-controller baseline and artifact readback.
+- [ ] Repair confirmed Roads baseline diagnostic isolation and renew five contexts.
 
 - [x] Reconcile later source/producer repairs and declare the bounded r4/r7 engine comparison.
 - [ ] Validate and independently review 18 seed pairs before full-panel expansion.
@@ -364,6 +386,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Fresh Roads context exposed linked `tc_out.txt` being rewritten in baseline runs; unit regression reproduces it. Baseline v1 export failure was missing harness cleanup, not changed native output.
+
 The 36-history packet uses a custom roughness binary for mode 1. Its 18 mode-0
 outputs are exact-r4 controls, suitable for the first release-engine comparison.
 
@@ -473,6 +497,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- Keep strict particle failure visible despite identical historical r4 audit operands. Treat `tc_out.txt` exclusion as unchanged-contract conformance; preserve failed roots and redeclare fresh execution.
+
 2026-11-03: preserve v23/r4 as historical evidence; begin with exact-input engine
 comparisons, not parameter tuning. Mode 1 requires private source intervention and
 cannot be represented by an ignored presence file on r7. No withheld outcomes,
@@ -581,6 +607,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The r7 release reconciliation is complete for fixed panel magnitude; it does not resolve the scientific acceptance failures. Current full preparation succeeds under the bounded public-controller scope. Roads isolation repair and supported retention preparation are the next gates.
 
 Resumption checkpoint: declared comparison only; r7 Roads magnitude/physical
 results and current full-preparation acceptance remain unestablished.

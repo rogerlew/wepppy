@@ -1,0 +1,20 @@
+{
+  "results_sha256": "9fb20c75ecccaddfc812ef9e001e1da58ce5543b9f726acd9242f04ce26e7bc3",
+  "score_sha256": "b9ccda56893dc28967500c0c2c0332be0bce8150e389bb7edcb3d5bbbcd34631",
+  "magnitude_recoveries": [],
+  "magnitude_regressions": [],
+  "classification_counts": {
+    "meaningful_pass": 713,
+    "meaningful_low": 48,
+    "small_exceedance": 43,
+    "meaningful_high": 5,
+    "small_pass": 31
+  },
+  "annual_exports_changed": 218,
+  "annual_exports_unchanged": 622,
+  "annual_export_decreases": 80,
+  "annual_export_increases": 138,
+  "minimum_delta_kg_yr": -5.734080000000006,
+  "maximum_delta_kg_yr": 0.8791200000000003,
+  "method": "Direct per-case frozen-threshold classification and r7-minus-r4 export arithmetic, without scorer import"
+}

@@ -1,0 +1,18 @@
+{
+  "root": "/wc1/runs/ro/roads-parameterization-program-20261103/current-roads-v1/inslope_bd",
+  "failure": "baseline invariance",
+  "changed": [
+    {
+      "path": "wepp/runs/tc_out.txt",
+      "before": "02a434a67f75cfd33d85a2b224aae536784e9a9a02ffa76a9b4750a7aad04ec3",
+      "after": "4761c5fd127642ada46e984b2254958a67ecb4cc79aaf26070f30b1642987830"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "native_diagnostic_symlink": "/wc1/runs/ro/roads-parameterization-program-20261103/current-roads-v1/inslope_bd/wepp/runs/tc_out.txt",
+  "baseline_files": 907,
+  "regression_before": "/tmp/roads-tc-regression-before.log",
+  "regression_after": "/tmp/roads-tc-regression-after.log",
+  "controller_tests_passed": 50
+}

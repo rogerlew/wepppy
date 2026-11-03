@@ -1,5 +1,16 @@
 # Roads parameterization program tracker
 
+## Baseline isolation conformance repair
+
+The first fresh r7 Roads context completed native execution but changed exactly
+one protected baseline file, `wepp/runs/tc_out.txt`, through a workspace symlink.
+The unchanged preparation lifecycle contract requires the baseline to remain
+intact. This is a conformance fix: exclude this generated diagnostic from input
+staging while preserving `tc.txt`. Retain the failed `current-roads-v1` root.
+Regression plan: reproduce the overwrite with real filesystem staging, repair,
+run controller tests, independently review, then rerun all five declared contexts
+in a fresh root. No parameter, persistence, or output-scope intent changes.
+
 ## Active resumption: revision 7 reconciliation, 2026-11-03 UTC
 
 Executing the operator's resumption prompt under the existing scientific and human
@@ -11,10 +22,28 @@ checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](artifacts/resumption-r7-seed-results.md) and
 [ledger v25](artifacts/candidate-ledger-v25.json) retain the current checkpoint.
-The full 840-case replay is running. A separately reviewed copied-project lane
-has 344 current prepared inputs for 66 hillslopes/193 OFEs, excludes the withheld
-materials, and is ready for baseline execution (ledger v26). No parameter
-acceptance is claimed.
+The complete fixed-input r7 panel preserves all r4 magnitude classifications:
+713/766 meaningful and 31/74 small-load cases pass, with zero recoveries or
+regressions. Annual sediment changes in 218/840 cases. All 840 native/calendar
+and general physical checks pass; the strict EVENT particle audit retains one
+failure (839/840 pass), reproduced with identical audit operands on r4. No
+bound is relaxed and no scientific acceptance is claimed.
+
+Current full preparation and public-controller baseline execution succeeded in
+`current-project-v2`: 66 hills, 193 OFEs, 344 inputs, complete 2000–2015 calendars,
+fresh interchange, reports and exports. Its 470 raw outputs exactly reproduce
+the v1 native outputs; v1 failed export because the harness omitted canonical
+cleanup. Both attempts remain retained. This is not RQ/browser/deployment parity.
+
+The first Roads context in `current-roads-v1` exposed a baseline `tc_out.txt`
+symlink overwrite. A minimal conformance repair preserves the existing lifecycle
+contract; the regression failed before repair and all 50 controller tests pass
+afterward. Fresh five-context validation and independent review are underway.
+Optional source-associated retention is a distinct supported hypothesis; its
+actual Roads role/companion API compatibility must pass before behavioral runs.
+Six withheld materials, production defaults and the explicit human UI gate remain
+untouched. See ledger v27 and the additive result/review artifacts.
+
 
 
 ## Current: rock-cover audit separates surface protection from profile fragments

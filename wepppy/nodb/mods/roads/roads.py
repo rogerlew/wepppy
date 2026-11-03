@@ -3572,7 +3572,8 @@ class Roads(NoDbBase):
         runs_dir.mkdir(parents=True, exist_ok=True)
 
         for entry in baseline_runs_dir.iterdir():
-            if entry.name in {"pw0.run", "pw0.err"}:
+            # Native watershed rewrites tc_out.txt; never link baseline diagnostics.
+            if entry.name in {"pw0.run", "pw0.err", "tc_out.txt"}:
                 continue
             dst = runs_dir / entry.name
             if entry.is_dir():

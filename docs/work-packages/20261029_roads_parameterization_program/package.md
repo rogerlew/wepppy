@@ -11,10 +11,28 @@ checks pass, with all 18 r4 output controls reproduced exactly. All nine
 conditioned U12 annual exports and classifications remain unchanged on r7.
 [Seed results](artifacts/resumption-r7-seed-results.md) and
 [ledger v25](artifacts/candidate-ledger-v25.json) retain the current checkpoint.
-The full 840-case replay is running. A separately reviewed copied-project lane
-has 344 current prepared inputs for 66 hillslopes/193 OFEs, excludes the withheld
-materials, and is ready for baseline execution (ledger v26). No parameter
-acceptance is claimed.
+The complete fixed-input r7 panel preserves all r4 magnitude classifications:
+713/766 meaningful and 31/74 small-load cases pass, with zero recoveries or
+regressions. Annual sediment changes in 218/840 cases. All 840 native/calendar
+and general physical checks pass; the strict EVENT particle audit retains one
+failure (839/840 pass), reproduced with identical audit operands on r4. No
+bound is relaxed and no scientific acceptance is claimed.
+
+Current full preparation and public-controller baseline execution succeeded in
+`current-project-v2`: 66 hills, 193 OFEs, 344 inputs, complete 2000–2015 calendars,
+fresh interchange, reports and exports. Its 470 raw outputs exactly reproduce
+the v1 native outputs; v1 failed export because the harness omitted canonical
+cleanup. Both attempts remain retained. This is not RQ/browser/deployment parity.
+
+The first Roads context in `current-roads-v1` exposed a baseline `tc_out.txt`
+symlink overwrite. A minimal conformance repair preserves the existing lifecycle
+contract; the regression failed before repair and all 50 controller tests pass
+afterward. Fresh five-context validation and independent review are underway.
+Optional source-associated retention is a distinct supported hypothesis; its
+actual Roads role/companion API compatibility must pass before behavioral runs.
+Six withheld materials, production defaults and the explicit human UI gate remain
+untouched. See ledger v27 and the additive result/review artifacts.
+
 
 
 ## Current: rock-cover audit separates surface protection from profile fragments
