@@ -21,7 +21,8 @@ selected by each element and rotation, not only successful model completion.
 
 ## Progress
 
-
+- [ ] (2026-11-03 UTC) MIPA-03 authorized continuation: complete specialized 9005/revegetation/RAP consumers and revise undeployed 261029 after reviewed contract ancestors; implementation pending reference-semantic reconciliation.
+- [x] (2026-11-03 UTC) Verify selected native default branch and clean tracked source at `4f0728984`; preserve exact revision-6 native/vendored pairs and sidecars in `/wc1/holdouts/mipa-native-r7-20261103/baseline-r6/manifest.json`.
 - [x] (2026-11-02 19:32 UTC) Establish audit/scaffold authority and dispatch four agents.
 - [x] (2026-11-02 19:32 UTC) Create package, tracker and initial findings register.
 - [x] (2026-11-02 UTC) Reconcile all four audit lanes and bound additional repair milestones.
@@ -47,6 +48,23 @@ selected by each element and rotation, not only successful model completion.
 
 ## Surprises & Discoveries
 
+MIPA-03 (2026-11-03 UTC): selected source still misbinds 9005 texture to `lkeff`
+and consumes two restrictive records. Compiling the actual source reader blocks
+against an ordinary two-OFE soil emitted by the installed writer reads `lkeff`
+as 3 and 1 instead of 0.7 and 1.7, then fails when the duplicate restrictive
+read consumes the next OFE header. Retained evidence:
+`/wc1/holdouts/mipa-native-r7-20261103/soil-baseline/receipt.json`.
+The debug representation is labeled diagnostic text, not a native soil input;
+its expected parse rejection is not a consumer defect.
+
+The independently bound specialized reference is source `2e5928702` in
+`/home/workdir/wepp-forest-revegetation`, with committed/installed executable
+SHA256 `2c79a5ecb392a6ed7f70102ff7b6caac888d0cb9df1ce303c93eb10d447740a0`.
+Its 9005 conductivity is a distinct ground-cover interpolation, not an extension
+of the 9003 minimum. Reference canopy logic has unresolved recurring fire-day
+and transformed-forest comparison/assignment semantics. A focused operator
+question is pending; no numerical interpretation is invented. Independent
+producer review also reproduces stale fire flags and date/fallback mismatches.
 The broad regression stopped after 9,899 passes at an order-dependent test fixture:
 `test_managements_module.py` replaced/deleted the canonical management module,
 splitting class identities. The PMET suite passes alone; the two-module order
@@ -102,6 +120,16 @@ can conceal the error, so repeated-material parity alone is insufficient.
 
 ## Decision Log
 
+2026-11-03 UTC, MIPA-03: the operator's instruction to execute
+`/tmp/mofe_9005_revegetation_rap_consumer_handoff.md` authorizes the specialized
+consumer continuation, necessary contract amendments, implementation, validation,
+local revision and scoped commits. Earlier MIPA-02 reader exclusions remain
+historical; they do not prohibit this newly authorized work. Complete the two
+independent contract reviews and standalone ancestors before production edits.
+Preserve non-9005 behavior and the revision-6 FC/HK correction. No deployment,
+default change, Windows release, uploaded-version expansion, installed Rust
+replacement or bulk existing-project regeneration is authorized. An unresolved
+scientific choice requires a focused answer, not a guessed formula.
 2026-11-03 UTC: retain partial-preparation inputs/outputs before complete copied-project
 preparation. Use the installed revision 6 name and all saved configuration flags,
 then compare retained revision 5 with those identical inputs. No original project
@@ -142,7 +170,15 @@ repair, a new restriction, default changes or existing-project regeneration.
 
 ## Outcomes & Retrospective
 
-
+MIPA-03 interim outcome (2026-11-03 UTC): selected/reference provenance, retained
+revision-6 rollback pair, actual compiled reader failures and independent producer
+protocol review are established. No new production source or release artifact has
+been changed. The reference contains numerical/fire semantics not established by
+the current canonical contracts; the focused scientific-choice question remains
+pending. This is a concrete prerequisite for the reviewed consumer contract, not
+completion of the requested implementation/release. Remaining work is the MIPA-03
+checkpoint, faithful bounded port, discriminating native histories, complete
+configured fork validation, native/WEPPpy gates, independent reviews and revision 7.
 M2/M3 producer repairs are implemented. See
 `artifacts/20261102_producer_execution.md` for source coverage, exact checks,
 copied-project evidence and limitations. A supported fork of awake-versatility

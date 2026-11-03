@@ -138,3 +138,35 @@ not one uninterrupted full-suite pass. Test-stub and scoped documentation checks
 pass. Full configured project review and test-isolation review are retained
 separately. Native release/report `8931daed2` and full-context supplement
 `4f0728984` are pushed; WEPPpy handoff is committed locally.
+
+## MIPA-03 specialized consumer continuation
+
+The operator authorized execution of the specialized consumer handoff on
+2026-11-03 UTC, including necessary contracts, implementation, local revision and
+scoped commits. This supersedes MIPA-02's reader exclusion for the new scope;
+it does not retroactively change revision-6 evidence. Deployment, default switches,
+Windows, uploaded-version expansion, installed Rust replacement and existing-project
+regeneration remain excluded.
+
+Starting revisions: WEPPpy `3e4e80c6d`; selected native default branch
+`wepp_260430_negmeltfix_comparator` at `4f0728984`. Exact r6 native/vendored pairs
+and sidecars are preserved in
+`/wc1/holdouts/mipa-native-r7-20261103/baseline-r6/manifest.json`.
+
+Independent [reference discovery](artifacts/mipa03_reference_discovery.md) binds
+the specialized source `2e5928702` to the committed/installed historical artifact.
+Independent [producer review](artifacts/mipa03_producer_protocol_review.md) records
+actual writer failures and complete protocol coverage. These are discovery/review
+records, not the two required approvals of a future normative checkpoint.
+Compiled selected-reader blocks on actual ordinary writer output reproduce both
+header misbinding and second-OFE record failure in
+`/wc1/holdouts/mipa-native-r7-20261103/soil-baseline/receipt.json`.
+The labeled debug representation is diagnostic text, not native input.
+
+The [decision preparation](artifacts/20261103_specialized_consumer_decision.md)
+identifies the unresolved scientific choice. The operator question is pending:
+preserve exact historical fire/cover numerical rules or prepare corrected
+semantics for review. There is no inferred answer from elapsed time. Production
+implementation, canonical ratification, rebuild, new histories, native gates,
+configured fork validation and revision-7 publication remain pending. SOIL-02 and
+COVER-01 are not closed. No production code or installed artifact changed.
