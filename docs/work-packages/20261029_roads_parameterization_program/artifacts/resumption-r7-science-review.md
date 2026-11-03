@@ -6,19 +6,19 @@ validation of unexecuted results. Active plan: `prompts/active/program_execplan.
 
 ## Disposition and concrete findings
 
-**Scientific design PASS, conditional on the final implementation/completeness
-review and a freshly bound v2 declaration before execution.** The auxiliary and
-runtime declaration corrections below are accepted on source inspection; v2
-staging has not yet been independently read back. No native run was executed by
-this reviewer. No r7 Roads score, parameter acceptance, production adoption, or
-UI approval follows from this review.
+**Final pre-execution PASS for the bounded 36-call seed trial and exact v3
+declaration identified below.** Independent helper, test and staging readback
+closes the initial conditions. Native runtime and scientific result gates remain
+to be evaluated after execution. No native run was executed by this reviewer.
+No r7 Roads score, parameter acceptance, production adoption, or UI approval
+follows from this review.
 
 | ID | Finding | Disposition |
 | --- | --- | --- |
 | R7-S01 | The first current declaration did not explicitly identify the conditioned development soil treatment. | Closed: protocol and ledger v24 now name conditioned U12 `erosion_road_cap`, including legacy road Ki/Kr/critical shear, disabled dynamic road conductivity adjustment, and the upper-200-mm conductivity cap. This is not unmodified generated soil. |
-| R7-S02 | All 18 staged v1 modern tasks omit `reference.sol`: the driver took `auxiliary_inputs` from upstream records where that map is empty. The retained u2 rows bind this file, and the reused `continuation.audit` / `analyze.validate_runtime` requires it. Every modern run would fail the audit after execution. | Source correction accepted: the v2 driver binds, verifies and copies auxiliary inputs from the retained mode-0 folder and checks them after execution. V1 remains unexecuted. Fresh v2 staging must contain all 36 auxiliary references before running. The historical auditor is unchanged. |
+| R7-S02 | All 18 staged v1 modern tasks omit `reference.sol`: the driver took `auxiliary_inputs` from upstream records where that map is empty. The retained u2 rows bind this file, and the reused `continuation.audit` / `analyze.validate_runtime` requires it. Every modern run would fail the audit after execution. | Closed: the driver binds, verifies and copies auxiliary inputs from the retained mode-0 folder and checks them after execution. Independent v3 readback verifies all 36 auxiliary references. V1 and failed v2 staging remain unexecuted. The historical auditor is unchanged. |
 | R7-S03 | The reused runtime audit explicitly checked only the UI banner; presence/hash checks alone do not demonstrate consumption of every enabled companion. | Source correction accepted: v2 requires UI, groundwater and PMET stdout markers. Snow's selected native open/read path is confirmed, but no dynamic read trace or stdout marker is claimed. Runtime marker results remain to be observed. |
-| R7-S04 | The independent implementation review found that a header-only PASS could satisfy the historical particle checker with zero checked events. | Pending execution condition: review and exercise the isolated PASS calendar/completeness helper, including terminal positive-sediment coverage, before binding v2. Preserve valid zero-sediment/NO_EVENT histories; requiring a positive event count alone is not an adequate repair. |
+| R7-S04 | The independent implementation review found that a header-only PASS could satisfy the historical particle checker with zero checked events. | Closed for the declared completeness scope: the independently reviewed helper requires the full PASS daily calendar, accepts sparse/empty ELEMENT, and records positive terminal dates without EVENT payloads. Fifteen tests and all 18 retained histories pass. Native classification does not require EVENT merely because sediment is positive; strict EVENT numerical predicates remain unchanged. |
 
 Reviewed original machine declaration, retained as rejected unexecuted staging:
 `/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v1/declaration.json`,
@@ -26,9 +26,10 @@ SHA256 `6cf343c22b48f648349903952d847d1e3182bc21453a41b13b86bebe98d001e6`.
 All 36 output directories were empty and no execution-start receipt existed at
 review. That declaration binds the original protocol, frozen acceptance document,
 driver, auditor dependencies, binaries, source panel, and FSWEPP reference records.
-The corrected protocol selects a fresh `engine-seeds-v2` root; its final driver,
-helper and input declaration must be frozen after implementation review. This
-review does not authorize executing the rejected v1 declaration.
+The first correction targeted `engine-seeds-v2`, whose staging failed because a
+host-prefixed source path was absent inside the service container. That partial
+attempt is retained. Explicit path mapping and final source/helper bindings are
+in fresh v3. This review does not authorize executing rejected v1 or partial v2.
 
 ## Comparability and controls
 
@@ -48,8 +49,8 @@ identical within each lane. The source results hash is
 `c9e9e6d693e5cb917bfd83751122264509f5b2081885471e697094f065e912b9`.
 
 The rejected v1 staging has 36 distinct case/lane/revision tasks and 450 verified files:
-432 model inputs plus only 18 auxiliary references, exposing R7-S02. Corrected v2
-must bind 468 entries: 432 model inputs plus 36 auxiliary references. Every
+432 model inputs plus only 18 auxiliary references, exposing R7-S02. Final v3
+binds 468 entries: 432 model inputs plus 36 auxiliary references. Every
 engine pair has identical model-input bytes and no experimental controls copied.
 Eight unique FSWEPP reference records serve the nine contrasts; QA verified
 their 56 output hashes, reference exports, and exact climate/management/geometry
@@ -116,3 +117,59 @@ Fresh preparation, six withheld materials, source-supported physical hypotheses,
 and the explicit human configuration specification/layout gate remain separate.
 No surface-armor, retention, porosity, conductivity or roughness adjustment is
 accepted by the proposed engine replay.
+
+## Final helper and v3 prelaunch readback
+
+Accepted declaration:
+`/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/declaration.json`,
+SHA256 `c60b95c568980858c2b8f0fd0c6e0cf646900c73c0ca0f91bfc711007dbd384f`.
+QA independently rehashed all 468 staged input/auxiliary entries, both binaries
+and all 78 dependencies. Each of the 18 r4/r7 pairs has identical inputs; all
+36 output directories were empty and no execution-start receipt existed at
+readback. Declared UID/GID are 1000/993, with four workers and 300-second timeouts.
+
+Independent canonical test command:
+
+```sh
+wctl run-pytest tests/tools/test_roads_pass_completeness_r7.py --maxfail=1
+```
+
+Result: **15 passed**. Tests cover complete zero-event histories in ordinary and
+leap years, empty/sparse ELEMENT, complete positive events, explicit positive
+non-EVENT diagnostics, truncated/header-only PASS, missing dates, duplicate and
+out-of-calendar dates, missing SRC3 payloads, and changed climate/output hashes.
+
+Independent read-only execution of the helper on all 18 retained ordinary
+histories accepts **105,192 daily PASS records**. It preserves **31 positive
+terminal non-EVENT dates across eight histories**, and accepts three histories
+with no positive terminal sediment. ELEMENT is event-supported, not a daily
+calendar. Requiring daily ELEMENT or positive sediment to imply EVENT would
+incorrectly reject these retained histories.
+The retained `resumption-r7-pass-completeness-readback.json` has SHA256
+`b2a8b17711525e1dccb19beffd73ddfa0cadc09482f6ca16a12db94109d7c1b9`;
+its counts and helper identity agree with the independent readback.
+
+Both r4 `b01a739957bef5aacf35b4a89bc13eddc9d94804` and r7
+`e0abe0581f77c6f66917e90daf8f8f429e9315c8` source use
+`runoff(nplane).ge.0.001` meters to select EVENT in `src/wshpas.for`.
+SUBEVENT/NO EVENT therefore need not mean zero ELEMENT sediment. The helper
+retains date, label, printed sediment and runoff tokens for those cases and
+explicitly leaves their particle closure uncertified. This is a completeness
+repair, not a new transport tolerance or full mass-closure claim.
+
+The interpreter binds the summary to the results hash, reconciles its acceptance
+flag with all row-level physical/particle/completeness and r4 parity predicates,
+and checks all three OFEs before paired differences. Failed gates are explicitly
+`diagnostic_only_gate_failed`; they cannot be presented as accepted seeds. Its
+positive-only log-ratio summary reports excluded zero counts and remains a
+selected-panel diagnostic, not the full stratified acceptance calculation.
+
+| Independently reviewed artifact | SHA256 |
+| --- | --- |
+| `audit_pass_completeness_r7.py` | `187f25c351f96c33b8704aea8d0d11306105f68bd18bb3ad8ff4fd81614484aa` |
+| `tests/tools/test_roads_pass_completeness_r7.py` | `69a026f7566611913ae6eb37080996b23b6ae1d26883f67e31eb4da036e526cf` |
+| `interpret_r7_seeds.py` | `7e398d4660b17da79a4f21af053a42b448538e3217949650f8e9e772853b1f55` |
+
+No blocking finding remains for executing the declared seed batch. Interpretation,
+broader expansion, fresh preparation, candidate selection and the human UI gate
+retain the conditions above. The reviewer modified only this review artifact.

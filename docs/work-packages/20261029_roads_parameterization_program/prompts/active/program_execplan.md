@@ -6,13 +6,12 @@ Executing the operator's resumption prompt under the existing scientific and hum
 UI gates. [Protocol and reconciliation](../../artifacts/resumption-r7-20261103.md) separate
 fixed-input engine effects from current full preparation and later parameter lanes.
 The current installed release is r7; the r4 results below remain historical.
-First declare 18 ordinary-mode seed cases on exact r4/r7 binaries. Experimental
-roughness mode 1 is retained evidence, not an ordinary r7 runtime option. No model
-execution or parameter acceptance has yet occurred in this resumption. The fresh
-`engine-seeds-v3` declaration binds 36 calls after two retained staging attempts;
-independent final review precedes launch. Calendar completeness now supplements
-the unchanged strict EVENT particle predicates; non-EVENT sediment is reported
-explicitly outside their coverage.
+Completed all 36 exact-input seed calls: native/physical/calendar/strict EVENT
+checks pass, with all 18 r4 output controls reproduced exactly. All nine
+conditioned U12 annual exports and classifications remain unchanged on r7.
+[Seed results](../../artifacts/resumption-r7-seed-results.md) and
+[ledger v25](../../artifacts/candidate-ledger-v25.json) retain the current checkpoint.
+The full 840-case replay is being staged; no parameter acceptance is claimed.
 
 
 This living plan follows docs/prompt_templates/codex_exec_plans.md. The current
@@ -1487,3 +1486,11 @@ contract/scalar specification is concrete but not an executed behavioral lane.
 The operator requested and authorized auditing rock cover before the next behavioral experiment, using the prior gridded RUSLE work as evidence. Inventory actual profile and surface quantities separately, verify proxy availability and native consumers, and evaluate overlap and spatial support. Do not transfer a RUSLE fraction-of-bare parameter into soil RFG. Read-only evidence and review determine whether any later revision is justified. The effective-capacity contract remains separate and unexecuted. This amendment records the new sequencing and prevents confounded cover/capacity tuning.
 
 Rock-audit completion amendment: current status and living sections now record the bounded provenance/consumer findings and separate next decisions. This preserves the original capacity packet and avoids interpreting absence of explicit rock fields as zero surface rock.
+
+
+## Revision 7 seed checkpoint — 2026-11-03 UTC
+
+- Progress: 36/36 native, physical, calendar and strict EVENT audits pass; 18/18 exact r4 controls. Conditional full-panel declaration is staging.
+- Surprises & Discoveries: sparse ELEMENT dates and native 1 mm EVENT classification require distinct calendar and particle-coverage statements; 31 positive non-EVENT dates exist in retained seed history. r7 changes legacy controls but preserves all nine conditioned U12 annual exports.
+- Decision Log: retain r7 as an experimental engine baseline for the full unchanged development replay, without parameter/default adoption or isolated FC/HK causality claims. Preserve rejected unexecuted staging attempts.
+- Outcomes & Retrospective: pre-execution review closed auxiliary staging and header-only PASS false-acceptance gaps; committed focused tests pass (15). The independent current-producer/full-project contrast and scientific acceptance remain open.

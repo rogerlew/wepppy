@@ -1,0 +1,30 @@
+{
+  "version": 25,
+  "predecessor": {
+    "path": "candidate-ledger-v24.json",
+    "sha256": "da8152eea4486fbfabf7c422d747a8be2286a03a49a1607e4f0b5351766d0be4"
+  },
+  "status": "r7_seed_comparability_passed_full_panel_staging",
+  "seed_root": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3",
+  "seed_declaration_sha256": "c60b95c568980858c2b8f0fd0c6e0cf646900c73c0ca0f91bfc711007dbd384f",
+  "summary": {
+    "cases": 36,
+    "native_pass": 36,
+    "physical_pass": 36,
+    "particle_pass": 36,
+    "pass_completeness": 36,
+    "r4_exact": 18,
+    "r7_changed_outputs": 116,
+    "results_sha256": "a649bea9c8504744128f2d791ca5992b0ea40c10aa356130412bff43e56c47be",
+    "source_and_dependency_integrity": true,
+    "seed_comparability_gate": true
+  },
+  "interpretation_sha256": "b36cebb1aee2bbf397781161d78fc1bb869c025971896c95d550d1b0d6669168",
+  "baseline_variant": "conditioned U12 erosion_road_cap",
+  "modern_seed_export_and_classifications_unchanged": 9,
+  "seed_magnitude_acceptance": false,
+  "full_r7_panel_score": null,
+  "withheld_materials_untouched": true,
+  "production_defaults_changed": false,
+  "ui_human_gate_preserved": true
+}

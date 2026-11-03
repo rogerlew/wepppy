@@ -1,0 +1,29 @@
+{
+  "scope": "Independent read-only staging verification; no model invocation",
+  "declaration_sha256": "68fa8f4507821db21e104a625da0f6ba6401136bc6408594c4051344a51f6b04",
+  "tasks": 840,
+  "native_input_copies": 10080,
+  "auxiliary_copies": 840,
+  "source_output_bindings": 5880,
+  "reference_output_bindings": 5880,
+  "dependencies": 80,
+  "uid": 1000,
+  "gid": 993,
+  "workers": 8,
+  "timeout_seconds": 300,
+  "driver_sha256": "da7c6e21123d7e1b8c1f3b608cbfb615d5b24683e01be8f116b5abaad350c6e8",
+  "binary_sha256": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+  "materials": {
+    "1718465": 120,
+    "1718494": 120,
+    "1718510": 120,
+    "1856573": 120,
+    "2711184": 120,
+    "2711250": 120,
+    "53949": 120
+  },
+  "all_copies_separate_regular_files": true,
+  "all_output_directories_empty": true,
+  "source_panel_sha256": "79aee5a98f36d76e2e603ec0f3614be84b21dcbdff64857c43f2247df534d983",
+  "seed_summary_sha256": "96f9de6b2f253d585d264427ae030b3831616d073b44027351c6ad5bf91cab2f"
+}

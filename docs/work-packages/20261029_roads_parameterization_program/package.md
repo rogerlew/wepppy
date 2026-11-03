@@ -6,13 +6,12 @@ Executing the operator's resumption prompt under the existing scientific and hum
 UI gates. [Protocol and reconciliation](artifacts/resumption-r7-20261103.md) separate
 fixed-input engine effects from current full preparation and later parameter lanes.
 The current installed release is r7; the r4 results below remain historical.
-First declare 18 ordinary-mode seed cases on exact r4/r7 binaries. Experimental
-roughness mode 1 is retained evidence, not an ordinary r7 runtime option. No model
-execution or parameter acceptance has yet occurred in this resumption. The fresh
-`engine-seeds-v3` declaration binds 36 calls after two retained staging attempts;
-independent final review precedes launch. Calendar completeness now supplements
-the unchanged strict EVENT particle predicates; non-EVENT sediment is reported
-explicitly outside their coverage.
+Completed all 36 exact-input seed calls: native/physical/calendar/strict EVENT
+checks pass, with all 18 r4 output controls reproduced exactly. All nine
+conditioned U12 annual exports and classifications remain unchanged on r7.
+[Seed results](artifacts/resumption-r7-seed-results.md) and
+[ledger v25](artifacts/candidate-ledger-v25.json) retain the current checkpoint.
+The full 840-case replay is being staged; no parameter acceptance is claimed.
 
 
 ## Current: rock-cover audit separates surface protection from profile fragments
