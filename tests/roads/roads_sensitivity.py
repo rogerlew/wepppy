@@ -95,6 +95,41 @@ def paired_events(baseline, contrast):
                 annual=[dict(year=r[0], runoff_delta_m3=r[1], sediment_delta_kg=r[2]) for r in annual])
 
 
+def validate_calendar_context(root, expected_cli_sha256):
+    """Reject a reader calendar that differs from the actual native climate."""
+    import pyarrow.parquet as pq
+    from tests.roads.extract_fixture import climate_dates
+    from wepppy.wepp.interchange._rust_interchange import resolve_cli_calendar_path
+
+    root = Path(root)
+    output = root / "wepp/roads/output"
+    expected = root / "climate"
+    selected = next((parent / "climate" for parent in (output, *output.parents)
+                     if (parent / "climate").exists()), None)
+    if selected != expected or expected.is_symlink():
+        raise ValueError("Unexpected ancestor calendar context")
+    actual = root / "wepp/roads/runs/p1.cli"
+    if digest(actual) != expected_cli_sha256:
+        raise ValueError("Native climate differs from prepared receipt")
+    source = expected / "site.cli"
+    if (list(expected.glob("*.cli")) != [source] or source.is_symlink()
+            or digest(source) != digest(actual)):
+        raise ValueError("Reader climate differs from native climate")
+    cached = expected / "wepp_cli.parquet"
+    if cached.is_symlink():
+        raise ValueError("Reader calendar cache is aliased")
+    resolved = resolve_cli_calendar_path(output)
+    if resolved != cached:
+        raise ValueError("Reader calendar context is unavailable")
+    dates = climate_dates(actual)
+    observed = pq.read_table(resolved, columns=["year", "month", "day_of_month"]).to_pylist()
+    if [(r["year"], r["month"], r["day_of_month"]) for r in observed] != [(d.year, d.month, d.day) for d in dates]:
+        raise ValueError("Cached reader calendar differs from native calendar")
+    return dict(native_cli_sha256=digest(actual), reader_cli_sha256=digest(source),
+                reader_parquet_sha256=digest(resolved), days=len(dates),
+                first=str(dates[0]), last=str(dates[-1]))
+
+
 def prepare(root, case, *, geometry=None, traffic=None, binary="wepp_261029"):
     """Prepare one profile exclusively; retain actual canonical builder readback."""
     from wepppy.nodb.mods.roads import Roads
@@ -123,6 +158,7 @@ def execute(root, record):
     verify(runs, record["prepared_files"])
     if inventory(runs) != record["prepared_files"]:
         raise ValueError("Unrecorded native runtime input")
+    calendar_context = validate_calendar_context(root, record["prepared_files"]["p1.cli"])
     if (root / "execution-start.json").exists():
         raise ValueError("Study execution already started; use a fresh root")
     prepared = root / ("final-prepared.json" if "generated_source" in record else "prepared.json")
@@ -144,6 +180,7 @@ def execute(root, record):
         if {p.name for p in output.iterdir()} != expected:
             raise ValueError("Missing or unexpected native outputs")
         result = dict(record, status="completed", elapsed_seconds=time.monotonic()-started,
+                      calendar_context=calendar_context,
                       output_sha256={str(p.relative_to(root)): digest(p) for p in output.iterdir()})
         verify(runs, record["prepared_files"])
         if digest(binary) != record["binary_sha256"]:
@@ -171,6 +208,7 @@ def summarize(root, record, *, start_year, years):
     from wepppy.nodb.mods.roads._segment_loss_summary import build_segment_loss_summary
 
     root = Path(root)
+    calendar_context = validate_calendar_context(root, record["prepared_files"]["p1.cli"])
     output = root / "wepp/roads/output"
     run_wepp_hillslope_pass_interchange(output, expected_hillslopes=1)
     run_wepp_hillslope_wat_interchange(output, expected_hillslopes=1)
@@ -207,7 +245,7 @@ def summarize(root, record, *, start_year, years):
             FROM element_rows GROUP BY OFE ORDER BY OFE''', [width, years]).fetchall()
         if any(not math.isfinite(v) or v < 0 for row in boundary for v in row[1:]):
             raise ValueError("Invalid native sediment boundary")
-    result = dict(summary=summary, native_areas=geometry,
+    result = dict(summary=summary, native_areas=geometry, calendar_context=calendar_context,
                   role_boundary=[dict(ofe=row[0], role=record["ofe_order"][row[0]-1],
                                       boundary_kg_yr=row[1], minimum_kg_m=row[2], maximum_kg_m=row[3])
                                  for row in boundary],

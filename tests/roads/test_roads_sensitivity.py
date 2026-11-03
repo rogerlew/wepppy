@@ -118,3 +118,38 @@ def test_event_comparison_keeps_zero_days_and_checks_calendar(tmp_path):
     pq.write_table(pa.concat_tables([one, one]), path)
     with pytest.raises(ValueError, match="Duplicate"):
         sensitivity.paired_events(tmp_path / "baseline", tmp_path / "contrast")
+
+
+@pytest.mark.integration
+def test_calendar_context_rejects_stale_cli_cache_and_nearer_ancestor(tmp_path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from tests.roads.roads_matrix import Case
+    root = tmp_path / "capsule"
+    record = sensitivity.prepare(root, Case("median", "loam", "gravel", "low", "rutted"))
+    climate = root / "climate/site.cli"
+    original = climate.read_bytes()
+    climate.write_bytes(original + b"\n")
+    with pytest.raises(ValueError, match="Reader climate differs"):
+        sensitivity.execute(root, record)
+    assert not (root / "execution-start.json").exists()
+    climate.write_bytes(original)
+    cached = root / "climate/wepp_cli.parquet"
+    pq.write_table(pa.table(dict(year=[1999], month=[1], day_of_month=[1])), cached)
+    with pytest.raises(ValueError, match="Cached reader calendar differs"):
+        sensitivity.execute(root, record)
+    assert not (root / "execution-start.json").exists()
+    with pytest.raises(ValueError, match="Cached reader calendar differs"):
+        sensitivity.summarize(root, record, start_year=2000, years=16)
+    (root / "wepp/climate").mkdir()
+    with pytest.raises(ValueError, match="Unexpected ancestor"):
+        sensitivity.validate_calendar_context(root, record["prepared_files"]["p1.cli"])
+    (root / "wepp/climate").rmdir()
+    cached.unlink()  # Remove only this test's deliberately malformed cache.
+    valid = sensitivity.validate_calendar_context(root, record["prepared_files"]["p1.cli"])
+    assert valid["days"] == 5844 and valid["first"] == "2000-01-01"
+    native = root / "wepp/roads/runs/p1.cli"
+    native.write_bytes(original + b"\n")
+    climate.write_bytes(original + b"\n")
+    with pytest.raises(ValueError, match="differs from prepared receipt"):
+        sensitivity.summarize(root, record, start_year=2000, years=16)
