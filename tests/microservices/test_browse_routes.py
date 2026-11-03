@@ -545,3 +545,31 @@ def test_parquet_schema_endpoint_rejects_non_parquet_paths(tmp_path: Path, load_
 
     assert response.status_code == 400
     assert "only available for parquet files" in response.text
+
+
+def test_retired_and_failed_revegetation_inputs_remain_browsable(tmp_path, load_run_browse):
+    from wepppy.nodb.mods.rap.revegetation_inputs import cover_output, publish_revegetation_input
+
+    root = tmp_path / 'revegetation-evidence'
+    runs = root / 'wepp' / 'runs'
+    runs.mkdir(parents=True)
+    (runs / 'firedate.txt').write_text('6 1 2005\n')
+    publish_revegetation_input(str(runs), 'firedate.txt', None)
+    with pytest.raises(RuntimeError, match='interrupted'):
+        with cover_output(str(runs), 'p2.cov') as stream:
+            stream.write('2000 2001\n')
+            raise RuntimeError('interrupted')
+    retired = next(runs.glob('revegetation-input-*/firedate.txt'))
+    failed = next(runs.glob('p2.cov.revegetation-*.tmp'))
+    browse = load_run_browse({'revegetation-evidence': root}, SITE_PREFIX='/weppcloud')
+    base = '/weppcloud/runs/revegetation-evidence/cfg/browse/'
+    with TestClient(browse.create_app()) as client:
+        listing = client.get(base + 'wepp/runs/')
+        assert listing.status_code == 200
+        assert retired.parent.name in listing.text
+        assert failed.name in listing.text
+        for path in (retired, failed):
+            response = client.get(base + str(path.relative_to(root)) + '?download')
+            assert response.status_code == 200
+            assert response.content == path.read_bytes()
+            assert 'attachment' in response.headers['content-disposition']

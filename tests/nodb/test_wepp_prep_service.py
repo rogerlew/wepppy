@@ -194,10 +194,14 @@ def test_prep_watershed_prefers_user_override_over_critical_shear_map(
 
 
 def test_prep_hillslopes_passes_max_workers_to_multi_ofe(
+    tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = WeppPrepService()
     wepp = _DummyWeppPrepHillslopes()
+    wepp.runs_dir = str(tmp_path)
+    for name in ('cancov.txt', 'simfire.txt', 'firedate.txt'):
+        (tmp_path / name).write_text('prior specialized input')
 
     monkeypatch.setattr(
         "wepppy.nodb.core.wepp.Disturbed.getInstance",
@@ -209,3 +213,7 @@ def test_prep_hillslopes_passes_max_workers_to_multi_ofe(
     assert len(wepp.multi_ofe_calls) == 1
     _translator, max_workers = wepp.multi_ofe_calls[0]
     assert max_workers == 7
+    for name in ('cancov.txt', 'simfire.txt', 'firedate.txt'):
+        assert not (tmp_path / name).exists()
+        retired = list(tmp_path.glob(f'revegetation-input-*/{name}'))
+        assert len(retired) == 1 and retired[0].read_text() == 'prior specialized input'
