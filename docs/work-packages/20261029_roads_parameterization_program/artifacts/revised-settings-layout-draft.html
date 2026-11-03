@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roads settings — static design draft</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;color:#283238;background:#f7f8f8;margin:0;padding:2rem}main{max-width:850px;margin:auto;background:white;padding:2rem;border:1px solid #d5dadd}h1{font-size:1.5rem;margin-top:0}h2,legend{font-size:1.1rem;font-weight:600}fieldset{border:1px solid #cbd3d5;padding:1.3rem;margin:1.4rem 0}p{max-width:72ch}.muted,small{color:#53636a}.draft{padding:.75rem;background:#fff5d6}.fields{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}label{display:block;font-weight:600}input,select{display:block;box-sizing:border-box;width:100%;max-width:20rem;padding:.5rem;border:1px solid #adb8bd;border-radius:3px;background:white;color:inherit;font:inherit}small{display:block;margin-top:.3rem}button{font:inherit;padding:.55rem .85rem;border:1px solid #a8b4b9;border-radius:3px;background:#eef1f2;color:#35464e;margin:.3rem .35rem .3rem 0}.primary{background:#336b60;color:white;border-color:#336b60}.status{border-left:3px solid #4c7a6e;padding-left:1rem}summary{cursor:default;font-weight:600}@media(max-width:600px){body{padding:.5rem}main{padding:1rem}.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<p class="draft"><strong>Static design draft.</strong> No settings are saved. The supported controls have bounded study evidence; human approval is still required.</p>
+<h1>Roads</h1>
+<p class="muted">Upload your road map, review settings, then prepare and run Roads.</p>
+<p><strong>Uploaded roads</strong><br><code>roads.geojson</code> <span class="muted">(illustration)</span></p>
+<details><summary>Attribute mapping</summary><p>Existing design, surface and traffic mappings remain here. Feature values take precedence over fallbacks.</p></details>
+<section aria-label="Saved settings example"><h2>Saved settings — view mode</h2><p><strong>Default settings</strong></p><p>Surface: Gravel · Traffic: Low · Road width: 4 m<br>Fill length: 30 m · Fill slope: 10%</p><p><button type="button" disabled>Edit settings</button></p><small>When any value differs, status reads “Custom settings”. Legacy provenance is shown separately. Run Roads to see actual settings use.</small></section>
+<fieldset><legend>Roads settings — edit mode</legend>
+<p><strong>Default settings</strong></p>
+<p>These fallback values apply where road attributes are missing or invalid. They do not replace valid values in your uploaded map.</p>
+<div class="fields">
+<div><label for="surface">Surface fallback</label><select id="surface"><option>Gravel</option><option>Paved</option></select><small>Road surface. Feature surface takes precedence.</small></div>
+<div><label for="traffic">Traffic fallback</label><select id="traffic"><option>Low</option><option>High</option><option>None</option></select><small>Modeled traffic category. Feature traffic takes precedence. A lower category does not always predict less erosion.</small></div>
+<div><label for="width">Road width fallback (m)</label><input id="width" type="number" value="4" min="0.3" max="100" step="any"><small>Allowed: 0.3–100 m. Width affects the modeled strip footprint, including fill/buffer where present. Studied values: 2, 4 and 8 m; not a recommended range.</small></div>
+<div><label for="fill">Fill length fallback (m)</label><input id="fill" type="number" value="30" min="0.3" max="100" step="any"><small>Outslope rutted roads only. Allowed: 0.3–100 m. Studied values: 10, 30 and 60 m; not a recommended range.</small></div>
+<div><label for="fill-slope">Fill slope fallback (%)</label><input id="fill-slope" type="number" value="10" min="0.1" max="150" step="any"><small>Outslope rutted roads only. Allowed: 0.1–150%. Studied values: 2, 10 and 30%; not a recommended range.</small></div>
+</div>
+<p class="muted">Neither default nor custom settings are field-calibrated by this study. Run Roads to see actual settings use.</p>
+<p><button class="primary" type="button" disabled>Save settings</button><button type="button" disabled>Cancel</button><button type="button" disabled>Reset to defaults</button></p>
+<small>Reset fills the draft with defaults. Save applies the changes. Uploaded roads and attribute mapping are retained.</small>
+</fieldset>
+<p class="status">After saving: Settings saved. Prepare and run Roads to generate results.</p>
+<p><button class="primary" type="button" disabled>Prepare Segment Candidates</button><button class="primary" type="button" disabled>Run WEPPcloud Roads</button></p>
+<details><summary>Settings and preparation details</summary><p>Model policy: existing legacy road templates. This editor does not adopt a generated-soil policy.</p><p>Saved settings are shown here; actual feature/fallback usage and emitted values are labeled for the last current completed run. Counts in this draft are deliberately omitted.</p><p>Soil texture and profile rock fragments remain inspectable in existing details; they are not editable in this proposal. No surface-armor or generated-soil policy control is proposed here.</p></details>
+<section aria-label="Illustrative state examples"><h2>State examples — illustration only</h2>
+<p class="muted">These examples show proposed wording, not observed project results. Only the relevant state appears in the implemented view.</p>
+<fieldset><legend>Completed run: fallback unused</legend><p><strong>Settings used in the last completed run</strong></p><p>Road width: applicable segments used uploaded feature widths. The fallback was not used.</p><p>Fill settings: no applicable outslope rutted segments executed.</p><small>Actual counts come from that run's source records. Missing historical usage is shown as “Usage unavailable for this run”, never zero.</small></fieldset>
+<fieldset><legend>Validation error</legend><label for="invalid-width">Road width fallback (m)</label><input id="invalid-width" value="" aria-invalid="true" aria-describedby="invalid-width-message"><p id="invalid-width-message">Enter a road width from 0.3 to 100 m. Your other draft values are retained. Saved settings and current results have not changed.</p></fieldset>
+<fieldset><legend>Unsaved settings: adjacent actions unavailable</legend><p>Save or Cancel your settings changes before uploading, applying mappings, preparing or running Roads.</p><button type="button" disabled>Save settings</button><button type="button" disabled>Cancel</button><small>In the live editor Save, Cancel and Reset remain available. Upload, Apply Attribute Mapping, Prepare and Run are unavailable until the draft is resolved. All buttons in this static proposal are disabled.</small></fieldset>
+<fieldset><legend>Roads operation busy</legend><p>Another Roads operation is running. Your draft is retained. Try Save again after it finishes.</p><button type="button" disabled>Save settings</button></fieldset>
+<fieldset><legend>Settings saved; results unavailable</legend><p>Settings saved. Prepare and run Roads to generate results.</p><button type="button" disabled>Prepare Segment Candidates</button><small>Previous attempts remain available in project history.</small></fieldset>
+<fieldset><legend>Readonly project</legend><p>Saved settings are available to inspect. This project is readonly; editing is unavailable.</p><small>Edit, Save and Reset actions are not offered.</small></fieldset>
+<fieldset><legend>Saved settings need repair</legend><p>A saved setting is invalid. Review all five fields or Reset to defaults, then Save. Prepare and Run remain unavailable until repair.</p><small>No saved value is silently replaced. Unrelated settings and uploaded roads remain unchanged.</small></fieldset>
+</section>
+</main></body></html>

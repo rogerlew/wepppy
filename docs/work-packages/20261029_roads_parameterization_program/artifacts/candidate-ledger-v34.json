@@ -1,0 +1,39 @@
+{
+  "version": 34,
+  "predecessor": {
+    "path": "candidate-ledger-v33.json",
+    "sha256": "0879cbe303fdd508c251ad1ef22b8211007c829ec27d0acfa3c5737a9010a026"
+  },
+  "status": "bounded_sensitivity_complete_reviewed_settings_proposal",
+  "evidence": {
+    "revised-sensitivity-results.md": "7b8adac63f719c1aca262d2a190de86b73a0f5e0e2ae2c540c23c1a8e4970d93",
+    "revised-sensitivity-summary.json": "cf320dbfa2c91e02b0dad4de102ff15c8ed5b18384c593138df4a203c88115ad",
+    "revised-sensitivity-science-review.md": "2af21faeb1abffc6816ad82c4aa5a0fcecadfc90d4222ccb815cc65e8400f56f",
+    "revised-project-sensitivity-results.md": "f724b477a2283c4011bb6f165197d37dea436a1d72dab8ad5f2bae0c6a94f875",
+    "revised-project-sensitivity-results.json": "56c0d8456d51185e901667395cfea576cc5e452b7999e5163edbfd677d1aff01",
+    "revised-calendar-context-quality-review.md": "3adcc9dda35a28becc886bfe792c05d4d20ec65ca58d21a6b866bad9120e3a8f",
+    "revised-research-role-disposition.md": "b63191df85edb6393f4c975fbf93a45376766d69666e04d2b08b6bcb2ff40760",
+    "revised-research-role-readback.json": "5b7ebf37c23d7b857c116f1d9167933664a1f6f0bb772474de9894f1a3261091"
+  },
+  "native_study_calls": {
+    "isolated_profiles": 47,
+    "project_profiles": 140,
+    "project_watersheds": 4
+  },
+  "strict_EVENT_particle_audit": {
+    "isolated_profiles_passed": 47,
+    "flags": 0,
+    "project_strict_audit_claimed": false
+  },
+  "source_files_preserved": 3537,
+  "baseline_files_preserved_per_project_context": 907,
+  "failed_attempts_retained": true,
+  "historical_results_reclassified": false,
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "production_settings_wiring_started": false,
+  "human_specification_approval": "absent",
+  "human_layout_approval": "absent",
+  "repository_sanity": "running; final calendar guard independently tested after broad launch",
+  "program_complete": false
+}

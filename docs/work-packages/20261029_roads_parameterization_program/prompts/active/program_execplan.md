@@ -12,13 +12,46 @@ magnitude thresholds pass, or to require a surface dataset before any further
 progress, are superseded. Surface research remains optional when supported.
 The explicit human specification/layout gate and deployment boundaries remain.
 
-Next: inventory and disposition known findings (including the strict particle flag),
-repair confirmed defects, then specify a bounded sensitivity harness and proposed
-controls using existing builders and retained evidence. No new numerical sweep or
-production UI change follows from this documentation checkpoint.
+Current execution status and the still-open human specification/layout gate are
+recorded in the revised checkpoint below. Historical criteria, experiments and
+failed classifications remain unchanged.
 
 The retained r7 checkpoint below predates this amendment; its evidence remains
 valid, while its next-step and closure recommendations are superseded above.
+
+## Revised sensitivity and proposal checkpoint — 2026-11-03
+
+Known findings are dispositioned in the [issue register](../../artifacts/revised-issue-register.md).
+The exact-r7 particle flag is explained while its strict historical failure remains
+unchanged. The optional-attribute resolver/buffer conformance defect is repaired,
+and the reusable study harness now rejects mismatched reader calendar contexts.
+No confirmed supported-path defect remains unresolved in this bounded scope.
+
+The [profile study](../../artifacts/revised-sensitivity-results.md) completed 47 distinct
+native profiles with all strict EVENT/calendar checks passing. The
+[project study](../../artifacts/revised-project-sensitivity-results.md) completed four
+contexts (140 profiles and four watershed runs), preserving all source and baseline
+files. Independent [scientific review](../../artifacts/revised-sensitivity-science-review.md)
+accepts these bounded findings. Width scales footprint; fill responses depend on
+whether total mass or density is compared; traffic rankings are nonmonotonic.
+PASS and terminal sediment support remain explicitly different. Failed attempts,
+source bindings and additive continuations remain retained in [ledger v34](../../artifacts/candidate-ledger-v34.json).
+
+The proposed [settings contract](../../../../schemas/roads-settings-contract.md),
+[ADR-0135](../../../../adrs/ADR-0135-roads-settings-controls.md) and
+[static layout](../../artifacts/revised-settings-layout-draft.html) expose five existing
+fallback controls: surface, traffic, width, fill length and fill slope. Scientific,
+correctness, security and UX/QA proposal reviews pass. The
+[proposal checkpoint](../../artifacts/20261103_revised_settings_contract_decision.md)
+records exact deltas and compatibility/validation obligations. Production settings
+wiring has not started. Neither defaults nor generated-soil policy are adopted.
+
+The full repository sanity run is active; the late calendar guard has a separate
+21-test focused pass and the publication gate passes three tests. Human approval
+of both specification and layout is **absent**. The package remains active; after
+approval, ratify the contract-first ancestor and implement/validate the actual
+browser-to-native-to-report workflow, including reset/reload/fork/restore and real
+service boundaries. Controller studies do not certify that future workflow.
 
 ## Revised execution sequence — 2026-11-03
 
@@ -262,12 +295,14 @@ requires explicit human specification/layout approval before production wiring.
 
 - [x] (2026-11-03) Verified handoff HEAD and clean worktree; opened bounded issue register and assigned independent current-r7 particle investigation, controls inventory, sensitivity harness and disposable-project lanes.
 - [x] (2026-11-03) Complete current-source particle disposition and bounded resolver/buffer-peer conformance repair; 59 controller tests and independent generated-input review pass. Broad sanity remains pending.
-- [ ] Execute preregistered, independently reviewed sensitivity contrasts and validate emitted/native/artifact effects.
-- [ ] Commit reviewed concrete specification/layout proposal; obtain explicit human approval before production wiring.
+- [x] (2026-11-03) Execute and independently review 47 profile contrasts and four project contexts, with emitted/native/report readbacks and all failure retention.
+- [x] (2026-11-03) Prepare the concrete specification/layout and complete scientific, correctness, security and UX/QA reviews.
+- [ ] Finish broad sanity and commit the final scoped proposal checkpoint.
+- [ ] Obtain explicit human specification/layout approval, ratify the ancestor, then implement and validate the actual workflow.
 - [x] Record the operator-approved pivot in the canonical adjudication contract.
-- [ ] Register and disposition known findings; resolve confirmed supported-path defects.
-- [ ] Define and validate the sensitivity harness and evidence-backed candidate controls.
-- [ ] Prepare the configuration specification/layout for human review.
+- [x] Disposition known findings and repair confirmed bounded resolver/calendar-context defects.
+- [x] Validate the maintained sensitivity harness and five evidence-backed existing controls.
+- [x] Prepare and independently review the configuration specification/layout; human approval remains absent.
 
 - [x] Completed and independently scored all 840 r7 cases; no magnitude classification changes.
 - [x] Completed fresh full-preparation public-controller baseline and artifact readback.
@@ -476,6 +511,8 @@ regressions when substantive executable/harness changes are complete, not after
 every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
+
+- Revised study adapters exposed bounded evidence-plumbing failures: an unused helper hash drift stopped the project sequence, an inherited reader expected yearly LOSS text absent from canonical abbreviated reports, and native-generated `chntyp.txt` was initially treated as invariant input. Preserve failed checks and additive reviewed continuations; none establishes a production physics defect. Freeze relevant helpers before declaration and classify native-produced sidecars by actual source consumers.
 
 - 2026-11-03 revised execution: production Roads still uses legacy soil templates; conditioned generated U12 is research injection, so control studies must keep separate lanes. Fresh exact-r7 observation explains the retained particle flag, preserving strict failure and all output hashes.
 
@@ -715,7 +752,7 @@ confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
 
-Current revised execution: R-01 has a reviewed source-supported disposition, with no native behavior change. Control inventory, bounded study and resolver defect repair are in progress. Specification/layout approval is absent; the program remains active.
+Current revised execution: R-01 and R-09/R-11 have source-supported dispositions; R-08 and R-10 are repaired with regressions. The 47-profile/four-project sensitivity study and independent proposal reviews are complete. Full repository sanity is running. Specification/layout approval is absent; the program remains active.
 
 The new direction is documented; defect disposition, sensitivity harness work and
 the approved user workflow remain open. Previous experiments constrain proposed
@@ -1640,3 +1677,5 @@ Rock-audit completion amendment: current status and living sections now record t
 - Outcomes & Retrospective: pre-execution review closed auxiliary staging and header-only PASS false-acceptance gaps; committed focused tests pass (15). The independent current-producer/full-project contrast and scientific acceptance remain open.
 
 Revision note (2026-11-03): activated the revised defect/sensitivity sequence, corrected the current purpose, and recorded exact-r7 particle disposition without rewriting historical experiments.
+
+Revision note (2026-11-03): recorded completed bounded studies, source-supported report limits and reviewed five-field proposal; broad sanity and explicit human approval remain open.

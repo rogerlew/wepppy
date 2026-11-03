@@ -1,0 +1,67 @@
+{
+  "qualified_readback_sha256": "56c0d8456d51185e901667395cfea576cc5e452b7999e5163edbfd677d1aff01",
+  "independent_reader_sha256": "9b6fe3be64f0432c2d5119247ac34f510403010e770fdcad14660a8f5e774c7e",
+  "contexts": [
+    {
+      "case": "w4-f30",
+      "profiles": 35,
+      "profile_export_kg_yr": 9025.416676122848,
+      "profile_runoff_m3_yr": 2311.0889497749995,
+      "profile_area_m2": 10737.699999999997,
+      "export_density_kg_m2_yr": 0.8405353731360394,
+      "role_sediment_kg_yr": {
+        "road": 9172.697249999997,
+        "fill": 9448.212000000001,
+        "buffer": 9040.69025
+      },
+      "max_summary_export_difference_kg_yr": 9.094947017729282e-13,
+      "raw_artifacts_verified": 1003
+    },
+    {
+      "case": "w8-f30",
+      "profiles": 35,
+      "profile_export_kg_yr": 18050.81688299767,
+      "profile_runoff_m3_yr": 4622.179292031251,
+      "profile_area_m2": 21475.29,
+      "export_density_kg_m2_yr": 0.8405389116048105,
+      "role_sediment_kg_yr": {
+        "road": 18345.394499999995,
+        "fill": 18896.424000000003,
+        "buffer": 18081.3805
+      },
+      "max_summary_export_difference_kg_yr": 1.8189894035458565e-12,
+      "raw_artifacts_verified": 1003
+    },
+    {
+      "case": "w4-f60",
+      "profiles": 35,
+      "profile_export_kg_yr": 9394.052400701383,
+      "profile_runoff_m3_yr": 3142.1521464875,
+      "profile_area_m2": 14937.699999999999,
+      "export_density_kg_m2_yr": 0.6288821171064745,
+      "role_sediment_kg_yr": {
+        "road": 9231.646250000005,
+        "fill": 9779.428000000005,
+        "buffer": 9424.383000000002
+      },
+      "max_summary_export_difference_kg_yr": 9.094947017729282e-13,
+      "raw_artifacts_verified": 1003
+    },
+    {
+      "case": "w8-f60",
+      "profiles": 35,
+      "profile_export_kg_yr": 18788.092452699042,
+      "profile_runoff_m3_yr": 6284.307114787501,
+      "profile_area_m2": 29875.29,
+      "export_density_kg_m2_yr": 0.6288840192914962,
+      "role_sediment_kg_yr": {
+        "road": 18463.29250000001,
+        "fill": 19558.85600000001,
+        "buffer": 18848.766000000003
+      },
+      "max_summary_export_difference_kg_yr": 4.547473508864641e-13,
+      "raw_artifacts_verified": 1003
+    }
+  ],
+  "attribution": "mixed Roads profile export, not road-prism detachment or watershed outlet yield"
+}

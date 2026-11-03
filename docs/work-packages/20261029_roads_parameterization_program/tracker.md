@@ -12,13 +12,46 @@ magnitude thresholds pass, or to require a surface dataset before any further
 progress, are superseded. Surface research remains optional when supported.
 The explicit human specification/layout gate and deployment boundaries remain.
 
-Next: inventory and disposition known findings (including the strict particle flag),
-repair confirmed defects, then specify a bounded sensitivity harness and proposed
-controls using existing builders and retained evidence. No new numerical sweep or
-production UI change follows from this documentation checkpoint.
+Current execution status and the still-open human specification/layout gate are
+recorded in the revised checkpoint below. Historical criteria, experiments and
+failed classifications remain unchanged.
 
 The retained r7 checkpoint below predates this amendment; its evidence remains
 valid, while its next-step and closure recommendations are superseded above.
+
+## Revised sensitivity and proposal checkpoint — 2026-11-03
+
+Known findings are dispositioned in the [issue register](artifacts/revised-issue-register.md).
+The exact-r7 particle flag is explained while its strict historical failure remains
+unchanged. The optional-attribute resolver/buffer conformance defect is repaired,
+and the reusable study harness now rejects mismatched reader calendar contexts.
+No confirmed supported-path defect remains unresolved in this bounded scope.
+
+The [profile study](artifacts/revised-sensitivity-results.md) completed 47 distinct
+native profiles with all strict EVENT/calendar checks passing. The
+[project study](artifacts/revised-project-sensitivity-results.md) completed four
+contexts (140 profiles and four watershed runs), preserving all source and baseline
+files. Independent [scientific review](artifacts/revised-sensitivity-science-review.md)
+accepts these bounded findings. Width scales footprint; fill responses depend on
+whether total mass or density is compared; traffic rankings are nonmonotonic.
+PASS and terminal sediment support remain explicitly different. Failed attempts,
+source bindings and additive continuations remain retained in [ledger v34](artifacts/candidate-ledger-v34.json).
+
+The proposed [settings contract](../../schemas/roads-settings-contract.md),
+[ADR-0135](../../adrs/ADR-0135-roads-settings-controls.md) and
+[static layout](artifacts/revised-settings-layout-draft.html) expose five existing
+fallback controls: surface, traffic, width, fill length and fill slope. Scientific,
+correctness, security and UX/QA proposal reviews pass. The
+[proposal checkpoint](artifacts/20261103_revised_settings_contract_decision.md)
+records exact deltas and compatibility/validation obligations. Production settings
+wiring has not started. Neither defaults nor generated-soil policy are adopted.
+
+The full repository sanity run is active; the late calendar guard has a separate
+21-test focused pass and the publication gate passes three tests. Human approval
+of both specification and layout is **absent**. The package remains active; after
+approval, ratify the contract-first ancestor and implement/validate the actual
+browser-to-native-to-report workflow, including reset/reload/fork/restore and real
+service boundaries. Controller studies do not certify that future workflow.
 
 ## Revised execution in progress — 2026-11-03
 
@@ -39,8 +72,10 @@ independent review; strict particle failure remains unchanged. See
 R-08 resolver conformance repair passes 59 controller tests and independent
 correctness review, including generated soil/slope readback. See
 [findings](artifacts/revised-input-resolution-findings.md) and
-[ledger v33](artifacts/candidate-ledger-v33.json). Broad sanity remains pending
-source stabilization and stale-publication review.
+[ledger v33](artifacts/candidate-ledger-v33.json). The tested sensitivity tooling and reviewed stale-publication receipt are committed
+in `fe6afa041`; the full repository sanity run is active. Profile and project
+studies execute reviewed declarations with failed adapter checks retained and
+explicit additive continuations. Historical publication remains stale.
 
 No defaults adopted, deployment performed, reserved material consumed or historical
 experiment reclassified. New evidence/decisions append from ledger v32 onward.

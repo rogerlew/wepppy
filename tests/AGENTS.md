@@ -17,7 +17,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | RedisPrep snapshots | `tests/nodb/test_redis_prep_snapshots.py` | Disposable real Redis, deterministic process/file failures, archive and receipt consumer readback; optional marked `RQ212_TEST_REDIS_SOCKET` |
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Disturbed matrix | `tests/disturbed/` | 96 canonical hourly hillslope cases including young forest; committed finite climate; legacy/v3 PASS and event-accounting contracts |
-| Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; separate opt-in full-project checks; reviewed Usersum report |
+| Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; declared paired sensitivity helper with exact runtime/calendar guards; separate opt-in full-project checks; reviewed Usersum report |
 | Roads generated-soil benchmark | `tests/tools/test_roads_soil_benchmark.py` | Common native report and calendar validation; opt-in cross-binary study under `docs/work-packages/20261029_roads_soil_benchmark/` |
 | Roads prepared-soil hydraulics | `tests/tools/test_roads_prepared_soil_hydraulics.py` | Layer-depth and deeper-material preservation; isolated follow-up experiment under `docs/work-packages/20261029_roads_prepared_soil_hydraulics/` |
 | Roads OFE budgets | `tests/tools/test_roads_ofe_budget.py` | Finite/calendar checks, unequal-area water transfers, independent sediment reconciliation and factorial invariants; isolated `20261029_roads_ofe_budget` study |

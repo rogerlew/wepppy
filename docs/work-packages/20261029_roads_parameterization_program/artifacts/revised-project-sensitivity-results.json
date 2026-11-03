@@ -1,0 +1,168 @@
+{
+  "status": "completed_with_explicit_generated_diagnostic_disposition",
+  "original_declaration_sha256": "d45818657bb9e5c2ca809365fb8f88966e57341061f51f90d76f1558265f720e",
+  "continuation_declaration_sha256": "02f6752a4dd2ec6eb9af61e654a09ba77655b1f5a7daa6734a6977f3772b3a57",
+  "interrupted_attempts_retained": true,
+  "source_files_preserved": 3537,
+  "native_calls": 144,
+  "comparison_disposition": "Only chntyp.txt excluded from input parity; source e0abe058 wshdrv516-519 and wshcqi139-154 prove generated write-only diagnostic. Original comparator failure retained.",
+  "invariant_runtime_files": 520,
+  "four_distinct_slopes_per_profile": true,
+  "contexts": [
+    {
+      "case": {
+        "name": "w4-f30",
+        "width": 4,
+        "fill": 30
+      },
+      "profiles": 35,
+      "full_modeled_area_m2": 441820.29,
+      "roads_profile_area_m2": 10737.7,
+      "roads_mean_annual_sediment_kg": 9025.416676122857,
+      "roads_mean_annual_runoff_m3": 2311.088949775,
+      "mixed_mean_annual": {
+        "sed_del": 9027.341449609652,
+        "tdet": 11335.00456302637,
+        "tdep": -2307.6504961965597,
+        "runvol": 84960.69576403125,
+        "Runoff": 192.2969535057596,
+        "Lateral Flow": 1195.5978616790428,
+        "Percolation": 99.91704215668294
+      },
+      "role_boundary_sediment_kg_yr": {
+        "road": 9172.69725,
+        "fill": 9448.212,
+        "buffer": 9040.69025
+      },
+      "protected_baseline_files": 907,
+      "artifact_count": 1003,
+      "generated_chntyp_sha256": "a60b262428e8d059fa327ed8ce86afc9f392f2dc0e81b29afadc79dd6f578c71",
+      "readback_sha256": "9c621f9cd760f410a8ba2778c1eef65314c9338a419565fb5918b6f42118bcf3"
+    },
+    {
+      "case": {
+        "name": "w8-f30",
+        "width": 8,
+        "fill": 30
+      },
+      "profiles": 35,
+      "full_modeled_area_m2": 442400.42,
+      "roads_profile_area_m2": 21475.29,
+      "roads_mean_annual_sediment_kg": 18050.81688299766,
+      "roads_mean_annual_runoff_m3": 4622.17929203125,
+      "mixed_mean_annual": {
+        "sed_del": 18052.981938484943,
+        "tdet": 22668.35044831586,
+        "tdep": -4615.368460244712,
+        "runvol": 85186.9191530875,
+        "Runoff": 192.55614439309866,
+        "Lateral Flow": 1165.7381376015646,
+        "Percolation": 135.44153621441905
+      },
+      "role_boundary_sediment_kg_yr": {
+        "road": 18345.3945,
+        "fill": 18896.424,
+        "buffer": 18081.3805
+      },
+      "protected_baseline_files": 907,
+      "artifact_count": 1003,
+      "generated_chntyp_sha256": "c0d0489bac01c5e3b7434f536f42f64195825f5dc239d9c4a7cd230d20ffa72f",
+      "readback_sha256": "ef1cb442b2ff8a795d9d56d486bb7a45e5ee1ec34fa577b83a6c31ddb7a2b179"
+    },
+    {
+      "case": {
+        "name": "w4-f60",
+        "width": 4,
+        "fill": 60
+      },
+      "profiles": 35,
+      "full_modeled_area_m2": 441942.03,
+      "roads_profile_area_m2": 14937.7,
+      "roads_mean_annual_sediment_kg": 9394.052400701381,
+      "roads_mean_annual_runoff_m3": 3142.1521464875,
+      "mixed_mean_annual": {
+        "sed_del": 9395.999968558866,
+        "tdet": 11708.683295662058,
+        "tdep": -2312.6640994809886,
+        "runvol": 85094.0329111875,
+        "Runoff": 192.54568955839636,
+        "Lateral Flow": 1183.4163198416304,
+        "Percolation": 113.7526879911662
+      },
+      "role_boundary_sediment_kg_yr": {
+        "road": 9231.646250000002,
+        "fill": 9779.428,
+        "buffer": 9424.383
+      },
+      "protected_baseline_files": 907,
+      "artifact_count": 1003,
+      "generated_chntyp_sha256": "20f5d8fa6aa4dec1dae25762583cbb1b59f2c4cd8ebed9e2d4c1a7e46ef38839",
+      "readback_sha256": "88208cbd95b62388110bc6baeef8a2e9b80e89234615a5a9bc82de570d651f5b"
+    },
+    {
+      "case": {
+        "name": "w8-f60",
+        "width": 8,
+        "fill": 60
+      },
+      "profiles": 35,
+      "full_modeled_area_m2": 445237.85,
+      "roads_profile_area_m2": 29875.29,
+      "roads_mean_annual_sediment_kg": 18788.092452699053,
+      "roads_mean_annual_runoff_m3": 6284.307114787501,
+      "mixed_mean_annual": {
+        "sed_del": 18790.246497176042,
+        "tdet": 23415.59689727775,
+        "tdep": -4625.394356821304,
+        "runvol": 86259.64993223752,
+        "Runoff": 193.73835789620645,
+        "Lateral Flow": 1141.2796917139344,
+        "Percolation": 162.4745796462298
+      },
+      "role_boundary_sediment_kg_yr": {
+        "road": 18463.292500000003,
+        "fill": 19558.856,
+        "buffer": 18848.766
+      },
+      "protected_baseline_files": 907,
+      "artifact_count": 1003,
+      "generated_chntyp_sha256": "e9de0e5f6b95bd0ccdeb012e2eb298d703ec64fa2b3d64459ee28d79e04853c6",
+      "readback_sha256": "244dc8de3ece5faab2773b060735784ed1f147db3f7de8cde8912ae7ddc79be2"
+    }
+  ],
+  "interactions": {
+    "roads_mean_annual_sediment_kg": {
+      "values": [
+        9025.416676122857,
+        18050.81688299766,
+        9394.052400701381,
+        18788.092452699053
+      ],
+      "width_effect": 9025.400206874803,
+      "fill_effect": 368.6357245785239,
+      "interaction": 368.6398451228688
+    },
+    "roads_mean_annual_runoff_m3": {
+      "values": [
+        2311.088949775,
+        4622.17929203125,
+        3142.1521464875,
+        6284.307114787501
+      ],
+      "width_effect": 2311.09034225625,
+      "fill_effect": 831.0631967125,
+      "interaction": 831.0646260437506
+    },
+    "roads_sediment_density_kg_m2_yr": {
+      "values": [
+        0.84053537313604,
+        0.84053891160481,
+        0.6288821171064742,
+        0.6288840192914965
+      ],
+      "interaction": -1.6362837477190695e-06
+    }
+  },
+  "readback_script_sha256": "a0b61647cdf67b6cbbe42da1ba6989df1044a4fc93068ac6386a948991acc85c",
+  "final_execution_log_sha256": "7e3c41a32469b0aefb5525dc8b8ae484e7e7ec3df51f8a68f1b1b117b94fba69"
+}

@@ -56,9 +56,13 @@ capsule has an exclusive directory, input readback, complete runtime inventory,
 retained failures, native tables and production segment-summary metrics. The
 runner invokes the explicitly hashed installed watershed executable in hillslope
 mode once, with a 300-second timeout; it retains stdout/stderr and never retries.
+Before execution and summary, the helper verifies that the declared native CLI,
+the discovered ancestor climate and every cached calendar date agree. Mismatches
+fail explicitly; the helper does not silently repair or delete a cache.
 This helper does not adopt generated-soil policies or change project defaults.
 Run its deterministic safeguards with
 `wctl run-pytest tests/roads/test_roads_sensitivity.py -q`.
+
 ## Interpret results
 
 Detachment is native mean annual full-profile detachment, including non-road

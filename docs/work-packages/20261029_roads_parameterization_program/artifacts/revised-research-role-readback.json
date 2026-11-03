@@ -1,0 +1,123 @@
+{
+  "scope": "read-only representation audit; no native calls",
+  "capsules": [
+    {
+      "stratum": "meaningful_high",
+      "case": {
+        "climate": "site",
+        "soil": "1856573",
+        "design": "outunrut",
+        "surface": "paved",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "folder": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/meaningful_high/modern/r7/runs",
+      "files": {
+        "p1.sol": "1123f07bbed8f1d3375819e57b105b49c0516d573dc6e3da1afb5d19e8064934",
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+      },
+      "initial_role_assignments": [
+        "1\t# `Initial Conditions indx' - <ROAD>",
+        "2       # `Initial Conditions indx' - <FILL>",
+        "3\t# `Initial Conditions indx' - <FOREST>"
+      ],
+      "slope_text": "97.3\n# Benchmark matched fswepp2 geometry\n3\n100 43.1052293811319\n2 5.60\n0.00, 0.06 1.00, 0.06\n3 4.57\n0.00, 0.06 0.05, 0.50 1.00, 0.50\n3 39.62\n0.00, 0.50 0.05, 0.25 1.00, 0.25\n",
+      "soil_luse": [
+        "bare",
+        "bare",
+        "forest"
+      ],
+      "original_record": "/workdir/wepppy/out/roads-parameterization-program-20261030/development-matrix-v1/matrix-v1/site-1856573-outunrut-paved-high-erosion_road_cap-project/record.json",
+      "original_record_sha256": "25b846299764b818cd2d822e53eac62a49bcdf42fddf01555a47e171921f94e4",
+      "original_transform_order": [
+        1,
+        2,
+        3
+      ],
+      "original_road_index": 0
+    },
+    {
+      "stratum": "passing_same_signature",
+      "case": {
+        "climate": "site",
+        "soil": "1718465",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "folder": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/passing_same_signature/modern/r7/runs",
+      "files": {
+        "p1.sol": "f1f33a38adf57cc44ad4bbfe69b7a839ca356800122fecefeb529cbbe09e1486",
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+      },
+      "initial_role_assignments": [
+        "1\t# `Initial Conditions indx' - <ROAD>",
+        "2       # `Initial Conditions indx' - <FILL>",
+        "3\t# `Initial Conditions indx' - <FOREST>"
+      ],
+      "slope_text": "97.3\n# Benchmark matched fswepp2 geometry\n3\n100 43.1052293811319\n2 5.60\n0.00, 0.06 1.00, 0.06\n3 4.57\n0.00, 0.06 0.05, 0.50 1.00, 0.50\n3 39.62\n0.00, 0.50 0.05, 0.25 1.00, 0.25\n",
+      "soil_luse": [
+        "bare",
+        "bare",
+        "forest"
+      ],
+      "original_record": "/workdir/wepppy/out/roads-parameterization-program-20261030/development-matrix-v1/matrix-v1/site-1718465-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "original_record_sha256": "57f20859255e86761e0d2d8cc8cbdb793cf62b0ed694f7ded4928033c04a6015",
+      "original_transform_order": [
+        1,
+        2,
+        3
+      ],
+      "original_road_index": 0
+    },
+    {
+      "stratum": "underprediction_less_supply",
+      "case": {
+        "climate": "site",
+        "soil": "2711184",
+        "design": "outunrut",
+        "surface": "gravel",
+        "traffic": "high",
+        "variant": "erosion_road_cap",
+        "runtime": "project"
+      },
+      "folder": "/wc1/runs/ro/roads-parameterization-program-20261103/engine-seeds-v3/cases/underprediction_less_supply/modern/r7/runs",
+      "files": {
+        "p1.sol": "4089a743eb2bb1611c5c1e41f36bf3d96f1a50619d7775840c42b3c7f7fbc64c",
+        "p1.slp": "f79d4739fe7fa1fdd7157c53dd6eaae661c4729b228e42bead741a9d6c66b8d3",
+        "p1.man": "6ed3319bd1bce803b0cd2efbf631765b6d6e1f00bd2534f59358df11f9ecb31c"
+      },
+      "initial_role_assignments": [
+        "1\t# `Initial Conditions indx' - <ROAD>",
+        "2       # `Initial Conditions indx' - <FILL>",
+        "3\t# `Initial Conditions indx' - <FOREST>"
+      ],
+      "slope_text": "97.3\n# Benchmark matched fswepp2 geometry\n3\n100 43.1052293811319\n2 5.60\n0.00, 0.06 1.00, 0.06\n3 4.57\n0.00, 0.06 0.05, 0.50 1.00, 0.50\n3 39.62\n0.00, 0.50 0.05, 0.25 1.00, 0.25\n",
+      "soil_luse": [
+        "bare",
+        "bare",
+        "forest"
+      ],
+      "original_record": "/workdir/wepppy/out/roads-parameterization-program-20261030/development-matrix-v1/matrix-v1/site-2711184-outunrut-gravel-high-erosion_road_cap-project/record.json",
+      "original_record_sha256": "a59b84949dd6704f601fee5a53d37d66ec654d54f48bd038d518b102fa09eb0c",
+      "original_transform_order": [
+        1,
+        2,
+        3
+      ],
+      "original_road_index": 0
+    }
+  ],
+  "source_sha256": {
+    "docs/work-packages/20261029_roads_soil_benchmark/artifacts/benchmark.py": "67361b38694dc83b5a392e33cc35c61aa46b3139f6bf95add1355dd7fec862ba",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/development_matrix.py": "8089c28bb9b389d2e13d3f7fa660e8e6b1f3385563d99d261e6ed2e46b77dfde",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/development_pilot.py": "be89eec36e454eb114822e7645afcd9e9a0f4b12d02377da17ccda1ccf913e1b",
+    "docs/work-packages/20261029_roads_parameterization_program/artifacts/builder_bridge.py": "68c3993fea7e67fc68a949db8f49813a25163fa7a5e48f1f642e46b26f48ef09",
+    "tests/roads/roads_matrix.py": "0c649eadbac69ea848f5b6f880f45e139c14ea0f2b00f66d184773c30bf93c3f"
+  }
+}
