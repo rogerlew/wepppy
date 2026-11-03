@@ -1,0 +1,2403 @@
+{
+  "status": "completed_independent_raw_review_pass",
+  "raw_root": "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-overrides-v1",
+  "native_calls": 18,
+  "contexts": [
+    "road-only gravel/loam/low traffic",
+    "road/fill/buffer gravel/loam/low traffic"
+  ],
+  "years": 16,
+  "override_scope": "road role only",
+  "strict_particle_flags": 0,
+  "all_declared_checks_passed": true,
+  "physical_scope": "finite nonnegative WAT/sediment, complete per-role calendars, emitted native areas, printed LOSS/ELEMENT/EBE reconciliation; no cross-role water-transfer or storage-closure certification",
+  "findings": [
+    {
+      "arm": "baseline",
+      "context": "road",
+      "input_changes": [],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 0.6597078843477933
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 6.913738627964873
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.953999999999995,
+          "maximum_kg_m": 0.917,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.050000000000000044,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 6.956,
+        "report_printed_bound_kg_yr": 0.10263195600000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 6.954,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "avke_half",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 265.1745169370227,
+          "percent": 95.1091733451017,
+          "value": 543.9851801049617
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 2.7790289374999992,
+          "percent": 95.10917334510174,
+          "value": 5.7009646875
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": 0.3286512962440421,
+          "percent": 49.81770023393861,
+          "value": 0.9883591805918354
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": 3.444265584637561,
+          "percent": 49.81770023393861,
+          "value": 10.358004212602435
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 10.385500000000011,
+          "maximum_kg_m": 1.062,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 10.388,
+        "report_printed_bound_kg_yr": 0.135635388,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 10.3855,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "avke_double",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": -110.94822876908401,
+          "percent": -39.79339509775326,
+          "value": 167.86243439885502
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": -1.1627374375000001,
+          "percent": -39.79339509775326,
+          "value": 1.7591983125000006
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": -0.2477081389572398,
+          "percent": -37.548154999258706,
+          "value": 0.41199974539055345
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": -2.595981296271873,
+          "percent": -37.548154999258706,
+          "value": 4.3177573316930005
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 4.344999999999998,
+          "maximum_kg_m": 0.882,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 4.344,
+        "report_printed_bound_kg_yr": 0.075254344,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 4.345,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "ki_half",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": -0.288656255584226,
+          "percent": -43.75516231242258,
+          "value": 0.3710516287635673
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": -3.025117558522688,
+          "percent": -43.75516231242258,
+          "value": 3.8886210694421854
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 3.9059999999999997,
+          "maximum_kg_m": 0.519,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 3.908,
+        "report_printed_bound_kg_yr": 0.102628908,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 3.906,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "ki_double",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": 0.5773099533082486,
+          "percent": 87.5099368986615,
+          "value": 1.237017837656042
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": 6.050208310670445,
+          "percent": 87.5099368986615,
+          "value": 12.963946938635319
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 13.045500000000006,
+          "maximum_kg_m": 1.748,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 13.044,
+        "report_printed_bound_kg_yr": 0.10263804400000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 13.0455,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "kr_half",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": -0.04111466118880591,
+          "percent": -6.232252511193359,
+          "value": 0.6185932231589873
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": -0.43088164925868533,
+          "percent": -6.232252511193348,
+          "value": 6.482856978706188
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.522749999999998,
+          "maximum_kg_m": 0.874,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05000000000000002,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 6.524,
+        "report_printed_bound_kg_yr": 0.102631524,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 6.52275,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "kr_double",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": 0.08220537515419213,
+          "percent": 12.460875048577424,
+          "value": 0.7419132595019854
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": 0.8615123316159341,
+          "percent": 12.460875048577424,
+          "value": 7.7752509595808075
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 7.815500000000001,
+          "maximum_kg_m": 1.037,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05000000000000002,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 7.816,
+        "report_printed_bound_kg_yr": 0.102632816,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 7.8155,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "shcrit_half",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": 0.09903982726381666,
+          "percent": 15.012679037742638,
+          "value": 0.7587477116116099
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": 1.0379373897247994,
+          "percent": 15.01267903774266,
+          "value": 7.951676017689673
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 7.99525,
+          "maximum_kg_m": 0.991,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05000000000000002,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 7.996,
+        "report_printed_bound_kg_yr": 0.102632996,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 7.99525,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "shcrit_double",
+      "context": "road",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 278.810663167939,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 278.810663167939
+        },
+        "runoff_volume_m3": {
+          "baseline": 2.9219357500000007,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 2.9219357500000007
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.6597078843477933,
+          "delta": -0.022164654997196775,
+          "percent": -3.3597680917682893,
+          "value": 0.6375432293505965
+        },
+        "sediment_yield_kg": {
+          "baseline": 6.913738627964873,
+          "delta": -0.2322855843706222,
+          "percent": -3.3597680917682893,
+          "value": 6.681453043594251
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.720999999999997,
+          "maximum_kg_m": 0.898,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 6.72,
+        "report_printed_bound_kg_yr": 0.10263172000000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 6.721,
+        "terminal_ofe": 1
+      }
+    },
+    {
+      "arm": "baseline",
+      "context": "road_fill_buffer",
+      "input_changes": [],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 0.019035405065558716
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 4.767988260821147
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.623999999999996,
+          "maximum_kg_m": 0.929,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 5.326249999999997,
+          "maximum_kg_m": 0.929,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 4.7677499999999995,
+          "maximum_kg_m": 0.929,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.04999999999999999,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 4.768,
+        "report_printed_bound_kg_yr": 0.10550476800000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 4.76775,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "avke_half",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 5.503151199696589,
+          "percent": 2.2512800455764204,
+          "value": 249.94858172309162
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 1.3784293124999962,
+          "percent": 2.2512800455764204,
+          "value": 62.607120749999986
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": 0.006156082556155986,
+          "percent": 32.34017103893605,
+          "value": 0.025191487621714703
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": 1.5419755586659516,
+          "percent": 32.34017103893605,
+          "value": 6.309963819487098
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 9.703000000000005,
+          "maximum_kg_m": 1.074,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 6.573500000000001,
+          "maximum_kg_m": 1.244,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 6.309000000000002,
+          "maximum_kg_m": 3.266,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05000000000000002,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 6.308,
+        "report_printed_bound_kg_yr": 0.136381308,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 6.309,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "avke_double",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": -2.4841214867452663,
+          "percent": -1.0162274178847963,
+          "value": 241.96130903664977
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": -0.6222227499999633,
+          "percent": -1.0162274178848074,
+          "value": 60.606468687500026
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": -0.003597734209951804,
+          "percent": -18.900224069627413,
+          "value": 0.015437670855606912
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": -0.9011604649087275,
+          "percent": -18.900224069627402,
+          "value": 3.8668277959124193
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 4.218499999999999,
+          "maximum_kg_m": 0.891,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 4.106750000000001,
+          "maximum_kg_m": 0.891,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 3.8660000000000005,
+          "maximum_kg_m": 0.891,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05000000000000002,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 3.868,
+        "report_printed_bound_kg_yr": 0.08462886800000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 3.866,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "ki_half",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": -0.008434177290592244,
+          "percent": -44.307842473247035,
+          "value": 0.010601227774966472
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": -2.1125927277475447,
+          "percent": -44.307842473247035,
+          "value": 2.655395533073602
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 3.5784999999999982,
+          "maximum_kg_m": 0.522,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 2.8949999999999982,
+          "maximum_kg_m": 0.522,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 2.655999999999999,
+          "maximum_kg_m": 0.522,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.05,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 2.656,
+        "report_printed_bound_kg_yr": 0.10550265600000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 2.656,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "ki_double",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": 0.015999253813656016,
+          "percent": 84.04997823032359,
+          "value": 0.03503465887921473
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": 4.007493095244559,
+          "percent": 84.0499782303236,
+          "value": 8.775481356065706
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 12.71575,
+          "maximum_kg_m": 1.761,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 10.110250000000002,
+          "maximum_kg_m": 1.761,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 8.777249999999999,
+          "maximum_kg_m": 1.761,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.050000000000000044,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 8.776,
+        "report_printed_bound_kg_yr": 0.10550877600000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 8.77725,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "kr_half",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": -0.000755012052429338,
+          "percent": -3.9663566382172832,
+          "value": 0.01828039301312938
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": -0.1891154188925004,
+          "percent": -3.9663566382172832,
+          "value": 4.578872841928646
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.3569999999999975,
+          "maximum_kg_m": 0.881,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 5.117499999999998,
+          "maximum_kg_m": 0.881,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 4.578499999999999,
+          "maximum_kg_m": 0.881,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.049000000000000016,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 4.58,
+        "report_printed_bound_kg_yr": 0.10550458000000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 4.5785,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "kr_double",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": 0.0015095988861935014,
+          "percent": 7.9304794460342665,
+          "value": 0.020545003951752218
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": 0.3781243290137484,
+          "percent": 7.930479446034289,
+          "value": 5.146112589834895
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 7.155499999999997,
+          "maximum_kg_m": 1.043,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 5.742499999999999,
+          "maximum_kg_m": 1.043,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 5.145749999999996,
+          "maximum_kg_m": 1.043,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.04900000000000001,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 5.148,
+        "report_printed_bound_kg_yr": 0.105505148,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 5.14575,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "shcrit_half",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": 0.0015901157247840796,
+          "percent": 8.353464080788697,
+          "value": 0.020625520790342796
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": 0.39829218674391687,
+          "percent": 8.353464080788719,
+          "value": 5.166280447565064
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 7.304500000000003,
+          "maximum_kg_m": 0.984,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 5.7469999999999954,
+          "maximum_kg_m": 0.984,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 5.166749999999995,
+          "maximum_kg_m": 0.984,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.04999999999999999,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 5.168,
+        "report_printed_bound_kg_yr": 0.10550516800000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 5.16675,
+        "terminal_ofe": 3
+      }
+    },
+    {
+      "arm": "shcrit_double",
+      "context": "road_fill_buffer",
+      "input_changes": [
+        "wepp/roads/runs/p1.sol"
+      ],
+      "metrics": {
+        "runoff_depth_mm": {
+          "baseline": 244.44543052339503,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 244.44543052339503
+        },
+        "runoff_volume_m3": {
+          "baseline": 61.22869143749999,
+          "delta": 0.0,
+          "percent": 0.0,
+          "value": 61.22869143749999
+        },
+        "sediment_yield_density_kg_m2": {
+          "baseline": 0.019035405065558716,
+          "delta": -0.0002969609441821758,
+          "percent": -1.5600453111422108,
+          "value": 0.01873844412137654
+        },
+        "sediment_yield_kg": {
+          "baseline": 4.767988260821147,
+          "delta": -0.07438277729875065,
+          "percent": -1.5600453111421997,
+          "value": 4.693605483522396
+        }
+      },
+      "role_boundary": [
+        {
+          "boundary_kg_yr": 6.497999999999999,
+          "maximum_kg_m": 0.914,
+          "minimum_kg_m": 0.0,
+          "ofe": 1,
+          "role": 1
+        },
+        {
+          "boundary_kg_yr": 5.247499999999998,
+          "maximum_kg_m": 0.914,
+          "minimum_kg_m": 0.0,
+          "ofe": 2,
+          "role": 2
+        },
+        {
+          "boundary_kg_yr": 4.69375,
+          "maximum_kg_m": 0.914,
+          "minimum_kg_m": 0.0,
+          "ofe": 3,
+          "role": 3
+        }
+      ],
+      "strict_audits": {
+        "calendar_pass": true,
+        "full_water_storage_closure_claim": false,
+        "max_ebe_delta_kg_m": 0.04900000000000001,
+        "particle_flags": [],
+        "particle_pass": true,
+        "physical_pass": true,
+        "report_export_kg_yr": 4.692,
+        "report_printed_bound_kg_yr": 0.10550469200000001,
+        "runtime_markers": {
+          "groundwater": true,
+          "pmet": true,
+          "ui": true
+        },
+        "terminal_export_kg_yr": 4.69375,
+        "terminal_ofe": 3
+      }
+    }
+  ],
+  "runtime_coefficients": {
+    "interpretation": "ELEMENT adjusted event values are distinct from supplied soil baselines; ranges do not promise all internal hourly values.",
+    "native_print_scaling": "sedout.for:510-512 prints Ki/1000000 and Kr*1000; this readback restores baseline-compatible units.",
+    "rows": [
+      {
+        "arm": "baseline",
+        "context": "road",
+        "element_sha256": "ddde0e2f1f064db0a6b354dd3494de9c85c322453ff715bf570845ca4d2f9683",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "avke_half",
+        "context": "road",
+        "element_sha256": "f9dc38c767f5d69ab11c7eb622b95be68912bf0108b6d53cad3da1aedddfa730",
+        "roles": [
+          {
+            "event_rows": 1069,
+            "input": {
+              "avke": 4.05,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 4.05,
+                "minimum": 4.05
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "avke_double",
+        "context": "road",
+        "element_sha256": "71da3f047af3e1eee28e738092b70c7fe20dd74f65a64eff60a43e85aae2b6f5",
+        "roles": [
+          {
+            "event_rows": 586,
+            "input": {
+              "avke": 16.2,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 16.2,
+                "minimum": 16.2
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.124
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "ki_half",
+        "context": "road",
+        "element_sha256": "1c3f55646cd7062c2c28e3fb48a49ea3b0fe89c0d73950403b630ce5bb730806",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 250000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 195000.0,
+                "minimum": 195000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "ki_double",
+        "context": "road",
+        "element_sha256": "0f8bf7206deea53e13918cb420ebcd8c5296369291a30f50f835a7f419fb05d3",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 1000000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 782000.0,
+                "minimum": 781000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "kr_half",
+        "context": "road",
+        "element_sha256": "4e983966af1524e3a370a9c8a80c092eac70017c792a58287d982ac3895223aa",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 3.75e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 3.7e-05,
+                "minimum": 3.7e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "kr_double",
+        "context": "road",
+        "element_sha256": "8c7cfabfb0e0de2ee047d085de6bb831daa4e6bcf12c2e653a0dccb946315818",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 0.00015,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 0.00015,
+                "minimum": 0.00015
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "shcrit_half",
+        "context": "road",
+        "element_sha256": "3a265446c0a1d834484b4c5319c798eb9ac677d2abd8e966ddbebaefd39f894d",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 1
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 2.0,
+                "minimum": 1.055
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "shcrit_double",
+        "context": "road",
+        "element_sha256": "7ef166d084164fe7ae778ae67abdaca59b152c9fde4525950fbfae8189d3420b",
+        "roles": [
+          {
+            "event_rows": 805,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 4
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 5.242,
+                "minimum": 4.052
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          }
+        ]
+      },
+      {
+        "arm": "baseline",
+        "context": "road_fill_buffer",
+        "element_sha256": "96567f25e607321db9ecaaf7a981288fc33e8f4db38afc12d768945895fa022f",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "avke_half",
+        "context": "road_fill_buffer",
+        "element_sha256": "0be3a7174bbaf5c897c9698af168ea445739da7d57bbeead10a42970bb46767c",
+        "roles": [
+          {
+            "event_rows": 1075,
+            "input": {
+              "avke": 4.05,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 4.05,
+                "minimum": 4.05
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 1075,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 1075,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "avke_double",
+        "context": "road_fill_buffer",
+        "element_sha256": "188dac6fc83c28a2eb294143d9a54874e674ac6267cae2612a50f5785beb5d09",
+        "roles": [
+          {
+            "event_rows": 661,
+            "input": {
+              "avke": 16.2,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 16.2,
+                "minimum": 16.2
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.124
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 661,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 661,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "ki_half",
+        "context": "road_fill_buffer",
+        "element_sha256": "ee8df72352ba18a60c46e80948b93c73ab0326a2623f3c1f78b9471119e0a2ad",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 250000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 195000.0,
+                "minimum": 195000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "ki_double",
+        "context": "road_fill_buffer",
+        "element_sha256": "4a58eccd13d34773c3dda1c3b1e4e81044d8aeda87c5948db0881e62ddb147cf",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 1000000,
+              "kr": 7.5e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 782000.0,
+                "minimum": 781000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "kr_half",
+        "context": "road_fill_buffer",
+        "element_sha256": "d38631fe3a0a2a38710703f4643287f65cc5dcdbcec1f26cc7304d0eb60e7def",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 3.75e-05,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 3.7e-05,
+                "minimum": 3.7e-05
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "kr_double",
+        "context": "road_fill_buffer",
+        "element_sha256": "77bb67208b279fdd777da24bbb6c5af634bde0ff44cf23bb742d0a08043f980a",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 0.00015,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 0.00015,
+                "minimum": 0.00015
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 2.073
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "shcrit_half",
+        "context": "road_fill_buffer",
+        "element_sha256": "f40a93f49928b9f169ddb6f9e8715cb5bc86b868693c938da795c983aedc1bf6",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 1
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 2.0,
+                "minimum": 1.055
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      },
+      {
+        "arm": "shcrit_double",
+        "context": "road_fill_buffer",
+        "element_sha256": "4ce3bc7ccfb378b355189134c94b62a6008d61999f6e7bb317e283a9ed240b16",
+        "roles": [
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 8.1,
+              "ki": 500000,
+              "kr": 7.5e-05,
+              "shcrit": 4
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 8.1,
+                "minimum": 8.1
+              },
+              "Ki": {
+                "maximum": 391000.0,
+                "minimum": 391000.0
+              },
+              "Kr": {
+                "maximum": 7.5e-05,
+                "minimum": 7.5e-05
+              },
+              "Tcrit": {
+                "maximum": 5.242,
+                "minimum": 4.052
+              }
+            },
+            "ofe": 1,
+            "role": "Road"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 11.4,
+              "ki": 2000000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 11.4,
+                "minimum": 11.4
+              },
+              "Ki": {
+                "maximum": 527000.0,
+                "minimum": 60000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 0.000187
+              },
+              "Tcrit": {
+                "maximum": 4.0,
+                "minimum": 4.0
+              }
+            },
+            "ofe": 2,
+            "role": "Fill"
+          },
+          {
+            "event_rows": 828,
+            "input": {
+              "avke": 26,
+              "ki": 120000.0,
+              "kr": 0.0003,
+              "shcrit": 2
+            },
+            "native_event_adjusted": {
+              "Keff": {
+                "maximum": 26.0,
+                "minimum": 26.0
+              },
+              "Ki": {
+                "maximum": 79000.0,
+                "minimum": 4000.0
+              },
+              "Kr": {
+                "maximum": 0.0003,
+                "minimum": 4.4e-05
+              },
+              "Tcrit": {
+                "maximum": 3.504,
+                "minimum": 3.504
+              }
+            },
+            "ofe": 3,
+            "role": "Forest"
+          }
+        ]
+      }
+    ],
+    "script_sha256": "a833c64f192995e091cafa2a8aa2ff3a73a96c8db1bd617576b828436814982c",
+    "units": {
+      "Keff": "mm/h",
+      "Ki": "kg s/m4",
+      "Kr": "s/m",
+      "Tcrit": "Pa"
+    }
+  },
+  "receipts": {
+    "declaration.json": "60cf93ec889c58c1f2bb2ae194ffa2a1ce8c029b38c15926fdff1e0d1d909942",
+    "declaration-v2.json": "0fcf213cf4cd0a981c5096aaa2310f2979956cad713ffcd8a8392c1704c5d79a",
+    "declaration-v3.json": "7f21279127b45d9d464cb3c5f9e27e888b24c9c27163e6069c431a522fcc783c",
+    "declaration-v4.json": "10cda340c75bc50ec7ffeee02e20a3217efbb8651e8a211fb7797e0104674e2b",
+    "declaration-v5.json": "5027d7fcb802f18d5e20743d3c6e4e8c77aaa34db1347e23503c34daa32aaaab",
+    "execution-review-v5.json": "48d360b4f345880b45adec7c0625250d7043cfbc7dfdefdea3705feb183152c5",
+    "results.json": "e51100d2460c7f47051390c59af71a7ed8b064dff1b643fe4c0593acf66d7bd0",
+    "analysis.json": "40b281e94b804f839100e17357fe271618e9dc4b03a2c554e1a4ddacb6953e2c",
+    "runtime-coefficient-readback.json": "21802d9986bdc50279a29511495b21b34bde82767df0dcb17973ea85eb069437",
+    "execution.log": "5288e7389b6a29b81db42b66409724ab6780b10bbc742c021e41b50808e02525",
+    "analysis.log": "19182535c9d7680381c55dee7efb05defeae47dc46405fbc7f005768c50d7ac3"
+  },
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "production_wiring_validated": false,
+  "independent_review": "parameterization-overrides-science-review.md",
+  "independent_readback_sha256": "3b5e4ffdfc0f09c87d5fc60749c78d51cc0a8663985f38e94faaac3cef25e98b",
+  "independent_review_sha256": "1cd6f681d51d919c4437fb6a67e2a77d4a342dfa52b59484f3fac4d77aa2872f",
+  "runtime_coefficient_independent_readback_sha256": "7d6dfd20d462ceebdf15b00fc43e08386ddcfede91fe790ca5412781e7cabc1f"
+}

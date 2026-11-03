@@ -1,117 +1,112 @@
-# ADR-0135: Expose supported Roads fallback controls
+# ADR-0135: Roads-owned parameterization and dedicated view
 
-## Operator clarification: default settings and user overrides
-
-Operator direction, 2026-11-03: this is a default settings harness, not a
-calibration harness. Users need explicit key-driver overrides to increase/decrease
-Roads runoff and sediment toward observations or user expectations. The former
-five-fallback-only proposal is insufficient and requires revision; its reviews
-apply only to that earlier scope. Lack of field calibration does not exclude useful
-controls. Preserve source values, explicit override precedence and honest response
-limits. See the authoritative [requirement and rationale](../schemas/roads-settings-contract.md#operator-clarification-default-settings-and-user-overrides).
-Specification/layout review and human approval remain required before wiring.
-The earlier proposed decision below is retained for context and is superseded
-where it restricts controls to five fallbacks.
-
-
-
-Status: **proposed; human specification/layout approval absent; implementation pending**.
+Status: **revised proposal; implementation pending; exact replacement specification
+and layout approval absent**. This replaces the former five-fallback editor proposal;
+its reviewed text remains in commit `8b02c5fb1`, not as competing current guidance.
 
 ## Decision provenance
 
-- Decision venue: Roads revised completion handoff, 2026-11-03 UTC; operator
-  environment America/Los_Angeles.
-- Participants present: operator and Codex through the task conversation; independent
-  agent reviews are required and have not been substituted for operator approval.
-- Decision owner: operator Roger Lew; the precise proposal remains unapproved.
-- Proposed implementer: Codex after the explicit human gate and contract checkpoint.
-- Authorized work now: defect disposition, bounded sensitivity, proposed specification
-  and static layout. No production view/persistence/application wiring yet.
+Decision venue: operator/Codex task conversation, 2026-11-03, operator timezone
+America/Los_Angeles. Decision owner: Roger Lew. Implementer: Codex after review and
+human specification/layout gate. The operator explicitly requested driver overrides,
+a dedicated view, a Disturbed-like lifecycle, authoritative project state written
+with Roads, and contractual repository defaults. The latest instruction authorizes
+necessary documentation and execution. It does not approve an unseen replacement
+layout; the existing explicit gate remains applicable.
 
-Operator further requires a dedicated parameterization view with role-specific
-source values, adjustment arithmetic, overrides and prepared-input readback; see
-[view requirements](../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility).
-The inline-editor placement below is superseded and awaits a revised proposal.
+## Proposed decision
 
-## Proposed decision and exact delta
+Repository baseline authority consists of bundled Roads soil/management templates
+and the documented selection/assembly rules, as specified in the
+[baseline contract](../schemas/roads-parameterization-baseline-contract.md).
+Project authority is one additive `_parameterization` object in `roads.nodb` with
+schema version, retained baseline contents and role-scoped overrides. The existing
+`_roads_params` remains authoritative for existing physical/mapping settings.
+The [project/view contract](../schemas/roads-settings-contract.md) defines exact
+keys, precedence, lifecycle, transport and valid states.
 
-Expose five already supported Roads fallback settings in the existing panel:
-surface, traffic, road width, fill length and fill slope. Preserve their existing
-baseline values gravel, low, 4 m, 30 m and 10%, validation limits, template assembly,
-feature precedence and role applicability. Add Edit/Save/Cancel/Reset with Reset
-changing the draft until Save, and additive provenance metadata/visible artifact
-records. Exact fields, protocol, metadata and state behavior are specified in the
-[proposed Roads settings contract](../schemas/roads-settings-contract.md).
+Retain all current template texts and hashes inside the NoDb baseline, bound to
+resolver version1 and a deterministic manifest identity. This lets an old project
+reproduce its baseline after repository changes without a separate mutable CSV or
+multi-file configuration commit. Copies emitted for execution are derivatives.
+Read-only access never enrolls legacy projects. First explicit Save/Prepare binds
+the baseline; subsequent operations retain it. Reset removes overrides against that
+baseline; adoption of newer repository defaults is a separate future operation.
 
-Before, the panel exposes surface/traffic fallbacks but users must use the API or
-input attributes for width/fill defaults. After approval and implementation, users
-can edit these five supported fallbacks without CSV/native edits and inspect which
-current-run segments used them. No formula, threshold, unit conversion, soil policy,
-scientific default or native executable changes. Existing ordinary API numeric strings, aliases and omitted-key partial updates
-remain supported. The proposal deliberately rejects JSON booleans previously
-accepted as numeric values and JSON null previously normalized to traffic `none`;
-the string `none` stays valid. This bounded validation delta requires approval.
-Present malformed saved values become an explicit repair state rather than silent
-normalization; absent legacy keys keep existing defaults. Unrelated settings remain
-unchanged. Study values are not calibrated ranges.
+Expose default/multiply/absolute overrides for baseline conductivity, Ki, Kr and
+critical shear, separately for template-owned road/fill/buffer roles. Apply after
+ordinary template and traffic adjustments, before native serialization. Positive
+finite native-representable values are required; zero is a native estimation/bypass
+sentinel, not an off switch. Retain source values and distinguish input validity,
+study coverage and calibration claims. No universal response direction or arbitrary
+field-calibrated range is asserted.
 
-The panel's existing Apply Attribute Mapping also submits surface/traffic fallbacks.
-Separate it prospectively: mapping action submits mapping only; settings Save submits
-the five settings only. Dirty drafts block adjacent upload/mapping/Prepare/Run actions
-with inline Save/Cancel guidance; passive refresh cannot replace a draft. Matching
-Save responses own hydration, and Cancel reloads without mutation. This reviewed
-client behavior change prevents accidental Save/discard while preserving the existing
-server API and normal clean-state workflow.
+The dedicated view shows source -> adjustments -> override -> emitted values,
+including mixed-template groups and role applicability, plus actual compatible
+run comparisons. Existing Roads lifecycle guards, NoDb locking, auth, CSRF,
+readonly, history and baseline-output isolation apply. Save invalidates Roads
+preparation/results and requires explicit Prepare/Run; it never implicitly reruns.
+
+## Exact delta and compatibility
+
+Currently Roads stores ordinary settings and reads live repository templates during
+assembly. Users cannot independently override these native drivers. After approved
+implementation, bound projects use retained templates and saved driver overrides.
+Default-only generation must match current production output bytes across supported
+branches. No scientific default, native formula, binary, source soil, shared
+Disturbed table or baseline WEPP output changes in this proposal.
+
+Add schema and request fields without removing existing keys. Existing unbound
+projects remain readable and historical results remain governed by current lifecycle
+admission. Additive provenance records distinguish legacy/unbound data from actual
+bound readback. An already-prepared unbound legacy project must explicitly Prepare
+before a new Run can bind to the new configuration; historical result viewing is
+preserved. This one-time Run preflight change is part of the approval scope.
+Geometry preparation and native soil/management assembly during Run are separate
+phases; the view must not claim native input readback after geometry preparation. The old proposed five-field API tightening and metadata-only object
+are withdrawn; ordinary API behavior remains unchanged outside the new payload.
 
 ## Rationale and alternatives
 
-The revised operator objective prioritizes defects and useful controls over fitting
-legacy-model agreement. Interpretable existing geometry and management choices have
-known production consumers and can be characterized with bounded paired studies.
-Width affects modeled footprint; traffic and surface are coupled packages. Showing
-those limitations and actual source precedence makes the controls understandable.
+The user needs controllable physical drivers, not just geometry fallbacks that may
+be unused or alter modeled area. Native Ki/Kr/shear and conductivity have traceable
+consumers. Separate role controls avoid a blanket change to unrelated landuse soils.
 
-Reject direct Ki/Kr knobs as the first UI merely because they are easy to vary;
-reject blanket attribute override because it changes working source authority;
-reject buffer override because routing-derived geometry is not a free default.
-Texture/profile fragments remain inspectable but are not selected as initial fields.
-Profile fragments are not surface armor. Generated `erosion_road_cap` remains a
-conditioned research baseline, not a policy adoption hidden behind the new editor.
-A new endpoint, queue, generic optimizer or CSV table adds unnecessary scope.
+Reject editing generated `.sol`/`.man` as the authority: preparation would overwrite
+intent. Reject a second editable CSV: it splits project configuration across mutable
+stores. Disturbed provides a lifecycle analogy, not a requirement to duplicate its
+CSV storage. Reject repository-only hashes: they detect drift but cannot recover
+old content. Reject copying executable Python into state: bind a supported resolver
+version instead. Reject automatic rebase/reset-to-latest: it changes saved projects.
+Reject a generic optimizer or output multiplier: neither supplies the requested
+transparent input parameterization. No new dependency, queue or service is needed.
 
-## Evidence and acceptance
+## Evidence and validation
 
-Source and native consumer evidence:
-[control inventory](../work-packages/20261029_roads_parameterization_program/artifacts/revised-control-inventory.md).
-Workflow reasoning and layout:
-[design draft](../work-packages/20261029_roads_parameterization_program/artifacts/revised-workflow-design-draft.md) and
-[static layout](../work-packages/20261029_roads_parameterization_program/artifacts/revised-settings-layout-draft.html).
-Current [adjudication authority](../schemas/roads-parameterization-adjudication-contract.md)
-separates numerical correctness, legacy comparison and empirical uncertainty.
+The [baseline inventory](../work-packages/20261029_roads_parameterization_program/artifacts/parameterization-baseline-inventory.json)
+binds all18 template assets, role values and source/native identities. Source audit
+shows zero estimation sentinels, traffic Ki/Kr adjustment and management coupling.
+The existing 47-profile/four-project studies characterize geometry/traffic; they do
+not certify the new overrides. New bounded override and retained-baseline prototype
+results must be independently reviewed before the replacement approval request.
 
-The [profile study](../work-packages/20261029_roads_parameterization_program/artifacts/revised-sensitivity-results.md)
-and [project study](../work-packages/20261029_roads_parameterization_program/artifacts/revised-project-sensitivity-results.md)
-retain the completed bounded contrasts and their source-supported limitations.
-The [scientific review](../work-packages/20261029_roads_parameterization_program/artifacts/revised-sensitivity-science-review.md)
-assesses control characterization separately from default adoption. Width changes
-footprint, fill responses differ on total versus density scales, and traffic
-rankings are not universally monotonic. This ADR does not establish field
-calibration or completed-run browser/RQ validation. Before implementation require independent contract/science/security/UX
-reviews, disposition, explicit human approval of both specification and layout,
-and the standalone contract-first ancestor. After implementation require the actual
-browser-to-native-to-report chain, invalid/readonly/reset/reload/fork/restore states,
-source/role diagnostics, output isolation and production-equivalent boundaries.
+After approval, required evidence includes default byte parity, actual Roads NoDb
+persistence, all native writer paths, actual input readback, mixed-role no-op checks,
+invalid atomic saves, lifecycle invalidation, fork/archive/restore, and browser to
+native to fresh report propagation under production-equivalent identities/mounts.
+Independent scientific, correctness, security and UX reviews are required. Static
+prototype and isolated native runs do not substitute for implemented workflow proof.
 
 ## Risks and rollback
 
-Fallback changes may affect no segments when feature values win; expose actual
-completed-run usage rather than silently overriding features. Width changes area;
-report both absolute and area-normalized study outputs. Validity bounds do not imply
-robustness or empirical calibration. Additive metadata cannot certify historical
-outputs or silently migrate projects. Preserve old payload keys and values.
+Extreme input values or coupled processes can fail native execution or produce
+unhelpful responses even when parser-valid; preserve failures and never publish
+incoherent results. Retained templates enlarge the NoDb payload modestly; prototype
+roundtrip/size evidence must be retained. Resolver versions require ongoing support
+for bound projects. Unknown versions or corrupt content fail explicitly rather than
+silently adopting defaults. Plain-text rendering and strict materialization allowlists
+prevent saved source content from becoming executable markup or arbitrary file paths.
 
-If implementation violates source precedence, baseline isolation, atomic validation
-or lifecycle readiness, withhold release and repair or revert the editor change.
-Keep diagnostics and history. An undeployed rollback removes the new view/wiring
-without changing scientific defaults or overwriting projects. Deployment and any
-new-default adoption require separate authorization.
+Rollback of a future implementation must preserve saved state and historical
+artifacts, avoid interpreting new state as old defaults, and disable unsupported
+execution explicitly. No deployment or old-state migration is authorized here.

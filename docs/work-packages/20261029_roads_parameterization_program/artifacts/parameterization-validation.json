@@ -1,0 +1,152 @@
+{
+  "status": "preapproval_validation_passed",
+  "production_source_changed": false,
+  "markdown": [
+    {
+      "path": "PROJECT_TRACKER.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/adrs/ADR-0135-roads-settings-controls.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/schemas/roads-parameterization-adjudication-contract.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/schemas/roads-preparation-lifecycle-contract.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/schemas/roads-settings-contract.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/acceptance.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/autonomy.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/package.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/prompts/active/program_execplan.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/tracker.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/specification.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/schemas/roads-parameterization-baseline-contract.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/20261103_parameterization_authority_contract_decision.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-baseline-science-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-binding-results.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-contract-correctness-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-overrides-protocol-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-overrides-protocol.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-overrides-results.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-overrides-science-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-security-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-view-notes.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    },
+    {
+      "path": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-view-ux-review.md",
+      "returncode": 0,
+      "output": "\u2705 1 files validated, 0 errors, 0 warnings"
+    }
+  ],
+  "git_diff_check": 0,
+  "local_link_existence": "passed for changed Markdown",
+  "spelling_preview": "Reviewed; existing PROJECT_TRACKER differences and reviewed analogue/oversized retained to avoid unrelated prose/hash churn.",
+  "prototype": {
+    "cases": 168,
+    "byte_identical_pairs": 336,
+    "source_bytes": 167705,
+    "json_bytes": 177697,
+    "evidence": "parameterization-binding-results.json",
+    "scope": "isolated writer parity, not actual NoDb persistence/fork/restore"
+  },
+  "native_study": {
+    "profiles": 18,
+    "strict_EVENT_particle_flags": 0,
+    "raw_output_hashes_checked": 126,
+    "source_dependencies_checked": 141,
+    "runtime_role_instances_checked": 36,
+    "evidence": "parameterization-overrides-results.json",
+    "scope": "road-only overrides; one climate/texture/surface/traffic, two profile arrangements; no full water-storage closure"
+  },
+  "static_browser": {
+    "widths": [
+      1440,
+      390
+    ],
+    "status": "passed_after_fixes",
+    "evidence": "parameterization-view-ux-review.md"
+  },
+  "full_repository_suite": "not repeated: documentation and isolated prototype/study scripts only; previous production changes retain v35 validation",
+  "production_workflow_validation": "pending implementation after explicit human specification/layout approval",
+  "program_complete": false
+}

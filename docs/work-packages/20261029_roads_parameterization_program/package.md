@@ -1,5 +1,37 @@
 # Roads parameterization and configuration view
 
+## Active execution: contractual parameterization and dedicated view
+
+2026-11-03 operator instruction: make the necessary documentation updates and
+execute the revised objective. The active work is this package and ExecPlan;
+prior completed scientific studies and immutable ledgers remain evidence.
+The [repository baseline contract](../../schemas/roads-parameterization-baseline-contract.md)
+now specifies all16 soils, two management assets, native meanings and adjustment
+rules. The rewritten [project/view contract](../../schemas/roads-settings-contract.md)
+defines a concrete version1 NoDb schema with embedded baseline texts, deterministic
+identity, role overrides, positive native-representable validation and lifecycle.
+The five-field inline proposal is superseded, not an implementation ancestor.
+
+Preapproval execution complete: source inventory and baseline-binding prototype
+pass; 168 production-builder cases give 336 byte-identical soil/management pairs.
+All 18 declared native profiles pass, with independent raw-output verification;
+road conductivity changes runoff in both directions, while Ki/Kr/shear change
+sediment without changing runoff in the tested contexts. These are one climate,
+texture/surface/traffic and two geometries; fill/buffer overrides were not varied.
+Scientific/source, correctness, security and dedicated-view UX reviews pass after
+fixes. No production parameterization wiring has begun.
+Final evidence: [ledger v39](artifacts/candidate-ledger-v39.json),
+[validation receipt](artifacts/parameterization-validation.json), and
+[contract decision](artifacts/20261103_parameterization_authority_contract_decision.md).
+
+The explicit human specification/layout gate remains: user agreement to ownership
+and instructions to execute authorize this concrete design, studies and reviews,
+not approval of an unseen replacement layout. Complete those tasks and present
+both artifacts. After explicit approval, ratify a standalone contract-first ancestor,
+implement against the reviewed specification, then validate the actual browser ->
+NoDb -> native-input -> fresh-report workflow. No deployment/default adoption.
+
+
 ## Current scope correction — 2026-11-03
 
 Roads owns authoritative saved parameterization in `roads.nodb`; the dedicated

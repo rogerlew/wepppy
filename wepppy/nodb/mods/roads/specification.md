@@ -397,6 +397,10 @@ Implication: this is an approximation relative to full WEPP:Road 3-OFE physics; 
 
 ## Single-OFE Parameterization (Greenfield, Legacy-Derived)
 
+The complete current repository baseline authority is the
+[Roads parameterization baseline contract](../../../../docs/schemas/roads-parameterization-baseline-contract.md),
+including bundled values, management semantics and assembly transformations.
+
 This section defines the required parameterization contract for `Inslope_bd` and `Inslope_rd` in WEPPcloud Roads.
 
 Source rationale:
@@ -482,8 +486,9 @@ Apply legacy WEPP:Road adjustments to selected template:
 
 All generated soil assembly paths apply the shared
 [200 mm boundary contract](../../../../docs/schemas/soil-horizon-boundary-contract.md)
-before publication. Existing legacy templates already end at 200 mm, so this
-operation is a no-op for those templates. Generated modern soils retain their
+before publication. Legacy road source horizons end at 200 mm and are unchanged;
+legacy fill/forest source horizons end at 300 mm and are split at 200 mm while
+preserving their properties and total depth. Generated modern soils retain their
 deeper material properties when a crossing horizon is subdivided. This changes
 input consistency, not the Roads erosion calibration or selected WEPP binary.
 

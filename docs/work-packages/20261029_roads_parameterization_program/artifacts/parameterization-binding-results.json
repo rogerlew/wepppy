@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "prototype_only": true,
+  "no_native_execution": true,
+  "no_production_persistence_wiring": true,
+  "no_canonical_fork_archive_claim": true,
+  "baseline_id": "roads-legacy-v1-3293894ba3394c99836302c5e1bf669acb08c68a4316f1914f12ed60d7e92b63",
+  "asset_count": 18,
+  "source_bytes": 167705,
+  "serialized_bytes": 177697,
+  "inventory_sha256": "0df45896deb664c3cc5d33754fcecad9650f5ba9f6da98b85c0cfc11cfb0976a",
+  "script_sha256": "a0ba84dcf8b14cc3b48f593d936f211e07197d247cb1e4efaf7f50badbbaf7bb",
+  "roads_source_sha256": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d",
+  "exact_json_roundtrip": true,
+  "rejected_invalid_cases": [
+    "text_tamper",
+    "asset_path",
+    "baseline_id",
+    "resolver_version"
+  ],
+  "sandbox_repository_edit_and_delete_preserved_bound_bytes": true,
+  "ordinary_file_copy_and_tar_member_roundtrip": true,
+  "cases": 168,
+  "byte_identical_pairs": 336,
+  "matrix_reader_sha256": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e",
+  "raw_root": "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-binding-v1",
+  "raw_results_sha256": "9fbe6ccc4a96e0c948d3273b5b7e4aece8c732b86823a4c90440b308250e0959",
+  "command": "wctl run-python docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization_binding_prototype.py /wc1/runs/ro/roads-parameterization-program-20261103/parameterization-binding-v1",
+  "returncode": 0
+}

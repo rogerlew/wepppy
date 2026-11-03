@@ -1,0 +1,406 @@
+{
+  "passed": true,
+  "profile_count": 18,
+  "declaration_sha256": "5027d7fcb802f18d5e20743d3c6e4e8c77aaa34db1347e23503c34daa32aaaab",
+  "results_sha256": "e51100d2460c7f47051390c59af71a7ed8b064dff1b643fe4c0593acf66d7bd0",
+  "reader_sha256": "a36d2ff63dfb5135f4e00da7d1b624efe92589dd458ade94173cecec98cddb91",
+  "method": "Raw PASS Decimal arithmetic; fixed-width ELEMENT readback and unchanged strict particle audit with actual terminal OFE. No native reruns.",
+  "checks": [
+    {
+      "context": "road",
+      "arm": "baseline",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "6.913738627964875",
+      "boundary_kg_yr": {
+        "1": "6.95400"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "c4d4f3bdf5234464ec3ddc04dfce71455bde93f8d26b518b77f7655739dadfb6",
+        "wepp/roads/output/H1.element.dat": "e98d97f67f970a758dddb98ea80e398abceba4aceea7cef7418aab0f90dac068",
+        "wepp/roads/output/H1.loss.dat": "d56e553ab6865fe71fca2206ff5c626bf68cc0645c1a8357e683b788734cb29a",
+        "wepp/roads/output/H1.pass.dat": "fe4f2f1166b108dc2d7ef29c7b73dd79416d18310d8e153757671c00bf03cb78",
+        "wepp/roads/output/H1.plot.dat": "1707d901f136c09fcd40a3f4fa150d4d6bf2e2724eb2c769c719d948e618e143",
+        "wepp/roads/output/H1.soil.dat": "fca72ad84bf7a5ffc05a657f59e5a16c270e00063347fc1bdc1e6b665fac8d55",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "avke_half",
+      "events": 629,
+      "days": 5844,
+      "runoff_m3_yr": "5.7009646875",
+      "pass_sediment_kg_yr": "10.3580042126024375",
+      "boundary_kg_yr": {
+        "1": "10.38550"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "77467d8ebe140d14e81afb6d6b4860fcb56f1a0924dd14a3e532af9f10d085c7",
+        "wepp/roads/output/H1.element.dat": "275fe9543f2d734647e29625bcea9ed07ebd90b06bccd0bb03ef873ca0e364f5",
+        "wepp/roads/output/H1.loss.dat": "756589f97fbf56fa45e6875d62846d055f1654f350c0c496837a3d49959f11ec",
+        "wepp/roads/output/H1.pass.dat": "728afc43ec0ebd10b5ce9d7cf677087cfa16fda75958fcd6fffcd342ec093ee6",
+        "wepp/roads/output/H1.plot.dat": "8b5eb50a566d28d2416d3043228224729a661e1c9c4149653253fca35b19c8df",
+        "wepp/roads/output/H1.soil.dat": "96ef539faf47bef2a0a0ad014fe405e4404a3b76bcd7258838a7e827567245e8",
+        "wepp/roads/output/H1.wat.dat": "00b76dd060d29922213861dfdd450825d0db0a788c6fe78a366b5b87b1a4b687"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "avke_double",
+      "events": 177,
+      "days": 5844,
+      "runoff_m3_yr": "1.7591983125",
+      "pass_sediment_kg_yr": "4.317757331693",
+      "boundary_kg_yr": {
+        "1": "4.34500"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "1abdff779f3ee686398fa9785c1204d0b6de44ee04acfedd69b0de9c09ad5686",
+        "wepp/roads/output/H1.element.dat": "6dc03bce91abbd0d7d7b2dfe33d266f476cc2251e0137146f68b86f573b54f32",
+        "wepp/roads/output/H1.loss.dat": "2221cf3a71f023edd6ead3b1ff523017f409bb3b4254848740ba490ac46ec6ba",
+        "wepp/roads/output/H1.pass.dat": "d89ad5237efdc3d09e51631d058841faac74a793bb727ade01d6c88e4033c56b",
+        "wepp/roads/output/H1.plot.dat": "1780bf2f449d822aadd6cbc5ebd0a0ad7001bd6c2f2eb58e3fea400859331a46",
+        "wepp/roads/output/H1.soil.dat": "9c9b97838a503e8e5dd909b0bdf1b2679978d5778c457d8d221632e74d4b670a",
+        "wepp/roads/output/H1.wat.dat": "b93c0c3760e66481626eb5e25aabd12e475e82be4fcb70e6c1810e937fdc9f2a"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "ki_half",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "3.8886210694421875",
+      "boundary_kg_yr": {
+        "1": "3.90600"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "3ae512358689ae7a1a27eb4bad018acb29790e90f67858e509e7be36e1c280c6",
+        "wepp/roads/output/H1.element.dat": "45805b8a658f0336bed55c100e5ba02d99decdd4559b84aa31125f0f60d512cf",
+        "wepp/roads/output/H1.loss.dat": "e9c55a2b43cc46a060321fe113535884702625d5fc3bec92afaf95950af48c32",
+        "wepp/roads/output/H1.pass.dat": "0fbe1cffb9c2bdb6134d0038c8fc21c6839a3f41c76150f049d3e48159970191",
+        "wepp/roads/output/H1.plot.dat": "4bf386390da629f3cdadeabf608c136c3d587ca137c59ff273e62557fe3c4f77",
+        "wepp/roads/output/H1.soil.dat": "fca72ad84bf7a5ffc05a657f59e5a16c270e00063347fc1bdc1e6b665fac8d55",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "ki_double",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "12.9639469386353125",
+      "boundary_kg_yr": {
+        "1": "13.04550"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "1431a360ab5485e64513744d885965709501caae161e43c6ccc86161ff60a575",
+        "wepp/roads/output/H1.element.dat": "2cda6a323d660739ffad9149ae3c700cbfb498a60133b81058cfe48538aac41d",
+        "wepp/roads/output/H1.loss.dat": "f1e87d68f8f4ed0fc68ed8ae7104e126a6e0f4f3858cc3f5e69ae9e185c0df1a",
+        "wepp/roads/output/H1.pass.dat": "2073053cbfe621751318187e9621f9890757023dfb38eca55e783af10474f886",
+        "wepp/roads/output/H1.plot.dat": "73af6aedc501d379691111d4df6d967f278397c2169414f433b83c835b34da3a",
+        "wepp/roads/output/H1.soil.dat": "fca72ad84bf7a5ffc05a657f59e5a16c270e00063347fc1bdc1e6b665fac8d55",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "kr_half",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "6.4828569787061875",
+      "boundary_kg_yr": {
+        "1": "6.52275"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "fdab14c63bd4a746dd7cabb4e955a0bb0b512d4d6382f596de1f5b396bd91ea0",
+        "wepp/roads/output/H1.element.dat": "f51bd5eb3409db81f61f093f5cef1a14b6ce62e902fb3e0577ea8ff5e6518041",
+        "wepp/roads/output/H1.loss.dat": "7272f9e9833ccf82f288330295f5b1c7628d2f44014188791846d151cf41a1b8",
+        "wepp/roads/output/H1.pass.dat": "fdecbb82bb054cb7605b43a5657b7a05766058527be1e7031202844683238636",
+        "wepp/roads/output/H1.plot.dat": "79e048f555b27fee225b871ea9f129a18f13ea1d13cfd092170250de458854c3",
+        "wepp/roads/output/H1.soil.dat": "fca72ad84bf7a5ffc05a657f59e5a16c270e00063347fc1bdc1e6b665fac8d55",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "kr_double",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "7.7752509595808125",
+      "boundary_kg_yr": {
+        "1": "7.81550"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "ca27de5cadcecb2aa325bd255ddb1a05832c3cd8e0e331a09681ea54a63c748a",
+        "wepp/roads/output/H1.element.dat": "b628f95c66c5c5779ef9f8292e150230086d981f7da3aa8ade70b56f7a35a5b5",
+        "wepp/roads/output/H1.loss.dat": "8100039dd45fac398cf7ed8c264e8da01b1f89f857f44b0ebad6ff655cd41e7e",
+        "wepp/roads/output/H1.pass.dat": "08be203ebcc206c9be426d33e82f3d4cd7781f217994186b92c52e85c28dc40b",
+        "wepp/roads/output/H1.plot.dat": "692532302ff64f03e6b11e5335ce1dccd962c8822f479463d7116de10c650ed2",
+        "wepp/roads/output/H1.soil.dat": "fca72ad84bf7a5ffc05a657f59e5a16c270e00063347fc1bdc1e6b665fac8d55",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "shcrit_half",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "7.95167601768968125",
+      "boundary_kg_yr": {
+        "1": "7.99525"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "b4ded1c68e9f93a0ca81d76faff82afabe0f93001c1fc246e6dd3e02fe11f3c7",
+        "wepp/roads/output/H1.element.dat": "ff6ff2e8f387f59af1d6e9bb164aaa2e8da486fd553f0133b1692c58a5a3dff4",
+        "wepp/roads/output/H1.loss.dat": "214a214fcac63f3ebd2d33c7527556dc8b3d54cfc78b47c216841a0b9c02c4be",
+        "wepp/roads/output/H1.pass.dat": "a33b79bb26880f7c535f4c8ea38f1d0e742855e29b0a35b8175b7770d210bf64",
+        "wepp/roads/output/H1.plot.dat": "ab6d4b7cd2320c4d3c1c9e6cf8692df4c957f2e4e8cb14bae972eef8810ecd52",
+        "wepp/roads/output/H1.soil.dat": "06d48b5417abb1053d3fabb6475f4571e3ad3a94edd4493b3a056b3c65dce987",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road",
+      "arm": "shcrit_double",
+      "events": 369,
+      "days": 5844,
+      "runoff_m3_yr": "2.92193575",
+      "pass_sediment_kg_yr": "6.68145304359425",
+      "boundary_kg_yr": {
+        "1": "6.72100"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "72ff01a6f7d594dc371b98f10a7e19fb4b375c607166d2746adbf004a578fb3e",
+        "wepp/roads/output/H1.element.dat": "7766e642befaef2b1680fc5b56c023154baaa40671582091cb2c960ea31db424",
+        "wepp/roads/output/H1.loss.dat": "f6beb7f2ee06b35f5aaa9795bb6569c4667c3c372af39101614db511ee950924",
+        "wepp/roads/output/H1.pass.dat": "6aac5878e120bce96bd6025c84513033cd980d1d333214d6e7467aaab2356a63",
+        "wepp/roads/output/H1.plot.dat": "e45fe0adbd1881235eaa99541fde0f5c9ce0c5d17625c2e811c353016cdfe141",
+        "wepp/roads/output/H1.soil.dat": "7123f6c8c6961ed8602badc9d78862bd7269177b42aa7da2787f6870c22cc20c",
+        "wepp/roads/output/H1.wat.dat": "6d0746acec53279f837a562f466348129e998221e7961a8f283b8c61a0d7c357"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "baseline",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "4.767988260821147533947515328",
+      "boundary_kg_yr": {
+        "1": "6.62400",
+        "2": "5.32625",
+        "3": "4.76775"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "5e104532ca2ca676f2846a21d36e1d92b1a664113bf3d057c67533bb3af3a919",
+        "wepp/roads/output/H1.element.dat": "0c16b731f2726747094cfc05751428934bf52f1373b5c79bd07524dc89ec9874",
+        "wepp/roads/output/H1.loss.dat": "a36292b088bb92345522ca30c31406ce0a851dba9ce949c012eea83fc88c531e",
+        "wepp/roads/output/H1.pass.dat": "2c83db6f753813b04aea7e5cedcd3dc265f083159a3f4ed1c1d721e47bc73b46",
+        "wepp/roads/output/H1.plot.dat": "c0fb133bba34f8a8c183520f6632d3ab7a43f717d5e04bac5542b55d1aeda77f",
+        "wepp/roads/output/H1.soil.dat": "a88ccc41484af9f2c6d7ac9aaaa25f292ec1ad102e72e292400cee14357b3b7a",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "avke_half",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "62.60712075",
+      "pass_sediment_kg_yr": "6.309963819487097930144482306",
+      "boundary_kg_yr": {
+        "1": "9.70300",
+        "2": "6.57350",
+        "3": "6.30900"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "2365ae44efed89b1909c49033e71a61eac3868329e725309d1d5b3f451f0f5b2",
+        "wepp/roads/output/H1.element.dat": "cd65dc8ff2c1b1ddef87b4411ca075ca649de7b44f211898006cfb5b630a2bc2",
+        "wepp/roads/output/H1.loss.dat": "2ce18e50241e0a17b8fa80f9885938f5bd83a1bbaa70a2628ee8f2e98000e0ac",
+        "wepp/roads/output/H1.pass.dat": "146cbb4ced16115a492160ce70043552c009ae0fa1f520458850825a3ac1d735",
+        "wepp/roads/output/H1.plot.dat": "c7536ab7eda95b666dcc9d00f06ebb1d757c32a4f1e8ea2e414cefd6ca6b2042",
+        "wepp/roads/output/H1.soil.dat": "882be175c4e9f05d5f3042bd9dc4f6f0523edc994e0623a38d36e1b7a6b819c3",
+        "wepp/roads/output/H1.wat.dat": "cb010d0fbf291cd5557beef2e6a36c980e44fbc52134f588911efaa1ca84ae0d"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "avke_double",
+      "events": 231,
+      "days": 5844,
+      "runoff_m3_yr": "60.6064686875",
+      "pass_sediment_kg_yr": "3.866827795912418858494715954",
+      "boundary_kg_yr": {
+        "1": "4.21850",
+        "2": "4.10675",
+        "3": "3.86600"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "40deef6f51d0df0c3747baa71602c69ce7259947aa55a92cdfe1a899632ce121",
+        "wepp/roads/output/H1.element.dat": "4cd4476ea51839b738ab2be725a6856d514ee9f3e8baf72fa421160084ce1bb6",
+        "wepp/roads/output/H1.loss.dat": "e364b079222ba47ea8c66e256b42b9b6f99f17217601300d82473c34fdc851ef",
+        "wepp/roads/output/H1.pass.dat": "bdd87e44d05f2ec9e8306d0795149d4fa0358669de7bfe3d137ca5b4069b957f",
+        "wepp/roads/output/H1.plot.dat": "704b2ee570a26373ae786c52e380ffcc40424c7b08d929351ae8f601f5b8804a",
+        "wepp/roads/output/H1.soil.dat": "d92da7612b125d161954d3baa442f2beb256e0914d224d2cf9e3902a609f8029",
+        "wepp/roads/output/H1.wat.dat": "153c2976b63364d1208db885b7a6325ddb07a7945d3b0cdd59d885e381961636"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "ki_half",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "2.655395533073603491545624502",
+      "boundary_kg_yr": {
+        "1": "3.57850",
+        "2": "2.89500",
+        "3": "2.65600"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "5dbf44652da3e49b0f5705a14759bcc5d205ba3674724e09aacf098657b883fc",
+        "wepp/roads/output/H1.element.dat": "646217d296a108ec47ea8e40dc07aa17b6cdab4a99c574c95dc362724a357058",
+        "wepp/roads/output/H1.loss.dat": "336946c7aa9238d49775cd2821cbd8dd696fdef780a414946419a8a2ac4f4fd8",
+        "wepp/roads/output/H1.pass.dat": "dab49b8860cc7465eea1d42ad3f2059aea3a5f31bd1e324ce166f3862f6ac02e",
+        "wepp/roads/output/H1.plot.dat": "aa5f76ae62580c275282d7bcb0f73ff29b948f12bba40fbc242cb1090419e190",
+        "wepp/roads/output/H1.soil.dat": "a88ccc41484af9f2c6d7ac9aaaa25f292ec1ad102e72e292400cee14357b3b7a",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "ki_double",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "8.775481356065703292074280294",
+      "boundary_kg_yr": {
+        "1": "12.71575",
+        "2": "10.11025",
+        "3": "8.77725"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "a58d002ed298a15c59c7de14ed026fec8ee28c6adc77cda2d2b4c24bc9f653ae",
+        "wepp/roads/output/H1.element.dat": "373af529da51bc96f142c876d662e17694a31d169dd95d1cf5fcf23f891f8aa4",
+        "wepp/roads/output/H1.loss.dat": "26965a43b3061f8f8adfc260c35f8cba97cba70c38a698e7c2d0f431f4ddda71",
+        "wepp/roads/output/H1.pass.dat": "77fde2a0b0f0cfe43d147b6e0c7c1580c01a1d49b7bacf6707535c18a8b7adba",
+        "wepp/roads/output/H1.plot.dat": "e6289ca32d3db14be8a85b18855164a6c475e4e981785a3b775cf51161bcdc63",
+        "wepp/roads/output/H1.soil.dat": "a88ccc41484af9f2c6d7ac9aaaa25f292ec1ad102e72e292400cee14357b3b7a",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "kr_half",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "4.578872841928647533947515328",
+      "boundary_kg_yr": {
+        "1": "6.35700",
+        "2": "5.11750",
+        "3": "4.57850"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "051f8b65bf97c92fdbe15f6195e31a995d4f45b5e28705a15fac1cead56bdc40",
+        "wepp/roads/output/H1.element.dat": "d1603cb8c15205cd6ab7a228c0b1cc9469562261f22c5214b166b4b267d2d6c5",
+        "wepp/roads/output/H1.loss.dat": "72a2882e841f4e1e023eece8f9629430d3716c7483746969077de21c0307bf01",
+        "wepp/roads/output/H1.pass.dat": "9abdd3000251eb6e4c84d9cf3d5ec6e4421df7b4806fc4da4ea09adad95b07b3",
+        "wepp/roads/output/H1.plot.dat": "c6399b50a5cf4865827aa5576b3fba52fe7219279f8a76e836e887a5eef57b40",
+        "wepp/roads/output/H1.soil.dat": "a88ccc41484af9f2c6d7ac9aaaa25f292ec1ad102e72e292400cee14357b3b7a",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "kr_double",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "5.146112589834897533947515328",
+      "boundary_kg_yr": {
+        "1": "7.15550",
+        "2": "5.74250",
+        "3": "5.14575"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "242950169c010875c8475477f61684e879071997a31c8de98b08e4dcf8a6b6f3",
+        "wepp/roads/output/H1.element.dat": "4e9e5a47d2cd49e3e116250ae5d393c5efe1f1f9bcd3fec9ee82e373943188cb",
+        "wepp/roads/output/H1.loss.dat": "5af83d76d35e250e278b3a403a695b46725237797c6b57a08a7a02f927aae8cf",
+        "wepp/roads/output/H1.pass.dat": "0bc863616d31b055e21698032b8d7ae31754a05a05a0274b9604fb68965742a4",
+        "wepp/roads/output/H1.plot.dat": "ecc542569345b5fba65295a749ea9b3bee353d0a864b18866df199fb49896183",
+        "wepp/roads/output/H1.soil.dat": "a88ccc41484af9f2c6d7ac9aaaa25f292ec1ad102e72e292400cee14357b3b7a",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "shcrit_half",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "5.166280447565060033933826378",
+      "boundary_kg_yr": {
+        "1": "7.30450",
+        "2": "5.74700",
+        "3": "5.16675"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "c5c727d2e4b5ec98a89e5fbb500c56582eb55131d4c3eafdeeb422a2567e8a8c",
+        "wepp/roads/output/H1.element.dat": "34da111e82c54afdc2df6cda0541c31ce349c336dbeeb55402d7e437b5a54ddb",
+        "wepp/roads/output/H1.loss.dat": "719d1b66309c950a9b3646cd499455a52b43d95e3c3f64269b7797ee081272fc",
+        "wepp/roads/output/H1.pass.dat": "d202b88d57d5d98862974afcfb81e91e0b14b7378b78659023ed116cad961b6f",
+        "wepp/roads/output/H1.plot.dat": "0c1136e4c90b580e1cfa6c37154e818bf02608449c3d9f95b2d1640d2d922080",
+        "wepp/roads/output/H1.soil.dat": "e17d63bf9322a25ab4da28b3305ec83a4771845b2f95b56b29024035de397210",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    },
+    {
+      "context": "road_fill_buffer",
+      "arm": "shcrit_double",
+      "events": 232,
+      "days": 5844,
+      "runoff_m3_yr": "61.2286914375",
+      "pass_sediment_kg_yr": "4.693605483522397533947515328",
+      "boundary_kg_yr": {
+        "1": "6.49800",
+        "2": "5.24750",
+        "3": "4.69375"
+      },
+      "strict_particle_pass": true,
+      "output_hashes": {
+        "wepp/roads/output/H1.ebe.dat": "f2d16f8c8b0154aa36ace5b29bec37da4a4fcd42f517e668a3806a1f42af0385",
+        "wepp/roads/output/H1.element.dat": "428e73099dbd3f57c2557850d06a8ceb36b7ad18dc898c887713afa0098ebb1a",
+        "wepp/roads/output/H1.loss.dat": "f1086ab4014548976d55e2c5b2e1aa016b99934f6cc914e2a85aa3adad89cf54",
+        "wepp/roads/output/H1.pass.dat": "8ac5b256d56a89aad0b35d47ccc759340a90054f07a263820ac6ddcecaf67ed7",
+        "wepp/roads/output/H1.plot.dat": "b3ee9a8da67022969ba1cf7f9d8b74d5b1cc65dd4f2d3c7a2472865e48eaa34c",
+        "wepp/roads/output/H1.soil.dat": "26ffe78c226ce4ef97022f639db51a5cf8317267784dfc7f9eca251c44ca5dab",
+        "wepp/roads/output/H1.wat.dat": "1ece98ec1b9304eb8f58910aae06848a46f678a2a34a901528d6555c5f8b43e7"
+      }
+    }
+  ]
+}

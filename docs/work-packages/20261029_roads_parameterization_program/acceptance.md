@@ -1,5 +1,19 @@
 # Success criteria
 
+## Current execution amendment: default settings and project authority
+
+2026-11-03: execute the revised dedicated-view objective under the
+[project/view contract](../../schemas/roads-settings-contract.md) and
+[repository baseline contract](../../schemas/roads-parameterization-baseline-contract.md).
+Authorize bounded driver characterization, retained-baseline prototypes, source
+inventory, concrete contracts/layout and independent reviews. The earlier
+five-fallback scope and blanket no-new-sweep sentence below are superseded.
+Prior scientific experiments/classifications remain immutable. Completion requires
+explicitly approved specification/layout followed by actual implemented workflow
+validation; a proposal or default parity prototype alone cannot close the package.
+No production wiring before that explicit gate, and no deployment/default adoption.
+
+
 ## Current direction — operator amendment, 2026-11-03
 
 Resolve known and newly identified defects, then develop sensitivity analysis and

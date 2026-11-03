@@ -22,6 +22,21 @@ and historical-result admission heuristics. They add complexity without serving
 this workflow. Existing artifact hashes remain useful integrity evidence; they
 are not a reason to introduce an identity/versioning subsystem for this feature.
 
+## Proposed bound parameterization integration
+
+Implementation pending under the explicit human specification/layout gate.
+[Project parameterization](roads-settings-contract.md) adds Roads-owned baseline
+contents and overrides in `roads.nodb`, governed by the
+[repository baseline contract](roads-parameterization-baseline-contract.md).
+Accepted model-affecting edits use this contract's retention, invalidation and
+publication rules. The saved parameterization identity must participate in
+preparation/result admission; old results cannot be re-admitted merely because
+geometry identifiers still match. Legacy reads do not bind defaults or invalidate
+previously eligible results. First explicit Save/Prepare binds the baseline before
+new inputs are produced. Bound reset removes overrides, not baseline content.
+Fork/archive/restore retain the NoDb baseline and ordinary historical artifacts.
+This amendment adds no queue or stable cross-preparation segment identity.
+
 ## Identity and labels
 
 - Each prepared geometry feature has a unique `segment_id` within the current set.

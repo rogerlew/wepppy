@@ -1,0 +1,69 @@
+{
+  "version": 39,
+  "predecessor": {
+    "path": "candidate-ledger-v38.json",
+    "sha256": "e0c18dc0b052b5afb23b59dcb1533da29b080a0e2cd3c3ead866dc8d353ac87c"
+  },
+  "status": "reviewed_dedicated_parameterization_proposal_preapproval_work_complete",
+  "starting_revision": "6afbadba8",
+  "evidence": {
+    "20261103_parameterization_authority_contract_decision.md": "504c151817eddf4daa4711e9d467047f9724254636b8652efe5b700c6aef0081",
+    "parameterization-baseline-inventory.json": "0df45896deb664c3cc5d33754fcecad9650f5ba9f6da98b85c0cfc11cfb0976a",
+    "parameterization-baseline-inventory.py": "59ae5c176935b3af046c7e2a020e2fc4af4393e105fabf91d7048819630bbaa1",
+    "parameterization-baseline-science-review.md": "3856a4922e0c6a38e6b87c4aaa535aa3c07c3c6b6a4df20927fe1c0b531cd354",
+    "parameterization-binding-results.json": "b7c4196d28d7b4e1f285a5b4421b092de2844eba0c8df506948d4ac991ffed46",
+    "parameterization-binding-results.md": "4a6c0d6f087d8ec5890853d6dff6498a5700e87d1e6dabe57cfd739ec68eb4d1",
+    "parameterization-contract-correctness-review.md": "6b14632af9b4dbe341fc64586bffa59d5d040002f5873fbffa2c1f2270099ace",
+    "parameterization-overrides-independent-readback.json": "3b5e4ffdfc0f09c87d5fc60749c78d51cc0a8663985f38e94faaac3cef25e98b",
+    "parameterization-overrides-protocol-review.md": "1fc6d0612f45bd561585a4e80548b8aa3774280d158618c6a9b3123733f9b73f",
+    "parameterization-overrides-protocol.md": "47f48b96904a08f8656266381bec29b7a3e01dac8a427fd3f704e65785abc9b6",
+    "parameterization-overrides-results.json": "835b41f216d7da700b2cff190bb6bed900ddbc11e46597f16ffc117d0bc40268",
+    "parameterization-overrides-results.md": "31888eaa53ade5dbe6143ec42925ff9b564f4a6c33d425abfde650f9715063a6",
+    "parameterization-overrides-science-review.md": "1cd6f681d51d919c4437fb6a67e2a77d4a342dfa52b59484f3fac4d77aa2872f",
+    "parameterization-security-review.md": "d80b86eb2df168f8206112d42492e226b6193e4ea38559d6d650568ef4ec5a0e",
+    "parameterization-validation.json": "c92c3dfdafdacb319b75b54265f95b4981cb0e9db5bb2bb120fac0c779017873",
+    "parameterization-view-draft.html": "7a8b69ba1d234ab0cb73eeca0ae288cab353b120269c2c7c90f9e2b29ab21a80",
+    "parameterization-view-notes.md": "ee361bc968c84a7ac2ab10b92fffd0bb63a15910d61211f963297fd63fd46bcb",
+    "parameterization-view-ux-review.md": "825d4d59bc391da14938345c96972e102fcda3c6ad115fabce654ccb68a6bddb",
+    "parameterization_binding_prototype.py": "a0ba84dcf8b14cc3b48f593d936f211e07197d247cb1e4efaf7f50badbbaf7bb",
+    "parameterization_overrides.py": "daedda3d047518a634494641e76fd1cc8478bc30887f1396c46150243a852298",
+    "parameterization_overrides_independent_readback.py": "a36d2ff63dfb5135f4e00da7d1b624efe92589dd458ade94173cecec98cddb91",
+    "parameterization_overrides_readback.py": "a833c64f192995e091cafa2a8aa2ff3a73a96c8db1bd617576b828436814982c"
+  },
+  "canonical_proposal": {
+    "docs/schemas/roads-settings-contract.md": "8c849bbc6ee34926caa505d78c6c076407a440cee75fc64ad659107110d18ed7",
+    "docs/schemas/roads-parameterization-baseline-contract.md": "d2a73ccd22884b1f9040d259c54c374589e2576201c1ca1ebade9b5220e37aea",
+    "docs/schemas/roads-preparation-lifecycle-contract.md": "9a16c0545e9138565cb7906ee141be83121ac1f7c1aed3dd737cd749eb4ca284",
+    "docs/adrs/ADR-0135-roads-settings-controls.md": "c24df1c900787ff7f21cb76805915d2f86c28da40c1f954b80a10ef94f62c42e"
+  },
+  "completed": {
+    "baseline_assets": 18,
+    "baseline_matrix_role_rows": 48,
+    "default_parity_cases": 168,
+    "default_parity_file_pairs": 336,
+    "native_profiles": 18,
+    "strict_EVENT_particle_flags": 0,
+    "independent_reviews": [
+      "baseline science",
+      "override protocol and outputs",
+      "correctness",
+      "security",
+      "dedicated-view UX"
+    ]
+  },
+  "retained_failures": [
+    "preexecution audit assumptions/approval revocation; no native failures",
+    "independent reader SRC3 omission corrected before final receipt",
+    "static preview overflow Save defect fixed and rerendered"
+  ],
+  "limits": "Native contrasts vary road drivers only; no fill/buffer response ranges, calibration or complete future workflow claim.",
+  "human_specification_approval": "absent for replacement concrete proposal",
+  "human_layout_approval": "absent for replacement concrete proposal",
+  "accepted_implementation_ancestor": null,
+  "production_settings_wiring_started": false,
+  "defaults_adopted": false,
+  "withheld_materials_used": false,
+  "deployment_performed": false,
+  "historical_results_reclassified": false,
+  "program_complete": false
+}

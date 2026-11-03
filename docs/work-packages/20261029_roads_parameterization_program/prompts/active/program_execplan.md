@@ -1,5 +1,37 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+## Active execution: contractual parameterization and dedicated view
+
+2026-11-03 operator instruction: make the necessary documentation updates and
+execute the revised objective. The active work is this package and ExecPlan;
+prior completed scientific studies and immutable ledgers remain evidence.
+The [repository baseline contract](../../../../schemas/roads-parameterization-baseline-contract.md)
+now specifies all16 soils, two management assets, native meanings and adjustment
+rules. The rewritten [project/view contract](../../../../schemas/roads-settings-contract.md)
+defines a concrete version1 NoDb schema with embedded baseline texts, deterministic
+identity, role overrides, positive native-representable validation and lifecycle.
+The five-field inline proposal is superseded, not an implementation ancestor.
+
+Preapproval execution complete: source inventory and baseline-binding prototype
+pass; 168 production-builder cases give 336 byte-identical soil/management pairs.
+All 18 declared native profiles pass, with independent raw-output verification;
+road conductivity changes runoff in both directions, while Ki/Kr/shear change
+sediment without changing runoff in the tested contexts. These are one climate,
+texture/surface/traffic and two geometries; fill/buffer overrides were not varied.
+Scientific/source, correctness, security and dedicated-view UX reviews pass after
+fixes. No production parameterization wiring has begun.
+Final evidence: [ledger v39](../../artifacts/candidate-ledger-v39.json),
+[validation receipt](../../artifacts/parameterization-validation.json), and
+[contract decision](../../artifacts/20261103_parameterization_authority_contract_decision.md).
+
+The explicit human specification/layout gate remains: user agreement to ownership
+and instructions to execute authorize this concrete design, studies and reviews,
+not approval of an unseen replacement layout. Complete those tasks and present
+both artifacts. After explicit approval, ratify a standalone contract-first ancestor,
+implement against the reviewed specification, then validate the actual browser ->
+NoDb -> native-input -> fresh-report workflow. No deployment/default adoption.
+
+
 ## Current scope correction — 2026-11-03
 
 Roads owns authoritative saved parameterization in `roads.nodb`; the dedicated
@@ -317,7 +349,53 @@ require further fitting. Prepare exact supported configuration fields and a stat
 layout for human review. The eventual product is a run-scoped edit/save/reset
 workflow backed by generated-input and native/report readback. This execution
 requires explicit human specification/layout approval before production wiring.
+## Revised execution milestones and concrete steps
+
+First, complete canonical source/default documentation and replace the accumulated
+five-field proposal with one coherent project/view contract. Use the current
+Roads soil/management templates and resolver as the production baseline; bind
+all18 asset hashes and exact native source. Preserve study-only generated-soil
+policies as research evidence. Record ADR-0135 and a new contract decision artifact.
+
+Second, execute isolated baseline retention/default parity and bounded driver
+contrasts. The retained-baseline prototype uses current production writers across
+168 cases without native executions. The override protocol uses18 isolated native
+profiles: road-only and road/fill/buffer baselines plus half/double four road drivers.
+Source/input/runtime identities and all failed protocol attempts remain visible.
+Independent reviewers must examine any reused audit assumptions before execution.
+These studies do not certify the future production NoDb/UI workflow or default
+adoption. Add role-specific contrasts only if a concrete decision needs them.
+
+Third, review the dedicated static layout and exact schema. Correctness, security,
+scientific and UX findings must be dispositioned with final artifact hashes.
+Validate Markdown with `wctl doc-lint --path <changed-file>`; read generated input
+and browser artifacts. No broad repository suite is needed for documentation and
+isolated scripts alone. Prior production fix validation remains retained in v35.
+
+After explicit human approval of the replacement specification/layout, commit the
+accepted ancestor before production edits. Implement the embedded baseline and
+four role overrides through Roads, preserving existing `_roads_params`. Add tests
+for absent/unbound/bound/invalid state, real persistence/cache boundaries, all native
+writers, override arithmetic and lifecycle invalidation. Add the dedicated route,
+view and controller with existing auth/CSRF/read-only guards. Validate actual
+browser save -> reload -> Prepare -> Run -> report under production-equivalent
+identities/mounts; no code-only or mock-only claim completes this milestone.
+Run focused wctl pytest, frontend lint/tests, then substantive repository sanity;
+queue graph/live job validation applies only if wiring changes. Obtain independent
+final workflow reviews, update all package records and commit scoped changes.
+
+Recovery preserves raw failed attempts. Invalid saves leave previous coherent
+state; post-invalidation failures stay explicit and cannot resurrect old reports.
+Re-run a failed study only under a new bound declaration; never overwrite evidence.
+
 ## Progress
+
+- [x] Replace conflicting inline proposal with concrete repository/project contracts and revised ADR.
+- [x] Complete source inventory and168-case retained-baseline default parity prototype.
+- [x] Finish all 18 bounded native override profiles and independent source/artifact reviews.
+- [x] Finish dedicated-layout review and resolve all proposal findings; prepare concrete specification/layout for explicit approval.
+- [ ] Obtain explicit human approval of the replacement specification and dedicated layout.
+- [ ] After approval only: ratify ancestor, wire production and validate complete lifecycle.
 
 - [ ] Specify Roads-owned NoDb parameterization and bound-baseline lifecycle, including overrides, reset/adoption distinction and archive/fork/restore.
 
@@ -544,6 +622,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- 2026-11-03 source audit: native zero values are estimation/bypass sentinels; no-traffic management changes road/fill plant and initial values but retains yearly surface operations. Geometry Prepare precedes soil/management assembly during Run.
+
 - Disturbed stores its editable lookup outside disturbed.nodb in a project CSV. Copying that storage literally would conflict with the requested single Roads NoDb authority.
 
 - A five-field inline editor also lacks room and scope for the required role-specific parameter provenance; dedicated inspection/editing is now an explicit user requirement.
@@ -671,6 +751,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: retain all18 baseline asset texts within roads.nodb,167705 bytes before JSON overhead. One atomic owner avoids split CSV state and reproduces source after repository drift; resolver version binds interpretation.
+
 - 2026-11-03: operator requests Disturbed-like ownership/lifecycle. Roads owns parameterization in roads.nodb; bundled templates plus assembly rules remain repository defaults. Do not add a second mutable authority.
 
 - 2026-11-03: operator requires parameter specificity and visibility in its own view. Replace inline-editor placement; retain one settings authority and explicit source/adjustment/override/prepared evidence.
@@ -795,6 +877,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Current revision completes the authorized preapproval work: repository/project contracts, 168-case retained-baseline parity, 18 native road-driver profiles and independent source/correctness/security/UX review. Implementation and exact replacement-layout approval remain pending. Do not substitute prior inline reviews or prior whole-suite validation for this future workflow.
 
 The replacement specification also needs a substantive project-owned parameterization model; the former five-value metadata record is insufficient. Baseline-retention representation remains an explicit design decision.
 
@@ -1731,3 +1815,5 @@ Revision note (2026-11-03): activated the revised defect/sensitivity sequence, c
 Revision note (2026-11-03): recorded completed bounded studies, source-supported report limits and reviewed five-field proposal; broad sanity and explicit human approval remain open.
 
 Revision note (2026-11-03 final validation): recorded completed broad sanity and final focused delta, with source-version qualification and additive ledger v35. Explicit specification/layout approval remains absent.
+
+Revision note (2026-11-03): execute operator-requested contractual defaults/project authority and dedicated view; replace accumulated proposal text, bind source and prototype evidence, retain explicit production gate.

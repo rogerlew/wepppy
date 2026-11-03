@@ -78,6 +78,17 @@ parameterization policy still requires its own evidence, ADR and applicable revi
 Preserve the six reserved materials; declare any new use before execution, and
 never describe adaptively inspected cases as independent validation.
 
+## Contractual default and project authorities
+
+The [repository baseline contract](roads-parameterization-baseline-contract.md)
+specifies soil/management values and selection/adjustment rules. The
+[project/view contract](roads-settings-contract.md) specifies authoritative
+`roads.nodb` state, retained baseline material, override precedence and lifecycle.
+These are separate contractual layers: changing repository defaults cannot
+silently change a bound project. A dedicated parameterization view exposes both
+source arithmetic and actual emitted values. Neither UI constants nor study
+fixtures are alternate production default authorities.
+
 ## End-user workflow and closure
 
 Prepare a concrete field specification and static layout after sensitivity evidence
