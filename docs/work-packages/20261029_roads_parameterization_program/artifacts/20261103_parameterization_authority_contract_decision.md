@@ -1,8 +1,10 @@
 # Roads repository/project parameterization contract decision
 
-Status: reviewed proposal checkpoint; exact replacement
-specification/layout human approval absent. Not an accepted implementation ancestor.
-Starting implementation revision: `6afbadba8` (current branch preserved).
+Status: **accepted contract-first checkpoint, 2026-11-03**. The operator explicitly
+approved the reviewed replacement specification and dedicated layout at `9532a2968`:
+"I approve. please proceed with implementation". Independent reviews bound to
+ledger v39 precede this ratification. No normative behavior changes in this status
+commit. Starting implementation revision: `9532a2968`; current branch preserved.
 
 ## Authority and intended outcome
 
@@ -100,3 +102,12 @@ road overrides in one climate/texture/surface/traffic and two geometries. Human 
 of both replacement specification/layout is the remaining prerequisite for
 ratification and production implementation. Program remains active; no deployment,
 default adoption, reserve-material use or real-project regeneration occurred.
+
+## Approval ratification
+
+The later explicit approval above satisfies the prerequisite described in the
+historical proposal rationale. Proceed with implementation after this standalone
+checkpoint commit. No further specification/layout approval is needed for faithful
+implementation. Material contract changes require their applicable review; routine
+implementation choices do not reopen approval. Program completion still requires
+real workflow validation and independent final reviews. Deployment is not authorized.

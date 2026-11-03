@@ -1,5 +1,16 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+## Approved implementation execution — 2026-11-03
+
+The operator approved the replacement specification and dedicated layout at
+`9532a2968` and explicitly instructed implementation. The human gate is satisfied.
+Ratify the accepted contract-first ancestor before source edits, then implement
+Roads-owned parameterization, native input propagation and the dedicated view.
+Validate focused tests, actual NoDb/browser/native/report workflow, broad sanity,
+frontend gates and independent final reviews. Prior pending-approval entries below
+are historical; no deployment or new-default adoption is authorized.
+
+
 ## Active execution: contractual parameterization and dedicated view
 
 2026-11-03 operator instruction: make the necessary documentation updates and
@@ -394,7 +405,7 @@ Re-run a failed study only under a new bound declaration; never overwrite eviden
 - [x] Complete source inventory and168-case retained-baseline default parity prototype.
 - [x] Finish all 18 bounded native override profiles and independent source/artifact reviews.
 - [x] Finish dedicated-layout review and resolve all proposal findings; prepare concrete specification/layout for explicit approval.
-- [ ] Obtain explicit human approval of the replacement specification and dedicated layout.
+- [x] Obtain explicit human approval of the replacement specification and dedicated layout (2026-11-03, proposal9532a2968).
 - [ ] After approval only: ratify ancestor, wire production and validate complete lifecycle.
 
 - [ ] Specify Roads-owned NoDb parameterization and bound-baseline lifecycle, including overrides, reset/adoption distinction and archive/fork/restore.
@@ -751,6 +762,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: operator explicitly approves both replacement artifacts and instructs implementation. Ratify status-only ancestor and proceed; preserve accepted contracts and separate deployment boundary.
+
 - 2026-11-03: retain all18 baseline asset texts within roads.nodb,167705 bytes before JSON overhead. One atomic owner avoids split CSV state and reproduces source after repository drift; resolver version binds interpretation.
 
 - 2026-11-03: operator requests Disturbed-like ownership/lifecycle. Roads owns parameterization in roads.nodb; bundled templates plus assembly rules remain repository defaults. Do not add a second mutable authority.
@@ -877,6 +890,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Approved implementation is active; proposal work is complete. No production workflow claim until source, generated artifacts and real service-boundary validation pass.
 
 Current revision completes the authorized preapproval work: repository/project contracts, 168-case retained-baseline parity, 18 native road-driver profiles and independent source/correctness/security/UX review. Implementation and exact replacement-layout approval remain pending. Do not substitute prior inline reviews or prior whole-suite validation for this future workflow.
 

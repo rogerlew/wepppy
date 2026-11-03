@@ -1,5 +1,16 @@
 # Roads parameterization program tracker
 
+## Approved implementation execution — 2026-11-03
+
+The operator approved the replacement specification and dedicated layout at
+`9532a2968` and explicitly instructed implementation. The human gate is satisfied.
+Ratify the accepted contract-first ancestor before source edits, then implement
+Roads-owned parameterization, native input propagation and the dedicated view.
+Validate focused tests, actual NoDb/browser/native/report workflow, broad sanity,
+frontend gates and independent final reviews. Prior pending-approval entries below
+are historical; no deployment or new-default adoption is authorized.
+
+
 ## Active execution: contractual parameterization and dedicated view
 
 2026-11-03 operator instruction: make the necessary documentation updates and

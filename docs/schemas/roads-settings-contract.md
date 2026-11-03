@@ -1,12 +1,10 @@
 # Roads parameterization project and view contract
 
-Status: **revised proposal; implementation pending; replacement specification and
-layout not yet approved**. Operator-approved direction is a default-settings
-harness, explicit driver overrides, a dedicated view, and authoritative project
-parameterization written with Roads. The exact schema/layout below require the
-explicit gate in [adjudication](roads-parameterization-adjudication-contract.md#end-user-workflow-and-closure).
-This replaces the five-fallback-only and inline-editor proposal, whose reviews
-remain historical evidence at commit `8b02c5fb1`.
+Status: **approved 2026-11-03; implementation pending**. The operator explicitly
+approved the replacement specification and dedicated layout at proposal checkpoint
+`9532a2968` and instructed implementation. The approved content supersedes the
+five-fallback-only inline proposal. Reviews and exact proposed artifact hashes are
+retained in ledger v39; this status ratification changes no normative behavior.
 
 ## Operator clarification: default settings and user overrides
 

@@ -1,8 +1,8 @@
 # ADR-0135: Roads-owned parameterization and dedicated view
 
-Status: **revised proposal; implementation pending; exact replacement specification
-and layout approval absent**. This replaces the former five-fallback editor proposal;
-its reviewed text remains in commit `8b02c5fb1`, not as competing current guidance.
+Status: **accepted 2026-11-03; implementation pending**. Operator approval applies
+to the replacement specification and dedicated layout at `9532a2968`. This replaces
+the former five-fallback editor proposal; its text remains historical evidence.
 
 ## Decision provenance
 
@@ -10,9 +10,9 @@ Decision venue: operator/Codex task conversation, 2026-11-03, operator timezone
 America/Los_Angeles. Decision owner: Roger Lew. Implementer: Codex after review and
 human specification/layout gate. The operator explicitly requested driver overrides,
 a dedicated view, a Disturbed-like lifecycle, authoritative project state written
-with Roads, and contractual repository defaults. The latest instruction authorizes
-necessary documentation and execution. It does not approve an unseen replacement
-layout; the existing explicit gate remains applicable.
+with Roads, and contractual repository defaults. The operator subsequently stated "I approve. please proceed with implementation"
+after the reviewed replacement specification/layout were presented at9532a2968.
+The explicit human gate is satisfied; deployment remains separate.
 
 ## Proposed decision
 
