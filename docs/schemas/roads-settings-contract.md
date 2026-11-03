@@ -40,6 +40,53 @@ Revise the concrete specification/layout and obtain independent review and expli
 human approval before production persistence/application/UI wiring.
 
 
+## Parameterization ownership and lifecycle
+
+Operator direction, 2026-11-03: use a project-owned parameterization model and
+lifecycle substantially similar to Disturbed, with Roads as the owning controller.
+Saved Roads parameterization is authoritative project state in `roads.nodb` and
+must be written through the Roads controller's normal locked persistence path.
+The dedicated view edits that state; it must not own an independent configuration,
+mutable CSV authority or editable generated soil/management files.
+
+Current implementation stores ordinary settings in `_roads_params` in `roads.nodb`.
+Scientific baselines come from bundled
+`wepppy/nodb/mods/roads/legacy_templates/soils/*.sol` and
+`legacy_templates/managements/*.man`, interpreted by template selection and
+transformation rules in `roads.py`. Templates alone do not express the full
+parameterization: traffic modifies road Ki/Kr and selects management; design and
+surface select template variants; role assembly and fragment replacement also
+matter. These existing assets/rules are the repository baseline authority, not
+research generated-soil fixtures or an independent new UI defaults table.
+
+Disturbed is an architectural analogue, not a literal storage precedent:
+`disturbed.nodb` owns controller state while its editable lookup is a project-local
+`disturbed/disturbed_land_soil_lookup.csv` seeded from repository/config defaults.
+Roads will retain one authoritative saved parameterization in its NoDb state.
+Generated lookup/export tables, if provided for inspection, are derived artifacts.
+
+The replacement proposal must specify an additive Roads-owned parameterization
+schema, source-baseline binding, role/scope overrides and effective-value resolution.
+It must make existing projects reproducible across repository template changes:
+a hash detects drift but cannot reproduce vanished source content. Decide and
+review the minimal retained baseline content/reference mechanism before wiring;
+do not silently rebase saved projects when defaults change. Exact schema and
+baseline-retention representation remain open, rather than inventing them here.
+
+Validate the complete edit before accepted mutation. Persist through Roads locking
+and cache rules; accepted model-affecting changes use existing Roads retention and
+preparation/result invalidation. Preparation and execution consume the authoritative
+saved configuration and materialize soil/management artifacts with readback evidence.
+Fork/archive/restore carry saved configuration and its required baseline material.
+Reset removes overrides against the project's bound baseline; adopting a newer
+repository baseline is a separate explicit action, not an incidental reload/reset.
+Baseline WEPP state and shared Disturbed parameterization remain independent.
+
+Rationale: one controller-owned configuration keeps the editor, builders, reports
+and restored projects consistent. Avoid two mutable parameter stores or duplicated
+numeric defaults in UI code. The existing five-field metadata-only proposal below
+is insufficient for this requirement and must be replaced before approval.
+
 ## Dedicated parameterization view and visibility
 
 Operator direction, 2026-11-03: provide this specificity in its **own Roads

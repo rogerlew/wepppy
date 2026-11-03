@@ -2,6 +2,11 @@
 
 ## Current scope correction — 2026-11-03
 
+Roads owns authoritative saved parameterization in `roads.nodb`; the dedicated
+view and generated artifacts are consumers. Repository templates plus assembly
+rules supply baselines. See [ownership and lifecycle](../../../../schemas/roads-settings-contract.md#parameterization-ownership-and-lifecycle);
+exact additive schema and retained-baseline representation need review.
+
 Further operator direction: give parameterization its own view, with role-specific
 values, source baselines, adjustment arithmetic, overrides and actual prepared
 values. See [dedicated view requirements](../../../../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility). The inline layout is superseded.
@@ -314,6 +319,8 @@ workflow backed by generated-input and native/report readback. This execution
 requires explicit human specification/layout approval before production wiring.
 ## Progress
 
+- [ ] Specify Roads-owned NoDb parameterization and bound-baseline lifecycle, including overrides, reset/adoption distinction and archive/fork/restore.
+
 - [ ] Design and review the dedicated Roads parameterization view with source-to-prepared-value visibility and baseline/custom result comparisons.
 
 - [ ] Revise the five-field proposal into explicit runoff/erosion driver overrides under the clarified default-settings objective; characterize controls, revise layout and repeat appropriate reviews before human approval.
@@ -537,6 +544,8 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+- Disturbed stores its editable lookup outside disturbed.nodb in a project CSV. Copying that storage literally would conflict with the requested single Roads NoDb authority.
+
 - A five-field inline editor also lacks room and scope for the required role-specific parameter provenance; dedicated inspection/editing is now an explicit user requirement.
 
 - Operator clarification: default fallbacks were mistaken for sufficient user adjustment controls. Feature precedence can make fallback edits ineffective; geometry and traffic do not provide adequate control of runoff/erosion drivers.
@@ -662,6 +671,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+- 2026-11-03: operator requests Disturbed-like ownership/lifecycle. Roads owns parameterization in roads.nodb; bundled templates plus assembly rules remain repository defaults. Do not add a second mutable authority.
+
 - 2026-11-03: operator requires parameter specificity and visibility in its own view. Replace inline-editor placement; retain one settings authority and explicit source/adjustment/override/prepared evidence.
 
 - 2026-11-03: supersede five-fallback-only scope with explicit driver overrides to support adjustment toward observations or user expectations. Do not gate controls on field calibration; preserve evidence limits and require revised specification/layout review.
@@ -784,6 +795,8 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+The replacement specification also needs a substantive project-owned parameterization model; the former five-value metadata record is insufficient. Baseline-retention representation remains an explicit design decision.
 
 The replacement proposal must be a dedicated parameterization view. The former inline static layout is not an approval candidate.
 

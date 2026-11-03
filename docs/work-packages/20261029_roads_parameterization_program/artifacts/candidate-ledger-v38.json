@@ -1,0 +1,13 @@
+{
+  "version": 38,
+  "predecessor": {
+    "path": "candidate-ledger-v37.json",
+    "sha256": "bf717fa6fc39aaca00389d6344d4f743a72552210eed02996eec680dcc122c8c"
+  },
+  "status": "roads_owned_parameterization_lifecycle_required",
+  "authority": "roads.nodb through Roads controller",
+  "canonical_requirement": "docs/schemas/roads-settings-contract.md#parameterization-ownership-and-lifecycle",
+  "schema_and_baseline_retention": "pending concrete proposal and review",
+  "production_settings_wiring_started": false,
+  "program_complete": false
+}

@@ -2,6 +2,11 @@
 
 ## Current scope correction — 2026-11-03
 
+Roads owns authoritative saved parameterization in `roads.nodb`; the dedicated
+view and generated artifacts are consumers. Repository templates plus assembly
+rules supply baselines. See [ownership and lifecycle](../../schemas/roads-settings-contract.md#parameterization-ownership-and-lifecycle);
+exact additive schema and retained-baseline representation need review.
+
 Further operator direction: give parameterization its own view, with role-specific
 values, source baselines, adjustment arithmetic, overrides and actual prepared
 values. See [dedicated view requirements](../../schemas/roads-settings-contract.md#dedicated-parameterization-view-and-visibility). The inline layout is superseded.
