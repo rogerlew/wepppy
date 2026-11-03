@@ -33,6 +33,9 @@ Canonical behavioral contract:
   preservation” section of `docs/schemas/climate-parquet-lineage-contract.md`.
 * Historic PRISM downstream climate eligibility and parent-file inheritance follow
   `docs/schemas/prism-downstream-eligibility-contract.md`.
+* Specialized 9005/RAP preparation follows
+  `docs/schemas/specialized-revegetation-consumer-contract.md`; preserve the bound
+  reference science, exact cover years, canonical dates and archive-visible prior inputs.
 * Applicable current canonical domain and shared/cross-cutting contracts are
   normative for UI-coupled NoDb inputs, mutation, persistence, and reload.
   Historical and archived plans are context only.

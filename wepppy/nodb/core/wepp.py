@@ -1727,8 +1727,11 @@ class Wepp(NoDbBase):
         climate = self.climate_instance
         cli = ClimateFile(climate.cli_path)
         years = cli.years
-        assert min(years) == rap_ts.rap_start_year, 'RAP_TS start year does not match climate'
-        assert max(years) == rap_ts.rap_end_year, 'RAP_TS end year does not match climate'
+        from wepppy.nodb.mods.rap.rap_ts import _cover_data_by_year
+        from wepppy.nodb.mods.rap.rap import RAP_Band
+        cover_years = sorted(_cover_data_by_year(rap_ts.data)[RAP_Band.TREE])
+        if sorted(set(years)) != cover_years:
+            raise ValueError('RAP cover years must exactly match climate years.')
 
         rap_ts.prep_cover(self.runs_dir)
         self._prep_firedate()
@@ -1738,14 +1741,13 @@ class Wepp(NoDbBase):
         require_feature_allowed(self, "revegetation")
         self.logger.info('    prep firedate.txt... ')
         disturbed = Disturbed.getInstance(self.wd)
+        from wepppy.nodb.mods.rap.rap_ts import _parse_fire_date
+        from wepppy.nodb.mods.rap.revegetation_inputs import publish_revegetation_input
+        content = None
         if disturbed.fire_date is not None:
-            with open(_join(self.runs_dir, 'firedate.txt'), 'w') as fp:
-                firedate = disturbed.fire_date
-                mo, da, yr = firedate.strip().replace('/', ' ').replace('-', ' ').split()
-                assert isint(mo), mo
-                assert isint(da), da
-                assert isint(yr), yr
-                fp.write(firedate)
+            fire_date = _parse_fire_date(disturbed.fire_date)
+            content = f"{fire_date.month} {fire_date.day} {fire_date.year}\n"
+        publish_revegetation_input(self.runs_dir, 'firedate.txt', content)
 
     @property
     def sol_versions(self) -> Set[str]:

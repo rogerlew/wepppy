@@ -67,3 +67,23 @@ Inspect per-OFE runoff, storage, ET and drainage: correct ownership can change
 heterogeneous histories materially. Do not treat the ownership correction as
 new retention defaults, thermal calibration or universal physical validation.
 No deployment or bulk regeneration accompanies the local release revision.
+
+## Specialized 9005 and RAP preparation
+
+The [specialized consumer contract](../schemas/specialized-revegetation-consumer-contract.md)
+is authoritative for the seven-field soil header, six cover bands, Gregorian
+fire date and reference-preserving dynamic behavior. Full `Wepp.prep_hillslopes`
+is required: private preparation helpers omit enabled companion files. Cover
+years must exactly match climate years; hydrated string year keys are normalized
+without changing saved data. Ordinary cover clears stale `simfire.txt`; leaving
+9005 clears specialized presence flags and dates. Saved fire-date text is retained,
+while emitted `firedate.txt` uses month, day and four-digit year.
+
+Changed prior flags, dates and cover files are retained in visible
+`revegetation-input-*` directories under `wepp/runs`; failed attempts remain visible
+with `.tmp` names. Archive/restore includes this evidence. Symlink destinations
+fail preparation, hardlinked files are replaced without truncating their source,
+and existing permissions are preserved. A failed preparation must be resolved
+before execution. No existing project is automatically regenerated or switched
+to a new executable. Reference fire/canopy/root quirks are deliberate compatibility
+exceptions; see ADR-0134 rather than inferring a scientific correction.

@@ -134,3 +134,58 @@ def test_twelve_ofe_cover_blocks_follow_numeric_identity(tmp_path, monkeypatch, 
     rows = (tmp_path / 'p1.cov').read_text().splitlines()[1:]
     assert len(rows) == 12 * 6
     assert [float(rows[i * 6]) for i in range(12)] == list(range(1, 13))
+
+
+@pytest.mark.parametrize('year_keys', [('2023', '2024'), (2023, 2024)])
+@pytest.mark.parametrize('fallback', [True, False])
+def test_single_ofe_missing_year_preserves_fallback(tmp_path, monkeypatch, year_keys, fallback):
+    rap = object.__new__(RAP_TS)
+    rap.wd = str(tmp_path)
+    rap.logger = logging.getLogger('tests.rap.fallback')
+    rap.data = {band: {year_keys[0]: {'101': 17.0}, year_keys[1]: {}}
+                for band in (RAP_Band.TREE, RAP_Band.SHRUB,
+                             RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                             RAP_Band.ANNUAL_FORB_AND_GRASS,
+                             RAP_Band.LITTER, RAP_Band.BARE_GROUND)}
+    monkeypatch.setattr(Wepp, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(_multi_ofe=False)))
+    monkeypatch.setattr(Disturbed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(fire_date=None)))
+    monkeypatch.setattr(Revegetation, 'tryGetInstance', classmethod(lambda cls, wd: None))
+    translator = SimpleNamespace(iter_wepp_sub_ids=lambda: [1], top=lambda wepp: 101)
+    monkeypatch.setattr(Watershed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(translator_factory=lambda: translator)))
+    (tmp_path / 'simfire.txt').write_text('old transformed activation')
+    rap.prep_cover(str(tmp_path), fallback=fallback)
+    rows = (tmp_path / 'p1.cov').read_text().splitlines()
+    assert rows[0].split() == ['2023', '2024']
+    assert all(list(map(float, row.split())) == [17.0, 17.0 if fallback else 0.0] for row in rows[1:])
+    assert not (tmp_path / 'simfire.txt').exists()
+    assert next(tmp_path.glob('revegetation-input-*/simfire.txt')).read_text() == 'old transformed activation'
+
+
+@pytest.mark.parametrize('saved,expected', [
+    ('06 01 24', '6 1 2024\n'), ('2024-02-29', '2 29 2024\n'),
+    ('06/01/2024', '6 1 2024\n'), (None, None),
+])
+def test_actual_firedate_writer_normalizes_and_clears(tmp_path, monkeypatch, saved, expected):
+    import wepppy.nodb.core.wepp as wepp_module
+    monkeypatch.setattr(wepp_module, 'require_feature_allowed', lambda *args: None)
+    monkeypatch.setattr(Disturbed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(fire_date=saved)))
+    holder = SimpleNamespace(wd=str(tmp_path), runs_dir=str(tmp_path), logger=logging.getLogger('test.firedate'))
+    (tmp_path / 'firedate.txt').write_text('prior date')
+    Wepp._prep_firedate(holder)
+    assert next(tmp_path.glob('revegetation-input-*/firedate.txt')).read_text() == 'prior date'
+    if expected is None:
+        assert not (tmp_path / 'firedate.txt').exists()
+    else:
+        assert (tmp_path / 'firedate.txt').read_text() == expected
+    assert saved == getattr(Disturbed.getInstance(str(tmp_path)), 'fire_date')
+
+
+def test_invalid_fire_date_preserves_prior_input(tmp_path, monkeypatch):
+    import wepppy.nodb.core.wepp as wepp_module
+    monkeypatch.setattr(wepp_module, 'require_feature_allowed', lambda *args: None)
+    monkeypatch.setattr(Disturbed, 'getInstance', classmethod(lambda cls, wd: SimpleNamespace(fire_date='2023-02-29')))
+    holder = SimpleNamespace(wd=str(tmp_path), runs_dir=str(tmp_path), logger=logging.getLogger('test.firedate'))
+    (tmp_path / 'firedate.txt').write_text('prior date')
+    with pytest.raises(ValueError):
+        Wepp._prep_firedate(holder)
+    assert (tmp_path / 'firedate.txt').read_text() == 'prior date'

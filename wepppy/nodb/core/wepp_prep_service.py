@@ -115,6 +115,10 @@ class WeppPrepService:
 
         if reveg:
             wepp._prep_revegetation()
+        else:
+            from wepppy.nodb.mods.rap.revegetation_inputs import publish_revegetation_input
+            for name in ('cancov.txt', 'simfire.txt', 'firedate.txt'):
+                publish_revegetation_input(wepp.runs_dir, name, None)
 
     def prep_managements(self, wepp: "Wepp", translator: Any) -> None:
         from wepppy.nodb.core import wepp as wepp_module

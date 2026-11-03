@@ -194,3 +194,16 @@ can change chunks without changing their directory metadata. Those changes can
 still evade the finalization check. Keep such indirect inputs stable during
 analysis and rerun after changing them. Existing native formats and strict
 publication checks remain supported; no recursive dependency guarantee is made.
+
+## Native specialized input contract
+
+9005/revegetation preparation requires a compatible specialized executable and
+complete hillslope preparation. The canonical
+[specialized consumer contract](../../../../docs/schemas/specialized-revegetation-consumer-contract.md)
+defines activation, exact climate-year coverage and the six cover bands. Both
+integer and hydrated string year keys are accepted. Saved fire dates retain their
+original text; emitted dates use month, day and four-digit year. Removing a fire
+date or transform retires stale activation inputs. Changed inputs and failed
+write attempts remain visible under `wepp/runs` for archive and diagnosis.
+Reference scientific behavior is preserved under ADR-0134; this compatibility
+work does not establish field calibration or change executable defaults.

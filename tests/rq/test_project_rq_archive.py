@@ -867,3 +867,28 @@ def test_pmet_identity_and_failed_attempt_survive_archive_restore(archive_rq_env
         assert (root / relative).read_bytes() == content
     pmetpara_prep(str(runs), 0.5, 0.8)
     assert (runs / 'p1.man').read_bytes() == expected['wepp/runs/p1.man']
+
+
+def test_revegetation_retired_and_failed_inputs_survive_archive_restore(archive_rq_environment):
+    from wepppy.nodb.mods.rap.revegetation_inputs import cover_output, publish_revegetation_input
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'demo'
+    runs = root / 'wepp/runs'
+    runs.mkdir(parents=True)
+    (runs / 'firedate.txt').write_text('6 1 24')
+    publish_revegetation_input(str(runs), 'firedate.txt', '6 1 2024\n')
+    with pytest.raises(RuntimeError):
+        with cover_output(str(runs), 'p1.cov') as stream:
+            stream.write('2024\npartial')
+            raise RuntimeError('retained failed cover')
+    expected = {str(path.relative_to(root)): path.read_bytes()
+                for path in runs.rglob('*') if path.is_file()}
+    project.archive_rq('demo', comment='MIPA-03 executable input history')
+    archive = next((root / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as z:
+        for relative, content in expected.items():
+            assert z.read(relative) == content
+    (runs / 'firedate.txt').write_text('later state')
+    project.restore_archive_rq('demo', archive.name)
+    for relative, content in expected.items():
+        assert (root / relative).read_bytes() == content

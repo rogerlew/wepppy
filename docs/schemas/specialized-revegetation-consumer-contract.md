@@ -164,11 +164,12 @@ Reject extra records and nonfinite values before dynamic consumption.
 
 Specialized producer destinations must be regular files or absent; reject symlinks
 and other file types. Never truncate a hardlinked destination. Changed/cleared
-existing flags or dates move by rename into a fresh visible
+existing flags, dates or cover files move by rename into a fresh visible
 `wepp/runs/revegetation-input-<unique>/` directory under their original basenames.
 Write replacements to visible exclusive temporary files and atomically replace
 only the requested destination. Unchanged bytes are a no-op; absent optional
 clears are a no-op. Failed attempts and retired files remain visible and included
 in existing archive/restore; do not remove their only useful copy after failure.
-No history path may traverse a symlink. A publication error fails preparation;
+Existing file modes remain unchanged when replacing records; new files honor the
+service umask. No history path may traverse a symlink. A publication error fails preparation;
 file existence alone cannot mark the deck ready.

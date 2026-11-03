@@ -520,9 +520,23 @@ starting at `ea5d4cdbd`. No branch switch.
    WEPPpy gates. Commit scoped results and push native as required. Close only
    demonstrated acceptance; no deployment/default switch/Rust promotion.
 
-Progress: scientific choice resolved; canonical checkpoint reviews underway.
+Progress: checkpoint reviews passed and standalone ancestors `c8f6ea854`/
+`ee9e73f8b` (hash confirmations `60ed676f9`/`db697ba20`) preceded production
+edits. Native model port committed `0d99afdfe`; reference snapshot byte handling
+corrected at `1ee6cd68c`. Independent correctness/security implementation reviews
+close their source findings. Focused native 320 and Python 75 tests pass. Eight
+development daily/hourly transformed/observed histories complete with exact
+observer off/on ordinary-output parity. Final matched build and broad WEPPpy
+suite are running; supported disposable 72-hill fork is preparing through the
+complete configured workflow.
 Discoveries: isolated reference GROW requires removal of unreachable CO2 and
 annual-only branches rather than importing unrelated management parameters.
 Decision: preserve the full reachable specialized numerical sequence, including
 known reference quirks and explicit failures; document, do not retune.
 Outcome: implementation/release validation pending; no fresh result inferred from r6.
+
+MIPA-03 discovery: cover tokens must parse directly to native REAL; a legal
+26-character value discriminates double rounding through REAL64. Corrected
+parser and BAND observer use stored REAL values. Historical reference fixtures
+need narrow `-text` attributes to preserve provenance hashes across checkout.
+Final release acceptance remains pending; development passes are not final-pair claims.

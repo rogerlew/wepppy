@@ -178,3 +178,13 @@ The operator answered on 2026-11-03 UTC: “preserve reference. that is anurag's
 proceeds under the proposed specialized consumer contract and ADR-0134, with
 independent checkpoint reviews underway. Preserve the bound reference's reachable
 specialized numerical sequence and quirks; no scientific correction is inferred.
+
+MIPA-03 reviewed standalone ancestors: WEPPpy `c8f6ea854`, native `ee9e73f8b`.
+Final hash confirmation follows in standalone review commits before implementation.
+Both independent contract reviews PASS; implementation now proceeds.
+
+MIPA-03 progress (2026-11-03 UTC): reference science explicitly preserved;
+checkpoint ancestors and native port `0d99afdfe` recorded in active plan.
+320 native focused / 75 Python focused tests pass; eight development histories
+complete with observation parity. Final build, broad suite and disposable
+configured-project validation in progress. No closure or deployment claim yet.

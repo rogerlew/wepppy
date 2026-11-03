@@ -66,6 +66,9 @@ __all__ = [
 ]
 
 
+from .revegetation_inputs import cover_output, publish_revegetation_input
+
+
 def _ordered_cover_ofes(data, years, topaz_id):
     bands = (RAP_Band.TREE, RAP_Band.SHRUB, RAP_Band.PERENNIAL_FORB_AND_GRASS,
              RAP_Band.ANNUAL_FORB_AND_GRASS, RAP_Band.LITTER, RAP_Band.BARE_GROUND)
@@ -79,18 +82,44 @@ def _ordered_cover_ofes(data, years, topaz_id):
     return ids
 
 
-def _parse_fire_year(fire_date: str) -> int:
-    """Parse fire-date strings used by Disturbed into a four-digit year."""
+def _parse_fire_date(fire_date: str) -> datetime:
+    """Parse the established Disturbed date formats without changing saved text."""
     normalized = str(fire_date).strip().replace('-', ' ').replace('/', ' ').replace('.', ' ')
     normalized = ' '.join(normalized.split())
 
     for fmt in ('%Y %m %d', '%m %d %Y', '%m %d %y'):
         try:
-            return datetime.strptime(normalized, fmt).year
+            return datetime.strptime(normalized, fmt)
         except ValueError:
             continue
 
     raise ValueError(f"Unsupported fire date format: {fire_date!r}")
+
+def _parse_fire_year(fire_date: str) -> int:
+    return _parse_fire_date(fire_date).year
+
+
+def _cover_data_by_year(data):
+    """Normalize hydrated and legacy year keys without altering band values."""
+    normalized = {}
+    expected = None
+    for band, mapping in data.items():
+        years = {}
+        for key, values in mapping.items():
+            text = str(key)
+            if not text.isdigit() or not 1 <= int(text) <= 9999:
+                raise ValueError(f"Invalid RAP calendar year: {key!r}")
+            year = int(text)
+            if year in years:
+                raise ValueError(f"Duplicate RAP calendar year: {key!r}")
+            years[year] = values
+        if expected is None:
+            expected = set(years)
+        elif set(years) != expected:
+            raise ValueError("RAP calendar years disagree across bands; rebuild cover.")
+        normalized[band] = years
+    return normalized
+
 
 YearKey: TypeAlias = int | str
 TopazId: TypeAlias = int | str
@@ -352,21 +381,21 @@ class RAP_TS(NoDbBase):
         if fire_date is not None and  cover_transform is not None:
             return self._prep_transformed_cover(runs_dir)
 
+        publish_revegetation_input(runs_dir, 'simfire.txt', None)
         self.logger.info('RAP_TS::prep_cover\n')
-        data = self.data
+        data = _cover_data_by_year(self.data)
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
-        with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
-            fp.write("")
+        publish_revegetation_input(runs_dir, 'cancov.txt', '')
 
         years = sorted([yr for yr in data[RAP_Band.TREE]])
 
         for wepp_id in translator.iter_wepp_sub_ids():
             topaz_id = str(translator.top(wepp=wepp_id))
 
-            with open(_join(runs_dir, f'p{wepp_id}.cov'), 'w') as fp:
+            with cover_output(runs_dir, f'p{wepp_id}.cov') as fp:
                 fp.write(' \t'.join([str(yr) for yr in years]))
                 fp.write('\n')
 
@@ -422,16 +451,14 @@ class RAP_TS(NoDbBase):
         cover_transform = reveg.cover_transform
         managements = landuse.managements
 
-        data = self.data
+        data = _cover_data_by_year(self.data)
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
-        with open(_join(runs_dir, 'simfire.txt'), 'w') as fp:
-            fp.write("")
+        publish_revegetation_input(runs_dir, 'simfire.txt', '')
 
-        with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
-            fp.write("")
+        publish_revegetation_input(runs_dir, 'cancov.txt', '')
 
         years = sorted([yr for yr in data[RAP_Band.TREE]])
         fire_year = _parse_fire_year(fire_date)
@@ -440,7 +467,7 @@ class RAP_TS(NoDbBase):
         for wepp_id in translator.iter_wepp_sub_ids():
             topaz_id = str(translator.top(wepp=wepp_id))
 
-            with open(_join(runs_dir, f'p{wepp_id}.cov'), 'w') as fp:
+            with cover_output(runs_dir, f'p{wepp_id}.cov') as fp:
                 fp.write(' \t'.join([str(yr) for yr in years]))
                 fp.write('\n')
 
