@@ -145,7 +145,7 @@ WEPPcloud collects only the information necessary to operate the platform and su
 
 **How TTL resets.** When a project is accessed, WEPPcloud refreshes the project's last-access timestamp and extends the expiration window by another 90 days.
 
-**Disabling TTL deletion.** Logged-in users with `PowerUser`, `Admin`, or `Root` permissions can disable TTL deletion for a project from the run header: **More -> Disable TTL Deletion**. If TTL deletion is turned back on, the project starts a fresh 90-day TTL window.
+**Disabling TTL deletion.** Every logged-in user who can access a project can disable TTL deletion from the run header: **More -> Disable TTL Deletion**. No special role is required. If TTL deletion is turned back on, the project starts a fresh 90-day TTL window.
 
 **Usage data.** WEPPcloud records basic access information such as login timestamps and run access counts for operational monitoring. This data is used to maintain service reliability and track platform usage metrics displayed on the landing page.
 

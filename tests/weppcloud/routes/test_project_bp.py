@@ -3,12 +3,14 @@ from __future__ import annotations
 from dataclasses import replace
 import inspect
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict
 
 import pytest
 
 pytest.importorskip("flask")
-from flask import Flask
+from flask import Flask, abort, g
+from flask_principal import Identity, RoleNeed
 from flask_login import LoginManager
 from werkzeug.exceptions import Forbidden
 
@@ -168,6 +170,131 @@ def test_setname_accepts_json_payload(project_client):
 
     controller = RonStub.getInstance(run_dir)
     assert controller.name == "Watershed Scenario"
+
+
+@pytest.fixture()
+def ttl_client(project_client):
+    client, _, _, run_dir, _ = project_client
+    # Keep the real Flask-Security role decorators executable so a restrictive
+    # decorator regression returns 403 instead of failing on missing app setup.
+    client.application.extensions['security'] = SimpleNamespace(
+        _unauthz_handler=lambda *args: abort(403),
+    )
+
+    @client.application.errorhandler(Forbidden)
+    def forbidden_response(error):
+        return error.get_response()
+
+    @client.application.before_request
+    def load_identity():
+        identity = Identity(project_module.current_user.get_id())
+        identity.provides.update(RoleNeed(role) for role in project_module.current_user.roles)
+        g.identity = identity
+
+    return client, Path(run_dir)
+
+
+@pytest.mark.parametrize('roles', [set(), {'User'}, {'Dev'}, {'PowerUser'}, {'Admin'}, {'Root'}])
+def test_ttl_toggle_available_to_every_authenticated_role(ttl_client, roles):
+    import json
+
+    client, run_dir = ttl_client
+    project_module.current_user.roles = roles
+    url = f'/runs/{RUN_ID}/{CONFIG}/tasks/set_ttl_disabled'
+    for disabled in (True, False):
+        response = client.post(url, json={'ttl_disabled': disabled})
+        assert response.status_code == 200
+        assert response.get_json()['Content']['ttl_disabled'] is disabled
+        saved = json.loads((run_dir / 'TTL').read_text())
+        assert saved['user_disabled'] is disabled
+        assert saved['policy'] == ('disabled' if disabled else 'rolling_90d')
+        assert saved['disabled_by_user_id'] == ('test-user-id' if disabled else None)
+
+
+def test_ttl_toggle_rejects_anonymous_user(ttl_client):
+    client, run_dir = ttl_client
+    project_module.current_user.is_authenticated = False
+    response = client.post(
+        f'/runs/{RUN_ID}/{CONFIG}/tasks/set_ttl_disabled', json={'ttl_disabled': True},
+    )
+    assert response.status_code == 403
+    assert not (run_dir / 'TTL').exists()
+
+
+def test_ttl_toggle_preserves_run_authorization(ttl_client, monkeypatch):
+    client, run_dir = ttl_client
+    helpers = __import__('wepppy.weppcloud.utils.helpers', fromlist=['authorize'])
+
+    def denied(runid, config):
+        raise Forbidden()
+
+    monkeypatch.setattr(helpers, 'authorize', denied)
+    response = client.post(
+        f'/runs/{RUN_ID}/{CONFIG}/tasks/set_ttl_disabled', json={'ttl_disabled': True},
+    )
+    assert response.status_code == 403
+    assert not (run_dir / 'TTL').exists()
+
+
+@pytest.mark.parametrize('payload', [{}, {'ttl_disabled': None}, {'ttl_disabled': 'invalid'}])
+def test_ttl_toggle_invalid_payload_preserves_file(ttl_client, payload):
+    client, run_dir = ttl_client
+    url = f'/runs/{RUN_ID}/{CONFIG}/tasks/set_ttl_disabled'
+    assert client.post(url, json={'ttl_disabled': True}).status_code == 200
+    before = (run_dir / 'TTL').read_bytes()
+    response = client.post(url, json=payload)
+    assert response.get_json()['error']
+    assert (run_dir / 'TTL').read_bytes() == before
+
+
+def test_ttl_toggle_real_authorization_csrf_and_persistence(tmp_path, monkeypatch):
+    import importlib
+    import json
+    from flask_login import current_user
+    from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+    from wepppy.weppcloud.utils import helpers
+
+    app_module = importlib.import_module('wepppy.weppcloud.app')
+    app = Flask(__name__)
+    app.config.update(TESTING=True, SECRET_KEY='test-only-ttl-secret')
+    app.register_blueprint(project_module.project_bp)
+    login = LoginManager(app)
+    CSRFProtect(app)
+    app.register_error_handler(CSRFError, lambda exc: ({'error': str(exc)}, 400))
+    app.register_error_handler(Forbidden, lambda exc: ({'error': str(exc)}, 403))
+    user = SimpleNamespace(is_authenticated=True, id=12, has_role=lambda role: False)
+    login.request_loader(lambda request: user)
+    monkeypatch.setattr(project_module, 'current_user', current_user)
+    monkeypatch.setattr(helpers, 'get_wd', lambda *args, **kw: str(tmp_path))
+    monkeypatch.setattr(project_module, 'load_run_context', lambda *args: SimpleNamespace(active_root=tmp_path))
+    owners = [object()]
+    monkeypatch.setattr(app_module, 'get_run_owners', lambda runid: owners)
+
+    @app.get('/ttl-csrf')
+    def token():
+        return {'token': generate_csrf()}
+
+    client = app.test_client()
+    headers = {'X-CSRFToken': client.get('/ttl-csrf').json['token']}
+    url = '/runs/ttl-private/cfg/tasks/set_ttl_disabled'
+    path = tmp_path / 'TTL'
+    assert client.post(url, json={'ttl_disabled': True}, headers=headers).status_code == 403
+    assert not path.exists()
+    owners[:] = [user]
+    assert client.post(url, json={'ttl_disabled': True}).status_code == 400
+    assert not path.exists()
+    assert client.post(url, json={'ttl_disabled': True}, headers=headers).status_code == 200
+    saved = json.loads(path.read_text())
+    assert saved['user_disabled'] is True
+    assert saved['disabled_by_user_id'] == '12'
+    owners[:] = [object()]
+    (tmp_path / 'PUBLIC').touch()
+    assert client.post(url, json={'ttl_disabled': False}, headers=headers).status_code == 200
+    assert json.loads(path.read_text())['user_disabled'] is False
+    before = path.read_bytes()
+    user.is_authenticated = False
+    assert client.post(url, json={'ttl_disabled': True}, headers=headers).status_code == 403
+    assert path.read_bytes() == before
 
 
 def test_clear_locks_requires_privileged_role_and_post(project_client, monkeypatch: pytest.MonkeyPatch):

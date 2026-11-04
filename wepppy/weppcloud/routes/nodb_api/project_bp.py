@@ -680,9 +680,11 @@ def task_set_public(runid, config):
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_ttl_disabled', methods=['POST'])
-@roles_required('Admin', 'Root', 'PowerUser')
 @authorize_and_handle_with_exception_factory
 def task_set_ttl_disabled(runid, config):
+    if not bool(getattr(current_user, 'is_authenticated', False)):
+        abort(403)
+
     payload = parse_request_payload(request, boolean_fields={'ttl_disabled'})
     state = payload.get('ttl_disabled', None)
 

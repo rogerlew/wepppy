@@ -146,7 +146,7 @@
                        {% if current_ron.public %}checked{% endif %}>
                 <span>Public</span>
               </label>
-              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
+              {% if user.is_authenticated %}
               <label class="wc-run-header__toggle">
                 <input id="checkbox_ttl_disabled"
                        type="checkbox"

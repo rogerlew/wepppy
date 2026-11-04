@@ -5206,10 +5206,11 @@ def test_developer_soil_inputs_remove_only_maxima(jinja_env):
 
 
 @pytest.mark.parametrize('template_name', ['header/_run_header_fixed.htm', 'reports/_base_report.htm'])
-def test_dev_only_header_does_not_grant_ttl_control(jinja_env, template_name):
-    user = SimpleNamespace(has_role=lambda role: role == 'Dev', roles=['Dev'], is_authenticated=True)
+@pytest.mark.parametrize('roles', [[], ['User'], ['Dev'], ['PowerUser'], ['Admin'], ['Root']])
+@pytest.mark.parametrize('authenticated', [True, False])
+def test_ttl_header_control_available_to_all_signed_in_users(jinja_env, template_name, roles, authenticated):
+    user = SimpleNamespace(has_role=lambda role: role in roles, roles=roles, is_authenticated=authenticated)
     rendered = jinja_env.get_template(template_name).render(
         user=user, current_user=user,
         request=SimpleNamespace(view_args={'runid': 'test-run', 'config': 'test-config'}))
-    assert 'data-modal-open="puModal"' in rendered
-    assert 'id="checkbox_ttl_disabled"' not in rendered
+    assert ('id="checkbox_ttl_disabled"' in rendered) is authenticated

@@ -23,7 +23,7 @@ they do not have an active deletion time to display.
 
 ## Disabling TTL Deletion
 
-The existing **More → Disable TTL Deletion** control is available only to users
-with the required PowerUser, Admin, or Root permission. Turning TTL deletion back
+The **More → Disable TTL Deletion** control is available to every signed-in user
+who can access the project. No special role is required. Turning TTL deletion back
 on starts a fresh rolling TTL window. This guide explains the displayed status;
 it does not change project retention or restore deleted projects.

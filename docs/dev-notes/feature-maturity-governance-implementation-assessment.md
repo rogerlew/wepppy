@@ -107,7 +107,7 @@ Run-token minting remains Admin/Root-only. Do not accidentally extend it when ad
 
 The [browse auth contract][browsecontract] says grouped routes must authorize against an identifier claim, but the user-token branch skips that check. Reconcile both this contract discrepancy and the intended legacy privileged-user audience before enabling self-service. Do not silently remove current user access or assume that new collaborator groups automatically constrain these routes.
 
-There is an additional existing mismatch: the header exposes the TTL toggle to PowerUser/Admin/Root using OR, but `task_set_ttl_disabled` uses `roles_required('Admin', 'Root', 'PowerUser')`, which requires all three. This was confirmed against the installed Flask-Security decorator documentation. A PowerUser-only account cannot use that visible control. Reconcile the exact intended TTL audience in its existing contract before changing it.
+The assessment found a TTL mismatch: the header used PowerUser/Admin/Root OR, while `task_set_ttl_disabled` required all three roles. On 2026-11-03 the operator clarified that both restrictions were wrong: every signed-in user with existing project access must be able to use the control. The [project TTL control contract](../ui-docs/contracts/project-ttl-control-contract.md) records the corrected audience and local repair evidence; TTL access does not depend on PowerUser self-service. Production rollout remains separate from local validation.
 
 ### No persisted collaborator group or grant model exists
 

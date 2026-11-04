@@ -60,7 +60,8 @@ unselected runs. Timestamp values are rendered with DOM text nodes, never HTML.
 The `usersum.weppcloud.run_ttl_deletion` document has `min_role: user`, appears
 in the generated Usersum catalog/navigation tree, and is resolvable by the
 least-privileged authenticated Runs-catalog user. It explains rolling deletion,
-access refresh, disabled TTL, and the existing role-gated control. It does not
+access refresh, disabled TTL, and the control available to all signed-in users
+under the [project TTL control contract](project-ttl-control-contract.md). It does not
 guarantee an exact retention duration beyond the displayed per-run timestamp.
 
 ## PostgreSQL projection amendment (specified; implementation pending)
