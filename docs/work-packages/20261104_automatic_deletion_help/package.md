@@ -1,6 +1,7 @@
 # Automatic deletion help
 
-Status: active. Scope: understandable project deletion controls, state and help.
+Status: completed locally, 2026-11-04. Implementation is in the containing commit;
+remote push is verified in the final handoff. No deployment. Scope: understandable project deletion controls, state and help.
 
 User approved the assessment on 2026-11-04, with exact labels “Disable automatic
 deletion”, “Automatic deletion is enabled for [readable date]”, and “Automatic

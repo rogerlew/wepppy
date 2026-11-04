@@ -42,9 +42,14 @@ def public_row(row, owner="<anonymous>", now=None, map_only=False):
     else:
         value.update({key: row[key] for key in ("date_created", "last_modified", "owner_id")})
         value["owner"] = owner
-        value["ttl_deletion_at"] = (_iso(row["ttl_deletion_at"])
-                                    if state == "current" and row["ttl_state"] == "ready" and _recent(row["ttl_observed_at"], now)
-                                    else None)
+        ttl_current = state == "current" and row["ttl_state"] == "ready" and _recent(row["ttl_observed_at"], now)
+        value["ttl_deletion_at"] = _iso(row["ttl_deletion_at"]) if ttl_current else None
+        value["ttl_disabled"] = None
+        if ttl_current:
+            if row["ttl_policy"] in {"disabled", "excluded"}:
+                value["ttl_disabled"] = True
+            elif row["ttl_policy"] == "rolling_90d" and row["ttl_deletion_at"] is not None:
+                value["ttl_disabled"] = False
     return value
 
 

@@ -463,7 +463,7 @@ The rationale is to make scientific meaning discoverable before users combine fi
 
 ## Automatic deletion help (2026-11-04)
 
-Implementation pending checkpoint. Preserve the existing
+Implemented and locally validated after checkpoint `c62567f1c`; deployment separate. Preserve the existing
 `usersum.weppcloud.run_ttl_deletion` identity and URL, but title the guide **Keep
 your project from being automatically deleted** and place it under **Managing
 projects**. Explain the inactivity period, exact **Disable automatic deletion**

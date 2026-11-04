@@ -2,7 +2,7 @@
   <div class="wc-header__inner wc-usersum-header-inner">
     <a class="wc-brand" href="{{ url_for_run('weppcloud_site.index') }}">WEPPcloud</a>
     <div class="wc-header__nav">
-      <a class="wc-link" href="{{ url_for_run('usersum.usersum_index') }}">UserSummary Docs</a>
+      <a class="wc-link" href="{{ url_for_run('usersum.usersum_index') }}">WEPPcloud Help</a>
     </div>
     <div class="wc-header__tools">
       {% include 'header/_theme_switcher.htm' %}
@@ -15,7 +15,7 @@
               name="role"
               class="wc-theme-switcher__select wc-run-header__input"
               onchange="if (this.form.requestSubmit) { this.form.requestSubmit(); } else { this.form.submit(); }"
-              aria-label="Usersum role discovery filter"
+              aria-label="Help audience filter"
             >
               {% for role in header_role_options %}
                 <option value="{{ role }}" {% if role == header_selected_role %}selected{% endif %}>{{ role }}</option>
@@ -30,8 +30,8 @@
             type="search"
             name="q"
             value="{{ header_search_query }}"
-            placeholder="Search docs..."
-            aria-label="Search docs"
+            placeholder="Search help..."
+            aria-label="Search help"
           >
         </label>
         <button type="submit" class="pure-button">Search</button>

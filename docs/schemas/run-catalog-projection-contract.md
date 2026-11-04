@@ -900,7 +900,7 @@ rollback proof, and explicit legacy-reader retirement disposition.
 
 ## Automatic deletion presentation amendment (2026-11-04)
 
-Implementation pending checkpoint. Catalog JSON adds nullable `ttl_disabled`,
+Implemented and locally validated after checkpoint `c62567f1c`; deployment separate. Catalog JSON adds nullable `ttl_disabled`,
 derived only from existing projected `ttl_policy` when the row is current,
 `ttl_state` is ready, and the TTL observation passes the same freshness check as
 `ttl_deletion_at`. Disabled/excluded maps to true; active with valid expiration

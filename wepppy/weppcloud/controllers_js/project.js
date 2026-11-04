@@ -831,6 +831,7 @@ var Project = (function () {
             readonly: readToggleState(dom, READONLY_SELECTOR, false),
             public: readToggleState(dom, PUBLIC_SELECTOR, false),
             ttlDisabled: readToggleState(dom, TTL_DISABLED_SELECTOR, false),
+            ttlSaving: false,
             mods: Array.isArray(runContext.mods && runContext.mods.list)
                 ? runContext.mods.list.slice()
                 : []
@@ -1561,24 +1562,52 @@ var Project = (function () {
         };
         project.setPublic = project.set_public;
 
+        function updateDeletionStatus(ttl) {
+            var message = "Automatic deletion status is unavailable";
+            if (ttl && (ttl.policy === "disabled" || ttl.policy === "excluded")) {
+                message = "Automatic deletion is disabled";
+            } else if (ttl && ttl.policy === "rolling_90d" && ttl.expires_at) {
+                var date = new Date(ttl.expires_at);
+                if (!isNaN(date.getTime())) {
+                    message = "Automatic deletion is enabled for " + date.toLocaleString("en-US", {
+                        year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "UTC", timeZoneName: "short"
+                    });
+                }
+            }
+            dom.qsa("[data-project-ttl-status]").forEach(function (element) {
+                element.textContent = message;
+            });
+            return message;
+        }
+
+        dom.qsa("[data-project-ttl-status]").slice(0, 1).forEach(function (element) {
+            updateDeletionStatus({ policy: element.dataset.ttlPolicy, expires_at: element.dataset.ttlExpiresAt });
+        });
+
         project.set_ttl_disabled = function (stateValue, options) {
             options = options || {};
+            if (state.ttlSaving) {
+                return Promise.resolve(null);
+            }
             var desiredState = Boolean(stateValue);
-            var previous = readToggleState(dom, TTL_DISABLED_SELECTOR, state.ttlDisabled);
+            var previous = state.ttlDisabled;
+            state.ttlSaving = true;
+            dom.qsa(TTL_DISABLED_SELECTOR).forEach(function (element) { element.disabled = true; });
 
             return http.postJson(url_for_run("tasks/set_ttl_disabled"), { ttl_disabled: desiredState }).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
-                    syncToggleState(dom, TTL_DISABLED_SELECTOR, desiredState);
-                    state.ttlDisabled = desiredState;
+                    var content = response.Content || response.content || response;
+                    var savedState = content.ttl && typeof content.ttl.user_disabled === "boolean"
+                        ? content.ttl.user_disabled : desiredState;
+                    syncToggleState(dom, TTL_DISABLED_SELECTOR, savedState);
+                    state.ttlDisabled = savedState;
+                    var deletionMessage = updateDeletionStatus(content.ttl);
                     if (options.notify !== false) {
-                        var message = desiredState
-                            ? "TTL deletion disabled for this project."
-                            : "TTL deletion re-enabled for this project.";
-                        project.notifyCommandBar(message);
+                        project.notifyCommandBar(deletionMessage + ".");
                     }
                     emitEvent(emitter, "project:ttl-disabled:changed", {
-                        ttlDisabled: desiredState,
+                        ttlDisabled: state.ttlDisabled,
                         previous: previous,
                         response: response
                     });
@@ -1588,7 +1617,7 @@ var Project = (function () {
                         project.pushResponseStacktrace(project, response);
                     }
                     if (options.notify !== false) {
-                        project.notifyCommandBar("Error updating TTL deletion state.", { duration: null });
+                        project.notifyCommandBar("Couldn’t confirm this change. Reload the page to check the automatic deletion setting.", { duration: null });
                     }
                     emitEvent(emitter, "project:ttl-disabled:update:failed", {
                         attempted: desiredState,
@@ -1600,15 +1629,18 @@ var Project = (function () {
             }).catch(function (error) {
                 syncToggleState(dom, TTL_DISABLED_SELECTOR, previous);
                 if (options.notify !== false) {
-                    project.notifyCommandBar("Error updating TTL deletion state.", { duration: null });
+                    project.notifyCommandBar("Couldn’t confirm this change. Reload the page to check the automatic deletion setting.", { duration: null });
                 }
-                notifyError("Error updating TTL deletion state", error);
+                notifyError("Couldn’t confirm the automatic deletion setting", error);
                 emitEvent(emitter, "project:ttl-disabled:update:failed", {
                     attempted: desiredState,
                     previous: previous,
                     error: error
                 });
                 return null;
+            }).finally(function () {
+                state.ttlSaving = false;
+                dom.qsa(TTL_DISABLED_SELECTOR).forEach(function (element) { element.disabled = false; });
             });
         };
         project.setTtlDisabled = project.set_ttl_disabled;

@@ -280,9 +280,9 @@ def test_runs2_template_requests_catalog_with_ron_meta() -> None:
 
     assert "function buildRunsCatalogUrl()" in template
     assert "params.set('include_ron_meta', '1');" in template
-    assert "{{ sortable_header('TTL Deletion', 'last_modified') }}" in template
+    assert '<th scope="col">Automatic deletion</th>' in template
     assert "runsTtlDeletionHelpUrl" in template
-    assert "TTL Deletion: " in template
+    assert "Automatic deletion is enabled for " in template
     assert "Last Modified: " in template
     assert "document.createElement('time')" in template
     assert 'id="runs-map-canvas" class="wc-map__canvas" role="application"' not in template

@@ -81,7 +81,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.profile_jwt_dataset_access_python_r": "Shows how advanced users can access WEPPcloud datasets programmatically from Python or R.",
     "usersum.weppcloud.references": "Collects the core technical and scientific references behind WEPPcloud and related workflows.",
     "usersum.weppcloud.rq_engine": "Documents the queue-backed execution layer that runs background jobs and asynchronous workflows.",
-    "usersum.weppcloud.run_ttl_deletion": "Explains when an active project is scheduled for TTL deletion, how access refreshes the timer, and why disabled projects show Last Modified instead.",
+    "usersum.weppcloud.run_ttl_deletion": "Learn how long projects are saved, how to disable automatic deletion, and how to check that your setting was saved.",
     "usersum.weppcloud.sbs_map_preparation": "Explains how to prepare a soil burn severity raster for upload, including supported raster styles, validation checks, and common fixes.",
     "usersum.weppcloud.user_guide": "Provides a broader tour of the WEPPcloud interface, workflows, and expected user actions.",
     "usersum.weppcloud.models.wepp": "Explains when to use the core WEPP model, how to interpret runoff and sediment outputs, and what limits still matter.",
@@ -597,7 +597,7 @@ def usersum_index():
     return _render_with_usersum_shell(
         "usersum/index.htm",
         caller_max_role=caller_max_role,
-        title="WEPPcloud UserSummary Documentation",
+        title="WEPPcloud Help",
     )
 
 
@@ -611,7 +611,7 @@ def feature_catalog():
         configs=load_config_registry(),
         role_audiences={role: sorted(audience) for role, audience in ROLE_AUDIENCES.items()},
         breadcrumbs=[
-            {"title": "Usersum", "href": url_for_run("usersum.usersum_index")},
+            {"title": "Help", "href": url_for_run("usersum.usersum_index")},
             {"title": "Feature catalog", "href": None},
         ],
     )
@@ -1143,7 +1143,7 @@ def usersum_search():
     return _render_with_usersum_shell(
         "usersum/search.htm",
         caller_max_role=caller_max_role,
-        title="Usersum Search",
+        title="Search help",
         query=query,
         selected_role=role_ceiling,
         header_selected_role=role_ceiling,

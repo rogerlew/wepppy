@@ -141,7 +141,7 @@
               {{ sortable_header('Config', 'config') }}
               <th scope="col">Link</th>
               {{ sortable_header('Creation date', 'date_created') }}
-              {{ sortable_header('TTL Deletion', 'last_modified') }}
+              <th scope="col">Automatic deletion</th>
               <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
             </tr>
           </thead>
@@ -421,23 +421,32 @@
     appendCell(formatOptionalValue(run.date_created));
 
     const lifecycleCell = document.createElement('td');
-    const lifecycleTime = document.createElement('time');
-    if (run.ttl_deletion_at) {
-      lifecycleCell.append('TTL Deletion: ');
+    if (run.ttl_disabled === true) {
+      lifecycleCell.append('Automatic deletion is disabled');
+    } else if (run.ttl_deletion_at) {
+      lifecycleCell.append('Automatic deletion is enabled for ');
+      const lifecycleTime = document.createElement('time');
       lifecycleTime.dateTime = String(run.ttl_deletion_at);
-      lifecycleTime.textContent = formatOptionalValue(run.ttl_deletion_at);
+      lifecycleTime.textContent = new Date(run.ttl_deletion_at).toLocaleString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
+      });
       lifecycleCell.appendChild(lifecycleTime);
-      lifecycleCell.append(' ');
-      const ttlHelpLink = document.createElement('a');
-      ttlHelpLink.href = runsTtlDeletionHelpUrl;
-      ttlHelpLink.textContent = 'Learn More';
-      lifecycleCell.appendChild(ttlHelpLink);
     } else {
-      lifecycleCell.append('Last Modified: ');
-      lifecycleTime.dateTime = run.last_modified ? String(run.last_modified) : '';
-      lifecycleTime.textContent = formatOptionalValue(run.last_modified);
-      lifecycleCell.appendChild(lifecycleTime);
+      lifecycleCell.append('Automatic deletion status is unavailable');
+      if (run.last_modified) {
+        lifecycleCell.appendChild(document.createElement('br'));
+        lifecycleCell.append('Last Modified: ');
+        const modifiedTime = document.createElement('time');
+        modifiedTime.dateTime = String(run.last_modified);
+        modifiedTime.textContent = formatOptionalValue(run.last_modified);
+        lifecycleCell.appendChild(modifiedTime);
+      }
     }
+    lifecycleCell.appendChild(document.createElement('br'));
+    const ttlHelpLink = document.createElement('a');
+    ttlHelpLink.href = runsTtlDeletionHelpUrl;
+    ttlHelpLink.textContent = 'How to keep your project';
+    lifecycleCell.appendChild(ttlHelpLink);
     row.appendChild(lifecycleCell);
 
     const selectCell = document.createElement('td');

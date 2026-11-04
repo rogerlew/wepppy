@@ -50,14 +50,14 @@ describe("Runs lifecycle cell", () => {
         });
         const lifecycleCell = row.children[6];
 
-        expect(lifecycleCell.textContent).toBe("TTL Deletion: 2026-12-31T00:00:00Z Learn More");
+        expect(lifecycleCell.textContent).toBe("Automatic deletion is enabled for Dec 31, 2026, 12:00 AM UTCHow to keep your project");
         expect(lifecycleCell.querySelector("time").dateTime).toBe("2026-12-31T00:00:00Z");
         expect(lifecycleCell.querySelector("a").getAttribute("href")).toBe(
             "/weppcloud/usersum/doc/usersum.weppcloud.run_ttl_deletion"
         );
     });
 
-    test("renders Last Modified without a policy link when TTL is inactive", () => {
+    test("keeps unknown status distinct from disabled and provides help", () => {
         const buildRunRow = loadBuildRunRow();
         const row = buildRunRow({
             runid: "disabled-run",
@@ -68,9 +68,15 @@ describe("Runs lifecycle cell", () => {
         });
         const lifecycleCell = row.children[6];
 
-        expect(lifecycleCell.textContent).toBe("Last Modified: 2026-07-20T00:00:00Z");
+        expect(lifecycleCell.textContent).toBe("Automatic deletion status is unavailableLast Modified: 2026-07-20T00:00:00ZHow to keep your project");
         expect(lifecycleCell.querySelector("time").dateTime).toBe("2026-07-20T00:00:00Z");
-        expect(lifecycleCell.querySelector("a")).toBeNull();
+        expect(lifecycleCell.querySelector("a").textContent).toBe("How to keep your project");
+    });
+
+    test("shows confirmed disabled policy without an expiration", () => {
+        const row = loadBuildRunRow()({ runid: "kept", config: "cfg", ttl_disabled: true });
+        expect(row.children[6].textContent).toBe("Automatic deletion is disabledHow to keep your project");
+        expect(row.children[6].querySelector("time")).toBeNull();
     });
 
     test("keeps the help URL deployment-prefix-aware in Jinja", () => {

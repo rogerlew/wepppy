@@ -29,7 +29,7 @@
   </ul>
 {% endmacro %}
 
-{% block title %}{{ title or "WEPPcloud UserSummary Documentation" }}{% endblock %}
+{% block title %}{{ title or "WEPPcloud Help" }}{% endblock %}
 
 {% block site_header %}
   {% include "usersum/header.htm" %}
@@ -417,7 +417,7 @@
 
 {% block body %}
 <div class="wc-usersum-layout">
-  <aside class="wc-usersum-sidebar" aria-label="Usersum navigation">
+  <aside class="wc-usersum-sidebar" aria-label="Help navigation">
     <p class="wc-usersum-nav-title">Documentation</p>
     {{ render_nav(nav_tree) }}
   </aside>

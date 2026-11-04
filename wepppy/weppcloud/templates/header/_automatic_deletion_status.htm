@@ -1,0 +1,13 @@
+{% set deletion_policy = current_ttl.policy if current_ttl else none %}
+<span class="wc-run-header__meta" data-project-ttl-status
+      data-ttl-policy="{{ deletion_policy or '' }}"
+      data-ttl-expires-at="{{ current_ttl.expires_at if current_ttl and current_ttl.expires_at else '' }}"
+      aria-live="polite">
+  {% if deletion_policy in ['disabled', 'excluded'] %}
+  Automatic deletion is disabled
+  {% elif deletion_policy == 'rolling_90d' and current_ttl.expires_at %}
+  Automatic deletion is enabled for {{ current_ttl.expires_at }}
+  {% else %}
+  Automatic deletion status is unavailable
+  {% endif %}
+</span>

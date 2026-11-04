@@ -1,4 +1,4 @@
-Active: [Automatic deletion help](docs/work-packages/20261104_automatic_deletion_help/package.md) — operator-approved plain-language controls, status and discoverability; scoped validation only.
+Completed locally: [Automatic deletion help](docs/work-packages/20261104_automatic_deletion_help/package.md) — operator wording, accurate saved status and contextual/searchable help; scoped tests and independent reviews pass. No deployment.
 
 Active repair: [RedisPrep atomic ordered snapshots](docs/work-packages/20261031_redisprep_ordered_snapshots/package.md) — implemented and independently reviewed; local NFS/consumer checks pass. Broad continuation: 8,619 passed / 295 skipped; production parity remains a rollout hold. No deployment.
 

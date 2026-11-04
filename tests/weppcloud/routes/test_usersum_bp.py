@@ -355,7 +355,7 @@ def test_usersum_doc_route_renders_run_ttl_deletion_guide_from_manifest(
 
     assert response.status_code == 200
     body = response.get_data(as_text=True)
-    assert "Project TTL Deletion" in body
+    assert "Keep your project from being automatically deleted" in body
     assert "Last Modified" in body
 
 
@@ -368,7 +368,7 @@ def test_usersum_doc_route_renders_run_ttl_deletion_guide_for_privileged_user(
     response = usersum_client.get("/usersum/doc/usersum.weppcloud.run_ttl_deletion")
 
     assert response.status_code == 200
-    assert "Project TTL Deletion" in response.get_data(as_text=True)
+    assert "Keep your project from being automatically deleted" in response.get_data(as_text=True)
 
 
 def test_usersum_doc_route_renders_weppcloud_calibration_guidance(usersum_client) -> None:
@@ -617,7 +617,8 @@ def test_usersum_search_page_renders_results(usersum_client) -> None:
     assert response.status_code == 200
 
     body = response.get_data(as_text=True)
-    assert "Usersum Search" in body
+    assert "<title>Search help</title>" in body
+    assert "<h1>Search help</h1>" in body
     assert "/usersum/doc/usersum.weppcloud.mods_overview" in body
 
 
@@ -726,6 +727,37 @@ def test_water_guides_are_user_visible_in_fresh_catalog(usersum_client, monkeypa
             assert "Role:" in body
             assert runtime_catalog.load_runtime_catalog(usersum_base_dir=base, repo_root=root).docs_by_id["usersum.weppcloud." + doc_id]["min_role"] == "user"
             assert "Understanding water balance and runoff" in body
+    finally:
+        usersum_routes._catalog.cache_clear()
+        runtime_catalog.load_runtime_catalog.cache_clear()
+
+
+@pytest.mark.parametrize('query', ['keep my project', 'stop deletion', 'how long are projects saved'])
+def test_automatic_deletion_help_is_discoverable_by_user_task(usersum_client, monkeypatch, tmp_path, query):
+    from wepppy.weppcloud.usersum_docs.docs_contracts import load_and_validate_contracts
+    from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
+
+    root = Path(__file__).resolve().parents[3]
+    base = root / 'wepppy/weppcloud/routes/usersum'
+    contracts = load_and_validate_contracts(base_dir=base, repo_root=root, require_local_files=True, require_vendor_files=True)
+    index_path = tmp_path / 'docs_index.json'
+    write_generated_index(build_generated_index(contracts, repo_root=root), index_path)
+    monkeypatch.setattr(runtime_catalog, '_doc_index_path', lambda _base: index_path)
+    usersum_client.application.config['USERSUM_SEARCH_DISABLE_POSTGRES'] = 'true'
+    runtime_catalog.load_runtime_catalog.cache_clear()
+    usersum_routes._catalog.cache_clear()
+    try:
+        response = usersum_client.get('/usersum/api/search', query_string={'q': query, 'role': 'user'})
+        assert response.status_code == 200
+        assert 'usersum.weppcloud.run_ttl_deletion' in {row['doc_id'] for row in response.json['results']}
+        response = usersum_client.get('/usersum/doc/usersum.weppcloud.run_ttl_deletion')
+        assert response.status_code == 200
+        body = response.get_data(as_text=True)
+        assert 'Managing projects' in body
+        assert 'Disable automatic deletion' in body
+        assert 'Automatic deletion is disabled' in body
+        assert 'WEPPcloud Help' in body
+        assert 'Search help' in body
     finally:
         usersum_routes._catalog.cache_clear()
         runtime_catalog.load_runtime_catalog.cache_clear()

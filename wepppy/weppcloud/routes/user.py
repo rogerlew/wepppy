@@ -282,41 +282,49 @@ def _catalog_meta_from_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "last_modified": row.get("last_modified"),
         "owner_id": row.get("owner_id"),
         "config": row.get("config"),
-        "ttl_deletion_at": _ttl_deletion_at(row.get("wd")),
+        **_ttl_catalog_fields(row.get("wd")),
     }
 
 
-def _ttl_deletion_at(wd: str | None) -> Optional[str]:
-    """Return a normalized active TTL expiration without modifying run state."""
+def _ttl_catalog_fields(wd: str | None) -> dict:
+    """Read deletion status once; missing evidence never implies disabled."""
+    unknown = {"ttl_deletion_at": None, "ttl_disabled": None}
     if not wd:
-        return None
+        return unknown
 
     try:
         state = run_ttl.read_ttl_state(wd)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         logger.warning("Unable to read TTL metadata for runs catalog: %s", wd, exc_info=True)
-        return None
-    if not isinstance(state, dict) or state.get("policy") != run_ttl.POLICY_ROLLING:
-        return None
+        return unknown
+    if not isinstance(state, dict):
+        return unknown
+    if state.get("policy") in (run_ttl.POLICY_DISABLED, run_ttl.POLICY_EXCLUDED):
+        return {"ttl_deletion_at": None, "ttl_disabled": True}
+    if state.get("policy") != run_ttl.POLICY_ROLLING:
+        return unknown
 
     expires_at = state.get("expires_at")
     if not isinstance(expires_at, str):
-        return None
+        return unknown
 
     raw_expiration = expires_at.strip()
     if not raw_expiration:
-        return None
+        return unknown
     if raw_expiration.endswith("Z"):
         raw_expiration = f"{raw_expiration[:-1]}+00:00"
 
     try:
         expiration = datetime.fromisoformat(raw_expiration)
     except (TypeError, ValueError):
-        return None
+        return unknown
     if expiration.tzinfo is None:
-        return None
+        return unknown
 
-    return expiration.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return {
+        "ttl_deletion_at": expiration.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "ttl_disabled": False,
+    }
 
 
 def _collect_metas_for_runs(runs) -> List[dict]:
@@ -779,7 +787,7 @@ def _build_meta(wd, attrs: dict):
         readonly=ron.readonly,
     )
     meta.update(attrs)
-    meta["ttl_deletion_at"] = _ttl_deletion_at(wd)
+    meta.update(_ttl_catalog_fields(wd))
 
     return meta
 

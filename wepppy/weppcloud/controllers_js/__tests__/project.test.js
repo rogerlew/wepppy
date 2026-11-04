@@ -24,6 +24,8 @@ describe("Project controller", () => {
                 <input data-project-field="scenario" value="Initial Scenario">
                 <input type="checkbox" data-project-toggle="readonly">
                 <input type="checkbox" data-project-toggle="public">
+                <input type="checkbox" data-project-toggle="ttl_disabled">
+                <span data-project-ttl-status data-ttl-policy="rolling_90d" data-ttl-expires-at="2026-12-31T00:00:00Z"></span>
                 <input id="readonlyTarget" class="disable-readonly" type="text" value="editable">
                 <label><input type="radio" name="unit_main_selector" value="0" data-project-unitizer="global" checked></label>
                 <label><input type="radio" name="unit_main_selector" value="1" data-project-unitizer="global"></label>
@@ -151,6 +153,65 @@ describe("Project controller", () => {
         await import("../project.js");
         project = window.Project.getInstance();
         await flushPromises();
+    });
+
+    test.each(["disabled", "excluded"])("uses effective %s policy after clearing user override", async (policy) => {
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { ttl: { policy } } } });
+        await project.set_ttl_disabled(false);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe("Automatic deletion is disabled");
+        expect(commandBar.showResult).toHaveBeenCalledWith("Automatic deletion is disabled.");
+    });
+
+    test("updates deletion status after a successful save", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { ttl: { policy: "disabled" } } } });
+        await project.set_ttl_disabled(true);
+        expect(document.querySelector('[data-project-toggle="ttl_disabled"]').checked).toBe(true);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe("Automatic deletion is disabled");
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { ttl: { policy: "rolling_90d", expires_at: "2027-01-02T00:00:00Z" } } } });
+        await project.set_ttl_disabled(false);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe("Automatic deletion is enabled for Jan 2, 2027, 12:00 AM UTC");
+    });
+
+    test.each(["response", "network"])("restores confirmed checkbox after %s failure", async (kind) => {
+        const checkbox = document.querySelector('[data-project-toggle="ttl_disabled"]');
+        const before = document.querySelector("[data-project-ttl-status]").textContent;
+        checkbox.checked = true;
+        if (kind === "response") {
+            postJsonMock.mockResolvedValueOnce({ body: { error: { message: "save failed" } } });
+        } else {
+            postJsonMock.mockRejectedValueOnce(new Error("network failure"));
+        }
+        await project.set_ttl_disabled(true);
+        expect(checkbox.checked).toBe(false);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe(before);
+        expect(commandBar.showResult).toHaveBeenCalledWith(expect.stringContaining("Reload the page"));
+    });
+
+    test("prevents overlapping automatic deletion saves", async () => {
+        let finish;
+        postJsonMock.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+        const first = project.set_ttl_disabled(true);
+        const checkbox = document.querySelector('[data-project-toggle="ttl_disabled"]');
+        expect(checkbox.disabled).toBe(true);
+        await project.set_ttl_disabled(false);
+        expect(postJsonMock).toHaveBeenCalledTimes(1);
+        finish({ body: { Content: { ttl: { policy: "disabled", user_disabled: true } } } });
+        await first;
+        expect(checkbox.checked).toBe(true);
+        expect(checkbox.disabled).toBe(false);
+    });
+
+    test("reflects the saved batch override rather than the requested checkbox", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { ttl: { policy: "excluded", user_disabled: false } } } });
+        await project.set_ttl_disabled(true);
+        expect(document.querySelector('[data-project-toggle="ttl_disabled"]').checked).toBe(false);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe("Automatic deletion is disabled");
+    });
+
+    test("malformed expiration never displays an enabled date", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { ttl: { policy: "rolling_90d", expires_at: "not-a-date" } } } });
+        await project.set_ttl_disabled(false);
+        expect(document.querySelector("[data-project-ttl-status]").textContent).toBe("Automatic deletion status is unavailable");
     });
 
     afterEach(() => {

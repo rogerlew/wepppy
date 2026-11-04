@@ -141,11 +141,9 @@ WEPPcloud collects only the information necessary to operate the platform and su
 
 **Run data.** Watershed delineations, model inputs, simulation outputs, and uploaded files (such as burn severity maps) are stored on WEPPcloud servers for as long as the project exists. Run data includes geographic coordinates of your watershed area.
 
-**Project TTL (Time To Live).** WEPPcloud uses a project TTL (Time To Live), which is an inactivity timer for project data. By default, each project has a rolling 90-day TTL. If a project is not accessed before the timer expires, it is queued for deletion.
+**How long projects are saved.** By default, WEPPcloud automatically deletes projects after 90 days without access. Opening a project restarts that period.
 
-**How TTL resets.** When a project is accessed, WEPPcloud refreshes the project's last-access timestamp and extends the expiration window by another 90 days.
-
-**Disabling TTL deletion.** Every logged-in user who can access a project can disable TTL deletion from the run header: **More -> Disable TTL Deletion**. No special role is required. If TTL deletion is turned back on, the project starts a fresh 90-day TTL window.
+**Keep a project without opening it regularly.** Sign in, open the project, and select **More → Disable automatic deletion**. Wait for **Automatic deletion is disabled**, then reload to confirm it saved. Every signed-in user with project access can do this. Turning automatic deletion back on starts a new 90-day period for ordinary projects. [How to keep your project](run-ttl-deletion.md) explains the setting and its exceptions.
 
 **Usage data.** WEPPcloud records basic access information such as login timestamps and run access counts for operational monitoring. This data is used to maintain service reliability and track platform usage metrics displayed on the landing page.
 

@@ -17,18 +17,18 @@
   </ul>
 {% endmacro %}
 {% block body_content %}
-<h1>WEPPcloud UserSummary Documentation</h1>
+<h1>WEPPcloud Help</h1>
 <p>Browse the sections below or use the navigation tree on the left to find end-user guides, workflow references, and technical documentation.</p>
 <p><a href="{{ url_for_run('usersum.feature_catalog') }}">Feature catalog</a> — browse all registered features and interface configurations with their maturity classifications and access requirements.</p>
 <form class="wc-usersum-search-form" action="{{ url_for_run('usersum.usersum_search') }}" method="get">
-  <label for="usersum-search-query">Search usersum docs</label>
+  <label for="usersum-search-query">Search help</label>
   <div class="wc-usersum-search-row">
     <input
       id="usersum-search-query"
       class="wc-usersum-search-input"
       type="search"
       name="q"
-      placeholder="Search documentation"
+      placeholder="Search help"
       required
     >
     <button class="pure-button wc-usersum-search-submit" type="submit">Search</button>

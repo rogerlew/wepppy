@@ -14,7 +14,8 @@ the misleading deletion-column sort link without changing sort semantics.
 
 ## Presentation Contract
 
-Implementation of the 2026-11-04 wording amendment is pending its checkpoint.
+The 2026-11-04 wording amendment is implemented and locally validated after
+checkpoint `c62567f1c`; deployment remains separate.
 An active valid expiration renders **Automatic deletion is enabled for [readable
 date]**, using readable UTC and an ISO `datetime` attribute. Confirmed disabled
 or excluded policy renders **Automatic deletion is disabled**. Missing, empty,

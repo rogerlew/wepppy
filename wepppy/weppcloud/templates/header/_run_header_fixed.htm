@@ -53,6 +53,7 @@
           Last Modified: —
         </span>
         {% endif %}
+        {% include "header/_automatic_deletion_status.htm" %}
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">
@@ -248,9 +249,14 @@
                 <input id="checkbox_ttl_disabled"
                        type="checkbox"
                        data-project-toggle="ttl_disabled"
+                       aria-describedby="automatic-deletion-help"
                        {% if current_ttl and current_ttl.user_disabled %}checked{% endif %}>
-                <span>Disable TTL Deletion</span>
+                <span>Disable automatic deletion</span>
               </label>
+              <p id="automatic-deletion-help" class="wc-text-muted">
+                Prevent automatic deletion of this project due to inactivity.
+                <a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion') }}">How to keep your project</a>
+              </p>
               {% endif %}
               {% if user.has_role('Admin') %}
               <a class="pure-button pure-button-secondary"

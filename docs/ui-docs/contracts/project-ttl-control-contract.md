@@ -57,7 +57,7 @@ or original-incident resolution is claimed.
 
 ## Plain-language presentation (2026-11-04)
 
-Implementation pending checkpoint. Both headers label the checkbox **Disable
+Implemented and locally validated after checkpoint `c62567f1c`; deployment separate. Both headers label the checkbox **Disable
 automatic deletion**, explain that it prevents deletion due to inactivity, and
 link **How to keep your project** to the existing guide ID. A persistent status
 uses **Automatic deletion is disabled** for confirmed disabled/excluded policy

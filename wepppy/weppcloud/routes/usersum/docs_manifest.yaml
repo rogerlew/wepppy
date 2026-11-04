@@ -300,7 +300,7 @@ docs:
   - doc_id: usersum.weppcloud.run_ttl_deletion
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/run-ttl-deletion.md
-    title: Project TTL Deletion
+    title: Keep your project from being automatically deleted
     min_role: user
     category: weppcloud
     audience_tags: [user]

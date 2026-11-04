@@ -55,6 +55,7 @@ def test_collect_metas_for_runs_skips_missing_and_broken_runs(
             "owner_id": None,
             "config": "cfg",
             "ttl_deletion_at": None,
+            "ttl_disabled": None,
         }
     ]
 
@@ -69,7 +70,7 @@ def test_collect_metas_for_runs_skips_missing_and_broken_runs(
     assert any(record.exc_info for record in warning_records)
 
 
-def test_ttl_deletion_at_accepts_only_active_timezone_aware_expirations(
+def test_ttl_catalog_fields_accepts_only_active_timezone_aware_expirations(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -81,7 +82,7 @@ def test_ttl_deletion_at_accepts_only_active_timezone_aware_expirations(
         },
     )
 
-    assert user_routes._ttl_deletion_at("/tmp/run") == "2026-12-31T07:00:00Z"
+    assert user_routes._ttl_catalog_fields("/tmp/run") == {"ttl_deletion_at": "2026-12-31T07:00:00Z", "ttl_disabled": False}
 
 
 @pytest.mark.parametrize(
@@ -89,23 +90,22 @@ def test_ttl_deletion_at_accepts_only_active_timezone_aware_expirations(
     [
         None,
         {},
-        {"policy": "disabled", "expires_at": "2026-12-31T00:00:00Z"},
         {"policy": user_routes.run_ttl.POLICY_ROLLING, "expires_at": None},
         {"policy": user_routes.run_ttl.POLICY_ROLLING, "expires_at": "not-a-date"},
         {"policy": user_routes.run_ttl.POLICY_ROLLING, "expires_at": "2026-12-31T00:00:00"},
         {"policy": 1, "expires_at": "2026-12-31T00:00:00Z"},
     ],
 )
-def test_ttl_deletion_at_falls_back_for_inactive_or_invalid_state(
+def test_ttl_catalog_fields_falls_back_for_inactive_or_invalid_state(
     monkeypatch: pytest.MonkeyPatch,
     state: object,
 ) -> None:
     monkeypatch.setattr(user_routes.run_ttl, "read_ttl_state", lambda _wd: state)
 
-    assert user_routes._ttl_deletion_at("/tmp/run") is None
+    assert user_routes._ttl_catalog_fields("/tmp/run") == {"ttl_deletion_at": None, "ttl_disabled": None}
 
 
-def test_ttl_deletion_at_falls_back_for_expected_reader_error(
+def test_ttl_catalog_fields_falls_back_for_expected_reader_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def _raise_invalid_encoding(_wd: str):
@@ -113,4 +113,22 @@ def test_ttl_deletion_at_falls_back_for_expected_reader_error(
 
     monkeypatch.setattr(user_routes.run_ttl, "read_ttl_state", _raise_invalid_encoding)
 
-    assert user_routes._ttl_deletion_at("/tmp/run") is None
+    assert user_routes._ttl_catalog_fields("/tmp/run") == {"ttl_deletion_at": None, "ttl_disabled": None}
+
+
+@pytest.mark.parametrize("policy", ["disabled", "excluded"])
+def test_catalog_disabled_status_reads_real_ttl_once(tmp_path, monkeypatch, policy):
+    import json
+    from wepppy.weppcloud.utils import run_ttl
+    path = tmp_path / "TTL"
+    path.write_text(json.dumps({"policy": policy, "user_disabled": policy == "disabled"}))
+    before = path.read_bytes()
+    reader = run_ttl.read_ttl_state
+    calls = []
+    def read(wd):
+        calls.append(wd)
+        return reader(wd)
+    monkeypatch.setattr(run_ttl, "read_ttl_state", read)
+    assert user_routes._ttl_catalog_fields(str(tmp_path)) == {"ttl_deletion_at": None, "ttl_disabled": True}
+    assert calls == [str(tmp_path)]
+    assert path.read_bytes() == before

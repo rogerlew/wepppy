@@ -10,9 +10,10 @@ only this plan; unrelated active work packages are outside scope.
 
 - [x] Inspected controls, catalog readers, docs and existing tests.
 - [x] Recorded operator wording and compatibility plan.
-- [ ] Review and commit contract checkpoint before implementation.
-- [ ] Implement and test catalog state, controls, messages and documentation.
-- [ ] Rebuild bundle, close reviews, commit and push.
+- [x] Review and commit contract checkpoint before implementation (`c62567f1c`).
+- [x] Implement and test catalog state, controls, messages and documentation.
+- [x] Rebuild bundle and close independent correctness/security reviews.
+- [x] Prepare final implementation commit; authorized push verified in handoff.
 
 ## Surprises & Discoveries
 
@@ -29,7 +30,10 @@ ambiguous timezone changes. Only scoped tests; no full-suite run.
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation; no deployment claim.
+Implementation and scoped validation complete. Operator wording and discoverable
+help are implemented; confirmed status survives failure/readonly/batch cases.
+Desktop render inspected. Existing mobile fixture overflow is unchanged.
+No production deployment claim.
 
 ## Context and Orientation
 
@@ -82,3 +86,6 @@ user run or production service is mutated by this task.
 Catalog `ttl_disabled`: true for known disabled/excluded policy, false for known
 active valid expiration, null otherwise. SQL path requires current/fresh data.
 Use existing Flask/Jinja/Jest/pytest/Usersum tooling and browser date formatting.
+
+Revision 2026-11-04: recorded scoped validation, final reviews and existing mobile
+fixture limitation; implementation is ready for the final authorized commit/push handoff.

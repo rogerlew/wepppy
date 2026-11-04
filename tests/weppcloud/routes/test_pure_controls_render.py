@@ -5214,3 +5214,20 @@ def test_ttl_header_control_available_to_all_signed_in_users(jinja_env, template
         user=user, current_user=user,
         request=SimpleNamespace(view_args={'runid': 'test-run', 'config': 'test-config'}))
     assert ('id="checkbox_ttl_disabled"' in rendered) is authenticated
+
+
+@pytest.mark.parametrize('template_name', ['header/_run_header_fixed.htm', 'reports/_base_report.htm'])
+@pytest.mark.parametrize('ttl,message', [
+    (None, 'Automatic deletion status is unavailable'),
+    ({'policy': 'disabled', 'user_disabled': True}, 'Automatic deletion is disabled'),
+    ({'policy': 'excluded', 'user_disabled': False}, 'Automatic deletion is disabled'),
+    ({'policy': 'rolling_90d', 'expires_at': '2027-01-02T00:00:00Z'}, 'Automatic deletion is enabled for'),
+])
+def test_automatic_deletion_header_status_and_contextual_help(jinja_env, template_name, ttl, message):
+    user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    rendered = jinja_env.get_template(template_name).render(user=user, current_user=user, current_ttl=ttl)
+    assert message in rendered
+    assert 'Disable automatic deletion' in rendered
+    assert 'How to keep your project' in rendered
+    assert 'aria-describedby="automatic-deletion-help"' in rendered
+    assert 'data-project-ttl-status' in rendered

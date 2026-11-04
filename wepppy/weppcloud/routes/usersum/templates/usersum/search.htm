@@ -1,9 +1,9 @@
 {% extends "usersum/layout.j2" %}
 {% block body_content %}
-<p><a href="{{ url_for_run('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
-<h1>Usersum Search</h1>
+<p><a href="{{ url_for_run('usersum.usersum_index') }}">&larr; Back to help</a></p>
+<h1>Search help</h1>
 <form class="wc-usersum-search-form" action="{{ url_for_run('usersum.usersum_search') }}" method="get">
-  <label for="usersum-search-query">Search usersum docs</label>
+  <label for="usersum-search-query">Search help</label>
   <div class="wc-usersum-search-row">
     <input
       id="usersum-search-query"
@@ -11,7 +11,7 @@
       type="search"
       name="q"
       value="{{ query }}"
-      placeholder="Search documentation"
+      placeholder="Search help"
       required
     >
     <button class="pure-button wc-usersum-search-submit" type="submit">Search</button>
@@ -58,6 +58,6 @@
     <p>No matches found.</p>
   {% endif %}
 {% else %}
-  <p>Enter a query to search usersum documentation.</p>
+  <p>Search for what you want to do, such as “keep my project”.</p>
 {% endif %}
 {% endblock %}

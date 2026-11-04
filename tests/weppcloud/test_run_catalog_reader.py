@@ -46,7 +46,7 @@ def reader_app(database, monkeypatch):
     monkeypatch.setattr(user_routes, "_collect_run_rows", forbidden)
     monkeypatch.setattr(user_routes, "_collect_metas_for_runs", forbidden)
     monkeypatch.setattr(user_routes, "_collect_map_metas_for_runs", forbidden)
-    monkeypatch.setattr(user_routes, "_ttl_deletion_at", forbidden)
+    monkeypatch.setattr(user_routes, "_ttl_catalog_fields", forbidden)
     now = repository.utcnow()
     with database.begin() as connection:
         connection.execute(users.insert(), [{"id": 1, "email": "owner@example.test"}, {"id": 2, "email": "other@example.test"}])
@@ -175,6 +175,8 @@ def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
         controller._map = None
     with engine.connect() as connection:
         assert connection.scalar(sa.select(catalog.c.dirty_revision).where(catalog.c.run_id == 1)) == 2
+    from wepppy.weppcloud.utils.run_ttl import set_user_ttl_disabled
+    set_user_ttl_disabled(str(directory), True, "1")
     assert repository.refresh(engine, 1, roots) == "ready"
     template = Path(__file__).parents[2] / "wepppy/weppcloud/templates/user/runs2.html"
     app.jinja_loader = DictLoader({"user/runs2.html": template.read_text(),
@@ -205,6 +207,10 @@ def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
     await page.route('**/*', route => route.request().url().startsWith(origin) ? route.continue() : route.abort());
     await page.goto(origin + '/runs', {waitUntil: 'domcontentloaded'});
     await page.getByRole('cell', {name: 'Source to browser', exact: true}).waitFor();
+    await page.getByRole('cell', {name: /^Automatic deletion is disabled/}).waitFor();
+    const catalog = await page.evaluate(async () => (await fetch('/runs/catalog')).json());
+    if (catalog.runs.find(run => run.runid === 'run-1').ttl_disabled !== true) throw new Error('TTL policy did not reach catalog');
+    await page.getByRole('link', {name: 'How to keep your project'}).first().waitFor();
     await page.getByText('Visible (metadata updating)', {exact: true}).waitFor();
     const summary = await page.locator('#runs_catalog_status').textContent();
     if (!summary.includes('Metadata updating: 1. Unavailable projects: 1.')) throw new Error(summary);
@@ -222,3 +228,27 @@ def test_real_file_sql_http_browser_chain(reader_app, tmp_path, monkeypatch):
     finally:
         server.shutdown()
         thread.join(timeout=5)
+
+
+@pytest.mark.parametrize("policy,expiration,dirty,old,expected", [
+    ("disabled", False, False, False, True),
+    ("excluded", False, False, False, True),
+    ("rolling_90d", True, False, False, False),
+    ("rolling_90d", False, False, False, None),
+    ("disabled", False, True, False, None),
+    ("disabled", False, False, True, None),
+    ("unknown", False, False, False, None),
+])
+def test_catalog_deletion_status_requires_fresh_policy(reader_app, policy, expiration, dirty, old, expected):
+    app, routes, engine = reader_app
+    now = repository.utcnow()
+    with engine.begin() as connection:
+        connection.execute(catalog.update().where(catalog.c.run_id == 1).values(
+            ttl_policy=policy, ttl_state="ready", ttl_observed_at=now - timedelta(days=2) if old else now,
+            ttl_deletion_at=now + timedelta(days=90) if expiration else None,
+            dirty_revision=2 if dirty else 1,
+        ))
+    with app.test_request_context("/runs/catalog"):
+        payload = routes.runs_catalog.__wrapped__().get_json()
+    row = next(row for row in payload["runs"] if row["runid"] == "run-1")
+    assert row["ttl_disabled"] is expected

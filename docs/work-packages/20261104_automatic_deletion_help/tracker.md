@@ -1,9 +1,14 @@
 # Tracker
 
-- Contract checkpoint: reviewed by ttl_review and ttl_security; all findings resolved. Ancestor commit pending.
-- Implementation and scoped verification: pending.
-- Commit/push: authorized by user; pending.
+- Contract checkpoint: `c62567f1c`; independent correctness/security reviews passed
+  before implementation. Queued-deletion caveat and conflicting wording resolved.
+- Implementation complete; scoped verification and final reviews pass. See
+  artifacts/20261104_correctness_review.md and artifacts/20261104_security_review.md.
+- Controller bundle and targeted published help index rebuilt.
+- Final implementation: containing commit; authorized remote push is verified
+  in the final handoff. No production deployment.
 
-Decision: use the operator's exact wording. Preserve internal TTL names for
-compatibility while explaining the feature in everyday language. Missing or
-stale data cannot establish that automatic deletion is disabled.
+Decision: exact operator labels; compatible nullable status from existing policy;
+no access/default/storage changes. Retain technical IDs/URLs for compatibility.
+Unknown/stale state never claims automatic deletion is disabled. Natural-language
+search and contextual links make help discoverable. No production deployment.
