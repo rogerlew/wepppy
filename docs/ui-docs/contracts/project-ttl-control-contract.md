@@ -54,3 +54,24 @@ security (`ttl_security`) reviewers reported no remaining findings after the
 real authorization test was added. The full Python run was stopped at the
 operator's request; it is not a completed validation gate. No production rollout
 or original-incident resolution is claimed.
+
+## Plain-language presentation (2026-11-04)
+
+Implementation pending checkpoint. Both headers label the checkbox **Disable
+automatic deletion**, explain that it prevents deletion due to inactivity, and
+link **How to keep your project** to the existing guide ID. A persistent status
+uses **Automatic deletion is disabled** for confirmed disabled/excluded policy
+or **Automatic deletion is enabled for [readable date]** for a valid active
+expiration. Unknown state is explicitly unavailable, never assumed disabled.
+Dates are readable UTC dates with timezone indicated. Success updates status
+from the returned policy. Errors restore the last confirmed checkbox value; an
+uncertain network failure asks the user to reload to check whether it saved.
+This avoids claiming a timed-out mutation did not reach the server.
+
+The operator chose these exact labels to replace technical TTL wording. Internal
+selectors, request keys and events stay compatible. No access or retention change.
+
+Disabled describes the inactivity policy, not a promise that an already-started
+deletion can be canceled. Help must say this control cannot undo deletion that
+has already started or restore deleted projects. Existing queued/trash handling
+is unchanged; this work does not redesign deletion or project recovery.

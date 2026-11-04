@@ -501,7 +501,8 @@ fields are retained; older consumers can ignore these additive fields.
 UI adds an accessible updating/stale summary and stale-row indicator. Healthy
 empty catalogs remain ordinary empty results. TTL dates are emitted only when
 the row is clean, TTL is ready, and its observation is <=24 hours old; otherwise
-use the existing Last Modified presentation. The UI explains metadata may be
+use unavailable deletion status with Last Modified per the automatic deletion
+presentation amendment below. The UI explains metadata may be
 updating, without implying expiry or readonly values authorize actions.
 Missed notifications can remain invisible until reconciliation, so immediate
 read-after-write is not promised. Refreshing a page does not enqueue repair.
@@ -896,3 +897,15 @@ worker docs, catalog user help, and RQ dependency documentation with runtime
 changes. Shared-contract amendments in this set remain implementation-pending.
 Closure requires independent correctness/security sign-off, all host evidence,
 rollback proof, and explicit legacy-reader retirement disposition.
+
+## Automatic deletion presentation amendment (2026-11-04)
+
+Implementation pending checkpoint. Catalog JSON adds nullable `ttl_disabled`,
+derived only from existing projected `ttl_policy` when the row is current,
+`ttl_state` is ready, and the TTL observation passes the same freshness check as
+`ttl_deletion_at`. Disabled/excluded maps to true; active with valid expiration
+maps to false; stale, missing, invalid or unsupported maps to null. No database
+column or migration is added and no request opens project files. The
+[Runs catalog presentation contract](../ui-docs/contracts/runs-catalog-ttl-deletion-contract.md)
+defines wording and unknown-state behavior. Scope filtering remains prior to
+projection; map-only payloads stay unchanged.

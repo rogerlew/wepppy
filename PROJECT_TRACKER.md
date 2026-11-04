@@ -1,3 +1,5 @@
+Active: [Automatic deletion help](docs/work-packages/20261104_automatic_deletion_help/package.md) — operator-approved plain-language controls, status and discoverability; scoped validation only.
+
 Active repair: [RedisPrep atomic ordered snapshots](docs/work-packages/20261031_redisprep_ordered_snapshots/package.md) — implemented and independently reviewed; local NFS/consumer checks pass. Broad continuation: 8,619 passed / 295 skipped; production parity remains a rollout hold. No deployment.
 
 Active: [Caddy MPTCP and homelab Tailscale migration](docs/work-packages/20261029_caddy_mptcp_tailscale/package.md) — patch all active Caddy Compose variants; validate private TLS and auth before homelab cutover.

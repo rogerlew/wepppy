@@ -460,3 +460,19 @@ WEPP Results provides interpretation help independently of run-specific README e
 Generated interchange README text explains its per-file metadata/sample role, the distinct meanings of interchange schema version, model provenance and report accounting version, and points readers to user guidance. Previews remain bounded to three rows. Metadata descriptions must agree with the current scientific contract without changing column names, types or values. Regenerating documentation does not rewrite or certify historical data.
 
 The rationale is to make scientific meaning discoverable before users combine fields in a spreadsheet; schemas and sample rows alone cannot communicate normalization and event filtering. Validate user-role nav/search, rendered contextual links, absent/present/legacy artifacts and actual generated metadata before claiming completion.
+
+## Automatic deletion help (2026-11-04)
+
+Implementation pending checkpoint. Preserve the existing
+`usersum.weppcloud.run_ttl_deletion` identity and URL, but title the guide **Keep
+your project from being automatically deleted** and place it under **Managing
+projects**. Explain the inactivity period, exact **Disable automatic deletion**
+steps, **Automatic deletion is disabled** confirmation, and re-enabling's fresh
+90-day window before exceptions. Include natural search phrases about keeping
+projects, stopping deletion and how long projects are saved. General help chrome
+uses **WEPPcloud Help** and **Search help**, not internal Usersum terminology.
+Contextual links from both project headers and every catalog state use **How to
+keep your project**. Preserve document visibility and search architecture.
+
+Explain that disabling automatic deletion cannot undo deletion that has already
+started or restore deleted projects; avoid an indefinite storage guarantee.

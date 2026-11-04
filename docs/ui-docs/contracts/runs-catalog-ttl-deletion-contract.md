@@ -9,40 +9,33 @@
 The Runs catalog gives an authenticated caller lifecycle information only for
 runs they are already allowed to enumerate. This contract governs a single
 read-only lifecycle column; it does not govern TTL calculation, deletion,
-permissions, catalog ownership/filtering, or catalog sorting.
+permissions or catalog ownership/filtering. The 2026-11-04 amendment removes
+the misleading deletion-column sort link without changing sort semantics.
 
 ## Presentation Contract
 
-For an active TTL state, the lifecycle cell renders the text `TTL Deletion:`,
-the expiration timestamp, and a `Learn More` link. An active state is exactly a
-TTL payload whose `policy` equals `rolling_90d` and whose `expires_at` is a
-timezone-aware ISO-8601 timestamp. The Jinja template must create the link with
-`url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion')`; it
-must not read the href from catalog JSON or a timestamp value. This preserves
-the deployment prefix and makes the route an immutable same-origin template
-value.
+Implementation of the 2026-11-04 wording amendment is pending its checkpoint.
+An active valid expiration renders **Automatic deletion is enabled for [readable
+date]**, using readable UTC and an ISO `datetime` attribute. Confirmed disabled
+or excluded policy renders **Automatic deletion is disabled**. Missing, empty,
+malformed, unreadable, stale or unsupported state renders **Automatic deletion
+status is unavailable**, followed by the existing Last Modified date if known.
+Unknown state never implies protection. All rows link **How to keep your project**
+using `url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion')`.
+Text is rendered with DOM text nodes; no raw paths or payloads appear.
 
-For every other state, including the existing Disable TTL Deletion setting,
-readonly/batch exclusions, missing TTL file, malformed JSON, non-mapping TTL
-file, non-string/unknown policy, or missing/null/invalid timestamp, the lifecycle
-cell renders `Last Modified:` and the existing catalog
-timestamp. It does not render a deletion time or Learn More link. A missing
-last-modified value uses the existing `—` empty-date convention. Per-row TTL
-failure is silent to the user, does not include filesystem paths or raw metadata
-in a response, and must not cause a catalog failure, TTL touch, or mutation.
-
-The table's existing `last_modified` sort remains unchanged. The column is not
-sortable by TTL expiration in this bounded remediation.
+The column is **Automatic deletion** and is not presented as sortable: the old
+header incorrectly sorted by last-modified while describing deletion. Other
+sorts are unchanged.
 
 ## Payload and Compatibility
 
-`/runs/catalog` retains all existing fields, especially `last_modified`, and
-adds `ttl_deletion_at` to every returned row. It is either `null` or a UTC
-ISO-8601 string ending in `Z`. It is non-null only for the active state above;
-the server normalizes an accepted expiry to that representation before JSON
-serialization. The browser displays this existing serialized string rather than
-attempting locale conversion. Older/incomplete runs receive `null`. No database
-column, persisted run state, request shape, sort key, or time calculation changes.
+Keep `ttl_deletion_at` and all existing fields. Add nullable boolean
+`ttl_disabled`: true for known disabled/excluded policy, false for active policy
+with a valid timezone-aware expiration, null for all other states. Read the TTL
+file once per selected row. No persistence schema, default, formula, or physical
+deletion change. Old clients may ignore the additive field; new clients must
+treat its absence as unknown unless an active date is supplied.
 
 ## Authorization and Safety
 
@@ -76,8 +69,8 @@ After cutover, authorization still precedes scope selection and no request
 opens TTL/project files or triggers repair. A background non-mutating extractor
 preserves the existing normalization and expiration validation. Known-dirty,
 unreadable, or older-than-24-hour TTL observations emit null `ttl_deletion_at`
-and use Last Modified; active current observations retain the same UTC format,
-label, and immutable same-origin Learn More link. Additive scoped freshness
+and use unknown status with Last Modified; current observations use the
+plain-language presentation above and the immutable same-origin help link. Additive scoped freshness
 metadata and accessible stale/updating presentation are specified in that
 contract. Policy calculations, TTL touch, readonly/ownership authorization,
 and physical deletion authority remain unchanged.
