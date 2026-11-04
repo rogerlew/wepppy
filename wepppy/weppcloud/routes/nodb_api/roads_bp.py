@@ -69,6 +69,47 @@ def _sync_roads_enabled_state(wd: str, cfg_fn: str) -> Roads:
     return controller
 
 
+def _parameterization_view_state(wd: str) -> Dict[str, Any]:
+    """Read optional Roads state without creating or enabling a controller."""
+    ron = Ron.getInstance(wd)
+    enabled = "roads" in (ron.mods or [])
+    controller = Roads.tryGetInstance(wd)
+    readonly = os.path.exists(os.path.join(wd, "READONLY")) or bool(getattr(ron, "readonly", False))
+    if controller is None:
+        return {"enabled": enabled, "readonly": readonly, "controller_present": False,
+                "parameterization": Roads.initial_parameterization_preview() if enabled else None,
+                "status": "absent"}
+    try:
+        summary = controller.query_summary()
+    except (roads_lifecycle.RoadsResultsUnavailable, roads_lifecycle.RoadsOperationBusy):
+        # A running writer owns scientific admission. Render an inspectable shell
+        # without bypassing that guard or guessing at a partly updated snapshot.
+        return {"enabled": enabled and bool(controller.enabled), "readonly": readonly,
+                "controller_present": True, "parameterization": None,
+                "status": "running", "busy": True}
+    summary.update(enabled=enabled and bool(controller.enabled), readonly=readonly,
+                   controller_present=True)
+    return summary
+
+
+@roads_bp.route("/runs/<string:runid>/<config>/roads/parameterization", methods=["GET"])
+@authorize_and_handle_with_exception_factory
+def roads_parameterization(runid: str, config: str) -> Response:
+    ctx = load_run_context(runid, config)
+    state = _parameterization_view_state(str(ctx.active_root))
+    return render_template(
+        "roads/parameterization.htm", runid=runid, config=config,
+        parameterization_state=state,
+        parameterization_roles=(("road", "Road"), ("fill", "Fill"), ("buffer", "Forest / buffer")),
+        parameterization_fields=(
+            ("ksat_mm_h", "Baseline effective hydraulic conductivity", "mm/h"),
+            ("ki_kg_s_m4", "Interrill erodibility (Ki)", "kg s/m⁴"),
+            ("kr_s_m", "Rill erodibility (Kr)", "s/m"),
+            ("critical_shear_pa", "Critical shear", "Pa"),
+        ),
+    )
+
+
 def _require_enabled(controller: Roads) -> Response | None:
     if not controller.enabled:
         return error_factory("Roads module is not enabled for this run.")
@@ -369,12 +410,29 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
 def roads_set_params(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
+    payload = parse_request_payload(request)
+    if "parameterization" in payload:
+        ron = Ron.getInstance(wd)
+        if os.path.exists(os.path.join(wd, "READONLY")) or bool(getattr(ron, "readonly", False)):
+            return error_factory("This project is read-only.", status_code=403)
+        if "roads" not in (ron.mods or []):
+            return error_factory("Roads module is not enabled for this run.")
+        controller = Roads.tryGetInstance(wd)
+        if controller is None:
+            try:
+                Roads.validate_initial_params(payload)
+            except ValueError as exc:
+                return error_factory(str(exc))
+            controller = _ensure_roads_controller(wd, f"{config}.cfg")
+            controller.set_enabled(True)
+        else:
+            controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
+    else:
+        controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
     disabled_response = _require_enabled(controller)
     if disabled_response is not None:
         return disabled_response
 
-    payload = parse_request_payload(request)
     try:
         params = controller.set_params(payload)
     except ValueError as exc:
@@ -384,6 +442,7 @@ def roads_set_params(runid: str, config: str) -> Response:
     return success_factory(
         {
             "roads_params": params,
+            "parameterization": summary.get("parameterization"),
             "attribute_field_map": summary.get("attribute_field_map") or {},
             "discovered_attribute_catalog": summary.get("discovered_attribute_catalog"),
         }
@@ -481,6 +540,9 @@ def roads_get_config(runid: str, config: str) -> Response:
 @roads_bp.route("/runs/<string:runid>/<config>/api/roads/config", methods=["POST"])
 @authorize_and_handle_with_exception_factory
 def roads_set_config(runid: str, config: str) -> Response:
+    if "parameterization" in parse_request_payload(request):
+        # The new payload has one validation/initialization boundary across aliases.
+        return roads_set_params.__wrapped__(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
@@ -541,9 +603,7 @@ def query_roads(runid: str, config: str) -> Response:
 @authorize_and_handle_with_exception_factory
 def query_roads_summary(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
-    return jsonify(controller.query_summary())
+    return jsonify(_parameterization_view_state(str(ctx.active_root)))
 
 
 @roads_bp.route("/runs/<string:runid>/<config>/resources/roads.json", methods=["GET"])

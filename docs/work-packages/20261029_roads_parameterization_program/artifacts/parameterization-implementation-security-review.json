@@ -1,0 +1,113 @@
+{
+  "status": "pass_source_and_local_runtime",
+  "source_sha256": {
+    "wepppy/nodb/mods/roads/parameterization.py": "e5ce6f6972ecfa7eee88f11846269235d727f0d2f4e7675e0f3e37a8707c1d14",
+    "wepppy/nodb/mods/roads/roads.py": "b65713d1356143ca8ac76c62e5c28437f5e35f439df5c6af771266dd6bc5fb0a",
+    "wepppy/nodb/mods/roads/_parameterization_comparisons.py": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e",
+    "wepppy/wepp/interchange/_roads_lifecycle.py": "daf24fbc23c3fb411a0cadd0d1cb3a13a7b4bdf4f673edcf0c7647940cda9d54",
+    "wepppy/wepp/management/managements.py": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d",
+    "wepppy/weppcloud/routes/nodb_api/roads_bp.py": "f35c73ec3a9f5b639575f3cd55de34fdc1c08a54bfc5862046cc165fdf6692fa",
+    "wepppy/weppcloud/controllers_js/roads_parameterization.js": "df43f5653dde239ec1b9537afcbd2d56d8568ea1e4ce8693f90bde37c27575f4",
+    "wepppy/weppcloud/templates/roads/parameterization.htm": "42d271efd290409d6172c4e589db9e61633f252db701a75199f427887f5b1beb"
+  },
+  "focused_checks": [
+    {
+      "passed": 119,
+      "seconds": 23.49,
+      "command": "wctl run-pytest tests/nodb/mods/test_roads_parameterization.py tests/weppcloud/routes/test_roads_bp.py tests/wepp/interchange/test_roads_lifecycle.py -q --maxfail=1"
+    },
+    {
+      "passed": 226,
+      "seconds": 14.2,
+      "command": "wctl run-pytest tests/nodb/mods/test_roads_parameterization.py tests/nodb/mods/test_roads_parameterization_comparisons.py tests/wepp/management -q --maxfail=1"
+    },
+    {
+      "passed": 10,
+      "deselected": 69,
+      "seconds": 10.62,
+      "command": "wctl run-pytest tests/nodb/mods/test_roads_controller.py -k parameterization_historical -q --maxfail=1"
+    },
+    {
+      "passed": 23,
+      "deselected": 70,
+      "warnings": 2,
+      "seconds": 11.57,
+      "command": "wctl run-pytest tests/nodb/mods/test_roads_parameterization_comparisons.py tests/nodb/mods/test_roads_controller.py -k 'comparison or parameterization_historical' -q --maxfail=1",
+      "log": "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/security-final-focused-v2.log"
+    }
+  ],
+  "unresolved_source_findings": [],
+  "runtime_workflow": "passed_local_continuous_default_custom_readonly_archive_reset_restore_full_fork_private_authorization",
+  "comparison_owner_validation": {
+    "passed": 13,
+    "includes": "unavailable manifest binding, output alias rejection, historical snapshot tamper"
+  },
+  "prior_source_sha256": {
+    "wepppy/nodb/mods/roads/parameterization.py": "e5ce6f6972ecfa7eee88f11846269235d727f0d2f4e7675e0f3e37a8707c1d14",
+    "wepppy/nodb/mods/roads/roads.py": "ae418b53f7f6d9580e48ba10981dc0ac9a3c016f634c2942a7b79a1134dab735",
+    "wepppy/nodb/mods/roads/_parameterization_comparisons.py": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e",
+    "wepppy/wepp/interchange/_roads_lifecycle.py": "b3c68420eb79d0a6472c264f6acd56700f6257fe5fe89a8592e21198ab9da255",
+    "wepppy/wepp/management/managements.py": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d",
+    "wepppy/weppcloud/routes/nodb_api/roads_bp.py": "5b2a5d94ec5f0d79cbee9f1d50b9a0ecfe0d505c67c24393edcbda9d54596db4",
+    "wepppy/weppcloud/controllers_js/roads_parameterization.js": "fbc070b42002215cce03cae7c489551f448a34d1369859ea1ef0c9b5f1f53b7f",
+    "wepppy/weppcloud/templates/roads/parameterization.htm": "2b481801f11fd3a6c2451974b9c303470e44878d827f7b5a590ea495ddcc0608"
+  },
+  "reviewer": "independent /root/security (security_reviewer)",
+  "review_date": "2026-11-03",
+  "ancestor": "73b5da4ac3337d066619bd625d48b6adc2f307d1",
+  "security_impact": "high",
+  "findings": {
+    "IS-01": {
+      "severity": "medium",
+      "source_status": "resolved",
+      "runtime_status": "not_required_for_specific_finding"
+    },
+    "IS-02": {
+      "severity": "medium",
+      "source_status": "resolved",
+      "runtime_status": "not_required_for_specific_finding"
+    },
+    "IS-03": {
+      "severity": "medium",
+      "source_status": "resolved",
+      "runtime_status": "not_required_for_specific_finding"
+    },
+    "IS-04": {
+      "severity": "medium",
+      "source_status": "resolved",
+      "runtime_status": "resolved"
+    }
+  },
+  "unresolved_findings": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "runtime_evidence": "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/security-final-runtime-v2.json",
+  "runtime_evidence_sha256": "0dbec6643cf25c8539ee23029b5fa73b7ea404ab5e0c2e72259ccdd68ae66900",
+  "service_source_limit": "Mounted source hashes do not prove loaded worker code; native execution uses restarted/resumed checkpoint, later query-only/UI updates separately verified after Flask reload. Final rq-engine restart precedes successful fork.",
+  "residual_scope": [
+    "Local continuous workflow only; no production deployment certification.",
+    "Single-storm/unavailable snapshot binding has source/regression evidence, not a new live native execution.",
+    "Independent security pass does not replace correctness, UX, scientific or broad-suite gates."
+  ],
+  "supplemental_disturbed_provenance_review": {
+    "status": "pass",
+    "evidence": "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/disturbed-security-source-review-v1.json",
+    "sha256": "187831a933eeb51c1a26322506d8a2a0e99a10bb63b95cdb8fd90881850a0e59",
+    "source_sha256": {
+      "tests/disturbed/PLAN.md": "c6117e6076a654fb9bd1598cbdf3a72d5fb2d661988606e0ab54d8543d82e543",
+      "tests/disturbed/test_matrix_contracts.py": "029c7bf4d6f048912e2942d15236a7be09f9798a18cc043b85a60cf608beae67",
+      "tests/disturbed/analysis_source_reviews_current.json": "f3425335eb9da1a37076d719a4df4724e3d8b9c3a340da335256764aab9e2124"
+    },
+    "unresolved_findings": []
+  },
+  "late_template_review": {
+    "status": "pass_source",
+    "change": "Load existing same-origin deferred controllers_gl_stale_check.js after controllers-gl.js via static_url. No native writer, mutation, auth or outbound-network changes.",
+    "prior_template_sha256": "24c62d40b20d0dc0793d753dc10e010031366e9af1ed1c7c96875b8a28816d2b",
+    "template_sha256": "42d271efd290409d6172c4e589db9e61633f252db701a75199f427887f5b1beb",
+    "shared_script_sha256": "0b5219aa5240bb110cb15baf427841e5e0a27e94285eee2f81714cf60c21fc29",
+    "rendered_acceptance": "Owned by final UX/browser check after web reload; not inferred from template hash."
+  }
+}

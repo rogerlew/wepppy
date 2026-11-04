@@ -1,10 +1,71 @@
 # Roads parameterization program tracker
 
+
+## Completion — 2026-11-03
+
+Status: **Closed 2026-11-03 — implemented and locally validated**.
+
+The approved Roads-owned retained baseline, twelve role-driver overrides and
+dedicated view are wired and validated. Real default/custom browser -> NoDb ->
+native -> fresh-report workflows pass; canonical archive/reset/restore/full-fork
+and private authorization preserve exact authority, inputs and eligibility.
+Independent correctness (IC-01–IC-08), security (IS-01–IS-04) and UX
+(IU-01–IU-10) findings are closed.
+
+Final regression coverage: **13,034 unique passed, 422 runtime skipped and one
+collection skipped**, with all13,456 collected tests reconciled across the retained
+broad prefix and142-test passing suffix after the template-only stale-guard repair.
+Affected view checks287 passed; focused Roads273 passed; frontend122 suites /
+1,033 tests passed. Management stubtest retains143 diagnostics identical to HEAD,
+with zero new diagnostics; it is inherited debt, not a passing stubtest.
+
+No production deployment, scientific default adoption or reclassification of
+historical experiments occurred. All907 baseline files and4,731 source-study
+files remain unchanged. The live workflow covers one continuous rutted project;
+other writer branches have focused coverage, not an exhaustive live claim.
+
+Evidence: [implementation results](artifacts/parameterization-implementation-results.md),
+[final validation](artifacts/parameterization-implementation-validation.json) and
+[additive ledger v40](artifacts/candidate-ledger-v40.json).
+
+All checkpoints below preserve historical execution wording. Their pending gates
+and next-step instructions are superseded by this completion record; original
+scientific criteria and failed classifications remain unchanged.
+
+## Resumed workflow checkpoint — 2026-11-03
+
+The default workflow is validated after the authorized local service restart:
+Prepare `75640f2d-3397-41c9-9525-842c6ec12bab`, Run
+`90043676-79c3-436c-8393-27ea6558d6da`, and
+`parameterization-workflow-v1/native-default-restarted-readback.json` under the
+study root. Independent readback verifies 35 profiles and 105 role records with
+exact native propagation and current configuration/snapshot receipt identities.
+Pre-restart failures remain retained. The earlier unbound/Save diagnosis was
+incorrect: configuration hash is computed, `_parameterization` is durably bound,
+and unchanged default Save is intentionally disabled.
+
+Custom browser Save and native Run passed: all 420 emitted driver values match
+intent, 70 geometry/management files are unchanged and current receipts bind actual
+comparison snapshots. Independent raw PASS recomputation confirms displayed
+baseline/custom metrics. Desktop/mobile and all UX findings pass after bounded
+drift disclosure and populated selector width corrections. Canonical archive,
+readonly denial, Reset/Save, restore/full-fork and private authorization all pass.
+Final broad testing found the shared management-parser source hash differs from
+the published Disturbed report provenance; all96 native Disturbed cases passed.
+Independent review is resolving strict provenance without rewriting historical
+report output, then the broad gate must pass before closure.
+The first readonly attempt overlapped archive locking and failed explicitly without
+mutation; the sequential retry passed. The web reload interrupted the first broad
+run, retained as exit137; final-source broad validation restarted. No scientific
+default adoption or production deployment is authorized.
+
+
 ## Approved implementation execution — 2026-11-03
 
 The operator approved the replacement specification and dedicated layout at
 `9532a2968` and explicitly instructed implementation. The human gate is satisfied.
-Ratify the accepted contract-first ancestor before source edits, then implement
+Accepted contract-first ancestor: `73b5da4ac` (status ratification of reviewed
+proposal `9532a2968`, committed before source edits). Now implement
 Roads-owned parameterization, native input propagation and the dedicated view.
 Validate focused tests, actual NoDb/browser/native/report workflow, broad sanity,
 frontend gates and independent final reviews. Prior pending-approval entries below

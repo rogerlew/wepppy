@@ -521,3 +521,24 @@ so concurrent successful requests do not erase errors. See
 Post-fire debris flow uses the same hidden mod placeholders and dynamic bootstrap
 path as RUSLE. Its controller remounts after section replacement; enabling it
 also reveals the registry-declared RUSLE/POLARIS dependencies.
+
+### Roads parameterization view
+
+`roads_parameterization.js` boots only on `#roads_parameterization` in the
+standalone `roads/parameterization.htm` page. It uses `WCDom` delegation and
+`WCHttp` session/CSRF handling; this settings-only view does not enqueue jobs or
+replace the Roads run controller. The run page links to the view and provides
+Prepare/Run after a successful settings save.
+Load the deferred `controllers-gl.js` and shared `controllers_gl_stale_check.js`
+in immediate sequence through `static_url`, as on other dedicated views. The
+base page supplies the expected build ID; the shared guard reports stale bundles.
+
+The server supplies baseline/resolved groups and actual completed-run readbacks.
+The editor submits only `parameterization.overrides` (and explicit invalid-state
+`repair: true`) through the existing Roads `set_params` route. Draft state is
+local; passive refresh cannot replace dirty inputs, pending Save owns its response,
+and Cancel reloads authoritative state. Full source and state semantics are in the
+[Roads settings contract](../../../docs/schemas/roads-settings-contract.md).
+
+Coverage: `__tests__/roads_parameterization.test.js` and
+`tests/weppcloud/routes/test_roads_bp.py`; rebuild `controllers-gl.js` after edits.

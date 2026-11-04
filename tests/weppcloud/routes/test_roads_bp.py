@@ -37,6 +37,7 @@ class RoadsStub(LockedMixin):
                 "traffic": None,
             },
         }
+        self._parameterization_state = None
         self._attribute_field_map: Dict[str, Any] = dict(self._params["attribute_field_map"])
         self._attribute_catalog: Optional[Dict[str, Any]] = None
         self._uploaded_geojson_relpath: Optional[str] = None
@@ -92,6 +93,10 @@ class RoadsStub(LockedMixin):
         return cls._instances.get(wd)
 
     @classmethod
+    def initial_parameterization_preview(cls):
+        return {"status": "unbound", "baseline_id": "preview", "overrides": {}, "groups": []}
+
+    @classmethod
     def reset_instances(cls) -> None:
         cls._instances.clear()
 
@@ -112,7 +117,9 @@ class RoadsStub(LockedMixin):
         if "attribute_field_map" in payload and isinstance(payload["attribute_field_map"], dict):
             self._attribute_field_map.update(payload["attribute_field_map"])
             self._params["attribute_field_map"] = dict(self._attribute_field_map)
-        self._params.update(payload)
+        self._params.update({key: value for key, value in payload.items() if key != "parameterization"})
+        if "parameterization" in payload:
+            self._parameterization_state = {"status": "bound", "overrides": payload["parameterization"].get("overrides", {})}
         return dict(self._params)
 
     def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
@@ -195,6 +202,7 @@ class RoadsStub(LockedMixin):
             "attribute_field_map": dict(self._attribute_field_map),
             "discovered_attribute_catalog": self._attribute_catalog,
             "uploaded_geojson_relpath": self._uploaded_geojson_relpath,
+            "parameterization": self._parameterization_state,
             "last_prepare_summary": self._prepare_summary,
             "last_run_summary": self._run_summary,
             "status": self._status,
@@ -869,3 +877,154 @@ def test_detachment_authorization_precedes_view_and_artifact_access(roads_client
 def test_malformed_payload_route_matrix(roads_client, tmp_path):
     from tests.factories.request_payload import assert_malformed_routes
     assert_malformed_routes(roads_client[0], RUN_ID, CONFIG, tmp_path)
+
+
+def test_parameterization_view_and_query_do_not_initialize_absent_roads(roads_client, monkeypatch):
+    client, RoadsStub, RonStub, _prep, _rq, run_dir = roads_client
+    RoadsStub._instances.pop(run_dir)
+    contexts = []
+    monkeypatch.setattr(roads_module, 'render_template', lambda template, **context: contexts.append(context) or 'view')
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/roads/parameterization')
+    assert response.status_code == 200
+    assert RoadsStub.tryGetInstance(run_dir) is None
+    assert contexts[-1]['parameterization_state']['controller_present'] is False
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/query/roads/summary')
+    assert response.status_code == 200
+    assert response.json['parameterization']['status'] == 'unbound'
+    assert RoadsStub.tryGetInstance(run_dir) is None
+    RonStub.getInstance(run_dir).mods = []
+    client.get(f'/runs/{RUN_ID}/{CONFIG}/roads/parameterization')
+    assert contexts[-1]['parameterization_state']['enabled'] is False
+    assert contexts[-1]['parameterization_state']['parameterization'] is None
+
+
+def test_parameterization_save_returns_authoritative_query(roads_client, monkeypatch):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    controller = RoadsStub.getInstance(run_dir)
+    original = controller.query_summary
+    parameterization = {'status': 'bound', 'baseline_id': 'server-baseline', 'overrides': {}}
+    monkeypatch.setattr(controller, 'query_summary', lambda: dict(original(), parameterization=parameterization))
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json={'parameterization': {'overrides': {}}})
+    assert response.status_code == 200
+    assert response.json['Content']['parameterization'] == parameterization
+
+
+def test_parameterization_readonly_save_does_not_initialize(roads_client):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    RoadsStub._instances.pop(run_dir)
+    Path(run_dir, 'READONLY').touch()
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json={'parameterization': {'overrides': {}}})
+    assert response.status_code == 403
+    assert RoadsStub.tryGetInstance(run_dir) is None
+
+
+def test_parameterization_actual_template_fields_and_safe_seed(roads_client, monkeypatch):
+    from jinja2 import FileSystemLoader
+
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    templates = Path(roads_module.__file__).resolve().parents[2] / 'templates'
+    client.application.jinja_loader = FileSystemLoader(str(templates))
+    client.application.jinja_env.globals.update(
+        static_url=lambda name: '/static/' + name,
+        url_for=lambda *args, **kwargs: '/',
+        url_for_run=lambda endpoint, **kwargs: '/runs/test/cfg/' + endpoint,
+    )
+    controller = RoadsStub.getInstance(run_dir)
+    original = controller.query_summary
+    monkeypatch.setattr(controller, 'query_summary', lambda: dict(original(), parameterization={
+        'status': 'invalid', 'diagnostics': ['</script><script>alert(1)</script>'],
+    }))
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/roads/parameterization')
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert html.count('data-rp-row data-role=') == 12
+    assert html.count('data-rp-mode disabled') == 12
+    assert html.count('data-rp-value type="number"') == 12
+    assert 'data-rp-leave-action="save"' in html
+    assert 'data-rp-leave-action="discard"' in html
+    assert 'data-rp-leave-action="stay"' in html
+    assert '</script><script>alert(1)</script>' not in html
+    assert r'\u003c/script\u003e' in html
+    assert 'controllers-gl.js' in html
+
+
+def test_parameterization_invalid_first_save_does_not_create_controller(roads_client, monkeypatch):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    RoadsStub._instances.pop(run_dir)
+    def reject_initial(*args, **kwargs):
+        raise ValueError('parameterization overrides must contain all roles')
+    monkeypatch.setattr(RoadsStub, 'validate_initial_params', reject_initial, raising=False)
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json={'parameterization': {'overrides': {}}})
+    assert 'error' in response.json
+    assert RoadsStub.tryGetInstance(run_dir) is None
+
+
+def test_parameterization_save_does_not_enable_existing_disabled_controller(roads_client):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(False)
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json={'parameterization': {'overrides': {}}})
+    assert 'error' in response.json
+    assert controller.enabled is False
+
+
+def test_parameterization_valid_first_save_validates_before_initialization(roads_client, monkeypatch):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    RoadsStub._instances.pop(run_dir)
+    calls = []
+    def validate_initial(payload):
+        assert RoadsStub.tryGetInstance(run_dir) is None
+        calls.append(payload)
+    monkeypatch.setattr(RoadsStub, 'validate_initial_params', validate_initial, raising=False)
+    payload = {'parameterization': {'overrides': {'road': {}}}}
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json=payload)
+    assert response.status_code == 200
+    assert calls == [payload]
+    assert RoadsStub.tryGetInstance(run_dir).enabled is True
+
+
+def test_parameterization_config_alias_uses_same_preflight(roads_client, monkeypatch):
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    RoadsStub._instances.pop(run_dir)
+    def reject_initial(payload):
+        raise ValueError('invalid nested parameterization')
+    monkeypatch.setattr(RoadsStub, 'validate_initial_params', reject_initial, raising=False)
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/api/roads/config', json={'parameterization': {}})
+    assert 'invalid nested' in response.json['error']['message']
+    assert RoadsStub.tryGetInstance(run_dir) is None
+
+
+def test_parameterization_response_preserves_ordinary_params_roundtrip(roads_client):
+    client, _roads, _ron, _prep, _rq, _run_dir = roads_client
+    custom = {'road': {'ki_kg_s_m4': {'mode': 'multiply', 'value': 2}}}
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json={'parameterization': {'overrides': custom}})
+    content = response.json['Content']
+    assert 'parameterization' not in content['roads_params']
+    assert content['parameterization']['overrides'] == custom
+    response = client.post(f'/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params', json=content['roads_params'])
+    assert response.json['Content']['parameterization']['overrides'] == custom
+    assert 'parameterization' not in response.json['Content']['roads_params']
+
+
+def test_parameterization_busy_get_renders_shell_without_scientific_admission(roads_client, monkeypatch):
+    from wepppy.wepp.interchange import _roads_lifecycle
+    client, RoadsStub, _ron, _prep, _rq, run_dir = roads_client
+    from jinja2 import FileSystemLoader
+    templates = Path(roads_module.__file__).resolve().parents[2] / 'templates'
+    client.application.jinja_loader = FileSystemLoader(str(templates))
+    client.application.jinja_env.globals.update(
+        static_url=lambda name: '/static/' + name,
+        url_for=lambda *args, **kwargs: '/',
+        url_for_run=lambda endpoint, **kwargs: '/runs/test/cfg/' + endpoint,
+    )
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    def busy_summary():
+        raise _roads_lifecycle.RoadsResultsUnavailable('Roads is busy')
+    monkeypatch.setattr(controller, 'query_summary', busy_summary)
+    response = client.get(f'/runs/{RUN_ID}/{CONFIG}/roads/parameterization')
+    assert response.status_code == 200
+    assert 'text/html' in response.content_type
+    assert 'data-parameterization-seed' in response.text
+    assert '"busy": true' in response.text
+    assert '"parameterization": null' in response.text

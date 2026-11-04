@@ -1,10 +1,68 @@
 # Validate modern Roads parameters and prepare a human-reviewed configuration design
 
+
+## Completion — 2026-11-03
+
+Status: **Closed 2026-11-03 — implemented and locally validated**.
+
+The approved Roads-owned retained baseline, twelve role-driver overrides and
+dedicated view are wired and validated. Real default/custom browser -> NoDb ->
+native -> fresh-report workflows pass; canonical archive/reset/restore/full-fork
+and private authorization preserve exact authority, inputs and eligibility.
+Independent correctness (IC-01–IC-08), security (IS-01–IS-04) and UX
+(IU-01–IU-10) findings are closed.
+
+Final regression coverage: **13,034 unique passed, 422 runtime skipped and one
+collection skipped**, with all13,456 collected tests reconciled across the retained
+broad prefix and142-test passing suffix after the template-only stale-guard repair.
+Affected view checks287 passed; focused Roads273 passed; frontend122 suites /
+1,033 tests passed. Management stubtest retains143 diagnostics identical to HEAD,
+with zero new diagnostics; it is inherited debt, not a passing stubtest.
+
+No production deployment, scientific default adoption or reclassification of
+historical experiments occurred. All907 baseline files and4,731 source-study
+files remain unchanged. The live workflow covers one continuous rutted project;
+other writer branches have focused coverage, not an exhaustive live claim.
+
+Evidence: [implementation results](../../artifacts/parameterization-implementation-results.md),
+[final validation](../../artifacts/parameterization-implementation-validation.json) and
+[additive ledger v40](../../artifacts/candidate-ledger-v40.json).
+
+All checkpoints below preserve historical execution wording. Their pending gates
+and next-step instructions are superseded by this completion record; original
+scientific criteria and failed classifications remain unchanged.
+
+## Resumed workflow checkpoint — 2026-11-03
+
+The default workflow is validated after the authorized local service restart:
+Prepare `75640f2d-3397-41c9-9525-842c6ec12bab`, Run
+`90043676-79c3-436c-8393-27ea6558d6da`, and
+`parameterization-workflow-v1/native-default-restarted-readback.json` under the
+study root. Independent readback verifies 35 profiles and 105 role records with
+exact native propagation and current configuration/snapshot receipt identities.
+Pre-restart failures remain retained. The earlier unbound/Save diagnosis was
+incorrect: configuration hash is computed, `_parameterization` is durably bound,
+and unchanged default Save is intentionally disabled.
+
+Custom browser Save and native Run pass with420 exact driver values, unchanged
+slope/management inputs and bound current receipts. Independent raw native
+comparison verification, canonical archive/reset/restore/full-fork readbacks,
+private authorization and final correctness/security/UX reviews all pass.
+IC-07 repository drift disclosure and the populated mobile selector are corrected.
+All907 protected baseline files and4,731 source-study files remain unchanged.
+
+The final broad retry is running after a reviewed Disturbed report-provenance
+correction. Fresh96-case native output parity supports an exact source-review
+sidecar; original report and producer provenance remain unchanged. No scientific
+default adoption or production deployment is authorized.
+
+
 ## Approved implementation execution — 2026-11-03
 
 The operator approved the replacement specification and dedicated layout at
 `9532a2968` and explicitly instructed implementation. The human gate is satisfied.
-Ratify the accepted contract-first ancestor before source edits, then implement
+Accepted contract-first ancestor: `73b5da4ac` (status ratification of reviewed
+proposal `9532a2968`, committed before source edits). Now implement
 Roads-owned parameterization, native input propagation and the dedicated view.
 Validate focused tests, actual NoDb/browser/native/report workflow, broad sanity,
 frontend gates and independent final reviews. Prior pending-approval entries below
@@ -401,6 +459,22 @@ Re-run a failed study only under a new bound declaration; never overwrite eviden
 
 ## Progress
 
+- [x] Resumed verified post-restart default workflow; retained failed attempts and corrected the unsupported unbound/Save diagnosis.
+- [x] Real custom Save and Prepare completed; all twelve multiplier entries persisted.
+- [x] Custom native readback and final populated desktop/mobile UX pass; all 420 values and actual comparison metrics independently checked.
+- [x] Canonical archive, readonly denial and Reset/Save pass with protected baseline/source preservation.
+- [x] Restore/full-fork readbacks and private authorization pass; all source and baseline inventories remain unchanged.
+- [x] Resolve shared-parser report provenance with exact reviewed source delta, unchanged original report/provenance and independently verified96-case artifact parity; all final independent reviews pass.
+- [x] Broad retry completed12,892 passes/423 skips before finding missing shared stale-check script in new template; standard deferred script pair restored.
+- [x] Complete142-test suffix and287 affected view tests; all13,456 collected tests reconciled (13,034 passed,422 runtime skips,1 collection skip). Final rendered guard/build identities pass.
+- [x] Final validation receipt, additive ledger v40, independent reviews, current documentation and package closure completed.
+
+- [x] Commit accepted contract-first ancestor `73b5da4ac` before implementation.
+- [ ] Implement and test embedded baseline/override collaborator and Roads mutation/native writers.
+- [ ] Implement and test dedicated route/view/controller and all valid states.
+- [ ] Validate real disposable browser/persistence/native/report lifecycle and independent final reviews.
+- [ ] Complete focused/full repository/frontend gates and final documentation checkpoint.
+
 - [x] Replace conflicting inline proposal with concrete repository/project contracts and revised ADR.
 - [x] Complete source inventory and168-case retained-baseline default parity prototype.
 - [x] Finish all 18 bounded native override profiles and independent source/artifact reviews.
@@ -633,6 +707,10 @@ every unchanged batch. Use wctl doc-lint for changed documentation.
 
 ## Surprises & Discoveries
 
+Final broad testing passed all96 native Disturbed cases before its published-report source hash guard rejected the opt-in shared management parser addition. Preserve original report/execution provenance and record a reviewed source disposition; do not relabel historical output as current execution. Fork required an rq-engine-only reload after an old-process import error. The private-auth helper needed the existing404 concealment response and a valid anonymous CSRF token to isolate authorization.
+
+The prior default failure was stale worker code after the owning-codec repair, not absent parameterization. Current post-restart receipts pass independent admission. Final review found missing repository-drift display; retained project authority remains correct.
+
 - 2026-11-03 source audit: native zero values are estimation/bypass sentinels; no-traffic management changes road/fill plant and initial values but retains yearly surface operations. Geometry Prepare precedes soil/management assembly during Run.
 
 - Disturbed stores its editable lookup outside disturbed.nodb in a project CSV. Copying that storage literally would conflict with the requested single Roads NoDb authority.
@@ -762,6 +840,8 @@ and this continuation supersede those statements without altering old evidence.
 
 ## Decision Log
 
+2026-11-03 resumption: retain the valid restarted default checkpoint without redundant native execution; use additive custom/lifecycle evidence labels and repair confirmed IC-07 display conformance only.
+
 - 2026-11-03: operator explicitly approves both replacement artifacts and instructs implementation. Ratify status-only ancestor and proceed; preserve accepted contracts and separate deployment boundary.
 
 - 2026-11-03: retain all18 baseline asset texts within roads.nodb,167705 bytes before JSON overhead. One atomic owner avoids split CSV state and reproduces source after repository drift; resolver version binds interpretation.
@@ -890,6 +970,10 @@ changes. Independent implementation review closed the normalized-legacy control
 confound with 96 exact-deck controls and corrected attribution.
 
 ## Outcomes & Retrospective
+
+Final outcome: approved implementation delivered with actual browser/native/report/lifecycle proof and reconciled repository coverage. Source/baseline artifacts and scientific classifications are preserved. Reload long-lived services before boundary validation, test populated mobile state, and retain strict publication provenance instead of relabeling old output. The late stale-bundle omission was repaired and verified through the existing shared template contract. Production deployment and any scientific-default decision remain separate.
+
+Resumed implementation validation is in progress. Default/custom native workflows, canonical lifecycle readbacks, private authorization and final UX/security review pass. Final correctness disposition of shared-parser report provenance and the broad retry remain required before closure.
 
 Approved implementation is active; proposal work is complete. No production workflow claim until source, generated artifacts and real service-boundary validation pass.
 

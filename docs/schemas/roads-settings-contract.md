@@ -1,6 +1,6 @@
 # Roads parameterization project and view contract
 
-Status: **approved 2026-11-03; implementation pending**. The operator explicitly
+Status: **approved 2026-11-03; implemented; local workflow validated**. The operator explicitly
 approved the replacement specification and dedicated layout at proposal checkpoint
 `9532a2968` and instructed implementation. The approved content supersedes the
 five-fallback-only inline proposal. Reviews and exact proposed artifact hashes are
@@ -267,6 +267,10 @@ server-owned baseline identity, override entries, representation diagnostics and
 resolved groups. Public queries omit full retained template texts; authorized
 artifact browsing retains normal project access. Legacy original keys remain.
 Invalid saved fields return explicit diagnostics, never nonfinite JSON.
+The additive `repository_baseline` diagnostic reports `matching`, `different`,
+or `unavailable`, with the current repository `baseline_id` when available and
+an explicit reason when unavailable. This read-only drift comparison never
+rebinds the retained project baseline or changes result eligibility.
 
 Extend preparation identity with a hash of canonical saved parameterization; an
 absent legacy record must not masquerade as the bound version. All existing
@@ -287,6 +291,42 @@ explicit unsupported state; existing diagnostic artifacts remain browseable
 without evaluating unknown rules. Block ordinary Save and Run. Only the explicit
 repair path may replace this state, after retaining it and reviewing the reset
 consequence; no automatic downgrade is permitted.
+
+### Derived comparison snapshot artifact
+
+After successful continuous-run report generation, Roads writes the derived
+`wepp/roads/output/roads.parameterization.comparison.json` before result
+publication. It is retained with normal Roads history and included in ordinary
+archive/restore; it is not a second editable parameter store. The snapshot records
+run identity/time, saved baseline identity and override entries, configuration
+hash, actual summary-source hashes, simulation years, modeled profile area, annual
+PASS runoff and EVENT sediment totals, and area-normalized quantities.
+
+Comparison compatibility requires identical bound baseline, native binary pair,
+actual climate, management and slope contents, non-overridden soil contents,
+profile/report scope and calendar. Bind normalized native run controls and the
+present/absent content of hillslope runtime sidecars `wepp_ui.txt`, `pmetpara.txt`,
+`snow.txt` and `gwcoeff.txt`; a changed evaporation/snow configuration is not an
+override-only comparison. Preparation-local IDs alone never establish
+compatibility. Sum each distinct executed modeled profile once, including explicitly
+labeled replacement remainders; report this as modeled-profile export, not watershed
+outlet yield or road-only sediment for mixed profiles. Do not combine terminal
+ELEMENT sediment with PASS EVENT particle export. A missing continuous-run segment
+summary yields an explicit unavailable reason, never fabricated zero results.
+
+The view reads current and retained snapshots and verifies their referenced source
+bytes and summary totals before comparing a default run with a custom run. A
+snapshot written before failed publication is not a completed run: require the
+original successful Roads receipt with matching parameterization hash and required
+resources. The receipt's `parameterization_snapshot_sha256` binds the exact snapshot
+bytes at publication; both current and historical consumers verify it before using
+snapshot metadata or results. Current paths also require current-result admission; historical paths
+remain historical and do not instantiate a controller from retained files. Different
+climate/geometry/scope, missing source evidence or malformed snapshots are explicit
+unavailable diagnostics. Editing settings does not relabel retained snapshots with
+new settings. Current-result eligibility remains governed by the Roads receipt;
+retained comparisons are historical evidence even when their settings differ from
+the currently saved draft.
 
 ## Compatibility and regression plan
 

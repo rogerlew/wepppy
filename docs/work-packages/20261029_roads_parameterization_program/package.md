@@ -1,5 +1,37 @@
 # Roads parameterization and configuration view
 
+
+## Completion — 2026-11-03
+
+Status: **Closed 2026-11-03 — implemented and locally validated**.
+
+The approved Roads-owned retained baseline, twelve role-driver overrides and
+dedicated view are wired and validated. Real default/custom browser -> NoDb ->
+native -> fresh-report workflows pass; canonical archive/reset/restore/full-fork
+and private authorization preserve exact authority, inputs and eligibility.
+Independent correctness (IC-01–IC-08), security (IS-01–IS-04) and UX
+(IU-01–IU-10) findings are closed.
+
+Final regression coverage: **13,034 unique passed, 422 runtime skipped and one
+collection skipped**, with all13,456 collected tests reconciled across the retained
+broad prefix and142-test passing suffix after the template-only stale-guard repair.
+Affected view checks287 passed; focused Roads273 passed; frontend122 suites /
+1,033 tests passed. Management stubtest retains143 diagnostics identical to HEAD,
+with zero new diagnostics; it is inherited debt, not a passing stubtest.
+
+No production deployment, scientific default adoption or reclassification of
+historical experiments occurred. All907 baseline files and4,731 source-study
+files remain unchanged. The live workflow covers one continuous rutted project;
+other writer branches have focused coverage, not an exhaustive live claim.
+
+Evidence: [implementation results](artifacts/parameterization-implementation-results.md),
+[final validation](artifacts/parameterization-implementation-validation.json) and
+[additive ledger v40](artifacts/candidate-ledger-v40.json).
+
+All checkpoints below preserve historical execution wording. Their pending gates
+and next-step instructions are superseded by this completion record; original
+scientific criteria and failed classifications remain unchanged.
+
 ## Approved implementation execution — 2026-11-03
 
 The operator approved the replacement specification and dedicated layout at
@@ -276,7 +308,7 @@ bounded improvement, with the primary failures unresolved; no parameter
 candidate or new native defect is established.
 The six withheld materials and human UI specification/layout gate remain intact.
 
-Status: active. One outcome-driven program, authorized by the operator on
+Status: Closed 2026-11-03. One outcome-driven program, authorized by the operator on
 2026-10-29 Pacific (2026-10-30 UTC). This supersedes the sequence of individually
 approved experiments; closed studies remain historical evidence.
 
@@ -285,7 +317,7 @@ soils and released `wepp_261029`, with order-of-magnitude agreement against FSWE
 then a run-scoped Roads parameterization view for editing key values by road
 configuration. The operator clarified that users need not edit CSV files.
 
-Execution follows the [active plan](prompts/active/program_execplan.md),
+Execution follows the [completed execution plan](prompts/completed/program_execplan.md),
 [acceptance criteria](acceptance.md), [autonomy charter](autonomy.md) and
 [tracker](tracker.md). Completion requires both the scientific gate and a working
 user-facing workflow, not a favorable selected case or a scaffold.
@@ -391,10 +423,10 @@ reviewed ancestor-checkpoint requirement. The current instruction authorizes thi
 program's objective and autonomous experimental choices; it does not imply a
 specific unreviewed field schema or production rollout.
 
-Security impact: medium potential because the final view writes run-scoped model
-inputs. Preserve existing run authorization, readonly and CSRF controls; retain
-correctness and security/noninterference review. Reassess if the actual design adds
-an authorization boundary. Complexity budget: existing Roads/NoDb/Flask/controller
+Security impact: **high** under the package process because the dedicated public
+route and retained/native file handling affect the attack surface. Preserve existing
+run authorization, readonly and CSRF controls; the dedicated independent
+implementation security artifact assesses each surface and live lifecycle evidence. Complexity budget: existing Roads/NoDb/Flask/controller
 patterns, owned native writers/readers and local batch execution; no new service,
 dependency, optimizer infrastructure or deployment topology.
 

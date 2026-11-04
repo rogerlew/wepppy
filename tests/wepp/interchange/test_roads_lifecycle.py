@@ -1,5 +1,6 @@
 """Filesystem evidence for Roads replacement, admission, and coordination."""
 import json
+import jsonpickle
 import multiprocessing
 from pathlib import Path
 
@@ -76,6 +77,131 @@ def test_receipt_never_admits_missing_required_resource(tmp_path):
 def test_legacy_files_are_not_current(tmp_path):
     prepared(tmp_path)
     assert not lifecycle.available(tmp_path)
+
+
+def _bind_parameterization(root, *, custom=False):
+    from wepppy.nodb.mods.roads.roads import Roads
+    from wepppy.nodb.mods.roads.parameterization import (
+        UNBOUND, apply_payload, configuration_hash, default_overrides,
+    )
+    overrides = default_overrides()
+    if custom:
+        overrides['road']['ki_kg_s_m4'] = {'mode': 'multiply', 'value': 2.0}
+    state = apply_payload(UNBOUND, {'overrides': overrides})
+    identity = configuration_hash(state)
+    controller = Roads.__new__(Roads)
+    controller.__dict__.update(wd=str(root),
+                              _last_run_summary={'overrides': state['overrides']},
+                              _parameterization=state,
+                              _last_prepare_summary={'parameterization_hash': identity})
+    encoded = jsonpickle.encode(controller)
+    # Match real NoDb persistence, including an aliased override mapping.
+    assert 'py/state' in json.loads(encoded)
+    assert 'py/id' in json.loads(encoded)['py/state']['_parameterization']['overrides']
+    (root / 'roads.nodb').write_text(encoded)
+    manifest = root / lifecycle.SEGMENTS / 'roads.segment.pass.manifest.json'
+    records = json.loads(manifest.read_text())
+    for record in records:
+        record['parameterization'] = {'configuration_hash': identity}
+    manifest.write_text(json.dumps(records))
+    # Admission fixture only; the comparison helper separately validates contents.
+    (root / lifecycle.PARAMETERIZATION_SNAPSHOT).write_text('{}')
+    return identity
+
+
+def test_bound_receipt_rejects_changed_saved_state_even_with_surviving_outputs(tmp_path):
+    resources = prepared(tmp_path)
+    resources['required_relpaths'].append(str(lifecycle.PARAMETERIZATION_SNAPSHOT))
+    identity = _bind_parameterization(tmp_path)
+    with lifecycle.operation(tmp_path):
+        lifecycle.publish(tmp_path, resources, single_storm=False)
+    assert lifecycle.require_current(tmp_path)['parameterization_hash'] == identity
+    _bind_parameterization(tmp_path, custom=True)
+    # Even matching new preparation/manifest cannot admit the previous receipt.
+    assert not lifecycle.available(tmp_path)
+    assert (tmp_path / lifecycle.RECEIPT).is_file()
+
+
+def test_bound_publication_rejects_missing_profile_parameterization(tmp_path):
+    resources = prepared(tmp_path)
+    resources['required_relpaths'].append(str(lifecycle.PARAMETERIZATION_SNAPSHOT))
+    _bind_parameterization(tmp_path)
+    manifest = tmp_path / lifecycle.SEGMENTS / 'roads.segment.pass.manifest.json'
+    records = json.loads(manifest.read_text())
+    records[0].pop('parameterization')
+    manifest.write_text(json.dumps(records))
+    with lifecycle.operation(tmp_path), pytest.raises(ValueError, match='profile parameterization'):
+        lifecycle.publish(tmp_path, resources, single_storm=False)
+    assert not (tmp_path / lifecycle.RECEIPT).exists()
+
+
+def test_legacy_receipt_not_reinterpreted_as_new_bound_results(tmp_path):
+    publish(tmp_path)
+    assert lifecycle.available(tmp_path)
+    _bind_parameterization(tmp_path)
+    assert not lifecycle.available(tmp_path)
+
+
+def test_bound_receipt_rejects_tampered_baseline_and_preserves_diagnostics(tmp_path):
+    resources = prepared(tmp_path)
+    resources['required_relpaths'].append(str(lifecycle.PARAMETERIZATION_SNAPSHOT))
+    _bind_parameterization(tmp_path)
+    with lifecycle.operation(tmp_path):
+        lifecycle.publish(tmp_path, resources, single_storm=False)
+    nodb = tmp_path / 'roads.nodb'
+    state = jsonpickle.decode(nodb.read_text())
+    asset = next(iter(state._parameterization['baseline']['assets'].values()))
+    asset['text'] += '\n# altered without updating its bound hash\n'
+    nodb.write_text(jsonpickle.encode(state))
+    assert not lifecycle.available(tmp_path)
+    assert (tmp_path / lifecycle.RECEIPT).is_file()
+
+
+def test_bound_publication_requires_comparison_resource(tmp_path):
+    resources = prepared(tmp_path)
+    _bind_parameterization(tmp_path)
+    with lifecycle.operation(tmp_path), pytest.raises(lifecycle.RoadsResultsUnavailable, match='comparison evidence'):
+        lifecycle.publish(tmp_path, resources, single_storm=False)
+    assert not (tmp_path / lifecycle.RECEIPT).exists()
+
+
+def test_bound_receipt_rejects_changed_comparison_metadata(tmp_path):
+    resources = prepared(tmp_path)
+    resources['required_relpaths'].append(str(lifecycle.PARAMETERIZATION_SNAPSHOT))
+    _bind_parameterization(tmp_path)
+    with lifecycle.operation(tmp_path):
+        lifecycle.publish(tmp_path, resources, single_storm=False)
+    assert lifecycle.available(tmp_path)
+    (tmp_path / lifecycle.PARAMETERIZATION_SNAPSHOT).write_text('{"is_default":true}')
+    assert not lifecycle.available(tmp_path)
+
+
+def test_identity_decodes_owned_state_without_postload_or_cache_mutation(tmp_path, monkeypatch):
+    from wepppy.nodb.mods.roads.roads import Roads
+    prepared(tmp_path)
+    identity = _bind_parameterization(tmp_path)
+    before = {str(path.relative_to(tmp_path)): path.read_bytes()
+              for path in tmp_path.rglob('*') if path.is_file()}
+    def forbidden(*args, **kwargs):
+        raise AssertionError('Admission must not hydrate/cache/normalize a controller')
+    monkeypatch.setattr(Roads, '_post_instance_loaded', forbidden)
+    monkeypatch.setattr(Roads, 'getInstance', forbidden)
+    assert lifecycle._parameterization_identity(tmp_path) == identity
+    assert before == {str(path.relative_to(tmp_path)): path.read_bytes()
+                      for path in tmp_path.rglob('*') if path.is_file()}
+
+
+@pytest.mark.parametrize('saved', ['legacy', 'null', 'wrong_type'])
+def test_owned_state_distinguishes_legacy_from_malformed(tmp_path, saved):
+    from wepppy.nodb.mods.roads.roads import Roads
+    publish(tmp_path)
+    controller = Roads.__new__(Roads)
+    controller.__dict__.update(wd=str(tmp_path))
+    if saved == 'null':
+        controller._parameterization = None
+    content = jsonpickle.encode(controller) if saved != 'wrong_type' else '{}'
+    (tmp_path / 'roads.nodb').write_text(content)
+    assert lifecycle.available(tmp_path) is (saved == 'legacy')
 
 
 def test_read_lock_blocks_other_process_mutation(tmp_path):

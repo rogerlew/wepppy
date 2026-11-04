@@ -2332,7 +2332,14 @@ class Management(object):
     """Runtime representation of a WEPP management (``.man``) file."""
 
     def __init__(self, **kwargs: Any) -> None:
-        self._strict_upload = bool(kwargs.get("StrictUpload", False))
+        # Retained Roads templates use 97.3; validate their grammar with the same
+        # bounded parser without widening the public strict-upload 98.4 format.
+        strict_legacy_roads = bool(kwargs.get("StrictLegacyRoads", False))
+        if strict_legacy_roads and kwargs.get("StrictUpload", False):
+            raise ValueError("StrictLegacyRoads and StrictUpload are mutually exclusive.")
+        if strict_legacy_roads:
+            self._strict_legacy_roads = True
+        self._strict_upload = bool(kwargs.get("StrictUpload", False) or strict_legacy_roads)
         self._native_scenario_references = bool(kwargs.get("NativeScenarioReferences", False) or self._strict_upload or kwargs.get("Key") == "single-user-defined")
         self._input_max_ofes = int(kwargs.get("InputMaxOfes", 1))
         self.key: Optional[int] = kwargs["Key"]
@@ -2442,8 +2449,9 @@ class Management(object):
         if self._strict_upload:
             lines = _StrictInputLines(lines)
         self.datver = lines.pop(0)
-        if self._strict_upload and self.datver != "98.4":
-            raise ValueError("Only management version 98.4 is supported.")
+        strict_version = "97.3" if getattr(self, "_strict_legacy_roads", False) else "98.4"
+        if self._strict_upload and self.datver != strict_version:
+            raise ValueError(f"Only management version {strict_version} is supported.")
         try:
             self.datver_value = float(self.datver)
         except ValueError:

@@ -4,33 +4,49 @@
   "provenance_sha256": "44e3f899ef18162e046e983cf0b518923e19abb3838dbcd4cb45e196a5d8e3f0",
   "published_report_sha256": "263174f8f56c94a9fb2773572d16f65593453df4816a6d38b7a069e97a924d7a",
   "reviewed_source_deltas": {
-    "wepppy/wepp/soils/horizon_boundary.py": {
-      "recorded": null,
-      "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
-    },
     "tests/roads/roads_analysis.py": {
       "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
-      "current": "e096957eb27244d3ac0a341dffad3f5acb3201bacdbe24dd9aa2d63c2eea1a23"
+      "current": "4d0540a2d7c20a86e6414a6ef30c4607d324a4102cd62414fc7f68fad9b69ed1"
+    },
+    "tests/roads/roads_matrix.py": {
+      "recorded": "4288f063a083f845599326a82154304b3a217620de4f1ee1e314346208a751a9",
+      "current": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e"
     },
     "tests/roads/roads_sensitivity.py": {
       "recorded": null,
       "current": "1f2ee6564fa5e01a63dde1503b120a483943b9a759fd29ac778dcc7b26354246"
     },
-    "tests/roads/test_roads_sensitivity.py": {
-      "recorded": null,
-      "current": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db"
-    },
     "tests/roads/test_roads_publication.py": {
       "recorded": "bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c",
       "current": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
     },
+    "tests/roads/test_roads_sensitivity.py": {
+      "recorded": null,
+      "current": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db"
+    },
+    "wepppy/nodb/mods/roads/_parameterization_comparisons.py": {
+      "recorded": null,
+      "current": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e"
+    },
+    "wepppy/nodb/mods/roads/parameterization.py": {
+      "recorded": null,
+      "current": "e5ce6f6972ecfa7eee88f11846269235d727f0d2f4e7675e0f3e37a8707c1d14"
+    },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d"
+      "current": "b65713d1356143ca8ac76c62e5c28437f5e35f439df5c6af771266dd6bc5fb0a"
     },
-    "tests/roads/roads_matrix.py": {
-      "recorded": "4288f063a083f845599326a82154304b3a217620de4f1ee1e314346208a751a9",
-      "current": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e"
+    "wepppy/wepp/interchange/_roads_lifecycle.py": {
+      "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
+      "current": "daf24fbc23c3fb411a0cadd0d1cb3a13a7b4bdf4f673edcf0c7647940cda9d54"
+    },
+    "wepppy/wepp/management/managements.py": {
+      "recorded": null,
+      "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+    },
+    "wepppy/wepp/soils/horizon_boundary.py": {
+      "recorded": null,
+      "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
     }
   },
   "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale. The generated-soil boundary change adds the shared normalizer to execution-source hashing; historical reports remain unchanged and explicitly stale.",
@@ -108,6 +124,57 @@
       "current_sha256": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db",
       "scope": "Late confirmed study-calendar-context guard: require actual discovered reader climate and any cached calendar to agree with bound native CLI before execution/summary. Final21 focused helper/contract tests pass; historical publication remains unchanged and stale.",
       "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/revised-calendar-context-quality-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "accepted_contract_ancestor": "73b5da4ac",
+      "scope": "Approved Roads-owned baseline and role-driver overrides; all writers/default parity, lifecycle receipt and derived comparisons. Strict opt-in management validation included in source inventory. Historical report/results/provenance unchanged and remain stale; this is not a refresh.",
+      "source_deltas": {
+        "tests/roads/roads_analysis.py": {
+          "previous_reviewed": "e096957eb27244d3ac0a341dffad3f5acb3201bacdbe24dd9aa2d63c2eea1a23",
+          "current": "4d0540a2d7c20a86e6414a6ef30c4607d324a4102cd62414fc7f68fad9b69ed1"
+        },
+        "wepppy/nodb/mods/roads/_parameterization_comparisons.py": {
+          "previous_reviewed": null,
+          "current": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e"
+        },
+        "wepppy/nodb/mods/roads/parameterization.py": {
+          "previous_reviewed": null,
+          "current": "e5ce6f6972ecfa7eee88f11846269235d727f0d2f4e7675e0f3e37a8707c1d14"
+        },
+        "wepppy/nodb/mods/roads/roads.py": {
+          "previous_reviewed": "7506718831d8a8b11ca0877cd75aa82596d0aeb900cf04505f29df864bd77a4d",
+          "current": "ae418b53f7f6d9580e48ba10981dc0ac9a3c016f634c2942a7b79a1134dab735"
+        },
+        "wepppy/wepp/interchange/_roads_lifecycle.py": {
+          "previous_reviewed": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
+          "current": "b3c68420eb79d0a6472c264f6acd56700f6257fe5fe89a8592e21198ab9da255"
+        },
+        "wepppy/wepp/management/managements.py": {
+          "previous_reviewed": null,
+          "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+        }
+      },
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-correctness-review.md",
+      "security_evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-security-review.md"
+    },
+    {
+      "date": "2026-11-03",
+      "accepted_contract_ancestor": "73b5da4ac",
+      "scope": "Independent final correctness review of runtime codec correction and query-only repository drift disclosure. Historical report/results/provenance remain byte-identical, explicitly stale, and are not refreshed by this metadata update.",
+      "source_deltas": {
+        "wepppy/nodb/mods/roads/roads.py": {
+          "previous_reviewed": "ae418b53f7f6d9580e48ba10981dc0ac9a3c016f634c2942a7b79a1134dab735",
+          "current": "b65713d1356143ca8ac76c62e5c28437f5e35f439df5c6af771266dd6bc5fb0a",
+          "scope": "IC-07 read-only repository-baseline drift disclosure; retained parameterization and native assembly unchanged."
+        },
+        "wepppy/wepp/interchange/_roads_lifecycle.py": {
+          "previous_reviewed": "b3c68420eb79d0a6472c264f6acd56700f6257fe5fe89a8592e21198ab9da255",
+          "current": "daf24fbc23c3fb411a0cadd0d1cb3a13a7b4bdf4f673edcf0c7647940cda9d54",
+          "scope": "IC-06 corrected durable NoDb identity through owned jsonpickle codec without post-load/cache hydration; real restarted default/custom receipts independently verified."
+        }
+      },
+      "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-correctness-review.md"
     }
   ]
 }

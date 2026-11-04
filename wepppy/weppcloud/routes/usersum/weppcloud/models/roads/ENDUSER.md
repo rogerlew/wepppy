@@ -70,6 +70,109 @@ The control also shows a summary panel and a Roads results panel. After a run fi
 
 Those status values tell you whether report links are ready or whether you still need to rerun or regenerate Roads resources.
 
+## Roads Parameterization
+
+The approved dedicated **Roads Parameterization** view lets you inspect and adjust
+runoff and erosion drivers without changing road width or slope merely to tune
+results. The implemented workflow is locally validated; see the
+[program status](../../../../../../../docs/work-packages/20261029_roads_parameterization_program/tracker.md)
+for current evidence. The behavior below describes the approved feature.
+
+Open it from the Roads control. The view separates **Road**, **Fill**, and
+**Forest/buffer** parameters. Each role has four controls:
+
+| Parameter | Unit | What changing it generally does |
+| --- | --- | --- |
+| Baseline effective hydraulic conductivity | mm/h | Lower values generally increase runoff; higher values generally decrease runoff |
+| Interrill erodibility, Ki | kg s/m4 | Higher values increase sediment supply from areas between concentrated flow paths |
+| Rill erodibility, Kr | s/m | Higher values increase detachment capacity where concentrated flow exceeds its erosion threshold |
+| Critical shear | Pa | Higher values make concentrated-flow erosion harder to initiate |
+
+These are input controls, not guaranteed proportional changes in outlet sediment.
+Transport, deposition, climate and management can change the response. Conductivity
+is a baseline model input, not the instantaneous infiltration rate throughout a run.
+
+### See where each value comes from
+
+For each parameter, inspect the selected source template, its baseline value,
+applied adjustments, your override and the final resolved input. Where segments
+have different source choices, inspect their groups and member segments.
+
+For example, ordinary gravel/loam settings have these input values after low-traffic
+adjustment and before user overrides:
+
+| Parameter | Road | Fill | Forest/buffer |
+| --- | ---: | ---: | ---: |
+| Conductivity, mm/h | 8.1 | 11.4 | 26 |
+| Ki, kg s/m4 | 500,000 | 2,000,000 | 120,000 |
+| Kr, s/m | 0.000075 | 0.0003 | 0.0003 |
+| Critical shear, Pa | 2 | 2 | 2 |
+
+The source road Ki is 2,000,000 and Kr is 0.0003. Low and no traffic divide both
+road values by four; fill/buffer values are unchanged by that division. No traffic
+also selects different management, so its results can differ from low traffic.
+Rocked-ditch and other texture/surface choices have different source values. The
+[complete repository baseline reference](../../../../../../../docs/schemas/roads-parameterization-baseline-contract.md)
+contains the full matrix and rules; these example values are not a promise that
+all your segments share them.
+
+### Edit, save and reset
+
+Each of the 12 role/parameter entries offers:
+
+- **Default:** use the project's resolved baseline value.
+- **Multiply:** scale that resolved value. A road Ki multiplier of 2 changes
+  500,000 to 1,000,000 in the example above.
+- **Absolute:** supply the final input value in the displayed units.
+
+Overrides apply to all modeled template rows of that role, after ordinary source
+and traffic adjustments. They do not change road geometry or surface/traffic
+labels. Forest/buffer includes template Forest rows used upstream or as unrutted
+remainders; it does not change independently sourced landuse or the baseline
+watershed soils. A role absent from the configuration is labeled as unused.
+
+Use positive values. Zero is not an off switch: it can ask the native model to
+estimate a parameter instead. The application rejects nonfinite values and values
+that become zero or overflow during native conversion. Accepted input limits are
+not field-calibrated ranges.
+
+**Save** commits your changes but does not run WEPP. Return to Roads, Prepare and
+Run to generate new results. **Cancel** discards the draft and reloads saved values.
+**Reset overrides** sets the draft entries to Default; Save commits that reset.
+Reset preserves the project's saved baseline and physical/mapping settings.
+
+The project saves its baseline template contents and overrides together in
+`roads.nodb`. Repository updates do not silently change a bound project. An older
+unbound project is labeled as a preview until its first explicit Save or Prepare;
+a previously prepared legacy project must Prepare before a new Run. Choosing
+newer repository defaults is a separate action, not part of Reset, and is not
+available in this first version.
+
+The view reports whether repository defaults match the retained baseline, differ
+from it, or could not be checked. A failed repository check leaves valid retained
+settings inspectable and unchanged.
+
+### Compare actual inputs and results
+
+Keep **Saved configuration**, **Preview**, and **Used in last completed run**
+separate. Final soil and management inputs are assembled during Run, so geometry
+preparation alone cannot establish their emitted values. Native WEPP may further
+adjust coefficients during simulation; baseline inputs and runtime diagnostics
+are not interchangeable.
+
+Saving changes makes old Roads results historical. They remain inspectable but
+must not be labeled as results of your new settings. Compare actual retained runs
+only when climate, geometry, area and report scope match. Inspect both total runoff
+and sediment and area-normalized values. Missing comparisons mean the required
+runs do not yet exist; no baseline run is generated automatically.
+
+The bounded driver study varied road parameters in two profile arrangements using
+one climate/texture/surface/traffic combination. It supports useful adjustment
+controls, not universal response ranges for fill/buffer or field calibration.
+Matching observations or expectations is an analytical choice, not proof of
+physical validity. The [project parameterization contract](../../../../../../../docs/schemas/roads-settings-contract.md)
+defines ownership, validation and lifecycle details.
+
 ## Upload Mapping: What The Controls Mean
 
 The mapping controls use the labels the user sees in the Roads form:

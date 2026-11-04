@@ -1,5 +1,12 @@
 # Roads correctness, sensitivity and parameter controls
 
+
+Status: replacement specification/layout approved at `9532a2968`, ratified at
+`73b5da4ac`; Roads-owned parameterization and dedicated view implemented with
+local native/report and lifecycle validation. The [settings contract](roads-settings-contract.md)
+is the current project/view authority. Historical scope clarifications below do
+not reopen the satisfied approval gate or adopt scientific defaults.
+
 ## Operator clarification: default settings and user overrides
 
 Operator direction, 2026-11-03: this is a default settings harness, not a

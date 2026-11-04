@@ -26,6 +26,12 @@ Canonical behavioral contract:
   exception and validate emitted 200 mm boundaries before publication.
 * WEPP input omission follows `docs/schemas/wepp-run-input-contract.md`:
   omitted kslast preserves saved state; explicit clearing remains supported.
+* Roads repository baselines and project-owned overrides follow
+  `docs/schemas/roads-parameterization-baseline-contract.md` and
+  `docs/schemas/roads-settings-contract.md`. `roads.nodb` owns retained template
+  contents and overrides; generated soil/management files are readback evidence.
+  Reset removes overrides against the bound baseline, not current repository
+  defaults. Validate native input propagation and legacy binding/invalidation.
 * Treatment soil class selection follows `docs/schemas/disturbed-treatment-soil-lookup-contract.md`:
   thinning prefixes use the effective thinning row in both soil writers; mulch
   retains burned base classes. Keep the shared suffix helper unchanged for RUSLE.

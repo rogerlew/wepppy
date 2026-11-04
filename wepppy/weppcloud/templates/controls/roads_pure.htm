@@ -46,6 +46,9 @@
      stacktrace_panel_options={"panel_id": "roads_stacktrace_panel", "body_id": "roads_stacktrace"}
    ) %}
   <section class="wc-stack">
+    <p><a class="pure-button" href="{{ url_for_run('roads.roads_parameterization', runid=runid, config=config) }}">Roads Parameterization</a>
+      <span class="wc-text-muted">Inspect source values and adjust runoff and erosion drivers.</span></p>
+
     {{ ui.file_upload(
          "roads_geojson_file",
          "Upload roads GeoJSON",

@@ -6,6 +6,7 @@ from contextvars import ContextVar
 import fcntl
 from functools import wraps
 import inspect
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -20,6 +21,7 @@ SEGMENTS = Path('wepp/roads/segments')
 RUNS = Path('wepp/roads/runs')
 HISTORY = Path('wepp/roads/history')
 RECEIPT = OUTPUT / 'roads.current.json'
+PARAMETERIZATION_SNAPSHOT = OUTPUT / 'roads.parameterization.comparison.json'
 CACHE = Path('wepp/reports/cache')
 CACHE_KEY = 'hillslope_watbal_summary_roads'
 COMMON = ('H.pass.parquet', 'ebe_pw0.parquet', 'README.md')
@@ -123,13 +125,48 @@ def mandatory_paths(single_storm: bool) -> set[str]:
     return {str(OUTPUT/'interchange'/name) for name in COMMON + (() if single_storm else CONTINUOUS)}
 
 
+def _parameterization_identity(root: Path) -> str | None:
+    """Read durable project authority without creating/hydrating a controller."""
+    path = _path(root, 'roads.nodb')
+    from wepppy.nodb import _read_retry
+    from wepppy.nodb.mods.roads.roads import Roads
+    snapshot = _read_retry.read_text_snapshot(str(path), allow_missing=True)
+    if snapshot is None:
+        return None
+    # NoDb's owned codec handles py/state envelopes and py/id shared references.
+    # Do not run post-load hooks here: admission must not create directories,
+    # append initialization logs, normalize saved values or consult a cache.
+    instance = Roads._decode_jsonpickle(Roads._preprocess_json_for_decode(snapshot[0]))
+    if not isinstance(instance, Roads):
+        raise ValueError('Roads saved state must decode to its owning controller')
+    state = instance.__dict__
+    if '_parameterization' not in state:
+        return None
+    from wepppy.nodb.mods.roads.parameterization import configuration_hash, validate_state
+    parameterization = validate_state(state['_parameterization'])
+    identity = configuration_hash(parameterization)
+    preparation = state.get('_last_prepare_summary')
+    if not isinstance(preparation, dict) or preparation.get('parameterization_hash') != identity:
+        raise RoadsResultsUnavailable('Roads parameterization changed; Prepare and run Roads again.')
+    return identity
+
+
 def _validate_receipt(root: Path, payload: dict) -> list[str]:
-    if not isinstance(payload, dict) or set(payload) != {'policy', 'is_single_storm', 'required_relpaths'} or payload.get('policy') != POLICY or type(payload.get('is_single_storm')) is not bool:
+    required_keys = {'policy', 'is_single_storm', 'required_relpaths'}
+    if (not isinstance(payload, dict) or not required_keys.issubset(payload)
+            or set(payload) - required_keys - {'parameterization_hash', 'parameterization_snapshot_sha256'}
+            or payload.get('policy') != POLICY or type(payload.get('is_single_storm')) is not bool):
         raise RoadsResultsUnavailable('Prepare and run Roads again; current result receipt is invalid.')
+    identity = _parameterization_identity(root)
+    if (identity is None and ({'parameterization_hash', 'parameterization_snapshot_sha256'} & payload.keys())) or (
+            identity is not None and payload.get('parameterization_hash') != identity):
+        raise RoadsResultsUnavailable('Roads results do not match the saved parameterization; Prepare and run Roads again.')
     paths = payload.get('required_relpaths')
     if (not isinstance(paths, list) or not paths or any(not isinstance(p, str) for p in paths)
             or len(set(paths)) != len(paths) or not mandatory_paths(payload['is_single_storm']).issubset(paths)):
         raise RoadsResultsUnavailable('Roads result receipt has incomplete required resources.')
+    if identity is not None and str(PARAMETERIZATION_SNAPSHOT) not in paths:
+        raise RoadsResultsUnavailable('Roads result receipt omits parameterization comparison evidence.')
     optional = [OUTPUT/'interchange/chnwb.parquet']
     ledger = SEGMENTS/'roads.accounting.json'
     if (root/ledger).exists():
@@ -143,6 +180,10 @@ def _validate_receipt(root: Path, payload: dict) -> list[str]:
             raise RoadsResultsUnavailable(f'Roads result resource is missing: {relative}')
         with _path(root, relative).open('rb') as stream:
             stream.read(1)
+    if identity is not None:
+        snapshot_hash = hashlib.sha256(_path(root, PARAMETERIZATION_SNAPSHOT).read_bytes()).hexdigest()
+        if payload.get('parameterization_snapshot_sha256') != snapshot_hash:
+            raise RoadsResultsUnavailable('Roads parameterization comparison evidence changed after publication.')
     return paths
 
 
@@ -300,6 +341,11 @@ def _validate_generated_set(root, payload):
         profile_ids.add(profile)
         if record.get('design') != 'outslope_unrutted_remainder' and record['segment_id'] not in ids:
             raise ValueError('Roads profile has no prepared geometry')
+        if 'parameterization_hash' in payload:
+            provenance = record.get('parameterization')
+            if (not isinstance(provenance, dict)
+                    or provenance.get('configuration_hash') != payload['parameterization_hash']):
+                raise ValueError('Roads profile parameterization does not match current preparation')
     if (root / SEGMENTS / 'roads.accounting.json').exists():
         from wepppy.wepp.interchange.roads_accounting import accounting_source, load
         if payload['is_single_storm']:
@@ -314,6 +360,11 @@ def publish(root: str | Path, resources: dict, *, single_storm: bool):
         raise RuntimeError('Only the full Roads operation may publish current results')
     payload = {'policy': POLICY, 'is_single_storm': single_storm,
                'required_relpaths': resources['required_relpaths']}
+    identity = _parameterization_identity(root)
+    if identity is not None:
+        payload['parameterization_hash'] = identity
+        payload['parameterization_snapshot_sha256'] = hashlib.sha256(
+            _path(root, PARAMETERIZATION_SNAPSHOT).read_bytes()).hexdigest()
     _validate_generated_set(root, payload)
     destination = _path(root, RECEIPT)
     candidate = destination.with_name(f'roads.current.pending-{uuid4().hex}.json')

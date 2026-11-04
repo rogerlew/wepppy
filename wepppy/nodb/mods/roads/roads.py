@@ -11,6 +11,7 @@ import re
 import shlex
 import shutil
 import time
+import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
@@ -31,6 +32,8 @@ from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.geojson_crs_inference import GeoBounds, infer_geojson_crs
 from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_monotonic_segments
+from wepppy.nodb.mods.roads import parameterization as roads_parameterization
+from wepppy.nodb.mods.roads import _parameterization_comparisons
 
 __all__ = ["Roads"]
 
@@ -154,6 +157,7 @@ class Roads(NoDbBase):
 
     __name__ = "Roads"
     filename = "roads.nodb"
+    TRANSIENT_FIELDS = ("_parameterization_runtime_templates", "_parameterization_runtime_readbacks")
 
     def __init__(
         self,
@@ -732,6 +736,13 @@ class Roads(NoDbBase):
         if not prepared_signature or prepared_signature != current_signature:
             raise ValueError("Roads parameters changed after prepare_segments. Run prepare_segments again.")
 
+        state = self._saved_parameterization_state()
+        if state is None:
+            raise ValueError("Roads parameterization is unbound. Run prepare_segments before a new Roads run.")
+        signature = roads_parameterization.configuration_hash(roads_parameterization.validate_state(state))
+        if prepare_summary.get("parameterization_hash") != signature:
+            raise ValueError("Roads parameterization changed after prepare_segments. Run prepare_segments again.")
+
         if status == "idle":
             raise ValueError("Roads segments are stale or missing. Run prepare_segments before run_roads_wepp.")
 
@@ -866,17 +877,9 @@ class Roads(NoDbBase):
             },
         )
 
-    @roads_lifecycle.mutation
-    def set_params(self, payload: Mapping[str, Any]) -> Dict[str, Any]:
-        if not isinstance(payload, Mapping):
-            raise ValueError("Roads params payload must be a JSON object.")
-
-        self._append_roads_log(
-            "config",
-            "set_params_requested",
-            {"keys": sorted(str(key) for key in payload.keys())},
-        )
-        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+    @classmethod
+    def _validated_params_payload(cls, payload, current_params, *, known_fields=None):
+        params = cls._normalize_params_with_defaults(current_params)
 
         if "input_crs" in payload:
             value = str(payload["input_crs"]).strip()
@@ -919,7 +922,7 @@ class Roads(NoDbBase):
             if key == "fill_slope_default_pct":
                 if not (0.1 <= numeric <= 150.0):
                     raise ValueError("fill_slope_default_pct must be between 0.1 and 150.")
-                numeric = self._clamp_fill_slope_pct(numeric)
+                numeric = cls._clamp_fill_slope_pct(numeric)
             params[key] = numeric
 
         if "trace_max_steps" in payload:
@@ -984,9 +987,9 @@ class Roads(NoDbBase):
 
         if "attribute_field_map" in payload:
             payload_map = payload["attribute_field_map"]
-            current_map = self._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
+            current_map = cls._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
             if payload_map in (None, ""):
-                merged_map = self._empty_attribute_field_map()
+                merged_map = cls._empty_attribute_field_map()
             else:
                 if not isinstance(payload_map, Mapping):
                     raise ValueError("attribute_field_map must be an object.")
@@ -996,16 +999,62 @@ class Roads(NoDbBase):
                     if key_text not in ATTRIBUTE_FIELD_MAP_KEYS:
                         raise ValueError(f"attribute_field_map has unsupported key: {key_text}.")
                     merged_map[key_text] = payload_map[key]
-            known_fields = set(self._discovered_attribute_field_names()) or None
-            params["attribute_field_map"] = self._normalize_attribute_field_map(
+            params["attribute_field_map"] = cls._normalize_attribute_field_map(
                 merged_map,
                 known_fields=known_fields,
             )
 
-        params = self._normalize_params_with_defaults(params)
+        params = cls._normalize_params_with_defaults(params)
+        return params
 
-        roads_lifecycle.retain(self.wd, replace_segments=True)
+    @classmethod
+    def validate_initial_params(cls, payload):
+        """Validate a first-use request before creating any Roads state or files."""
+        if not isinstance(payload, Mapping):
+            raise ValueError("Roads params payload must be a JSON object.")
+        params = cls._validated_params_payload(payload, cls._default_params())
+        if "parameterization" in payload:
+            roads_parameterization.apply_payload(
+                roads_parameterization.UNBOUND, payload["parameterization"],
+                template_root=Path(__file__).resolve().parent / "legacy_templates",
+            )
+        return params
+
+    @roads_lifecycle.mutation
+    def set_params(self, payload: Mapping[str, Any]) -> Dict[str, Any]:
+        if not isinstance(payload, Mapping):
+            raise ValueError("Roads params payload must be a JSON object.")
+
+        self._append_roads_log(
+            "config",
+            "set_params_requested",
+            {"keys": sorted(str(key) for key in payload.keys())},
+        )
         with self.locked():
+            self.recover_mutation_state()
+            params = self._validated_params_payload(
+                payload, self._roads_params,
+                known_fields=set(self._discovered_attribute_field_names()) or None,
+            )
+
+            state = self._saved_parameterization_state()
+            if "parameterization" in payload:
+                state = roads_parameterization.apply_payload(
+                    roads_parameterization.UNBOUND if state is None else state,
+                    payload["parameterization"], template_root=Path(self.roads_legacy_templates_dir)
+                )
+            elif state is not None:
+                state = roads_parameterization.validate_state(state)
+            retained = roads_lifecycle.retain(self.wd, replace_segments=True)
+            if "parameterization" in payload:
+                # Retain the previous durable authority, including invalid repair input.
+                history = Path(self.roads_wepp_dir) / "history"
+                if history.resolve() != Path(self.wd).resolve() / "wepp/roads/history":
+                    raise ValueError("Roads parameterization history path must not be aliased.")
+                history.mkdir(parents=True, exist_ok=True)
+                snapshot = retained or Path(tempfile.mkdtemp(prefix="parameterization-", dir=history))
+                shutil.copy2(self._nodb, snapshot / "roads.nodb")
+                self._parameterization = state
             self._roads_params = params
             self._timestamps["set_params"] = int(time.time())
             self._clear_stale_run_state_locked()
@@ -1548,7 +1597,16 @@ class Roads(NoDbBase):
             )
             input_crs_value = crs_inference.crs
             input_crs_source = crs_inference.source
-            roads_lifecycle.retain(self.wd, replace_segments=True)
+            with self.locked():
+                self.recover_mutation_state()
+                if self._normalize_params_with_defaults(self._roads_params) != params:
+                    raise ValueError("Roads settings changed while preparing; retry Prepare.")
+                state = self._saved_parameterization_state()
+                self._parameterization = (
+                    roads_parameterization.new_state(Path(self.roads_legacy_templates_dir))
+                    if state is None else roads_parameterization.validate_state(state)
+                )
+                roads_lifecycle.retain(self.wd, replace_segments=True)
             self._reset_roads_log("prepare")
             self._ensure_roads_dirs()
             convert_kwargs = {
@@ -1654,6 +1712,7 @@ class Roads(NoDbBase):
                 "design_property_keys": list(design_property_keys),
                 "attribute_field_map": dict(attribute_field_map),
                 "roads_params_signature": self._params_signature(params),
+                "parameterization_hash": roads_parameterization.configuration_hash(self._parameterization),
                 "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),
                 "prepared_at": int(time.time()),
             }
@@ -2866,6 +2925,7 @@ class Roads(NoDbBase):
             out.append(horizon_line)
 
         output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
+        self._apply_parameterization_to_soil(output_path, template_path, traffic, ofe_order)
 
     
     
@@ -2985,6 +3045,7 @@ class Roads(NoDbBase):
         out.append(buffer_header)
         out.append(buffer_horizon_line)
         output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
+        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1, 3))
 
     def _build_routed_three_ofe_soil_file(
         self,
@@ -3091,6 +3152,7 @@ class Roads(NoDbBase):
         out.append(buffer_header)
         out.append(buffer_horizon_line)
         output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
+        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1, 2, 3))
 
     @staticmethod
     def _strip_management_scenario_block(
@@ -3234,6 +3296,342 @@ class Roads(NoDbBase):
         ]
         path.write_text("\n".join(content) + "\n", encoding="utf-8")
 
+    def _saved_parameterization_state(self):
+        # A persisted null is malformed, distinct from an absent legacy key.
+        state = getattr(self, "_parameterization", None)
+        return {} if state is None and "_parameterization" in self.__dict__ else state
+
+    def _parameterization_template_path(self, directory: str, name: str) -> Path:
+        state = self._saved_parameterization_state()
+        if state is None:
+            return Path(self.roads_legacy_templates_dir) / directory / name
+        root = getattr(self, "_parameterization_runtime_templates", None)
+        if root is None:
+            self._ensure_roads_dirs()
+            root = roads_parameterization.materialize_baseline(state, Path(self.roads_runs_dir))
+            self._parameterization_runtime_templates = root
+        return Path(root) / directory / name
+
+    def _apply_parameterization_to_soil(self, path, template_path, traffic, ofe_order):
+        state = self._saved_parameterization_state()
+        if state is None:
+            return
+        record = roads_parameterization.apply_soil_overrides(
+            path, state, ofe_order, template_name=Path(template_path).name, traffic=traffic
+        )
+        cache = getattr(self, "_parameterization_runtime_readbacks", None)
+        if cache is None:
+            cache = self._parameterization_runtime_readbacks = {}
+        cache[str(Path(path))] = record
+
+    def _record_parameterization_inputs(self, soil_path, slope_path, management_path):
+        readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
+        provenance = readbacks.get(str(Path(soil_path)))
+        if provenance is None:
+            raise ValueError("Roads native soil has no parameterization readback.")
+        files = []
+        for path in (soil_path, slope_path, management_path):
+            path = Path(path)
+            if not path.is_file() or not path.resolve().is_relative_to(Path(self.wd).resolve()):
+                raise ValueError(f"Roads parameterization input is missing or outside the run: {path.name}")
+            files.append({"relpath": os.path.relpath(path, self.wd),
+                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        provenance["input_files"] = files
+        # Visible even if native execution fails before the manifest is written.
+        Path(soil_path).with_suffix(".parameterization.json").write_text(
+            json.dumps(provenance, indent=2, sort_keys=True), encoding="utf-8"
+        )
+
+    def _attach_parameterization_records(self, records):
+        state = roads_parameterization.validate_state(self._saved_parameterization_state())
+        signature = roads_parameterization.configuration_hash(state)
+        readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
+        for record in records:
+            run_id = record.get("segment_run_id")
+            matched = [(path, value) for path, value in readbacks.items()
+                       if Path(path).name.startswith(f"p{run_id}.")]
+            if matched:
+                _, provenance = matched[0]
+                provenance = json.loads(json.dumps(provenance))
+                if record.get("status") == "completed":
+                    files = provenance.get("input_files", [])
+                    if not provenance.get("ofes") or {Path(row["relpath"]).suffix for row in files} != {".sol", ".slp", ".man"}:
+                        raise ValueError("Completed Roads profile lacks complete native parameterization inputs.")
+                    for row in files:
+                        path = Path(self.wd) / row["relpath"]
+                        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != row["sha256"]:
+                            raise ValueError("Completed Roads parameterization inputs changed after readback.")
+                record["parameterization"] = provenance
+            else:
+                if record.get("status") == "completed":
+                    raise ValueError("Completed Roads profile lacks native parameterization readback.")
+                record["parameterization"] = {
+                    "baseline_id": state["baseline"]["id"],
+                    "configuration_hash": signature,
+                    "ofes": [], "input_files": [],
+                    "reason": record.get("reason") or "native_inputs_not_assembled",
+                }
+
+    @staticmethod
+    def _parameterization_group(state, design, surface, traffic, texture, routing,
+                                segment_ids, index, source_kind):
+        selection_design = "outslope_rutted" if design == "outslope_unrutted" else design
+        name = roads_parameterization.soil_template_name(selection_design, surface, texture)
+        details = roads_parameterization.resolve_groups(state, name, traffic)
+        roles = {}
+        for detail in details:
+            role = detail["role"]
+            roles[role] = {}
+            for parameter in roads_parameterization.PARAMETERS:
+                source_value = detail["baseline"][parameter]
+                adjusted_value = detail["adjusted"][parameter]
+                roles[role][parameter] = {
+                    "source": source_value, "adjusted": adjusted_value,
+                    "resolved": detail["resolved"][parameter],
+                    "adjustment": ("Divide by 4 for low/no road traffic"
+                                   if role == "road" and parameter in ("ki_kg_s_m4", "kr_s_m") and traffic != "high"
+                                   else "Native input formatting" if adjusted_value != source_value else "Unchanged"),
+                    "source_asset": f"soils/{name}",
+                    "source_sha256": detail["source_sha256"],
+                }
+        # Inslope profiles can route through a buffer; actual membership is
+        # established only by execution, never guessed from a fallback.
+        applicable = ["road", "fill", "buffer"] if design.startswith("outslope") else ["road"]
+        if not design.startswith("outslope") and routing != "channel_associated":
+            applicable.append("buffer")
+        return {
+            "id": f"group-{index + 1}", "label": f"{design} / {surface} / {texture} / {traffic}",
+            "design": design, "surface": surface, "traffic": traffic, "soil_texture": texture,
+            "segment_ids": segment_ids, "segment_count": len(segment_ids),
+            "source_asset": f"soils/{name}", "roles": roles,
+            "applicable_roles": applicable, "source_kind": source_kind,
+            "routing_mode": routing,
+            "applicability": "preview",
+            "management_asset": "managements/" + roads_parameterization.management_template_name(traffic),
+            "management_note": "No traffic changes road/fill plants and initial conditions; yearly operations remain." if traffic == "none" else "High/low traffic share the ordinary management template.",
+        }
+
+    @classmethod
+    def initial_parameterization_preview(cls):
+        """Return a default preview for enabled first use without creating Roads."""
+        state = roads_parameterization.new_state(Path(__file__).resolve().parent / "legacy_templates")
+        params = cls._default_params()
+        group = cls._parameterization_group(
+            state, "inslope_bd", params["surface_default"], params["traffic_default"],
+            params["soil_texture_default"], "unknown", [], 0, "defaults_preview",
+        )
+        return {"status": "unbound", "baseline_id": state["baseline"]["id"],
+                "configuration_hash": None, "overrides": state["overrides"],
+                "diagnostics": [], "groups": [group], "last_completed_run": None,
+                "comparisons": {"available": False, "reason": "No completed Roads execution exists."}}
+
+    def _parameterization_groups(self, state, params):
+        """Resolve displayed groups through the same feature/default selector as Run."""
+        prepared = Path(self.roads_monotonic_geojson_path)
+        staged = self.roads_staged_geojson_path
+        source = prepared if prepared.exists() else (Path(staged) if staged else None)
+        features = []
+        source_kind = "defaults_preview"
+        if source is not None and source.exists():
+            payload = json.loads(source.read_text(encoding="utf-8"))
+            features = payload.get("features", [])
+            source_kind = "prepared_segments" if source == prepared else "uploaded_features_preview"
+        mapping = self._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
+        groups = {}
+        diagnostics = []
+        for index, feature in enumerate(features):
+            properties = feature.get("properties") or {}
+            segment_id = self._segment_key(feature, fallback_index=index)
+            warnings, examples = Counter(), []
+            design, _ = self._resolve_design_for_feature(
+                properties=properties, attribute_field_map=mapping,
+                warning_counts=warnings, warning_examples=examples,
+                warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT, segment_id=segment_id,
+            )
+            if design is None:
+                continue
+            try:
+                resolved = self._resolve_segment_run_inputs(
+                    properties=properties, params=params, segment_id=segment_id, design=design,
+                    warning_counts=warnings, warning_examples=examples,
+                    warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
+                )
+            except ValueError as exc:
+                diagnostics.append(f"{segment_id}: {exc}")
+                continue
+            routing = self._derive_routing_mode_hint(properties)
+            key = (design, resolved["surface"], resolved["traffic"], resolved["soil_texture"], routing)
+            groups.setdefault(key, []).append(segment_id)
+        if not features:
+            groups[("inslope_bd", params["surface_default"], params["traffic_default"],
+                    params["soil_texture_default"], "unknown")] = []
+        result = []
+        for index, ((design, surface, traffic, texture, routing), segment_ids) in enumerate(groups.items()):
+            result.append(self._parameterization_group(
+                state, design, surface, traffic, texture, routing, segment_ids, index, source_kind,
+            ))
+        return result, diagnostics
+
+    def _last_parameterization_readback(self, diagnostics):
+        last_run = getattr(self, "_last_run_summary", None)
+        if isinstance(last_run, Mapping) and last_run.get("status") == "completed":
+            records = [dict(row["parameterization"], segment_id=row.get("segment_id"),
+                            segment_run_id=row.get("segment_run_id"))
+                       for row in last_run.get("segment_execution_records", [])
+                       if isinstance(row, Mapping) and row.get("status") == "completed"
+                       and isinstance(row.get("parameterization"), Mapping)]
+            current = roads_lifecycle.available(self.wd)
+            if records and current:
+                return {"configuration_hash": last_run.get("parameterization_hash"),
+                        "baseline_id": records[0].get("baseline_id"), "records": records,
+                        "completed_at": last_run.get("completed_at"),
+                        "current": current, "historical": not current}
+        project = Path(self.wd).resolve()
+
+        def contained(root, relative):
+            relative = Path(relative)
+            path = root / relative
+            if relative.is_absolute() or ".." in relative.parts or path.resolve() != root / relative:
+                raise ValueError("Historical parameterization path must not be aliased or escape its snapshot.")
+            return path
+
+        try:
+            history = contained(project, "wepp/roads/history")
+            snapshots = [] if not history.is_dir() else sorted(history.iterdir(), reverse=True)
+        except (OSError, ValueError) as exc:
+            diagnostics.append(f"Historical readback unavailable: {exc}")
+            return None
+        candidates = []
+        for snapshot in snapshots:
+            try:
+                snapshot = contained(project, snapshot.relative_to(project))
+                if not snapshot.is_dir():
+                    continue
+                receipt_path = contained(snapshot, "wepp/roads/output/roads.current.json")
+                if receipt_path.is_file():
+                    candidates.append((receipt_path.stat().st_mtime_ns, snapshot, receipt_path))
+            except (OSError, ValueError) as exc:
+                diagnostics.append(f"Historical readback unavailable at {snapshot.name}: {exc}")
+        for _, snapshot, receipt_path in sorted(candidates, reverse=True):
+            try:
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                required_keys = {"policy", "is_single_storm", "required_relpaths",
+                                 "parameterization_hash", "parameterization_snapshot_sha256"}
+                if (not isinstance(receipt, dict) or set(receipt) != required_keys
+                        or receipt.get("policy") != roads_lifecycle.POLICY
+                        or type(receipt.get("is_single_storm")) is not bool):
+                    raise ValueError("Retained completed-result receipt is invalid.")
+                signature = receipt["parameterization_hash"]
+                if not isinstance(signature, str) or not re.fullmatch(r"[0-9a-f]{64}", signature):
+                    raise ValueError("Retained parameterization identity is invalid.")
+                required = receipt["required_relpaths"]
+                if (not isinstance(required, list) or any(not isinstance(name, str) for name in required)
+                        or len(set(required)) != len(required)
+                        or not roads_lifecycle.mandatory_paths(receipt["is_single_storm"]).issubset(required)
+                        or "wepp/roads/output/roads.parameterization.comparison.json" not in required):
+                    raise ValueError("Retained completed-result receipt has incomplete resources.")
+                optional = ["wepp/roads/output/interchange/chnwb.parquet"]
+                if contained(snapshot, "wepp/roads/segments/roads.accounting.json").exists():
+                    optional.append("wepp/roads/segments/roads.accounting.json")
+                    if not receipt["is_single_storm"]:
+                        optional.append("wepp/roads/output/interchange/H.accounting.wat.parquet")
+                if any(name not in required for name in optional
+                       if name != "wepp/roads/output/interchange/chnwb.parquet"
+                       or contained(snapshot, name).exists()):
+                    raise ValueError("Retained receipt omits produced report resources.")
+                for name in required:
+                    if not contained(snapshot, name).is_file():
+                        raise ValueError("Retained completed-result resource is missing.")
+                comparison_path = contained(snapshot, "wepp/roads/output/roads.parameterization.comparison.json")
+                if hashlib.sha256(comparison_path.read_bytes()).hexdigest() != receipt["parameterization_snapshot_sha256"]:
+                    raise ValueError("Retained parameterization snapshot hash changed.")
+                comparison = json.loads(comparison_path.read_text(encoding="utf-8"))
+                if not isinstance(comparison, dict) or comparison.get("configuration_hash") != signature:
+                    raise ValueError("Retained parameterization snapshot identity changed.")
+                manifest_name = "wepp/roads/segments/roads.segment.pass.manifest.json"
+                manifest = contained(snapshot, manifest_name)
+                sources = comparison.get("sources")
+                if not isinstance(sources, dict):
+                    raise ValueError("Retained parameterization source bindings are invalid.")
+                manifest_hash = sources.get(manifest_name)
+                if not manifest_hash or hashlib.sha256(manifest.read_bytes()).hexdigest() != manifest_hash:
+                    raise ValueError("Retained native manifest hash changed.")
+                rows = json.loads(manifest.read_text(encoding="utf-8"))
+                if not isinstance(rows, list):
+                    raise ValueError("Retained execution manifest is not a list.")
+                records = []
+                for row in rows:
+                    if not isinstance(row, Mapping) or row.get("status") != "completed":
+                        continue
+                    record = row.get("parameterization")
+                    if (not isinstance(record, dict) or record.get("configuration_hash") != signature
+                            or record.get("baseline_id") != comparison.get("baseline_id")
+                            or not isinstance(record.get("ofes"), list) or not record["ofes"]):
+                        raise ValueError("Retained native readback does not match its execution.")
+                    files = record.get("input_files")
+                    if not isinstance(files, list) or len(files) != 3:
+                        raise ValueError("Retained native input bindings are incomplete.")
+                    suffixes = set()
+                    for file_record in files:
+                        if not isinstance(file_record, dict) or not isinstance(file_record.get("relpath"), str):
+                            raise ValueError("Retained native input binding is invalid.")
+                        path = contained(snapshot, file_record["relpath"])
+                        suffixes.add(path.suffix)
+                        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != file_record.get("sha256"):
+                            raise ValueError("Retained native input hash changed.")
+                    if suffixes != {".sol", ".slp", ".man"}:
+                        raise ValueError("Retained native input bindings are incomplete.")
+                    records.append(dict(record, segment_id=row.get("segment_id"),
+                                        segment_run_id=row.get("segment_run_id")))
+                if not records:
+                    raise ValueError("Retained completed native readbacks are missing.")
+                return {"configuration_hash": signature, "baseline_id": records[0]["baseline_id"],
+                        "records": records, "completed_at": comparison.get("completed_at"),
+                        "current": False, "historical": True,
+                        "history_relpath": os.path.relpath(snapshot, self.wd)}
+            except (OSError, ValueError, TypeError, KeyError) as exc:
+                diagnostics.append(f"Historical readback unavailable at {snapshot.name}: {exc}")
+        return None
+
+    def query_parameterization(self):
+        """Inspect saved authority without enrolling or repairing legacy state."""
+        raw_state = self._saved_parameterization_state()
+        try:
+            state = (roads_parameterization.new_state(Path(self.roads_legacy_templates_dir))
+                     if raw_state is None else roads_parameterization.validate_state(raw_state))
+        except (ValueError, TypeError, KeyError) as exc:
+            return {"status": "invalid", "baseline_id": None, "configuration_hash": None,
+                    "overrides": None, "diagnostics": [str(exc)], "groups": [],
+                    "last_completed_run": None,
+                    "comparisons": {"available": False, "reason": "Repair parameterization before a new execution."}}
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        groups, diagnostics = self._parameterization_groups(state, params)
+        try:
+            repository_baseline = (state["baseline"] if raw_state is None else
+                                   roads_parameterization.bind_baseline(Path(self.roads_legacy_templates_dir)))
+            repository = {"status": "matching" if repository_baseline["id"] == state["baseline"]["id"] else "different",
+                          "baseline_id": repository_baseline["id"]}
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            # Repository inspection is diagnostic; retained valid state remains authoritative.
+            repository = {"status": "unavailable", "baseline_id": None, "reason": str(exc)}
+        last_completed = self._last_parameterization_readback(diagnostics)
+        if last_completed and last_completed["current"]:
+            for group in groups:
+                members = set(group["segment_ids"])
+                actual = {ofe["role"] for row in last_completed["records"]
+                          if row.get("segment_id") in members for ofe in row.get("ofes", [])}
+                group["applicable_roles"] = [role for role in roads_parameterization.ROLES if role in actual]
+                group["applicability"] = "last_completed_run"
+        return {
+            "status": "unbound" if raw_state is None else "bound",
+            "baseline_id": state["baseline"]["id"],
+            "repository_baseline": repository,
+            "configuration_hash": None if raw_state is None else roads_parameterization.configuration_hash(state),
+            "overrides": state["overrides"], "diagnostics": diagnostics, "groups": groups,
+            "last_completed_run": last_completed,
+            "comparisons": _parameterization_comparisons.query_comparisons(self.wd),
+        }
+
     def _resolve_legacy_soil_template_path(self, *, design: str, surface: str, soil_texture: str) -> Path:
         if design == "inslope_rd":
             tau_value = "10"
@@ -3244,7 +3642,7 @@ class Roads(NoDbBase):
 
         surface_prefix = "p" if surface == "paved" else "g"
         template_name = f"3{surface_prefix}{soil_texture}{tau_value}.sol"
-        template_path = Path(self.roads_legacy_soils_dir) / template_name
+        template_path = self._parameterization_template_path("soils", template_name)
         if not template_path.exists():
             raise FileNotFoundError(
                 f"Roads soil template is missing: {template_path} "
@@ -3254,7 +3652,7 @@ class Roads(NoDbBase):
 
     def _resolve_legacy_management_template_path(self, *, traffic: str) -> Path:
         template_name = "3inslopen.man" if traffic == "none" else "3inslope.man"
-        template_path = Path(self.roads_legacy_managements_dir) / template_name
+        template_path = self._parameterization_template_path("managements", template_name)
         if not template_path.exists():
             raise FileNotFoundError(
                 f"Roads management template is missing: {template_path} (traffic={traffic})."
@@ -3445,6 +3843,7 @@ class Roads(NoDbBase):
         out.append(" ".join(horizon_tokens))
 
         output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
+        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1,))
 
     def _materialize_single_ofe_management_template(self, *, traffic: str) -> Path:
         source_path = self._resolve_legacy_management_template_path(traffic=traffic)
@@ -3628,6 +4027,14 @@ class Roads(NoDbBase):
             shutil.copy2(single_ofe_soil_path, segment_sol_path)
         if single_ofe_slope_path.resolve() != segment_slp_path.resolve():
             shutil.copy2(single_ofe_slope_path, segment_slp_path)
+
+        if self._saved_parameterization_state() is not None:
+            readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
+            source_record = readbacks.get(str(single_ofe_soil_path))
+            if source_record is None:
+                raise ValueError("Roads native soil has no parameterization readback.")
+            readbacks[str(segment_sol_path)] = source_record
+            self._record_parameterization_inputs(segment_sol_path, segment_slp_path, segment_man_path)
 
         make_hillslope_run(
             segment_run_id,
@@ -3910,6 +4317,11 @@ class Roads(NoDbBase):
                 "roads_runs_workspace_prepared",
                 {"roads_runs_relpath": os.path.relpath(self.roads_runs_dir, self.wd)},
             )
+
+            self._parameterization_runtime_templates = roads_parameterization.materialize_baseline(
+                self._parameterization, Path(self.roads_runs_dir)
+            )
+            self._parameterization_runtime_readbacks = {}
 
             params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
             attribute_field_map = self._normalize_attribute_field_map(
@@ -5648,6 +6060,7 @@ class Roads(NoDbBase):
                         )
                     )
 
+            self._attach_parameterization_records(segment_execution_records)
             Path(self.roads_segment_pass_manifest_path).write_text(
                 json.dumps(segment_execution_records, indent=2, sort_keys=True),
                 encoding="utf-8",
@@ -5711,6 +6124,7 @@ class Roads(NoDbBase):
                     "skipped_segments": skipped_segments,
                     "skipped_segment_reason_counts": dict(sorted(skipped_reason_counts.items())),
                     "segment_execution_records": segment_execution_records,
+                "parameterization_hash": roads_parameterization.configuration_hash(self._parameterization),
                     "pass_staging_strategy": {},
                     "segment_pass_count": successful_segment_count,
                     "segment_pass_manifest_relpath": os.path.relpath(self.roads_segment_pass_manifest_path, self.wd),
@@ -5794,6 +6208,7 @@ class Roads(NoDbBase):
                 "skipped_segments": skipped_segments,
                 "skipped_segment_reason_counts": dict(sorted(skipped_reason_counts.items())),
                 "segment_execution_records": segment_execution_records,
+                "parameterization_hash": roads_parameterization.configuration_hash(self._parameterization),
                 "pass_staging_strategy": staged_strategy,
                 "segment_pass_count": successful_segment_count,
                 "segment_pass_manifest_relpath": os.path.relpath(self.roads_segment_pass_manifest_path, self.wd),
@@ -5868,6 +6283,15 @@ class Roads(NoDbBase):
                 "completed_at": int(time.time()),
             }
 
+            run_summary["parameterization_comparison"] = _parameterization_comparisons.write_comparison_snapshot(
+                self.wd, parameterization=self._parameterization,
+                configuration_hash=roads_parameterization.configuration_hash(self._parameterization),
+                completed_at=run_summary["completed_at"],
+                wepp_bin=getattr(self.wepp_instance, "wepp_bin", None),
+            )
+            comparison_relpath = "wepp/roads/output/roads.parameterization.comparison.json"
+            if comparison_relpath not in roads_report_resources["required_relpaths"]:
+                roads_report_resources["required_relpaths"].append(comparison_relpath)
             with self.locked():
                 self._last_run_summary = run_summary
                 self._status = "completed"
@@ -5896,6 +6320,10 @@ class Roads(NoDbBase):
                 self._last_run_summary = failed_run_summary
             self._record_error_and_raise(exc)
 
+        finally:
+            self.__dict__.pop("_parameterization_runtime_templates", None)
+            self.__dict__.pop("_parameterization_runtime_readbacks", None)
+
     def query_status(self) -> Dict[str, Any]:
         status_payload = {
             "enabled": bool(getattr(self, "_enabled", False)),
@@ -5919,6 +6347,7 @@ class Roads(NoDbBase):
         params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
         return {
             "roads_params": params,
+            "parameterization": self.query_parameterization(),
             "attribute_field_map": dict(params["attribute_field_map"]),
             "discovered_attribute_catalog": getattr(self, "_uploaded_attribute_catalog", None),
             "uploaded_geojson_relpath": getattr(self, "_uploaded_geojson_relpath", None),
@@ -5935,6 +6364,7 @@ class Roads(NoDbBase):
             "uploaded_geojson_relpath": getattr(self, "_uploaded_geojson_relpath", None),
             "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),
             "roads_params": params,
+            "parameterization": self.query_parameterization(),
             "attribute_field_map": dict(params.get("attribute_field_map", self._empty_attribute_field_map())),
             "discovered_attribute_catalog": getattr(self, "_uploaded_attribute_catalog", None),
             "last_prepare_summary": getattr(self, "_last_prepare_summary", None),

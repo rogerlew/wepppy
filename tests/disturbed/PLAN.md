@@ -65,6 +65,17 @@ The fast freshness check requires only repository files; raw experiment folders
 are supplementary evidence, never a required gate. Do not simply replace hashes
 to silence the check without verifying the outputs used for the report.
 
+A source-only change outside the matrix's selected execution path may retain the
+published report after explicit review. Keep its original provenance and report
+bytes; record the exact old/current source hashes and review evidence separately
+in `analysis_source_reviews_current.json`. The repository gate requires that
+sidecar's deltas to equal all actual source drift and pins the unchanged provenance
+and report hashes. Any later unreviewed drift fails. Review must establish
+unchanged effective inputs and report outputs from actual retained execution
+artifacts; generated diagnostic timestamps may differ only when explicitly
+identified. This is a reviewed compatibility disposition, not relabeling an old
+execution with new source identities or permission to bypass scientific refresh.
+
 Validate the report and its ENDUSER link with the focused matrix and Usersum
 tests, documentation lint and Usersum contract validation. Rebuild the local
 Usersum index with `tools/usersum_docs_tool.py build-index --write --skip-vendor-sync`

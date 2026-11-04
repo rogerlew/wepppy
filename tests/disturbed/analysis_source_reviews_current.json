@@ -1,0 +1,18 @@
+{
+  "status": "unchanged_outputs_after_source_review",
+  "date": "2026-11-03",
+  "provenance_sha256": "8928a034a2dce03ad0efd5b4285407830f92664879019c5ad577b36ceb951220",
+  "report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
+  "reviewed_source_deltas": {
+    "wepppy/wepp/management/managements.py": {
+      "recorded": "c83275c7b2dd5331f991086158b3a2605a056c9431551d388128391872842664",
+      "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+    }
+  },
+  "rationale": "Opt-in StrictLegacyRoads validation adds the supported Roads 97.3 parser boundary; the Disturbed matrix does not select it. All96 fresh broad-suite cases passed. All768 published native output bytes and96 management files match; all96 soil differences are exactly one generated Build Date comment. Original report, producer identities and case hashes are preserved.",
+  "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-correctness-review.md",
+  "raw_evidence": [
+    "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/disturbed-broad-parity-v1.json",
+    "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/disturbed-broad-soil-comment-review-v1.json"
+  ]
+}

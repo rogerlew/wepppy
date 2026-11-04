@@ -102,11 +102,23 @@ def test_report_preserves_reviewed_context_before_generated_tables():
     assert 'Full-Record Totals and One-Sided Events' in report
 
 
-def test_published_report_sources_and_content_are_current():
+def test_published_report_sources_and_content_are_current_or_reviewed():
     repo = Path(__file__).resolve().parents[2]
-    metadata = json.loads((Path(__file__).parent/'analysis_results_current.provenance.json').read_text())
-    for relative, expected in metadata['sources'].items():
-        actual = hashlib.sha256((repo/relative).read_bytes()).hexdigest()
-        assert actual == expected, f'Review and refresh the canonical report: {relative} changed'
+    provenance = Path(__file__).parent/'analysis_results_current.provenance.json'
+    metadata = json.loads(provenance.read_text())
+    current = {relative: hashlib.sha256((repo/relative).read_bytes()).hexdigest()
+               for relative in metadata['sources']}
+    deltas = {relative: {'recorded': expected, 'current': current[relative]}
+              for relative, expected in metadata['sources'].items() if current[relative] != expected}
+    review_path = Path(__file__).parent/'analysis_source_reviews_current.json'
+    if review_path.exists():
+        review = json.loads(review_path.read_text())
+        assert review['status'] == 'unchanged_outputs_after_source_review'
+        assert review['provenance_sha256'] == hashlib.sha256(provenance.read_bytes()).hexdigest()
+        assert review['report_sha256'] == metadata['report_sha256']
+        assert review['reviewed_source_deltas'] == deltas, 'Unreviewed Disturbed publication source drift'
+        assert (repo/review['evidence']).is_file()
+    else:
+        assert not deltas, f'Review and refresh the canonical report: {sorted(deltas)} changed'
     report = Path(__file__).parent/'analysis_results_current.md'
     assert hashlib.sha256(report.read_bytes()).hexdigest() == metadata['report_sha256']

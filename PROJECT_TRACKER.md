@@ -51,7 +51,7 @@ Active; closure blocked: [Rock and water development program](docs/work-packages
 
 Failed admission checkpoint: [Retention under active frost/configuration](docs/work-packages/20261101_retention_frost_consumers/package.md) — moderate-rock candidate KSFLAG1 stops at year 9/day 355 on an unfunded signed withdrawal. New native consumer observer deferred; next investigate signed-input provenance and return timing. No retention promotion or tolerance change.
 
-Active: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — contractual repository baseline and authoritative Roads NoDb parameterization specified; dedicated-view proposal replaces five-field inline scope. Retained baseline prototype passes 168 cases/336 file pairs; all 18 native road-driver profiles and independent proposal reviews pass. Replacement specification/layout human approval pending; production wiring/default adoption/deployment unstarted.
+Completed locally: [Roads parameterization and configuration view](docs/work-packages/20261029_roads_parameterization_program/package.md) — retained baselines, twelve driver overrides and dedicated view implemented; real native/report/archive/reset/restore/fork and private authorization checks pass. Independent reviews closed; reconciled regression coverage13,034 passed/423 total skips, frontend1,033 passed. Existing143 Management stub diagnostics unchanged. Historical science/defaults preserved; no production deployment.
 
 Completed locally: [Roads drainage physical justification and validation](docs/work-packages/20261029_roads_drainage_validation/package.md) — 2,112 native runs; source drainage fixes 17 factor-ten failures but regresses 13. Missing UI-mode sidecar materially affects prior benchmark applicability; six negative-flux cases retained. No production candidate accepted; 12,186 tests passed / 298 skipped.
 
@@ -1682,6 +1682,14 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Roads Parameterization and Configuration View
+
+Closed2026-11-03. [Package](docs/work-packages/20261029_roads_parameterization_program/package.md)
+delivers the approved project-owned baseline/override workflow and dedicated view.
+Real native/report/lifecycle evidence, independent reviews and complete reconciled
+regression coverage pass. No deployment or new scientific defaults.
+
 
 ### MOFE water consumer accounting
 

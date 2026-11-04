@@ -1,0 +1,99 @@
+{% extends "base_pure.htm" %}
+{% block title %}Roads Parameterization{% endblock %}
+{% block head_extras %}
+<style>
+  .wc-page__body, .wc-page__body > .wc-container { min-width: 0; }
+  .wc-header__tools, .wc-theme-switcher, .wc-theme-switcher .wc-run-header__field { min-width: 0; max-width: 100%; }
+  .wc-theme-switcher__select { min-width: 0; max-width: 100%; }
+  #roads_parameterization { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+  #roads_parameterization > *, #roads_parameterization .wc-stack-sm { min-width: 0; }
+  #roads_parameterization [data-rp-group] { max-width: 100%; min-width: 0; width: 100%; }
+  #roads_parameterization code, #roads_parameterization p, #roads_parameterization summary { overflow-wrap: anywhere; }
+
+  .rp-actions { position: sticky; top: 0; z-index: 2; background: var(--wc-color-surface, white); padding: 0.75rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .rp-table-wrap { position: relative; overflow-x: auto; min-width: 0; max-width: 100%; }
+  .rp-table { width: 100%; }
+  .rp-table th, .rp-table td { vertical-align: top; }
+  .rp-table input { width: 9rem; max-width: 100%; }
+  .rp-table select { max-width: 100%; }
+  .rp-details { overflow-wrap: anywhere; white-space: pre-wrap; }
+</style>
+{% endblock %}
+{% block body %}
+<section id="roads_parameterization" class="wc-stack"
+      data-query-url="{{ url_for_run('roads.query_roads_summary', runid=runid, config=config) }}"
+      data-save-url="{{ url_for_run('roads.roads_set_params', runid=runid, config=config) }}">
+  <header class="wc-stack-sm">
+    <h1>Roads Parameterization</h1>
+    <p>Run <code>{{ runid }}/{{ config }}</code></p>
+    <p><a href="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}#roads" data-rp-navigate>Return to Roads · Prepare and Run</a></p>
+    <p>Inspect how source templates and traffic produce model inputs, then adjust the drivers for road, fill and forest/buffer separately.</p>
+  </header>
+  <section class="wc-panel wc-stack-sm" aria-label="Saved configuration">
+    <h2>Saved configuration</h2>
+    <p data-rp-state></p><p data-rp-baseline class="rp-details"></p>
+    <p data-rp-repository></p>
+    <p>Overrides apply to every template-owned row of the selected role. They do not alter physical geometry, source hillslope soils or baseline WEPP results.</p>
+    <p>Reset removes overrides against this project’s retained baseline. Repository updates do not change that baseline; adopting newer defaults is a separate future operation.</p>
+  </section>
+  <p data-rp-errors class="wc-alert wc-alert--danger" role="alert" hidden></p>
+  <p data-rp-status role="status" aria-live="polite"></p>
+  <div data-rp-actions class="rp-actions" aria-label="Parameterization actions">
+    <button type="button" class="pure-button pure-button-primary" data-rp-action="edit">Edit overrides</button>
+    <button type="button" class="pure-button pure-button-primary" data-rp-action="save" disabled>Save settings</button>
+    <button type="button" class="pure-button" data-rp-action="cancel" disabled>Cancel</button>
+    <button type="button" class="pure-button" data-rp-action="reset" disabled>Reset overrides</button>
+    <button type="button" class="pure-button" data-rp-action="repair" hidden>Repair parameterization</button>
+  </div>
+  <section class="wc-panel wc-stack-sm">
+    <h2>Preview (not prepared)</h2>
+    <label for="rp_group">Resolved template group</label>
+    <select id="rp_group" data-rp-group></select><details><summary data-rp-members-summary>Segment membership</summary><p data-rp-members></p></details><p data-rp-management></p>
+    <p>A group shows its source differences; overrides are role-wide, not limited to the selected group. Inputs must be positive and finite after native conversion. Zero triggers native estimation and is not an off switch. Valid inputs are not field-calibrated ranges.</p>
+    <p>Lower conductivity generally increases runoff. Ki and Kr control sediment detachment; higher critical shear resists detachment. Deposition, transport and evolving management can change delivered responses.</p>
+  </section>
+  {% for role, role_label in parameterization_roles %}
+  <section class="wc-panel wc-stack-sm" data-rp-role="{{ role }}" aria-labelledby="rp_{{ role }}_heading">
+    <h2 id="rp_{{ role }}_heading">{{ role_label }}</h2>
+    <p data-rp-applicability></p>
+    <div class="rp-table-wrap" tabindex="0" role="region" aria-label="{{ role_label }} parameter table">
+    <table class="pure-table pure-table-horizontal rp-table">
+      <thead><tr><th scope="col">Parameter</th><th scope="col">Source baseline</th><th scope="col">Adjustment</th><th scope="col">Override</th><th scope="col">Resolved input</th></tr></thead>
+      <tbody>
+      {% for field, label, unit in parameterization_fields %}
+      <tr data-rp-row data-role="{{ role }}" data-field="{{ field }}">
+        <th scope="row">{{ label }}<br><small>{{ unit }}</small></th>
+        <td data-rp-source>Unavailable</td><td data-rp-adjustment>Unavailable</td>
+        <td><label class="wc-sr-only" for="rp_{{ role }}_{{ field }}_mode">{{ role_label }} {{ label }} override mode</label>
+          <select id="rp_{{ role }}_{{ field }}_mode" data-rp-mode disabled>
+            <option value="default">Default</option><option value="multiply">Multiply</option><option value="absolute">Absolute</option>
+          </select>
+          <label class="wc-sr-only" for="rp_{{ role }}_{{ field }}_value">{{ role_label }} {{ label }} override value</label>
+          <input id="rp_{{ role }}_{{ field }}_value" data-rp-value type="number" step="any" inputmode="decimal" disabled>
+        </td><td data-rp-resolved>Unavailable</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  {% endfor %}
+  <section class="wc-panel wc-stack-sm"><h2>Used in last completed run</h2><div data-rp-readback></div>
+    <p>Actual values come from native input assembly during Run, not geometry Prepare. Baseline input parameters differ from event-adjusted native coefficients.</p></section>
+  <section class="wc-panel wc-stack-sm"><h2>Baseline / custom comparison</h2><div data-rp-comparison></div>
+    <p>Compare only retained executions with matching climate, geometry and report scope. No baseline run is generated automatically.</p></section>
+  <details class="wc-panel"><summary>Source and execution provenance</summary>
+    <p>Conductivity (AVKE) is written in mm/h. The native 98.4 reader divides it by 3,600,000 to obtain m/s. Ki (kg s/m⁴), Kr (s/m), and critical shear (Pa) are emitted in the units shown. These are baseline inputs; event and management adjustments can change native coefficients.</p>
+    <pre data-rp-details class="rp-details"></pre></details>
+  <dialog data-rp-leave aria-labelledby="rp_leave_heading"><h2 id="rp_leave_heading">Unsaved parameterization changes</h2>
+    <p>Save your changes, discard them, or stay here.</p>
+    <button type="button" class="pure-button" data-rp-leave-action="save">Save and leave</button>
+    <button type="button" class="pure-button" data-rp-leave-action="discard">Discard and leave</button>
+    <button type="button" class="pure-button" data-rp-leave-action="stay">Stay</button>
+  </dialog>
+  <script type="application/json" data-parameterization-seed>{{ parameterization_state | tojson }}</script>
+</section>
+{% endblock %}
+{% block script_extras %}
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
+{% endblock %}

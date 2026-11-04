@@ -23,6 +23,97 @@ Primary users are WEPPcloud operators and analysts who need to test how inslope 
 7. Click `Run WEPPcloud Roads` to execute Roads segment runs, combine pass files, rerun the Roads-scoped watershed, and regenerate Roads report resources.
 8. Review Roads status, Roads-scoped report links, regenerated resources, and diagnostics.
 
+## Parameterization ownership and overrides
+
+The approved [project/view contract](../../../../docs/schemas/roads-settings-contract.md)
+defines the dedicated **Roads Parameterization** view and Roads-owned saved state.
+The implementation passes the local browser/native/report and archive/restore/fork
+workflow. The [program tracker](../../../../docs/work-packages/20261029_roads_parameterization_program/tracker.md)
+records final regression/review gates and evidence. This is not a production
+deployment or a new-default adoption.
+
+| Authority | Contents | Consumers |
+| --- | --- | --- |
+| Repository baseline | Bundled soil/management templates plus documented selection and transformation rules in `roads.py` | First explicit project binding |
+| Project `roads.nodb` | `_roads_params` for existing physical/mapping settings; `_parameterization` for retained baseline and overrides | Dedicated view, preparation and native-input assembly |
+| Generated soil/management files | Resolved inputs and actual serialized values | Native WEPP execution and provenance readback |
+
+The [repository baseline contract](../../../../docs/schemas/roads-parameterization-baseline-contract.md)
+lists all 16 soil templates, both management templates, source values, units,
+role mappings, traffic adjustments and native consumption. It is the default-value
+and formula authority. Do not add independent defaults in the UI or make generated
+files an editable parameter store. Shared Disturbed state is not the authority for
+Roads template values.
+
+`_parameterization` schema version 1 retains all 18 source texts and hashes, a
+content-bound baseline identity, resolver version, and 12 override entries: four
+drivers for each of `road`, `fill`, and `buffer`. Existing `_roads_params` values
+are not copied into it. The buffer role means every template Forest row, including
+unrutted upstream/remainder template Forest; independently sourced landuse is excluded.
+The view reports whether repository assets match the retained baseline; a difference
+or unavailable repository inspection never rebinds the project. The additive
+`repository_baseline` query diagnostic describes this comparison without changing
+result eligibility.
+
+| Driver key | Unit | Native meaning |
+| --- | --- | --- |
+| `ksat_mm_h` | mm/h | Baseline effective hydraulic conductivity, legacy AVKE |
+| `ki_kg_s_m4` | kg s/m4 | Interrill erodibility |
+| `kr_s_m` | s/m | Rill erodibility |
+| `critical_shear_pa` | Pa | Concentrated-flow detachment threshold |
+
+An override is Default, Multiply, or Absolute. First resolve feature/fallback
+choices and retained templates, then apply existing traffic and role adjustments,
+then apply the override once. For example, gravel/loam road Ki starts at 2,000,000;
+low traffic divides it by four to 500,000; Multiply by 2 resolves to 1,000,000.
+Fill and buffer Ki do not receive the road traffic division. Conductivity changes
+AVKE, not an unrelated horizon Ksat column. Overrides do not alter geometry,
+management choice, surface/traffic labels or fragment content.
+
+Save validates the complete override object and persists through Roads locking and
+lifecycle guards. Values must be positive and remain finite/positive through native
+conversion and serialization; zero invokes native estimation/bypass and is not an
+off switch. Validity limits do not establish calibrated ranges or guarantee a
+successful native run for extreme values.
+
+### Binding, reset and retained evidence
+
+A legacy read produces an unbound preview without changing saved state. First
+explicit Save binds the baseline with the submitted overrides; first Prepare binds
+default overrides. An already-prepared unbound project must Prepare before a new
+Run. A bound project continues using its retained texts after repository updates.
+**Reset overrides** changes the draft to Default; Save commits the reset against
+the same project baseline. Adoption of newer repository defaults is separate and
+is not a version-1 action.
+
+Accepted model-affecting edits invalidate Roads preparation/results and retain
+historical evidence. Geometry Prepare does not emit the final soil/management
+files: assembly occurs during Run. The view distinguishes saved intent, preview
+and values actually emitted for a recorded run. Mixed projects group differing
+source resolutions instead of presenting one universal value. Compatible retained
+runs may be compared using runoff/sediment totals and area-normalized values;
+missing or incompatible evidence is explicit, never synthesized.
+
+Fork/archive/restore must carry the single authoritative NoDb payload and its
+retained baseline. Unsupported resolver versions or corrupt content are explicit
+states, not permission to substitute current defaults. Use the reviewed repair
+workflow for invalid state; never edit Redis cache, generated inputs or template
+copies to repair authority. The baseline WEPP dataset remains independent.
+
+### Runtime reload and validation
+
+After authorized code updates, reload the web and applicable Roads workers through
+the environment's canonical orchestration entry point before workflow validation.
+Long-lived workers can otherwise keep old lifecycle decoding even when mounted
+source files have changed. A source hash from a separate process does not prove
+which code an existing worker loaded.
+
+Validate the publication receipt's parameterization and comparison-snapshot hashes
+against durable Roads state and actual generated inputs. If old worker code
+produced an incomplete receipt, retain that failed attempt and explicitly Prepare
+and Run again after reload; do not synthesize or patch a successful receipt.
+Deployment remains governed by the normal operator workflow.
+
 ## Components
 
 | Component | Purpose |
@@ -278,7 +369,7 @@ The controller persists Roads settings in `roads_params`.
 | `soil_texture_default` | `loam` | Default soil texture when no segment override is present |
 | `surface_default` | `gravel` | Fallback surface value used by Roads mapping/runtime logic |
 | `traffic_default` | `low` | Fallback traffic value used by Roads mapping/runtime logic |
-| `rfg_pct_default` | `15.0` | Default rock fragment percentage |
+| `rfg_pct_default` | `20.0` | Default rock fragment percentage |
 | `road_width_m_default` | `4.0` | Default road width for generated single-OFE profiles |
 | `max_upload_mb` | `50` | Maximum upload size for Roads GeoJSON |
 | `attribute_field_map.design` | `null` | User-selected field for design resolution |

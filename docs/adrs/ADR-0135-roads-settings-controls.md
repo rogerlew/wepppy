@@ -1,6 +1,6 @@
 # ADR-0135: Roads-owned parameterization and dedicated view
 
-Status: **accepted 2026-11-03; implementation pending**. Operator approval applies
+Status: **accepted 2026-11-03; implemented; local workflow validated**. Operator approval applies
 to the replacement specification and dedicated layout at `9532a2968`. This replaces
 the former five-fallback editor proposal; its text remains historical evidence.
 
@@ -14,7 +14,7 @@ with Roads, and contractual repository defaults. The operator subsequently state
 after the reviewed replacement specification/layout were presented at9532a2968.
 The explicit human gate is satisfied; deployment remains separate.
 
-## Proposed decision
+## Decision
 
 Repository baseline authority consists of bundled Roads soil/management templates
 and the documented selection/assembly rules, as specified in the
@@ -96,6 +96,18 @@ invalid atomic saves, lifecycle invalidation, fork/archive/restore, and browser 
 native to fresh report propagation under production-equivalent identities/mounts.
 Independent scientific, correctness, security and UX reviews are required. Static
 prototype and isolated native runs do not substitute for implemented workflow proof.
+
+## Implementation evidence
+
+The dedicated view and Roads-owned state are implemented. Actual local browser
+Save/Prepare/Run validates default and custom propagation across35 profiles and
+105 role records, with independent native input, raw output and fresh-report
+readback. Canonical archive/reset/restore/full-fork checks preserve retained
+baselines, native artifacts and current-result eligibility; private authorization
+and readonly denial pass. Independent correctness, security and UX reviews pass.
+See the [implementation results](../work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-results.md)
+for exact evidence and final regression status. This evidence does not adopt new
+scientific defaults or authorize production deployment.
 
 ## Risks and rollback
 

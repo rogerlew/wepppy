@@ -1,5 +1,17 @@
 # Success criteria
 
+
+## Approved implementation checkpoint
+
+The operator approved the replacement specification/layout at `9532a2968`;
+`73b5da4ac` is the accepted implementation ancestor. The implemented workflow
+passes actual default/custom native propagation, fresh reports, canonical
+archive/reset/restore/full-fork readback and private authorization. All independent
+implementation reviews and final reconciled regression coverage pass; package
+closed2026-11-03 with13,034 unique passing tests and423 total skips. See [implementation results](artifacts/parameterization-implementation-results.md).
+Earlier planning language below is historical; no default adoption or deployment
+is authorized, and original scientific classifications remain unchanged.
+
 ## Current execution amendment: default settings and project authority
 
 2026-11-03: execute the revised dedicated-view objective under the
