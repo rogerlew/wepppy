@@ -14,6 +14,7 @@ provisioning and credential-file conventions (`dev-agent` is the canonical
 account for authenticated CAP bypass and rq-engine token mint flows).
 
 ## Task Start: Route or Blueprint Changes
+- For user-facing labels, messages, navigation and help, follow [Writing for people](../../docs/standards/user-facing-language-standard.md); review the complete user task, not only the text.
 - Follow `docs/standards/contract-first-change-standard.md`, including its finite
   canonical-authority set, conflict rule, and required ancestor checkpoint.
 - Identify every applicable current canonical domain and shared/cross-cutting

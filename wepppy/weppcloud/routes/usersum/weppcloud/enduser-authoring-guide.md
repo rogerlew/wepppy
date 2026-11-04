@@ -2,6 +2,10 @@
 
 This guide defines how to write `ENDUSER.md` files for WEPPcloud and related usersum content.
 
+Follow [Writing for people](../../../../../docs/standards/user-facing-language-standard.md)
+for the complete UI/help task. Clear prose cannot compensate for an unexplained
+control, misleading status, or help that users cannot find.
+
 Write for non-developers with backgrounds in hydrology, soil science, forestry, agriculture, range, watershed restoration, or land management. Assume roughly the knowledge level of an upper-division undergraduate hydrology student: readers should be comfortable with terms like runoff, infiltration, sediment yield, watershed, and soil texture, but they should not need to understand WEPPcloud internals, code structure, or queueing details.
 
 ## When to write an ENDUSER.md
@@ -87,8 +91,8 @@ Avoid:
 
 Specialized vocabulary is unavoidable in hydrology and soil science, but unexplained jargon is not.
 
-- Define acronyms on first use.
-- If the UI label is technical, keep the exact label and explain it in plain language immediately after.
+- Define necessary scientific acronyms on first use. Replace unnecessary software jargon; expanding an acronym alone does not make a label understandable.
+- Instructions must name the actual control. When UI changes are in scope, improve confusing labels and instructions together. For docs-only work, flag the UI problem rather than inventing a label or treating the existing jargon as permanent.
 - If a term has both a technical and everyday meaning, make the technical meaning explicit.
 - If you must use a specialized term repeatedly, define it once and use it consistently.
 
@@ -195,7 +199,10 @@ One-sentence plain-language summary.
 ## Related Docs
 ```
 
-Some sections can be omitted when they do not fit the page, but `What This Is For`, `When to Use It`, and `Interpreting Results` should be treated as the default, not the exception.
+Use this outline for substantial feature or reference pages. For a short task,
+lead with the user's question, the answer, the steps and the expected confirmation.
+Add reversal and relevant limits afterward. Do not require users to read ten
+sections to change one setting.
 
 ## Recommended Table Patterns
 
@@ -255,6 +262,8 @@ Before publishing an `ENDUSER.md`, verify that:
 - assumptions, limits, and uncertainty are stated clearly,
 - a hydrology undergraduate or land manager could paraphrase the page accurately,
 - the page contains no unnecessary developer internals.
+
+Also review the complete task under [Writing for people](../../../../../docs/standards/user-facing-language-standard.md#review-the-whole-task): the control and help must use consistent terms, be reachable by ordinary users, and make the saved outcome clear. Do not infer intended access policy from implementation or claim human comprehension from string assertions.
 
 ## Usersum Publication Rules
 

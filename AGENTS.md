@@ -111,7 +111,7 @@
 
 ## Documentation Map
 - Architecture overview: `ARCHITECTURE.md`
-- Human-facing project overview: `readme.md`
+- Human-facing project overview: `readme.md`; UI/help writing must follow [Writing for people](docs/standards/user-facing-language-standard.md).
 - Active initiative board: `PROJECT_TRACKER.md`
 - Work package process: `docs/work-packages/README.md`; mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`

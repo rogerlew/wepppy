@@ -5,6 +5,7 @@
 > **Deep Dive:** Scroll to [Design Philosophy](#design-philosophy) for rationale and technical details.  
 > **Theme System:** See [`theme-system.md`](theme-system.md) for VS Code theme integration and color customization.  
 > **Controller Contract:** See [`controller-contract.md`](controller-contract.md) for explicit requirements all controllers must follow.
+> **User-facing writing:** Follow [Writing for people](../standards/user-facing-language-standard.md) for labels, messages, navigation and contextual help. Internal pattern names below are authoring aids, not proposed UI labels.
 
 <!-- toc -->
 - [Pattern Catalog](#pattern-catalog)

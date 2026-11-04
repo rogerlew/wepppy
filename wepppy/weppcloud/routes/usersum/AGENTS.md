@@ -34,6 +34,7 @@
     - `/usersum/src/<repo-relative-path>`
 
 ## Authoring Rules For Usersum Markdown
+- Follow [Writing for people](../../../../docs/standards/user-facing-language-standard.md): lead with the task, make help discoverable beside the action, and verify published navigation/search as well as source text.
 - Prefer normal repo-relative markdown links (for example `../../../../nodb/mods/openet/README.md`).
 - Do not hardcode `/nodb/...` or other non-usersum absolute app paths for markdown docs.
 - Do not hand-author `/usersum/src//...` links; canonical route is single-slash `/usersum/src/...`.
