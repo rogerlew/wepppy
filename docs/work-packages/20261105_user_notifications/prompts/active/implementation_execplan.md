@@ -53,12 +53,22 @@ ordinary catalog membership for recipients and direct bounded background TTL
 reads initially, so no catalog rollout is silently introduced. Contract edge-case
 clarifications require review/ratification before implementation.
 
+2026-11-05, independent rollout review/Codex: exercise application activation
+rollback after candidate browser acceptance while notification scheduling remains
+disabled, then restore candidate and enable the schedule. This proves removal
+and restoration of live wiring while avoiding real-user notification creation
+solely for rollback testing. The actual scheduled sweep remains a separate gate.
+
 ## Outcomes & Retrospective
 
 
-Outcome is an independently reviewed design scaffold with all reported findings closed. No code, migration, test deployment or
-nightly execution has occurred. Replace this paragraph with supported outcomes
-as milestones complete; job success alone never proves a correct inbox.
+Implementation is committed at `4cf1432d5` after contract ancestor `ceeaa5960`.
+Independent correctness, security and QA implementation reviews have no open
+medium/high findings. Forest backup restoration, additive live migration and
+fixture-scoped real-worker retry passed, including unchanged TTL bytes and
+preserved read state. WEPPcloud (2,325), RQ (1,329) and frontend (1,051) tests
+passed. Full repository pytest remains running; browser acceptance, application
+rollback and actual scheduled execution remain open.
 
 ## Context and Orientation
 
@@ -318,7 +328,7 @@ existing Flask/Jinja/frontend helpers provide rendering and authenticated mutati
 No additional dependency, privilege or deployment topology is permitted.
 
 Revision note: 2026-11-05 initial scaffold captures operator requirements and
-explicit forest delivery gates; design review passed after corrections; implementation remains pending.
+explicit forest delivery gates; design review passed after corrections; implementation and forest acceptance are tracked above.
 Review revision: preserve global CSRF 400/precedence, migrate before real preflight,
 default the new schedule off, constrain fixture scope across reconciliation, and
 state actual startup-relative scheduler timing rather than imply a fixed UTC hour.
@@ -327,3 +337,12 @@ Execution note: the operator explicitly approved scheduler-only recreation with
 `wctl docker compose up -d --no-deps --force-recreate scheduler` for activation
 and rollback. Canonical targeted-web remains the web activation mechanism; no
 full-stack restart is authorized or needed.
+
+Execution revision: retained completed implementation, migration and focused-suite
+evidence; broad tests and live browser/scheduler/rollback gates remain open.
+
+Forest pre-activation browser login exposed an existing CAPTCHA verification
+transport failure: public forest HTTPS is refused from web/rq-engine containers,
+while internal CAP is healthy. The bounded repair and independent review are in
+[forest login blocker](../../artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
+pending; notification scheduling remains disabled. Full repository tests continue.

@@ -1,0 +1,29 @@
+{
+  "job_id": "12fa4429-8cf2-4feb-8410-3c86a31c6eea",
+  "notification_id": 101,
+  "read_before_retry": true,
+  "job": {
+    "job_id": "12fa4429-8cf2-4feb-8410-3c86a31c6eea",
+    "runid": null,
+    "status": "finished",
+    "result": {
+      "examined": 1,
+      "created": 0,
+      "updated": 1,
+      "resolved": 0,
+      "unavailable": 0,
+      "skipped": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.053
+    },
+    "started_at": "2026-11-05 20:53:45.974854",
+    "ended_at": "2026-11-05 20:53:46.043162",
+    "description": "wepppy.rq.notifications_rq.populate_notifications(registration_ids=[2325])",
+    "elapsed_s": 0.068308,
+    "exc_info": null,
+    "auth_actor": null,
+    "culvert_batch_uuid": null,
+    "children": {}
+  },
+  "read_after_retry": "2026-11-05T20:53:45.931779+00:00"
+}

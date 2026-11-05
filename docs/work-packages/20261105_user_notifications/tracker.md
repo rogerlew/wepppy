@@ -38,15 +38,14 @@ reviewed intent ratified and forest delivery authorized. Runtime implementation 
 Reviews: [correctness/UX](artifacts/20261105_correctness_review.md),
 [security](artifacts/20261105_security_review.md), and
 [disposition](artifacts/20261105_review_disposition.md). Both reviewers confirmed
-closure; no open medium/high design findings. Runtime approval remains pending.
+closure; no open medium/high design findings. Forest runtime acceptance remains pending.
 
 ## Validation and evidence
 
 Documentation lint: contract, seven package documents and PROJECT_TRACKER passed
 with zero errors/warnings. Spelling preview is clean for contract/package files.
-Runtime tests: not run (documentation-only).
-Implementation tests, real PostgreSQL boundaries and forest acceptance remain
-required by the ExecPlan; no implementation/deployment success is claimed.
+Implementation and PostgreSQL tests passed; see the execution update below.
+Full-suite and forest browser/scheduler/rollback acceptance remain open.
 
 ## Surprises and risks
 
@@ -57,9 +56,8 @@ expiration refresh. Existing header overrides require an explicit coverage map.
 
 ## Next action
 
-Ratify the reviewed proposal, author the workflow-default ADR and record the
-standalone ancestor checkpoint when implementation is requested. Preserve this
-package as an executable scaffold; keep plan/tracker current thereafter.
+Finish the full repository test run, activate candidate web code, validate the
+browser workflow, rehearse rollback, then observe the enabled scheduled task.
 
 ## Execution update — 2026-11-05 UTC
 
@@ -75,3 +73,13 @@ Operator explicitly approved scheduler-only recreation for activation and rollba
 exception avoids the canonical full deployment restarting unrelated services.
 Web activation uses the canonical targeted-web entry point. Blueprint availability
 context prevents mixed-version header links during source-mounted cutover.
+
+Focused regression results: WEPPcloud 2,325 passed; RQ 1,329 passed and 220 skipped;
+frontend 1,051 passed. Candidate implementation is `4cf1432d5`. Live migration is
+`f6b8d27a901c`; application activation and scheduler remain pending.
+
+Forest pre-activation browser login exposed an existing CAPTCHA verification
+transport failure: public forest HTTPS is refused from web/rq-engine containers,
+while internal CAP is healthy. The bounded repair and independent review are in
+[forest login blocker](artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
+pending; notification scheduling remains disabled. Full repository tests continue.

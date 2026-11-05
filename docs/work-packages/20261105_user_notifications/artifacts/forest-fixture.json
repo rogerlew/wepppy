@@ -108,5 +108,6 @@
   "job_id": "notification_acceptance_07e6b9a1d1894700958850eb2f3d8fae",
   "ttl_sha256": "210ceafaa291df2351d7dd1cbf1075903e3bd5ea1c3b4b2d5cc8344ed298d3e0",
   "unrelated_before_sha256": "a683096011db3975a1e401e33b0047d1f2677a11efe85ef12806f016ae039795",
-  "created_at": "2026-11-05T20:46:08.847222+00:00"
+  "created_at": "2026-11-05T20:46:08.847222+00:00",
+  "second_user_id": 2831
 }
