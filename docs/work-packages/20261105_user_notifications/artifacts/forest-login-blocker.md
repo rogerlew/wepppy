@@ -40,3 +40,9 @@ requires fresh-token success, replay/invalid/missing-token rejection for all thr
 helpers, actual browser login, and unchanged browser CAP URLs. Failed checks must
 not create sessions/projects/jobs. Retain the repair during notification-only
 rollback and document a separate repair rollback. Approval remains pending.
+
+## Repair authorization
+
+2026-11-05: operator explicitly instructed “execute the repair.” Proceed with
+the reviewed forest-only configuration and canonical targeted-web activation.
+Both CAPTCHA consumers are covered; no other deployment is changed.

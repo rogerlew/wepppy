@@ -31,7 +31,16 @@ CADDY_UPSTREAM_SCHEME=https
 WEPPCLOUD_BIND_PREFIX=127.0.0.1:
 REDIS_BIND_PREFIX=100.99.21.102:
 CAP_BASE_URL=https://forest.tail305ec9.ts.net/cap
+CAP_VERIFY_BASE_URL=http://cap:3000/cap
 ```
+
+Forest server-side CAPTCHA verification uses the existing internal CAP service.
+The browser URL remains public-to-tailnet HTTPS. Dev Compose forwards the optional
+verification override to Flask and maps it to rq-engine's verification-only base
+URL. When unset, existing URL behavior is preserved. This forest repair was
+operator-approved on 2026-11-05; forest1/production are not changed or verified.
+Rollback removes only this override and its Compose mappings, followed by canonical
+targeted-web activation. Do not remove it during notification-only rollback.
 
 For forest1 substitute its hostname and use `REDIS_BIND_PREFIX=127.0.0.1:`.
 Forest Redis retains authenticated access over its Tailscale address for companion
