@@ -59,6 +59,79 @@ an empty or partial catalog on error. No caller-supplied filesystem path or
 registry selector is accepted. Use application URL helpers for links so proxy
 prefixes remain correct.
 
+## Automatic ADR catalog
+
+Status: requested feature; proposed contract checkpoint, implementation pending.
+
+The Help index and sidebar expose **Architecture Decision Records (ADRs)** as a
+standalone dynamic link outside curated manifest sections. `/usersum/adrs/`
+(trailing slash optional) lists every regular, non-symlink Markdown file directly
+inside repository `docs/adrs/` whose filename matches
+`ADR-[0-9]+-<nonempty-slug>.md`. README, templates, subdirectories and other files
+are excluded. The root directory itself must resolve inside the repository and
+must not be a symlink. No per-ADR manifest/nav entry, generated-index edit,
+background job, database change or web-worker reload is needed when an ADR is
+added, edited or removed from the source tree available to the web process.
+
+Sort records by their explicit recorded Date, descending. Read the ISO date
+immediately following a `Date:` label in the Markdown preamble before the first
+section heading (H2 or deeper); support plain/bold labels and an inline label
+following Status text. Use the first such field and its first ISO calendar date,
+including when a suffix gives a timezone or an additional UTC date. Validate the
+calendar date. Do not infer dates from status text, provenance prose, git history
+or filesystem timestamps. Missing or invalid dates display **Date unavailable**
+and sort after all dated records. Ties, including undated records, sort by numeric
+ADR identifier descending and then filename descending. The page explains
+**Newest recorded date first; undated records last**. Every matching file remains
+included, including duplicate numeric IDs and proposed/superseded records.
+
+Rationale: the operator requested reverse chronological order. Numeric ordering
+is not equivalent: ADR-0028 GridMET is dated 2026-08-31, after ADR-0029 dated
+2026-07-28. Explicit dates preserve the requested chronology without inventing
+missing metadata. Existing ADR content is not rewritten by this feature.
+
+Each entry shows its recorded date (or unavailable label), filename-derived ADR
+identifier and first Markdown H1 title;
+use the filename as the visible title if no H1 is present. Title text is escaped
+by Jinja, not treated as HTML. A brief introduction explains that records describe
+decisions at a point in time and readers should check each record's status.
+Links open the complete document in the existing Help Markdown shell at
+`/usersum/adrs/<filename>`, with Help → ADRs → document breadcrumbs and existing
+GitHub/raw-source links. Preserve Markdown heading anchors and existing relative Markdown-link behavior.
+For unregistered eligible ADR targets, links use the new ADR document route.
+Manifest-tracked targets retain canonical routes and role checks; other Markdown
+links retain existing routing. Non-Markdown assets retain existing renderer
+behavior; this feature does not add generic relative PDF/image publication.
+
+The ADR catalog and documents are public repository documentation, visible to
+anonymous and authenticated readers independently of the role-discovery filter.
+Dedicated ADR routes remain usable with `USERSUM_REQUIRE_MANIFEST_FOR_SRC` enabled;
+the generic source route's strict-manifest behavior and all existing document
+role gates remain unchanged. New ADRs are discovered on each request. They are
+not automatically enrolled in full-text Help search in this bounded change.
+This follows the existing Feature Catalog pattern and avoids stale manually
+maintained lists or expanding the manifest/search schema.
+
+Valid-state and failure behavior:
+
+| State | Required behavior |
+| --- | --- |
+| Directory absent or empty | Successful catalog page with a clear no-records message; no invented entries or filesystem writes |
+| Populated directory | Every eligible file appears exactly once in the stated order and renders through its detail link |
+| Legacy ADR without date, status or H1 | Included; missing H1 uses filename; missing/invalid date sorts last; metadata omissions do not block reading |
+| Added, edited or removed ADR | Next request reflects the source tree; removed document returns 404 |
+| Duplicate numeric identifier | Both filenames remain visible, deterministically ordered |
+| Nonmatching file, symlink, directory, traversal or encoded traversal | No listing entry and 404 on the dedicated document route; no outside-root read |
+| Unreadable file or invalid UTF-8 | Explicit server error under normal error handling, never silently omitted or rendered as successful empty content |
+
+Use the shared Help layout, ordinary links and heading structure without new
+JavaScript or dependencies. Validation must use real temporary directories for
+filesystem/discovery boundaries and real repository ADRs for complete route
+rendering, including site-prefix URLs and cross-ADR links. Verify the empty,
+legacy, populated, freshness and hostile-path states independently of role and
+strict-manifest options. There is no deployment or project/run mutation in this
+feature.
+
 ## Role Model
 
 Usersum roles are mutually exclusive at the document level.
@@ -137,7 +210,9 @@ Contract highlights:
 - `source` is `local` or `vendor`.
 - vendor docs require `vendor_id`; vendor alias route generation expects vendor docs under configured `target_root`.
 - `nav_key` in manifest must map 1:1 to a nav leaf node.
-- only manifest-tracked docs are published in usersum nav/search surfaces.
+- Curated nav/search documents are manifest-tracked. Standalone dynamic Feature
+  Catalog and ADR catalog links are the explicit navigation exceptions; neither
+  automatically adds entries to full-text search.
 
 PostgreSQL bootstrap/migration discoverability:
 
@@ -188,6 +263,8 @@ Key behavior:
 - search result links resolve to canonical doc routes.
 - markdown in-doc `.md` links are rewritten:
   - if target path is manifest-tracked -> canonical `/usersum/doc/<doc_id>` route
+  - otherwise, if the target is an eligible ADR under **Automatic ADR catalog**
+    -> `/usersum/adrs/<filename>` (additive behavior; implementation pending)
   - otherwise -> `/usersum/src/<repo-relative-path>`
 
 This keeps links valid under prefixed deployments such as `/weppcloud/...`.
