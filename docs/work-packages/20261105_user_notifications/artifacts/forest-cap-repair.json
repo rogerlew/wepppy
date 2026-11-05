@@ -25,5 +25,9 @@
     "wepppy-rq-engine"
   ],
   "candidate_revision": "f9610c8a1",
-  "public_browser_cap_url": "https://forest.tail305ec9.ts.net/cap"
+  "public_browser_cap_url": "https://forest.tail305ec9.ts.net/cap",
+  "browser_password_login": true,
+  "browser_logout_login": true,
+  "ordinary_account_login": true,
+  "public_cap_challenge_redeem": true
 }

@@ -1,0 +1,60 @@
+{
+  "baseline_revision": "ceeaa5960",
+  "candidate_wiring_revision": "4cf1432d5",
+  "preserved_overlays": [
+    "approved forest CAPTCHA routing repair f9610c8a1",
+    "concurrent operator ttl_gc.enabled=false pause"
+  ],
+  "files": [
+    {
+      "path": "wepppy/weppcloud/app.py",
+      "baseline_sha256": "2e7c998d689c8506a9c168daa7dcd3a0c1917411868771e4236fb125b8e8aee5",
+      "candidate_sha256": "7553eca6cfdf8602f6106b4659d2558669a7e23f11e571d4613615d0befe80fb"
+    },
+    {
+      "path": "wepppy/weppcloud/_blueprints_context.py",
+      "baseline_sha256": "30082da5d9022e4e41141ac640afdafcc095b53da9cf341ee714d5aa6390218c",
+      "candidate_sha256": "3a1f95ff5536de741308922037fe6e5e38980c8b3592674fc581c2e1521d560a"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/__init__.py",
+      "baseline_sha256": "d2dcf7dc84e3cde4b89b34e3497456379d5692f3eb56d72bb8fbee70e460ebb4",
+      "candidate_sha256": "2972f9c799c6c179789b4dfbb965baa0fd39baf001dad036f423b356212f2468"
+    },
+    {
+      "path": "docker/scheduled-tasks.yml",
+      "baseline_sha256": "380729b9aa91b27a899c6f94d68cecfc9499711fe35b6ad4dc237fe9493084b3",
+      "candidate_sha256": "afee664eba6ea428e40c6d0678a7b98a66ce1bb4f5944a8a60739a4aeb52a8ab"
+    },
+    {
+      "path": "docker/docker-compose.dev.yml",
+      "baseline_sha256": "d4ce87c86412ca338cf91a5b960b006f1cf075b92b35486b7b739bdeea96c676",
+      "candidate_sha256": "6df089616bea312d17924dd7cd364961a54f682410580bfc191a119d74942a8d"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/base_pure.htm",
+      "baseline_sha256": "e0ab3696e4e9ba9fbf9a8cbd1b06056f24a2f398fecbbc98018135c4a9dd1478",
+      "candidate_sha256": "35d4d2d17134212c50739feab31213ad39bc17ddeb6747604e70a51412c95698"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/gl_dashboard.htm",
+      "baseline_sha256": "f17dbcba987dcd92f6714b3a2db3fe68184e5dca135598c5ae0627e8d665a63e",
+      "candidate_sha256": "b7d1e57167db00494cec2bfc382fdf7599e253b40c97701156945691846af496"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/header/_layout_fixed.htm",
+      "baseline_sha256": "4eca1cfe4338aac019a223a12f73814f7edbe54b36be758b3ceca5ff35370f3a",
+      "candidate_sha256": "710b99fde829dd39fa3bf9ba33c6745ea031dba8a6d19e41ec0d78282b407611"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/header/_run_header_fixed.htm",
+      "baseline_sha256": "d992a239042068f12552a068ed0a8fd6904dfa767ef84ccd8038e08e06310aab",
+      "candidate_sha256": "31fd57e5fe27cc47adacdcc421deed0e1709690395b4bf39231157428d4271a5"
+    },
+    {
+      "path": "wepppy/weppcloud/templates/reports/_base_report.htm",
+      "baseline_sha256": "19170922d505a290fdf9e4da72d173df2dcff96abc4d89c33220ee4d72be3422",
+      "candidate_sha256": "0de1ecf5dce7237a56efad6782ca6d5bf2d42210b9658b755681d2f1dd0dcbf1"
+    }
+  ]
+}

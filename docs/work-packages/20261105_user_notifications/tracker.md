@@ -1,109 +1,84 @@
 # User notifications tracker
 
-Status: approved CAPTCHA repair and notification forest activation in progress.
-Last updated: 2026-11-05 21:38 UTC.
+Status: closed — implemented and verified on forest, 2026-11-05.
+Last updated: 2026-11-05 UTC.
 
 ## Task board
 
-- [x] Inspect TTL, scheduler, database and shared headers.
-- [x] Record conversation-derived behavior in the canonical notification contract.
-- [x] Scaffold complete implementation/testing/forest deployment ExecPlan.
-- [x] Obtain two independent contract reviews, correct findings and obtain post-fix confirmation.
-- [x] Record operator decision checkpoint and standalone ancestor commit (`ceeaa5960`).
-- [x] Add ADR-0137 and additive migration; restored-database rehearsal passed.
-- [x] Implement task, Flask surfaces and header/list UI.
-- [x] Complete local regression and independent implementation reviews (broad-run disposition below).
-- [ ] Deploy to forest, verify artifacts/browser/job tree, observe nightly execution.
-- [ ] Verify rollback, finish documentation and close package.
+- [x] Contract, ADR-0137, independent design review and ancestor `ceeaa5960`.
+- [x] Additive PostgreSQL schema, generic inbox, Flask API and shared headers.
+- [x] Retry-safe nightly RQ producer and server-side read state.
+- [x] Regression checks and independent correctness, security and QA reviews.
+- [x] Forest backup/restore rehearsal, live migration and real worker parity.
+- [x] Authorized CAPTCHA transport repair and real-token/browser acceptance.
+- [x] Browser pagination, sorting, bulk actions, isolation, history and mobile headers.
+- [x] Application rollback/restoration with exact notification/read-state preservation.
+- [x] Actual scheduled sweep and source/database/browser readback.
+- [x] Fixture cleanup, final browser acceptance, documentation closure and archival.
 
-## Decisions
+## Decisions and authority
 
-- 2026-11-05 19:58 UTC — Nightly RQ producer; Flask inbox/API; PostgreSQL read state.
-  Reuses existing mechanisms and avoids a second account API or delivery service.
-- 2026-11-05 19:58 UTC — Bell with unread count, direct listing, no attention popup.
-  Explicit read/unread actions preserve user control and eliminate repeat alerts.
-- 2026-11-05 19:58 UTC — 100 rows per page; select-all is current page; unread-first,
-  read-first and newest sorts. Page-bound selection limits accidental bulk changes.
-- 2026-11-05 19:58 UTC — Start with background non-mutating TTL reads; catalog
-  projection deployment is not assumed. Preserve its separate owner and cutover.
-- 2026-11-05 19:58 UTC — Test deployment targets forest, not forest1; do not infer
-  authorization to deploy production from the work-package scaffold request.
+The [canonical contract](../../schemas/user-notifications-contract.md) records
+operator decisions and rationale: existing account PostgreSQL, Flask API, nightly
+RQ producer, quiet bell, 100 rows per page, current-page selection, explicit
+read/unread and three sort modes. No new service or retention-policy change.
+The [contract checkpoint](artifacts/20261105_contract_decision.md) and independent
+reviews preceded implementation. The operator authorized forest execution and
+separately approved the CAPTCHA repair and scheduler-only recreation exception.
+Canonical targeted-web deployment handled all web activation and rollback.
+Concurrent operator GC pause and unrelated workspace edits were preserved.
 
-## Contract checkpoint
+## Runtime evidence
 
-Starting revision: `5fb446744d1e5d0e193c3d3aa2cf2dc040e22823`.
-Checkpoint: [contract decision](artifacts/20261105_contract_decision.md).
-Ancestor revision: `ceeaa5960`. Operator requested execution on 2026-11-05;
-reviewed intent ratified and forest delivery authorized. Runtime implementation in progress.
-Reviews: [correctness/UX](artifacts/20261105_correctness_review.md),
-[security](artifacts/20261105_security_review.md), and
-[disposition](artifacts/20261105_review_disposition.md). Both reviewers confirmed
-closure; no open medium/high design findings. Forest runtime acceptance remains pending.
+The live additive migration is `f6b8d27a901c`. Restored database rehearsal preserved
+28 users, 570 runs and 259 memberships; its disposable database was removed.
+Restricted backups and raw logs remain in `/var/tmp/notification-rollout-20261105/`.
+Four local batch workers match candidate task/producer source and runtime identity.
+Real worker retries preserved TTL bytes and recipient read timestamps.
 
-## Validation and evidence
+CAPTCHA verification now uses the existing internal CAP service on forest while
+browser challenge URLs remain HTTPS. Fresh tokens pass; replayed, invalid and
+missing tokens fail. The original deployment stopped before cutover because host
+Python lacked Jinja2; canonical deployments succeeded with repository virtualenv
+PATH. See [validation](artifacts/20261105_validation.md) for exact commands.
 
-Documentation lint: contract, seven package documents and PROJECT_TRACKER passed
-with zero errors/warnings. Spelling preview is clean for contract/package files.
-Implementation and PostgreSQL tests passed; see the execution update below.
-Full-suite and forest browser/scheduler/rollback acceptance remain open.
+Rollback removed notification routes/bells while ordinary authenticated pages
+remained healthy. All 101 fixture notifications and recipient records matched
+before rollback, after rollback and after restoration, including the read timestamp.
+Candidate browser acceptance then passed again.
 
-## Surprises and risks
+Scheduler job `b4cd4984-a290-4596-8587-91cdc374963c` ran at
+2026-11-05 23:01:53 UTC: 572 examined, 0 created, 1 updated, 0 resolved,
+470 unavailable and 101 skipped in 2.098 seconds. Exact TTL bytes, read timestamp,
+active status and browser badge/content passed readback. The availability audit
+found 469 missing local project directories and one missing TTL; unknown sources
+were not initialized or represented as valid expiration dates.
+The next daily enqueue is expected around 2026-11-06 23:01:53 UTC (scheduler polling
+applies). Restart resets the 900-second initial delay; interval is 86,400 seconds,
+zero jitter. Notifications are enabled; the separate GC pause remains effective.
 
-The worktree already has unrelated controller-input-validation documentation
-and a modified PROJECT_TRACKER. Preserve those edits; ignore generated docs_index.
-Daily access compilation and GC use different queues; do not promise immediate
-expiration refresh. Existing header overrides require an explicit coverage map.
+## Regression disposition
 
-## Next action
+Notification tests: 26 passed; corrected combined suite: 78 passed; complete
+WEPPcloud: 2,325 passed; RQ: 1,329 passed, 220 skipped; frontend: 1,051 passed.
+Full repository run: 12,877 passed, 423 skipped, one stale collected migration-head
+assertion failed. The process collected it before correction; fresh verification
+passed and the corrected complete WEPPcloud suite passed. No single all-green full
+run is claimed. Exact results and hashes: [regression results](artifacts/regression-results.json).
+Graph, stub, JavaScript, exception and documentation checks passed.
 
-Finish the full repository test run, activate candidate web code, validate the
-browser workflow, rehearse rollback, then observe the enabled scheduled task.
+## Closure
 
-## Execution update — 2026-11-05 UTC
+Fixture registration 2325, disposable user 2831, 101 fixture notices, the exact
+fixture directory and disposable credentials are removed. The rehearsal database
+is absent. Gunicorn-held NFS fixture log handles were released by a successful
+canonical targeted-web recreation. Post-cleanup real browser acceptance passed:
+empty inbox, hidden zero badge, anonymous count 401 and missing-CSRF mutation 400.
+All other container identities are unchanged; scheduler stayed running through
+cleanup and its next daily execution remains scheduled. See
+[cleanup](artifacts/forest-cleanup.json), [browser](artifacts/forest-post-cleanup-browser.json)
+and [runtime](artifacts/forest-final-runtime.json).
 
-26 real PostgreSQL/TTL/Flask tests pass; 1,051 frontend tests passed, with the four
-notification tests rerun after final script changes. Independent correctness,
-security and QA code reviews have no open medium/high findings. Full pytest completed; see the final regression disposition below. Rehearsal restored database counts remained 28 users, 570 runs and 259
-memberships after migration to f6b8d27a901c. Live backup is restricted under
-`/var/tmp/notification-rollout-20261105/`.
-
-Operator explicitly approved scheduler-only recreation for activation and rollback:
-`wctl docker compose up -d --no-deps --force-recreate scheduler`. This bounded
-exception avoids the canonical full deployment restarting unrelated services.
-Web activation uses the canonical targeted-web entry point. Blueprint availability
-context prevents mixed-version header links during source-mounted cutover.
-
-Focused regression results: WEPPcloud 2,325 passed; RQ 1,329 passed and 220 skipped;
-frontend 1,051 passed. Candidate implementation is `4cf1432d5`. Live migration is
-`f6b8d27a901c`; application activation and scheduler remain pending.
-
-Forest pre-activation browser login exposed an existing CAPTCHA verification
-transport failure: public forest HTTPS is refused from web/rq-engine containers,
-while internal CAP is healthy. The bounded repair and independent review are in
-[forest login blocker](artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
-pending; notification scheduling remains disabled. Full repository results are recorded in the final regression disposition.
-
-The disposable restored database `notifications_rehearsal_20261105` was removed
-after confirming zero connected sessions. Migration/query-plan evidence and the
-restricted original backup remain retained. The live account database was not
-restored or downgraded.
-
-## Final regression disposition — 2026-11-05 21:38 UTC
-
-Full pytest: 12,877 passed, 423 skipped, one failure in 3,654.63 seconds. The
-long-running process had collected the old migration-head assertion before its
-correction. Its trace compares old/new migration IDs while displaying the edited
-source line. Fresh verification passes (1 test); the corrected focused suite
-passed 78 and the complete WEPPcloud suite passed 2,325. No single all-green full
-run is claimed. Exact logs/hashes are in `artifacts/regression-results.json`.
-
-Awaiting the already presented approval for the reviewed forest CAPTCHA transport
-repair. No web deployment, application rollback or scheduled execution is claimed.
-The scheduler-only recreation approval remains valid. Fixture run registration
-2325 and ordinary test user 2831 are retained for acceptance; remove them and the
-gitignored `docker/secrets/notifications-acceptance.env` after completing acceptance.
-The fixture has a future expiry and must be cleaned before 2026-11-12.
-
-Operator approved the CAPTCHA routing repair. Canonical targeted-web activation
-is running for `f9610c8a1`; schedule remains disabled. Root/Docker host overrides
-are aligned and notification-only rollback snapshots retain the repair.
+Final correctness and security review artifacts record their independent gate
+dispositions. This package activates forest only; no production or forest1 rollout
+is implied. History purge and a maintenance publisher remain outside scope.

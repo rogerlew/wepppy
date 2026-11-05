@@ -278,3 +278,35 @@ test('notification fixture pages remain usable without inbox activation', async 
   expect(response.status()).toBe(404);
   fs.writeFileSync(path.join(evidence,'forest-baseline-browser.json'),JSON.stringify({inbox_status:404,bell_absent:true,pages},null,2)+'\n');
 });
+
+test('scheduled notification output reaches the authenticated inbox', async ({ page }) => {
+  test.skip(process.env.SMOKE_NOTIFICATIONS_SCHEDULED !== 'true', 'Requires a completed actual scheduled sweep.');
+  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const readback = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-scheduled-readback.json'), 'utf8'));
+  await login(page);
+  await page.goto(base + '/weppcloud/notifications?sort=read_first');
+  const notice = page.locator('.wc-notifications-item').filter({has:page.locator(`[data-notification-id="${readback.fixture_notification_id}"]`)});
+  await expect(notice).toContainText('Read · Active');
+  await expect(page.locator('[data-notification-bell]')).toHaveAttribute('aria-label', `Notifications, ${readback.fixture_user_unread_count} unread`);
+  fs.writeFileSync(path.join(evidence,'forest-scheduled-browser.json'),JSON.stringify({job_id:readback.job_id,read_state_visible:true,active_warning_visible:true,unread_count_matches_database:true},null,2)+'\n');
+});
+
+test('notification fixture cleanup leaves a healthy empty inbox', async ({ page }) => {
+  test.skip(process.env.SMOKE_NOTIFICATIONS_CLEANUP !== 'true', 'Only immediately after scoped acceptance cleanup.');
+  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const cleanup = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-cleanup.json'), 'utf8'));
+  expect(cleanup.nonfixture_notifications_retained).toBe(0);
+  await login(page);
+  await page.goto(base + '/weppcloud/notifications');
+  await expect(page.getByText('No notifications on this page.')).toBeVisible();
+  await expect(page.locator('[data-notification-bell]')).toHaveAttribute('aria-label','Notifications, 0 unread');
+  await expect(page.locator('[data-notification-count]')).toBeHidden();
+  const anonymous = await page.context().browser().newContext();
+  const count = await anonymous.request.get(base + '/weppcloud/api/notifications/unread-count');
+  expect(count.status()).toBe(401);
+  const csrf = await anonymous.request.post(base + '/weppcloud/api/notifications/read-state', {data:{notification_ids:[1],read:true}});
+  expect(csrf.status()).toBe(400);
+  expect((await csrf.json()).error.code).toBe('csrf_failed');
+  await anonymous.close();
+  fs.writeFileSync(path.join(evidence,'forest-post-cleanup-browser.json'),JSON.stringify({empty_inbox:true,zero_badge_hidden:true,anonymous_count_status:401,missing_csrf_status:400},null,2)+'\n');
+});

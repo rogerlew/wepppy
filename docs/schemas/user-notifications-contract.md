@@ -1,6 +1,6 @@
 # User Notifications Contract
 
-Status: ratified by the operator on 2026-11-05 by requesting work-package execution; implementation and deployment pending.
+Status: ratified and implemented on 2026-11-05; forest browser, rollback and actual scheduled execution verified.
 Decision owner: requesting operator. Initial scope agreed 2026-11-05.
 
 ## Purpose and scope

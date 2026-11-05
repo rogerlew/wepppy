@@ -1,4 +1,4 @@
-# Forest baseline login blocker
+# Forest baseline login blocker — repaired
 
 Before notification activation, a real browser challenge/redeem succeeds but
 password login returns the existing CAPTCHA validation error. The web container
@@ -16,11 +16,11 @@ deployment; no additional service recreation. Preserve this repair during the
 notification-only rollback. Rollback of the repair itself removes that host key
 and Compose line and uses the same targeted-web deployment.
 
-This is a pre-existing login transport defect, independent of notification code.
-Operator approval is pending because root AGENTS requires explicit approval for
-unrequested authentication/runtime behavior changes. The patch is prepared at
-`/var/tmp/notification-rollout-20261105/cap-verification-repair.patch`; no repair
-configuration has been applied.
+This is a preexisting login transport defect, independent of notification code.
+Operator approval was required because root AGENTS requires explicit approval for
+unrequested authentication/runtime behavior changes. The patch was prepared at
+`/var/tmp/notification-rollout-20261105/cap-verification-repair.patch` before repair
+configuration was applied.
 
 Independent review confirmed rq-engine has the same unreachable public route in
 project/fork CAPTCHA verification. Include its environment mapping
@@ -28,7 +28,7 @@ project/fork CAPTCHA verification. Include its environment mapping
 consumer. Interpolation was verified for absent, empty, relative and explicit
 internal overrides. Both services are already in the targeted-web activation set.
 Validate each helper with fresh and replayed tokens and invalid tokens, without
-creating projects/jobs, then prove actual browser login. Approval remains pending.
+creating projects/jobs, then prove actual browser login. Approval was subsequently granted below.
 
 ## Independent security disposition
 
@@ -39,7 +39,7 @@ no published port, privilege or authorization expansion is proposed. Acceptance
 requires fresh-token success, replay/invalid/missing-token rejection for all three
 helpers, actual browser login, and unchanged browser CAP URLs. Failed checks must
 not create sessions/projects/jobs. Retain the repair during notification-only
-rollback and document a separate repair rollback. Approval remains pending.
+rollback and document a separate repair rollback. Approval was subsequently granted below.
 
 ## Repair authorization
 
@@ -53,3 +53,12 @@ first deployment stopped before service recreation; the static builder preflight
 passed under `.venv/bin/python3`, and the canonical deployment was retried.
 The retained `cap-transport-canary.py` exercises actual fresh/replayed/invalid/
 missing tokens through all affected verification helpers without creating jobs.
+
+## Verified repair outcome
+
+Canonical targeted-web activation succeeded. Fresh tokens pass; replayed,
+invalid and missing tokens fail in Flask login, rq-engine project and rq-engine
+fork verification. Browser password login, logout/login and ordinary-account
+login pass through the unchanged public challenge/redeem URL. Container identity
+comparison showed only web and rq-engine recreated. See `forest-cap-repair.json`
+and `forest-browser.json`. The CAPTCHA blocker is closed.

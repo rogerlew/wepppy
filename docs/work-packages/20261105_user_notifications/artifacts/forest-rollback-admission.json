@@ -1,0 +1,9 @@
+{
+  "notification_admissions_enabled": false,
+  "pending_notification_jobs": [],
+  "eligible_batch_workers": 4,
+  "eligible_batch_hostnames": [
+    "020621d1f64f"
+  ],
+  "scope": "Verified immediately before baseline source swap; unrelated queues were not flushed or changed."
+}

@@ -1,0 +1,21 @@
+{
+  "notification_id": 101,
+  "read_at": "2026-11-05T22:47:23.916225+00:00",
+  "notification_total_before": 101,
+  "ttl_sha256": "210ceafaa291df2351d7dd1cbf1075903e3bd5ea1c3b4b2d5cc8344ed298d3e0",
+  "ttl": {
+    "created_at": "2026-08-14T20:46:08.847222Z",
+    "db_cleared": false,
+    "delete_state": "active",
+    "disabled_by_user_id": null,
+    "disabled_reason": null,
+    "expires_at": "2026-11-12T20:46:08.847222Z",
+    "last_accessed_at": "2026-08-14T20:46:08.847222Z",
+    "last_touched_by": "create",
+    "policy": "rolling_90d",
+    "ttl_days": 90,
+    "updated_at": "2026-08-14T20:46:08.847222Z",
+    "user_disabled": false,
+    "version": 1
+  }
+}

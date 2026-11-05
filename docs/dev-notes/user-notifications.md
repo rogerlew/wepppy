@@ -64,3 +64,10 @@ On rollback stop admissions first, inventory queued/started notification jobs,
 restore only feature-touched source and activate web rollback. Keep tables/read
 state, unrelated edits/services and GC unchanged. Never flush Redis. The execution
 package records exact commands, revisions, browser artifacts and remaining gates.
+
+Forest activation is recorded in the 2026-11-05 notification work package. Its
+gitignored root and Docker environment files enable the notification sweep;
+production/forest1 are not activated by that work. The separately paused GC
+schedule is independent of notification population. On forest, canonical web
+deployment needs the repository virtualenv on host PATH for the Jinja controller
+builder. Scheduler-only recreation was explicitly authorized for this rollout.

@@ -1,0 +1,10 @@
+{
+  "fixture_registration_removed": 2325,
+  "fixture_user_removed": 2831,
+  "fixture_notifications_removed": 101,
+  "fixture_directory_removed": true,
+  "fixture_credential_removed": true,
+  "nonfixture_notifications_retained": 0,
+  "rehearsal_database_removed": true,
+  "open_nfs_log_handles_released_by": "canonical targeted-web recreation"
+}

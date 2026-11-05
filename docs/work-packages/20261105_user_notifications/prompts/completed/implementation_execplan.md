@@ -1,7 +1,7 @@
 # Deliver the notification inbox through forest acceptance
 
 
-This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
+This completed ExecPlan was maintained under `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log and Outcomes & Retrospective
 current, and update the package tracker at every handoff. The operator requested execution on 2026-11-05. Execute each
 milestone without routine permission pauses; stop only at a real authority,
@@ -26,11 +26,11 @@ or any production host.
 - [x] (2026-11-05 UTC) Two independent design reviews and post-fix confirmations; no open medium/high findings.
 - [x] (2026-11-05 UTC) Operator execution ratification, ADR-0137 and ancestor `ceeaa5960`.
 - [x] (2026-11-05 UTC) M1: schema/repository real-PG tests and restored-database migration validated.
-- [x] (2026-11-05 UTC) M2: producer retry/reconciliation/source-boundary tests passed; live schedule pending M5.
-- [ ] M3: Flask API, listing, headers and user workflow validated.
+- [x] (2026-11-05 UTC) M2: producer retry/reconciliation/source-boundary tests passed; actual scheduled execution verified in M5.
+- [x] (2026-11-05 UTC) M3: real browser API/list/header/account isolation/history and mobile/dark workflows pass.
 - [x] (2026-11-05 21:38 UTC) M4: regression gates/reviews retained; stale collected migration assertion disposition below.
-- [ ] M5: forest activation, browser/job evidence, nightly observation and rollback complete.
-- [ ] Package closure and prompt archival.
+- [x] (2026-11-05 23:02 UTC) M5: forest activation, browser/job evidence, actual scheduled observation, rollback and final cleanup passed.
+- [x] (2026-11-05 UTC) Final fixture cleanup/browser acceptance, package closure and prompt archival.
 
 ## Surprises & Discoveries
 
@@ -70,8 +70,9 @@ preserved read state. WEPPcloud (2,325), RQ (1,329) and frontend (1,051) tests
 passed. Full repository pytest finished with 12,877 passed and 423 skipped before the
 old migration-head assertion, collected before correction, failed. Its fresh
 rerun passes (1 test), and the corrected full WEPPcloud suite passed. This is not
-claimed as a single all-green full run. Browser acceptance, application
-rollback and actual scheduled execution remain open.
+claimed as a single all-green full run. Browser acceptance, application rollback
+and actual scheduled execution passed. Final fixture filesystem cleanup and
+post-cleanup acceptance passed. All authorized forest delivery gates are complete.
 
 ## Context and Orientation
 
@@ -341,35 +342,41 @@ Execution note: the operator explicitly approved scheduler-only recreation with
 and rollback. Canonical targeted-web remains the web activation mechanism; no
 full-stack restart is authorized or needed.
 
-Execution revision: retained completed implementation, migration and focused-suite
-evidence; broad tests and live browser/scheduler/rollback gates remain open.
+Execution record — 2026-11-05:
 
-Forest pre-activation browser login exposed an existing CAPTCHA verification
-transport failure: public forest HTTPS is refused from web/rq-engine containers,
-while internal CAP is healthy. The bounded repair and independent review are in
-[forest login blocker](../../artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
-pending; notification scheduling remains disabled. Full repository results are recorded in the final regression disposition.
-
-Handoff 2026-11-05 21:38 UTC: independent work completed; forest activation is
-blocked on the pending operator approval for the prepared CAPTCHA transport repair.
-Scheduler-only recreation is already approved and must not be requested again.
-No web/scheduler recreation has occurred. On approval, apply the reviewed patch,
-update homelab documentation and source snapshots (preserve the repair in both
-notification rollback/candidate Compose snapshots), set the host override, then
-follow canonical targeted-web activation and the retained token/browser canaries.
-Run the application rollback with admissions disabled, restore candidate, then
-enable scheduling and observe the real 900-second delayed scheduled execution.
-The restricted prepared patch/canary are under `/var/tmp/notification-rollout-20261105/`.
-
-Repair execution: operator approved on 2026-11-05. Contract checkpoint `262eee74d`
-and implementation `f9610c8a1` expose the existing internal CAPTCHA override for
-forest. Both host environment files are aligned. Notification rollback snapshots
-now retain the independent CAPTCHA repair. Canonical targeted-web activation is
-running with schedule disabled.
-
-Concurrent operator GC pause: on 2026-11-05, unrelated workspace edits set
-`ttl_gc.enabled: false`. Both rollback/candidate schedule snapshots preserve
-that pause. Never revert it or stage its unrelated provenance documentation.
-The initial deploy stopped before cutover because host Python lacked Jinja2;
-the controller builder passed using the repository virtualenv. Canonical
-deployment now runs with `PATH=/home/workdir/wepppy/.venv/bin:$PATH`.
+- Operator approved the separately reviewed CAPTCHA transport repair. Contract
+  checkpoint `262eee74d` and implementation `f9610c8a1` expose the existing
+  internal verification override; browser challenge URLs remain unchanged.
+  Both host environment files are aligned. Real fresh/replay/invalid/missing-token
+  canaries and normal browser login passed in all three verification helpers.
+- Unrelated operator changes paused `ttl_gc.enabled`. Both rollback/candidate
+  schedule snapshots preserved that pause; its provenance was not staged here.
+- The initial canonical deployment stopped before cutover because host Python
+  lacked Jinja2. Subsequent canonical deployments succeeded with
+  `PATH=/home/workdir/wepppy/.venv/bin:$PATH`. A future early host prerequisite
+  check would avoid an expensive build before discovering this tooling issue.
+- Primary/history browser acceptance passed. A 390px header overflow was repaired
+  and independently verified across all five header families in `0bc7cc576`.
+- With notification scheduling disabled and no pending notification jobs,
+  exact baseline source replacement and canonical targeted-web rollback passed.
+  Ordinary authenticated pages remained healthy, inbox returned 404 and bells
+  were absent. All 101 notification/recipient rows matched exact hashes, including
+  the read timestamp. Candidate source restoration matched all ten source hashes;
+  canonical deployment and repeated browser acceptance passed.
+- Four local batch workers match task/producer source and execution identity.
+  Approved scheduler-only recreation enabled notifications at 22:46:39 UTC.
+  Actual unscoped scheduled job `b4cd4984-a290-4596-8587-91cdc374963c` began
+  23:01:53 UTC and completed in 2.098 seconds: 572 examined, 0 created, 1 updated,
+  0 resolved, 470 unavailable, 101 skipped. Exact TTL bytes, read timestamp,
+  active state and browser content/count readback passed.
+- Source audit explains 469 missing local project directories and one missing TTL.
+  These observations remain unavailable, without source initialization or false
+  expiration claims. Next daily enqueue is expected around 2026-11-06 23:01:53 UTC;
+  restart resets the initial 900-second delay, with scheduler polling applied.
+- Fixture database rows and disposable credentials were removed. NFS log files
+  held by four Gunicorn workers require a final canonical targeted-web recreation
+  to finish filesystem cleanup. The canonical recreation succeeded; exact fixture
+  directory/database/credential absence was verified, and the post-cleanup browser
+  passed empty-inbox, zero-badge, anonymous-auth and CSRF checks. Scheduler identity
+  and timing stayed unchanged; all unrelated container identities are preserved.
+  Package closed with evidence retained; production and forest1 were not activated.

@@ -1,0 +1,17 @@
+{
+  "changed_container_names": [
+    "weppcloud",
+    "wepppy-scheduler",
+    "wepppy-rq-engine"
+  ],
+  "other_container_identities_unchanged": true,
+  "scheduler_unchanged_during_final_web_cleanup": true,
+  "notification_sweep_enabled": true,
+  "service_health": {
+    "weppcloud": "running",
+    "wepppy-scheduler": "running",
+    "wepppy-rq-engine": "running"
+  },
+  "expected_next_scheduled_enqueue_utc": "2026-11-06T23:01:53Z",
+  "scheduler_restart_resets_initial_delay": true
+}

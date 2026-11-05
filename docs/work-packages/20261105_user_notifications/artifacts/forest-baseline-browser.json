@@ -1,0 +1,22 @@
+{
+  "inbox_status": 404,
+  "bell_absent": true,
+  "pages": [
+    {
+      "route": "/weppcloud/profile",
+      "status": 200
+    },
+    {
+      "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m/",
+      "status": 200
+    },
+    {
+      "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m/gl-dashboard",
+      "status": 200
+    },
+    {
+      "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m/storm-event-analyzer",
+      "status": 200
+    }
+  ]
+}

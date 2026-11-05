@@ -1,6 +1,6 @@
 # User notifications
 
-Status: Open — implementation complete; forest acceptance in progress, 2026-11-05. Timezone: UTC.
+Status: Closed — implemented and verified on forest, 2026-11-05. Timezone: UTC.
 
 ## Overview
 
@@ -12,11 +12,13 @@ The generic schema accommodates future maintenance notices.
 ## Authority and deliverables
 
 The [canonical contract](../../schemas/user-notifications-contract.md) owns durable
-behavior. The [ExecPlan](prompts/active/implementation_execplan.md) covers delivery
+behavior. The [ExecPlan](prompts/completed/implementation_execplan.md) covers delivery
 through a forest test deployment. The [tracker](tracker.md) records evidence.
 The operator requested the contract, scaffold and independent reviews, then
 authorized execution through forest acceptance. Implementation is committed;
-live migration and scoped worker preflight passed. Remaining gates are tracked below.
+live migration, scoped worker preflight, browser acceptance and application rollback
+passed. Actual scheduled execution, fixture cleanup and post-cleanup browser
+acceptance also passed.
 
 Deliver two additive PostgreSQL tables, migrations, a repeatable nightly task,
 three Flask routes, shared bell integration, a 100-row listing, tests and updated
@@ -56,13 +58,13 @@ implementation-derived clarifications remain proposed until checkpoint review.
 ## Success criteria and generated evidence
 
 - [x] Contract checkpoint has two independent reviews, disposition and an ancestor revision.
-- [ ] Nightly task is wired and retry-safe, with reconciliation and persistent read state.
-- [ ] Ordinary users see only their notices; empty, stale, revoked and hostile cases behave as contracted.
-- [ ] All header families, three sorts, 100-row pagination and bulk updates pass browser acceptance.
-- [ ] Focused, broad, frontend, graph, migration and documentation gates pass or retain explicit blockers.
+- [x] Nightly task is wired and retry-safe, with reconciliation and persistent read state.
+- [x] Ordinary users see only their notices; empty, stale, revoked and hostile cases behave as contracted.
+- [x] All header families, three sorts, 100-row pagination and bulk updates pass browser acceptance.
+- [x] Focused, broad, frontend, graph, migration and documentation gates pass or retain explicit blockers.
 - [x] Independent correctness, security and QA reviews have no open medium/high findings.
-- [ ] Forest runtime identity/mount parity, scheduler execution and full browser workflow are evidenced.
-- [ ] Rollback is verified and user/operator/developer docs are updated before closure.
+- [x] Forest runtime identity/mount parity, scheduler execution and full browser workflow are evidenced.
+- [x] Rollback is verified and user/operator/developer docs are updated before closure.
 
 Generated evidence applies to TTL observations transformed into database inbox
 rows and browser output. Retain fixture intent, exact TTL bytes and protections,
@@ -70,7 +72,8 @@ unmocked worker reads, reloaded database rows, actual route responses and render
 browser results under a named candidate revision. Model-run output generation is
 not changed and is N/A. Do not add private inbox records to project archives:
 these are account records, observable through the authorized inbox and operator
-job telemetry, not new project artifacts. Highest current claim: design scaffold.
+job telemetry, not new project artifacts. Highest supported claim: implemented and verified on forest, including actual
+scheduled execution, application rollback and final fixture cleanup.
 
 ## Risks
 
@@ -85,5 +88,5 @@ Forest has separate identity/configuration from forest1; verify the actual targe
 
 Decision owner: requesting operator. Implementer: executing agent. Reviewers:
 independent correctness/UX and security agents, followed by implementation QA.
-First complete the review disposition and contract ancestor checkpoint, then
-execute the milestones in order when implementation is requested.
+Delivery is complete. Retained evidence and final review dispositions are linked
+from the tracker; no additional deployment is authorized by closure.

@@ -1,0 +1,27 @@
+{
+  "admission": "Actual scheduler enqueue after approved activation; empty args/kwargs, not manual fixture invocation.",
+  "created_at": "2026-11-05T23:01:53.639197+00:00",
+  "job": {
+    "job_id": "b4cd4984-a290-4596-8587-91cdc374963c",
+    "runid": null,
+    "status": "finished",
+    "result": {
+      "examined": 572,
+      "created": 0,
+      "updated": 1,
+      "resolved": 0,
+      "unavailable": 470,
+      "skipped": 101,
+      "status": "completed",
+      "elapsed_seconds": 2.098
+    },
+    "started_at": "2026-11-05 23:01:53.684409",
+    "ended_at": "2026-11-05 23:01:55.816796",
+    "description": "wepppy.rq.notifications_rq.populate_notifications()",
+    "elapsed_s": 2.132387,
+    "exc_info": null,
+    "auth_actor": null,
+    "culvert_batch_uuid": null,
+    "children": {}
+  }
+}

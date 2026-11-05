@@ -1,0 +1,13 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "hostname": "020621d1f64f",
+  "live_batch_workers": 4,
+  "source_hashes": {
+    "wepppy/rq/notifications_rq.py": "fc30ad5f73180ba6a9b96b5df805f2a840c11b28a009a4b97d5945aa66c673f0",
+    "wepppy/weppcloud/notifications/producer.py": "7b5ac4526da5747105416e97e041c5689e2f9af9071ddd14348cf48a1285f02d"
+  }
+}

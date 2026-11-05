@@ -1,0 +1,13 @@
+{
+  "post_cleanup_browser": {
+    "passed": 1,
+    "log": "/var/tmp/notification-rollout-20261105/post-cleanup-browser.log",
+    "sha256": "0cb737f611d103e5d78c2fda7cfd07dcdde92a7746c56662771e8fb47dfec1b5"
+  },
+  "final_canonical_deployment": {
+    "exit_code": 0,
+    "log": "/var/tmp/notification-rollout-20261105/deploy-cleanup-release.log",
+    "sha256": "56cfab21ae4b03712218ce16a9186966c2312c31c6cddda280d456c5fd0f8df9"
+  },
+  "targeted_smoke_eslint": "passed"
+}

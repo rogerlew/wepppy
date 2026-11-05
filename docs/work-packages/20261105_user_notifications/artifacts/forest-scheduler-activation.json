@@ -1,0 +1,16 @@
+{
+  "host": "forest",
+  "scheduler_started_at": "2026-11-05T22:46:39.683556305Z",
+  "expected_first_enqueue_after": "2026-11-05T23:01:53+00:00",
+  "notifications_enabled": true,
+  "initial_delay_seconds": 900,
+  "interval_seconds": 86400,
+  "jitter_seconds": 0,
+  "ttl_gc_enabled": false,
+  "command": "wctl docker compose up -d --no-deps --force-recreate scheduler",
+  "authorization": "Operator explicitly approved scheduler-only recreation; repair separately approved.",
+  "scheduler_config_loaded_at": "2026-11-05T22:46:53.622413+00:00",
+  "configured_max_poll_seconds": 30,
+  "observed_notification_enqueue_log": "2026-11-05T23:01:53.638678917Z 2026-11-05 23:01:53,638 INFO Scheduling task notifications",
+  "expected_next_daily_enqueue_utc": "2026-11-06T23:01:53+00:00"
+}

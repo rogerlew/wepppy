@@ -1,0 +1,9 @@
+{
+  "registered_projects": 572,
+  "counts": {
+    "project_directory_missing": 469,
+    "known_status": 102,
+    "ttl_file_missing": 1
+  },
+  "scope": "Read-only aggregate audit; no project identities retained and no missing TTL initialized."
+}
