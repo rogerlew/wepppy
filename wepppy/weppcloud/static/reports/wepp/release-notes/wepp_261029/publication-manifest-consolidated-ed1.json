@@ -1,0 +1,31 @@
+{
+  "schema": "wepp-release-report-publication-v1",
+  "title": "WEPP 261029 consolidated scientific and engineering release report",
+  "document_edition": 1,
+  "artifact_revision": 7,
+  "publication_date": "2026-11-05",
+  "pdf": "wepp_261029_release-notes-consolidated-ed1.pdf",
+  "pdf_sha256": "429ec4862e6057235af7a63b98d70f02dbc2977ed5d44c7abfaf69f839d31ef2",
+  "pages": 21,
+  "figures": 8,
+  "release_tag": "261029",
+  "source_commit": "e0abe0581f77c6f66917e90daf8f8f429e9315c8",
+  "matched_pair_sha256": {
+    "wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "approval": {
+    "owner": "Roger Lew",
+    "date": "2026-11-05",
+    "decision": "Approved presented PDF and explicitly authorized committing, vendoring and pushing both repositories.",
+    "approved_pdf_preserved_without_rebuild": true
+  },
+  "review_scope": "Owner-approved consolidation with author verification; no new independent scientific or implementation review claimed. Historical approvals remain specific to earlier editions.",
+  "reading_authority": "Single consolidated stakeholder account for revisions 1\u20137; prior issued reports remain immutable historical evidence.",
+  "scope_limits": [
+    "No model reruns for this editorial consolidation.",
+    "Historical revision-2 Cedar results are not a fresh revision-7 benchmark.",
+    "No model binary change, default switch or production deployment."
+  ],
+  "document_status_note": "The approved PDF retains its preparation-time owner-review wording. This later manifest records approval without changing approved bytes."
+}
