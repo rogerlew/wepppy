@@ -1,3 +1,5 @@
+Completed locally: [Optional module visibility](docs/work-packages/20261105_optional_module_visibility/package.md) — Observed empty-state, bootstrap and remount fixes; peer audit found no second activation defect. 537 scoped Python and 90 scoped JavaScript tests; independent review passed. No full suite or deployment.
+
 Completed locally: [Automatic deletion help](docs/work-packages/20261104_automatic_deletion_help/package.md) — operator wording, accurate saved status and contextual/searchable help; scoped tests and independent reviews pass. No deployment.
 
 Active repair: [RedisPrep atomic ordered snapshots](docs/work-packages/20261031_redisprep_ordered_snapshots/package.md) — implemented and independently reviewed; local NFS/consumer checks pass. Broad continuation: 8,619 passed / 295 skipped; production parity remains a rollout hold. No deployment.

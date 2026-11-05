@@ -5231,3 +5231,44 @@ def test_automatic_deletion_header_status_and_contextual_help(jinja_env, templat
     assert 'How to keep your project' in rendered
     assert 'aria-describedby="automatic-deletion-help"' in rendered
     assert 'data-project-ttl-status' in rendered
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("preview", [False, True])
+@pytest.mark.parametrize("results", ["absent", None, {}, {"Streamflow (mm)": {"NSE": 0.8}}])
+@pytest.mark.parametrize("explicit_context", [False, True])
+def test_runs0_observed_shell_requires_own_state(
+    jinja_env, enabled, preview, results, explicit_context,
+):
+    from jinja2 import ChoiceLoader, DictLoader
+    from wepppy.weppcloud.routes.run_0.run_0_bp import _observed_visible
+
+    # Keep the actual page decisions, nav, Observed control and shared macros;
+    # replace unrelated controls and the outer site chrome only.
+    source = (RUN_0_TEMPLATE_ROOT / "runs0_pure.htm").read_text()
+    unrelated = {
+        name: "" for name in re.findall(r"{% include ['\"]([^'\"]+)", source)
+        if name != "controls/observed_pure.htm"
+    }
+    unrelated["base_pure.htm"] = "{% block body_container %}{% endblock %}"
+    env = jinja_env.overlay(loader=ChoiceLoader([DictLoader(unrelated), jinja_env.loader]))
+    mods = ["observed"] if enabled else ["disturbed", "roads"]
+    observed = None if results == "absent" else SimpleNamespace(results=results)
+    visible = enabled or preview or (observed is not None and results is not None)
+    context = {
+        "ron": SimpleNamespace(mods=mods, enable_landuse_change=False),
+        "observed": observed,
+        "playwright_load_all": preview,
+        "toc_task_emojis": {},
+        "roads": None,
+        "debris_flow": None,
+    }
+    if explicit_context:
+        context["show_observed"] = _observed_visible(mods, observed, playwright_load_all=preview)
+    html = env.get_template("runs0_pure.htm").render(**context)
+    assert ('id="observed_form"' in html) is visible
+    assert ('Observed Data Model Fit' in html) is visible
+    for attribute in ["data-mod-section", "data-mod-nav"]:
+        tag = re.search(r'<[^>]+ ' + attribute + r'="observed"[^>]*>', html)
+        assert tag is not None
+        assert ('hidden' in tag.group(0)) is (not visible)

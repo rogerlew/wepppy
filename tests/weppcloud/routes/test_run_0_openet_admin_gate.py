@@ -1487,3 +1487,49 @@ def test_single_input_policy_overrides_load_all_bootstrap(run0_template_app, ena
     script += "\nif (Object.values(flags).some(x => x !== " + json.dumps(not enabled) + ")) process.exit(1);"
     subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)
     assert js.index("applySingleInputPolicy(modFlags, context);") > js.index("modFlags.baer = true;")
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("preview", [False, True])
+@pytest.mark.parametrize("state", ["absent", "initialized", "empty_results", "results"])
+def test_observed_visibility_uses_enabled_state_or_retained_results(
+    run0_module, enabled, preview, state,
+):
+    observed = {
+        "absent": None,
+        "initialized": SimpleNamespace(results=None),
+        "empty_results": SimpleNamespace(results={}),
+        "results": SimpleNamespace(results={"Streamflow (mm)": {"NSE": 0.8}}),
+    }[state]
+    assert run0_module._observed_visible(
+        ["observed"] if enabled else ["disturbed", "roads"], observed,
+        playwright_load_all=preview,
+    ) is (enabled or preview or state in {"empty_results", "results"})
+
+
+@pytest.mark.parametrize("state", [None, SimpleNamespace(results=None), SimpleNamespace(results={})])
+def test_observed_bootstrap_results_require_present_state(run0_template_app, state):
+    context = _bootstrap_context(set())
+    context["ron"].mods = []
+    context["observed"] = state
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    expected = "true" if state is not None and state.results is not None else "false"
+    assert re.search(r'"observed"\s*:\s*\{\s*"hasResults"\s*:\s*' + expected, js)
+    assert _extract_mod_flag(js, "observed") == expected
+
+
+@pytest.mark.parametrize("visible", [False, True])
+def test_observed_bootstrap_only_constructs_visible_controller(run0_template_app, visible):
+    context = _bootstrap_context(set())
+    context["show_observed"] = visible
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    start = js.index("function createBootstrapEntries(")
+    # Execute the actual controller selection with unrelated controller symbols absent.
+    end = js.index("\n    }", start) + len("\n    }")
+    script = "const Observed = {getInstance: () => ({})}; function applySingleInputPolicy() {}\n"
+    script += "const document = {getElementById: () => null};\n" + js[start:end]
+    script += "\nconst entries = createBootstrapEntries({mods: {flags: {observed: " + str(visible).lower() + "}}, flags: {}, ui: {}});"
+    script += "\nif (entries.filter(x => x.name === 'observed').length !== " + str(int(visible)) + ") process.exit(1);"
+    subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)

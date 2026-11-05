@@ -296,6 +296,16 @@ def _feature_role_enabled(mod_name: str, *, playwright_load_all: bool) -> bool:
     return user_meets_min_role(current_user, spec.min_role)
 
 
+def _observed_visible(mods_list, observed, *, playwright_load_all: bool) -> bool:
+    # Ron initializes Observed for every project; only enabled state or retained
+    # results justify rendering its section (including legacy unselected results).
+    return (
+        'observed' in mods_list
+        or playwright_load_all
+        or (observed is not None and observed.results is not None)
+    )
+
+
 def _omni_contrasts_visible(
     mods_list,
     omni,
@@ -2233,7 +2243,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         is_omni_child=is_omni_child,
         playwright_load_all=playwright_load_all,
     )
-    show_observed = (observed is not None) or playwright_load_all
+    show_observed = _observed_visible(
+        mods_list, observed, playwright_load_all=playwright_load_all,
+    )
     show_ag_fields = (
         _feature_role_enabled("ag_fields", playwright_load_all=playwright_load_all)
         and ('ag_fields' in mods_list or playwright_load_all)

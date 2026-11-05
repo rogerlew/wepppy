@@ -11,6 +11,7 @@ describe("Observed controller", () => {
     let baseInstance;
     let statusStreamMock;
     let observed;
+    let realControlBase;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -19,9 +20,14 @@ describe("Observed controller", () => {
             <div class="controller-section" id="observed_section">
                 <form id="observed_form">
                     <div id="info"></div>
-                    <div id="status"></div>
-                    <div id="stacktrace" style="display:none;"></div>
-                    <div id="rq_job"></div>
+                    <section id="observed_status_panel" data-status-panel>
+                        <div id="status" data-status-log></div>
+                        <div id="rq_job"></div>
+                        <span id="braille"></span>
+                    </section>
+                    <details id="observed_stacktrace_panel" data-stacktrace-panel>
+                        <pre id="stacktrace" data-stacktrace-body style="display:none;"></pre>
+                    </details>
                     <textarea id="observed_text" name="observed_text">Date,Streamflow (mm)
 01/01/2020,12
 01/02/2020,15
@@ -49,6 +55,7 @@ describe("Observed controller", () => {
             triggerEvent: jest.fn(),
             hideStacktrace: jest.fn()
         }));
+        realControlBase = global.controlBase;
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         window.url_for_run = jest.fn((path) => path);
@@ -63,6 +70,8 @@ describe("Observed controller", () => {
         delete global.WCHttp;
         delete global.controlBase;
         delete window.url_for_run;
+        delete window.StatusStream;
+        delete window.runid;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -183,4 +192,95 @@ describe("Observed controller", () => {
         expect(hideSpy).toHaveBeenCalled();
         expect(showSpy).toHaveBeenCalled();
     });
+
+    test("enabled empty state remains usable after WEPP completion", async () => {
+        observed.bootstrap({ mods: { flags: { observed: true } }, data: { climate: {}, observed: {} } });
+        expect(document.getElementById("observed_section").hidden).toBe(false);
+        httpMock.getJson.mockResolvedValue(false);
+        await observed.onWeppRunCompleted();
+        await flushPromises();
+        expect(document.getElementById("observed_section").hidden).toBe(false);
+    });
+
+    test("absent form is a no-op, then first enable and replacement bind once", async () => {
+        const markup = document.body.innerHTML;
+        document.body.innerHTML = "";
+        observed.bootstrap({ mods: { flags: { observed: false } } });
+        await observed.onWeppRunCompleted();
+        expect(httpMock.getJson).not.toHaveBeenCalled();
+        expect(observed.form).toBeNull();
+
+        for (const value of ["first CSV", "replacement CSV"]) {
+            document.body.innerHTML = markup;
+            const form = document.getElementById("observed_form");
+            document.getElementById("observed_text").value = value;
+            observed.bootstrap({ mods: { flags: { observed: true } } });
+            observed.bootstrap({ mods: { flags: { observed: true } } });
+            expect(observed.form).toBe(form);
+            expect(document.getElementById("observed_section").hidden).toBe(false);
+            httpMock.postJson.mockClear();
+            form.querySelector("button").click();
+            await flushPromises();
+            expect(httpMock.postJson).toHaveBeenCalledTimes(1);
+            expect(httpMock.postJson).toHaveBeenCalledWith(
+                "tasks/run_model_fit/", { data: value }, { form }
+            );
+            expect(form.querySelector("#info").textContent).toContain("View Model Fit Results");
+        }
+    });
+
+    test("retained results stay visible without an enabled mod", async () => {
+        observed.bootstrap({ mods: { flags: { observed: false } }, data: { observed: { hasResults: true } } });
+        httpMock.getJson.mockResolvedValue(false);
+        await observed.onWeppRunCompleted();
+        await flushPromises();
+        expect(document.getElementById("observed_section").hidden).toBe(false);
+        expect(document.getElementById("info").textContent).toContain("View Model Fit Results");
+    });
+
+
+    test("WEPP notification before first enable does not poison the singleton", async () => {
+        const markup = document.body.innerHTML;
+        observed.dispose();
+        document.body.innerHTML = "";
+        jest.resetModules();
+        await import("../observed.js");
+        observed = window.Observed.getInstance();
+        await observed.onWeppRunCompleted();
+        expect(httpMock.getJson).not.toHaveBeenCalled();
+        document.body.innerHTML = markup;
+        observed.bootstrap({ mods: { flags: { observed: true } } });
+        document.querySelector("[data-action='observed-run']").click();
+        await flushPromises();
+        expect(httpMock.postJson).toHaveBeenCalledTimes(1);
+        expect(document.getElementById("status").textContent).toBe(STATUS_DONE);
+    });
+
+
+    test("real status handles detach on absence and rebind to replacement panels once", async () => {
+        observed.dispose();
+        jest.resetModules();
+        await import("../status_stream.js");
+        global.controlBase = realControlBase;
+        window.runid = "observed-test";
+        await import("../observed.js");
+        observed = window.Observed.getInstance();
+        const markup = document.body.innerHTML;
+        const oldHandle = observed._statusStreamHandle;
+        const oldStream = observed.statusStream;
+        expect(oldHandle.element).toBe(document.getElementById("observed_status_panel"));
+        document.body.innerHTML = "";
+        observed.bootstrap({ mods: { flags: { observed: false } } });
+        expect(observed._statusStreamHandle).toBeNull();
+        expect(observed.statusStream).toBeNull();
+        document.body.innerHTML = markup;
+        observed.bootstrap({ mods: { flags: { observed: true } } });
+        const newHandle = observed._statusStreamHandle;
+        expect(newHandle.element).toBe(document.getElementById("observed_status_panel"));
+        expect(observed.statusStream).not.toBe(oldStream);
+        observed.bootstrap({ mods: { flags: { observed: true } } });
+        expect(observed._statusStreamHandle).toBe(newHandle);
+        observed.dispose();
+    });
+
 });

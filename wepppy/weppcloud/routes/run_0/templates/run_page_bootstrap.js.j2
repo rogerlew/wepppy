@@ -54,7 +54,7 @@
     {% set show_path_ce = show_path_ce if show_path_ce is defined else ('path_ce' in mods_list or playwright_load_all) %}
     {% set show_rap_ts = show_rap_ts if show_rap_ts is defined else ('rap_ts' in mods_list or playwright_load_all) %}
     {% set show_treatments = show_treatments if show_treatments is defined else ('treatments' in mods_list or playwright_load_all) %}
-    {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
+    {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all or (observed is defined and observed is not none and observed.results is not none)) %}
     {% set show_ag_fields = show_ag_fields if show_ag_fields is defined else ('ag_fields' in mods_list or playwright_load_all) %}
     {% set show_debris_flow = show_debris_flow if show_debris_flow is defined else ((('debris_flow' in mods_list) and allow_debris_flow) or playwright_load_all) %}
     {% set ash_has_results = False %}
@@ -159,7 +159,7 @@
                 "precipScalingMode": climate_precip_mode
             },
             "observed": {
-                "hasResults": observed.results is not none
+                "hasResults": observed is defined and observed is not none and observed.results is not none
             },
             "rangelandCover": {
                 "hasCovers": rangeland_has_covers
@@ -304,7 +304,9 @@
         }
         add("soil", typeof Soil !== "undefined" ? Soil : null);
         add("climate", typeof Climate !== "undefined" ? Climate : null);
-        add("observed", typeof Observed !== "undefined" ? Observed : null);
+        if (modFlags.observed) {
+            add("observed", typeof Observed !== "undefined" ? Observed : null);
+        }
         if (modFlags.ag_fields) {
             add("agFields", typeof AgFields !== "undefined" ? AgFields : null);
         }

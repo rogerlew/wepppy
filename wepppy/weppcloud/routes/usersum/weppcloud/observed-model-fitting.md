@@ -6,7 +6,9 @@ The Observed Model Fit tool compares measured watershed responses against a comp
 
 - A completed WEPP Cloud run for the project.
 - Observed outlet data for at least one supported measure.
-- A climate configuration that exposes observed years (the control remains hidden until observed climate data are available).
+- A climate configuration that exposes observed years for comparison.
+
+Enable **Observed Data** in the **Mods** menu to open the control. Saved model-fit results remain available when the feature is not selected. An unused project does not show an empty Observed heading.
 
 ## Preparing Observed Data
 
@@ -33,7 +35,7 @@ The blank entry on 01/05 is skipped during fitting.
 
 ## Running the Fit
 
-1. Navigate to the  **Observed** Control for the active run.
+1. Enable **Observed Data** in **Mods**, then open **Observed Data Model Fit**.
 2. Paste the prepared CSV text into the **Observed Timeseries** field.
 3. Click **Run Model Fit**. The job is dispatched to the WEPP Cloud queue.
 4. When processing completes, follow the “View Model Fit Results” link.
@@ -48,6 +50,6 @@ The generated report includes:
 
 ## Troubleshooting
 
-- **Control hidden** – Ensure the climate configuration advertises observed years and that the WEPP run finished successfully.
+- **Control hidden** – Select **Observed Data** in **Mods**. An initialized state file alone does not enable the control.
 - **Parsing failure** – Confirm the header includes the `Date` column plus supported measure names and that the file is comma-separated.
 - **Empty report** – Only overlapping calendar days between the observed file and the simulated series are scored; unmatched dates are dropped.

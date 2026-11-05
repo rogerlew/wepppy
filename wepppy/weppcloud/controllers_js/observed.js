@@ -183,62 +183,62 @@ var Observed = (function () {
         }
 
         var formElement = null;
-        try {
-            formElement = dom.qs(SELECTORS.form);
-        } catch (err) {
-            console.warn("[Observed] Unable to locate form element:", err);
-        }
-
-        var containerElement = null;
-        if (formElement && typeof formElement.closest === "function") {
-            containerElement = formElement.closest(".controller-section");
-        }
-        if (!containerElement) {
-            containerElement = formElement || null;
-        }
-
-        var infoElement = formElement ? dom.qs(SELECTORS.info, formElement) : null;
-        var statusElement = formElement ? dom.qs(SELECTORS.status, formElement) : null;
-        var stacktraceElement = formElement ? dom.qs(SELECTORS.stacktrace, formElement) : null;
-        var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
-        var textAreaElement = formElement ? dom.qs(SELECTORS.textarea, formElement) : null;
-        var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
-        var statusPanelElement = dom.qs("#observed_status_panel");
-        var stacktracePanelElement = dom.qs("#observed_stacktrace_panel");
-        var spinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
-
+        var stacktraceElement = null;
         var controller = Object.assign(base, {
             dom: dom,
             forms: forms,
             http: http,
             events: emitter,
-            form: formElement,
-            container: containerElement,
-            info: createLegacyAdapter(infoElement),
-            status: createLegacyAdapter(statusElement),
-            stacktrace: createLegacyAdapter(stacktraceElement),
-            rq_job: createLegacyAdapter(rqJobElement),
-            hint: createLegacyAdapter(hintElement),
-            textarea: textAreaElement,
-            statusPanelEl: statusPanelElement,
-            stacktracePanelEl: stacktracePanelElement,
-            statusSpinnerEl: spinnerElement,
+            form: null,
+            container: null,
             statusStream: null,
             command_btn_id: "btn_run_observed",
             state: {
-                visible: false
+                visible: false,
+                keepVisible: false
             },
             _delegates: []
         });
 
-        controller.attach_status_stream(controller, {
-            element: statusPanelElement,
-            form: formElement,
-            channel: WS_CHANNEL,
-            runId: window.runid || window.runId || null,
-            stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null,
-            spinner: spinnerElement
-        });
+        function bindForm() {
+            var nextForm = dom.qs(SELECTORS.form);
+            if (nextForm === formElement) {
+                return;
+            }
+            controller.dispose();
+            formElement = nextForm;
+            controller.form = nextForm;
+            controller.container = nextForm
+                ? nextForm.closest(".controller-section") || nextForm
+                : null;
+            controller.info = createLegacyAdapter(nextForm ? dom.qs(SELECTORS.info, nextForm) : null);
+            controller.status = createLegacyAdapter(nextForm ? dom.qs(SELECTORS.status, nextForm) : null);
+            stacktraceElement = nextForm ? dom.qs(SELECTORS.stacktrace, nextForm) : null;
+            controller.stacktrace = createLegacyAdapter(stacktraceElement);
+            controller.rq_job = createLegacyAdapter(nextForm ? dom.qs(SELECTORS.rqJob, nextForm) : null);
+            controller.hint = createLegacyAdapter(nextForm ? dom.qs(SELECTORS.hint, nextForm) : null);
+            controller.textarea = nextForm ? dom.qs(SELECTORS.textarea, nextForm) : null;
+            controller.statusPanelEl = nextForm ? dom.qs("#observed_status_panel", nextForm) : null;
+            controller.stacktracePanelEl = nextForm ? dom.qs("#observed_stacktrace_panel", nextForm) : null;
+            controller.statusSpinnerEl = controller.statusPanelEl
+                ? controller.statusPanelEl.querySelector("#braille") : null;
+            if (!nextForm) {
+                return;
+            }
+            controller.attach_status_stream(controller, {
+                element: controller.statusPanelEl,
+                form: nextForm,
+                channel: WS_CHANNEL,
+                runId: window.runid || window.runId || null,
+                stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+                spinner: controller.statusSpinnerEl
+            });
+            controller._delegates.push(dom.delegate(nextForm, "click", ACTIONS.run, function (event) {
+                event.preventDefault();
+                controller.run_model_fit();
+            }));
+            controller.hideStacktrace();
+        }
 
         controller.hideStacktrace = function () {
             if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
@@ -272,7 +272,11 @@ var Observed = (function () {
         };
 
         controller.onWeppRunCompleted = function () {
-            http.getJson(url_for_run("query/climate_has_observed/")).then(function (hasObserved) {
+            if (!controller.form || !controller.form.isConnected) {
+                return;
+            }
+            var requestedForm = controller.form;
+            return http.getJson(url_for_run("query/climate_has_observed/")).then(function (hasObserved) {
                 var available = false;
                 if (typeof hasObserved === "boolean") {
                     available = hasObserved;
@@ -280,7 +284,10 @@ var Observed = (function () {
                     available = hasObserved.available;
                 }
 
-                if (available) {
+                if (controller.form !== requestedForm || !requestedForm.isConnected) {
+                    return;
+                }
+                if (available || controller.state.keepVisible) {
                     controller.showControl();
                 } else {
                     controller.hideControl();
@@ -411,28 +418,23 @@ var Observed = (function () {
                 }
             });
             controller._delegates = [];
-            controller.disconnect_status_stream(controller);
+            controller.detach_status_stream(controller);
         };
 
-        if (formElement) {
-            controller._delegates.push(dom.delegate(formElement, "click", ACTIONS.run, function (event) {
-                event.preventDefault();
-                controller.run_model_fit();
-            }));
-        }
-
-        controller.hideStacktrace();
+        bindForm();
 
         controller.bootstrap = function bootstrap(context) {
+            bindForm();
+            if (!controller.form) {
+                return controller;
+            }
             var ctx = context || {};
             var climateData = (ctx.data && ctx.data.climate) || {};
             var observedData = (ctx.data && ctx.data.observed) || {};
-            var shouldShow = Boolean(climateData.hasObserved || observedData.hasResults || observedData.resultsAvailable);
-            var forceVisible = Boolean(ctx.flags && ctx.flags.playwrightLoadAll);
-
-            if (forceVisible) {
-                shouldShow = true;
-            }
+            var modFlags = (ctx.mods && ctx.mods.flags) || {};
+            controller.state.keepVisible = Boolean(modFlags.observed || observedData.hasResults
+                || observedData.resultsAvailable || (ctx.flags && ctx.flags.playwrightLoadAll));
+            var shouldShow = controller.state.keepVisible || Boolean(climateData.hasObserved);
 
             if (typeof controller.hideControl === "function") {
                 controller.hideControl();
