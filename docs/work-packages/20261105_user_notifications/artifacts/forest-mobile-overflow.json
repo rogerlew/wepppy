@@ -1,0 +1,32 @@
+[
+  {
+    "tag": "DIV",
+    "classes": "wc-header__tools",
+    "right": 486.265625,
+    "width": 462.265625
+  },
+  {
+    "tag": "DIV",
+    "classes": "wc-theme-switcher",
+    "right": 486.265625,
+    "width": 390
+  },
+  {
+    "tag": "LABEL",
+    "classes": "wc-run-header__field",
+    "right": 486.265625,
+    "width": 390
+  },
+  {
+    "tag": "SPAN",
+    "classes": "",
+    "right": 486.265625,
+    "width": 390
+  },
+  {
+    "tag": "SELECT",
+    "classes": "wc-theme-switcher__select wc-run-header__input",
+    "right": 486.265625,
+    "width": 390
+  }
+]

@@ -128,7 +128,8 @@ async function login(page, credentialFile = 'docker/secrets/dev-agent.env') {
   }
   await Promise.all([page.waitForNavigation({timeout:30_000}),
     page.locator('input[type="submit"], button[type="submit"]').first().click()]);
-  await expect(page).not.toHaveURL(/\/login$/, {timeout:5000});
+  const messages=await page.locator('.pure-form-message-inline, [role="alert"]').allTextContents();
+  await expect(page, messages.join(' ')).not.toHaveURL(/\/login$/, {timeout:5000});
 }
 
 test('notification inbox persists explicit read state and page selection', async ({ page }) => {
@@ -183,6 +184,11 @@ test('notification inbox persists explicit read state and page selection', async
   await page.goto(base + '/weppcloud/notifications');
   await expect(page.locator('[data-notification-bell]')).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
+  if (overflow) {
+    const details=await page.evaluate(() => Array.from(document.querySelectorAll('*')).filter(el => el.getBoundingClientRect().right > window.innerWidth + 1).map(el => ({tag:el.tagName,classes:el.className,right:el.getBoundingClientRect().right,width:el.getBoundingClientRect().width})).slice(0,15));
+    fs.writeFileSync(path.join(evidence,'forest-mobile-overflow.json'),JSON.stringify(details,null,2));
+    await page.screenshot({path:path.join(evidence,'forest-mobile-overflow.png')});
+  }
   expect(overflow).toBe(false);
   await page.screenshot({path:path.join(evidence,'forest-notifications-mobile.png'),fullPage:false});
   await page.setViewportSize({width:1280,height:900});
@@ -201,6 +207,12 @@ test('notification inbox persists explicit read state and page selection', async
     pages.push({route,status:response.status()});
     expect(response.status()).toBe(200);
     await expect(page.locator('[data-notification-bell]')).toBeVisible();
+    await page.setViewportSize({width:390,height:844});
+    const headerBounds=await page.locator('header [data-notification-bell], header [data-theme-select]').evaluateAll(elements => elements.map(element => ({right:element.getBoundingClientRect().right,left:element.getBoundingClientRect().left})));
+    pages[pages.length-1].mobile_header_bounds=headerBounds;
+    fs.writeFileSync(path.join(evidence,'forest-header-bounds.json'),JSON.stringify(pages,null,2)+'\n');
+    expect(headerBounds.every(bounds => bounds.left>=0 && bounds.right<=390)).toBe(true);
+    await page.setViewportSize({width:1280,height:900});
   }
   const anonymous = await page.context().browser().newContext();
   const anonymousPage = await anonymous.newPage();
@@ -217,11 +229,14 @@ test('notification inbox persists explicit read state and page selection', async
   await expect(ordinaryPage.getByText('No notifications on this page.')).toBeVisible();
   await expect(ordinaryPage.locator('[data-notification-bell]')).toHaveAttribute('aria-label', 'Notifications, 0 unread');
   await expect(ordinaryPage.locator('[data-notification-count]')).toBeHidden();
-  const csrf = await ordinaryPage.locator('meta[name="csrf-token"]').getAttribute('content');
-  const foreign = await ordinaryPage.request.post(base + '/weppcloud/api/notifications/read-state', {
-    headers:{'X-CSRFToken':csrf}, data:{notification_ids:[fixture.notice_ids[0]],read:true}
-  });
-  expect(foreign.status()).toBe(404);
+  const foreignStatus = await ordinaryPage.evaluate(async (identifier) => {
+    const response=await fetch('/weppcloud/api/notifications/read-state', {
+      method:'POST', headers:{'Content-Type':'application/json', 'X-CSRFToken':document.querySelector('meta[name="csrf-token"]').content},
+      body:JSON.stringify({notification_ids:[identifier],read:true})
+    });
+    return response.status;
+  }, fixture.notice_ids[0]);
+  expect(foreignStatus).toBe(404);
   const unchanged = await page.request.get(base + '/weppcloud/api/notifications/unread-count');
   expect((await unchanged.json()).Content.unread_count).toBe(101);
   await ordinary.close();

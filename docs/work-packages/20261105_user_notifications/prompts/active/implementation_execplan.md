@@ -360,3 +360,16 @@ follow canonical targeted-web activation and the retained token/browser canaries
 Run the application rollback with admissions disabled, restore candidate, then
 enable scheduling and observe the real 900-second delayed scheduled execution.
 The restricted prepared patch/canary are under `/var/tmp/notification-rollout-20261105/`.
+
+Repair execution: operator approved on 2026-11-05. Contract checkpoint `262eee74d`
+and implementation `f9610c8a1` expose the existing internal CAPTCHA override for
+forest. Both host environment files are aligned. Notification rollback snapshots
+now retain the independent CAPTCHA repair. Canonical targeted-web activation is
+running with schedule disabled.
+
+Concurrent operator GC pause: on 2026-11-05, unrelated workspace edits set
+`ttl_gc.enabled: false`. Both rollback/candidate schedule snapshots preserve
+that pause. Never revert it or stage its unrelated provenance documentation.
+The initial deploy stopped before cutover because host Python lacked Jinja2;
+the controller builder passed using the repository virtualenv. Canonical
+deployment now runs with `PATH=/home/workdir/wepppy/.venv/bin:$PATH`.

@@ -35,7 +35,8 @@ normal session/CSRF middleware, canonical JSON envelopes and `url_for` prefixes.
 Bulk selection is atomic and limited to 100 IDs; read state is per recipient.
 Database outage is explicit, never converted to an empty inbox or zero badge.
 The asynchronous bell is shared across Pure, legacy, run, report and dashboard
-headers. `static/js/notifications.js` is standalone; no controller bundle rebuild
+headers. Below 540px, bell/theme groups wrap and constrain the theme selector
+to available width in both standard and run/report headers. `static/js/notifications.js` is standalone; no controller bundle rebuild
 is required for changes limited to this script.
 
 No history pruning or maintenance authoring interface is included. Future kinds

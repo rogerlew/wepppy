@@ -61,3 +61,14 @@ Canonical targeted-web recreates only web/rq-engine; canonical full mode would
 recreate 25 services. Operator explicitly approved scheduler-only recreation with
 `wctl docker compose up -d --no-deps --force-recreate scheduler` for activation
 and rollback. No full-stack or production rollout is included.
+
+## Forest browser follow-up
+
+QA requested mobile bounds for project/report header variants after an inbox
+overflow was fixed. Actual 390px checks confirmed the alternate group also
+overflowed. Scoped notification CSS now wraps both header groups and constrains
+theme controls; all five route bounds pass. QA independently confirmed closure.
+Primary browser acceptance passes including ordinary-account isolation, keyboard
+bell, logout/login persistence, failures, pagination and light/dark screenshots.
+CAPTCHA routing repair passes all three real verification helper canaries and
+actual password login. No medium/high review finding remains open.

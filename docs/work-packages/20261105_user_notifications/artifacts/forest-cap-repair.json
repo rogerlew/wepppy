@@ -1,0 +1,29 @@
+{
+  "web": {
+    "fresh_token": true,
+    "replay_rejected": true,
+    "invalid_rejected": true,
+    "missing_rejected": true,
+    "internal_transport": true
+  },
+  "project": {
+    "fresh_token": true,
+    "replay_rejected": true,
+    "invalid_rejected": true,
+    "missing_rejected": true,
+    "internal_transport": true
+  },
+  "fork": {
+    "fresh_token": true,
+    "replay_rejected": true,
+    "invalid_rejected": true,
+    "missing_rejected": true,
+    "internal_transport": true
+  },
+  "changed_containers_since_initial_preflight": [
+    "weppcloud",
+    "wepppy-rq-engine"
+  ],
+  "candidate_revision": "f9610c8a1",
+  "public_browser_cap_url": "https://forest.tail305ec9.ts.net/cap"
+}

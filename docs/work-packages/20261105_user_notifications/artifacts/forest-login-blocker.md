@@ -46,3 +46,10 @@ rollback and document a separate repair rollback. Approval remains pending.
 2026-11-05: operator explicitly instructed “execute the repair.” Proceed with
 the reviewed forest-only configuration and canonical targeted-web activation.
 Both CAPTCHA consumers are covered; no other deployment is changed.
+
+Execution commands use the repository virtualenv on host PATH because the host
+default Python lacks Jinja2, required by the canonical controller builder. The
+first deployment stopped before service recreation; the static builder preflight
+passed under `.venv/bin/python3`, and the canonical deployment was retried.
+The retained `cap-transport-canary.py` exercises actual fresh/replayed/invalid/
+missing tokens through all affected verification helpers without creating jobs.

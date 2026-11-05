@@ -1,0 +1,72 @@
+[
+  {
+    "route": "/weppcloud/runs/",
+    "status": 200,
+    "mobile_header_bounds": [
+      {
+        "right": 88.265625,
+        "left": 24
+      },
+      {
+        "right": 366,
+        "left": 24
+      }
+    ]
+  },
+  {
+    "route": "/weppcloud/profile",
+    "status": 200,
+    "mobile_header_bounds": [
+      {
+        "right": 88.265625,
+        "left": 24
+      },
+      {
+        "right": 366,
+        "left": 24
+      }
+    ]
+  },
+  {
+    "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m",
+    "status": 200,
+    "mobile_header_bounds": [
+      {
+        "right": 80.265625,
+        "left": 16
+      },
+      {
+        "right": 374,
+        "left": 16
+      }
+    ]
+  },
+  {
+    "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m/gl-dashboard",
+    "status": 200,
+    "mobile_header_bounds": [
+      {
+        "right": 60,
+        "left": 16
+      },
+      {
+        "right": 374,
+        "left": 16
+      }
+    ]
+  },
+  {
+    "route": "/weppcloud/runs/notifications-fixture-6f487fd65e/disturbed9002-10m/storm-event-analyzer",
+    "status": 200,
+    "mobile_header_bounds": [
+      {
+        "right": 80.265625,
+        "left": 16
+      },
+      {
+        "right": 374,
+        "left": 16
+      }
+    ]
+  }
+]

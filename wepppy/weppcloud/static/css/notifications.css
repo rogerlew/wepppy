@@ -38,3 +38,24 @@
 .wc-notifications-item > input { margin-top: .5rem; flex-shrink: 0; }
 .wc-notifications-item > div { min-width: 0; }
 .wc-notifications-item h2 { margin-top: 0; font-size: 1.1rem; }
+@media (max-width: 540px) {
+  .wc-header__tools,
+  .wc-run-header__right,
+  .wc-run-header__theme {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .wc-header__tools .wc-theme-switcher,
+  .wc-header__tools .wc-run-header__field,
+  .wc-run-header__theme .wc-theme-switcher,
+  .wc-run-header__theme .wc-run-header__field {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .wc-header__tools .wc-theme-switcher__select,
+  .wc-run-header__theme .wc-theme-switcher__select {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

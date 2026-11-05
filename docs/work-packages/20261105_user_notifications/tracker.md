@@ -1,6 +1,6 @@
 # User notifications tracker
 
-Status: implementation validated; forest activation awaiting CAPTCHA routing approval.
+Status: approved CAPTCHA repair and notification forest activation in progress.
 Last updated: 2026-11-05 21:38 UTC.
 
 ## Task board
@@ -103,3 +103,7 @@ The scheduler-only recreation approval remains valid. Fixture run registration
 2325 and ordinary test user 2831 are retained for acceptance; remove them and the
 gitignored `docker/secrets/notifications-acceptance.env` after completing acceptance.
 The fixture has a future expiry and must be cleaned before 2026-11-12.
+
+Operator approved the CAPTCHA routing repair. Canonical targeted-web activation
+is running for `f9610c8a1`; schedule remains disabled. Root/Docker host overrides
+are aligned and notification-only rollback snapshots retain the repair.
