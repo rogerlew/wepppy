@@ -1,5 +1,7 @@
 # ADR-0062: Local Staley rainfall and result composition
 
+Date: 2026-09-09
+
 ## Status
 
 Accepted for local implementation. The operator explicitly approved R02 in the

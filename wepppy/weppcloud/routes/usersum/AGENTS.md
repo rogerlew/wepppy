@@ -30,7 +30,9 @@
   - In-repo markdown links are resolved relative to the source markdown file (or repo root for `/...` paths).
   - If target is under a Usersum category root, link is rewritten to:
     - `/usersum/view/<category>/<filename>`
-  - Otherwise, in-repo markdown targets are rewritten to:
+  - Otherwise, eligible public ADRs in `docs/adrs/` use `/usersum/adrs/<filename>`
+    after manifest precedence, as specified in the canonical specification.
+  - Other in-repo markdown targets are rewritten to:
     - `/usersum/src/<repo-relative-path>`
 
 ## Authoring Rules For Usersum Markdown
@@ -52,6 +54,15 @@
 - Preferred rebuild flow after vendor-repo updates:
   - `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py build-index --write --require-vendor-files`
   - `build-index` auto-syncs vendors; use `--skip-vendor-sync` only when intentionally avoiding sync.
+
+## Development rollout
+
+On bind-mounted forest, template edits can load before Python route changes.
+When adding an endpoint used by shared templates, gracefully reload the actual
+Gunicorn master (not docker-init) and verify the Help index, new route and an
+existing document over the external site-prefix URL before handoff. A stale
+worker can raise `BuildError` on every page using the shared shell. See
+[process recycle guidance](../../../../docs/dev-notes/rq-2-12-migration.md).
 
 ## Validation
 - Route-level regression tests:

@@ -1,5 +1,7 @@
 # ADR-0065: Require native SBS raster processing
 
+Date: 2026-09-10
+
 ## Status and provenance
 
 Accepted by project operator on 2026-09-10 in this development conversation

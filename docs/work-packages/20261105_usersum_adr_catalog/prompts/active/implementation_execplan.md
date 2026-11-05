@@ -15,11 +15,17 @@ its context. Source files under `docs/adrs/` remain authoritative.
 - [x] (2026-11-05 UTC) Prepare specification and checkpoint proposal.
 - [x] (2026-11-05 UTC) Two independent reviews recorded; link-rule gaps amended.
 - [x] (2026-11-05 UTC) Both reviewers approve revised date ordering and contract.
-- [ ] Commit the checkpoint after operator authorization.
-- [ ] Implement and validate the complete browse-and-read workflow.
-- [ ] Complete independent correctness review and final handoff.
+- [x] (2026-11-05 UTC) Operator approved; checkpoint committed as `0b804f1ff`.
+- [x] (2026-11-05 UTC) Implemented workflow; 100 focused tests and all 138 ADR renders pass.
+- [x] (2026-11-05 UTC) Independent correctness/security reviews pass; Review Date finding closed.
+- [x] (2026-11-05 UTC) Record incomplete broad gates and live forest acceptance.
+- [x] (2026-11-05 UTC) Repair reported Help 500 with graceful web reload; all 138 live ADRs return 200.
 
 ## Surprises & Discoveries
+
+Forest bind-mounted templates update independently of Gunicorn route imports.
+A new shared-template endpoint link can break existing Help until workers reload;
+unit tests alone did not expose this live cutover issue.
 
 There are 138 matching ADR files. Dates appear as plain/bold metadata, status
 paragraphs, provenance sections or are absent. Numeric filenames are the stable
@@ -29,6 +35,11 @@ Feature Catalog, but generic source rendering can require manifest membership.
 
 ## Decision Log
 
+The full pytest command was attempted, then interrupted in the unrelated slow
+native 100-year simulation matrix after 405 passes and 27 skips. Use the broad
+suite excluding tests explicitly marked slow and report the full gate incomplete,
+as permitted by the nearest WEPPcloud instructions.
+
 Use the existing dynamic Help pattern, direct file discovery on each request and
 dedicated detail routes. This avoids stale generated lists and preserves generic
 source-route guards. Use explicit preamble Date descending, with unavailable dates last and numeric
@@ -37,8 +48,16 @@ request after review demonstrated that numeric order alone is not chronological.
 
 ## Outcomes & Retrospective
 
-Reviewed contract ready; both reviewers approve. The operator authorized the checkpoint commit and implementation on 2026-11-05. No runtime files changed, no runtime tests claimed, and no production
-deployment. Update this section with actual validation outcomes.
+Implemented dynamic discovery, chronological listing, full Markdown views and
+Help navigation. All 100 focused tests and 1,047 frontend tests pass; independent
+reviews are clear. Broad runs stopped after 405 and 3,886 passes without observed
+failures, but remain incomplete. Details: `artifacts/20261105_validation.md`.
+
+The operator reported a live forest Help 500: templates loaded before Python
+route registration. Gracefully reloading the verified Gunicorn master restored
+Help. External HTTPS readback confirmed the index, catalog, all 138 ADR documents
+and existing Getting Started page. Durable guidance now requires coordinated
+route/template rollout and external readback. No production deployment.
 
 ## Context and Orientation
 
@@ -116,3 +135,48 @@ Revision note (2026-11-05 UTC): initial bounded plan and contract proposal.
 
 Revision note (2026-11-05 UTC): independent review exposed numeric/date inversions;
 use explicit recorded dates to honor the original chronological request.
+
+## Navigation follow-up
+
+Operator-requested sidebar placement is verified on forest: Quick Start → ADRs
+→ Feature Maturity and Release Governance. Contract checkpoint `6bedea271`
+precedes the template edit; 100 existing focused tests pass. The apparent missing
+records are all present but lack explicit dates (47 of 138). The operator selected date backfill; see the completed metadata follow-up below.
+
+## Date backfill follow-up
+
+- [x] Operator authorized backfilling missing dates.
+- [x] Audited original decision/venue evidence for all 47 missing fields.
+- [x] Added only explicit Date fields; all prior ADR content is preserved.
+- [x] Parser and external HTTPS readback confirm 138/138 valid dates in exact
+  chronological order, no unavailable dates, and all 47 updated detail pages
+  returning HTTP 200 with their dates. No index rebuild or worker reload.
+
+Evidence and per-record provenance: `artifacts/20261105_date_backfill.md`.
+
+## Date enforcement hardening follow-up
+
+Operator request: prevent recurrence after 47 of 138 ADRs omitted explicit dates.
+Scope: enforce the existing explicit-date authoring convention in a local CLI
+and the existing Docs Quality job, using the unchanged catalog parser. Document
+it beside the template and in local ADR authoring instructions. No publication,
+ordering, access, runtime renderer, hook installation or dependency changes.
+
+- [x] Confirm template/generic Markdown lint did not enforce ADR metadata.
+- [x] Identify existing Docs Quality spec/generator and catalog parser for reuse.
+- [x] Add failing regression coverage, bounded checker and CI invocation.
+- [x] Update authoring instructions and template reminder.
+- [x] Validate good/bad real files, all 138 ADRs and generated workflow parity.
+- [x] 122 focused tests, documentation lint and independent correctness review pass.
+
+Current package and date-backfill artifacts supply failure evidence. Precedents:
+markdown-doc adoption's Docs Quality job, root AGENTS size gate, and the Usersum
+catalog parser. Add one metadata check because generic Markdown lint accepts
+missing/placeholder dates. This is a permanent authoring invariant, not a retry,
+compatibility shim or temporary mitigation; no sunset flag is needed. Gate health
+is 138 valid records; danger is any numbered ADR lacking a recognized valid date.
+Rollback removes the checker CI step without modifying ADRs or runtime access.
+
+Broad native suites were already attempted and stopped for this package; this
+bounded tooling follow-up uses focused checker and existing Usersum tests plus
+CLI and workflow-generation readback, with no full-suite pass claimed.

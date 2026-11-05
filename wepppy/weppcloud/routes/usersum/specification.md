@@ -68,7 +68,7 @@ dynamic link. In the sidebar, place the same link in **Start Here**, immediately
 after **Quick Start** and before **Feature Maturity and Release Governance**,
 using the standard navigation-link styling. This placement was explicitly
 requested by the operator; no per-ADR manifest registration is required.
-Sidebar placement amendment: approved direction, implementation pending. `/usersum/adrs/`
+Sidebar placement amendment: verified on forest after checkpoint `6bedea271`. `/usersum/adrs/`
 (trailing slash optional) lists every regular, non-symlink Markdown file directly
 inside repository `docs/adrs/` whose filename matches
 `ADR-[0-9]+-<nonempty-slug>.md`. README, templates, subdirectories and other files

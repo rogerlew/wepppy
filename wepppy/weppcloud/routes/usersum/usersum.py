@@ -14,6 +14,7 @@ from flask import Blueprint, Response, abort, current_app, jsonify, redirect, re
 from wepppy.weppcloud.feature_registry.runtime import load_config_registry, load_feature_registry
 from wepppy.weppcloud.feature_registry.schema import ROLE_AUDIENCES
 from wepppy.weppcloud.usersum_anchors import usersum_anchor_slug
+from wepppy.weppcloud.usersum_docs.adr_catalog import discover_adrs, read_adr, resolve_adr
 from wepppy.weppcloud.usersum_docs.pg_search import (
     PostgresUsersumSearchBackend,
     UsersumSearchUnavailableError,
@@ -383,6 +384,9 @@ def _route_for_repo_markdown(path: Path) -> str | None:
     doc = _catalog().docs_by_rel_path.get(rel_path)
     if doc is not None:
         return _doc_route_url(doc)
+    adr_path = resolve_adr(_REPO_ROOT, path.name)
+    if adr_path is not None and path == adr_path.resolve():
+        return url_for_run("usersum.view_adr", filename=path.name)
     return url_for_run("usersum.view_src_markdown", rel_path=rel_path)
 
 
@@ -598,6 +602,40 @@ def usersum_index():
         "usersum/index.htm",
         caller_max_role=caller_max_role,
         title="WEPPcloud Help",
+    )
+
+
+@usersum_bp.route("/usersum/adrs/", strict_slashes=False)
+def adr_catalog():
+    return _render_with_usersum_shell(
+        "usersum/adrs.htm",
+        caller_max_role=_caller_max_role(),
+        title="Architecture Decision Records (ADRs)",
+        records=discover_adrs(_REPO_ROOT),
+        breadcrumbs=[
+            {"title": "Help", "href": url_for_run("usersum.usersum_index")},
+            {"title": "ADRs", "href": None},
+        ],
+    )
+
+
+@usersum_bp.route("/usersum/adrs/<filename>")
+def view_adr(filename: str):
+    path = resolve_adr(_REPO_ROOT, filename)
+    if path is None:
+        abort(404)
+    record = read_adr(path)
+    return _render_markdown_document(
+        path,
+        title=record.title,
+        doc_path_label=f"docs/adrs/{filename}",
+        caller_max_role=_caller_max_role(),
+        active_doc=None,
+        breadcrumbs=[
+            {"title": "Help", "href": url_for_run("usersum.usersum_index")},
+            {"title": "ADRs", "href": url_for_run("usersum.adr_catalog")},
+            {"title": record.title, "href": None},
+        ],
     )
 
 

@@ -1,5 +1,7 @@
 # ADR-0128: Retention and KSFLAG consumer experiment
 
+Date: 2026-11-01
+
 ## Status and decision provenance
 
 Accepted for bounded experiment only; no production promotion.

@@ -1,5 +1,7 @@
 # ADR-0052: Staley M3 upstream terrain definition
 
+Date: 2026-09-08
+
 ## Status
 
 Accepted engineering terrain formula by user on 2026-09-08 America/Los_Angeles.

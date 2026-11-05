@@ -1,5 +1,7 @@
 # ADR-0064: Disturbed is standard for Config Builder projects
 
+Date: 2026-09-10
+
 ## Status
 
 Accepted by operator, 2026-09-10; implementation pending.

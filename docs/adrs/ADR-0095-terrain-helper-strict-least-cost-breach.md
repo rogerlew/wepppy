@@ -1,5 +1,7 @@
 # ADR-0095: Preserve strict least-cost breach through the terrain helper
 
+Date: 2026-10-16
+
 Status: accepted for implementation, 2026-10-16 UTC.
 
 ## Decision and rationale

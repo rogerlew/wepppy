@@ -1,0 +1,28 @@
+{% extends "usersum/layout.j2" %}
+{% block body_content %}
+<h1>Architecture Decision Records (ADRs)</h1>
+<p>Read the decisions behind WEPPcloud and the reasons for them. Records describe decisions at a point in time;
+  check each record's status to see whether it is proposed, accepted, or superseded.</p>
+<p>Newest recorded date first; undated records last. This list updates automatically when records are added or changed.</p>
+{% if records %}
+<div class="wc-table-wrapper" role="region" aria-label="Architecture Decision Records" tabindex="0">
+  <table class="wc-table wc-table--striped">
+    <caption>{{ records|length }} decision records</caption>
+    <thead>
+      <tr><th scope="col">Recorded date</th><th scope="col">ADR</th><th scope="col">Decision</th></tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+      <tr>
+        <td>{% if record.recorded_date %}<time datetime="{{ record.recorded_date.isoformat() }}">{{ record.recorded_date.isoformat() }}</time>{% else %}Date unavailable{% endif %}</td>
+        <td>{{ record.identifier }}</td>
+        <th scope="row"><a href="{{ url_for_run('usersum.view_adr', filename=record.filename) }}">{{ record.title }}</a></th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>No Architecture Decision Records are available.</p>
+{% endif %}
+{% endblock %}

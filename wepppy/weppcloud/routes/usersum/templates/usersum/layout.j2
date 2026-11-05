@@ -24,6 +24,12 @@
             {{ node.title }}
           </a>
         </li>
+        {% if node.doc_id == 'usersum.weppcloud.quick_start' %}
+        <li class="wc-usersum-nav-leaf">
+          <a class="wc-usersum-nav-link {% if request.endpoint == 'usersum.adr_catalog' %}is-active{% endif %}"
+             href="{{ url_for_run('usersum.adr_catalog') }}"{% if request.endpoint == 'usersum.adr_catalog' %} aria-current="page"{% endif %}>Architecture Decision Records (ADRs)</a>
+        </li>
+        {% endif %}
       {% endif %}
     {% endfor %}
   </ul>

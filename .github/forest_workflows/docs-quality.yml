@@ -5,6 +5,9 @@ on:
     - '**/*.md'
     - wctl/**
     - tools/check_agents_size.sh
+    - tools/check_adr_dates.py
+    - tests/tools/test_check_adr_dates.py
+    - wepppy/weppcloud/usersum_docs/adr_catalog.py
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -16,6 +19,9 @@ on:
     - '**/*.md'
     - wctl/**
     - tools/check_agents_size.sh
+    - tools/check_adr_dates.py
+    - tests/tools/test_check_adr_dates.py
+    - wepppy/weppcloud/usersum_docs/adr_catalog.py
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -34,6 +40,8 @@ jobs:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
     steps:
+    - name: Enforce ADR recorded dates
+      run: python3 tools/check_adr_dates.py
     - name: Verify markdown-doc tooling
       run: |
         set -euo pipefail

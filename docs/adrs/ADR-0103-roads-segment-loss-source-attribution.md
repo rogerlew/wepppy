@@ -1,5 +1,7 @@
 # ADR-0103: Attribute Roads segment loss to its native profile
 
+Date: 2026-10-22
+
 ## Status
 
 Accepted and implemented, 2026-10-22; independently reviewed contract checkpoint

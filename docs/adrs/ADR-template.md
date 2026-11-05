@@ -4,6 +4,10 @@ Status: Proposed | Accepted | Superseded
 Date: YYYY-MM-DD  
 Review Date: YYYY-MM-DD (optional)
 
+<!-- Required: replace Date above with the original decision date before the
+first section heading. Preserve it when adding later amendments. Before commit,
+run: python3 tools/check_adr_dates.py -->
+
 ## Context
 
 [What problem are we solving, and why now?]

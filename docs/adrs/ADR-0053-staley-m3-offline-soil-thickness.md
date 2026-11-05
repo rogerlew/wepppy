@@ -1,5 +1,7 @@
 # ADR-0053: Offline Staley M3 soil thickness evaluation
 
+Date: 2026-09-08
+
 ## Status
 
 Accepted for offline evaluation, with subsequent owner decision on 2026-09-09:

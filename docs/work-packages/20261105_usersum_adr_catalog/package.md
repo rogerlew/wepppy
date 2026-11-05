@@ -1,6 +1,7 @@
 # Automatic ADR catalog in WEPPcloud Help
 
-Status: contract checkpoint preparation; implementation not started.
+Status: implemented, independently reviewed and verified on forest. Broad
+suites attempted but incomplete; scoped and live workflow acceptance passed.
 
 ## Purpose and scope
 
@@ -9,16 +10,18 @@ all ADRs newest first. Add a dynamic catalog and document view under the existin
 Help shell, discovered from `docs/adrs/`, and expose links on the Help index and
 sidebar. Preserve current Markdown rendering, source links and non-ADR access.
 Ordering follows the original request: recorded dates descending, undated
-records last, with numeric ID and filename tie breaks. No source ADR content is changed.
+records last, with numeric ID and filename tie breaks. The original implementation
+preserved source content; the operator subsequently authorized explicit date
+metadata backfill, recorded in `artifacts/20261105_date_backfill.md`.
 
 ## Authority and execution
 
 Current authority is the **Automatic ADR catalog** section of
-`wepppy/weppcloud/routes/usersum/specification.md` (proposed, not implemented).
+`wepppy/weppcloud/routes/usersum/specification.md` (approved checkpoint).
 Execute `prompts/active/implementation_execplan.md`. The repository contract-first
 standard requires two independent reviews and a committed checkpoint before
-implementation. Commit authority for this new work package has not been granted;
-prior commit/push requests concerned completed documentation edits.
+implementation. The operator authorized the checkpoint commit and implementation on 2026-11-05.
+Checkpoint ancestor: `0b804f1ff`.
 
 ## Complexity and security
 
@@ -43,4 +46,21 @@ sources are explained; malformed content errors explicitly. Canonical and
 prefix-aware links work, anonymous readers can use the page, and source-manifest
 strict mode does not break the dedicated ADR workflow or relax other routes.
 Read rendered HTML to establish these outcomes; job/file existence is not
-acceptance evidence. Deployment is outside this request.
+acceptance evidence. Production deployment is outside this request.
+
+## Forest recovery
+
+During implementation, fresh shared templates referenced the new route before
+the development web workers loaded it, causing the operator-reported Help 500.
+A scoped graceful web-worker reload restored Help and activated the catalog.
+External readback covered the index, all 138 ADRs and an existing help document.
+See `artifacts/20261105_validation.md` for evidence and test limitations.
+
+## Date authoring enforcement
+
+After the 47-record backfill, the operator requested prevention. The authoring
+rule and local command are in `docs/adrs/README.md` **Required Date Check** and
+`docs/adrs/AGENTS.md`. The checker shares the catalog parser and is wired into the
+existing Docs Quality job; it rejects absent, placeholder and invalid dates.
+No runtime publication behavior changes. See `artifacts/20261105_date_enforcement.md`
+for failure-class assessment, validation and review.

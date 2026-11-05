@@ -1,5 +1,7 @@
 # ADR-0069: Honor saved MOFE ground-cover selections
 
+Date: 2026-09-18
+
 Status: Accepted; implementation and Forest conformance validated 2026-09-19.
 Production deployment is not included.
 

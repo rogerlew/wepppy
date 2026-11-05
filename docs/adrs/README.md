@@ -31,6 +31,35 @@ Use a stable, sortable naming convention:
 - `ADR-0001-<slug>.md`, `ADR-0002-<slug>.md`, etc.
 - Use `docs/adrs/ADR-template.md` as the starting template for new records.
 
+WEPPcloud Help discovers these files automatically at `/usersum/adrs/`, linked
+from the Help index and sidebar. No manifest entry or generated-index rebuild is
+needed. Readers can open each full record with its source links.
+
+The Help listing uses the explicit `Date: YYYY-MM-DD` field before the first
+section heading, newest first. Missing or invalid dates appear last; numeric ADR
+IDs and filenames break ties. Include a first-level title and a valid date in new
+records. See the [Usersum specification](../../wepppy/weppcloud/routes/usersum/specification.md#automatic-adr-catalog)
+for publication and date-format details. Automatic discovery does not enroll
+records in full-text Help search.
+
+## Required Date Check
+
+Every numbered ADR must include a real `Date: YYYY-MM-DD` before its first
+section heading. Use the original decision date in its recorded timezone;
+keep later amendment, review and deployment dates separate. Do not leave the
+template placeholder or rely on a date mentioned only in prose.
+
+Before committing an ADR, run from the repository root:
+
+```bash
+python3 tools/check_adr_dates.py
+```
+
+The Docs Quality CI job runs the same check and fails for missing or invalid
+dates. It uses the catalog's parser, preserving supported plain/bold Date labels.
+The template and README are excluded; every numbered ADR is checked. The check
+reports affected filenames and does not modify documents.
+
 ## Recommended Sections
 
 Each ADR should normally include:

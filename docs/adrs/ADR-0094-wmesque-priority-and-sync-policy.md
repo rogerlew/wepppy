@@ -1,5 +1,7 @@
 # ADR-0094: WMesque priority retrieval and scheduled master sync
 
+Date: 2026-10-14
+
 Status: accepted for implementation, 2026-10-14; rollout pending.
 
 ## Decision and Rationale

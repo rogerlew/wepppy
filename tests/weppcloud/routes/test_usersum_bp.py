@@ -766,3 +766,164 @@ def test_automatic_deletion_help_is_discoverable_by_user_task(usersum_client, mo
     finally:
         usersum_routes._catalog.cache_clear()
         runtime_catalog.load_runtime_catalog.cache_clear()
+
+
+@pytest.fixture()
+def adr_root(tmp_path, monkeypatch):
+    monkeypatch.setattr(usersum_routes, "_REPO_ROOT", tmp_path)
+    root = tmp_path / "docs" / "adrs"
+    root.mkdir(parents=True)
+    return root
+
+
+def _adr_links(body):
+    return re.findall(r'<a href="[^"]*/usersum/adrs/(ADR-[^"]+\.md)">', body)
+
+
+def test_adr_catalog_chronology_duplicates_and_freshness(usersum_client, adr_root):
+    records = {
+        "ADR-0029-old.md": "# Older\nDate: 2026-07-28\n",
+        "ADR-0028-new.md": "# Newer\n**Date**: 2026-08-31\n",
+        "ADR-0028-tie.md": "# Tie\nStatus: accepted. **Date:** 2026-08-31 UTC\n",
+        "ADR-9999-invalid.md": "# Invalid\nDate: 2026-02-30\nDate: 2026-12-31\n",
+        "ADR-0001-legacy.md": "Legacy text\nReview Date: 2026-12-31\n## Provenance\nDate: 2026-12-31\n",
+    }
+    for filename, source in records.items():
+        (adr_root / filename).write_text(source)
+    body = usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    assert _adr_links(body) == [
+        'ADR-0028-tie.md', 'ADR-0028-new.md', 'ADR-0029-old.md',
+        'ADR-9999-invalid.md', 'ADR-0001-legacy.md',
+    ]
+    assert body.count('Date unavailable') == 2
+    assert 'Newest recorded date first; undated records last' in body
+    added = adr_root / 'ADR-0002-added.md'
+    added.write_text('# Added\n- Date: 2026-11-05 Pacific / 2026-11-06 UTC\n')
+    assert _adr_links(usersum_client.get('/usersum/adrs').get_data(as_text=True))[0] == added.name
+    added.write_text('# Changed\nDate: 2026-01-01\n')
+    body = usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    assert 'Changed' in body and _adr_links(body)[3] == added.name
+    added.unlink()
+    assert added.name not in usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    assert usersum_client.get('/usersum/adrs/' + added.name).status_code == 404
+
+
+@pytest.mark.parametrize('roles,authenticated', [((), False), (('User',), True), (('PowerUser',), True), (('Root',), True)])
+def test_adr_public_rendering_strict_mode_and_prefix(
+    usersum_client, adr_root, set_usersum_current_user, roles, authenticated,
+):
+    set_usersum_current_user(roles=roles, is_authenticated=authenticated)
+    app = usersum_client.application
+    app.config.update(USERSUM_REQUIRE_MANIFEST_FOR_SRC='true', SITE_PREFIX='/weppcloud')
+    name = 'ADR-0001-example.md'
+    source = '# Example\nDate: 2026-11-05\n\n## Details\n\nFull **content**.\n\n[Next](ADR-0002-next.md?x=1#details)\n'
+    (adr_root / name).write_text(source)
+    (adr_root / 'ADR-0002-next.md').write_text('# Next\n\n## Details\n')
+    body = usersum_client.get('/usersum/adrs/?role=internal').get_data(as_text=True)
+    assert f'href="/weppcloud/usersum/adrs/{name}"' in body
+    response = usersum_client.get('/usersum/adrs/' + name + '?role=user')
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert '<strong>content</strong>' in body and 'id="details"' in body
+    assert 'href="/weppcloud/usersum/adrs/ADR-0002-next.md?x=1#details"' in body
+    assert 'href="/weppcloud/usersum/adrs/"' in body
+    assert f'https://github.com/rogerlew/wepppy/blob/master/docs/adrs/{name}' in body
+    assert f'href="/weppcloud/usersum/raw/docs/adrs/{name}"' in body
+    assert usersum_client.get('/usersum/raw/docs/adrs/' + name).get_data(as_text=True) == source
+    assert usersum_client.get('/usersum/src/docs/adrs/' + name).status_code == 404
+    assert 'href="/weppcloud/usersum/adrs/"' in usersum_client.get('/usersum/').get_data(as_text=True)
+
+
+def test_adr_empty_missing_and_hostile_paths(usersum_client, adr_root):
+    assert 'No Architecture Decision Records are available.' in usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    outside = adr_root.parent / 'ADR-9999-outside.md'
+    outside.write_text('# Private sentinel\n')
+    (adr_root / 'ADR-0001-symlink.md').symlink_to(outside)
+    (adr_root / 'ADR-0002-directory.md').mkdir()
+    (adr_root / 'README.md').write_text('# Ignore\n')
+    (adr_root / 'ADR-template.md').write_text('# Ignore\n')
+    nested = adr_root / 'nested'
+    nested.mkdir()
+    (nested / 'ADR-0003-nested.md').write_text('# Ignore\n')
+    body = usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    assert not _adr_links(body) and 'Private sentinel' not in body
+    for filename in ('ADR-0001-symlink.md', 'ADR-0002-directory.md', 'README.md', 'ADR-template.md',
+                     '../ADR-9999-outside.md', '%2e%2e%2fADR-9999-outside.md', 'nested/ADR-0003-nested.md'):
+        assert usersum_client.get('/usersum/adrs/' + filename).status_code == 404
+    adr_root.rename(adr_root.with_name('saved'))
+    assert usersum_client.get('/usersum/adrs/').status_code == 200
+    adr_root.symlink_to(adr_root.with_name('saved'), target_is_directory=True)
+    assert not _adr_links(usersum_client.get('/usersum/adrs/').get_data(as_text=True))
+    assert usersum_client.get('/usersum/adrs/ADR-0001-symlink.md').status_code == 404
+
+
+def test_adr_title_escape_and_errors(usersum_client, adr_root, monkeypatch):
+    path = adr_root / 'ADR-0001-title.md'
+    path.write_text('# <script>alert("x")</script> & title\n')
+    body = usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    assert '<script>alert("x")</script>' not in body
+    assert '&lt;script&gt;' in body and '&amp; title' in body
+    path.write_bytes(b'\xff')
+    for route in ('/usersum/adrs/', '/usersum/adrs/' + path.name):
+        with pytest.raises(UnicodeDecodeError):
+            usersum_client.get(route)
+    original = Path.read_text
+    def denied(self, *args, **kwargs):
+        if self == path:
+            raise PermissionError('fixture denial')
+        return original(self, *args, **kwargs)
+    monkeypatch.setattr(Path, 'read_text', denied)
+    with pytest.raises(PermissionError, match='fixture denial'):
+        usersum_client.get('/usersum/adrs/')
+
+
+def test_adr_catalog_renders_every_repository_record(usersum_client):
+    root = usersum_routes._REPO_ROOT / 'docs' / 'adrs'
+    files = sorted(p for p in root.iterdir() if re.fullmatch(r'ADR-[0-9]+-.+\.md', p.name) and p.is_file() and not p.is_symlink())
+    response = usersum_client.get('/usersum/adrs/')
+    assert response.status_code == 200
+    links = _adr_links(response.get_data(as_text=True))
+    assert sorted(links) == [p.name for p in files]
+    assert len(links) == len(set(links))
+    assert links.index('ADR-0028-gridmet-download-retry-concurrency.md') < links.index('ADR-0029-omni-contrast-wepp-executable-inheritance.md')
+    for path in files:
+        response = usersum_client.get('/usersum/adrs/' + path.name)
+        assert response.status_code == 200, path.name
+        with usersum_client.application.test_request_context():
+            expected = usersum_routes._rewrite_markdown_links(path, usersum_routes._add_heading_anchors(usersum_routes.markdown_to_html(path.read_text())))
+        assert expected in response.get_data(as_text=True), path.name
+
+
+@pytest.mark.parametrize('metadata,expected', [
+    ('Date: 2024-02-29', '2024-02-29'),
+    ('**Date**: 2026-08-07', '2026-08-07'),
+    ('**Date:** 2026-08-07', '2026-08-07'),
+    ('- Date: 2026-10-30', '2026-10-30'),
+    ('Status: accepted; implemented 2026-10-13. Date: 2026-10-13.', '2026-10-13'),
+    ('Date: 2026-10-31 Pacific / 2026-11-01 UTC.', '2026-10-31'),
+    ('Date: 2025-02-29\nDate: 2026-01-01', None),
+    ('Date: unknown\nDate: 2026-01-01', None),
+    ('Review Date: 2026-12-31', None),
+    ('Status: Accepted. Review Date: 2027-01-01', None),
+    ('Status: Accepted. **Review Date:** 2027-01-01', None),
+    ('Status: accepted 2026-10-13', None),
+    ('## Provenance\nDate: 2026-01-01', None),
+    ('Provenance\n----------\nDate: 2026-01-01', None),
+    ('```markdown\nDate: 2026-01-01\n```', None),
+])
+def test_adr_recorded_date_metadata(usersum_client, adr_root, metadata, expected):
+    (adr_root / 'ADR-0001-date.md').write_text('# Date example\n' + metadata + '\n')
+    body = usersum_client.get('/usersum/adrs/').get_data(as_text=True)
+    if expected:
+        assert f'<time datetime="{expected}">{expected}</time>' in body
+    else:
+        assert 'Date unavailable' in body
+
+
+def test_adr_link_rewrite_keeps_manifest_precedence(usersum_client, monkeypatch):
+    path = usersum_routes._REPO_ROOT / 'docs/adrs/ADR-0001-soil-k-ksat-freeze.md'
+    catalog = usersum_routes._catalog()
+    doc = next(iter(catalog.docs_by_id.values()))
+    monkeypatch.setitem(catalog.docs_by_rel_path, 'docs/adrs/' + path.name, doc)
+    with usersum_client.application.test_request_context():
+        assert usersum_routes._route_for_repo_markdown(path) == usersum_routes._doc_route_url(doc)

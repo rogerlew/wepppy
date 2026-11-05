@@ -1,5 +1,7 @@
 # ADR-0073: Resolve thinning soil classes by prefix
 
+Date: 2026-09-25
+
 Status: accepted 2026-09-25; implemented in `9a5eb0813`, locally validated.
 
 ## Context and decision

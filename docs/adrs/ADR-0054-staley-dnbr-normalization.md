@@ -1,5 +1,7 @@
 # ADR-0054: Staley dNBR backend normalization
 
+Date: 2026-09-09
+
 ## Status and provenance
 
 Accepted for backend implementation, 2026-09-09. Venue: user/Codex repository

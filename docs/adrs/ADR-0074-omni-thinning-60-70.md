@@ -1,5 +1,7 @@
 # ADR-0074: Add 60% and 70% Omni thinning canopy; retain 65%
 
+Date: 2026-09-25
+
 Status: accepted and locally validated 2026-09-25; implementation `2d0891398`.
 Deployment and live acceptance remain separate.
 

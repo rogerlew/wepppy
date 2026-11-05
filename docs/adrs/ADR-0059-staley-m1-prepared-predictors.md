@@ -1,5 +1,7 @@
 # ADR-0059: Local M1 prepared predictor composition
 
+Date: 2026-09-09
+
 Status: accepted, 2026-09-09.
 
 ## Context and decision

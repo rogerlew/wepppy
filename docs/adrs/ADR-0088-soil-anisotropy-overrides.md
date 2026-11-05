@@ -1,5 +1,7 @@
 # ADR-0088: Optional depth-specific soil anisotropy
 
+Date: 2026-10-12
+
 Status: accepted and implemented on forest; production rollout pending.
 
 Amendment DM-01, accepted and locally implemented/validated 2026-10-29 UTC: [project developer mode](../schemas/project-developer-mode-contract.md) removes override maxima only for projects with developer mode enabled. The original implementation evidence below does not cover this amendment.

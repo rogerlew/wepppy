@@ -1,5 +1,7 @@
 # ADR-0129: Conserve represented interception supply
 
+Date: 2026-11-01
+
 ## Status and provenance
 
 Accepted for canonical integration and bounded final-engine/application

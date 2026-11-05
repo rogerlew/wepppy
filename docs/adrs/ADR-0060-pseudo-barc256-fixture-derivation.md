@@ -1,5 +1,7 @@
 # ADR-0060: Pseudo-BARC256 fixture derivation
 
+Date: 2026-09-09
+
 Status: accepted for test artifacts, 2026-09-09.
 
 ## Context and decision

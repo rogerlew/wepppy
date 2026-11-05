@@ -1,5 +1,7 @@
 # ADR-0092: Midpoint repair for PRISM temperature inversions
 
+Date: 2026-10-13
+
 ## Status
 
 Accepted 2026-10-13; implemented and development-stack validated 2026-10-14 UTC (2026-10-13 Pacific). Production deployment is not claimed. The operator accepted the evaluated midpoint recommendation and requested an implementation work-package and ADR. The [PRISM temperature-ordering package](../work-packages/20261013_prism_temperature_ordering/package.md) owns execution; this ADR owns the numerical decision. Acceptance does not claim installed code or deployment. The stable filename retains its original proposal suffix.

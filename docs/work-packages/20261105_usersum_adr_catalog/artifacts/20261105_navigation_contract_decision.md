@@ -17,10 +17,24 @@ Start leaf. Existing role views retain this public link.
 
 Validate the actual live sidebar HTML for unique ADR link and exact sibling
 order on the Help index and ADR catalog. Use existing scoped route/shell tests;
-no new tests solely pinning this literal placement. No generated-index edit or
-worker reload is needed for the existing endpoint's template placement.
+no new tests solely pinning this literal placement. No generated-index edit or new route registration is needed. Reload web workers
+if their template caches retain the old placement.
 
 Independent read-only reviews: `/root/adr_contract_correctness` approved with
 no blocking findings; `/root/adr_contract_security` passed with no findings.
 Both confirmed exact `usersum.weppcloud.quick_start` anchoring and requested
 one-link/sibling-order readback. Both approvals precede implementation edits.
+
+## Implementation evidence
+
+Checkpoint ancestor: `6bedea271`. Moved the existing sidebar link into the
+standard navigation list after `usersum.weppcloud.quick_start`. Forest template
+caches retained the earlier placement; gracefully reloaded the verified
+Gunicorn master. External Help index and ADR catalog both return HTTP 200 with
+exactly one sidebar ADR link between Quick Start and Feature Maturity and Release
+Governance. Existing focused route/shell suite: 100 passed.
+
+The operator also reported apparently missing records. Direct source/list
+comparison confirms all 138 are present; 47 lack explicit Date metadata and sort
+last. ADR-0131 through ADR-0135 are among these. Asked the operator to choose
+verified Date normalization or numeric ordering; neither change is applied yet.

@@ -1,5 +1,7 @@
 # ADR-0131: Donor-limited freeze restoration
 
+Date: 2026-11-02
+
 Status: Accepted for bounded water-restoration integration and tested combined-engine compatibility on November 2, 2026. Final release and retention remain gated.
 
 Canonical native source integration: `d2e14d96af5942409c9a315dc8594fcc164a702a`. Bounded combined-source validation and native promotion pass; remaining release and retention gates stay open.

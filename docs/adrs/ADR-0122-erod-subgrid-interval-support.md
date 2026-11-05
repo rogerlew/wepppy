@@ -1,5 +1,7 @@
 # ADR-0122: Integrate EROD intervals without an output-grid point
 
+Date: 2026-10-31
+
 Status: Accepted for `wepp_261029` artifact revision 4 (2026-10-31); application delivery tracked separately.
 
 ## Accepted implementation (U12 combined source)

@@ -1,5 +1,7 @@
 # ADR-0097: MACA projection selection and CCSM4 member
 
+Date: 2026-10-16
+
 ## Status
 
 Accepted intent; implementation pending the reviewed checkpoint.

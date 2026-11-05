@@ -1,5 +1,7 @@
 # ADR-0061: Persistent GridMET queue waiting and transport recovery
 
+Date: 2026-09-09
+
 Status: accepted, 2026-09-09 PDT. Supersedes ADR-0050's admission deadline and terminal transient Redis failure decisions.
 
 ## Context

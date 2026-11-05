@@ -1,5 +1,7 @@
 # ADR-0102: Roads modeled-area response mixture with expansion
 
+Date: 2026-10-22
+
 ## Status
 
 Accepted at independently reviewed contract checkpoint `83f7410e8`, 2026-10-22.

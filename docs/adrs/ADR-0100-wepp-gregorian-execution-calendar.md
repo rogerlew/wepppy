@@ -1,5 +1,7 @@
 # ADR-0100: Gregorian WEPP execution calendar
 
+Date: 2026-10-21
+
 Status: Accepted for implementation, 2026-10-21.
 
 ## Decision provenance

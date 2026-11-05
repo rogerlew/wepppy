@@ -1,5 +1,7 @@
 # ADR-0134: Preserve specialized revegetation reference semantics
 
+Date: 2026-11-03
+
 Status: accepted; implemented and validated in local undeployed revision 7.
 
 ## Decision provenance

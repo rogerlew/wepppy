@@ -1,5 +1,7 @@
 # ADR-0099: Physical hillslope water and routed PASS export
 
+Date: 2026-10-20
+
 ## Status
 
 Accepted on 2026-10-20 after operator selection and two independent contract

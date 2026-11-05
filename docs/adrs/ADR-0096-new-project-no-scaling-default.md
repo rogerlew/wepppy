@@ -1,5 +1,7 @@
 # ADR-0096: Explicit NoScaling default for new projects
 
+Date: 2026-10-16
+
 ## Status
 
 Accepted by the operator; implemented and locally validated after checkpoint

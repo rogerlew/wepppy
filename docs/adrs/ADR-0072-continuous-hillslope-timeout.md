@@ -1,5 +1,7 @@
 # ADR-0072: Double the single-OFE continuous hillslope timeout
 
+Date: 2026-09-23
+
 ## Status
 
 Accepted, 2026-09-23.

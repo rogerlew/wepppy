@@ -1,5 +1,7 @@
 # ADR-0066: Staley scalar estimates on valid support
 
+Date: 2026-09-11
+
 ## Status and provenance
 
 Accepted direction, 2026-09-11; numerical implementation pending.

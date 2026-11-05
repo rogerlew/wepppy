@@ -1,5 +1,7 @@
 # ADR-0121: Bound failed DEPEND root searches to the physical segment
 
+Date: 2026-10-31
+
 Status: Accepted for `wepp_261029` artifact revision 4 (2026-10-31); application delivery tracked separately.
 
 ## Context

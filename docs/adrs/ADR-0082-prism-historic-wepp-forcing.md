@@ -1,5 +1,7 @@
 # ADR-0082: Historic PRISM forcing and spatial methods
 
+Date: 2026-10-08
+
 Status: Accepted and implemented, 2026-10-08; both multiple methods validated through WEPP on forest.
 
 ## Context

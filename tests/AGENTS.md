@@ -12,6 +12,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Area | Location | Focus |
 |------|----------|-------|
 | Smoke/import checks | `tests/test_0_imports.py`, `tests/test_imports.py` | Early detection of missing optional dependencies or circular imports |
+| ADR authoring gate | `tests/tools/test_check_adr_dates.py` | Isolated CLI, explicit date semantics, malformed/absent source, template enforcement and real ADR inventory |
 | Utility modules | `tests/test_all_your_base*.py` | Core helpers used across controllers, raster IO, geometry utilities |
 | NoDb controllers | `tests/nodb/` | Singleton behavior, locking semantics, serialization |
 | RedisPrep snapshots | `tests/nodb/test_redis_prep_snapshots.py` | Disposable real Redis, deterministic process/file failures, archive and receipt consumer readback; optional marked `RQ212_TEST_REDIS_SOCKET` |

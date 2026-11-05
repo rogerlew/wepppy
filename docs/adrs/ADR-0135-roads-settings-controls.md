@@ -1,5 +1,7 @@
 # ADR-0135: Roads-owned parameterization and dedicated view
 
+Date: 2026-11-03
+
 Status: **accepted 2026-11-03; implemented; local workflow validated**. Operator approval applies
 to the replacement specification and dedicated layout at `9532a2968`. This replaces
 the former five-fallback editor proposal; its text remains historical evidence.

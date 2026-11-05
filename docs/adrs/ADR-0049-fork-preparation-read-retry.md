@@ -1,5 +1,7 @@
 # ADR-0049: Bound transient reads during WEPP preparation
 
+Date: 2026-09-07
+
 **Status**: Accepted; implemented locally, production rollout validation pending
 **Decision venue**: User/Codex incident-remediation session, 2026-09-07 UTC
 **Participants**: Requesting WEPPcloud operator and Codex

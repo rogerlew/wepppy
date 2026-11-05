@@ -1,5 +1,7 @@
 # ADR-0070: Propagate cover defaults and preserve omitted kslast
 
+Date: 2026-09-19
+
 Status: accepted; implementation conformance validated on Forest 2026-09-19.
 Production rollout is separate.
 

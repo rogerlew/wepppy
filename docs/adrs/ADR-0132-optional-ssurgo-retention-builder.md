@@ -1,5 +1,7 @@
 # ADR-0132: optional SSURGO retention builder
 
+Date: 2026-11-02
+
 Status: accepted bounded opt-in contract and canonical local implementation, 2026-11-02; broad regression passes. General release and package closure remain HOLD for the confirmed native FC/HK ownership defect; no deployment.
 
 ## Decision provenance

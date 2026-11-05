@@ -1,5 +1,7 @@
 # ADR-0055: Staley assessment uses the project watershed
 
+Date: 2026-09-09
+
 ## Status and decision provenance
 
 Accepted domain scope; implementation pending. Decision venue: user/Codex

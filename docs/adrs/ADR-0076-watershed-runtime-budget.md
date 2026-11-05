@@ -1,5 +1,7 @@
 # ADR-0076: Continuous watershed runtime budget
 
+Date: 2026-09-28
+
 ## Status and provenance
 
 Accepted, 2026-09-28. Implemented in `aa2d1cd2a`. Decision venue: this

@@ -1,5 +1,7 @@
 # ADR-0127: Experimental whole-soil retention inverse
 
+Date: 2026-11-01
+
 ## Status and provenance
 
 Accepted for bounded experiment only; production promotion is not approved.

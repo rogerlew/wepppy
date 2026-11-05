@@ -1,5 +1,7 @@
 # ADR-0101: Physical water allocation and routing
 
+Date: 2026-10-21
+
 ## Status
 
 Partially accepted for local source experiments, 2026-10-21. Independent reviews

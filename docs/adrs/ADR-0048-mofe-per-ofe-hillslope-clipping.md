@@ -1,5 +1,7 @@
 # ADR-0048: Apply Hillslope Clip Length Per OFE
 
+Date: 2026-09-04
+
 ## Status
 
 Accepted; implementation pending.

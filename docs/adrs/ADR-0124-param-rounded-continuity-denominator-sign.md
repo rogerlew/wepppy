@@ -1,5 +1,7 @@
 # ADR-0124: Preserve the physical sign of rounded PARAM continuity denominators
 
+Date: 2026-10-31
+
 Status: Accepted for `wepp_261029` artifact revision 4 (2026-10-31); application delivery tracked separately.
 
 ## Decision provenance

@@ -1,5 +1,7 @@
 # ADR-0058: Horn surface slope for Staley M1
 
+Date: 2026-09-09
+
 ## Status and provenance
 
 Accepted algorithm and uncertainty-preserving intersection support; local backend

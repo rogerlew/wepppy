@@ -1,5 +1,7 @@
 # ADR-0075: Builder opt-in single management and soil sources
 
+Date: 2026-09-25
+
 ## Status
 
 CBEXEC-01 (2026-10-12) amends the initial binary pin: compatible installed
