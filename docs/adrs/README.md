@@ -48,6 +48,8 @@ Each ADR should normally include:
 
 ## ADR Index
 
+- `ADR-0136`: [WEPP 261029 modeling corrections and release interpretation](ADR-0136-wepp-261029-modeling-release.md) (Proposed release-level synthesis; existing component decisions remain in force).
+
 - `ADR-0133`: [Native MOFE coefficient ownership](ADR-0133-native-mofe-coefficient-ownership.md) (Accepted ownership correction; no parameter retuning or deployment).
 
 - `ADR-0125`: [Rock fragment unit and basis repairs](ADR-0125-rock-fragment-unit-and-basis-repairs.md) (Development checkpoint; no native physics or deployment).
