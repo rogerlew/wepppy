@@ -305,7 +305,7 @@ Invite collaborators to your project by email address. Shared team members can v
 
 ### Readonly Toggle
 
-Lock your project to prevent accidental modifications. When Readonly is enabled, all Build and Run buttons are disabled.
+Lock your project to prevent accidental modifications. When Readonly is enabled, all Build and Run buttons are disabled. Readonly also disables automatic deletion due to inactivity while the project remains readonly. See [How to keep your project](run-ttl-deletion.md) for details.
 
 ### Public Toggle
 
