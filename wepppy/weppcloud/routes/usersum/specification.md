@@ -61,10 +61,14 @@ prefixes remain correct.
 
 ## Automatic ADR catalog
 
-Status: requested feature; proposed contract checkpoint, implementation pending.
+Status: implemented and verified on forest; contract checkpoint `0b804f1ff`.
 
-The Help index and sidebar expose **Architecture Decision Records (ADRs)** as a
-standalone dynamic link outside curated manifest sections. `/usersum/adrs/`
+The Help index exposes **Architecture Decision Records (ADRs)** as a standalone
+dynamic link. In the sidebar, place the same link in **Start Here**, immediately
+after **Quick Start** and before **Feature Maturity and Release Governance**,
+using the standard navigation-link styling. This placement was explicitly
+requested by the operator; no per-ADR manifest registration is required.
+Sidebar placement amendment: approved direction, implementation pending. `/usersum/adrs/`
 (trailing slash optional) lists every regular, non-symlink Markdown file directly
 inside repository `docs/adrs/` whose filename matches
 `ADR-[0-9]+-<nonempty-slug>.md`. README, templates, subdirectories and other files
@@ -129,8 +133,11 @@ JavaScript or dependencies. Validation must use real temporary directories for
 filesystem/discovery boundaries and real repository ADRs for complete route
 rendering, including site-prefix URLs and cross-ADR links. Verify the empty,
 legacy, populated, freshness and hostile-path states independently of role and
-strict-manifest options. There is no deployment or project/run mutation in this
-feature.
+strict-manifest options. This feature does not authorize a production deployment
+or project/run mutation. Initial rollout must load the new Python routes together with their
+shared-template links. On bind-mounted development hosts, reload web workers and
+verify the external Help index, catalog and document routes; template freshness
+alone does not establish route registration.
 
 ## Role Model
 
