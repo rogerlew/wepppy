@@ -17,6 +17,15 @@ Primary module: `wepppy/weppcloud/routes/usersum/`
 - Provide ranked search with PostgreSQL FTS + `pg_trgm`, with explicit fallback behavior.
 - Preserve compatibility with existing usersum and command-bar endpoints.
 
+## Changelog table presentation
+
+The WEPP Forest changelog keeps long compiler, version and commit metadata within
+its cells. Values wrap rather than painting over neighboring columns. The table
+retains a readable minimum width; on narrower viewports the document container
+scrolls horizontally without widening the page. This restores the existing
+readable-document layout for longer release labels; it does not change content,
+navigation, access rules or link resolution. Other document tables are unaffected.
+
 ## Public Feature Catalog
 
 Accepted 2026-10-27 at checkpoint `96f7df370`; implemented and locally validated (not deployed).

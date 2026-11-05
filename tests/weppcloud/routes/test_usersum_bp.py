@@ -265,7 +265,12 @@ def test_usersum_view_legacy_wepp_forest_change_log_alias_renders(usersum_client
     assert "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md" in body
     assert (
         'href="/usersum/src/wepppy/weppcloud/routes/usersum/vendor/wepp-forest/'
-        'release/wepp_260514_release_notes.md"'
+        'release/wepp_261026_release_notes.md"'
+    ) in body
+
+    assert (
+        'href="/weppcloud/static/reports/wepp/release-notes/wepp_261029/'
+        'wepp_261029_release-notes-consolidated-ed1.pdf"'
     ) in body
 
 

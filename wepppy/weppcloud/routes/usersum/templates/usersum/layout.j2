@@ -106,42 +106,46 @@
     height: auto;
   }
 
+  /* Keep long release metadata inside its cells; narrow views scroll locally. */
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] {
+    overflow-x: auto;
+  }
+
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table {
     table-layout: fixed;
+    min-width: 52rem;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th,
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td {
     word-break: normal;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(1),
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(1) {
-    width: 7%;
-    white-space: nowrap;
+    width: 11%;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(2),
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(2) {
-    width: 18%;
+    width: 15%;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(3),
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(3) {
-    width: 9%;
-    white-space: nowrap;
+    width: 14%;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(4),
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(4) {
-    width: 11%;
-    white-space: nowrap;
+    width: 18%;
   }
 
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(5),
   .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(5) {
-    width: 55%;
+    width: 42%;
   }
 
   .wc-usersum-nav-title {
