@@ -84,5 +84,18 @@
       "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
       "======================= 78 passed, 8 warnings in 23.42s ========================"
     ]
+  },
+  {
+    "log": "/var/tmp/notification-rollout-20261105/notifications-full-pytest.log",
+    "sha256": "5b053237456fe0851ef68568ac5a4748d4e401a1f1ea0748e05009054f457f3f",
+    "result": "1 failed, 12877 passed, 423 skipped, 5835 warnings in 3654.63s",
+    "failure": "test_feature_access.py::test_migration_head_schema_seed_and_legacy_preservation",
+    "explanation": "Long-lived full run collected the old assertion before it was corrected. Trace compares f6b8d27a901c against e7a1c9d204bf while showing the new source line heads = scripts.get_heads(). Corrected focused 78 and entire WEPPcloud 2325 passed in fresh processes."
+  },
+  {
+    "log": "/var/tmp/notification-rollout-20261105/notifications-migration-fresh.log",
+    "sha256": "3228d625819da56af0e30b8ecee15a22f31b2bda6d84c0235656c1fb46c5a42e",
+    "result": "1 passed, 2 warnings in 10.36s",
+    "scope": "Fresh rerun of corrected migration-head assertion after broad run stopped"
   }
 ]

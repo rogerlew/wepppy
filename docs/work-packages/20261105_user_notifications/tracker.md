@@ -1,7 +1,7 @@
 # User notifications tracker
 
-Status: implementation locally validated; forest activation in progress.
-Last updated: 2026-11-05 19:58 UTC.
+Status: implementation validated; forest activation awaiting CAPTCHA routing approval.
+Last updated: 2026-11-05 21:38 UTC.
 
 ## Task board
 
@@ -12,7 +12,7 @@ Last updated: 2026-11-05 19:58 UTC.
 - [x] Record operator decision checkpoint and standalone ancestor commit (`ceeaa5960`).
 - [x] Add ADR-0137 and additive migration; restored-database rehearsal passed.
 - [x] Implement task, Flask surfaces and header/list UI.
-- [ ] Complete local regression and independent implementation reviews.
+- [x] Complete local regression and independent implementation reviews (broad-run disposition below).
 - [ ] Deploy to forest, verify artifacts/browser/job tree, observe nightly execution.
 - [ ] Verify rollback, finish documentation and close package.
 
@@ -63,8 +63,7 @@ browser workflow, rehearse rollback, then observe the enabled scheduled task.
 
 26 real PostgreSQL/TTL/Flask tests pass; 1,051 frontend tests passed, with the four
 notification tests rerun after final script changes. Independent correctness,
-security and QA code reviews have no open medium/high findings. Full pytest is
-running. Rehearsal restored database counts remained 28 users, 570 runs and 259
+security and QA code reviews have no open medium/high findings. Full pytest completed; see the final regression disposition below. Rehearsal restored database counts remained 28 users, 570 runs and 259
 memberships after migration to f6b8d27a901c. Live backup is restricted under
 `/var/tmp/notification-rollout-20261105/`.
 
@@ -82,9 +81,25 @@ Forest pre-activation browser login exposed an existing CAPTCHA verification
 transport failure: public forest HTTPS is refused from web/rq-engine containers,
 while internal CAP is healthy. The bounded repair and independent review are in
 [forest login blocker](artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
-pending; notification scheduling remains disabled. Full repository tests continue.
+pending; notification scheduling remains disabled. Full repository results are recorded in the final regression disposition.
 
 The disposable restored database `notifications_rehearsal_20261105` was removed
 after confirming zero connected sessions. Migration/query-plan evidence and the
 restricted original backup remain retained. The live account database was not
 restored or downgraded.
+
+## Final regression disposition — 2026-11-05 21:38 UTC
+
+Full pytest: 12,877 passed, 423 skipped, one failure in 3,654.63 seconds. The
+long-running process had collected the old migration-head assertion before its
+correction. Its trace compares old/new migration IDs while displaying the edited
+source line. Fresh verification passes (1 test); the corrected focused suite
+passed 78 and the complete WEPPcloud suite passed 2,325. No single all-green full
+run is claimed. Exact logs/hashes are in `artifacts/regression-results.json`.
+
+Awaiting the already presented approval for the reviewed forest CAPTCHA transport
+repair. No web deployment, application rollback or scheduled execution is claimed.
+The scheduler-only recreation approval remains valid. Fixture run registration
+2325 and ordinary test user 2831 are retained for acceptance; remove them and the
+gitignored `docker/secrets/notifications-acceptance.env` after completing acceptance.
+The fixture has a future expiry and must be cleaned before 2026-11-12.

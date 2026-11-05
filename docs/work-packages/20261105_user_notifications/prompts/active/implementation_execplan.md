@@ -28,7 +28,7 @@ or any production host.
 - [x] (2026-11-05 UTC) M1: schema/repository real-PG tests and restored-database migration validated.
 - [x] (2026-11-05 UTC) M2: producer retry/reconciliation/source-boundary tests passed; live schedule pending M5.
 - [ ] M3: Flask API, listing, headers and user workflow validated.
-- [ ] M4: broad checks, documentation and independent implementation reviews complete.
+- [x] (2026-11-05 21:38 UTC) M4: regression gates/reviews retained; stale collected migration assertion disposition below.
 - [ ] M5: forest activation, browser/job evidence, nightly observation and rollback complete.
 - [ ] Package closure and prompt archival.
 
@@ -67,7 +67,10 @@ Independent correctness, security and QA implementation reviews have no open
 medium/high findings. Forest backup restoration, additive live migration and
 fixture-scoped real-worker retry passed, including unchanged TTL bytes and
 preserved read state. WEPPcloud (2,325), RQ (1,329) and frontend (1,051) tests
-passed. Full repository pytest remains running; browser acceptance, application
+passed. Full repository pytest finished with 12,877 passed and 423 skipped before the
+old migration-head assertion, collected before correction, failed. Its fresh
+rerun passes (1 test), and the corrected full WEPPcloud suite passed. This is not
+claimed as a single all-green full run. Browser acceptance, application
 rollback and actual scheduled execution remain open.
 
 ## Context and Orientation
@@ -345,4 +348,15 @@ Forest pre-activation browser login exposed an existing CAPTCHA verification
 transport failure: public forest HTTPS is refused from web/rq-engine containers,
 while internal CAP is healthy. The bounded repair and independent review are in
 [forest login blocker](../../artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
-pending; notification scheduling remains disabled. Full repository tests continue.
+pending; notification scheduling remains disabled. Full repository results are recorded in the final regression disposition.
+
+Handoff 2026-11-05 21:38 UTC: independent work completed; forest activation is
+blocked on the pending operator approval for the prepared CAPTCHA transport repair.
+Scheduler-only recreation is already approved and must not be requested again.
+No web/scheduler recreation has occurred. On approval, apply the reviewed patch,
+update homelab documentation and source snapshots (preserve the repair in both
+notification rollback/candidate Compose snapshots), set the host override, then
+follow canonical targeted-web activation and the retained token/browser canaries.
+Run the application rollback with admissions disabled, restore candidate, then
+enable scheduling and observe the real 900-second delayed scheduled execution.
+The restricted prepared patch/canary are under `/var/tmp/notification-rollout-20261105/`.
