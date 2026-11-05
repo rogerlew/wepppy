@@ -2,6 +2,10 @@
 
 Use the **Roads** control when you want to test how mapped road segments change runoff, routing, and sediment relative to an existing WEPPcloud watershed run. This workflow keeps the original watershed run as the baseline and writes a separate Roads-specific result set for comparison.
 
+For the complete workflow, upload examples, required unrutted-road attributes,
+parameter editing, dashboard interpretation and troubleshooting, see the
+[detailed Roads user guide](../../../../../../nodb/mods/roads/ENDUSER.md).
+
 ## What This Is For
 
 Roads is for questions such as:
@@ -136,9 +140,9 @@ estimate a parameter instead. The application rejects nonfinite values and value
 that become zero or overflow during native conversion. Accepted input limits are
 not field-calibrated ranges.
 
-**Save** commits your changes but does not run WEPP. Return to Roads, Prepare and
+**Save settings** commits your changes but does not run WEPP. Return to Roads, Prepare and
 Run to generate new results. **Cancel** discards the draft and reloads saved values.
-**Reset overrides** sets the draft entries to Default; Save commits that reset.
+**Reset overrides** sets the draft entries to Default; **Save settings** commits that reset.
 Reset preserves the project's saved baseline and physical/mapping settings.
 
 The project saves its baseline template contents and overrides together in
@@ -189,7 +193,7 @@ Important mapping behavior:
 
 - Roads only discovers top-level `feature.properties` keys from the uploaded GeoJSON.
 - If mapping is unset, legacy property keys are still checked.
-- If mapping is set but a value is missing or invalid, the selected fallback value is used.
+- If surface or traffic mapping is set but a value is missing or invalid, the selected fallback value is used. Design has no fallback class.
 - Changing mapping or fallback choices clears stale prepared and run summaries. If you change them, prepare again before running.
 
 Numeric upload attributes must be finite numbers. Optional width, rock-fragment and rutted fill/buffer values containing NaN or infinity use the existing invalid-value fallback; segment details identify when configured defaults were used. Required unrutted fill/buffer values remain mandatory and invalid values are rejected. Correct the source attributes and prepare/run again to replace old results; existing saved outputs are not rewritten automatically.

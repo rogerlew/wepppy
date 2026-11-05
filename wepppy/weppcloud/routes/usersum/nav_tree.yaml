@@ -57,6 +57,8 @@ roots:
     children:
       - key: usersum.source.disturbed_rankings
         doc_id: usersum.source.disturbed_rankings
+      - key: usersum.source.roads_enduser
+        doc_id: usersum.source.roads_enduser
       - key: usersum.source.roads_validation
         doc_id: usersum.source.roads_validation
       - key: usersum.weppcloud.mods_overview

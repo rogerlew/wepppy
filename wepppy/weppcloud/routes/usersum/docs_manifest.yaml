@@ -634,6 +634,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.source.rhem
+  - doc_id: usersum.source.roads_enduser
+    source: local
+    rel_path: wepppy/nodb/mods/roads/ENDUSER.md
+    title: Modeling Roads in WEPPcloud
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.roads_enduser
   - doc_id: usersum.source.roads
     source: local
     rel_path: wepppy/nodb/mods/roads/README.md

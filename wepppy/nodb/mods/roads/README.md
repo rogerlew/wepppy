@@ -1,27 +1,89 @@
 # Roads NoDb Controller
 
-> Converts uploaded road linework into Roads-scoped WEPP runs by segmenting inslope roads, mapping them to receiving hillslopes/channels, and regenerating Roads results and reports.
+> Builds road contributor profiles and hillslope replacements from uploaded linework, reruns watershed routing, and publishes a separate Roads result set.
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for NoDb controller conventions and [specification.md](specification.md) for the full Roads phase-1 contract.
+For project setup, input preparation, parameter editing and result interpretation,
+start with the [Roads user guide](ENDUSER.md). This README covers implementation,
+configuration and operations. See [NoDb conventions](../../AGENTS.md).
 
 ## Overview
 
-`wepppy.nodb.mods.roads` is the phase-1 Roads integration for WEPPcloud runs that already have a baseline WEPP watershed solution. It lets a user upload roads as GeoJSON, inspect discovered feature properties, map those properties to Roads semantics, prepare monotonic road segments, and then run a Roads-specific watershed update.
+`Roads` is a run-scoped NoDb controller for projects with a completed baseline
+WEPP solution and WBT delineation. The feature registry classifies Roads as
+experimental and requires PowerUser access or an authorized higher role.
+It supports both inslope and outslope designs. Baseline outputs remain under
+`wepp/output/`; Roads publishes separately under `wepp/roads/output/`.
 
-The module is centered on the run-scoped `Roads` NoDb controller in [roads.py](roads.py). It persists state to `roads.nodb`, stages uploaded GeoJSON under `roads/`, writes prepared segment artifacts under `wepp/roads/segments/`, and writes Roads run outputs under `wepp/roads/output/`.
+The controller owns upload and mapping state, retained parameterization,
+preparation, execution and report publication. Prepared eligibility, completed
+execution and current report availability are distinct states. A prepared segment
+or a successful background job alone does not establish usable current results.
 
-Primary users are WEPPcloud operators and analysts who need to test how inslope roads change runoff, sediment, and watershed results without modifying the baseline run. Primary developers are people working in NoDb, Roads UI/routes, and Roads RQ orchestration.
+## Design and execution paths
 
-## Workflow
+An overland flow element (OFE) is one modeled profile section with its own soil,
+management and geometry. Multiple OFEs can contribute to one road-associated
+profile; a profile export is therefore not necessarily road-prism-only export.
 
-1. Run baseline WEPP for the project.
-2. Enable the `Roads` mod from the WEPPcloud run page.
-3. Upload a Roads GeoJSON file.
-4. Review the discovered attribute catalog and map GeoJSON fields to `design`, `surface`, and `traffic`.
-5. Choose fallback values for `surface` and `traffic`.
-6. Click `Prepare Segment Candidates` to create monotonic segments and low-point attribution artifacts.
-7. Click `Run WEPPcloud Roads` to execute Roads segment runs, combine pass files, rerun the Roads-scoped watershed, and regenerate Roads report resources.
-8. Review Roads status, Roads-scoped report links, regenerated resources, and diagnostics.
+| Design | Flow representation | Executed profile / routing |
+| --- | --- | --- |
+| `Inslope_bd` | Bare-ditch point source | Channel-associated: road only; non-channel routed: road → buffer |
+| `Inslope_rd` | Vegetated or rocked-ditch point source | Same routing branches as bare ditch, with different template selection |
+| `Outslope_rutted` | Concentrated point source across fill | Road → fill → buffer, including channel-associated branches |
+| `Outslope_unrutted` | Sheet-flow hillslope replacement | Landuse → road → fill, with downstream landuse when long enough; unaffected remainder contributors preserve hillslope area |
+
+Design values are normalized case-insensitively. `outrut` resolves to rutted;
+`outslope` and `outunrut` resolve to unrutted. Other designs are excluded.
+Point-source preparation splits and orients monotonic line segments and identifies
+low points. Non-channel hillslope low points require successful run-stage tracing
+to a channel; unsuccessful traces are recorded as skipped contributors.
+
+Unrutted replacement uses hillslope-specific overlap rather than requiring
+point-source low-point delivery. Inclusion requires at least 10 m overlap and
+an overlap-length / modeled-hillslope-width ratio of at least 0.60. At most three
+qualifying crossings per hillslope are retained, ranked by descending overlap
+length with segment-ID tie breaking. Required fill/buffer inputs, area closure,
+and short downstream landuse handling are detailed in the
+[implementation specification](specification.md#settled-step-4-contract-details-implemented-2026-04-08).
+
+## Workflow and integration
+
+1. Complete baseline WEPP and enable Roads through the project Mods control.
+2. Upload a GeoJSON FeatureCollection containing LineString/MultiLineString roads.
+3. Review discovered top-level properties, select design/surface/traffic mappings
+   and fallbacks, and apply the mapping.
+4. Optionally edit and save **Roads Parameterization** overrides.
+5. **Prepare Segment Candidates** establishes current geometry and mapping evidence.
+6. **Run WEPPcloud Roads** assembles native inputs, executes contributors, combines
+   point-source responses or replaces unrutted hillslope responses, reruns the
+   watershed, regenerates reports and publishes current results.
+
+The [user guide](ENDUSER.md) includes a GeoJSON example, required unrutted fields,
+exact UI actions and troubleshooting. New uploads or model-affecting settings
+require a fresh Prepare and Run.
+
+Roads inherits the baseline project's selected WEPP binary for segment runs and
+the watershed rerun. Preparation and execution must use compatible releases;
+version-3 PASS inputs cannot be assumed readable by an unversioned executable.
+WBT flow tracing consumes Whitebox D8 pointers through `wepppyo3.roads_flowpath`,
+which normalizes them in memory. TOPAZ-style subcatchment IDs do not imply TOPAZ
+pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roads-flow-direction-contract.md).
+
+## Components
+
+| Component | Responsibility |
+| --- | --- |
+| [roads.py](roads.py) | NoDb state, upload/mapping, preparation, contributor assembly, execution and queries |
+| [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
+| [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
+| [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |
+| [_segment_loss_summary.py](_segment_loss_summary.py) | Mean annual source-profile loss summaries |
+| `legacy_templates/` | Repository soil and management baseline assets |
+| [roads_bp.py](../../../weppcloud/routes/nodb_api/roads_bp.py) | Run-scoped routes, parameterization view, reports and map queries |
+| [roads_rq.py](../../../rq/roads_rq.py) | Prepare/run background jobs |
+| [roads_pure.htm](../../../weppcloud/templates/controls/roads_pure.htm) | Run-page control and user-guide link |
+| [roads.js](../../../weppcloud/controllers_js/roads.js) | Upload, mapping and job UI |
+| [roads_parameterization.js](../../../weppcloud/controllers_js/roads_parameterization.js) | Parameter inspection, editing and comparison UI |
 
 ## Parameterization ownership and overrides
 
@@ -114,172 +176,6 @@ produced an incomplete receipt, retain that failed attempt and explicitly Prepar
 and Run again after reload; do not synthesize or patch a successful receipt.
 Deployment remains governed by the normal operator workflow.
 
-## Components
-
-| Component | Purpose |
-| --- | --- |
-| [roads.py](roads.py) | Run-scoped `Roads(NoDbBase)` controller, upload/config/query surface, prepare/run orchestration, artifact summaries |
-| [monotonic_segments.py](monotonic_segments.py) | Splits linework into monotonic segments and attributes low points to channels/hillslopes |
-| `legacy_templates/soils/` | Legacy-derived single-OFE road soil templates |
-| `legacy_templates/managements/` | Legacy-derived road management templates used during segment WEPP runs |
-| [specification.md](specification.md) | Full implementation contract, artifact layout, mapping rules, and phase-1 assumptions |
-
-## GeoJSON Preparation
-
-### Required format
-
-Roads uploads must be:
-
-- GeoJSON `FeatureCollection`
-- containing `LineString` or `MultiLineString` features only
-- small enough to fit the Roads upload limit (`max_upload_mb`, default `50`)
-- described in the run input CRS or with a valid GeoJSON `crs.properties.name`
-
-The controller only inspects top-level `feature.properties` keys for attribute discovery and mapping. Nested property-path mapping is out of scope for this phase.
-
-### Eligible road designs
-
-Only the following designs are eligible for inslope segment processing in phase 1:
-
-- `Inslope_bd`
-- `Inslope_rd`
-
-If a feature maps to any other design, it can remain in the uploaded GeoJSON but it will not become an eligible Roads segment for prepare/run work.
-
-### Recommended properties
-
-The Roads UI can map arbitrary top-level property names, but these are the canonical semantics:
-
-| Semantic | Typical values | Notes |
-| --- | --- | --- |
-| `design` | `Inslope_bd`, `Inslope_rd` | Required for prepare-stage eligibility |
-| `surface` | `gravel`, `paved`, `asphalt`, `dirt`, `native` | Aliases normalize to `gravel` or `paved` |
-| `traffic` | `high`, `low`, `none` | `no` and `notraffic` normalize to `none` |
-
-If `surface` or `traffic` is missing or invalid:
-
-- when a mapping is set, Roads falls back to the user-selected default value
-- when a mapping is unset, Roads falls back to legacy property keys and then to the configured default
-
-### Recommended authoring rules
-
-- Put the road attributes you care about directly on `feature.properties`.
-- Use one feature per logical road segment when possible.
-- Keep the road centerline geometry clean; self-intersections and noisy vertex order make monotonic splitting harder to interpret.
-- Use consistent casing for enumerated values even though the controller normalizes many aliases.
-- If you already know the Roads semantics, include explicit `design`, `surface`, and `traffic` fields to reduce UI mapping work.
-
-### Minimal example
-
-```json
-{
-  "type": "FeatureCollection",
-  "crs": {
-    "type": "name",
-    "properties": {
-      "name": "EPSG:4326"
-    }
-  },
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-116.0, 45.0],
-          [-116.0005, 45.0005]
-        ]
-      },
-      "properties": {
-        "ROADTYPE": "Inslope_bd",
-        "SURF_CLASS": "asphalt",
-        "TRAF_LEVEL": "low"
-      }
-    }
-  ]
-}
-```
-
-In the Roads UI, that upload would typically be mapped as:
-
-- `design` -> `ROADTYPE`
-- `surface` -> `SURF_CLASS`
-- `traffic` -> `TRAF_LEVEL`
-
-## User Interface Guide
-
-### Prerequisites on the run page
-
-Before Roads is useful, the run must already have:
-
-- a baseline WEPP solution
-- a WBT-based delineation backend
-
-Roads is backend-gated. Non-WBT runs cannot enable the mod.
-Roads is available to PowerUser, Dev, Admin, and Root accounts.
-
-### Upload and attribute discovery
-
-After upload, the Roads control shows:
-
-- the uploaded GeoJSON path and feature count
-- a discovered attribute catalog
-- sample values for discovered fields
-- persisted mapping controls for `design`, `surface`, and `traffic`
-
-This discovery catalog is specific to the current upload. Uploading a new file resets stale mapping state and then attempts best-effort remapping by exact field-name match.
-
-### Mapping controls
-
-The Roads control exposes five mapping-related controls:
-
-| Control | Purpose |
-| --- | --- |
-| `Design field` | Selects the field used to decide inslope eligibility during prepare and run |
-| `Surface field` | Selects the primary surface field |
-| `Traffic field` | Selects the primary traffic field |
-| `Surface fallback value` | Chooses `gravel` or `paved` when mapped surface is missing/invalid |
-| `Traffic fallback value` | Chooses `high`, `low`, or `none` when mapped traffic is missing/invalid |
-
-Click `Apply Attribute Mapping` after changing the mapping/default controls. This persists the settings to the run-scoped Roads controller and clears stale prepare/run state.
-
-### Prepare Segment Candidates
-
-`Prepare Segment Candidates` runs the deterministic preprocessing stage. It:
-
-- splits the uploaded linework into monotonic segments
-- orients segments from high point to low point
-- identifies low points
-- attributes channel and receiving-hillslope Topaz IDs for eligible inslope segments
-- writes segment preparation artifacts and summary diagnostics
-
-The prepare stage is where bad design mapping shows up first. If the mapped `design` field does not resolve to `Inslope_bd` or `Inslope_rd`, the feature will not become an eligible Roads segment.
-
-### Run WEPPcloud Roads
-
-`Run WEPPcloud Roads` uses the latest prepared segments and:
-
-- builds single-OFE road segment runs from the legacy-derived soil/management templates
-- executes segment WEPP runs
-- injects segment pass effects into watershed routing
-- runs the Roads-scoped watershed update
-- regenerates Roads-scoped report resources under `wepp/roads/output/interchange/`
-
-If the upload or Roads parameters changed after prepare, the run stage requires a fresh prepare cycle.
-
-Roads inherits the baseline project's selected WEPP binary for both segment runs
-and the watershed rerun. Input preparation and execution must use the same
-release so that the watershed reader supports the generated PASS format. An
-unversioned watershed executable can fail with an input conversion error when
-reading version 3 PASS files from a dated release.
-
-Roads requires WBT delineation. Downslope tracing explicitly consumes Whitebox
-D8 pointers through the paired `wepppyo3.roads_flowpath` release. The native
-adapter normalizes those pointers in memory; TOPAZ-style subcatchment IDs do
-not mean that the direction raster uses TOPAZ codes. Deploy the caller and
-native module together, then rerun Roads to regenerate affected results.
-See the [flow-direction contract](../../../../docs/schemas/roads-flow-direction-contract.md).
-
 ## Results and Artifacts
 
 ### What the user sees
@@ -359,78 +255,61 @@ These links are gated by the presence of Roads-scoped regenerated resources. If 
 
 ## Configuration
 
-The controller persists Roads settings in `roads_params`.
+`roads.nodb` owns the saved configuration. `_roads_params` is exposed as
+`roads_params`; retained baseline texts and overrides live separately in
+`_parameterization`. The run-page form exposes mapping and surface/traffic
+fallbacks; the other settings below are controller/API settings, not additional
+form controls. Use the validated controller/route mutation surface.
 
-| Parameter | Default | Description |
+| Parameter | Default | Meaning |
 | --- | --- | --- |
-| `input_crs` | `EPSG:4326` | Input CRS used when the upload does not provide a GeoJSON CRS block |
-| `sample_step_m` | `null` | Optional segment sampling step for profile evaluation |
-| `tolerance_m` | `0.5` | Monotonic segmentation tolerance |
-| `soil_texture_default` | `loam` | Default soil texture when no segment override is present |
-| `surface_default` | `gravel` | Fallback surface value used by Roads mapping/runtime logic |
-| `traffic_default` | `low` | Fallback traffic value used by Roads mapping/runtime logic |
-| `rfg_pct_default` | `20.0` | Default rock fragment percentage |
-| `road_width_m_default` | `4.0` | Default road width for generated single-OFE profiles |
-| `max_upload_mb` | `50` | Maximum upload size for Roads GeoJSON |
-| `attribute_field_map.design` | `null` | User-selected field for design resolution |
-| `attribute_field_map.surface` | `null` | User-selected field for surface resolution |
-| `attribute_field_map.traffic` | `null` | User-selected field for traffic resolution |
+| `input_crs` | `EPSG:4326` | Used when GeoJSON has no `crs.properties.name` |
+| `sample_step_m` | `null` | Optional elevation-profile sampling interval, m |
+| `tolerance_m` | `0.5` | Monotonic segmentation tolerance, m |
+| `soil_texture_default` | `loam` | Texture fallback: clay, loam, sand or silt |
+| `surface_default` | `gravel` | Surface fallback: gravel or paved |
+| `traffic_default` | `low` | Traffic fallback: high, low or none |
+| `rfg_pct_default` | `20.0` | Rock fragment input fallback, percent |
+| `road_width_m_default` | `4.0` | Road-width fallback, m |
+| `fill_length_default_m` | `30.0` | Rutted fill-length fallback, m; not a substitute for required unrutted fields |
+| `fill_slope_default_pct` | `10.0` | Rutted fill-grade fallback, percent |
+| `trace_max_steps` | `20000` | Maximum downslope trace steps |
+| `max_upload_mb` | `50` | Upload-size limit, MB |
+| `attribute_field_map` | All three entries `null` | Top-level property names for design, surface and traffic |
+| `attribute_discovery_profile_feature_limit` | `5000` | Maximum features profiled for discovery |
+| `attribute_discovery_value_preview_limit` | `5` | Sample values retained per field |
+| `attribute_discovery_value_max_chars` | `120` | Maximum sample-value text length |
 
-Attribute discovery profiling is also configurable through the Roads params contract:
+Explicit surface/traffic mappings take precedence and use their selected fallback
+when missing or invalid. Unset mappings check legacy keys first. Design has no
+fallback class; inspect design diagnostics when features are excluded.
+Finite-number validation distinguishes optional defaultable attributes from
+required unrutted geometry. The [specification](specification.md) records accepted
+aliases and per-path bounds. New uploads rediscover fields and attempt to preserve
+mapping by matching field names; users must review the resulting mapping.
 
-- `attribute_discovery_profile_feature_limit`
-- `attribute_discovery_value_preview_limit`
-- `attribute_discovery_value_max_chars`
+## Developer validation
 
-## Key Concepts
+The public package exports `Roads`, `MonotonicConversionSummary`, and the three
+`convert_geojson_*_to_monotonic_segments*` helpers listed explicitly in
+[__init__.py](__init__.py).
 
-| Term | Meaning |
-| --- | --- |
-| `eligible segment` | A prepared monotonic segment whose design resolves to an in-scope inslope design |
-| `low point` | The downslope end of an oriented monotonic road segment |
-| `mapped segment` | An eligible segment whose low point was attributed to both channel and receiving hillslope context needed for Roads execution |
-| `Roads-scoped output` | A regenerated report/query dataset under `wepp/roads/output/` that does not overwrite baseline `wepp/output/` |
-
-## Developer Notes
-
-### Public module surface
-
-The package exports:
-
-- `Roads`
-- `MonotonicConversionSummary`
-- `convert_geojson_file_to_monotonic_segments`
-- `convert_geojson_to_monotonic_segments`
-- `convert_geojson_to_monotonic_segments_with_low_points`
-
-See [__init__.py](__init__.py) for the canonical export list.
-
-### Integration points
-
-- NoDb controller: [roads.py](roads.py)
-- Segment utility: [monotonic_segments.py](monotonic_segments.py)
-- WEPPcloud routes: [roads_bp.py](../../../weppcloud/routes/nodb_api/roads_bp.py)
-- Run-page control: [roads_pure.htm](../../../weppcloud/templates/controls/roads_pure.htm)
-- Frontend controller: [roads.js](../../../weppcloud/controllers_js/roads.js)
-
-### Validation entry points
-
-Use these focused checks when changing Roads behavior:
+Focused checks for behavior changes:
 
 ```bash
-wctl run-pytest tests/nodb/mods/test_roads_controller.py --maxfail=1
-wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1
-wctl run-pytest tests/weppcloud/routes/test_roads_bp.py --maxfail=1
-wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1
+wctl run-pytest tests/nodb/mods/test_roads_controller.py tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1
+wctl run-pytest tests/nodb/mods/test_roads_parameterization.py tests/nodb/mods/test_roads_parameterization_comparisons.py --maxfail=1
+wctl run-pytest tests/nodb/mods/test_roads_segment_loss_summary.py tests/wepp/interchange/test_roads_accounting.py tests/wepp/interchange/test_roads_lifecycle.py --maxfail=1
+wctl run-pytest tests/weppcloud/routes/test_roads_bp.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1
 wctl run-npm test -- roads
 wctl run-npm lint
 ```
 
-For final handoff, run:
-
-```bash
-wctl run-pytest tests --maxfail=1
-```
+Substantive code changes also require the repository-wide pytest gate. Changes to
+native assembly or cross-process behavior require actual generated-input readback
+and end-to-end execution evidence; unit tests are insufficient. The
+[Roads validation suite contract](../../../../docs/schemas/roads-validation-suite-contract.md)
+defines the native matrix and opt-in project checks.
 
 ## Operational Notes
 
@@ -453,9 +332,19 @@ active Roads operation cannot block loading the project. Result queries and repo
 still use lifecycle admission. If a Roads report is busy, wait for the operation
 to finish; do not delete the coordination lock.
 
-## Further Reading
+## Documentation authority and further reading
 
-- [specification.md](specification.md)
-- [NoDb AGENTS.md](../../AGENTS.md)
-- [Roads routes in NoDb API](../../../weppcloud/routes/nodb_api/README.md)
-- [Roads GeoJSON attribute mapping work package](../../../../docs/work-packages/20260326_roads_geojson_attribute_mapping/package.md)
+The control links to [ENDUSER.md](ENDUSER.md) so setup and interpretation guidance
+is available at the point of use. This README remains the developer/operator
+reference; the existing Help model overview links to the detailed guide.
+
+- [Implementation specification](specification.md): design branches, mapping, geometry and artifacts.
+- [Parameterization baseline](../../../../docs/schemas/roads-parameterization-baseline-contract.md) and [project settings](../../../../docs/schemas/roads-settings-contract.md): current default and override authority.
+- [Preparation lifecycle](../../../../docs/schemas/roads-preparation-lifecycle-contract.md): invalidation, retention and current-result admission.
+- [Water accounting](../../../../docs/schemas/roads-water-accounting-contract.md) and [segment loss summary](../../../../docs/schemas/roads-segment-loss-summary-contract.md): output meaning and provenance.
+- [Dashboard contract](../../../../docs/schemas/roads-gl-dashboard-contract.md): detachment visualization and output scope.
+
+Read the current topic contracts alongside the implementation specification;
+its phase-specific sections describe individual paths, not an inslope-only limit
+on the current module. Study proposals and work-package evidence do not change
+production defaults or a project's retained parameterization.
