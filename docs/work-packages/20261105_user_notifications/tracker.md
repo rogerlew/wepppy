@@ -83,3 +83,8 @@ transport failure: public forest HTTPS is refused from web/rq-engine containers,
 while internal CAP is healthy. The bounded repair and independent review are in
 [forest login blocker](artifacts/forest-login-blocker.md). Operator approval for the prepared repair is
 pending; notification scheduling remains disabled. Full repository tests continue.
+
+The disposable restored database `notifications_rehearsal_20261105` was removed
+after confirming zero connected sessions. Migration/query-plan evidence and the
+restricted original backup remain retained. The live account database was not
+restored or downgraded.

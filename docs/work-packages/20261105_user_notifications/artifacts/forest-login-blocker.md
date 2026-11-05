@@ -29,3 +29,14 @@ consumer. Interpolation was verified for absent, empty, relative and explicit
 internal overrides. Both services are already in the targeted-web activation set.
 Validate each helper with fresh and replayed tokens and invalid tokens, without
 creating projects/jobs, then prove actual browser login. Approval remains pending.
+
+## Independent security disposition
+
+`notification_impl_security` found no medium/high blocker in the prepared patch.
+It covers all confirmed verification consumers and preserves secrets, browser
+URLs and rejection behavior. Internal HTTP uses the existing Docker network;
+no published port, privilege or authorization expansion is proposed. Acceptance
+requires fresh-token success, replay/invalid/missing-token rejection for all three
+helpers, actual browser login, and unchanged browser CAP URLs. Failed checks must
+not create sessions/projects/jobs. Retain the repair during notification-only
+rollback and document a separate repair rollback. Approval remains pending.
