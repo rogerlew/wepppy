@@ -43,6 +43,16 @@ Readonly projects and batch projects are excluded from automatic deletion.
 Unchecking this control does not remove those exclusions, so their status can
 remain **Automatic deletion is disabled**.
 
+## Will I receive a deletion notice?
+
+When you are signed in, the header bell shows your active unread notifications.
+Deletion notices are checked daily for recorded dates within the next two weeks.
+Opening the notification list does not mark them read; select notices and choose
+**Mark read** or **Mark unread**. There are no popup reminders or emails.
+
+Notices can lag recent visits or protection changes. They do not delay deletion
+or guarantee two weeks of notice. Use the project setting above to keep a project.
+
 ## Can this restore a project that was deleted?
 
 No. This setting cannot undo deletion that has already started or restore deleted

@@ -1,0 +1,28 @@
+{
+  "job": {
+    "job_id": "notification_acceptance_07e6b9a1d1894700958850eb2f3d8fae",
+    "runid": null,
+    "status": "finished",
+    "result": {
+      "examined": 1,
+      "created": 1,
+      "updated": 0,
+      "resolved": 0,
+      "unavailable": 0,
+      "skipped": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.052
+    },
+    "started_at": "2026-11-05 20:46:09.716576",
+    "ended_at": "2026-11-05 20:46:09.784813",
+    "description": "wepppy.rq.notifications_rq.populate_notifications(registration_ids=[2325])",
+    "elapsed_s": 0.068237,
+    "exc_info": null,
+    "auth_actor": null,
+    "culvert_batch_uuid": null,
+    "children": {}
+  },
+  "fixture_notifications": 101,
+  "nonfixture_rows_unchanged": true,
+  "ttl_bytes_unchanged": true
+}

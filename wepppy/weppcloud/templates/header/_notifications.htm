@@ -1,0 +1,12 @@
+{% if notification_inbox_available is defined and notification_inbox_available and current_user is defined and current_user.is_authenticated %}
+<link rel="stylesheet" href="{{ static_url('css/notifications.css') }}">
+<a class="wc-notification-bell" href="{{ url_for('notifications.index') }}"
+   data-notification-bell data-count-url="{{ url_for('notifications.unread_count') }}"
+   aria-label="Notifications" title="Notifications">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false">
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6" />
+  </svg>
+  <span data-notification-count hidden></span>
+</a>
+<script src="{{ static_url('js/notifications.js') }}" defer></script>
+{% endif %}

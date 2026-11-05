@@ -158,6 +158,9 @@ from wepppy.weppcloud.run_catalog.schema import catalog_table
 from wepppy.nodb.persistence_events import initialize_project_commits
 
 run_catalog_table = catalog_table(db.metadata)
+
+from wepppy.weppcloud.notifications.schema import notification_tables
+notification_table, notification_recipient_table = notification_tables(db.metadata)
 initialize_project_commits()
 
 # Define models

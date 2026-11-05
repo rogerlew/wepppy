@@ -133,6 +133,20 @@ project in the dashboard. PowerUser access is not required. You must still have
 permission to view the project; available views depend on its prepared data and
 outputs. The link follows your **Open links in new tabs** preference.
 
+## Notifications
+
+Select the bell in the header to view your notifications. Its number counts active
+unread notices. Opening the list does not mark them read. Select individual rows
+or **Select all on this page**, then choose **Mark read** or **Mark unread**.
+Each page holds up to 100 notices. Use **Unread first**, **Read first**, or
+**Newest first**, then **Apply sort**. Your read choices are saved across sessions.
+
+Deletion notices are checked daily for recorded dates within the next two weeks,
+including overdue projects after a missed check. They can lag recent project
+access. Resolved and unavailable notices stay in history but do not count toward
+the bell. Notifications do not delay deletion; follow
+[How to keep your project](run-ttl-deletion.md) when you need to retain it.
+
 ## Privacy Statement
 
 WEPPcloud collects only the information necessary to operate the platform and support your work.

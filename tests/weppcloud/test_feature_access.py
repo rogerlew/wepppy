@@ -195,7 +195,10 @@ def test_registered_integration_and_derivative_origin():
 
 def test_migration_head_schema_seed_and_legacy_preservation(database, store):
     scripts = ScriptDirectory(str(Path(__file__).parents[2] / 'wepppy/weppcloud/migrations'))
-    assert scripts.get_heads() == [MIGRATION.revision]
+    heads = scripts.get_heads()
+    assert len(heads) == 1
+    assert MIGRATION.revision in {revision.revision for revision in
+                                 scripts.iterate_revisions(heads[0], MIGRATION.down_revision)}
     assert MIGRATION.down_revision == 'd30c91a7b802'
     store.seed_groups(FEATURES)
     store.seed_groups(FEATURES)

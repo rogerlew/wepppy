@@ -1,6 +1,6 @@
 # User notifications tracker
 
-Status: design scaffold; implementation and forest deployment pending.
+Status: implementation locally validated; forest activation in progress.
 Last updated: 2026-11-05 19:58 UTC.
 
 ## Task board
@@ -9,9 +9,9 @@ Last updated: 2026-11-05 19:58 UTC.
 - [x] Record conversation-derived behavior in the canonical notification contract.
 - [x] Scaffold complete implementation/testing/forest deployment ExecPlan.
 - [x] Obtain two independent contract reviews, correct findings and obtain post-fix confirmation.
-- [ ] Record operator decision checkpoint and standalone ancestor commit.
-- [ ] Add parameterization ADR and additive schema/migration.
-- [ ] Implement task, Flask surfaces and header/list UI.
+- [x] Record operator decision checkpoint and standalone ancestor commit (`ceeaa5960`).
+- [x] Add ADR-0137 and additive migration; restored-database rehearsal passed.
+- [x] Implement task, Flask surfaces and header/list UI.
 - [ ] Complete local regression and independent implementation reviews.
 - [ ] Deploy to forest, verify artifacts/browser/job tree, observe nightly execution.
 - [ ] Verify rollback, finish documentation and close package.
@@ -33,7 +33,8 @@ Last updated: 2026-11-05 19:58 UTC.
 
 Starting revision: `5fb446744d1e5d0e193c3d3aa2cf2dc040e22823`.
 Checkpoint: [contract decision](artifacts/20261105_contract_decision.md).
-Ancestor revision: pending. No implementation edits authorized by this scaffold.
+Ancestor revision: `ceeaa5960`. Operator requested execution on 2026-11-05;
+reviewed intent ratified and forest delivery authorized. Runtime implementation in progress.
 Reviews: [correctness/UX](artifacts/20261105_correctness_review.md),
 [security](artifacts/20261105_security_review.md), and
 [disposition](artifacts/20261105_review_disposition.md). Both reviewers confirmed
@@ -59,3 +60,18 @@ expiration refresh. Existing header overrides require an explicit coverage map.
 Ratify the reviewed proposal, author the workflow-default ADR and record the
 standalone ancestor checkpoint when implementation is requested. Preserve this
 package as an executable scaffold; keep plan/tracker current thereafter.
+
+## Execution update — 2026-11-05 UTC
+
+26 real PostgreSQL/TTL/Flask tests pass; 1,051 frontend tests passed, with the four
+notification tests rerun after final script changes. Independent correctness,
+security and QA code reviews have no open medium/high findings. Full pytest is
+running. Rehearsal restored database counts remained 28 users, 570 runs and 259
+memberships after migration to f6b8d27a901c. Live backup is restricted under
+`/var/tmp/notification-rollout-20261105/`.
+
+Operator explicitly approved scheduler-only recreation for activation and rollback:
+`wctl docker compose up -d --no-deps --force-recreate scheduler`. This bounded
+exception avoids the canonical full deployment restarting unrelated services.
+Web activation uses the canonical targeted-web entry point. Blueprint availability
+context prevents mixed-version header links during source-mounted cutover.

@@ -1,0 +1,50 @@
+{% extends "base_pure.htm" %}
+{% block title %}Notifications — WEPPcloud{% endblock %}
+{% block header_nav %}<a href="{{ url_for('user.runs') }}">Projects</a>{% endblock %}
+{% block body %}
+<h1>Notifications</h1>
+<p>Opening this page does not mark notifications read. Select notifications below to change their read state.</p>
+{% if error %}<p role="alert">{{ error }}</p>{% else %}
+<form method="get" class="pure-form wc-notifications-sort">
+  <label for="notification-sort">Sort notifications</label>
+  <select id="notification-sort" name="sort">
+    {% for value, label in [('unread_first', 'Unread first'), ('read_first', 'Read first'), ('newest', 'Newest first')] %}
+    <option value="{{ value }}" {% if sort == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="pure-button" type="submit">Apply sort</button>
+</form>
+<div data-notification-list data-update-url="{{ url_for('notifications.read_state') }}">
+  <div class="wc-notifications-actions">
+    <label><input type="checkbox" data-select-all {% if not items %}disabled{% endif %}> Select all on this page</label>
+    <button class="pure-button" type="button" data-mark-read="true" disabled>Mark read</button>
+    <button class="pure-button" type="button" data-mark-read="false" disabled>Mark unread</button>
+  </div>
+  <p data-notification-error role="alert" hidden></p>
+  <ul class="wc-notifications-list">
+  {% for item in items %}
+    <li class="wc-notifications-item">
+      <input type="checkbox" data-notification-id="{{ item.id }}" aria-labelledby="notification-title-{{ item.id }}">
+      <div>
+        <h2 id="notification-title-{{ item.id }}">{{ item.title }}</h2>
+        <p class="wc-text-muted">{{ 'Read' if item.read_at else 'Unread' }} · {{ {'active': 'Active', 'resolved': 'Resolved', 'unavailable': 'Status unavailable'}[item.state] }} · <time datetime="{{ item.created_at.isoformat() }}">{{ item.created_at.strftime('%b %d, %Y, %H:%M UTC') }}</time></p>
+        <p>{% if item.kind == 'project_ttl' and item.state != 'active' and item.runid %}Earlier notice: {% endif %}{{ item.body }}</p>
+        {% if item.state == 'unavailable' %}<p>The current deletion status could not be checked. This does not mean your project is protected.</p>{% endif %}
+        {% if item.state == 'resolved' and item.runid %}<p>This warning is no longer active.</p>{% endif %}
+        {% if item.project_url %}<a href="{{ item.project_url }}">Open project</a> · {% endif %}
+        {% if item.kind == 'project_ttl' %}<a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion') }}">How to keep your project</a>{% endif %}
+      </div>
+    </li>
+  {% else %}
+    <li>No notifications on this page.</li>
+  {% endfor %}
+  </ul>
+</div>
+<nav aria-label="Notification pages" class="wc-notifications-pages">
+  {% if page > 1 %}<a href="{{ url_for('notifications.index', page=page-1, sort=sort) }}">Previous</a>{% endif %}
+  <span>Page {{ page }}</span>
+  {% if has_next %}<a href="{{ url_for('notifications.index', page=page+1, sort=sort) }}">Next</a>{% endif %}
+  {% if page > 1 %}<a href="{{ url_for('notifications.index', sort=sort) }}">First page</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

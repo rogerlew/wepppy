@@ -24,9 +24,9 @@ or any production host.
 
 - [x] (2026-11-05 19:58 UTC) Repository discovery and initial contract/scaffold authored.
 - [x] (2026-11-05 UTC) Two independent design reviews and post-fix confirmations; no open medium/high findings.
-- [ ] Operator ratification, ADR and standalone ancestor checkpoint.
-- [ ] M1: migration, account storage and notification repository validated.
-- [ ] M2: repeatable nightly producer and reconciliation validated.
+- [x] (2026-11-05 UTC) Operator execution ratification, ADR-0137 and ancestor `ceeaa5960`.
+- [x] (2026-11-05 UTC) M1: schema/repository real-PG tests and restored-database migration validated.
+- [x] (2026-11-05 UTC) M2: producer retry/reconciliation/source-boundary tests passed; live schedule pending M5.
 - [ ] M3: Flask API, listing, headers and user workflow validated.
 - [ ] M4: broad checks, documentation and independent implementation reviews complete.
 - [ ] M5: forest activation, browser/job evidence, nightly observation and rollback complete.
@@ -322,3 +322,8 @@ explicit forest delivery gates; design review passed after corrections; implemen
 Review revision: preserve global CSRF 400/precedence, migrate before real preflight,
 default the new schedule off, constrain fixture scope across reconciliation, and
 state actual startup-relative scheduler timing rather than imply a fixed UTC hour.
+
+Execution note: the operator explicitly approved scheduler-only recreation with
+`wctl docker compose up -d --no-deps --force-recreate scheduler` for activation
+and rollback. Canonical targeted-web remains the web activation mechanism; no
+full-stack restart is authorized or needed.

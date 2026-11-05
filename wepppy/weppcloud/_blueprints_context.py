@@ -8,6 +8,7 @@ _BLUEPRINT_ATTRS = [
     "security_ui_bp",
     "unitizer_bp",
     "user_bp",
+    "notifications_bp",
     "landuse_bp",
     "soils_bp",
     "climate_bp",

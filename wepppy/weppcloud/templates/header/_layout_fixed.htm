@@ -3,6 +3,7 @@
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <a class="navbar-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
         {% block nav_content %}{% endblock %}
+        <div style="margin-left: auto">{% include 'header/_notifications.htm' %}</div>
     </nav>
 </header>
 <!--/ _layout_fixed.htm -->
