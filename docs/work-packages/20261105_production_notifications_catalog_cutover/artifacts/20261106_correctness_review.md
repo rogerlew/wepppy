@@ -41,6 +41,7 @@ implemented by the present canonical script.
 | COR-03 | Medium | Scheduled catalog admission | Original `docker/scheduled-tasks.yml:13` passed batch into a reconciler whose shared admission requires default. The prior stub test did not test that boundary. Parent's working tree now selects default. | Publish the queue correction with actual-YAML, real-admission regression evidence; verify the deployed scheduler emits real default maintenance work and resulting catalog content. | Source/regression resolved; publication and production acceptance pending |
 | COR-04 | High | Old-runtime pre-build gate | The initially proposed `get_job_ids(cleanup=False)` repair was incompatible with actual installed RQ 1.16.2: its method accepts only `start`/`end` and unconditionally invokes cleanup. The stub accepted a keyword absent from that runtime. | Use direct non-cleaning Redis cardinality through the registry key, retaining stale entries conservatively. Validate the extracted deployment probe against both actual runtimes and update its regression. | Resolved: raw ZCARD and both-runtime direct execution passed |
 | COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remain in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denies all new admissions (`:132`); pilot observation also stops on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Open; blocks catalog admission, not notification or disabled-mode runtime deployment |
+| COR-06 | Medium | Source checkout/deployment preparation | wepp1's cached repository-local LFS basic-access setting selected a path that stalled both installed clients; identical cold-cache requests succeeded without that setting. | Remove only the isolated setting and prove ordinary cold-cache filter checkout plus recovered candidate source. | Resolved: exact one-key config diff, repeated cold fetch and normal filter checkout passed; deeper authenticated-request failure mechanism remains unproved |
 
 These are execution gates, not claims that the feature implementation is
 otherwise defective. Missing final migration/browser/model/cycle evidence remains
@@ -380,3 +381,156 @@ script itself takes beyond the earliest due time, inspect and drain any admitted
 work; a later stop does not retract queued jobs. No deletion or cancellation of
 accepted tasks is justified. Record the hold/recreation and actual first feature
 schedule time rather than promising a fixed wall-clock execution.
+
+## Source preparation: stalled Git LFS filter
+
+Read-only checks at 2026-11-06 06:01:52–06:02:24 UTC found wepp1 HEAD and
+ORIG_HEAD still at `0da9c9071069c37fdcf3df5a74b28d161b1af458`, with fetched
+origin/master at `8d079b41db466fda5235a599c151324190393e9d`. Merge PID 2479310
+waited in `pipe_read` while its `/usr/local/bin/git-lfs` child PID 2479332 remained
+alive. The merge owned the zero-byte `.git/index.lock`; there was no MERGE_HEAD
+or MERGE_MSG. LFS temporary object storage was empty, the cache contained 647
+objects, and the filter's cumulative disk-write bytes remained zero. A later
+check still showed both processes after 12 minutes. This confirms a stalled
+checkout/filter boundary, not an application runtime deployment. The exact
+network cause is not established by these observations.
+
+The operator's candidate-manifest comparison identifies 11 missing objects,
+2,930,288 bytes, among 653 unique published candidate objects. wepp2 completed
+the same fast-forward successfully. Those inventory/completion results are
+attributed to the operator; this reviewer did not repeat their entire hash audit.
+
+The existing recovery precedent is
+`docs/infrastructure/wepp1-deployment-20261012.md`, Progress and discoveries:
+stop only the owned stuck filter, preserve partial-checkout evidence, and seed
+committed-content-addressed objects from the verified local cache. The canonical
+`safe_git_fast_forward_pull` already restores its original tracked checkout when
+its merge fails (`scripts/deploy-production.sh:243`); a manually launched merge
+does not inherit that recovery wrapper.
+
+The bounded recovery is to copy only the manifest's missing objects over the
+existing SSH path, with temporary-file/rename transfer semantics and SHA256/size
+verification before and after transfer. Do not use in-place writes or overwrite
+an unexpected different object. Allow a brief observation for the current merge
+to finish; if it succeeds at the authorized candidate, no reset is needed.
+
+If still stalled, recheck the filter PID/start identity, terminate only that
+owned filter gracefully, and wait for both filter and merge to exit. Never remove
+an index lock owned by a live process. Retain the partial-checkout inventory and
+confirm the previously clean source has no unrelated new edits. Only under that
+documented condition may the operator recover this deployment's partial checkout
+directly to the exact already-published candidate:
+
+```bash
+GIT_LFS_SKIP_SMUDGE=1 git -C /workdir/wepppy reset --hard 8d079b41db466fda5235a599c151324190393e9d
+git -C /workdir/wepppy lfs checkout
+```
+
+This uses the same branch and authorized target; it is not permission to reset
+unrelated user changes. No stash, broad `git clean`, new protocol or registry is
+needed. Installed `git lfs checkout` documentation confirms it materializes
+available local objects without downloading and does not overwrite modified
+files. Verify final HEAD, clean tracked/untracked state, every candidate LFS
+path's actual bytes/hash/size and native vendored artifacts before the canonical
+build. An unresolved pointer or unexpected local edit blocks activation.
+This reviewer sent no signals and changed no production files.
+
+### Permanent Git LFS repair: configuration discrimination
+
+The operator subsequently requested a permanent wepp1 repair. Independent
+read-only comparison confirms all three hosts select `/usr/local/bin/git-lfs`
+2.3.4 (Go 1.9.1), while wepp1 also has packaged `/usr/bin/git-lfs` 3.4.1
+(Go 1.22.2). The October 12 record explicitly says both client versions stalled
+before cache seeding, so that precedent does not prove a client-selection fix.
+
+wepp1's two global credential-helper entries are an empty reset followed by Git
+Credential Manager with gpg storage. wepp2's global helper is credential store.
+However, both hosts have identical github.com-scoped empty-reset followed by the
+GitHub CLI auth helper. Git documents the empty entry as clearing inherited
+helpers; their raw global helper counts are therefore not evidence of different
+effective GitHub authentication. No credential values were printed or changed.
+[Git credential configuration](https://git-scm.com/docs/gitcredentials).
+
+The wepp1-only URL-scoped LFS `access=basic` entry is not inherently invalid:
+LFS normally records it after an authentication challenge and obtains credentials
+before the batch request. Removing it changes the initial authentication path;
+it does not prove the prior path was the stall's cause.
+[Git LFS configuration](https://github.com/git-lfs/git-lfs/blob/main/docs/man/git-lfs-config.adoc),
+[version 2.3.4 authentication code](https://raw.githubusercontent.com/git-lfs/git-lfs/v2.3.4/lfsapi/auth.go).
+
+The accepted diagnostic design uses the same exact published object set with a
+separate empty object store per bounded probe: current client/current config,
+packaged client/same config, then the exact access-key override only if needed.
+Retain sanitized duration, success/failure stage, object hashes and client identity.
+A permanent fix must additionally pass a real uncached filter checkout and repeated
+download without seeded objects. Preserve the successful credential topology;
+do not rewrite global helpers or reorder all executables on PATH based on counts.
+If client selection is proved causal, select the packaged binary consistently for
+both ordinary `git lfs` and Git's filters. If the cached access setting is proved
+causal, change only that repository/URL setting and verify normal challenge
+negotiation does not immediately recreate the same failure. TLS verification and
+credentials must remain intact. The permanent fix is unproved until those actual
+boundaries pass; the earlier cache recovery only restored deployment source.
+
+The subsequent controlled probes isolate the cached preauthentication setting:
+
+| Probe | Client | Access setting | Result |
+| --- | --- | --- | --- |
+| old-configured-01 | 2.3.4 | Original basic | Timeout after 45.005 seconds; 0/11 objects |
+| system-configured-01 | 3.4.1 | Original basic | Timeout after 45.009 seconds; 0/11 objects |
+| old-public-first-01 | 2.3.4 | Per-command empty override | 1.582 seconds; 11/11 hashes/sizes valid |
+| permanent-normal-01 | 2.3.4 | Persistently removed key; no access override | 1.632 seconds; 11/11 hashes/sizes valid |
+
+This reviewer read the retained private receipts and probe implementation. Every
+label creates a new exclusive mode-0700 directory with its own initially empty
+`lfs.storage`; all probes use the same candidate and 11 object IDs. The bounded
+timeouts and other probe settings are constant. No seeded cache supplies these
+results. The operator then removed only repository-local
+`lfs.https://github.com/rogerlew/wepppy.git/info/lfs.access` after backing up
+`.git/config`, leaving client selection and global credential helpers unchanged.
+
+Independent comparison of the parsed backup and live configuration confirms
+exactly that one setting removed and zero additions. Backup SHA256 is
+`13903f6324dfbfec9d1eecd5156bc8779c6b93e8fa139b0a68d7ccd2750556e9`;
+current SHA256 is
+`6fa0d6ad1c5f81db73420828f1decf194e6c820cd6a66dbb8412dd58a4654fa0`.
+The key is absent and there is no repository `.lfsconfig` fallback. This supports
+the smallest persistent repair: restore normal initial public/challenge-based
+negotiation for this repository. It does not establish why authenticated requests
+stalled internally, invalidate the credential helpers, or justify changing TLS,
+global authentication, or installed client versions.
+
+Remaining acceptance is a real off-tree `checkout-index` from the candidate's LFS
+pointer index with a separate empty object store, ordinary PATH/filter settings,
+and no skip-smudge or access override. Require all 11 output hashes/sizes, the
+access key still absent afterward, and then full source-recovery LFS/clean-tree
+validation. These pending gates prevent treating a fetch-only success as complete
+checkout/deployment recovery.
+
+### Permanent repair closure
+
+COR-06 is resolved. The retained normal-filter receipt records exit 0, no timeout,
+11/11 output files, 4.631 seconds, absent access key, clean worktree and an empty
+initial cache. This reviewer inspected the executed probe code; its SHA256 on
+wepp1 matches the reviewed local copy:
+`21d090a358eebff9965cb79c75e27ab05c53be96d3a46245f3cab262c575e27e`.
+It refuses skip-smudge, requires candidate HEAD, exclusively creates a new output
+directory, requires the cache not to exist, and invokes `git checkout-index` with
+only isolated `lfs.storage`; it does not change PATH, filters or access settings.
+
+Independent readback parsed each selected path's LFS pointer directly from
+candidate `8d079b41db466fda5235a599c151324190393e9d` and verified all 11 off-tree
+outputs plus their 11 isolated-cache objects against committed SHA256 and size.
+The main index matches the candidate, HEAD is that revision, and the access key
+remains absent. The source-recovery log records successful materialization of all
+661 LFS paths; the operator additionally reports full hash/size validation and
+clean matching source on wepp1/wepp2/wepp3. This review did not repeat the entire
+1.265-GB fleet hash audit.
+
+The fix is a persistent repository-local configuration correction, not a cache
+seed, binary replacement, credential rewrite or TLS change. The evidence isolates
+the problematic preauthentication path; it does not establish the deeper reason
+authenticated requests stalled or certify unrelated private repositories.
+The parent reports the completed broad suite: 13,361 passed, 281 skipped,
+3,579.24 seconds. Runtime deployment and its live acceptance gates are still
+pending; source/test readiness is not production activation.

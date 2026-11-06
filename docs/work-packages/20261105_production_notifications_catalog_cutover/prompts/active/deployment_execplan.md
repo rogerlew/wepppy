@@ -20,8 +20,8 @@ catalog remains legacy/timestamp-only with its sweep disabled.
 - [x] (2026-11-06 UTC) Initial three-repository/fleet inspection and wepp1 cleanup.
 - [x] (2026-11-06 UTC) Operator ratified combined deployment and new defaults.
 - [x] M0: concrete controls, independent review and private baseline checkpoint.
-- [ ] M1: scheduler repair and candidate validation/publication.
-- [ ] M2: backup, schema rehearsal and production migration.
+- [x] M1: scheduler repair and candidate validation/publication (8d079b41d).
+- [x] M2: backup, schema rehearsal and production migration (2026-11-06 06:34 UTC).
 - [ ] M3: compatible fleet activation and model/runtime acceptance.
 - [ ] M4: notification preflight, activation and scheduled/browser readback.
 - [ ] M5: default-worker pilot and bounded general catalog observation.
@@ -41,6 +41,8 @@ supported. The canonical script resumes its own global fence per host.
 
 ## Decision Log
 
+2026-11-06 UTC / operator and Codex: permanently remove only wepp1's repository-local forced LFS access=basic setting after controlled tests isolated it; preserve credential helpers, TLS and client selection. Normal uncached filters passed.
+
 2026-11-06 UTC / operator: proceed with the combined production deployment as a
 work package, including 2111d0eb2 and ADR-0138. Use the approved readiness sequence,
 with scoped worker holds and scheduler recreation where the canonical script
@@ -52,11 +54,17 @@ dispositions. Treat whole-cycle observation as required evidence, not a forecast
 
 ## Outcomes & Retrospective
 
-Preparation and cleanup complete; 186 focused and 72 deployment tests pass.
-Full regression is running. Private baseline snapshots exist on all three hosts;
-PostgreSQL custom-format backup is retained on wepp1. Deployment/activation remain pending.
-No production completion claim is made until exact artifacts and live consumers
-pass. This section will record actual revisions, timings, exceptions and limits.
+Published candidate 8d079b41d is clean on all three hosts. Full pytest passed:
+13,361 passed, 281 skipped; focused, deployment, frontend and documentation gates
+passed. The permanent wepp1 LFS configuration repair passed uncached fetch and
+normal checkout-filter verification; see docs/infrastructure/wepp1-git-lfs.md.
+All eight old runtime containers are stopped, with exact-ID receipts retained.
+Quiescent PostgreSQL and Redis recovery snapshots exist privately on wepp1.
+The two independently proven completed permits were retired with pilot bytes
+unchanged. Production migration reached f6b8d27a901c with existing counts unchanged
+(5,416 users; 33,444 runs; 9,444 ownership rows; 11 feature memberships).
+The canonical wepp1 build is running; fleet activation and feature acceptance
+remain open. Both feature flags remain false and catalog admission remains paused.
 
 ## Context and Orientation
 

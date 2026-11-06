@@ -8,7 +8,7 @@ Status: executing. Last updated: 2026-11-06 UTC.
 - [x] Published candidate/native hashes and current fleet baseline inspected.
 - [x] wepp1 cleanup completed: 215 GB free, tagged rollback images preserved.
 - [x] Package/checkpoint and independent preflight review.
-- [ ] Scheduler queue correction, regressions and published candidate.
+- [x] Scheduler queue correction, regressions and published candidate 8d079b41d.
 - [ ] Production state backup/rehearsal and coordinated migration/deployment.
 - [ ] Notification activation and actual scheduled/browser acceptance.
 - [ ] Default-worker pilot and monitored general catalog activation.
@@ -61,3 +61,14 @@ identity and all pilot history. No recovery mutation has run. Fresh full pytest
 is still running without a reported failure; focused/deployment/frontend gates
 pass. The new scheduler will be held after wepp1 activation through remote fleet
 activation to avoid admitting unrelated scheduled work during the transition.
+
+### Live cutover checkpoint (2026-11-06 06:34 UTC)
+
+Full suite: 13,361 passed, 281 skipped. Candidate 8d079b41d verified on all hosts.
+Permanent wepp1 LFS repair independently verified through uncached normal filters.
+All eight old runtime containers stopped. Quiescent account dump and Redis RDB
+retained privately; SHA256 values are in artifacts/20261106_live_checkpoint.md.
+Exact two expired completed permits retired, with historical pilot bytes preserved.
+Live migration f6b8d27a901c passed unchanged existing counts; both new tables empty.
+Canonical wepp1 build running; remote workers held. Both flags false; global
+catalog admission pause remains deployment-owned. No 2.x activation claimed yet.

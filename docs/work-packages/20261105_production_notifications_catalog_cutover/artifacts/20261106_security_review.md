@@ -17,12 +17,13 @@ closure or explicit owner risk acceptance before their dependent steps.
 
 - **Package**: `docs/work-packages/20261105_production_notifications_catalog_cutover/`.
 - **Reviewer**: independent `production_cutover_security`, security reviewer role.
-- **Date**: 2026-11-06 UTC; control review updated through 05:19 UTC.
+- **Date**: 2026-11-06 UTC; execution evidence reviewed through 06:37 UTC.
 - **Scope reviewed**: active deployment plan, readiness record, canonical deploy
   script, production build inputs, notification migration/auth/worker boundaries,
   RQ migration and query publication/admission contracts.
 - **Commit context**: application baseline `2111d0eb2`, with the scheduler repair
-  still under implementation. Production baseline is reported as `0da9c9071`.
+  subsequently published in candidate `8d079b41db466fda5235a599c151324190393e9d`.
+  Initial production baseline was `0da9c9071`.
 - **Related artifacts**: [readiness record](../notes/production-deployment-readiness.md),
   [active plan](../prompts/active/deployment_execplan.md),
   [notification implementation/forest security review](../../20261105_user_notifications/artifacts/20261105_final_security_review.md).
@@ -30,9 +31,10 @@ closure or explicit owner risk acceptance before their dependent steps.
   independent installed-runtime probe. Final deployment evidence is pending.
 
 This reviewer inspected source and retained records without production mutations.
-Production values below are attributed to the primary operator's readiness
-record; they are not independently refreshed live observations. Historical forest
-acceptance supports implementation confidence but does not certify production.
+Initial production values are attributed to the primary operator's readiness
+record. Later independent read-only checks are explicitly identified in the
+execution checkpoint below. Historical forest acceptance supports implementation
+confidence but does not certify production.
 
 ## Security Triage Decision
 
@@ -100,9 +102,9 @@ Valid states to preserve:
 
 - [x] Plan keeps raw backups and credentials outside git in private host evidence
   directories; no new credential or secret mount is proposed.
-- [ ] Verify mode 0700 directories and restricted backup/config files. Sanitize
-  retained summaries; no rendered Compose environment, process argv, raw Redis
-  job payloads, cookies, database URIs or secret-bearing command traces in artifacts.
+- [x] wepp1 evidence directory is mode 0700; raw backups, configuration, runtime
+  snapshots and operational logs inspected here are mode 0600. Repository
+  summaries contain safe identities/counts/digests; do not publish raw state.
 - [ ] Backup commands must use existing mounted secrets/configuration without
   placing credentials in argv or printing them. Export only allowlisted fields.
 
@@ -170,8 +172,9 @@ Valid states to preserve:
 
 - [x] Migration is additive: two notification tables and indexes; old account
   tables are not rewritten. Operational rollback retains the new tables.
-- [x] SEC-02 target guard reviewed; isolated rehearsal execution remains pending.
-- [ ] Retain a quiescent pre-2.x recovery checkpoint with all
+- [x] SEC-02 target guard, isolated rehearsal and actual additive production
+  migration passed; independent read-only SQL confirms the resulting state.
+- [x] Retained a quiescent pre-2.x recovery checkpoint with all
   producers/schedulers/consumers accounted for. A live backup is useful but is
   not a promise of no-data-loss rollback after later accepted work.
 - [ ] Preserve historical catalog ledger/pause/receipts; fresh pilot identity,
@@ -453,6 +456,54 @@ eight host/service pairs and eight distinct host/container identities, and carri
 forward the earliest host observation. Both explicitly reject optimized Python.
 Repository copies match these digests. The helper/source review is complete;
 actual hold receipts and recovery execution still require retained evidence.
+
+## Independent execution checkpoint — 2026-11-06 06:37 UTC
+
+Read-only SSH inspection verified the private wepp1 evidence directory at
+`/var/tmp/wepppy-production-cutover-20261106`, the per-host baseline/hold records,
+and the live account database. No RQ cleanup API or production mutation was used
+by this reviewer.
+
+- All eight hold rows match their host's protected original container ID/image:
+  five on wepp1, two on wepp2 and one on wepp3, each exited with PID zero. The
+  combined receipt SHA256 is
+  `ce187371385e84e719a0398bc81420d6bc518cc99860db9254444623ef10c3e9`.
+  Host observations preceded the guarded recovery by roughly 26 seconds. These
+  prove the recorded transition checkpoint, not an indefinite future hold.
+- Independently recomputed quiescent PostgreSQL dump SHA256
+  `2ed9d243168dd247f69048b4db156dcaa8012a9db37e4815207644df584b492f`
+  and Redis RDB SHA256
+  `ccb82587b264a8a652fee9217569878d3777d1bd0df95924a9962e2e51421756`.
+  Sizes are 6,309,454 and 1,366,035,866 bytes respectively; both are mode 0600.
+  The PostgreSQL restore rehearsal passed. A checksum is not a claim of a
+  complete production Redis restore rehearsal or safe post-2.x downgrade.
+- The executed permit helper matches the reviewed final digest `f9771b11…`.
+  Its retained before/after objects remove exactly two bindings and preserve
+  every other field, including `initialized_at`. Intended and actual after bytes
+  both hash to
+  `ebcf3f410d36ee26bf1623ccbabc9eef4ed3d09160675e99f0924f30a5f41608`.
+  The historical pilot snapshot matches the pinned digest; successful helper
+  readback records unchanged pilot bytes and deployment-owned pause.
+- Isolated rehearsal selected `cutover_rehearsal_20261106`. Live execution then
+  selected `wepppy` and advanced only `e7a1c9d204bf` → `f6b8d27a901c`.
+  Independent read-only `psql` confirms 5,416 users, 33,444 runs, 9,444 ownership
+  rows and 11 feature memberships, matching the pre-migration counts. Both
+  notification tables contain zero rows. This closes the migration execution
+  evidence gate without inferring later inbox behavior.
+- Parsed comparison of protected original and current repository Git settings
+  confirms exactly the expected forced LFS `access=basic` setting was removed
+  and none added. The [durable LFS record](../../../infrastructure/wepp1-git-lfs.md)
+  describes uncached fetch/filter verification; this reviewer did not repeat
+  those network transfers. Credential helpers and TLS settings were not removed
+  by the inspected repository-config delta.
+- The canonical deployment log starts at 06:33:24 UTC and is still in its image
+  build phase at review. Fleet activation, exact built-runtime parity, normal
+  routing/model acceptance, notification execution and catalog observation remain
+  open. No deployment-success or feature-enable claim follows from this checkpoint.
+
+The retained [live checkpoint](20261106_live_checkpoint.md) agrees with these
+checks. No new security finding was identified; medium/high findings remain
+closed, subject to the still-required later execution gates.
 
 ## Sign-off
 
