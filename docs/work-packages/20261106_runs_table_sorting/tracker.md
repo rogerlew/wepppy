@@ -9,4 +9,5 @@
 - 29 route tests (including Chromium variants), 1,069 frontend tests and lint passed.
 - Independent correctness/security reviews passed; no findings.
 - Full Python rerun omitted with bounded-scope rationale in artifacts/validation.md.
-- Development site verified; no production deployment.
+- Development site verified; web-only wepp1 hotfix applied at 2026-11-06 17:33 UTC.
+- Production checks and rollback: artifacts/2026-11-06_wepp1_hotfix.md.

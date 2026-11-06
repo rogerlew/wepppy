@@ -13,6 +13,8 @@ content, and show one help link above the table.
 - [x] (2026-11-06) Implement scoped layout/help and disabled-last ordering with failing-first regressions.
 - [x] (2026-11-06) 29 route/Chromium and 1,069 frontend tests passed; reviews and docs complete.
 
+- [x] (2026-11-06 17:33 UTC) Apply user-authorized wepp1 web-only hotfix; verify worker rotation and health.
+
 ## Surprises & Discoveries
 
 No template code intentionally disables sort anchors. Actual pointer/navigation
@@ -27,10 +29,14 @@ Reuse the existing server-side sorting and link transport if reproduction suppor
 it; do not introduce a new client sorting system without evidence. Keep disabled
 rows last independently of direction. Use current authorization and TTL contracts.
 
+On 2026-11-06 the user authorized a wepp1 web-only hotfix. Apply the reviewed
+three-file delta with backups and Gunicorn HUP to avoid unrelated service recreation.
+
 ## Outcomes & Retrospective
 
 Implemented and validated locally; forest navigation repaired by verified
-Gunicorn HUP. No production deployment. Broad Python rerun omitted under the
+Gunicorn HUP. Subsequent wepp1 web-only hotfix passed code/template and health
+checks; see artifacts/2026-11-06_wepp1_hotfix.md. Broad Python rerun omitted under the
 nearest documented handoff exception; see artifacts/validation.md.
 
 ## Context and Plan of Work
@@ -55,8 +61,11 @@ viewports. No live user mutation is required. Record limits and real results.
 
 Retain existing query keys, route endpoints, JSON fields, credentials and CSRF.
 Revert only this package's changes if needed. No new dependency, queue, schema,
-retention policy or deployment operation. Update this plan and tracker at handoff.
+retention policy change. The authorized web-only hotfix recovery is documented
+in artifacts/2026-11-06_wepp1_hotfix.md. Update this plan and tracker at handoff.
 
 Created 2026-11-06 for the reported sort defect and explicit presentation changes.
 
 Updated 2026-11-06: retained concrete failure/reload evidence and final validation.
+
+Updated 2026-11-06: record the subsequent user-authorized wepp1 hotfix and verification.
