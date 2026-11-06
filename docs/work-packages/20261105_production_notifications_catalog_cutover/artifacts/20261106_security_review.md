@@ -8,6 +8,9 @@
 | SEC-02 | Medium | Migration target and recovery copy | The initial restored-database rehearsal lacked an executable target guard. Old Flask configuration could select production while rehearsing. Active plan M2; `configuration.py:293`; notification migration. | Override both URI variables before Flask import; validate the owned target, effective app URI and connected database/server before upgrade; preserve backups and verify production unchanged after rehearsal. | Resolved at command review: helper digest and checks below. Successful isolated rehearsal remains required before production migration. |
 | SEC-03 | Medium | Old-runtime registry cleanup | The original deployment probe calls `StartedJobRegistry.get_job_ids()`, which cleans the registry. Its pre-build fallback can run old 1.16 against shared 2.x-written state. The first proposed `cleanup=False` correction also fails on actual RQ1.16.2, whose method has no cleanup parameter. | Use raw Redis `ZCARD` of each started-registry key, conservatively treating stale entries as a hold. Regression must forbid `get_job_ids()` and prove the embedded script reads cardinalities without cleanup under both runtime versions. | Resolved: raw ZCARD source, 38 passing execution tests, and independent exact-program execution under installed 1.16.2 and 2.12.0. |
 | SEC-04 | Medium | Hold-receipt identity | Initial `capture_old_runtime_holds.py:10` checks uniqueness only in the baseline snapshot, then inspects that old ID. A stopped original plus a current replacement/duplicate can still yield a passing receipt. The aggregator's timestamp policy also needs to preserve the oldest observation. | Enumerate current matching project/service containers, reject replacements/additional running copies, compare exact baseline ID/image and stopped state; forbid optimized Python. Aggregate using the earliest host observation or validate every host's age rather than refreshing stale evidence with aggregation time. | Resolved: current Docker inventory and exact baseline-ID checks added; reviewed aggregator validates each host age, unique identities and preserves the minimum timestamp. Final digests below. |
+| SEC-05 | Low | Vendor manifest and secrets | Initial `runtime_manifest.py` hashed the mounted Discord token inside the vendor tree. Only an aggregate digest was emitted, but credentials became part of purported source identity and could cause false cross-host drift. | Exclude the exact runtime-secret path, disclose the exclusion, regenerate source manifests, and never change/copy credentials to make source hashes match. | Resolved: exact exclusion reviewed; regenerated wepp1/wepp2 code-only manifests agree across all comparison fields. Earlier broad digests remain private historical evidence. |
+| SEC-06 | Medium | General observation continuity | The initial `observe_general_catalog.py` reset its deadline and overwrote activation/outcome files on restart, without rejecting prior evidence. After releasing its owned pause, it did not check whether an operator/heartbeat pause reappeared. A restarted or interrupted observation could therefore later look successful without preserving the failed interval. | Require a fresh, exclusive one-shot evidence marker before release; reject reuse rather than overwrite prior attempts. During active observation, any pause must terminate acceptance and preserve its owner. Retain the original deadline and failure outcome. | Resolved: exclusive start marker, fixed manifest deadline, active pause detection and completion WATCH reviewed; local negative checks pass. |
+| SEC-07 | Medium | Ordinary-work accounting | The initial collector excluded any unbound job whose description started with `wepppy.rq.query_catalog_rq.`. Canonical `_query_catalog_admission.py:136` grants maintenance classification only through ledger ownership; descriptive exclusion could hide ordinary queue delay. A concurrent ledger/queue snapshot could also misclassify new maintenance as an ordinary arrival. | Use ledger authority for exclusion. Re-read ownership or stop conservatively for unaccounted maintenance-looking work; never silently exclude by description or credit it as an ordinary arrival. | Resolved in final `e3f295df…`: canonical job prefix/description and refresh/inventory functions recheck ledger or stop; retained maintenance IDs purge prior ordinary candidates. Scheduler ticks cannot qualify as acceptance arrivals. Correctness's 18 real-Redis checks include the canonical-description regression. |
 
 These findings concern execution controls, not requests for new infrastructure or renewed
 authorization. No risk acceptance is recorded. Medium/high findings require
@@ -17,7 +20,8 @@ closure or explicit owner risk acceptance before their dependent steps.
 
 - **Package**: `docs/work-packages/20261105_production_notifications_catalog_cutover/`.
 - **Reviewer**: independent `production_cutover_security`, security reviewer role.
-- **Date**: 2026-11-06 UTC; execution evidence reviewed through 06:37 UTC.
+- **Date**: 2026-11-06 UTC; execution evidence reviewed through 07:04 UTC;
+  prepared general collector and corrections reviewed through 07:23 UTC.
 - **Scope reviewed**: active deployment plan, readiness record, canonical deploy
   script, production build inputs, notification migration/auth/worker boundaries,
   RQ migration and query publication/admission contracts.
@@ -66,9 +70,10 @@ Valid states to preserve:
 
 ## Verdict
 
-- **Gate status**: pass for reviewed execution controls/source repairs and exact
-  recovery/receipt helpers. Final production acceptance and package closeout
-  remain pending.
+- **Gate status**: pass for reviewed execution controls/source repairs, exact
+  recovery/receipt helpers and prepared general collector. Actual launch-manifest,
+  fleet/pilot and general observation acceptance remain mandatory execution gates.
+  Final production acceptance and package closeout remain pending.
 - **Unresolved findings**: high 0; medium 0; low 0.
 - **Recommendation**: proceed with guarded rehearsal and the reviewed sequence,
   retaining actual backup/hold/readback evidence before their dependent steps.
@@ -475,8 +480,9 @@ by this reviewer.
   and Redis RDB SHA256
   `ccb82587b264a8a652fee9217569878d3777d1bd0df95924a9962e2e51421756`.
   Sizes are 6,309,454 and 1,366,035,866 bytes respectively; both are mode 0600.
-  The PostgreSQL restore rehearsal passed. A checksum is not a claim of a
-  complete production Redis restore rehearsal or safe post-2.x downgrade.
+  The earlier protected PostgreSQL backup restored successfully for the migration
+  rehearsal; these new quiescent files were checksum-verified here. This is not a
+  claim of a complete Redis restore rehearsal or safe post-2.x downgrade.
 - The executed permit helper matches the reviewed final digest `f9771b11…`.
   Its retained before/after objects remove exactly two bindings and preserve
   every other field, including `initialized_at`. Intended and actual after bytes
@@ -504,6 +510,155 @@ by this reviewer.
 The retained [live checkpoint](20261106_live_checkpoint.md) agrees with these
 checks. No new security finding was identified; medium/high findings remain
 closed, subject to the still-required later execution gates.
+
+## Prepared general observation and runtime parity — 07:04 UTC
+
+The [prepared observation manifest](general_observation_manifest.json) matches
+the authorized limits: 172,800 seconds, existing default queue, twelve expected
+consumers, global cap seven, 300-second ordinary-wait stop criterion, and seven
+locators covering four namespaces. It correctly requires actual reconciliation
+completion beyond inventory, receipt/unreconciled ages, actual ordinary arrivals,
+artifact readback and explicit duplicate-traversal accounting. Stop behavior
+preserves admitted work, receipts, ledger history and the independent GC/Runs
+catalog settings. Its `prepared_not_activated` state is accurate.
+
+Before releasing the pause, complete its executable observation specification:
+collector command/cadence and owner, protected evidence path, exact runtime/config
+identities, authoritative cycle-completion fields, deadline behavior and sample
+failure/observer-loss handling. Explicit triggers must cover cap violations,
+uncertain accounting, configuration/artifact failure and reaching the deadline
+without complete acceptance. A bounded operator process in the existing runtime
+is sufficient; no new service is requested. Missing ordinary arrivals or
+unobserved intervals remain inconclusive. Recorded failures must not disappear
+because backlog clears or a later sample looks healthy. The operator confirmed
+these details will be completed before general release; this prepared manifest
+alone does not satisfy the activation evidence gate.
+
+Independent comparison of the regenerated code-only runtime manifests confirms
+wepp1/wepp2 equality for UID/GID/groups, installed distributions, explicit flags and
+roots, application/native file hashes, interchange selection, vendor source trees
+and Rosetta. RQ is 2.12.0, identity 1002:130, and both feature flags remain false.
+Manifest file SHA256 values are
+`abed509567d58cdb660e38ae0301d00ce5c361cd673379af10d5dc385ebe3067`
+and `1a0a5eb562103ca7b359a9a31badf460c51a65ace9af98db98ff544ef9278743`;
+their container hostnames differ as expected. The exact excluded runtime-secret
+path is `/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token`, named in
+`source_manifest_exclusions`. This closes SEC-05 without credential mutation.
+
+The primary operator reports successful canonical wepp1/wepp2 deployment,
+twelve default/eight batch registrations, held scheduler, and continuing wepp3
+build. Fixture CAP login, User-only token denial, self-service PowerUser grant,
+token mint, browser isolation/pagination/history and scoped batch population/retry
+also passed according to the operator's checkpoint. These browser/job results
+were not independently repeated by this reviewer in this pass. Acceptance-helper
+email and Referer corrections preserve the existing validator and strict CSRF
+behavior; no production validation exemption was introduced. Actual scheduled
+notification execution, full fleet acceptance, catalog pilot/general observation
+and fixture/token cleanup remain open.
+
+## Prepared general collector review — 07:13 UTC
+
+Reviewed the unexecuted [collector](observe_general_catalog.py), SHA256
+`8db746fdde670ce571eb1443308d6b2cc26654b43c114a4360b5b4dc9b372b1e`,
+and [manifest](general_observation_manifest.json), SHA256
+`9bfc9723dc0f8b9024cac1db880ebadc007bf47408c0128038789dfb1666c773`.
+These are review inputs, not production activation evidence.
+
+The collector operates under the existing UID/GID and worker, verifies enabled
+configuration and twelve compatible consumers, and reads queue/registry state
+without RQ cleanup. It releases only its own initial pause with compare-and-delete
+and uses NX on failure so another operator's pause survives. SIGTERM, SIGINT and
+the 45-second sample alarm reach the failure path. A separate human/operator
+heartbeat check within 60 seconds remains required for SIGKILL, host or connection
+loss; the manifest correctly avoids claiming automatic enforcement for those
+cases. Neither the collector nor the manifest adds a service or runtime privilege.
+
+The current source requires a new cycle after activation and a post-activation
+ordinary job with a recorded start; a completed older cycle or existing ordinary
+work alone no longer satisfies its completion condition. It checks discovery
+errors, cycle failures and terminal failures still represented in the ledger.
+The independent same-cycle artifact/age acceptance file is necessary, and the
+pending/admitted-scope age sample is explicitly not global receipt coverage.
+Ten-second samples can miss short-lived events; retained gaps or failures cannot
+be erased by later healthy state. Final acceptance must describe that limit.
+
+SEC-06 and SEC-07 identify the remaining concrete gaps. Required bounded checks
+are rejection of a reused evidence directory, termination when any pause returns,
+preservation of an existing other-owner pause, and inability of an unaccounted
+catalog-looking job to disappear from wait accounting or qualify as an ordinary
+arrival. The configured source/runtime identity placeholders remain null and
+`state` remains `prepared_not_activated`, so this manifest is intentionally not
+launchable. Populate them only after the separate pilot and real enabled fleet
+convergence gates. These findings hold general admission release; they do not
+invalidate already retained migration or compatible fleet-deployment evidence.
+
+## General collector correction and local boundary checks — 07:17 UTC
+
+Re-reviewed collector SHA256
+`bd855c349c089e6a448f4c140daf4889c50a5e8e882bce6ac9710930c9824af3`.
+An `O_EXCL` start marker rejects reuse of the evidence directory and preserves the
+original marker bytes. The effective deadline is bounded by both the configured
+duration and a fixed `absolute_deadline`. Once active, any admission pause stops
+observation; the final completion check also watches the pause, ledger, cursor,
+discovery and referenced job statuses. A changed checkpoint cannot produce a
+passing marker. Failure still uses NX and preserves another owner's pause.
+
+Refresh/inventory descriptions without an initially observed binding cause a
+ledger reread; absent authority fails explicitly. Unrecognized descriptions remain
+ordinary work. Reconciliation scheduler ticks count toward queue-delay health but
+cannot satisfy the required ordinary arrival. Maintenance admitted during the
+ledger/queue snapshot race cannot be credited as an ordinary arrival.
+
+Fourteen independent local behavioral checks passed using the actual collector
+functions and exclusive-marker statements extracted through Python AST, with fake
+Redis and temporary private directories. These covered own/other-owner pause
+return and preservation, both unaccounted maintenance functions, unknown-prefix
+and scheduler wait accounting, scheduler/pre-activation arrival exclusion, old
+cycle rejection, new-ledger ownership races, completion WATCH conflict and pause,
+exclusive-marker reuse, and a positive fresh-cycle/ordinary-arrival control.
+No network, live Redis or production mutation occurred. These checks validate the
+bounded failure behavior; they are not a production observation or a substitute
+for the required artifact/age evidence.
+
+SEC-06 and SEC-07 are closed. Before launch, populate `absolute_deadline`, the
+actual converged configuration/image identities and authorized state in the
+protected manifest. Retain the external heartbeat-monitor responsibility and
+fresh pilot acceptance. Successful source review does not clear those execution
+gates or authorize reuse of a failed observation as uninterrupted evidence.
+
+## Final canonical job-classification readback — 07:23 UTC
+
+Final collector SHA256 is
+`e3f295df4ff83351731837d5195747ab7c033eb481f3bacbb467513aa600a4be`.
+The earlier fourteen security checks did not cover the actual sanitized job
+description, `Query catalog maintenance`. Correctness's subsequent negative test
+exposed that omission before activation. Current code uses the canonical
+`cq.DESCRIPTION` and `cq.PREFIX`, rereads ledger authority, and stops if authority
+is absent. `maintenance_seen` retains identified IDs and removes any earlier
+ordinary candidate before arrival acceptance. The security reviewer independently
+verified those source paths and the constants in `query_catalog_rq.py`.
+
+The [correctness review](20261106_correctness_review.md#prepared-general-observation-collector-review)
+records eighteen passing checks on disposable Unix-socket Redis, including the
+canonical-description red/green case, concurrent admission, prior-candidate purge
+and an actual WATCH conflict. This reviewer read the exact harness, SHA256
+`5a271ff19a85f2abdb5271c7155cabc087b93e21bbe2bf71a169a1670de0f41b`,
+and verified its cases and isolation, without repeating its execution. SEC-07 is
+closed against this final source. The prepared manifest now includes the null
+absolute deadline and explicit launch preconditions; its SHA256 is
+`934c6b148e88f6b048eee8671014ade5db9abbdecc1e890da81fed84099c45c3`.
+
+The primary operator reports a fresh default-worker pilot completing in 105.65
+seconds, with one inventory job, sixteen refresh jobs, eight scopes/two artifact
+waves, query readbacks and unchanged sentinel/source data. Observed real model
+jobs waited at most 0.128 seconds. The operator also reports eighteen successful
+model jobs, twenty-five fresh Parquet files totaling 706,190 rows, native hash/log
+evidence, three strict report checks and browser CSV acceptance. These are
+operator-reported checkpoint results here, not independently repeated production
+tests. Scheduled notification dispatch is due after the current checkpoint;
+general refresh remains disabled and admission paused. Whole-cycle production
+observation and cleanup remain open. No new security finding follows from this
+source review, and no production mutation was performed by the reviewer.
 
 ## Sign-off
 

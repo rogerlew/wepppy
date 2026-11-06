@@ -293,7 +293,7 @@ records the current fleet/RQ prerequisite, flag staging, default-worker pilot,
 proposed bounded general observation and independent rollback boundaries.
 No production feature flags were changed during planning.
 
-- [ ] Repair the confirmed scheduler YAML batch/default mismatch and test the
+- [x] Repair the confirmed scheduler YAML batch/default mismatch and test the
   actual configuration-to-dispatch-to-admission boundary; preserve notification batch routing.
 - [ ] Publish reviewed correction and deploy compatible participants with general async disabled.
 - [ ] Complete fresh default-worker pilot and ordinary-arrival delay evidence.
@@ -307,3 +307,15 @@ Decision: repair to the already accepted default-queue contract, keep the shared
 ledger/history, and use the existing merged service environment instead of adding
 unnecessary Compose configuration layers. Outcomes: readiness findings retained;
 production cutover and full-capacity acceptance remain pending.
+
+November 6 execution checkpoint: the operator authorized the combined work
+package and production deployment, superseding the earlier pilot-only authority
+for this rollout. Candidate 8d079b41d is published; full suite 13,361 passed/281
+skipped. wepp1/wepp2 canonical deployments completed with twelve real default
+consumers, general async false and matching seven root locators/four namespaces.
+wepp3 deployment is underway. Exactly two proven completed historical permits
+were retired under independently reviewed guards; pilot history and ledger
+identity remain intact. The deployment-owned catalog pause remains set. Default
+pilot and complete reconciliation/ordinary-arrival observation are still open.
+See the combined package tracker and independent security/correctness reviews
+for the live execution and recovery evidence.

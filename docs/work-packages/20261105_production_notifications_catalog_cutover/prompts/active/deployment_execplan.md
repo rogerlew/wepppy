@@ -22,7 +22,7 @@ catalog remains legacy/timestamp-only with its sweep disabled.
 - [x] M0: concrete controls, independent review and private baseline checkpoint.
 - [x] M1: scheduler repair and candidate validation/publication (8d079b41d).
 - [x] M2: backup, schema rehearsal and production migration (2026-11-06 06:34 UTC).
-- [ ] M3: compatible fleet activation and model/runtime acceptance.
+- [x] M3: compatible fleet activation and model/runtime acceptance (2026-11-06 07:24 UTC).
 - [ ] M4: notification preflight, activation and scheduled/browser readback.
 - [ ] M5: default-worker pilot and bounded general catalog observation.
 - [ ] M6: final independent review, fixture cleanup and package closure.
@@ -63,8 +63,14 @@ Quiescent PostgreSQL and Redis recovery snapshots exist privately on wepp1.
 The two independently proven completed permits were retired with pilot bytes
 unchanged. Production migration reached f6b8d27a901c with existing counts unchanged
 (5,416 users; 33,444 runs; 9,444 ownership rows; 11 feature memberships).
-The canonical wepp1 build is running; fleet activation and feature acceptance
-remain open. Both feature flags remain false and catalog admission remains paused.
+Canonical deployments completed on all three hosts; code/native manifests match.
+Twelve default/eight batch registrations and matching native/runtime manifests
+are verified. Scoped notification population and inbox/history browser checks passed.
+All 18 owned-model jobs passed; 25 fresh Parquet files (706,190 rows), native execution hashes, strict reports, browser CSV and archive/restore byte parity passed.
+The fresh default-worker pilot completed both waves on eight scopes with actual
+query readback, unchanged source/sentinel and observed model waits below 0.13 seconds.
+Notification scheduling enabled at 07:12 UTC; actual scheduled readback and general
+observation remain open. General catalog refresh remains false with the general-observation owned pause; notification scheduling is true on wepp1.
 
 ## Context and Orientation
 

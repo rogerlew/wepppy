@@ -36,12 +36,13 @@ implemented by the present canonical script.
 
 | ID | Severity | User/state surface | Description and evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- |
-| COR-01 | High | Partial fleet activation/failure | ExecPlan M3 initially specified remote holds and an unspecified admission mechanism. The canonical script resumes its global fence after errors, including partial recreation (`scripts/deploy-production.sh:862`, `:888`, `:932`), and after success (`:1422`). It refuses externally owned suspension (`:694`). A per-host fence cannot establish fleet version isolation. | Before first RQ 2.x writes, stop all old worker pools and old web/API/scheduler producers, retain exact identities, and verify absence. Preserve holds after failed deployment and prohibit old worker restart after 2.x writes. | Design resolved in revised M3; live stopped-process/drain evidence remains an execution prerequisite |
-| COR-02 | Medium | Batch capacity and notification execution | wepp2 container `bf9adc613a7b` has no live worker registrations although Docker reports running. Read-only evidence below confirms retired workers and stalled child processes. Process count is not readiness. | Preserve logs/diagnostics; replace the container during the authorized canonical wepp2 deployment. Require four genuine batch registrations from its new hostname, alongside the six default registrations. Do not fabricate registrations or claim the old pool healthy. | Open: production recovery/verification pending |
-| COR-03 | Medium | Scheduled catalog admission | Original `docker/scheduled-tasks.yml:13` passed batch into a reconciler whose shared admission requires default. The prior stub test did not test that boundary. Parent's working tree now selects default. | Publish the queue correction with actual-YAML, real-admission regression evidence; verify the deployed scheduler emits real default maintenance work and resulting catalog content. | Source/regression resolved; publication and production acceptance pending |
+| COR-01 | High | Partial fleet activation/failure | ExecPlan M3 initially specified remote holds and an unspecified admission mechanism. The canonical script resumes its global fence after errors, including partial recreation (`scripts/deploy-production.sh:862`, `:888`, `:932`), and after success (`:1422`). It refuses externally owned suspension (`:694`). A per-host fence cannot establish fleet version isolation. | Before first RQ 2.x writes, stop all old worker pools and old web/API/scheduler producers, retain exact identities, and verify absence. Preserve holds after failed deployment and prohibit old worker restart after 2.x writes. | Resolved: retained eight-container hold receipt precedes activation; old wepp3 pool still held at stage readback |
+| COR-02 | Medium | Batch capacity and notification execution | wepp2 container `bf9adc613a7b` had no live worker registrations although Docker reported running. Read-only evidence below confirms retired workers and stalled child processes. Process count is not readiness. | Preserve logs/diagnostics; replace the container during the authorized canonical wepp2 deployment. Require four genuine batch registrations from its new hostname, alongside the six default registrations. Do not fabricate registrations or claim the old pool healthy. | Resolved: canonical recreation and fresh four-batch/six-default registrations verified at 07:01:47 UTC |
+| COR-03 | Medium | Scheduled catalog admission | Original `docker/scheduled-tasks.yml:13` passed batch into a reconciler whose shared admission requires default. The prior stub test did not test that boundary. Published candidate now selects default. | Publish the queue correction with actual-YAML, real-admission regression evidence; verify the deployed scheduler emits real default maintenance work and resulting catalog content. | Source/regression/publication resolved; actual scheduled production acceptance pending |
 | COR-04 | High | Old-runtime pre-build gate | The initially proposed `get_job_ids(cleanup=False)` repair was incompatible with actual installed RQ 1.16.2: its method accepts only `start`/`end` and unconditionally invokes cleanup. The stub accepted a keyword absent from that runtime. | Use direct non-cleaning Redis cardinality through the registry key, retaining stale entries conservatively. Validate the extracted deployment probe against both actual runtimes and update its regression. | Resolved: raw ZCARD and both-runtime direct execution passed |
-| COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remain in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denies all new admissions (`:132`); pilot observation also stops on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Open; blocks catalog admission, not notification or disabled-mode runtime deployment |
+| COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remained in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denied all new admissions (`:132`); pilot observation also stopped on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Resolved: exact two-binding removal, preserved metadata/history and live byte hashes verified; catalog remains paused |
 | COR-06 | Medium | Source checkout/deployment preparation | wepp1's cached repository-local LFS basic-access setting selected a path that stalled both installed clients; identical cold-cache requests succeeded without that setting. | Remove only the isolated setting and prove ordinary cold-cache filter checkout plus recovered candidate source. | Resolved: exact one-key config diff, repeated cold fetch and normal filter checkout passed; deeper authenticated-request failure mechanism remains unproved |
+| COR-07 | Medium | General catalog observation acceptance | Prepared collector could accept an older completed cycle, a preactivation ordinary job or a concurrently admitted maintenance job as evidence of ordinary arrivals; it also omitted observed terminal maintenance failures. Separate reads and old heartbeat timestamps weakened completion/monitoring. | Bind completion to a fresh observed cycle and new started arrival; classify canonical maintenance correctly; retain all-job wait/failure stops; establish a coherent final checkpoint and timestamp heartbeat after sample completion. | Resolved in prepared source: 18 real-Redis local boundary checks pass; live activation/observation evidence remains pending |
 
 These are execution gates, not claims that the feature implementation is
 otherwise defective. Missing final migration/browser/model/cycle evidence remains
@@ -203,10 +204,11 @@ capacity issue; a global pool-retirement repair is not claimed by this deploymen
   production first scheduled executions still required.
 - **Actual environment:** read-only wepp1/wepp2 checks above. Forest evidence is
   precedent, not production acceptance.
-- **Highest supported claim:** deployment planning reviewed with concrete open
-  prerequisites; no production deployment or feature acceptance asserted.
-- **Outstanding:** operator/parent owns migration, fleet activation, real job and
-  browser acceptance, full-root catalog cycle and ordinary-arrival measurements.
+- **Highest supported claim:** wepp1/wepp2 canonical activation, capacity restoration,
+  additive migration and scoped notification job/browser evidence are verified.
+  The stage review below does not assert completed fleet or feature acceptance.
+- **Outstanding:** operator/parent owns remaining fleet activation, real scheduler,
+  model/report/archive acceptance, full-root catalog cycle and ordinary-arrival measurements.
   A 48-hour observation cap is not evidence that a full cycle will finish. A pilot
   without ordinary arrivals does not establish ordinary-work delay.
 
@@ -216,7 +218,8 @@ capacity issue; a global pool-retirement repair is not claimed by this deploymen
 - [x] Local/source facts distinguished from live-production acceptance.
 - [x] No image-health/job-success substitute for generated artifact readback.
 - [x] Partial activation and unsupported reverse compatibility identified.
-- [x] Exact plan controls incorporated; live stopped-process/drain evidence pending.
+- [x] Exact plan controls incorporated; retained old-runtime hold evidence reviewed.
+- [x] Live additive migration and genuine wepp2 batch restoration verified.
 - [ ] Migration and real worker/browser/output checks pass in production.
 - [ ] Catalog complete-cycle and ordinary-arrival gates pass.
 
@@ -230,16 +233,16 @@ linked from final acceptance. No new exception or hidden project record is appro
 
 ## Verdict
 
-- **Gate status:** pass for revised design and prerequisite patches, conditional
-  on live stopped-process/drain evidence and the other stage prerequisites before
-  activation. Production feature/fleet acceptance remains pending.
-- **Unresolved findings:** High 0; Medium 2; Low 0. COR-01 is resolved as a design
-  finding but its live evidence is mandatory before transition; COR-03 source
-  repair is accepted without claiming deployment acceptance.
-- **Release recommendation:** ship-with-conditions. COR-02 requires genuine wepp2
-  capacity after its canonical recreation; it does not prohibit the preceding
-  wepp1 transition while every old wepp2 worker is verifiably held stopped.
-  COR-05 must close before new catalog pilot/general admission.
+- **Gate status:** pass for reviewed design, prerequisite repairs and completed
+  wepp1/wepp2 stage. Production feature/fleet acceptance remains pending.
+- **Unresolved findings:** High 0; Medium 0; Low 0. COR-01/COR-02/COR-05 live
+  closure evidence is recorded below. COR-03 source repair is accepted without
+  claiming actual scheduled production acceptance.
+- **Release recommendation:** ship-with-conditions. Complete wepp3 registration,
+  actual scheduled notification/catalog execution, model/report/archive workflows,
+  fresh catalog pilot and full-cycle/ordinary-arrival gates before final acceptance.
+  COR-07 source review is closed; populate the observation manifest and meet its
+  live launch prerequisites before releasing the owned catalog pause.
 - **Reviewer sign-off:** `production_cutover_correctness`, 2026-11-06 UTC.
   Re-review after concrete controls and actual deployment evidence are available.
 
@@ -534,3 +537,134 @@ authenticated requests stalled or certify unrelated private repositories.
 The parent reports the completed broad suite: 13,361 passed, 281 skipped,
 3,579.24 seconds. Runtime deployment and its live acceptance gates are still
 pending; source/test readiness is not production activation.
+
+## Live stage review: 2026-11-06 07:01–07:03 UTC
+
+The retained all-old-runtime receipt contains the exact eight expected unique
+host/service identities, each exited with PID zero before the live migration and
+candidate startup. The reviewed helper completed its quiescent started-registry
+checks without deleting RQ records. Canonical wepp1 and wepp2 logs end with
+`Deployment complete!` and resumed dequeue; the operator reports exit 0 for both.
+Independent Docker readback confirms their recreated worker containers running
+with zero restarts. COR-01's transition control is satisfied for this stage;
+restarting any old pool after 2.x writes remains prohibited.
+
+Fresh raw Redis reads at 07:01:47 UTC, without registry cleanup, confirm:
+
+| Host/container hostname | Queue | Genuine workers | Minimum remaining hash TTL |
+| --- | --- | --- | --- |
+| wepp1 / `aea1ed905302` | default | 6 | 242 seconds |
+| wepp1 / `d03741087af4` | batch | 4 | 80 seconds |
+| wepp2 / `3dad921db2dd` | default | 6 | 406 seconds |
+| wepp2 / `173c9c65029c` | batch | 4 | 406 seconds |
+
+All 20 hashes are idle with no current job or death marker; default, batch and
+fork/archive ready/started counts are zero. Global suspension and deploy fence
+are absent. wepp2 heartbeats are at most 72.5 seconds old. Its two containers
+started at 06:53:23 UTC and use image
+`sha256:99386c60de96ebbebaae2eda0871293c18513cec2631ae68bbab4af6e9c2ce59`.
+This closes COR-02 through actual restored capacity. It does not establish a
+software fix for the old retirement/futex mechanism or guarantee future capacity.
+
+The retained wepp1/wepp2 runtime receipts match in versions, identity
+UID 1002/GID 130, source-file hashes, vendor inventories, Rosetta assets and
+installed interchange bytes. Both report RQ 2.12.0 and the expected WEPP 261029
+watershed/hill hashes. Both new feature flags remain false; run-catalog read/write
+modes remain `legacy`/`timestamp_only` with its sweep false. The two host images
+need not have identical IDs because canonical builds occur separately; the
+retained content manifests establish the inspected equivalence.
+
+Scheduler `cf0c195e5645` started at 06:42:31 UTC and exited normally at 06:45:01,
+about 151 seconds later, before its earliest 900-second initial task delay.
+The exact old wepp3 fork/archive container `10ecab255dae` remains exited at this
+readback; its candidate build and eventual genuine registration are still gates.
+Twenty current workers therefore prove restored main-host capacity, not completed
+21-worker fleet acceptance.
+
+COR-05 is also closed from independent retained-byte comparison and live Redis
+readback at 07:02:37 UTC. The before snapshot has exactly two bindings; after and
+intended-after bytes match with zero bindings. All other ledger fields, including
+`initialized_at=1793120006.7626648`, are identical. Live ledger SHA256 is
+`ebcf3f410d36ee26bf1623ccbabc9eef4ed3d09160675e99f0924f30a5f41608`;
+the historical pilot retains SHA256
+`1c525ccb0670e0ad4370e52cbefdb9dd055b2bb893d52b7b309c5007b9e686c5`.
+Both keys and the exact owned catalog pause retain persistent TTL; the old pilot
+observer is absent. No ledger reset, reconstructed job status or historical pilot
+rewrite occurred. This permits the next gated pilot preparation; it does not
+unpause general admission or establish a completed fresh pilot.
+
+The guarded live migration receipt reports revision `f6b8d27a901c` on the intended
+production database/server with the four existing table counts unchanged. Private
+acceptance receipts show a real batch notification job creating one warning and
+a repeat updating that warning without duplication. The isolated browser receipt
+passes read/unread persistence, logout/login persistence, 100+1 pagination,
+selection handling, failure handling, account isolation and mobile overflow checks.
+These are scoped production evidence, not proof of the nightly schedule or every
+user's population. Credentials and account locators remain private. Real scheduler
+execution, model outputs/reports, archive/restore, fresh catalog pilot and full-root
+cycle/ordinary-arrival observation remain unaccepted at this checkpoint.
+
+## Prepared general-observation collector review
+
+Scope: `artifacts/observe_general_catalog.py` and
+`artifacts/general_observation_manifest.json`, before activation. The manifest
+remains `prepared_not_activated` with configuration/image placeholders. This
+review authorizes no live pause release and claims no full-root acceptance.
+
+The initial sample function could write `completed.json` during its paused
+preflight when supplied a retained completed cycle/proof and an older running
+ordinary job. A local execution of that exact extracted function reproduced
+success with zero new arrivals. The revised collector disables preflight
+completion, records activation/baseline cycle, pins a different cycle whose start
+is after activation, and requires a postactivation ordinary arrival with an
+actual start timestamp. Stop-delay checks cover every observed ordinary job,
+including old backlog and missing timestamps; only acceptance uses the narrower
+arrival set. Direct discovery errors and observed failed/stopped/canceled
+maintenance now stop observation.
+
+The completion path now watches ledger, cursor, discovery, pause and referenced
+job hashes, compares them with the sampled state and commits a read transaction.
+Changed state or WatchError defers completion to a later sample. Heartbeat time
+now records sample completion, retaining start separately. Previously two healthy
+44-second samples plus the 10-second sleep could leave the start-based heartbeat
+98 seconds old, falsely triggering the parent's 60-second stale rule.
+
+A further real negative test exposed canonical description drift: actual refresh
+and inventory jobs use `Query catalog maintenance`, not a function description
+(`wepppy/rq/query_catalog_rq.py:34`, `:203`, `:333`). A concurrent admission could
+therefore be retained as an ordinary arrival. Revised classification checks the
+canonical prefix/description, rereads ledger ownership and retains maintenance IDs
+to remove earlier ordinary candidates. Unknown maintenance-looking work stops
+observation. Reconciler ticks contribute to wait-health checks but cannot satisfy
+ordinary-arrival acceptance. An exclusive start marker prevents reuse of the
+observation directory; a fixed manifest deadline prevents restart-based extension.
+Any newly appearing admission pause interrupts the run without clearing its owner.
+
+Eighteen current-source checks passed using a disposable Unix-socket Redis and
+the production-pinned redis-py 6.2.0. They cover valid fresh-cycle/new-started-arrival
+success; paused preflight, old cycle/arrival and scheduler-tick exclusion; explicit
+stops for 300-second backlog, missing timestamps, failed maintenance, discovery
+errors, wrong-cycle proof, new pause and unaccounted maintenance; and deferral for
+changed state and an actual Redis WatchError. The canonical-description case
+failed before its repair and passed afterward. Concurrently admitted maintenance
+and previously misclassified ordinary entries are excluded. These tests execute
+the extracted current sample/save and durable admission/wait functions. They do
+not execute production mutations, the complete observer process, signal/deadline
+handling or general refresh. Source review covers those outer controls; actual
+production observation remains required.
+
+Reviewed collector SHA256:
+`e3f295df4ff83351731837d5195747ab7c033eb481f3bacbb467513aa600a4be`.
+Local harness `/tmp/review-general-catalog-collector.py` SHA256:
+`5a271ff19a85f2abdb5271c7155cabc087b93e21bbe2bf71a169a1670de0f41b`.
+The prepared manifest must receive concrete configuration, image and absolute
+deadline values only after actual fleet convergence. COR-07 is resolved in source;
+no live general-admission release is implied by this review.
+
+Observation remains sampled. Jobs that enter and leave between samples may be
+unseen; no claim of exhaustive ordinary-arrival or transient-failure coverage is
+supported. Pending/admitted scope ages do not establish the global oldest receipt
+or oldest undiscovered scope. Same-cycle independent artifact and age-coverage
+evidence is still mandatory. Parent monitoring must remain active through the
+bounded window: SIGKILL, host loss and blocked external I/O cannot be made safe by
+Python signal handling alone. Preserve any observation gap as incomplete evidence.

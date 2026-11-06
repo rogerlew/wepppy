@@ -72,3 +72,39 @@ Exact two expired completed permits retired, with historical pilot bytes preserv
 Live migration f6b8d27a901c passed unchanged existing counts; both new tables empty.
 Canonical wepp1 build running; remote workers held. Both flags false; global
 catalog admission pause remains deployment-owned. No 2.x activation claimed yet.
+
+### Fleet activation checkpoint (2026-11-06 06:54 UTC)
+
+Canonical wepp1 and wepp2 deployments completed with no RQ flush. wepp1 scheduler
+was stopped before its 900-second initial delay. Twelve default and eight batch
+workers are genuinely registered; wepp2's missing batch capacity is restored.
+Both hosts use RQ 2.12.0, UID1002/GID130, expected WEPP261029/interchange hashes,
+and identical dependency/vendor/runtime manifests. wepp3 canonical build started.
+Production CAP login, ordinary token denial, self-service PowerUser onboarding
+and token mint passed for two disposable accounts. Inbox pagination/read-state,
+isolation/mobile and history browser checks passed. The scoped real notification
+job created one TTL warning. Scheduler activation and actual scheduled sweep remain
+pending. Initial fixture .invalid emails and an absent test-client Referer were
+corrected in acceptance helpers; no production validation was weakened.
+
+### Acceptance checkpoint (2026-11-06 07:25 UTC)
+
+All three canonical deployments completed. Native/code/distribution/vendor parity
+passed using manifests that explicitly exclude the mounted bot-token secret.
+Owned model fcb15f42-88c9-4eb6-b169-4e1ff8d5ce74: all 18 jobs passed; 25 fresh
+Parquet files / 706,190 rows, both execution binary identities, three strict reports,
+rendered summary and authenticated CSV verified. Archive/restore preserved every
+Parquet hash and report construction. Public source was undone-terminal; earlier
+source candidates correctly rejected synthetic-account access and were untouched.
+Default pilot qcat-20261106-default01 passed in 105.65 seconds, one inventory and 16 refresh jobs, eight
+scopes/two artifact waves, query schemas/counts and unchanged source/sentinel.
+Observed actual modeling arrivals waited at most 0.128 seconds. Ten-second samples are
+not exhaustive transient concurrency evidence.
+Notification scheduler enabled at 07:12:24 UTC, with sweep due approximately 07:27:41 UTC
+after runtime initialization. General flag stays false and owned admission pause
+is production-cutover-20261106:general-observation. Reviewed collector and
+manifest are prepared; concrete configuration/images/deadline still required.
+API discovery does not list archive/restore metadata; live OpenAPI and exact
+route contract supplied that acceptance call. Outputs API reported an empty
+metadata inventory despite verified generated artifacts; no metadata-inventory
+completeness claim is made.

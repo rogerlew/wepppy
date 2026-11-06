@@ -242,3 +242,13 @@ The later full deployment and resumed pilot supersede the immediately preceding
 standby statements. [Acceptance](artifacts/20261027_shared_pilot_acceptance.md) and
 [sanitized results](artifacts/20261027_shared_pilot/summary.json) are current.
 General enablement remains excluded; whole-fleet capacity is not declared passed.
+
+## November 6 authorized combined production cutover
+
+Execution now follows the operator-authorized
+[production cutover package](../20261105_production_notifications_catalog_cutover/tracker.md).
+Scheduler routing correction and full regression passed. wepp1/wepp2 deployed
+with twelve real default consumers and general async false; wepp3 build ongoing.
+The exact two completed expired permits were retired with independent review,
+without resetting ledger identity or pilot history. Owned catalog admission pause
+remains set. Fresh default-worker pilot and complete-cycle acceptance remain open.

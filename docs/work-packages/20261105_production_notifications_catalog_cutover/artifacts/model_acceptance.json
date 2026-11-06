@@ -1,0 +1,195 @@
+{
+  "runid": "cutover-20261106-model",
+  "fresh_parquet_count": 25,
+  "fresh_rows": 706190,
+  "parquets": [
+    {
+      "path": "wepp/output/interchange/H.element.parquet",
+      "rows": 6800,
+      "columns": 30,
+      "bytes": 135428,
+      "sha256": "4fbea7306abe25868c13cf7310345d7b2035e28d33d0275ee3bbd43e328eb60d"
+    },
+    {
+      "path": "wepp/output/interchange/H.pass.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1519992,
+      "sha256": "e2119ec8ca31e1c1faca5b238c8c685d44c2fe6d64bd4882bafe021af2c93683"
+    },
+    {
+      "path": "wepp/output/interchange/H.ebe.parquet",
+      "rows": 2140,
+      "columns": 20,
+      "bytes": 41699,
+      "sha256": "76d2ead19fd643c96591602dd18c365501a773bf21a4fe812f911a23767a0f44"
+    },
+    {
+      "path": "wepp/output/interchange/H.loss.parquet",
+      "rows": 10,
+      "columns": 11,
+      "bytes": 5818,
+      "sha256": "55e039a1e4d98b91b898e7d12fec700fcba33241b13d47b7f4ab9a4ba777b010"
+    },
+    {
+      "path": "wepp/output/interchange/H.soil.parquet",
+      "rows": 73048,
+      "columns": 21,
+      "bytes": 934980,
+      "sha256": "f558f81637f44d5f246919b19ec83a58ab7e84e0c2d42625f0530e09e545a90f"
+    },
+    {
+      "path": "wepp/output/interchange/H.wat.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1808600,
+      "sha256": "207858669b9aecd6287501f58abdb04176caedabc8948444ed510271f9e466f9"
+    },
+    {
+      "path": "wepp/output/interchange/totalwatsed3.parquet",
+      "rows": 36524,
+      "columns": 79,
+      "bytes": 3834249,
+      "sha256": "df453c61209ca60857295f32445de825852aefe39475fd4d042c02590f2f6818"
+    },
+    {
+      "path": "wepp/output/interchange/ebe_pw0.parquet",
+      "rows": 36524,
+      "columns": 15,
+      "bytes": 537346,
+      "sha256": "9681c38189b5cf4bc7f5909f29da7391f6af04b4ac07ca935f2fb56de2e0ca61"
+    },
+    {
+      "path": "wepp/output/interchange/tc_out.parquet",
+      "rows": 36524,
+      "columns": 7,
+      "bytes": 338686,
+      "sha256": "db0b108b62779cbe426ce3e2034748d0c7d4715ebe114b806a2ebc32e680feee"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.chn.parquet",
+      "rows": 1,
+      "columns": 12,
+      "bytes": 4310,
+      "sha256": "af20f976d3bbc7b21557ad7cb3e6fd22a6db7ab9c5ef8a5b97a4bc2f6e521740"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "rows": 11,
+      "columns": 3,
+      "bytes": 1774,
+      "sha256": "28dce0a5d62bcbe05f09028afa6d34a0f873da03ab6d4cb7a499958d1edb1e49"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.class_data.parquet",
+      "rows": 5,
+      "columns": 8,
+      "bytes": 3223,
+      "sha256": "713402d500b2ab2254131ebe98915d10dd77ff0780611d3f82b7023459763382"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "rows": 200,
+      "columns": 13,
+      "bytes": 8923,
+      "sha256": "d85a3c9f500ac594d8702ff5591bcb7822b2001a8ea269bc44919f9a881cbe4c"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "rows": 100,
+      "columns": 12,
+      "bytes": 7140,
+      "sha256": "5caf9797ff26a846efdda4c9a89d3856bac61e3fd52ac6e096c780acc9931b7b"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "rows": 900,
+      "columns": 4,
+      "bytes": 5552,
+      "sha256": "acd44ab931487f0d3179e8cd262d05653f872c5117e88c81fa729ab9caba452b"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "rows": 500,
+      "columns": 9,
+      "bytes": 4403,
+      "sha256": "f9208f37a578b87502b9e869ced8e6e89996a260a116365f8a4085905542039a"
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.metadata.parquet",
+      "rows": 2,
+      "columns": 12,
+      "bytes": 4199,
+      "sha256": "d882c44e563bac6b1834bf935ec1f2a8eb8fdb45979a474197bc9bde8834cdfe"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+      "rows": 2,
+      "columns": 12,
+      "bytes": 4428,
+      "sha256": "8b4a2e79d73f8bb2621853c5e85ffcd5a3345c7491f230e5ce47a94dac6a7bd5"
+    },
+    {
+      "path": "wepp/output/interchange/soil_pw0.parquet",
+      "rows": 36524,
+      "columns": 21,
+      "bytes": 240159,
+      "sha256": "39c30236c6b78f5be4cc9310882d2fc154ff409b12912298e0364fd359d40dc4"
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.events.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1348283,
+      "sha256": "f0a70195575555b9f97a1f359938940dc974a7c9ecac190dc853d834a62fa4e5"
+    },
+    {
+      "path": "wepp/output/interchange/chanwb.parquet",
+      "rows": 36524,
+      "columns": 14,
+      "bytes": 411813,
+      "sha256": "8fbb37f1efdd00c2f09b0e319eed53865a9911edbfbb52df6e500861b48e9b5a"
+    },
+    {
+      "path": "wepp/output/interchange/chnwb.parquet",
+      "rows": 36524,
+      "columns": 29,
+      "bytes": 1238951,
+      "sha256": "732148968c5c85b1298a9cb873982ed33448d22375c57fd35ce45bb7bef0ccb5"
+    },
+    {
+      "path": "wepp/output/interchange/return_period_events.parquet",
+      "rows": 36524,
+      "columns": 25,
+      "bytes": 1756562,
+      "sha256": "4eaaf67c3efe912d2edcb0725073d1e674ebeb83713eb015ee4839c4ec211d1b"
+    },
+    {
+      "path": "wepp/output/interchange/chan.out.parquet",
+      "rows": 36524,
+      "columns": 10,
+      "bytes": 83629,
+      "sha256": "6c9156ad949534eb0b4af073f7187b6ec7eb283acdeb463d23d8e13118247379"
+    },
+    {
+      "path": "wepp/output/interchange/return_period_event_ranks.parquet",
+      "rows": 111135,
+      "columns": 5,
+      "bytes": 534252,
+      "sha256": "64b7d6f72b94696aa1171f01e7a8cd78cb5c2ad583fb5fad2dc2b040a2cde8f6"
+    }
+  ],
+  "binary_execution_identities": [
+    "[run_hillslope] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029_hill\" binary_sha256=210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936 binary_size_bytes=2766808 binary_mtime_ns=1793944930107963522 binary_identity_status=ok binary_identity_error=\"\"",
+    "[run_hillslope] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029_hill\" binary_sha256=210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936 binary_size_bytes=2766808 binary_mtime_ns=1793944930107963522 binary_identity_status=ok binary_identity_error=\"\"",
+    "[run_watershed] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029\" binary_sha256=4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825 binary_size_bytes=2827768 binary_mtime_ns=1793944930087962845 binary_identity_status=ok binary_identity_error=\"\""
+  ],
+  "strict_report_construction": [
+    "OutletSummaryReport",
+    "HillSummaryReport",
+    "ChannelSummaryReport"
+  ],
+  "archive_restore_artifacts_identical": true,
+  "archive_job": "db4a9162-7b25-4fc9-9235-6463894051b0",
+  "restore_job": "dec4d5b6-c37b-4c2d-ab54-a1a79670290b"
+}

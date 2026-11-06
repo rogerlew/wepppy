@@ -1,0 +1,208 @@
+{
+  "pilot_id": "qcat-20261106-default01",
+  "outcome": "completed",
+  "elapsed_seconds": 105.65531362593174,
+  "queue": "default",
+  "counters": {
+    "inventory": 1,
+    "refresh": 16
+  },
+  "global_outstanding": 0,
+  "global_uncertain": 0,
+  "readback": {
+    "queries": [
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-00",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-01",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-02",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-03",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-04",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-05",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-06",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "watershed/channels.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-07",
+        "rows": 19,
+        "source_rows": 19
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-00",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-01",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-02",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-03",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-04",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-05",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-06",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "wepp/output/interchange/H.pass.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-07",
+        "rows": 280512,
+        "source_rows": 280512
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-00",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-01",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-02",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-03",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-04",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-05",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-06",
+        "rows": 5844,
+        "source_rows": 5844
+      },
+      {
+        "dataset": "climate/gridmet_observed_101_2000-2015.parquet",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-07",
+        "rows": 5844,
+        "source_rows": 5844
+      }
+    ],
+    "scopes": [
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "b1671b96a4569cab38eec21d3abfc07c063d7c60826c2d262c2b7147d6402abd",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-00"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "b30703f958f8de10707e057bd6e852357373f2bdfb7e3d874009bca3c0e7e894",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-01"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "1760b7dea8563229a7fdb40d94b6a17c5a738a758ab1343b5d653eb2437e5cd0",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-02"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "cd291a323fed6a101efbdcb1f5cd8fd53471593e4890fd06787c3e7e03ef6719",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-03"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "8260711fcb3ccff67dafcd7bcc2c118ecfaa0b1d66d59396bf4962def8604a9b",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-04"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "b1d9cb05d5de48c69e130f742cac9b4d85637a23b7e23293d1cafafaed50897e",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-05"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "3c6ea187e6a40883019ce1d8a16954ab8b3c975450975ca5e55f3e4da3c1019d",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-06"
+      },
+      {
+        "catalog_entries": 81,
+        "catalog_sha256": "861797efd5f1c8fa7477275c2e443dd4b52296b63b14911dfa718ed7999104e1",
+        "path": "/wc1/runs/qc/qcat-pilot-qcat-20261106-default01-07"
+      }
+    ],
+    "sentinel_unchanged": true,
+    "source_unchanged": true,
+    "status": "passed"
+  },
+  "ordinary_workload": "Actual owned WEPP261029 modeling pipeline during pilot",
+  "maximum_observed_ordinary_wait_seconds": 0.12778496742248535,
+  "sampling_limitation": "Ten-second samples can miss short maintenance jobs; sampled peak is not exhaustive concurrency proof."
+}

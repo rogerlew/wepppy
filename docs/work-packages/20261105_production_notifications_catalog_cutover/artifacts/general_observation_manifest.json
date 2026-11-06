@@ -1,0 +1,81 @@
+{
+  "environment": "https://wepp.cloud",
+  "state": "prepared_not_activated",
+  "application_candidate": "8d079b41db466fda5235a599c151324190393e9d",
+  "maximum_observation_seconds": 172800,
+  "maintenance_queue": "default",
+  "expected_default_consumers": 12,
+  "global_maintenance_cap": 7,
+  "ordinary_wait_stop_seconds": 300,
+  "namespaces": [
+    "wc1:runs",
+    "wc1:batch",
+    "wc1:culverts",
+    "legacy:runs"
+  ],
+  "root_locator_count": 7,
+  "required_evidence": [
+    "Successful fresh default-worker pilot with artifacts and ordinary-arrival observations",
+    "All participating services agree on enabled configuration and roots before releasing owned pause",
+    "Actual scheduler dispatch on default",
+    "At least one complete reconciliation cycle with no cycle errors; inventory completion alone does not pass",
+    "Oldest pending receipt and unreconciled scope ages, with any sampling limitations explicit",
+    "Ordinary default arrivals, measured queue delay below stop threshold",
+    "Maintenance outstanding never above seven and no execution-uncertain reservations",
+    "Actual catalog/schema/query artifact readback",
+    "Duplicate locator traversal reported separately from unique project coverage"
+  ],
+  "stop_actions": [
+    "Pause new catalog admission with an owned pause, without overwriting another operator pause",
+    "Retain admitted jobs, receipts, ledger and historical pilot records",
+    "Allow admitted work to drain and inspect failure evidence",
+    "Do not restart RQ1.x or reset Redis"
+  ],
+  "preserved": [
+    "GC disabled",
+    "Runs catalog legacy reads",
+    "Runs catalog timestamp_only writes",
+    "Runs catalog sweep disabled"
+  ],
+  "started_at": null,
+  "completed_at": null,
+  "collector": "artifacts/observe_general_catalog.py",
+  "execution": "Existing wepp1 rq-worker via wctl docker compose exec -T rq-worker /opt/venv/bin/python; script/evidence under /wc1/query-catalog-validation/20261106/general-observation-01",
+  "cadence_seconds": 10,
+  "sample_deadline_seconds": 45,
+  "owner": "production-cutover-20261106:general-observation",
+  "pause_owner": "production-cutover-20261106:general-observation",
+  "evidence_path": "/wc1/query-catalog-validation/20261106/general-observation-01",
+  "observer_loss": "Parent operator monitors heartbeat at most every60seconds. On process/SSH loss or stale heartbeat beyond60seconds, set owned pause with NX immediately; preserve other owner. Any gap invalidates uninterrupted coverage until explicitly reviewed. SIGTERM/INT/sample alarm invoke finally pause. SIGKILL/host loss cannot be caught; do not claim automatic fail-closed heartbeat enforcement.",
+  "completion_fields": [
+    "cursor.completed_at",
+    "discovery.completed_at",
+    "matching cursor/discovery cycle",
+    "no cycle pending/errors/failures/unavailable namespace",
+    "zero outstanding/uncertain maintenance",
+    "observed ordinary arrivals",
+    "independently retained artifact-acceptance.json for same cycle"
+  ],
+  "age_coverage": "Collector retains ages for cursor-pending and admitted scopes plus cycle elapsed. It does not establish global oldest receipt; explicit independent coverage acceptance required or gate stays open.",
+  "deadline_action": "Pause own admission and retain incomplete outcome; absent ordinary arrivals or artifact/age proof never pass.",
+  "additional_stop_triggers": [
+    "incompatible/missing default consumers",
+    "RQ suspension",
+    "cap exceeded",
+    "execution-uncertain permits",
+    "cycle errors or namespace unavailability",
+    "missing ordinary timestamps",
+    "ordinary wait >=300 seconds",
+    "sample timeout/failure",
+    "artifact/coverage proof mismatch"
+  ],
+  "expected_configuration": null,
+  "host_runtime_images": null,
+  "absolute_deadline": null,
+  "authorization_preconditions": [
+    "Concrete expected_configuration, host_runtime_images and fixed absolute_deadline replace nulls before state authorized_observation",
+    "Fresh evidence directory and exclusive observer-start.json; no in-place retry",
+    "Any admission pause after release invalidates uninterrupted observation",
+    "Fresh target cycle and measured ordinary jobs enqueued after activation; scheduled reconciler ticks excluded from arrival acceptance"
+  ]
+}
