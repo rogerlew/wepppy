@@ -22,15 +22,27 @@ date]**, using readable UTC and an ISO `datetime` attribute. Confirmed disabled
 or excluded policy renders **Automatic deletion is disabled**. Missing, empty,
 malformed, unreadable, stale or unsupported state renders **Automatic deletion
 status is unavailable**, followed by the existing Last Modified date if known.
-Unknown state never implies protection. All rows link **How to keep your project**
-using `url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion')`.
+Unknown state never implies protection. The top of the Table card links
+**How to keep your project** once, not per row, using `url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion')`.
 Text is rendered with DOM text nodes; no raw paths or payloads appear.
 
 The column is **Automatic deletion** and sorts by `ttl_deletion_at`, never
 Last Modified. The first header activation selects ascending chronological
 order (earliest dates, including overdue dates, first); subsequent activations
-toggle direction and expose `aria-sort`. Disabled/unknown dates remain last
-in both directions. Existing sort defaults, catalog scope and paging remain.
+toggle direction and expose `aria-sort`. When sorting by expiration, dated active
+rows come first, unknown dates next, and confirmed-disabled rows last in both
+directions. Switching from Creation date or any other sort must leave every
+sort link operable; repeated activation continues to reverse direction. Other
+columns retain their own sort order. Existing sort defaults, scope and paging remain.
+
+For a fixed viewport, column widths stay consistent across sorting, filtering
+and pagination. Wrap header and cell content, including long unbroken labels,
+within their columns; retain horizontal table scrolling on narrow viewports.
+
+The 2026-11-06 presentation refinement is specified; implementation pending.
+Rationale: stable wrapping columns prevent moving click targets, a single panel
+help link removes repeated clutter, and disabled-last ordering keeps expiration
+review predictable in either direction.
 
 Place **Disable Automated Deletion for Selected** beside **Delete selected**.
 Reuse the visible checked-row selection and its readonly restrictions. Disable
