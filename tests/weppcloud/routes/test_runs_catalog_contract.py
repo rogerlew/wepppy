@@ -63,17 +63,17 @@ def runs_renderer() -> Flask:
     return app
 
 
-def _render(app: Flask, *, admin: bool) -> str:
+def _render(app: Flask, *, admin: bool, sort="last_modified", direction="desc", owner=False, per_page=25) -> str:
     with app.test_request_context("/runs"):
         return app.jinja_env.get_template("user/runs2.html").render(
             user=SimpleNamespace(),
             current_user=SimpleNamespace(
                 is_authenticated=True, has_role=lambda role: admin and role == "Admin"
             ),
-            show_owner=False,
-            sort="last_modified",
-            direction="desc",
-            per_page=25,
+            show_owner=owner,
+            sort=sort,
+            direction=direction,
+            per_page=per_page,
             is_admin_runs_viewer=admin,
             selected_alias="",
             current_user_alias="7",
@@ -147,3 +147,65 @@ def test_runs_expiration_sort_and_bulk_protection_controls(runs_renderer):
     assert 'id="disable_ttl_runs_button"' in rendered
     assert 'Disable Automated Deletion for Selected' in rendered
     assert rendered.index('id="delete_runs_button"') < rendered.index('id="disable_ttl_runs_button"') < rendered.index('id="runs_table"')
+
+
+def test_runs_help_is_once_above_table(runs_renderer):
+    rendered = _render(runs_renderer, admin=False)
+    assert rendered.count("How to keep your project") == 1
+    assert rendered.index("How to keep your project") < rendered.index('id="runs_search_input"')
+    assert 'ttlHelpLink' not in rendered
+    assert '<colgroup>' in rendered
+
+
+@pytest.mark.parametrize("owner", [False, True])
+def test_runs_sort_navigation_and_fixed_layout_in_chromium(runs_renderer, owner):
+    import os
+    import subprocess
+    import threading
+    from flask import request, send_file
+    from werkzeug.serving import make_server
+    from wepppy.weppcloud.routes.user import _normalize_sort_param, _normalize_direction, _sort_metas
+
+    app = runs_renderer
+    rows = [
+        {"runid": "disabled", "ttl_disabled": True, "ttl_deletion_at": None},
+        {"runid": "unknown", "ttl_disabled": None, "ttl_deletion_at": None},
+        {"runid": "late", "ttl_disabled": False, "ttl_deletion_at": "2027-01-01T00:00:00Z"},
+        {"runid": "early", "ttl_disabled": False, "ttl_deletion_at": "2026-11-01T00:00:00Z"},
+    ]
+    for index, row in enumerate(rows):
+        row.update(name="Project " + row["runid"] + " description " * (index + 1) * 5,
+                   scenario="long_" + "x" * (index + 1) * 80, config="cfg", owner="owner@example.test",
+                   date_created=f"2025-01-0{index + 1}T00:00:00Z")
+
+    def page():
+        return _render(app, admin=False, owner=owner,
+                       sort=_normalize_sort_param(request.args.get("sort")),
+                       direction=_normalize_direction(request.args.get("direction")),
+                       per_page=request.args.get("per_page", 25, type=int))
+
+    def catalog():
+        return jsonify(runs=_sort_metas(rows, _normalize_sort_param(request.args.get("sort")),
+                                       _normalize_direction(request.args.get("direction")) == "desc"))
+
+    app.view_functions["user.runs"] = page
+    app.view_functions["user.runs_catalog"] = catalog
+    static_root = REPO_ROOT / "wepppy/weppcloud/static"
+    app.add_url_rule("/test-pure.css", endpoint="test_pure_css", view_func=lambda: send_file(static_root / "vendor/purecss/pure-min.css"))
+    app.add_url_rule("/test-ui.css", endpoint="test_ui_css", view_func=lambda: send_file(static_root / "css/ui-foundation.css"))
+    app.jinja_loader.mapping["base_pure.htm"] += '<link rel="stylesheet" href="/test-pure.css"><link rel="stylesheet" href="/test-ui.css">'
+    server = make_server("127.0.0.1", 0, app, threaded=True)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    static_source = REPO_ROOT / "wepppy/weppcloud/static-src"
+    environment = dict(os.environ)
+    environment.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(static_source / ".playwright-browsers"))
+    try:
+        result = subprocess.run(["node", str(Path(__file__).with_name("runs_table_browser.cjs")),
+                                 f"http://127.0.0.1:{server.server_port}"], cwd=static_source,
+                                env=environment, capture_output=True, text=True, timeout=90)
+        assert result.returncode == 0, result.stderr
+        assert "Runs table Chromium: PASS" in result.stdout
+    finally:
+        server.shutdown()
+        thread.join(timeout=5)

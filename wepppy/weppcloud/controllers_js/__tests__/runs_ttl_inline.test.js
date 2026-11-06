@@ -10,14 +10,14 @@ const protectedTtl = { user_disabled: true, policy: 'disabled', delete_state: 'a
 const success = (ttl = protectedTtl) => response({ Content: { ttl_disabled: true, ttl } });
 const run = (runid, date = '2026-11-05T00:00:00Z') => ({ runid, config: 'cfg value', ttl_deletion_at: date, ttl_disabled: false });
 async function flush() { for (let n = 0; n < 30; n += 1) await Promise.resolve(); }
-async function initialize(rows, post) {
+async function initialize(rows, post, direction = 'asc') {
     document.head.innerHTML = '<meta name="csrf-token" content="csrf-test">';
     document.body.innerHTML = `<button id="delete_runs_button"></button><button id="disable_ttl_runs_button" disabled></button>
       <div id="runs-ttl-status"></div><div id="runs-delete-status"></div><div id="runs_catalog_status"></div>
       <table id="runs_table"><tbody id="runs_table_body"><tr id="runs_empty_row"><td></td></tr></tbody></table>
       <nav id="runs-pagination"></nav>`;
     const values = { site_prefix: '/weppcloud', show_owner: false, is_admin_runs_viewer: false,
-        current_user_alias: '7', selected_alias: '', sort: 'ttl_deletion_at', direction: 'asc', per_page: 25 };
+        current_user_alias: '7', selected_alias: '', sort: 'ttl_deletion_at', direction, per_page: 25 };
     const script = rawScript.replace(/{{\s*([\s\S]*?)\s*}}/g, (_, expr) => {
         if (expr.startsWith('url_for')) return JSON.stringify('/' + expr.match(/'([^']+)'/)[1]);
         const key = expr.split('|')[0].trim();
@@ -159,4 +159,14 @@ test('search after a failed scope load cannot resurrect prior scope selections',
     } finally {
         errorLog.mockRestore();
     }
+});
+
+
+test.each(['asc', 'desc'])('bulk protection keeps unknown rows before all disabled rows: %s', async direction => {
+    const rows = [run('protect'), { ...run('disabled', null), ttl_disabled: true }, run('unknown', null)];
+    const { button } = await initialize(rows, async () => success(), direction);
+    select('protect');
+    button.click();
+    await flush();
+    expect(Array.from(document.querySelectorAll('tr[data-run-row]')).map(row => row.id)).toEqual(['unknown', 'protect', 'disabled']);
 });

@@ -1,0 +1,8 @@
+{"field":"Creation date","href":"/weppcloud/runs?page=1&sort=date_created&direction=asc&per_page=25","bounds":{"x":913.59375,"y":597,"width":143.109375,"height":32}}
+url https://forest.tail305ec9.ts.net/weppcloud/runs?page=1&per_page=25&sort=date_created&direction=asc
+{"field":"Automatic deletion","href":"/weppcloud/runs?page=1&sort=ttl_deletion_at&direction=asc&per_page=25","bounds":{"x":1072.703125,"y":597,"width":222.671875,"height":32}}
+url https://forest.tail305ec9.ts.net/weppcloud/runs?page=1&per_page=25&sort=ttl_deletion_at&direction=asc
+{"field":"Automatic deletion","href":"/weppcloud/runs?page=1&sort=ttl_deletion_at&direction=desc&per_page=25","bounds":{"x":1072.703125,"y":597,"width":222.671875,"height":32}}
+url https://forest.tail305ec9.ts.net/weppcloud/runs?page=1&per_page=25&sort=ttl_deletion_at&direction=desc
+{"field":"Automatic deletion","href":"/weppcloud/runs?page=1&sort=ttl_deletion_at&direction=asc&per_page=25","bounds":{"x":1072.703125,"y":597,"width":222.671875,"height":32}}
+url https://forest.tail305ec9.ts.net/weppcloud/runs?page=1&per_page=25&sort=ttl_deletion_at&direction=asc

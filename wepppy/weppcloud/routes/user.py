@@ -372,10 +372,14 @@ def _sort_metas(metas: List[dict], field: str, is_desc: bool) -> List[dict]:
             return value.casefold()
         return value
 
+    disabled = []
+    if field == "ttl_deletion_at":
+        disabled = [meta for meta in metas if meta.get("ttl_disabled") is True]
+        metas = [meta for meta in metas if meta.get("ttl_disabled") is not True]
     non_null = [meta for meta in metas if meta.get(field) is not None]
     nulls = [meta for meta in metas if meta.get(field) is None]
     non_null.sort(key=_sort_value, reverse=is_desc)
-    return [*non_null, *nulls]
+    return [*non_null, *nulls, *disabled]
 
 
 def _slice_for_page(items: List[dict], page: int, per_page: int):

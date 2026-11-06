@@ -281,7 +281,7 @@ def test_runs2_template_requests_catalog_with_ron_meta() -> None:
     assert "function buildRunsCatalogUrl()" in template
     assert "params.set('include_ron_meta', '1');" in template
     assert "sortable_header('Automatic deletion', 'ttl_deletion_at')" in template
-    assert "runsTtlDeletionHelpUrl" in template
+    assert "usersum.weppcloud.run_ttl_deletion" in template
     assert "Automatic deletion is enabled for " in template
     assert "Last Modified: " in template
     assert "document.createElement('time')" in template
@@ -520,3 +520,16 @@ def test_expiration_sort_is_chronological_with_fractional_seconds_and_offsets(ru
     rows = [{"ttl_deletion_at": value} for value in dates]
     assert module._sort_metas(rows, "ttl_deletion_at", False) == [rows[1], rows[0], rows[2]]
     assert module._sort_metas(rows, "ttl_deletion_at", True) == [rows[0], rows[1], rows[2]]
+
+
+@pytest.mark.parametrize("descending", [False, True])
+def test_expiration_sort_keeps_disabled_after_unknown(runs_scope_client, descending):
+    module = runs_scope_client["module"]
+    rows = [
+        {"runid": "disabled", "ttl_disabled": True, "ttl_deletion_at": None},
+        {"runid": "unknown", "ttl_disabled": None, "ttl_deletion_at": None},
+        {"runid": "early", "ttl_disabled": False, "ttl_deletion_at": "2026-11-01T00:00:00Z"},
+        {"runid": "late", "ttl_disabled": False, "ttl_deletion_at": "2026-12-01T00:00:00Z"},
+    ]
+    expected = ["late", "early"] if descending else ["early", "late"]
+    assert [row["runid"] for row in module._sort_metas(rows, "ttl_deletion_at", descending)] == expected + ["unknown", "disabled"]

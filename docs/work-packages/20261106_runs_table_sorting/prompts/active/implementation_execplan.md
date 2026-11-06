@@ -9,15 +9,17 @@ content, and show one help link above the table.
 ## Progress
 
 - [x] (2026-11-06) Inspect current template, sort helper and shared scripts/styles.
-- [ ] Reproduce navigation/hit targets and complete independently reviewed checkpoint.
-- [ ] Implement bounded fixes with regression tests.
-- [ ] Validate, review and document results.
+- [x] (2026-11-06) Reproduce forest stale-worker behavior; checkpoint `5e35c480e` accepted.
+- [x] (2026-11-06) Implement scoped layout/help and disabled-last ordering with failing-first regressions.
+- [x] (2026-11-06) 29 route/Chromium and 1,069 frontend tests passed; reviews and docs complete.
 
 ## Surprises & Discoveries
 
 No template code intentionally disables sort anchors. Actual pointer/navigation
 and running application state must distinguish click-layout from sort-state bugs.
 Prior Chromium evidence checked a link target but did not follow repeated sorts.
+Forest workers returned stale normalization/template state; fresh code reversed
+properly. Worker reload restored real navigation without replacing sorting.
 
 ## Decision Log
 
@@ -27,7 +29,9 @@ rows last independently of direction. Use current authorization and TTL contract
 
 ## Outcomes & Retrospective
 
-Pending reproduction and implementation.
+Implemented and validated locally; forest navigation repaired by verified
+Gunicorn HUP. No production deployment. Broad Python rerun omitted under the
+nearest documented handoff exception; see artifacts/validation.md.
 
 ## Context and Plan of Work
 
@@ -54,3 +58,5 @@ Revert only this package's changes if needed. No new dependency, queue, schema,
 retention policy or deployment operation. Update this plan and tracker at handoff.
 
 Created 2026-11-06 for the reported sort defect and explicit presentation changes.
+
+Updated 2026-11-06: retained concrete failure/reload evidence and final validation.

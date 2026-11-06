@@ -48,6 +48,28 @@
   </th>
 {%- endmacro %}
 {% set column_count = 8 + (1 if show_owner else 0) %}
+<style>
+  #runs_table {
+    table-layout: fixed;
+    min-width: 70rem;
+  }
+  #runs_table th,
+  #runs_table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  #runs_table .wc-server-sort__label {
+    min-width: 0;
+  }
+  #runs_table .sortable-indicator {
+    flex-shrink: 0;
+  }
+  #runs_table .pure-button {
+    max-width: 100%;
+    white-space: normal;
+    padding-inline: var(--wc-space-sm);
+  }
+</style>
 <section class="wc-stack wc-table-page">
   <header class="wc-stack">
     <div class="wc-console-header">
@@ -78,6 +100,7 @@
 
   <section class="wc-panel wc-stack">
     <div id="runs-table-view" style="min-width: 0;" role="tabpanel" aria-labelledby="runs-tab-table">
+      <p><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion') }}">How to keep your project</a></p>
       <div class="wc-map-controls">
         <div class="wc-map-controls__row wc-map-controls__row--inputs">
           <label class="wc-map-controls__label" for="runs_search_input">Search runs</label>
@@ -134,6 +157,17 @@
       <p id="runs_catalog_status" class="wc-text-muted" role="status" aria-live="polite" hidden></p>
       <div class="wc-table-wrapper">
         <table class="wc-table wc-table--dense" id="runs_table">
+          <colgroup>
+            {% if show_owner %}<col style="width: 10%;">{% endif %}
+            <col style="width: {{ 14 if show_owner else 17 }}%;">
+            <col style="width: {{ 13 if show_owner else 15 }}%;">
+            <col style="width: {{ 12 if show_owner else 14 }}%;">
+            <col style="width: 10%;">
+            <col style="width: 8%;">
+            <col style="width: 12%;">
+            <col style="width: {{ 15 if show_owner else 18 }}%;">
+            <col style="width: 6%;">
+          </colgroup>
           <thead>
             <tr>
               {% if show_owner %}<th scope="col">Owner</th>{% endif %}
@@ -234,7 +268,6 @@
   const runsCatalogUrl = {{ url_for('user.runs_catalog') | tojson }};
   const runsMapDataUrl = {{ url_for('user.runs_map_data') | tojson }};
   const runsUsersUrl = {{ url_for('user.runs_users') | tojson }};
-  const runsTtlDeletionHelpUrl = {{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion') | tojson }};
   let runsCatalog = [];
   let runsFiltered = [];
   let runsCatalogLoaded = false;
@@ -449,11 +482,6 @@
         lifecycleCell.appendChild(modifiedTime);
       }
     }
-    lifecycleCell.appendChild(document.createElement('br'));
-    const ttlHelpLink = document.createElement('a');
-    ttlHelpLink.href = runsTtlDeletionHelpUrl;
-    ttlHelpLink.textContent = 'How to keep your project';
-    lifecycleCell.appendChild(ttlHelpLink);
     row.appendChild(lifecycleCell);
 
     const selectCell = document.createElement('td');
@@ -760,8 +788,9 @@
     if (generation === catalogGeneration) {
       if (runsSortParam === 'ttl_deletion_at') {
         // Dates are already ordered by the server; move newly protected rows behind them.
-        runsCatalog = runsCatalog.filter((run) => run.ttl_deletion_at != null)
-          .concat(runsCatalog.filter((run) => run.ttl_deletion_at == null));
+        runsCatalog = runsCatalog.filter((run) => run.ttl_disabled !== true && run.ttl_deletion_at != null)
+          .concat(runsCatalog.filter((run) => run.ttl_disabled !== true && run.ttl_deletion_at == null))
+          .concat(runsCatalog.filter((run) => run.ttl_disabled === true));
       }
       applyRunsFilter({ resetPage: false });
       runsTable.querySelectorAll('input[type="checkbox"]').forEach((box) => {

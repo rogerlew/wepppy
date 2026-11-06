@@ -21,8 +21,11 @@ special account role is required. The same control is available on report pages.
 
 On your **Runs** page, select the **Automatic deletion** column heading to sort
 by deletion date, earliest first. Select it again to reverse the order. Overdue
-dates are included; disabled projects and projects with unavailable dates appear
-last in either direction.
+dates are included. Projects with unavailable dates follow dated projects;
+projects with automatic deletion disabled always appear last in either direction.
+The column headings remain available when you switch from another sort, and
+columns keep their widths while long content wraps. The **How to keep your
+project** link appears once above the table.
 
 Check the projects you want to keep, then select **Disable Automated Deletion
 for Selected** beside **Delete selected**. The action applies to checked rows

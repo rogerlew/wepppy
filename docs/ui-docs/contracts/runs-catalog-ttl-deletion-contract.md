@@ -39,7 +39,9 @@ For a fixed viewport, column widths stay consistent across sorting, filtering
 and pagination. Wrap header and cell content, including long unbroken labels,
 within their columns; retain horizontal table scrolling on narrow viewports.
 
-The 2026-11-06 presentation refinement is specified; implementation pending.
+The 2026-11-06 presentation refinement is locally implemented after checkpoint
+`5e35c480e`, with repeated-navigation and layout regressions. Forest navigation
+was verified after a development worker reload; production deployment is separate.
 Rationale: stable wrapping columns prevent moving click targets, a single panel
 help link removes repeated clutter, and disabled-last ordering keeps expiration
 review predictable in either direction.
