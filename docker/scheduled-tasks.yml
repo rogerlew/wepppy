@@ -40,6 +40,8 @@ tasks:
     result_ttl: 86400
   - name: ttl_gc
     func: wepppy.rq.project_rq.gc_runs_rq
+    # Operator pause (2026-11-05); keep disabled across deployments.
+    enabled: false
     interval_seconds: 86400
     queue: default
     job_timeout: 14400

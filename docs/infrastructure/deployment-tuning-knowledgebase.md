@@ -127,6 +127,14 @@ Expected: identical length/hash across both containers.
 | GC scheduler | `docker/scheduled-tasks.yml`, scheduler sidecar | Daily logical-to-physical cleanup | Tune limits/jitter as run volume grows. |
 | NFS deletion fallback | Follow-up in TTL package | Rename-to-trash deferred | Implement only if `EBUSY`/delete tail risk becomes operationally significant. |
 
+Operator pause (2026-11-05): `ttl_gc.enabled` is explicitly `false` in
+`docker/scheduled-tasks.yml`, suspending scheduled automatic run deletion until
+the operator re-enables it. This tracked setting must be included in deployments
+so rebuilding/recreating the scheduler preserves the pause. TTL metadata and
+expiration calculations remain unchanged. To resume, set `enabled: true` and
+deploy through `scripts/deploy-production.sh`. The scheduler loads its config
+only at startup; a config edit requires a scheduler restart. Already queued or
+running GC jobs must be checked separately when applying a pause.
 ### NFS Mount Profiles (wepp1 Candidate Set)
 As of February 9, 2026, the following mount profiles are tracked for `nas.rocket.net:/wepp -> /geodata`:
 
