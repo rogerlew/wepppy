@@ -10,7 +10,7 @@ tasks:
     interval_seconds: "${QUERY_CATALOG_REFRESH_INTERVAL_SECONDS:-30}"
     initial_delay_seconds: 0
     jitter_seconds: 0
-    queue: batch
+    queue: default
     job_timeout: 3600
     result_ttl: 86400
   - name: wmesque_sync

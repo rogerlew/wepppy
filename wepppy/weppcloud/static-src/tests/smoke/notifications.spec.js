@@ -113,8 +113,8 @@ async function solveCapTokenFromEndpoint(page, endpoint) {
 }
 
 
-async function login(page, credentialFile = 'docker/secrets/dev-agent.env') {
-  const pairs = Object.fromEntries(fs.readFileSync(path.join(repo, credentialFile), 'utf8')
+async function login(page, credentialFile = process.env.SMOKE_AGENT_CREDENTIALS_FILE || 'docker/secrets/dev-agent.env') {
+  const pairs = Object.fromEntries(fs.readFileSync(path.resolve(repo, credentialFile), 'utf8')
     .split('\n').filter((s) => s.includes('=') && !s.startsWith('#')).map((line) => {
       const i = line.indexOf('='); return [line.slice(0,i), line.slice(i+1).trim().replace(/^["']|["']$/g,'')];
     }));
@@ -135,7 +135,7 @@ async function login(page, credentialFile = 'docker/secrets/dev-agent.env') {
 test('notification inbox persists explicit read state and page selection', async ({ page }) => {
   test.skip(process.env.SMOKE_NOTIFICATIONS !== 'true', 'Requires the scoped notification acceptance fixture.');
   test.setTimeout(180_000);
-  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const evidence = path.resolve(repo, process.env.SMOKE_NOTIFICATION_EVIDENCE_DIR || 'docs/work-packages/20261105_user_notifications/artifacts');
   const fixture = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-fixture.json'), 'utf8'));
   await login(page);
   await page.goto(base + '/weppcloud/profile');
@@ -224,7 +224,7 @@ test('notification inbox persists explicit read state and page selection', async
   await anonymous.close();
   const ordinary = await page.context().browser().newContext();
   const ordinaryPage = await ordinary.newPage();
-  await login(ordinaryPage, 'docker/secrets/notifications-acceptance.env');
+  await login(ordinaryPage, process.env.SMOKE_NOTIFICATION_SECONDARY_CREDENTIALS_FILE || 'docker/secrets/notifications-acceptance.env');
   await ordinaryPage.goto(base + '/weppcloud/notifications');
   await expect(ordinaryPage.getByText('No notifications on this page.')).toBeVisible();
   await expect(ordinaryPage.locator('[data-notification-bell]')).toHaveAttribute('aria-label', 'Notifications, 0 unread');
@@ -245,7 +245,7 @@ test('notification inbox persists explicit read state and page selection', async
 
 test('notification history distinguishes resolved and unavailable states', async ({ page }) => {
   test.skip(process.env.SMOKE_NOTIFICATIONS_HISTORY !== 'true', 'Requires the scoped history acceptance fixture.');
-  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const evidence = path.resolve(repo, process.env.SMOKE_NOTIFICATION_EVIDENCE_DIR || 'docs/work-packages/20261105_user_notifications/artifacts');
   const fixture = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-fixture.json'), 'utf8'));
   await login(page);
   await page.goto(base + '/weppcloud/notifications?sort=newest&page=2');
@@ -262,7 +262,7 @@ test('notification history distinguishes resolved and unavailable states', async
 test('notification fixture pages remain usable without inbox activation', async ({ page }) => {
   test.skip(process.env.SMOKE_NOTIFICATIONS_BASELINE !== 'true', 'Only for application rollback acceptance.');
   test.setTimeout(180_000);
-  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const evidence = path.resolve(repo, process.env.SMOKE_NOTIFICATION_EVIDENCE_DIR || 'docs/work-packages/20261105_user_notifications/artifacts');
   const fixture = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-fixture.json'), 'utf8'));
   await login(page);
   const pages=[];
@@ -281,7 +281,7 @@ test('notification fixture pages remain usable without inbox activation', async 
 
 test('scheduled notification output reaches the authenticated inbox', async ({ page }) => {
   test.skip(process.env.SMOKE_NOTIFICATIONS_SCHEDULED !== 'true', 'Requires a completed actual scheduled sweep.');
-  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const evidence = path.resolve(repo, process.env.SMOKE_NOTIFICATION_EVIDENCE_DIR || 'docs/work-packages/20261105_user_notifications/artifacts');
   const readback = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-scheduled-readback.json'), 'utf8'));
   await login(page);
   await page.goto(base + '/weppcloud/notifications?sort=read_first');
@@ -293,7 +293,7 @@ test('scheduled notification output reaches the authenticated inbox', async ({ p
 
 test('notification fixture cleanup leaves a healthy empty inbox', async ({ page }) => {
   test.skip(process.env.SMOKE_NOTIFICATIONS_CLEANUP !== 'true', 'Only immediately after scoped acceptance cleanup.');
-  const evidence = path.join(repo, 'docs/work-packages/20261105_user_notifications/artifacts');
+  const evidence = path.resolve(repo, process.env.SMOKE_NOTIFICATION_EVIDENCE_DIR || 'docs/work-packages/20261105_user_notifications/artifacts');
   const cleanup = JSON.parse(fs.readFileSync(path.join(evidence, 'forest-cleanup.json'), 'utf8'));
   expect(cleanup.nonfixture_notifications_retained).toBe(0);
   await login(page);

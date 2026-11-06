@@ -71,3 +71,14 @@ production/forest1 are not activated by that work. The separately paused GC
 schedule is independent of notification population. On forest, canonical web
 deployment needs the repository virtualenv on host PATH for the Jinja controller
 builder. Scheduler-only recreation was explicitly authorized for this rollout.
+
+## Production smoke evidence
+
+The notification Playwright suite accepts `SMOKE_NOTIFICATION_EVIDENCE_DIR`,
+`SMOKE_AGENT_CREDENTIALS_FILE` and `SMOKE_NOTIFICATION_SECONDARY_CREDENTIALS_FILE`
+so each deployment can retain separate evidence and disposable accounts without
+changing historical forest artifacts. Paths may be absolute or repository-relative.
+Use a fresh primary account with the fixture's 101 notices and an empty secondary
+account. The historical cleanup smoke assumes zero unrelated notifications;
+production cleanup instead verifies the fixture account and preserves every
+unrelated notification. Never remove production rows to satisfy that assertion.

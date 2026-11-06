@@ -1,3 +1,5 @@
+In progress: [Production notifications/catalog cutover](docs/work-packages/20261105_production_notifications_catalog_cutover/package.md) — authorized fleet deployment including RQ 2.12, WEPP 261029 config defaults, notification activation and default-worker catalog acceptance.
+
 Completed: [User notifications](docs/work-packages/20261105_user_notifications/package.md) — generic PostgreSQL inbox, Flask APIs, quiet unread bell and daily TTL reconciliation verified on forest. Browser, actual scheduled execution, CAPTCHA repair, application rollback and fixture cleanup passed; regression disposition and independent reviews retained.
 
 Verified on forest: [Usersum ADR catalog](docs/work-packages/20261105_usersum_adr_catalog/package.md) — automatic chronological discovery and full rendering; 122 scoped tests, 1,047 frontend tests and independent reviews pass. All 138 ADRs have verified dates; a shared-parser CI gate prevents missing dates. Forest stale-route 500 repaired; all live ADRs return 200. Broad suites incomplete; no production deployment.

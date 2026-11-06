@@ -284,3 +284,26 @@ separate, requires old-work drain, and must preserve receipts/ledger/pilot histo
 Acceptance means jobs actually run on default with verified catalog artifacts
 while batch backlog exists, default backlog defers admission, and incompatible
 workers cannot execute. No production deploy or general enablement is claimed.
+
+## November 6 combined production-cutover planning
+
+The operator requests production notification deployment and this package's
+cutover together. The [combined readiness plan](../../../20261105_production_notifications_catalog_cutover/notes/production-deployment-readiness.md#combined-notification-and-query-catalog-production-cutover)
+records the current fleet/RQ prerequisite, flag staging, default-worker pilot,
+proposed bounded general observation and independent rollback boundaries.
+No production feature flags were changed during planning.
+
+- [ ] Repair the confirmed scheduler YAML batch/default mismatch and test the
+  actual configuration-to-dispatch-to-admission boundary; preserve notification batch routing.
+- [ ] Publish reviewed correction and deploy compatible participants with general async disabled.
+- [ ] Complete fresh default-worker pilot and ordinary-arrival delay evidence.
+- [ ] Review the full-root observation manifest and complete the general-cycle gate.
+
+Discovery: the prior scheduler regression used a handwritten batch task and a
+stub accepting any queue. The installed actual-YAML probe passed batch through
+unchanged, and the admission guard rejected it before any Redis access. Direct
+pilot success therefore cannot replace actual scheduler execution evidence.
+Decision: repair to the already accepted default-queue contract, keep the shared
+ledger/history, and use the existing merged service environment instead of adding
+unnecessary Compose configuration layers. Outcomes: readiness findings retained;
+production cutover and full-capacity acceptance remain pending.

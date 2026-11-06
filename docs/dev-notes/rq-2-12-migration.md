@@ -54,6 +54,11 @@ RQ timestamps are timezone-aware. Interpret legacy naive RQ timestamps as UTC
 for arithmetic, while retaining existing public timestamp serialization.
 `rq.utils.utcnow` is removed; use explicit UTC datetime operations.
 
+During production pre-build checks that can still run RQ 1.16.2, use raw Redis
+`ZCARD` on the registry key. Its `get_job_ids()` always cleans registry state and
+does not accept `cleanup=False`. Stale entries must conservatively block the
+cutover until separately investigated; never clean newer state with an old runtime.
+
 Started-registry members can contain `job_id:execution_id`. Use
 `StartedJobRegistry.get_job_ids(cleanup=False)` for read-only discovery; do not
 treat raw sorted-set members as application IDs. Preserve exact job IDs in

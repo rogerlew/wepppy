@@ -592,7 +592,7 @@ import redis
 from rq.registry import StartedJobRegistry
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-print(sum(len(StartedJobRegistry(name, connection=connection).get_job_ids()) for name in ("default", "batch")))
+print(sum(connection.zcard(StartedJobRegistry(name, connection=connection).key) for name in ("default", "batch")))
 ')"
     [[ "${ACTIVE_RQ_JOBS}" =~ ^[0-9]+$ ]] || {
         echo "✗ Unable to determine active RQ job count." >&2

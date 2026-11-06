@@ -633,3 +633,32 @@ def test_queued_child_fails_after_owner_freeze(catalog_queue):
     drain(queue, worker)
     assert tasks.reconcile_query_catalogs(queue=queue)["admitted"] == 0
     assert core.pending_catalog_requests(child)
+
+
+def test_shipped_scheduler_admits_inventory_and_refresh_on_default(catalog_queue):
+    """Exercise shipped YAML through dispatch, real admission and artifact readback."""
+    from wepppy.tools import scheduler
+
+    root, queue, worker = catalog_queue
+    path = project(root)
+    core.record_catalog_refresh(path, "values.csv")
+    config = scheduler._load_config(str(Path(__file__).resolve().parents[2] / "docker/scheduled-tasks.yml"))
+    spec = next(item for item in scheduler._normalize_tasks(config["tasks"], config)
+                if item.name == "query_catalog_refresh")
+    scheduled_queue = Queue(spec.queue, connection=queue.connection)
+    state = scheduler.TaskState(spec, None, 0)
+
+    assert scheduler._enqueue_task(scheduled_queue, state)
+    admitted = queue.get_jobs()
+    assert admitted, "Scheduled reconciliation must admit work to the consumer queue"
+    assert all(job.origin == "default" for job in admitted)
+    drain(queue, worker)
+    worker.register_birth()
+    worker.set_state("idle")
+    assert scheduler._enqueue_task(scheduled_queue, state)
+    drain(queue, worker)
+
+    assert not core.pending_catalog_requests(path)
+    entries = json.loads((path / "_query_engine/catalog.json").read_text())["files"]
+    assert "values.csv" in {entry["path"] for entry in entries}
+    assert Queue("batch", connection=queue.connection).count == 0

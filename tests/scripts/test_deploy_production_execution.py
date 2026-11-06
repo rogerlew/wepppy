@@ -1029,3 +1029,34 @@ def test_targeted_batch_preserves_other_services_and_owned_fence(tmp_path: Path,
     assert not any("wctl|down" in c or "wctl|build" in c or "prune" in c for c in commands)
     assert not any("stop --timeout 216000 rq-worker rq-worker-batch" in c for c in commands)
     assert not any("cap-validator|" in c or "controllers-builder|" in c for c in commands)
+
+
+def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
+    """An old host's pre-build probe must not mutate newer shared RQ state."""
+    import redis
+    import rq.registry
+    import wepppy.config.redis_settings as settings
+
+    source = _DEPLOY.read_text(encoding="utf-8")
+    program = source.split("ACTIVE_RQ_JOBS=\"$(run_rq_control_program '\n", 1)[1].split("\n')\"", 1)[0]
+    calls = []
+    class Connection:
+        def zcard(self, key):
+            calls.append(key)
+            return 1 if key == "rq:wip:default" else 0
+
+    connection = Connection()
+
+    class Registry:
+        def __init__(self, name, connection):
+            self.key = "rq:wip:" + name
+
+        def get_job_ids(self):
+            raise AssertionError("RQ 1.16 get_job_ids unconditionally cleans shared state")
+
+    monkeypatch.setattr(redis, "Redis", lambda **kwargs: connection)
+    monkeypatch.setattr(settings, "redis_connection_kwargs", lambda db: {})
+    monkeypatch.setattr(rq.registry, "StartedJobRegistry", Registry)
+    exec(compile(program, str(_DEPLOY), "exec"), {})
+    assert calls == ["rq:wip:default", "rq:wip:batch"]
+    assert capsys.readouterr().out.strip() == "1"

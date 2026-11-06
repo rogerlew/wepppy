@@ -2,6 +2,16 @@
 
 ## Status
 
+2026-11-06: operator requests production cutover alongside notifications. Combined
+planning is recorded in [production readiness](../20261105_production_notifications_catalog_cutover/notes/production-deployment-readiness.md#combined-notification-and-query-catalog-production-cutover).
+Production flags remain unchanged. Confirmed blocker: the shipped scheduler YAML
+still selects batch, while default-worker admission rejects batch. A no-enqueue
+installed-code probe reproduced the mismatch. Repair the scheduled queue and
+real-YAML regression before deployment. Default-worker pilot and general-cycle /
+ordinary-arrival acceptance remain open; October 27 batch results do not close
+those gates. Existing merged service env files suffice for feature configuration.
+
+
 2026-10-28: operator authorized moving query-catalog refresh/inventory to default workers because batch backlog can last days. Contract checkpoint `0e6302905` passed independent correctness/security reviews and was committed before runtime edits. Implementation, 129 focused real-Redis tests and local forking-worker job-tree/artifact readback pass. Broad Python sweep stopped at preexisting Roads provenance mismatch after 6,810 passed/61 skipped; not a full-suite pass. Local implementation complete; production migration pending. See [validation](artifacts/20261028_default_queue_validation.md). October 27 deployment/pilot status below is historical for batch routing.
 
 2026-10-27 UTC: **Authorized bounded execution complete; general enablement HOLD.**

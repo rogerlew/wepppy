@@ -249,3 +249,12 @@ source/catalog hashes; do not delete evidence to manufacture a clean result.
 The first execution retained the readback/manifest/catalog/receipt chain but did
 not separately snapshot original status bytes before retirement. That limitation
 is recorded; do not claim exact original-status replay from its retained files.
+
+## November 6 deployment preparation
+
+The scheduler task must select `default` explicitly: its dispatch passes the
+configured Queue into reconciliation. A retained real-YAML integration regression
+now covers inventory admission, worker consumption and published catalog content;
+the earlier handwritten batch/stub dispatch check did not establish that boundary.
+The coordinated production rollout is tracked in the
+[deployment package](../work-packages/20261105_production_notifications_catalog_cutover/package.md).

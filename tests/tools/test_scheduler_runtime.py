@@ -291,9 +291,9 @@ def test_query_catalog_reconciliation_dispatches_bounded_inventory(monkeypatch):
     from wepppy.rq import query_catalog_rq
     calls = []
     monkeypatch.setattr(query_catalog_rq, "reconcile_query_catalogs", lambda **kwargs: calls.append(kwargs) or {})
-    config = {"name": "query_catalog", "func": "wepppy.rq.query_catalog_rq.reconcile_query_catalogs",
-              "interval_seconds": 30, "enabled": True, "queue": "batch"}
-    spec = scheduler._normalize_tasks([config], {})[0]
-    queue = _RecordingQueue("batch", object())
+    config = scheduler._load_config(str(Path(__file__).resolve().parents[2] / "docker/scheduled-tasks.yml"))
+    spec = next(item for item in scheduler._normalize_tasks(config["tasks"], config)
+                if item.name == "query_catalog_refresh")
+    queue = _RecordingQueue(spec.queue, object())
     assert scheduler._enqueue_task(queue, scheduler.TaskState(spec, None, 0))
     assert calls == [{"queue": queue}]

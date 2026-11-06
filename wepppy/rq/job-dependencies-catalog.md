@@ -16,7 +16,8 @@ queued/started/deferred/scheduled work coalesces; reservations remain through
 RQ terminal transition so late invalidations cannot create a second active job.
 Auth-actor and correlation metadata use the same Redis transaction as admission;
 a WATCH conflict must not leave a metadata-only job hash.
-The scheduler invokes `reconcile_query_catalogs` to admit one active
+The shipped `query_catalog_refresh` scheduler task selects `default` and passes
+that queue explicitly. The scheduler invokes `reconcile_query_catalogs` to admit one active
 `inventory_query_catalog_rq` per configured inventory cycle on default and drain
 its durable Redis discoveries. The inventory worker streams configured roots,
 checkpoints its frontier and fences every publication by current job/cycle.

@@ -1,0 +1,69 @@
+[
+  {
+    "host": "wepp1",
+    "rollback_images": [
+      {
+        "image": "sha256:091292e4c7b0be30946bcaf203e0e9e643bd87c55c5c8176af3d97e7077af3cf",
+        "tag": "wepppy-cutover-rollback-20261106:091292e4c7b0"
+      },
+      {
+        "image": "sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90",
+        "tag": "wepppy-cutover-rollback-20261106:2ad4f81b9a44"
+      },
+      {
+        "image": "sha256:5a31574dd0368e2b4943975a516474a331e67d1669e59d7bdbd1e21da27e1189",
+        "tag": "wepppy-cutover-rollback-20261106:5a31574dd036"
+      },
+      {
+        "image": "sha256:646a47c903c5c45f99081094d8c3ba51ec2a1091babf42dc5a928cef024e6fcd",
+        "tag": "wepppy-cutover-rollback-20261106:646a47c903c5"
+      },
+      {
+        "image": "sha256:67ef5b11f29c0afe1f0567519e94b66391e477163f6ea3363690db0de8f63da8",
+        "tag": "wepppy-cutover-rollback-20261106:67ef5b11f29c"
+      },
+      {
+        "image": "sha256:7ed8fd486756a551b9795d6476c24a5152c7c1c19622859e4e6211627ae9519e",
+        "tag": "wepppy-cutover-rollback-20261106:7ed8fd486756"
+      },
+      {
+        "image": "sha256:9ba5b94611af974347c7be9185e97174d0dcd2086edd45bf443d1a46657bd3c0",
+        "tag": "wepppy-cutover-rollback-20261106:9ba5b94611af"
+      },
+      {
+        "image": "sha256:b2e90f0007a4cf8cca4ffca4d303d289c67a941c844c43a7a54077d96c4285ac",
+        "tag": "wepppy-cutover-rollback-20261106:b2e90f0007a4"
+      },
+      {
+        "image": "sha256:c482971e06a84ca61d677321488dee4034e8979c6311d72f065be07f4e886760",
+        "tag": "wepppy-cutover-rollback-20261106:c482971e06a8"
+      },
+      {
+        "image": "sha256:cdc729021ea9cc6ffbe12a2b15ac8febcbc26ec51d14279e46f88a1a28408864",
+        "tag": "wepppy-cutover-rollback-20261106:cdc729021ea9"
+      }
+    ]
+  },
+  {
+    "host": "wepp2",
+    "rollback_images": [
+      {
+        "image": "sha256:e8e0c281333fc10b4fdaa42343330046399c8371516455f212c0405fdd742b8b",
+        "tag": "wepppy-cutover-rollback-20261106:e8e0c281333f"
+      },
+      {
+        "image": "sha256:ed210142e891be0190f48ceedbaa1a77865ea7ea2c52ec9496b4be42c05838bf",
+        "tag": "wepppy-cutover-rollback-20261106:ed210142e891"
+      }
+    ]
+  },
+  {
+    "host": "wepp3",
+    "rollback_images": [
+      {
+        "image": "sha256:21465fcca84c0a47d18fb2a114647c64327eb3b4d45342c6bab9c1ed52834122",
+        "tag": "wepppy-cutover-rollback-20261106:21465fcca84c"
+      }
+    ]
+  }
+]
