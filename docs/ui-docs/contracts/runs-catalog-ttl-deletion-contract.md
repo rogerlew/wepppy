@@ -8,9 +8,9 @@
 
 The Runs catalog gives an authenticated caller lifecycle information only for
 runs they are already allowed to enumerate. This contract governs a single
-read-only lifecycle column; it does not govern TTL calculation, deletion,
-permissions or catalog ownership/filtering. The 2026-11-04 amendment removes
-the misleading deletion-column sort link without changing sort semantics.
+lifecycle column and its bulk protection action; it does not govern TTL
+calculation, physical deletion, permissions or catalog ownership/filtering.
+The 2026-11-05 sorting/bulk amendment is specified; implementation is pending.
 
 ## Presentation Contract
 
@@ -25,9 +25,32 @@ Unknown state never implies protection. All rows link **How to keep your project
 using `url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion')`.
 Text is rendered with DOM text nodes; no raw paths or payloads appear.
 
-The column is **Automatic deletion** and is not presented as sortable: the old
-header incorrectly sorted by last-modified while describing deletion. Other
-sorts are unchanged.
+The column is **Automatic deletion** and sorts by `ttl_deletion_at`, never
+Last Modified. The first header activation selects ascending chronological
+order (earliest dates, including overdue dates, first); subsequent activations
+toggle direction and expose `aria-sort`. Disabled/unknown dates remain last
+in both directions. Existing sort defaults, catalog scope and paging remain.
+
+Place **Disable Automated Deletion for Selected** beside **Delete selected**.
+Reuse the visible checked-row selection and its readonly restrictions. Disable
+the new button when nothing is selected or while its batch is in progress.
+Snapshot the selection and issue sequential requests through the existing
+[TTL setter](project-ttl-control-contract.md), with same-origin credentials
+and CSRF protection. Report progress and final success/failure counts, identifying
+failed runs with text-safe messages. Only confirmed successful responses may
+update a row to disabled; failures remain unchanged and retryable. Re-sort the
+current catalog after successful dates become null and preserve failed selections
+that remain visible, so retry does not accidentally include successful rows. Responses
+from an earlier catalog scope must not overwrite the newly selected scope.
+This is a sequence of independent mutations, not an atomic bulk operation.
+Protection confirmation follows the setter contract: null metadata or a
+queued/trash/purged lifecycle is not successful protection. Explain that
+already-started deletion cannot be stopped by this control.
+
+Rationale (operator request, 2026-11-05): genuine expiration sorting helps users
+find runs needing protection; reusing the setter preserves authorization/audit
+and avoids a second bulk mutation API. The former no-sort rule prevented a
+misleading Last Modified sort, not this explicitly requested expiration sort.
 
 ## Payload and Compatibility
 

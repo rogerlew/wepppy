@@ -909,3 +909,15 @@ column or migration is added and no request opens project files. The
 [Runs catalog presentation contract](../ui-docs/contracts/runs-catalog-ttl-deletion-contract.md)
 defines wording and unknown-state behavior. Scope filtering remains prior to
 projection; map-only payloads stay unchanged.
+
+## Runs expiration sorting amendment (2026-11-05; implementation pending)
+
+The [Runs TTL catalog contract](../ui-docs/contracts/runs-catalog-ttl-deletion-contract.md)
+adds `sort=ttl_deletion_at` in both legacy and projected modes. Sort non-null
+expiration timestamps chronologically, with nulls last for either direction.
+This is metadata sorting and retains metadata pagination and authorization
+semantics. It does not add projection fields, indexes, freshness exceptions,
+request-time filesystem access or activation authority. Existing stale/unknown
+TTL suppression remains authoritative. Bulk protection uses the existing setter;
+projected metadata never authorizes mutation. The operator requested parity so
+switching catalog modes does not change the new sorting behavior.

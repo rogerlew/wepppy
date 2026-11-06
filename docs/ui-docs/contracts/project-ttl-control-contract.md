@@ -24,6 +24,32 @@ The stored TTL schema, rolling expiration calculation, readonly/batch policy,
 and deletion lifecycle are unchanged. Missing, empty, malformed, and legacy TTL
 metadata retain the existing setter's initialization/normalization behavior.
 
+## Runs catalog bulk protection (2026-11-05; implementation pending)
+
+The Runs page offers **Disable Automated Deletion for Selected** beside its
+delete action, as specified by the [catalog contract](runs-catalog-ttl-deletion-contract.md).
+Each selected run receives the existing JSON `ttl_disabled: true` POST, with
+the existing authentication, run authorization, CSRF protection and user audit.
+Catalog visibility, including an admin alias view, never grants mutation access.
+Missing/legacy metadata follows the existing setter behavior. Partial failures
+are reported individually and do not roll back successful protection. The
+client must verify the success envelope and returned disabled state before
+claiming protection. No bulk endpoint, re-enable action, policy formula or
+deletion lifecycle change is introduced. This reuses the established control
+to let users protect several projects without opening each one.
+
+
+Protection confirmation requires a non-null returned TTL object with
+`delete_state: "active"` and either `policy: "disabled"` with
+`user_disabled: true`, or `policy: "excluded"` with `disabled_reason: "batch"`,
+as well as the successful response's `ttl_disabled: true`. Existing batch
+exclusion is a successful protected outcome, not an invalid state. A missing run may return
+null TTL; queued/trash/purged states cannot be reported as protected because
+this action cannot stop or undo deletion already started. Report these as
+unconfirmed failures with a specific explanation, retaining the existing server
+behavior. Cover each response state in browser-handler tests. The batch/read-only
+exclusions and existing setter normalization remain unchanged.
+
 ## Regression and operator verification
 
 Exercise the registered route with an ordinary signed-in account, read the
