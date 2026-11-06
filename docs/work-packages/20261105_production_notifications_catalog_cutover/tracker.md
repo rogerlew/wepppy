@@ -9,8 +9,8 @@ Status: executing. Last updated: 2026-11-06 UTC.
 - [x] wepp1 cleanup completed: 215 GB free, tagged rollback images preserved.
 - [x] Package/checkpoint and independent preflight review.
 - [x] Scheduler queue correction, regressions and published candidate 8d079b41d.
-- [ ] Production state backup/rehearsal and coordinated migration/deployment.
-- [ ] Notification activation and actual scheduled/browser acceptance.
+- [x] Production state backup/rehearsal and coordinated migration/deployment.
+- [x] Notification activation and actual scheduled/browser acceptance.
 - [ ] Default-worker pilot and monitored general catalog activation.
 - [ ] Final reviews, cleanup and closure.
 
@@ -27,13 +27,11 @@ prune during deployment. No 1.x workers may attach after 2.x writes.
 
 Scheduler YAML corrected to default; actual-config integration failed before
 and passed after the correction. Focused tests: 186 passed; deployment tests:
-72 passed; RQ graph current. Broad suite running. wepp2
-batch workers retired; only stalled pool processes remain. Canonical recreation
-must restore real registrations. Independent review requires all old producers
-and five worker containers stopped before first 2.x writes; normal traffic may
-reopen on exclusively-2.x wepp1 while remote deployments continue.
-Production schema is e7a1c9d204bf, pending additive f6b8d27a901c. Production pins
-also change FastAPI/narwhals/pkginfo/dateutil relative to actual installed baseline.
+72 passed; full suite: 13,361 passed, 281 skipped; RQ graph current.
+All three hosts run compatible RQ 2.12.0; wepp2 batch capacity is restored.
+Production schema is f6b8d27a901c. Notifications and the default-worker pilot
+passed actual job, database, artifact and browser acceptance. The second canonical
+rollout enables general catalog configuration while admission remains paused.
 The old dashboard 502 and legacy archive read-only placement are retained existing
 limitations, not authority for new services or mount changes.
 
@@ -41,8 +39,9 @@ limitations, not authority for new services or mount changes.
 
 Readiness assessment is under notes/. Original production inspection and cleanup
 logs are retained under /tmp on forest; copy sanitized summaries to artifacts and
-private operational backups to mode-0700 host directories. Complete independent
-review and exact rollback/control commands before irreversible cutover.
+private operational backups to mode-0700 host directories. Finish fleet configuration
+convergence, then run the reviewed bounded general observation with independent
+artifact and age-coverage acceptance before closing the package.
 
 ### Reviewed execution preparation (2026-11-06 UTC)
 
@@ -108,3 +107,50 @@ API discovery does not list archive/restore metadata; live OpenAPI and exact
 route contract supplied that acceptance call. Outputs API reported an empty
 metadata inventory despite verified generated artifacts; no metadata-inventory
 completeness claim is made.
+
+### General transition staging (2026-11-06 07:32 UTC)
+
+The real scheduled notification job 8d431619-1510-4a78-80b3-5a4ee6373d32
+started at 07:27:41 UTC and remains active with a current heartbeat. The scheduler
+was held after enqueue to avoid admitting additional scheduled work during the
+next canonical transition; accepted work is not canceled. General enablement is
+staged in all three docker/.env files, but running processes remain false and
+the owned catalog pause stays set. All 21 queue-specific live worker registrations
+verified. The next deployment waits for accepted work to drain and scheduled
+notification database/browser acceptance.
+
+### Scheduled notification acceptance (2026-11-06 07:44 UTC)
+
+Actual scheduler job 8d431619-1510-4a78-80b3-5a4ee6373d32 completed in 761.804 seconds:
+33,446 examined; 4,992 created; 1 updated; 19,382 unavailable; 9,071 skipped.
+Unavailable sources were not assigned inferred dates. Database/read-state/TTL
+readback and actual browser acceptance passed; 5,093 total notices include 101
+owned test notices. Preserve all 4,992 nonfixture notices during cleanup.
+Queues are empty, source remains clean 8d079b41d, and compatible images retained.
+Second canonical full deployment started on wepp1 with general flag staged true
+and owned catalog admission pause retained. No skip-build bypass is available
+or used. Runtime convergence, observation and cleanup remain open.
+
+### Final configuration and cleanup checkpoint (2026-11-06 07:58 UTC)
+
+wepp1 second canonical deployment passed; every participating container matches
+the enabled configuration and code/native manifests remain identical. Scheduler
+is held while wepp2 builds, with catalog admission still paused. Post-recreation
+project, summary, Usersum and authenticated CSV checks passed with unchanged CSV
+hash. Reviewed notification fixture cleanup removed only registration 59273, its
+directory and 101 notices; all 4,992 production notice IDs remain. The fixture
+account now renders an empty inbox and zero unread badge. Accounts/model remain
+for general acceptance. SEC-08 optimized-Python guard finding is closed.
+
+### Scheduler storage prerequisite (2026-11-06 08:16 UTC)
+
+wepp2's second canonical deployment passed with matching runtime/native manifests
+and twelve compatible default consumers; wepp3 is exporting its final image.
+Prelaunch cursor readback found all four namespaces unavailable. Actual Docker
+mounts confirm scheduler alone inherited generic `/wc1` and `/wc1/geodata` host
+sources; workers validate all seven configured locators. The one-line wepp1 volume
+anchor repair has a failing-before/passing-after regression (47 focused checks
+pass) and actual merged Compose render confirms correct sources. COR-08/SEC-09
+hold general release until actual scheduler root/coordination parity and normal
+reconciliation readback pass. Existing scoped recreation authority applies;
+identity, image, destinations, RW mode and unrelated containers must remain fixed.

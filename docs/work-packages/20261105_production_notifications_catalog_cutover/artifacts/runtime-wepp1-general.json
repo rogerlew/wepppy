@@ -1,0 +1,59 @@
+{
+  "source_manifest_exclusions": [
+    "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token (runtime secret)"
+  ],
+  "hostname": "6aac280bc8cf",
+  "uid": 1002,
+  "gid": 130,
+  "groups": [
+    130
+  ],
+  "versions": {
+    "rq": "2.12.0",
+    "croniter": "6.0.0",
+    "redis": "6.2.0",
+    "fastapi": "0.143.1",
+    "narwhals": "2.27.1",
+    "pkginfo": "1.13",
+    "python-dateutil": "2.9.0.post0"
+  },
+  "flags": {
+    "QUERY_CATALOG_REFRESH_ENABLED": "true",
+    "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+    "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+    "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+    "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+    "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+  },
+  "files": {
+    "docker/requirements-uv.txt": "d15ff4fd344453b1d10f528178c90127c78e3748790a36768d38136ac7aacb80",
+    "docker/scheduled-tasks.yml": "c296f0cd2ab83b0bc251cb15a7c6fc3d57d1e909f2a0999f43b3e833f4ba2e13",
+    "scripts/deploy-production.sh": "5bafca2975615e9167443a3eb98576d331b70c963f014ffebaf6ee26724d33ce",
+    "wepppy/rq/query_catalog_rq.py": "47299c60816ed915b1ae03bc7cad426fa0d3b52961c1fc3c2f7056d4b3334999",
+    "wepppy/rq/notifications_rq.py": "fc30ad5f73180ba6a9b96b5df805f2a840c11b28a009a4b97d5945aa66c673f0",
+    "wepp_runner/bin/wepp_261029": "4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825",
+    "wepp_runner/bin/wepp_261029_hill": "210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936"
+  },
+  "interchange": {
+    "path": "/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so",
+    "sha256": "7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad"
+  },
+  "vendors": {
+    "wepppyo3": {
+      "files": 1544,
+      "sha256": "80ada14b23df29fe3007f5af5f60fc4c5334f4291c4973b21c686f52cc7f2ea0"
+    },
+    "weppcloud-wbt": {
+      "files": 1196,
+      "sha256": "7dc880d1c4744029e891afe39cf804ed6940ee50d6badf912a4c8b2efc17923e"
+    },
+    "weppcloud2": {
+      "files": 11,
+      "sha256": "e71746259c48fc1ae1d4a99cceeb620ff40dd217bc5eebc4b10e17d385098d86"
+    }
+  },
+  "rosetta": {
+    "files": 44,
+    "sha256": "de18ad7af4d0bde1988beb28e573058189d98ea75587d186b489ff0144c09309"
+  }
+}

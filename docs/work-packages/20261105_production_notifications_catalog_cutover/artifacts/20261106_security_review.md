@@ -11,6 +11,8 @@
 | SEC-05 | Low | Vendor manifest and secrets | Initial `runtime_manifest.py` hashed the mounted Discord token inside the vendor tree. Only an aggregate digest was emitted, but credentials became part of purported source identity and could cause false cross-host drift. | Exclude the exact runtime-secret path, disclose the exclusion, regenerate source manifests, and never change/copy credentials to make source hashes match. | Resolved: exact exclusion reviewed; regenerated wepp1/wepp2 code-only manifests agree across all comparison fields. Earlier broad digests remain private historical evidence. |
 | SEC-06 | Medium | General observation continuity | The initial `observe_general_catalog.py` reset its deadline and overwrote activation/outcome files on restart, without rejecting prior evidence. After releasing its owned pause, it did not check whether an operator/heartbeat pause reappeared. A restarted or interrupted observation could therefore later look successful without preserving the failed interval. | Require a fresh, exclusive one-shot evidence marker before release; reject reuse rather than overwrite prior attempts. During active observation, any pause must terminate acceptance and preserve its owner. Retain the original deadline and failure outcome. | Resolved: exclusive start marker, fixed manifest deadline, active pause detection and completion WATCH reviewed; local negative checks pass. |
 | SEC-07 | Medium | Ordinary-work accounting | The initial collector excluded any unbound job whose description started with `wepppy.rq.query_catalog_rq.`. Canonical `_query_catalog_admission.py:136` grants maintenance classification only through ledger ownership; descriptive exclusion could hide ordinary queue delay. A concurrent ledger/queue snapshot could also misclassify new maintenance as an ordinary arrival. | Use ledger authority for exclusion. Re-read ownership or stop conservatively for unaccounted maintenance-looking work; never silently exclude by description or credit it as an ordinary arrival. | Resolved in final `e3f295df…`: canonical job prefix/description and refresh/inventory functions recheck ledger or stop; retained maintenance IDs purge prior ordinary candidates. Scheduler ticks cannot qualify as acceptance arrivals. Correctness's 18 real-Redis checks include the canonical-description regression. |
+| SEC-08 | Medium | Scoped fixture deletion guards | Initial `/tmp/production-cleanup-notification-fixture.py` uses only assertions for environment, fixture/path identity, notice ownership and preservation. Optimized Python removes those guards while retaining SQL deletion and `rmtree`. | Add an explicit non-assert `__debug__` rejection before destructive execution; retain ordinary Python and the proven runtime identity. | Resolved: final `e94e6098…` rejects optimized Python before imports; both optimization levels checked without executing imports or mutations. |
+| SEC-09 | Medium | Scheduler storage parity | `docker-compose.prod.wepp1.yml` omits the scheduler volume override, so production inherits generic `/wc1:/wc1` and `/wc1/geodata:/geodata` instead of the accepted wepp1 storage. The scheduler directly calls reconciliation; healthy worker mounts do not prove this producer can see the four namespaces. Operator readback reports all four unavailable. | Apply only `volumes: *wepp1-volumes` to the wepp1 scheduler, verify the actual merged diff and seven-root/shared-coordination parity under its normal identity, and retain the owned admission pause through fleet convergence and evidence review. | Source repair approved at 08:19 UTC; regression and separate local Compose render reported passing. Open pending published host-config diff and actual scheduler runtime evidence; general release remains held. |
 
 These findings concern execution controls, not requests for new infrastructure or renewed
 authorization. No risk acceptance is recorded. Medium/high findings require
@@ -20,8 +22,8 @@ closure or explicit owner risk acceptance before their dependent steps.
 
 - **Package**: `docs/work-packages/20261105_production_notifications_catalog_cutover/`.
 - **Reviewer**: independent `production_cutover_security`, security reviewer role.
-- **Date**: 2026-11-06 UTC; execution evidence reviewed through 07:04 UTC;
-  prepared general collector and corrections reviewed through 07:23 UTC.
+- **Date**: 2026-11-06 UTC; review checkpoints retained through 07:59 UTC;
+  direct live readbacks and operator-reported receipts are distinguished below.
 - **Scope reviewed**: active deployment plan, readiness record, canonical deploy
   script, production build inputs, notification migration/auth/worker boundaries,
   RQ migration and query publication/admission contracts.
@@ -73,8 +75,10 @@ Valid states to preserve:
 - **Gate status**: pass for reviewed execution controls/source repairs, exact
   recovery/receipt helpers and prepared general collector. Actual launch-manifest,
   fleet/pilot and general observation acceptance remain mandatory execution gates.
+  Scoped notification-fixture cleanup is complete on retained source/receipt and
+  browser evidence. General release is held on scheduler storage parity (SEC-09).
   Final production acceptance and package closeout remain pending.
-- **Unresolved findings**: high 0; medium 0; low 0.
+- **Unresolved findings**: high 0; medium 1; low 0.
 - **Recommendation**: proceed with guarded rehearsal and the reviewed sequence,
   retaining actual backup/hold/readback evidence before their dependent steps.
   Feature enablement and package closure additionally require the
@@ -659,6 +663,198 @@ tests. Scheduled notification dispatch is due after the current checkpoint;
 general refresh remains disabled and admission paused. Whole-cycle production
 observation and cleanup remain open. No new security finding follows from this
 source review, and no production mutation was performed by the reviewer.
+
+## Flag-only image-reuse proposal disposition
+
+The operator considered retaining already verified host-local images for the
+second, environment-only activation using canonical `--skip-build`. Reusing exact
+tested image identities would not by itself require new deployment authority or
+a registry, but the existing canonical script rejects this command whenever
+locally built services will be recreated (`deploy-production.sh:579`). Every
+participating host has such services. The existing batch rollback mode applies
+only to the batch service and cannot activate all required producers/consumers.
+Calling this a supported flag-only lifecycle would therefore be inaccurate.
+
+After review, the operator retained the original full canonical build sequence.
+No `--skip-build` command was executed, no deployment guard was bypassed, and no
+image-reuse amendment or new mode was introduced. Existing no-flush/prune-skip,
+admission pause, fleet convergence and artifact/identity gates still apply. The
+additional build duration and potential movement of upstream build inputs remain
+reasons to verify the newly built runtime manifests before releasing admission.
+An explicit, guarded exact-image recreation mode is a possible later tooling
+improvement; its absence does not block the currently supported deployment path
+and is not a new unresolved security finding.
+
+## Notification-fixture cleanup review — 07:51 UTC
+
+Reviewed the unexecuted private helper
+`/tmp/production-cleanup-notification-fixture.py`, initial SHA256
+`f7f083287404d18e68bb8cab85a56b1341ccddf6df195e2d4177d618474892fa`.
+It pins one owned fixture's registration, run identifier, primary account and
+working directory; verifies the original TTL digest; selects one hundred
+synthetic notices plus its one run warning; and rejects recipients outside that
+account. Deleting those notice IDs cascades only their recipient rows under the
+notification schema. Canonical `delete_registered_run` separately verifies the
+exact registration/config/owner receipt. Lifecycle guarding and incarnation
+rotation protect deletion of the fixture directory; guard inodes are retained.
+The nonfixture notice-ID set is checked before and after, and both accounts remain
+available for remaining model/general acceptance.
+
+SEC-08 requires the same hard optimized-Python rejection used by the other
+destructive cutover helpers. Also validate the known run config before committing
+the notification deletion, verify path/TTL under the acquired lifecycle guard,
+and compare the exact hundred synthetic source keys created by the seed helper.
+These bounded changes prevent avoidable partial cleanup and strengthen binding to
+the retained fixture receipt; they do not enlarge cleanup scope.
+
+The operator requires no active fixture jobs and completed recreation of the old
+web processes before cleanup, so retained NFS log handles do not obstruct removal.
+SQL notification deletion, canonical registration deletion and filesystem removal
+are separate commits. On failure, retain the exception/private evidence and inspect
+actual remaining rows/directory before explicit recovery; never retry blindly.
+The reported scheduled sweep created 4,992 real notices, with 101 owned notices
+accounting for the remaining total. That reported count is not authority to delete
+any production notice. No cleanup execution or production mutation occurred in
+this review.
+
+## Notification-fixture cleanup correction — 07:54 UTC
+
+Re-reviewed the corrected helper, SHA256
+`e94e6098adea57ddf58fec6a9a67fa5202671a03b56631f020888bc8894126b7`.
+Its explicit `__debug__` rejection precedes imports. Independent local execution
+of the full compiled source at optimization levels one and two raises the expected
+rejection with imports unavailable; no helper imports, database/network calls or
+filesystem mutations occur. The isolated guard permits normal Python.
+
+Path resolution and original TTL hash now run inside the lifecycle guard. The
+exact run config is checked before the notice transaction; all hundred source
+keys must equal the original numbered fixture set. Recipient scoping, nonfixture
+ID preservation, canonical registration deletion, account retention and lifecycle
+rotation remain intact. SEC-08 is closed. Cleanup is still unexecuted at this
+checkpoint and remains contingent on the stated fixture quiescence and removal
+of old web-process log handles. Partial failure requires inspection, not blind
+retry; this review does not claim an atomic SQL/filesystem transaction.
+
+## Notification-fixture cleanup execution evidence — 07:59 UTC
+
+The retained [cleanup receipt](notification_fixture_cleanup.json), SHA256
+`3dc4ffff5a5a8fce2a8e78b4a972ac789722fcd95d2007a5c4265c5cd7c16257`,
+records successful removal of registration 59273, its directory and exactly 101
+owned notices. All 4,992 preexisting nonfixture notice IDs remain, and both
+acceptance accounts were retained. The package copy of the
+[cleanup helper](cleanup_notification_fixture.py) matches the reviewed
+`e94e6098…` source.
+
+The [browser receipt](notification_cleanup_browser.json), SHA256
+`8f88c5d2d4edbc2d504db006b14342916328886cc3383fb01fb0b6da76b16a9a`,
+records HTTP 200, zero fixture inbox rows and zero unread notices at
+07:58:03 UTC. This is consumer readback following cleanup, not merely a successful
+SQL deletion. The operator reports zero queued work before cleanup and a newly
+recreated web container after the old processes released their NFS log handles.
+The reviewer read the retained receipts and verified source identity without
+repeating production operations or claiming a separate live database census.
+
+The scoped notification-fixture cleanup gate is complete and SEC-08 remains
+closed. Remaining acceptance accounts/tokens and model/catalog fixtures are
+separate owned resources; their eventual cleanup remains open. The second wepp1
+canonical deployment is reported complete and wepp2 is building. General catalog
+activation/whole-cycle acceptance is not implied by this cleanup result.
+
+## Prepared cycle census and artifact readback — 08:09 UTC
+
+Reviewed [read_general_catalog_evidence.py](read_general_catalog_evidence.py),
+SHA256 `50193cf1f883ebfed8fff2d96078ba7c5b2a8c97aca2a1237a578468bc95ef89`.
+This is a source/preparation review; the helper has not run on production.
+It verifies UID/GID, production environment and matching enabled configuration,
+then reads only the retained target-cycle/dirty/pending/admitted coverage union.
+WATCH and a read transaction validate Redis membership without cleanup, enqueue,
+pause changes or ledger mutations. Configured locator validation rejects traversal
+and symlink paths; missing required roots remain errors rather than deleted-scope
+success. Scope identity uses `create=False`, and metadata/receipt reads do not
+initialize controllers or publish catalogs.
+
+The selected Parquet checks use canonical path/schema verification and fixed
+count queries through the pure planner/executor. They bypass `run_query` and its
+potential freshness repair. The inspected nonspatial DuckDB path neither installs
+extensions nor generates scientific output. If a selected source uses the Roads
+read boundary, it opens an existing guard read-only; it does not create a guard
+or perform publication. Before/after metadata, receipt and source-identity checks
+retain concurrent changes as failures instead of silently repairing evidence.
+
+The only explicit write is a fresh `O_EXCL`, mode-0600 evidence file under the
+validated existing private observer directory. The raw census includes project
+locators and must remain private; repository summaries should retain aggregates
+and digests rather than publish that raw inventory. `pending_age_coverage_accepted`
+remains false, so the helper cannot grant its own acceptance authority.
+
+During review, the author added the same clean-cycle predicate to both initial
+and final snapshots. Previously unchanged membership/generation could label a
+newly degraded same-cycle checkpoint successful. Fourteen isolated checks of the
+actual predicate pass: clean positive and rejection of missing completion,
+failures/errors, unavailable or failed discovery, namespace loss, rediscovery,
+pending cycle work, wrong cycle and nonempty frontier/stream. No helper imports,
+network access or filesystem writes occurred in these reviewer checks. The author
+owns broader disposable-runtime validation of the helper.
+
+No unresolved security finding remains for this prepared readback. Its interval
+census is not an atomic filesystem snapshot, cannot discover later-created scopes,
+and verifies artifacts only for the explicit samples. Unknown publication/receipt
+ages remain unknown. Final coverage acceptance still requires the operator's
+review of those limits and same-cycle evidence; source approval does not close
+the general production observation gate.
+
+## Scheduler mount repair: scope and execution conditions
+
+The scheduler inherits the generic production service mounts because its wepp1
+override supplies the image/environment/command but no volume override. The
+accepted wepp1 mapping is `/geodata/wc1:/wc1` and `/geodata:/geodata`, already used
+by the web/query/RQ consumers. Source inspection confirms `_enqueue_task` calls
+`reconcile_query_catalogs` directly in the scheduler, which probes roots and can
+create scoped refresh receipts. Worker-only path validation cannot certify this
+producer boundary. The operator has stopped the scheduler and retained the owned
+global catalog admission pause after observing four unavailable namespaces.
+
+The minimal one-line anchor override is within the existing authority to repair
+confirmed deployment prerequisites and use the bounded scheduler-only lifecycle.
+It restores the already selected roots at existing mount destinations; it does
+not change UID/GID, secrets, mount mode, Docker-socket access or service topology.
+No renewed user approval is required for that concrete correction. The plan must
+record the scheduler-specific finding and repair; the separate wepp3 legacy
+archive limitation remains excluded rather than becoming a general mount-repair
+authorization.
+
+Before release, retain a sanitized merged-config diff limited to the scheduler's
+two host source paths, regression evidence using the actual merged configuration,
+and a same-image scheduler probe under normal identity. Prove all seven locators,
+four namespaces and existing coordination identities match the working consumers.
+Retain the original scheduler configuration/image/container evidence and preserve
+the owned pause through convergence. The catalog task's initial delay is zero;
+the notification task's 900-second delay is not containment for reconciliation.
+Immediate containment is to stop the scheduler and retain the pause. Any rollback
+must preserve receipts/ledger/history and cannot reset Redis, weaken permissions
+or clear another owner's pause. SEC-09 remains open until the concrete correction
+and runtime evidence are reviewed; no host mutation was performed here.
+
+## Scheduler mount source/test review — 08:19 UTC
+
+The concrete configuration diff adds only `volumes: *wepp1-volumes` beneath the
+wepp1 scheduler image anchor. No image, identity, command, secret, privilege or
+other-service setting changes. The three added parametrized cases in
+`tests/docker/unit/test_rq_worker_startup_contract.py` read the actual wepp1
+override and require the two host source paths for scheduler/default/batch.
+They exercise the missing-override regression; they are not a Compose merge
+implementation. The operator separately rendered the actual merged Compose
+configuration and reports matching worker mappings, a red result of one failed
+and two passing cases before the fix, and 47 focused tests passing with the fix.
+This reviewer inspected the source/tests rather than repeating the same suite.
+
+The updated active plan explicitly scopes the correction and retains the pause,
+startup-delay warning, rollback containment and unrelated mount exclusions.
+Source review is approved. Protected before-config and 25-container identity,
+image and mount evidence are reported retained on wepp1. The exact two-field host
+configuration diff, same-image probe under normal identity, seven-root/shared-guard
+parity and scoped recreation readback still require execution evidence before
+SEC-09 can close. No scheduler activation was performed by this reviewer.
 
 ## Sign-off
 

@@ -1,0 +1,50 @@
+{
+  "job_id": "8d431619-1510-4a78-80b3-5a4ee6373d32",
+  "result": {
+    "examined": 33446,
+    "created": 4992,
+    "updated": 1,
+    "resolved": 0,
+    "unavailable": 19382,
+    "skipped": 9071,
+    "status": "completed",
+    "elapsed_seconds": 761.804
+  },
+  "database": {
+    "job_id": "8d431619-1510-4a78-80b3-5a4ee6373d32",
+    "examined": 33446,
+    "created": 4992,
+    "updated": 1,
+    "notification_total_after": 5093,
+    "fixture_notification_id": 101,
+    "fixture_state": "active",
+    "fixture_read_at_preserved": true,
+    "fixture_read_at": "2026-11-06T06:57:43.270025+00:00",
+    "source_ttl_sha256_after": "debf1b74372e599fbcc135e7345bfc4b9f5464c75757d1308e3543c410d919c5",
+    "source_ttl_unchanged": true,
+    "source_expiration_matches_notice": true,
+    "notice_expires_at": "2026-11-13T06:49:41.545256+00:00",
+    "fixture_user_unread_count": 99,
+    "ttl_at_readback": {
+      "created_at": "2026-08-15T06:49:41.545256Z",
+      "db_cleared": false,
+      "delete_state": "active",
+      "disabled_by_user_id": null,
+      "disabled_reason": null,
+      "expires_at": "2026-11-13T06:49:41.545256Z",
+      "last_accessed_at": "2026-08-15T06:49:41.545256Z",
+      "last_touched_by": "create",
+      "policy": "rolling_90d",
+      "ttl_days": 90,
+      "updated_at": "2026-08-15T06:49:41.545256Z",
+      "user_disabled": false,
+      "version": 1
+    }
+  },
+  "browser": {
+    "job_id": "8d431619-1510-4a78-80b3-5a4ee6373d32",
+    "read_state_visible": true,
+    "active_warning_visible": true,
+    "unread_count_matches_database": true
+  }
+}

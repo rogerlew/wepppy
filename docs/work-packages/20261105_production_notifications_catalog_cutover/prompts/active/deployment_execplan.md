@@ -23,7 +23,7 @@ catalog remains legacy/timestamp-only with its sweep disabled.
 - [x] M1: scheduler repair and candidate validation/publication (8d079b41d).
 - [x] M2: backup, schema rehearsal and production migration (2026-11-06 06:34 UTC).
 - [x] M3: compatible fleet activation and model/runtime acceptance (2026-11-06 07:24 UTC).
-- [ ] M4: notification preflight, activation and scheduled/browser readback.
+- [x] M4: notification preflight, activation and scheduled/browser readback (2026-11-06 07:44 UTC).
 - [ ] M5: default-worker pilot and bounded general catalog observation.
 - [ ] M6: final independent review, fixture cleanup and package closure.
 
@@ -39,9 +39,27 @@ all containers/tagged images. The current fleet still runs RQ 1.16.2 and the
 candidate upgrades to 2.12.0; mixed execution/reverse state compatibility is not
 supported. The canonical script resumes its own global fence per host.
 
+Final mount preflight found the scheduler alone inherited generic host sources
+`/wc1` and `/wc1/geodata`; all active project consumers use `/geodata/wc1` and
+`/geodata`. Catalog reconciliation runs directly in the scheduler, unlike the
+queued notification producer. It recorded all four namespaces unavailable while
+workers validated all seven locators. Keep admission paused until the one-line
+wepp1 volume-anchor correction passes runtime parity. Dormant webpush/scale-zero
+fork workers are inactive cases; shape-converter's empty mounts preserve isolation.
+
 ## Decision Log
 
 2026-11-06 UTC / operator and Codex: permanently remove only wepp1's repository-local forced LFS access=basic setting after controlled tests isolated it; preserve credential helpers, TLS and client selection. Normal uncached filters passed.
+
+2026-11-06 UTC / Codex and independent reviewers: the exact scheduler mount-source
+correction fits the authorized deployment prerequisite repair and scheduler-only
+recreation. Preserve image, identity, secrets, command, destinations and RW mode;
+change only the two host sources to the established wepp1 mappings. Retain old
+configuration/container evidence; prove merged-config scope, same-image one-off
+root/coordination inode parity, then actual recreated runtime visibility. Keep
+owned admission pause throughout; let normal reconciliation clear availability
+state. Immediate containment is scheduler stop plus retained pause, never reset
+catalog state. This does not expand the unrelated wepp3 archive mount boundary.
 
 2026-11-06 UTC / operator: proceed with the combined production deployment as a
 work package, including 2111d0eb2 and ADR-0138. Use the approved readiness sequence,
@@ -69,8 +87,13 @@ are verified. Scoped notification population and inbox/history browser checks pa
 All 18 owned-model jobs passed; 25 fresh Parquet files (706,190 rows), native execution hashes, strict reports, browser CSV and archive/restore byte parity passed.
 The fresh default-worker pilot completed both waves on eight scopes with actual
 query readback, unchanged source/sentinel and observed model waits below 0.13 seconds.
-Notification scheduling enabled at 07:12 UTC; actual scheduled readback and general
-observation remain open. General catalog refresh remains false with the general-observation owned pause; notification scheduling is true on wepp1.
+Notification scheduling enabled at 07:12 UTC; the actual scheduled sweep created
+4,992 production notices and preserved the fixture warning's read state and TTL.
+Scheduled browser acceptance passed. At 07:56 UTC the owned fixture and its 101
+notices were removed, retaining all production notices. General configuration is
+staged true on all hosts; wepp1's second canonical rollout passed and wepp2 is
+building. Admission remains paused by the general-observation owner; scheduler
+is temporarily stopped until fleet convergence. General observation remains open.
 
 ## Context and Orientation
 

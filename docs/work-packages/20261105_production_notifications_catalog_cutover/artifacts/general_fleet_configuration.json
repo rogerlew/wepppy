@@ -1,0 +1,315 @@
+{
+  "state": "wepp3_transition_pending",
+  "hosts": [
+    {
+      "host": "wepp1",
+      "participants": [
+        {
+          "service": "profile-playback",
+          "id": "d2fab5893053c21a76b4afac088b3268a41aafc7833ca5ca62096c82b00a8721",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:41.617844001Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "weppcloud",
+          "id": "7973f9ba83d08418faa122013666b7944722e08e64ed089ec7a175ba2cafdcac",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.812694152Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "query-engine",
+          "id": "450d2187ab98eaaf739b4ac4f2114199f79c94bb5d5590672e306d79d96c50f8",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.815809938Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "rq-worker",
+          "id": "6aac280bc8cf0bbf16c3b13bdc0cdc159a0bff519d202eddd77786fab90f88f0",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:29.871497476Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "rq-worker-batch",
+          "id": "4fcfc89e93b940fca8e159de1b10459cdf1a8e14d237cc8d3774984bff1ab4c5",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:29.858134801Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "browse",
+          "id": "64009db8e3d19cae5594aa1d0bc8b94c4535c48a33a57dcf116fb7c2772c5f12",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.814477977Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "rq-engine",
+          "id": "a0a9e080a32401e61f1bded1a1fe7d5ae560257b31374020cf7a2fb13516a6f8",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.7912165Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "download",
+          "id": "e5ae6afa6a5924717ecc464a037a7a38b2b0d6ab65678596d97f422e4c7b934b",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.815473218Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "scheduler",
+          "id": "68869d247f2ac86ba69e9c9ff0988c6144c2824fbfeae573ca0a96802501fea4",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "exited",
+          "started_at": "2026-11-06T07:53:09.800636183Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "dtale",
+          "id": "2b8c3d886b9ed0da63140290eb79983186761e6eb7ed827f3fe436966de1c668",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.814134412Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "wmesque2",
+          "id": "525add6d1cfa3e0737a9cc4090e90b30676564f8b6b869ef12a08217c38f2936",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.808958124Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "wmesque",
+          "id": "211866ffe2e44155c62aa7740fa1e939afb9ac94e6020b08412df97f14590c48",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.812080648Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "elevationquery",
+          "id": "9ddb897a00c006ec820001da31fe6d7d7459cd6d1fd43748f5a338b9025778b6",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.795895464Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "metquery",
+          "id": "4b365203a0b00e15ed6c675c7e4c9131884af8cb7fb22068a2af738635961da9",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.811012779Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "shape-converter",
+          "id": "cabac13f3f5e9af82e04e4ae65dd57a9939a539e58966f5264d929b8a97e6f47",
+          "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:09.814779101Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "status",
+          "id": "58193c662336a8f60e43d0f3e8578fde3894f6aedd3a3f3025ee24a1476ea77f",
+          "image": "sha256:1ec9259f23621d14a6cfcf5cddb39654512fc4d518c2ddafb73ddb71aaa77ba8",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:29.857320892Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "preflight",
+          "id": "64095e0dc815bb2bf325c508aaca175072b330131b0dee0be34cbca6231f22be",
+          "image": "sha256:dddcb1d78a50caecbb67b6dfe77c2716e92cdf8b5e6feca0cb9e2d1979301dda",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:29.852806486Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "cap",
+          "id": "2d4557c2c3115d729d51b368b912a890581defd42b200036df29aabacde5ba72",
+          "image": "sha256:10a34deb9dd1dccdb3a145eb6e07868d55b29bbf2beb581f92bada4d19c441d8",
+          "state": "running",
+          "started_at": "2026-11-06T07:53:03.878681426Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "true",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        }
+      ]
+    },
+    {
+      "host": "wepp2",
+      "participants": [
+        {
+          "service": "rq-worker-batch",
+          "id": "e4ba4e1ae4cbbd48d70735b616143d0701f52efca2e0aa429bf75ed8e55eb6d6",
+          "image": "sha256:f053880b07f0a3c10a3127851044ade06c0c00fb620435554ed532a9194587fa",
+          "state": "running",
+          "started_at": "2026-11-06T08:03:45.385492406Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "false",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        },
+        {
+          "service": "rq-worker",
+          "id": "f2371bef6f3ac1774cbbad6e7841340c82240c70a00144e6675358cb757cf3c9",
+          "image": "sha256:f053880b07f0a3c10a3127851044ade06c0c00fb620435554ed532a9194587fa",
+          "state": "running",
+          "started_at": "2026-11-06T08:03:45.384972776Z",
+          "flags": {
+            "QUERY_CATALOG_REFRESH_ENABLED": "true",
+            "QUERY_CATALOG_ROOTS_JSON": "[{\"path\":\"/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/wc1/runs\",\"namespace\":\"wc1:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"sharded\"},{\"path\":\"/geodata/wc1/batch\",\"namespace\":\"wc1:batch\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"batch\"},{\"path\":\"/geodata/wc1/culverts\",\"namespace\":\"wc1:culverts\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"culverts\"},{\"path\":\"/geodata/weppcloud_runs\",\"namespace\":\"legacy:runs\",\"coordination\":\"/geodata/wc1/query-engine-coordination/locks\",\"layout\":\"flat\"}]",
+            "WEPPCLOUD_NOTIFICATIONS_SWEEP_ENABLED": "false",
+            "WEPPCLOUD_RUN_CATALOG_READ_MODE": "legacy",
+            "WEPPCLOUD_RUN_CATALOG_WRITE_MODE": "timestamp_only",
+            "WEPPCLOUD_RUN_CATALOG_SWEEP_ENABLED": "false"
+          }
+        }
+      ]
+    }
+  ]
+}

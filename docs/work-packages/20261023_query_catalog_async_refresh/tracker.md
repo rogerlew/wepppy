@@ -247,8 +247,11 @@ General enablement remains excluded; whole-fleet capacity is not declared passed
 
 Execution now follows the operator-authorized
 [production cutover package](../20261105_production_notifications_catalog_cutover/tracker.md).
-Scheduler routing correction and full regression passed. wepp1/wepp2 deployed
-with twelve real default consumers and general async false; wepp3 build ongoing.
+Scheduler routing correction and full regression passed. All three hosts deployed
+with twelve real default consumers and general async initially false.
 The exact two completed expired permits were retired with independent review,
 without resetting ledger identity or pilot history. Owned catalog admission pause
-remains set. Fresh default-worker pilot and complete-cycle acceptance remain open.
+remains set. Fresh default-worker pilot qcat-20261106-default01 passed two waves
+on eight scopes with actual artifacts/query readback and ordinary waits below
+0.13 seconds. General enablement is staged on all hosts; wepp1's second canonical
+deployment passed and wepp2 is building. Complete-cycle observation remains open.

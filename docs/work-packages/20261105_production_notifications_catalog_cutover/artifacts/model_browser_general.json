@@ -1,0 +1,23 @@
+[
+  {
+    "path": "/weppcloud/runs/cutover-20261106-model/disturbed9002/",
+    "status": 200,
+    "body_length": 9660
+  },
+  {
+    "path": "/weppcloud/runs/cutover-20261106-model/disturbed9002/report/wepp/summary",
+    "status": 200,
+    "body_length": 3324
+  },
+  {
+    "path": "/weppcloud/usersum/",
+    "status": 200,
+    "body_length": 10998
+  },
+  {
+    "download_status": 200,
+    "bytes": 451,
+    "sha256": "9de50a64fbe1008c9432b178885f97b4d939d2404eec244bcdaaf5f56b025c00",
+    "content_type": "text/csv; charset=utf-8"
+  }
+]

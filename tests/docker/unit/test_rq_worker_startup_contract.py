@@ -34,6 +34,19 @@ def _command_block(service: dict[str, object]) -> str:
     return "\n".join(str(token) for token in command)
 
 
+@pytest.mark.parametrize("service", ["scheduler", "rq-worker", "rq-worker-batch"])
+def test_wepp1_catalog_producers_and_consumers_share_host_storage(service: str) -> None:
+    # Reconciliation executes in the scheduler, before any refresh is enqueued.
+    # Generic production mount sources name different directories on wepp1.
+    config = _load_yaml(_PROD_WEPP1_COMPOSE_PATH)
+    mounts = {
+        volume.split(":")[1]: volume.split(":")[0]
+        for volume in config["services"][service].get("volumes", [])
+    }
+    assert mounts.get("/wc1") == "/geodata/wc1"
+    assert mounts.get("/geodata") == "/geodata"
+
+
 def test_prod_compose_workers_use_startup_gate_contract() -> None:
     config = _load_yaml(_PROD_COMPOSE_PATH)
     services = config["services"]

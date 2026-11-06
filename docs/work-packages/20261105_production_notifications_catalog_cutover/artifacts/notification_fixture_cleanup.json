@@ -1,0 +1,8 @@
+{
+  "fixture_registration_removed": 59273,
+  "fixture_notifications_removed": 101,
+  "fixture_directory_removed": true,
+  "nonfixture_notifications_retained": 4992,
+  "all_preexisting_nonfixture_ids_preserved": true,
+  "accounts_retained_for_model_acceptance": true
+}

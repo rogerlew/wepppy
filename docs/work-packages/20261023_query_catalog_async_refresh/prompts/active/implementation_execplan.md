@@ -295,8 +295,8 @@ No production feature flags were changed during planning.
 
 - [x] Repair the confirmed scheduler YAML batch/default mismatch and test the
   actual configuration-to-dispatch-to-admission boundary; preserve notification batch routing.
-- [ ] Publish reviewed correction and deploy compatible participants with general async disabled.
-- [ ] Complete fresh default-worker pilot and ordinary-arrival delay evidence.
+- [x] Publish reviewed correction and deploy compatible participants with general async disabled.
+- [x] Complete fresh default-worker pilot and ordinary-arrival delay evidence.
 - [ ] Review the full-root observation manifest and complete the general-cycle gate.
 
 Discovery: the prior scheduler regression used a handwritten batch task and a
@@ -316,6 +316,12 @@ consumers, general async false and matching seven root locators/four namespaces.
 wepp3 deployment is underway. Exactly two proven completed historical permits
 were retired under independently reviewed guards; pilot history and ledger
 identity remain intact. The deployment-owned catalog pause remains set. Default
-pilot and complete reconciliation/ordinary-arrival observation are still open.
+pilot and complete reconciliation/ordinary-arrival observation were still open
+at that checkpoint. The fresh default-worker pilot subsequently passed both
+artifact waves on eight scopes, with actual ordinary model waits below 0.13 seconds.
+All three initial deployments completed. General configuration is now staged true;
+wepp1's second canonical deployment passed and wepp2 is building, while the owned
+admission pause and scheduler hold preserve the transition boundary. General-cycle
+acceptance remains open; reviewed monitoring must start only after convergence.
 See the combined package tracker and independent security/correctness reviews
 for the live execution and recovery evidence.

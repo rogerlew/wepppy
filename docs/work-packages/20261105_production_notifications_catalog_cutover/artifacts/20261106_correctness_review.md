@@ -43,6 +43,7 @@ implemented by the present canonical script.
 | COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remained in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denied all new admissions (`:132`); pilot observation also stopped on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Resolved: exact two-binding removal, preserved metadata/history and live byte hashes verified; catalog remains paused |
 | COR-06 | Medium | Source checkout/deployment preparation | wepp1's cached repository-local LFS basic-access setting selected a path that stalled both installed clients; identical cold-cache requests succeeded without that setting. | Remove only the isolated setting and prove ordinary cold-cache filter checkout plus recovered candidate source. | Resolved: exact one-key config diff, repeated cold fetch and normal filter checkout passed; deeper authenticated-request failure mechanism remains unproved |
 | COR-07 | Medium | General catalog observation acceptance | Prepared collector could accept an older completed cycle, a preactivation ordinary job or a concurrently admitted maintenance job as evidence of ordinary arrivals; it also omitted observed terminal maintenance failures. Separate reads and old heartbeat timestamps weakened completion/monitoring. | Bind completion to a fresh observed cycle and new started arrival; classify canonical maintenance correctly; retain all-job wait/failure stops; establish a coherent final checkpoint and timestamp heartbeat after sample completion. | Resolved in prepared source: 18 real-Redis local boundary checks pass; live activation/observation evidence remains pending |
+| COR-08 | Medium | Scheduler filesystem authority and general catalog launch | wepp1 scheduler inherited generic `/wc1` and `/wc1/geodata` host mounts instead of production `/geodata/wc1` and `/geodata`; it directly executes reconciliation, so matching worker configuration did not prove scheduler root visibility. Live mount audit confirms the mismatch. | Add only the scheduler's existing production volume anchor, test actual merged Compose mounts, and verify real scheduler root visibility/reconciliation while admission remains paused. Preserve isolated services and unrelated runtimes. | Open before general launch; parent implementing the bounded mount correction |
 
 These are execution gates, not claims that the feature implementation is
 otherwise defective. Missing final migration/browser/model/cycle evidence remains
@@ -235,7 +236,7 @@ linked from final acceptance. No new exception or hidden project record is appro
 
 - **Gate status:** pass for reviewed design, prerequisite repairs and completed
   wepp1/wepp2 stage. Production feature/fleet acceptance remains pending.
-- **Unresolved findings:** High 0; Medium 0; Low 0. COR-01/COR-02/COR-05 live
+- **Unresolved findings:** High 0; Medium 1; Low 0. COR-01/COR-02/COR-05 live
   closure evidence is recorded below. COR-03 source repair is accepted without
   claiming actual scheduled production acceptance.
 - **Release recommendation:** ship-with-conditions. Complete wepp3 registration,
@@ -243,6 +244,7 @@ linked from final acceptance. No new exception or hidden project record is appro
   fresh catalog pilot and full-cycle/ordinary-arrival gates before final acceptance.
   COR-07 source review is closed; populate the observation manifest and meet its
   live launch prerequisites before releasing the owned catalog pause.
+  COR-08 scheduler mount/visibility closure is required before general launch.
 - **Reviewer sign-off:** `production_cutover_correctness`, 2026-11-06 UTC.
   Re-review after concrete controls and actual deployment evidence are available.
 
@@ -668,3 +670,97 @@ or oldest undiscovered scope. Same-cycle independent artifact and age-coverage
 evidence is still mandatory. Parent monitoring must remain active through the
 bounded window: SIGKILL, host loss and blocked external I/O cannot be made safe by
 Python signal handling alone. Preserve any observation gap as incomplete evidence.
+
+## Second activation: retained-image proposal assessment
+
+Reusing the already-verified images for a flag-only transition would preserve
+application content, but the proposed `--skip-build` invocation is not supported
+by the current canonical script. Its guard rejects that flag whenever locally
+built services will be recreated (`scripts/deploy-production.sh:579`), which
+applies to all three production topologies. `--print-plan` exits before that
+guard and cannot establish execution support. The exact-image rollback option is
+limited to targeted batch activation and does not cover this fleet transition.
+
+The operator retained the original full canonical build sequence. No skip-build
+command ran, no guard was bypassed and no M5 image-reuse exception was adopted.
+This is a rejected planning clarification, not a failed deployment or an open
+runtime defect. Retained compatible images remain recovery evidence; the next
+builds still require actual candidate identity and content readback.
+
+## Independent cycle census and artifact-readback preparation
+
+The bounded procedure is retained in
+`artifacts/general_catalog_acceptance_procedure.md`; its executable helper is
+`artifacts/read_general_catalog_evidence.py` (SHA256
+`50193cf1f883ebfed8fff2d96078ba7c5b2a8c97aca2a1237a578468bc95ef89`).
+It reads the complete retained cycle/dirty/pending/admitted union, checks raw
+metadata and immutable receipts, distinguishes alias locators from unique scopes,
+and preserves explicit unknown ages. It uses representative actual Parquet schema
+and production planner/executor checks without the repairing query freshness
+barrier. Both start and end checkpoints must identify the same clean completed
+cycle. It neither mutates production state nor grants coverage acceptance itself.
+
+Publication age is separated from reconciliation state. The current scheduler
+records a full receipt for each writable discovered cycle item, but a timestamp
+alone is not an independent visit record. Older otherwise-current publications
+are reported separately from pending/noncurrent metadata; no gratuitous refresh
+is required to change that metric. Readonly and deleted scopes are explicit
+coverage classes. The procedure describes the full retained-union interval census
+and representative-query limits, including the inability to reconstruct peak
+ages of already-acknowledged receipts or oldest undiscovered scopes retrospectively.
+
+Sixteen local checks passed in `artifacts/validate_general_catalog_evidence.py`,
+using actual Parquet/planner/executor paths and disposable Redis with redis-py
+6.2.0. They verify unchanged filesystem bytes, receipt nonacknowledgment, known and
+unknown ages, old-current/noncurrent distinction, containment, scope bounds and
+clean/degraded completion. The independent security reviewer additionally passed
+14 clean-cycle predicate checks and found no read/write boundary issue. These are
+preparation evidence; no production census or general-cycle acceptance has run.
+The operator must inspect actual coverage, ages and artifact evidence before
+writing the separate same-cycle acceptance record. Unknown unresolved ages or
+incomplete coverage keep the acceptance gate open.
+
+## Scheduler mount mismatch: failure-class assessment
+
+The parent detected a real prelaunch mismatch: default workers could validate all
+seven configured locators, while the general cursor reported all four namespaces
+unavailable and no cycle. `wepppy/tools/scheduler.py:229` invokes reconciliation
+inside the scheduler process. This differs from notification population, which
+is enqueued for batch workers. Worker-only mount probes therefore could not prove
+catalog scheduler readiness.
+
+Independent read-only Docker inspection confirms the stopped wepp1 scheduler
+mounts host `/wc1` at `/wc1` and host `/wc1/geodata` at `/geodata`. All running
+project-data consumers instead mount `/geodata/wc1` and `/geodata`, respectively.
+Source inspection traces the mismatch to the missing `volumes: *wepp1-volumes`
+under scheduler in `docker/docker-compose.prod.wepp1.yml:177`; the generic base
+service supplies the wrong host-specific defaults. The smallest correction is
+that one scheduler anchor assignment, with identity, image, environment, secrets
+and command preserved.
+
+The full inherited-volume audit found only two other missing wepp1 overrides:
+the dormant `webpush` placeholder behind its profile and the profiled fork/archive
+service explicitly scaled to zero on wepp1. Neither is a running affected
+consumer. Retain them as inactive cases requiring mount review if ever activated;
+do not broaden this incident into their deployment. Shape-converter intentionally
+has `volumes: []` for isolation. Caddy's `/geodata` remains read-only. Every other
+active inherited project-data mount and the unrelated existing f-esri container
+is already correct. No filesystem cleanup or unrelated mount changes are needed.
+
+Regression acceptance should render the actual base-plus-wepp1 Compose merge and
+assert the two canonical bind sources for all active project-data services, plus
+the shape-converter/Caddy/inactive-service exceptions. A raw YAML anchor assertion
+alone does not prove merged target replacement. Before activation, compare the
+effective scheduler configuration and intended image, inspect root/coordination
+visibility under its actual UID/GID and mounts, and retain matching identities
+for every unrelated container.
+
+The package's already scoped scheduler recreation can apply this correction;
+plain restart would keep the old mounts. Preserve the owned catalog pause and
+verify its owner after recreation. Inspect the new scheduler's actual mounts and
+all seven locators, then let its real scheduled reconciliation clear unavailable
+namespace evidence naturally while admission remains paused. Do not delete the
+cursor or ledger to make the state appear clean. A new inventory cycle/default
+maintenance execution is a later post-release observation gate. This one-service
+configuration repair is distinct from the previously rejected full-fleet
+`--skip-build` proposal. No host mutation was performed by this reviewer.

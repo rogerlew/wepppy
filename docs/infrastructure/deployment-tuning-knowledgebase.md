@@ -135,6 +135,18 @@ expiration calculations remain unchanged. To resume, set `enabled: true` and
 deploy through `scripts/deploy-production.sh`. The scheduler loads its config
 only at startup; a config edit requires a scheduler restart. Already queued or
 running GC jobs must be checked separately when applying a pause.
+### Scheduler project-storage parity
+
+The wepp1 scheduler must use `*wepp1-volumes`, matching its workers:
+host `/geodata/wc1` at container `/wc1`, and host `/geodata` at `/geodata`.
+Catalog reconciliation executes directly inside the scheduler before queueing
+refresh jobs. Generic production mounts point to different host directories on
+wepp1 and can report every catalog namespace unavailable even while workers see
+all projects. Successful queued notification jobs do not prove scheduler storage
+visibility. Verify effective Compose mounts and actual configured-root access
+under the scheduler identity before releasing catalog admission. Retain cursor
+and receipt history; normal reconciliation repairs availability observations.
+
 ### NFS Mount Profiles (wepp1 Candidate Set)
 As of February 9, 2026, the following mount profiles are tracked for `nas.rocket.net:/wepp -> /geodata`:
 

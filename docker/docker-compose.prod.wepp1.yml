@@ -176,6 +176,7 @@ services:
       PERIDOT_CPU: "4"
   scheduler:
     <<: *wepppy-image
+    volumes: *wepp1-volumes
     environment:
       <<: *wepppy-env
       SCHEDULE_CONFIG: /workdir/wepppy/docker/scheduled-tasks.yml
