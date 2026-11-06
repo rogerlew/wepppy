@@ -1,6 +1,6 @@
 # Runs deletion-date sorting and bulk protection
 
-Status: contract checkpoint preparation; implementation pending.
+Status: local implementation and validation complete; production deployment separate.
 
 ## Scope
 

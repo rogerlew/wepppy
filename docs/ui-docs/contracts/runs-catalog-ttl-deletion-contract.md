@@ -10,7 +10,8 @@ The Runs catalog gives an authenticated caller lifecycle information only for
 runs they are already allowed to enumerate. This contract governs a single
 lifecycle column and its bulk protection action; it does not govern TTL
 calculation, physical deletion, permissions or catalog ownership/filtering.
-The 2026-11-05 sorting/bulk amendment is specified; implementation is pending.
+The 2026-11-05 sorting/bulk amendment is implemented locally after checkpoint
+`6cbd4404b`; deployment remains separate.
 
 ## Presentation Contract
 
@@ -112,3 +113,12 @@ user/privileged Usersum route tests; frontend and documentation checks; and two
 independent reviews with no unresolved high/medium finding. The accepted
 GOV-00A-M1B contract ancestor is recorded in the REM-02 tracker before
 implementation.
+
+## RUNS-TTL-BULK-01 local implementation evidence (2026-11-05)
+
+Implemented after standalone contract ancestor `6cbd4404b`: chronological
+expiration sorting and the selected-run protection action. Focused Python,
+frontend and rendered-template Chromium checks pass; the Chromium HTTP
+responses are mocked. Independent correctness/security reviews passed after
+stale scope-state fixes. See [validation and limits](../../work-packages/20261105_runs_bulk_ttl_control/artifacts/validation.md).
+Production deployment and catalog projection activation remain separate.

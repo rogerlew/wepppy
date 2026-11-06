@@ -280,7 +280,7 @@ def test_runs2_template_requests_catalog_with_ron_meta() -> None:
 
     assert "function buildRunsCatalogUrl()" in template
     assert "params.set('include_ron_meta', '1');" in template
-    assert '<th scope="col">Automatic deletion</th>' in template
+    assert "sortable_header('Automatic deletion', 'ttl_deletion_at')" in template
     assert "runsTtlDeletionHelpUrl" in template
     assert "Automatic deletion is enabled for " in template
     assert "Last Modified: " in template
@@ -481,3 +481,42 @@ def test_runs_map_data_skips_run_metadata_load_errors_and_logs_warning_boundary(
     payload = response.get_json()
     assert payload["runs"] == []
     assert "failed to load Ron" in caplog.text
+
+
+@pytest.mark.parametrize("projected", [False, True])
+@pytest.mark.parametrize("direction,expected", [("asc", ["other-run", "owner-run", "admin-run"]), ("desc", ["owner-run", "other-run", "admin-run"])])
+def test_catalog_sorts_expiration_dates_nulls_last(runs_scope_client, monkeypatch, projected, direction, expected):
+    context = runs_scope_client
+    module = context["module"]
+    client = context["client"]
+    client.get(f"/test-login/{context['admin_id']}")
+    from wepppy.weppcloud.app import db, Run, runs_users
+    with client.application.app_context():
+        for registered in Run.query.filter(Run.runid != "admin-run").all():
+            db.session.execute(runs_users.insert().values(user_id=context["admin_id"], run_id=registered.id))
+        db.session.commit()
+    values = [
+        {"runid": "owner-run", "ttl_deletion_at": "2026-12-01T00:00:00Z"},
+        {"runid": "admin-run", "ttl_deletion_at": None},
+        {"runid": "other-run", "ttl_deletion_at": "2026-11-01T00:00:00Z"},
+    ]
+    monkeypatch.setenv("WEPPCLOUD_RUN_CATALOG_READ_MODE", "postgres" if projected else "legacy")
+    if projected:
+        from wepppy.weppcloud.run_catalog import reader
+        monkeypatch.setattr(reader, "collect", lambda query: (values, {}))
+    else:
+        monkeypatch.setattr(module, "CATALOG_RON_META_MAX_RUNS", 0)
+        monkeypatch.setattr(module, "_catalog_meta_from_row", lambda row: next(v for v in values if v["runid"] == row["runid"]))
+    response = client.get(f"/runs/catalog?sort=ttl_deletion_at&direction={direction}&include_ron_meta=0")
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["sort"] == "ttl_deletion_at"
+    assert [v["runid"] for v in payload["runs"]] == expected
+
+
+def test_expiration_sort_is_chronological_with_fractional_seconds_and_offsets(runs_scope_client):
+    module = runs_scope_client["module"]
+    dates = ["2026-11-01T00:00:00.000001Z", "2026-11-01T01:00:00+01:00", None]
+    rows = [{"ttl_deletion_at": value} for value in dates]
+    assert module._sort_metas(rows, "ttl_deletion_at", False) == [rows[1], rows[0], rows[2]]
+    assert module._sort_metas(rows, "ttl_deletion_at", True) == [rows[0], rows[1], rows[2]]

@@ -138,3 +138,12 @@ def test_delete_route_rejects_missing_csrf_before_dependencies(
 
     response = app.test_client().post("/runs/run-1/cfg/tasks/delete/")
     assert response.status_code == 400
+
+
+def test_runs_expiration_sort_and_bulk_protection_controls(runs_renderer):
+    rendered = _render(runs_renderer, admin=False)
+    assert 'aria-label="Sort Automatic deletion ascending"' in rendered
+    assert 'sort=ttl_deletion_at' in rendered
+    assert 'id="disable_ttl_runs_button"' in rendered
+    assert 'Disable Automated Deletion for Selected' in rendered
+    assert rendered.index('id="delete_runs_button"') < rendered.index('id="disable_ttl_runs_button"') < rendered.index('id="runs_table"')

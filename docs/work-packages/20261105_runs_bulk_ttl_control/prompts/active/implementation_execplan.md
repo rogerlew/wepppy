@@ -11,16 +11,19 @@ Execute only this package; preserve all unrelated working-tree changes.
 - [x] (2026-11-05) Inspect template, sort helper, existing setter and canonical contracts.
 - [x] Prepare bounded contract decision and amendments.
 - [x] (2026-11-05) Obtain two independent reviews and resolve the medium response-integrity finding.
-- [ ] Commit accepted checkpoint after requested operator authority arrives.
-- [ ] Add regression tests then implement sorting and bulk protection.
-- [ ] Validate, review correctness/security, update tracker and hand off.
+- [x] (2026-11-05) Commit accepted checkpoint as `6cbd4404b` after operator approval.
+- [x] (2026-11-05) Add failing regressions, implement sorting and bulk protection.
+- [x] (2026-11-05) Focused tests, frontend checks, Chromium smoke and independent correctness/security reviews.
+- [x] (2026-11-05 Pacific) Full Python gate: 13,218 passed / 423 skipped; final documentation and handoff complete.
 
 ## Surprises & Discoveries
 
 The current domain contract explicitly prohibits sorting after a misleading
 Last Modified sort was removed. Sorting must use `ttl_deletion_at` instead.
 The existing setter already supports ordinary authenticated authorized users;
-no bulk API is needed. Selection currently excludes readonly rows.
+no bulk API is needed. Selection currently excludes readonly rows. Review found
+failed alias reloads could restore old rows on search; clearing cached arrays
+and checking fetch generations resolves that misleading-selection risk.
 
 ## Decision Log
 
@@ -31,9 +34,11 @@ artifact and current domain contracts. Checkpoint commit authority granted by th
 
 ## Outcomes & Retrospective
 
-Checkpoint prepared and independently accepted; documentation lint passed.
-Standalone checkpoint commit is the remaining prerequisite. Implementation and deployment
-are not claimed.
+Checkpoint committed; implementation and focused validation complete. Both
+independent implementation reviews passed after fixing stale alias-state reuse.
+Full Python gate passed: 13,218 passed / 423 skipped. Frontend: 1,067 passed;
+focused Python: 104 passed. Chromium confirmed the actual rendered action,
+partial failures and mobile fit with mocked HTTP. Deployment is not claimed.
 
 ## Context and Orientation
 
@@ -87,3 +92,10 @@ Reuse `ttl_deletion_at`, `ttl_disabled`, existing checkbox selection,
 dependency, schema, endpoint, scheduler change or TTL formula is introduced.
 
 Plan created 2026-11-05 for the operator-requested bounded enhancement.
+
+Updated 2026-11-05: implementation, focused validation and review evidence added;
+full Python validation passed; local implementation is complete.
+
+Final update: full gate passed after one hour. Independent review resolved stale
+scope-cache/error races, and Chromium exposed the narrow-screen wrapping fix.
+All production changes remain limited to the approved sorting/bulk UI scope.

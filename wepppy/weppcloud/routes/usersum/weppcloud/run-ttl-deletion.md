@@ -17,6 +17,23 @@ project without opening it regularly, disable automatic deletion.
 Every signed-in user who can access the project can use this setting. No
 special account role is required. The same control is available on report pages.
 
+## How do I keep several projects at once?
+
+On your **Runs** page, select the **Automatic deletion** column heading to sort
+by deletion date, earliest first. Select it again to reverse the order. Overdue
+dates are included; disabled projects and projects with unavailable dates appear
+last in either direction.
+
+Check the projects you want to keep, then select **Disable Automated Deletion
+for Selected** beside **Delete selected**. The action applies to checked rows
+on the current page. Readonly projects cannot be selected and are already
+excluded from automatic deletion.
+
+Wait for the result showing how many projects were protected. If some fail,
+the message identifies them; failed rows still visible on the page remain
+selected for retry. Successful projects show **Automatic deletion is disabled**.
+This action cannot stop or undo deletion that has already started.
+
 ## How do I know whether automatic deletion is enabled?
 
 The project header and your **Runs** list show its status:

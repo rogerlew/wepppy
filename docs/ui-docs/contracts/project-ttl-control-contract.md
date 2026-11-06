@@ -24,7 +24,7 @@ The stored TTL schema, rolling expiration calculation, readonly/batch policy,
 and deletion lifecycle are unchanged. Missing, empty, malformed, and legacy TTL
 metadata retain the existing setter's initialization/normalization behavior.
 
-## Runs catalog bulk protection (2026-11-05; implementation pending)
+## Runs catalog bulk protection (2026-11-05; locally implemented)
 
 The Runs page offers **Disable Automated Deletion for Selected** beside its
 delete action, as specified by the [catalog contract](runs-catalog-ttl-deletion-contract.md).
@@ -101,3 +101,12 @@ Disabled describes the inactivity policy, not a promise that an already-started
 deletion can be canceled. Help must say this control cannot undo deletion that
 has already started or restore deleted projects. Existing queued/trash handling
 is unchanged; this work does not redesign deletion or project recovery.
+
+## RUNS-TTL-BULK-01 local implementation evidence (2026-11-05)
+
+Implemented after standalone contract ancestor `6cbd4404b`: chronological
+expiration sorting and the selected-run protection action. Focused Python,
+frontend and rendered-template Chromium checks pass; the Chromium HTTP
+responses are mocked. Independent correctness/security reviews passed after
+stale scope-state fixes. See [validation and limits](../../work-packages/20261105_runs_bulk_ttl_control/artifacts/validation.md).
+Production deployment and catalog projection activation remain separate.

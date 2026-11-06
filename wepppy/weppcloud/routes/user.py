@@ -63,6 +63,7 @@ SORT_ALIASES = {
     'created': 'date_created',
     'datecreated': 'date_created',
     'date_created': 'date_created',
+    'ttl_deletion_at': 'ttl_deletion_at',
     'last_modified': 'last_modified',
     'modified': 'last_modified',
     'lastmodified': 'last_modified',
@@ -365,6 +366,8 @@ def _sort_metas(metas: List[dict], field: str, is_desc: bool) -> List[dict]:
 
     def _sort_value(meta: dict):
         value = meta.get(field)
+        if field == "ttl_deletion_at":
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
         if isinstance(value, str):
             return value.casefold()
         return value

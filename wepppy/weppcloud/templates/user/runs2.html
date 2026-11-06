@@ -77,7 +77,7 @@
   {% endif %}
 
   <section class="wc-panel wc-stack">
-    <div id="runs-table-view" role="tabpanel" aria-labelledby="runs-tab-table">
+    <div id="runs-table-view" style="min-width: 0;" role="tabpanel" aria-labelledby="runs-tab-table">
       <div class="wc-map-controls">
         <div class="wc-map-controls__row wc-map-controls__row--inputs">
           <label class="wc-map-controls__label" for="runs_search_input">Search runs</label>
@@ -124,11 +124,13 @@
         <div id="runs_admin_scope_status" class="wc-text-muted" aria-live="polite"></div>
         {% endif %}
       </div>
-      <div class="wc-toolbar wc-toolbar--end">
+      <div class="wc-toolbar wc-toolbar--end" style="flex-wrap: wrap;">
         <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
+        <button type="button" class="pure-button pure-button-secondary" id="disable_ttl_runs_button" style="white-space: normal; max-width: 100%;" disabled>Disable Automated Deletion for Selected</button>
         <div id="runs-delete-status" class="wc-text-muted" aria-live="polite" style="margin-left: var(--wc-space-sm);"></div>
       </div>
 
+      <p id="runs-ttl-status" class="wc-text-muted" role="status" aria-live="polite"></p>
       <p id="runs_catalog_status" class="wc-text-muted" role="status" aria-live="polite" hidden></p>
       <div class="wc-table-wrapper">
         <table class="wc-table wc-table--dense" id="runs_table">
@@ -141,7 +143,7 @@
               {{ sortable_header('Config', 'config') }}
               <th scope="col">Link</th>
               {{ sortable_header('Creation date', 'date_created') }}
-              <th scope="col">Automatic deletion</th>
+              {{ sortable_header('Automatic deletion', 'ttl_deletion_at') }}
               <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
             </tr>
           </thead>
@@ -199,6 +201,10 @@
 <script>
   const sitePrefix = {{ site_prefix | default('', true) | tojson }};
   const deleteButton = document.getElementById('delete_runs_button');
+  const disableTtlButton = document.getElementById('disable_ttl_runs_button');
+  const runsTtlStatus = document.getElementById('runs-ttl-status');
+  let ttlBatchInProgress = false;
+  let catalogGeneration = 0;
   const runsTable = document.getElementById('runs_table');
   const runsTableBody = document.getElementById('runs_table_body');
   const runsEmptyRow = document.getElementById('runs_empty_row');
@@ -371,6 +377,7 @@
       return;
     }
     runsTableBody.querySelectorAll('tr[data-run-row="true"]').forEach((row) => row.remove());
+    updateDeleteState();
   }
 
   function formatOptionalValue(value) {
@@ -697,7 +704,79 @@
       return;
     }
     const checked = runsTable.querySelectorAll('input[type="checkbox"]:checked');
-    deleteButton.disabled = checked.length === 0;
+    deleteButton.disabled = checked.length === 0 || ttlBatchInProgress;
+    if (disableTtlButton) {
+      disableTtlButton.disabled = checked.length === 0 || ttlBatchInProgress;
+    }
+  }
+
+  async function disableSelectedTtl() {
+    if (ttlBatchInProgress || !runsTable) return;
+    const selected = Array.from(runsTable.querySelectorAll('input[type="checkbox"]:checked'))
+      .filter((box) => !box.disabled)
+      .map((box) => ({ runid: box.value, config: box.dataset.config || '' }));
+    if (!selected.length) return;
+    const generation = catalogGeneration;
+    const failed = [];
+    let completed = 0;
+    ttlBatchInProgress = true;
+    updateDeleteState();
+    runsTtlStatus.classList.remove('wc-text-danger');
+    for (const selectedRun of selected) {
+      runsTtlStatus.textContent = `Disabling automatic deletion: ${completed + failed.length} of ${selected.length} processed…`;
+      try {
+        const response = await fetch(buildRunUrl(selectedRun.runid, selectedRun.config, 'tasks/set_ttl_disabled'), {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: csrfHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ ttl_disabled: true }),
+        });
+        const payload = await response.json();
+        if (!response.ok || payload?.error) {
+          throw new Error(payload?.error?.message || 'Unable to save automatic deletion setting.');
+        }
+        const result = payload?.Content;
+        const ttl = result?.ttl;
+        if (['queued', 'trash', 'purged'].includes(ttl?.delete_state)) {
+          throw new Error('Deletion has already started; this action cannot stop or undo it.');
+        }
+        const protectedPolicy = (ttl?.policy === 'disabled' && ttl.user_disabled === true)
+          || (ttl?.policy === 'excluded' && ttl.disabled_reason === 'batch');
+        if (result?.ttl_disabled !== true || ttl?.delete_state !== 'active' || !protectedPolicy) {
+          throw new Error('Protection could not be confirmed. The project may no longer exist.');
+        }
+        completed += 1;
+        if (generation === catalogGeneration) {
+          const run = runsCatalog.find((entry) => entry.runid === selectedRun.runid && entry.config === selectedRun.config);
+          if (run) {
+            run.ttl_disabled = true;
+            run.ttl_deletion_at = null;
+          }
+        }
+      } catch (error) {
+        failed.push({ ...selectedRun, message: error.message || 'Unable to confirm protection.' });
+      }
+    }
+    if (generation === catalogGeneration) {
+      if (runsSortParam === 'ttl_deletion_at') {
+        // Dates are already ordered by the server; move newly protected rows behind them.
+        runsCatalog = runsCatalog.filter((run) => run.ttl_deletion_at != null)
+          .concat(runsCatalog.filter((run) => run.ttl_deletion_at == null));
+      }
+      applyRunsFilter({ resetPage: false });
+      runsTable.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+        box.checked = !box.disabled && failed.some((run) => run.runid === box.value && run.config === box.dataset.config);
+      });
+    }
+    runsTtlStatus.textContent = `Automatic deletion disabled for ${completed} of ${selected.length} selected projects.`
+      + (failed.length ? ` ${failed.length} could not be confirmed: ${failed.map((run) => `${run.runid}: ${run.message}`).join('; ')}` : '');
+    runsTtlStatus.classList.toggle('wc-text-danger', failed.length > 0);
+    ttlBatchInProgress = false;
+    updateDeleteState();
+  }
+
+  if (disableTtlButton) {
+    disableTtlButton.addEventListener('click', disableSelectedTtl);
   }
 
   function applyRunsFilter(options = {}) {
@@ -886,6 +965,8 @@
   }
 
   function reloadRunsForScope() {
+    runsCatalog = [];
+    runsFiltered = [];
     currentPage = 1;
     runsCatalogLoaded = false;
     resetRunsMap();
@@ -898,9 +979,11 @@
   }
 
   async function loadRunsCatalog() {
+    const generation = ++catalogGeneration;
     if (!runsCatalogUrl) {
       return;
     }
+    clearRunRows();
     setRunsEmptyMessage('Loading runs...');
     try {
       const response = await fetch(buildRunsCatalogUrl());
@@ -908,6 +991,7 @@
       if (!response.ok || (payload && payload.error)) {
         throw new Error(payload?.error?.message || `Runs fetch failed ${response.status}`);
       }
+      if (generation !== catalogGeneration) return;
       runsCatalog = ((payload && payload.runs) || []).map((run) => ({
         ...run,
         searchIndex: buildSearchIndex(run),
@@ -925,6 +1009,7 @@
       runsCatalogLoaded = true;
       applyRunsFilter({ resetPage: false });
     } catch (error) {
+      if (generation !== catalogGeneration) return;
       console.error(error);
       runsCatalogLoaded = true;
       setRunsEmptyMessage(error?.message || 'Unable to load runs.');
@@ -933,6 +1018,7 @@
   }
 
   async function deleteRuns() {
+    if (ttlBatchInProgress) return;
     if (!runsTable) {
       return;
     }

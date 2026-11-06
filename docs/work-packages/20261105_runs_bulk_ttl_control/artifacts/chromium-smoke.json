@@ -1,0 +1,31 @@
+{
+  "result": "PASS",
+  "mobile_viewport": 375,
+  "mobile_button": {
+    "x": 25,
+    "y": 624.390625,
+    "width": 325,
+    "height": 56.78125
+  },
+  "browser": "Chromium",
+  "boundary": "rendered real template and handler; mocked catalog/setter HTTP responses",
+  "sort": "/runs?page=1&sort=ttl_deletion_at&direction=asc&per_page=25",
+  "status": "Automatic deletion disabled for 1 of 2 selected projects. 1 could not be confirmed: retry-second: Access denied",
+  "posts": [
+    {
+      "path": "/weppcloud/runs/keep-first/cfg/tasks/set_ttl_disabled",
+      "body": {
+        "ttl_disabled": true
+      },
+      "csrf": "csrf-value"
+    },
+    {
+      "path": "/weppcloud/runs/retry-second/cfg/tasks/set_ttl_disabled",
+      "body": {
+        "ttl_disabled": true
+      },
+      "csrf": "csrf-value"
+    }
+  ],
+  "page_errors": []
+}

@@ -910,7 +910,7 @@ column or migration is added and no request opens project files. The
 defines wording and unknown-state behavior. Scope filtering remains prior to
 projection; map-only payloads stay unchanged.
 
-## Runs expiration sorting amendment (2026-11-05; implementation pending)
+## Runs expiration sorting amendment (2026-11-05; locally implemented)
 
 The [Runs TTL catalog contract](../ui-docs/contracts/runs-catalog-ttl-deletion-contract.md)
 adds `sort=ttl_deletion_at` in both legacy and projected modes. Sort non-null
@@ -921,3 +921,8 @@ request-time filesystem access or activation authority. Existing stale/unknown
 TTL suppression remains authoritative. Bulk protection uses the existing setter;
 projected metadata never authorizes mutation. The operator requested parity so
 switching catalog modes does not change the new sorting behavior.
+
+
+The RUNS-TTL-BULK-01 sorting amendment is locally implemented after `6cbd4404b`;
+legacy/projected route regression checks passed. This does not activate the
+projection. See [validation](../work-packages/20261105_runs_bulk_ttl_control/artifacts/validation.md).
