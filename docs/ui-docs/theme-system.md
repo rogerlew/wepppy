@@ -229,3 +229,21 @@ wepppy/weppcloud/
 **Document owner:** GitHub Copilot (AI Agent)  
 **System status:** Production, monitored  
 **Next review:** Align with next theme catalog update or accessibility audit
+
+## Roads parameterization table headers
+
+The Roads Parameterization tables use the shared `wc-table` presentation so
+header backgrounds and text follow the selected theme, including dark themes.
+Pure CSS's `pure-table` class alone supplies fixed light header colors.
+
+This is a conformance repair under the controller contract's **Established
+presentation conventions**; parameterization behavior is unchanged. Verify
+computed header background and text against `--wc-color-surface-alt` and
+`--wc-color-text` in the default palette and every bundled theme. The same
+markup covers unavailable, populated, and editing states for all three roles.
+
+Validation (2026-11-05): Chromium computed header colors matched both tokens
+across all 15 stylesheet palettes (including default); frontend lint and all
+124 Jest suites (1,067 tests) passed. Independent correctness review found no
+issues. Verification used the actual table classes and shipped stylesheets in
+an isolated browser document; a live run page was not exercised.
