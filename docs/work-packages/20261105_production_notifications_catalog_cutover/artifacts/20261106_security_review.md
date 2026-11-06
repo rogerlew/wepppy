@@ -7,6 +7,7 @@
 | SEC-01 | High | Fleet execution and partial failure | The initial plan lacked a concrete admission hold. The canonical script resumes its global fence on normal completion and most errors, before package artifact acceptance. A traffic hold alone cannot prevent execution of retained queued/deferred work. `scripts/deploy-production.sh:849`, `:1007`, `:1134`, `:1422`; active plan M0/M3. | Stop old web/RQ producers, scheduler and all five old worker containers, verify child exit and empty started registries, hold remotes, and permit only new-runtime traffic when the canonical script resumes. Never restart old containers after 2.x writes, including on failure. | Resolved at control-design review: revised M3 states concrete services, warm timeout, ordering, outage and failure rules. Actual stop/readback remains a mandatory execution gate. |
 | SEC-02 | Medium | Migration target and recovery copy | The initial restored-database rehearsal lacked an executable target guard. Old Flask configuration could select production while rehearsing. Active plan M2; `configuration.py:293`; notification migration. | Override both URI variables before Flask import; validate the owned target, effective app URI and connected database/server before upgrade; preserve backups and verify production unchanged after rehearsal. | Resolved at command review: helper digest and checks below. Successful isolated rehearsal remains required before production migration. |
 | SEC-03 | Medium | Old-runtime registry cleanup | The original deployment probe calls `StartedJobRegistry.get_job_ids()`, which cleans the registry. Its pre-build fallback can run old 1.16 against shared 2.x-written state. The first proposed `cleanup=False` correction also fails on actual RQ1.16.2, whose method has no cleanup parameter. | Use raw Redis `ZCARD` of each started-registry key, conservatively treating stale entries as a hold. Regression must forbid `get_job_ids()` and prove the embedded script reads cardinalities without cleanup under both runtime versions. | Resolved: raw ZCARD source, 38 passing execution tests, and independent exact-program execution under installed 1.16.2 and 2.12.0. |
+| SEC-04 | Medium | Hold-receipt identity | Initial `capture_old_runtime_holds.py:10` checks uniqueness only in the baseline snapshot, then inspects that old ID. A stopped original plus a current replacement/duplicate can still yield a passing receipt. The aggregator's timestamp policy also needs to preserve the oldest observation. | Enumerate current matching project/service containers, reject replacements/additional running copies, compare exact baseline ID/image and stopped state; forbid optimized Python. Aggregate using the earliest host observation or validate every host's age rather than refreshing stale evidence with aggregation time. | Resolved: current Docker inventory and exact baseline-ID checks added; reviewed aggregator validates each host age, unique identities and preserves the minimum timestamp. Final digests below. |
 
 These findings concern execution controls, not requests for new infrastructure or renewed
 authorization. No risk acceptance is recorded. Medium/high findings require
@@ -63,8 +64,9 @@ Valid states to preserve:
 
 ## Verdict
 
-- **Gate status**: pass for the revised execution controls and candidate repair;
-  this is not final production acceptance or package closeout.
+- **Gate status**: pass for reviewed execution controls/source repairs and exact
+  recovery/receipt helpers. Final production acceptance and package closeout
+  remain pending.
 - **Unresolved findings**: high 0; medium 0; low 0.
 - **Recommendation**: proceed with guarded rehearsal and the reviewed sequence,
   retaining actual backup/hold/readback evidence before their dependent steps.
@@ -255,6 +257,202 @@ production execution; this review does not claim they have occurred.
 - Baseline dashboard routing and legacy archive mount placement are outside this
   release. Neither may be silently repaired by broadening services or permissions.
 - No medium/high risk acceptance is recommended or implied at this stage.
+
+## Root configuration and activation follow-up
+
+Stage the exact seven default locators on all three hosts during the initial
+deployment, with both feature flags false. These cover four storage namespaces;
+they do not represent seven distinct storage trees. The authoritative existing
+values are `_default_roots()` in `wepppy/query_engine/catalog_refresh.py:74`:
+
+```json
+[
+  {"path":"/wc1/runs","namespace":"wc1:runs","coordination":"/wc1/query-engine-coordination/locks","layout":"sharded"},
+  {"path":"/wc1/batch","namespace":"wc1:batch","coordination":"/wc1/query-engine-coordination/locks","layout":"batch"},
+  {"path":"/wc1/culverts","namespace":"wc1:culverts","coordination":"/wc1/query-engine-coordination/locks","layout":"culverts"},
+  {"path":"/geodata/wc1/runs","namespace":"wc1:runs","coordination":"/geodata/wc1/query-engine-coordination/locks","layout":"sharded"},
+  {"path":"/geodata/wc1/batch","namespace":"wc1:batch","coordination":"/geodata/wc1/query-engine-coordination/locks","layout":"batch"},
+  {"path":"/geodata/wc1/culverts","namespace":"wc1:culverts","coordination":"/geodata/wc1/query-engine-coordination/locks","layout":"culverts"},
+  {"path":"/geodata/weppcloud_runs","namespace":"legacy:runs","coordination":"/geodata/wc1/query-engine-coordination/locks","layout":"flat"}
+]
+```
+
+The reviewer ran read-only probes in the actual wepp1/wepp2 default-worker and
+wepp3 fork/archive containers as UID 1002/GID 130. All seven roots existed and were
+readable. Each `/wc1` versus `/geodata/wc1` pair, including the coordination
+directory, had identical device/inode identity within its host. Cross-host device
+or inode numbers are not used as an identity assertion. A temporary four-entry
+configuration in each inspection process rejected all three omitted
+`/geodata/wc1` spellings with `Managed catalog root lacks shared coordination
+configuration`, even with refresh disabled. No project or guard was created.
+
+The historical four-entry candidate configuration is therefore insufficient to
+preserve the currently supported alias paths. `Path.resolve()` does not collapse
+these bind-mount aliases. Retain seven entries rather than changing path
+classification during this deployment. wepp3's `/geodata` view, including its
+coordination alias and legacy projects, is read-only while its `/wc1` view is
+writable. Exact default staging preserves that existing limitation; it does not
+certify legacy archive operations. Both default-worker hosts can read/write all
+configured roots and coordination aliases, so the inspection found no missing
+alias that would permanently degrade general inventory.
+
+Inventory currently seeds every root locator and deduplicates by path text
+(`_query_catalog_inventory.py:84`, `:138`). Seven entries therefore retain extra
+alias traversal cost; namespace identity alone does not eliminate that cost.
+Measure actual complete-cycle duration and distinct `(namespace, relative scope)`
+coverage. Do not present raw locator visits as unique projects or infer capacity
+from the owned pilot. A missing redundant root spelling can be covered by an
+accessible configured namespace alias (`:246`); loss of the whole namespace must
+remain degraded. The operator selected observation of this existing configuration
+before considering any alias redesign.
+
+Staging roots now makes the disabled pilot configuration explicit and avoids a
+separate root change, but does not eliminate activation recreation. The enabled
+flag is part of the worker configuration and discovery identity
+(`query_catalog_rq.py:68`), and workers advertise it at birth
+(`rq_worker.py:126`). Changing an env file or only the scheduler cannot update the
+running fleet. The canonical deploy script's existing targeted options omit
+necessary default workers, scheduler and other publishers. Under the current
+plan, the supported complete lifecycle remains canonical wepp1 → wepp2 → wepp3
+deployment. Pause catalog admission, drain/retire the disabled pilot, preserve
+its receipts/ledger, activate consistent true settings, verify all twelve actual
+default consumers and participating publishers, and then unpause. No manual
+capability fabrication, ledger reset or additional deployment architecture is
+needed.
+
+## Disposable acceptance account review
+
+The proposed two uniquely named fixture accounts and owned project fork fit the
+authorized production acceptance scope. Directly provisioning only User and
+PowerUser on the primary fixture would be bounded test setup, but normal
+self-service onboarding provides stronger evidence without additional privilege.
+Create both as User, perform real CAP/password login, verify the primary's token
+mint is denied before promotion, then submit the current statement version and
+two affirmative synthetic fixture answers through authenticated, CSRF-protected
+`/profile/poweruser`. Refresh the profile and mint through `/profile/mint-token`.
+The secondary account remains User-only. Do not grant Admin/Root/Dev or internal
+feature memberships, bypass authentication, or record a real person's acceptance.
+Authority and behavior follow `feature-access-governance-contract.md` and
+`user.py:602`, `:1035`; production success remains to be observed.
+
+Fork the public source through normal authorization and mutate only the owned
+fork for native/model/report/archive acceptance. One separately registered real
+TTL fixture plus generic notices delivered only to the primary fixture account
+can provide the 101 records needed for pagination; no production recipient should
+receive test content. Producer scope, source keys, account IDs and cleanup must
+be manifest-bound. Preserve all unrelated notification content and read states.
+
+The profile token lifetime is 90 days (`user.py:73`). Revoke its exact `jti`
+through the existing token-revocation contract during cleanup; account deletion
+alone is not proof of revocation. Retain no credential values in committed
+evidence. `onboarding_acceptance` intentionally lacks a cascading user foreign
+key (`feature_access_schema.py:41`); explicitly retain/disposition the synthetic
+fixture audit record rather than assuming deletion removes it. No new security
+finding or authority expansion is introduced by this reviewed fixture design.
+
+## Expired completed permit recovery review
+
+The November 6 preflight found two retained claimed bindings from pilot
+`qcat-20261027-shared01`, each with an execution-exit timestamp but an expired RQ
+job hash (TTL -2). `_query_catalog_admission.execution_uncertain()` deliberately
+treats missing status as uncertain, so the existing ledger blocks new admission.
+Missing hashes alone would not justify removal.
+
+The reviewer independently verified the private historical `result.json` has
+SHA256 `a940ebc78d12d43970feb3916f80b00c925506a234679c0974b82dcab8bc8710`,
+matching the committed [October 27 summary](../../20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot/summary.json).
+It records both exact jobs finished after their matching execution-exit
+timestamps, completed pilot acceptance, one inventory plus sixteen refresh jobs,
+and zero outstanding work. The two job-ID SHA256 digests are
+`a8700dfc8f0a6f95ab03d84bae23a518d913023c580193153464f896712311ab` and
+`48e58df373448cb5fb2b574afdb95d359785e6969ef6088033fb89054e183216`.
+Exact IDs, scope locators and binding data remain in private operator evidence.
+The exit-writing code commits the matching pilot and global binding together
+after admitted scope work (`_query_catalog_admission.py:251`); historical finished
+evidence plus verified process exit closes the ambiguity left by hash expiry.
+
+Retiring only these proven completed permits is bounded recovery within the
+authorized cutover, without additional permission or architecture. The approved
+design requires all of the following before mutation:
+
+1. Retain private raw ledger, pilot and relevant queue/registry snapshots with
+   hashes. Verify the old producer/worker holds and global catalog pause.
+2. WATCH the ledger, pause key, both job keys, historical pilot key, and relevant
+   default/batch queue and started/deferred/scheduled registries. Require the
+   pause to remain present and unchanged, both job hashes absent, and neither
+   exact job ID present in active queue/registry membership. Recognize the RQ2
+   `job_id:execution_id` representation without deserializing or cleaning jobs.
+3. Require each current binding to equal the historical result's binding after
+   removing only its observer-added `status` field. Check claimed state, pilot,
+   generation, configuration, scope and execution-exit timestamp; require the
+   historical job status to be finished. Any mismatch aborts.
+4. Deep-copy the ledger and remove only the two exact bindings. Preserve
+   `initialized_at` and every other metadata field and binding. Commit one SET
+   under MULTI/EXEC; a WATCH conflict aborts for fresh inspection.
+5. Read back the exact resulting ledger and unchanged pause/pilot bytes. Retain
+   before/after audit evidence. Keep pilot manifests, budgets, receipts, guard
+   inodes and historical completion records intact.
+
+Do not reset the ledger, fabricate finished status, recreate expired job hashes,
+revive the old pilot, or erase unknown bindings. Before renewed admission, a
+correction can restore only this owned ledger change if its exact post-state is
+still unchanged under CAS; never restore an old ledger after new admissions.
+This review approves the bounded recovery design, not an unobserved execution.
+The fail-closed missing-status rule remains unchanged. A future long pause can
+outlast job retention again; retain terminal evidence for operator reconciliation
+instead of interpreting future missing jobs as automatically completed.
+
+The concrete initial helper `/tmp/production-retire-catalog-permits.py`, SHA256
+`143e44b662827c84b6f135716a94ba863b140638c568add6694ff1567aa5b498`, was reviewed
+without execution. Its WATCH set includes all three queues and their
+started/deferred/scheduled registries, both job keys, ledger, pause, pilot and
+observer. It pins historical and ledger hashes, matches exact bindings against
+both history and live pilot, requires empty started registries, preserves
+persistent ledger lifetime, saves exclusive mode-0600 fsynced snapshots and
+verifies post-state. No blocking defect was found under normal non-optimized
+Python and the promised fresh hold-receipt producer. That producer must compare
+the exact baseline container IDs/images; the helper itself checks receipt age,
+eight host/service pairs and exited/PID-zero states, not Docker identity.
+
+Before execution, reviewers recommended pinning the exact live pilot hash,
+explicitly checking pause TTL -1, rejecting optimized Python with an ordinary
+conditional, and fsyncing the evidence directory before EXEC. These strengthen
+the existing operation without expanding its scope. Exclusive snapshots make a
+blind rerun fail closed: after a conflict, inspect and use a new reviewed evidence
+directory; after a possible EXEC/readback failure, inspect actual Redis state
+before choosing recovery. A later edited helper requires its final digest to be
+recorded rather than presenting this reviewed initial hash as executed evidence.
+
+Final helper reread: SHA256
+`f9771b1104efbe43d902affc19b3614fbe24c6c8d7399419f46d601f201fe556`.
+All four recommendations are implemented: an optimization-independent guard,
+exact pilot SHA256 `1c525ccb0670e0ad4370e52cbefdb9dd055b2bb893d52b7b309c5007b9e686c5`,
+persistent pause TTL under WATCH, and directory fsync after the three pre-EXEC
+snapshots. Security review passes this exact helper subject to the fresh
+baseline-matched hold receipt and reviewed invocation. Runtime execution and
+actual before/after receipts remain pending; no additional defect was found.
+
+The subsequent initial receipt-producer review found SEC-04 in
+`capture_old_runtime_holds.py`, SHA256
+`c884f205d14c8f5eb6fe7c85aad5a99dcdf71fb706422c62232cb2d8e3d575f1`.
+Baseline identity verification is present, but the initial implementation does
+not enumerate current siblings/replacements. The exact retirement helper remains
+reviewed; its promised receipt-producer precondition is not satisfied until that
+gap and observation-age handling are closed.
+
+SEC-04 final reread passed. The retained
+[capture helper](capture_old_runtime_holds.py), SHA256
+`c099a679e94f78472d70d545278af9c151bef3ef829decc16a6a66ea57c6bce3`,
+enumerates current containers in the baseline Compose project and requires one
+matching service container with the exact baseline ID, then verifies image,
+exited/PID-zero state and restart policy. Additional matching one-offs also fail
+the uniqueness check. The [aggregation helper](aggregate_old_runtime_holds.py),
+SHA256 `8f0eb21821e7556d9a608a1af479a6009545a3506bd116c4727d86af0fdf3516`,
+validates each host timestamp is younger than 300 seconds, requires exactly the
+eight host/service pairs and eight distinct host/container identities, and carries
+forward the earliest host observation. Both explicitly reject optimized Python.
+Repository copies match these digests. The helper/source review is complete;
+actual hold receipts and recovery execution still require retained evidence.
 
 ## Sign-off
 

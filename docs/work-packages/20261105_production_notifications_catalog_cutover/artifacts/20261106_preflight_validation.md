@@ -34,3 +34,8 @@ The existing RQ dashboard 502 is baseline; no new service is introduced.
 
 Production after rehearsal: e7a1c9d204bf, notification table absent, original
 5416/33444/9444/11 counts unchanged. Live migration is still pending.
+
+The rehearsal database was removed after readback. Exact final control helpers
+and staged environment receipts are retained beside this note. Independent
+reviews close the compatibility/control findings at source review; actual old
+process holds, permit retirement, live migration and deployment are still pending.

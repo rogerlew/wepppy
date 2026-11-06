@@ -43,3 +43,21 @@ Readiness assessment is under notes/. Original production inspection and cleanup
 logs are retained under /tmp on forest; copy sanitized summaries to artifacts and
 private operational backups to mode-0700 host directories. Complete independent
 review and exact rollback/control commands before irreversible cutover.
+
+### Reviewed execution preparation (2026-11-06 UTC)
+
+Published checkpoint `b4d9aab1d` includes the operator's defaults. All three hosts
+have fetched it; running applications remain at 0da9c9071. Staged environment
+readback confirms seven equivalent root locators/four namespaces on 18 wepp1,
+two wepp2 and one wepp3 services, with both feature flags false. The isolated
+migration passed with counts preserved and its database was removed; live schema
+is unchanged. Images and protected backups remain retained.
+
+Two completed October pilot permits outlived their RQ hashes. Both reviewers
+verified their exact completed bindings against anchored historical results.
+The reviewed one-time helper retires only those two reservations after the
+baseline-matched all-old-runtime hold and catalog pause; it preserves ledger
+identity and all pilot history. No recovery mutation has run. Fresh full pytest
+is still running without a reported failure; focused/deployment/frontend gates
+pass. The new scheduler will be held after wepp1 activation through remote fleet
+activation to avoid admitting unrelated scheduled work during the transition.

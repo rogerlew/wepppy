@@ -130,17 +130,31 @@ Alembic may already have committed. Prefer the existing old
 runtime with only the candidate Alembic directory mounted read-only in a one-shot
 process, after the exact command passes rehearsal. This avoids a premature full
 application activation. Never replace live Redis with a prior snapshot or drop
-notification tables on rollback. Raw backups/credentials stay outside git.
+notification tables on rollback. Raw backups/credentials stay outside git. Retire only the two proven completed
+expired October pilot permits using artifacts/retire_completed_catalog_permits.py
+after fresh all-old-runtime holds and a deployment-owned catalog pause. Preserve
+all pilot bytes and every other ledger field; the independently anchored evidence,
+WATCH guards and exclusive snapshots are mandatory. Do not retry blindly after
+an uncertain commit/readback. This is not an RQ flush or ledger reset.
 
 ## M3 — Coordinated production activation
 
 Keep both feature flags false initially and preserve existing catalog modes/GC.
+Stage the exact seven default root locators for four namespaces; all aliases and
+shared coordination identities are preserved. Measure duplicate traversal cost
+in the general cycle; do not count aliases as unique project coverage.
 Gracefully stop old wepp1 weppcloud, rq-engine and scheduler, including in-flight
 requests through direct port 8000. Warm-stop all five old worker containers:
 wepp1/wepp2 rq-worker and rq-worker-batch, and wepp3 rq-worker-fork-archive.
 Use installed wctl compose stop with the canonical 216000-second worker timeout;
 never SIGKILL active work. Verify every old process stopped and all three started
 registries empty before any 2.x process starts. Preserve retired wepp2 batch logs.
+If the already-retired wepp2 batch pool fails warm shutdown, use the exact-ID
+conditional disposition in the correctness review: after a 30-second observation,
+refresh zero registrations/started jobs and absence of project FDs, mappings or
+job descendants, then terminate only that unchanged retired container. This is
+not an automatic short timeout for healthy pools. Any contrary evidence blocks
+escalation. Preserve its logs and verify process exit before continuing.
 Remote pools remain manually stopped until their own canonical deployment.
 The script owns its suspension; do not create an external rq:suspended key.
 
@@ -162,6 +176,10 @@ Use --skip-pull only after the verified candidate fast-forward. Do not bypass
 local builds with --skip-build. Capture output privately and retain sanitized
 service/image/distribution summaries. Each script's fence must remain owned and
 renewed through its cutover. Preserve tagged rollback images and all volumes.
+After wepp1's canonical completion, stop only its new scheduler until wepp2/3
+finish, then recreate scheduler through the scoped approved operation. Verify it
+has not reached the 900-second initial task delay; if it has, inspect/drain any
+admitted jobs instead of deleting them or claiming scheduling was prevented.
 Require expected worker registrations, actual RQ 2.12.0 imports, unchanged
 identities/mounts and correct native hashes across all consumers.
 

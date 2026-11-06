@@ -1,0 +1,179 @@
+[
+  {
+    "host": "wepp1",
+    "services": [
+      "browse",
+      "cap",
+      "download",
+      "dtale",
+      "elevationquery",
+      "metquery",
+      "preflight",
+      "profile-playback",
+      "query-engine",
+      "rq-engine",
+      "rq-worker",
+      "rq-worker-batch",
+      "scheduler",
+      "shape-converter",
+      "status",
+      "weppcloud",
+      "wmesque",
+      "wmesque2"
+    ],
+    "roots": [
+      {
+        "path": "/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/geodata/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/geodata/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "namespace": "legacy:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "flat"
+      }
+    ],
+    "refresh_enabled": false,
+    "notifications_enabled": false,
+    "env_sha256": "1bb6a330217c6af2e5a1e9fc3b02a8f7df27e876b55f407c27684d838efc657c"
+  },
+  {
+    "host": "wepp2",
+    "services": [
+      "rq-worker",
+      "rq-worker-batch"
+    ],
+    "roots": [
+      {
+        "path": "/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/geodata/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/geodata/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "namespace": "legacy:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "flat"
+      }
+    ],
+    "refresh_enabled": false,
+    "notifications_enabled": false,
+    "env_sha256": "f8c69eb2658357ca78a6cf1e8db8faa6b4d514d3605376d96245f83113f62ac0"
+  },
+  {
+    "host": "wepp3",
+    "services": [
+      "rq-worker-fork-archive"
+    ],
+    "roots": [
+      {
+        "path": "/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/geodata/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/geodata/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "namespace": "legacy:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "flat"
+      }
+    ],
+    "refresh_enabled": false,
+    "notifications_enabled": false,
+    "env_sha256": "0a4e5f9d7e774aafffd77e131c20b246d7d044cfaa876f4fec3e304059c40b4d"
+  }
+]

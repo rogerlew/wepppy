@@ -40,6 +40,7 @@ implemented by the present canonical script.
 | COR-02 | Medium | Batch capacity and notification execution | wepp2 container `bf9adc613a7b` has no live worker registrations although Docker reports running. Read-only evidence below confirms retired workers and stalled child processes. Process count is not readiness. | Preserve logs/diagnostics; replace the container during the authorized canonical wepp2 deployment. Require four genuine batch registrations from its new hostname, alongside the six default registrations. Do not fabricate registrations or claim the old pool healthy. | Open: production recovery/verification pending |
 | COR-03 | Medium | Scheduled catalog admission | Original `docker/scheduled-tasks.yml:13` passed batch into a reconciler whose shared admission requires default. The prior stub test did not test that boundary. Parent's working tree now selects default. | Publish the queue correction with actual-YAML, real-admission regression evidence; verify the deployed scheduler emits real default maintenance work and resulting catalog content. | Source/regression resolved; publication and production acceptance pending |
 | COR-04 | High | Old-runtime pre-build gate | The initially proposed `get_job_ids(cleanup=False)` repair was incompatible with actual installed RQ 1.16.2: its method accepts only `start`/`end` and unconditionally invokes cleanup. The stub accepted a keyword absent from that runtime. | Use direct non-cleaning Redis cardinality through the registry key, retaining stale entries conservatively. Validate the extracted deployment probe against both actual runtimes and update its regression. | Resolved: raw ZCARD and both-runtime direct execution passed |
+| COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remain in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denies all new admissions (`:132`); pilot observation also stops on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Open; blocks catalog admission, not notification or disabled-mode runtime deployment |
 
 These are execution gates, not claims that the feature implementation is
 otherwise defective. Missing final migration/browser/model/cycle evidence remains
@@ -50,8 +51,9 @@ an acceptance gap even after the plan controls are resolved.
 Use the existing script and existing containers; no new queue, service, proxy
 policy or firewall policy is necessary for RQ version isolation.
 
-1. Complete source publication, migration rehearsal, additive migration and
-   private image/config backups. Keep both new feature schedules disabled.
+1. Complete source publication, migration rehearsal and private image/config
+   backups. Keep both new feature schedules disabled. Apply the live additive
+   migration only after the old-runtime holds below, before candidate readers.
 2. Verify host identity and current process/container IDs. Gracefully stop old
    wepp1 `weppcloud`, `rq-engine`, and `scheduler`, allowing accepted requests to
    finish. Stop all old default/batch pools on wepp1 and wepp2 and fork/archive on
@@ -62,6 +64,8 @@ policy or firewall policy is necessary for RQ version isolation.
    and default/batch/fork-archive have no started executions. Retain queue,
    dependency, scheduler and historical records. Take the quiescent recovery
    snapshot after these checks; an earlier live backup alone is not that point.
+   Apply the guarded live migration now and retain exact count/revision readback;
+   if a post-migration assertion fails, inspect committed state before retrying.
 4. Run the reviewed canonical full deployment on wepp1, then worker deployment on
    wepp2 and fork/archive deployment on wepp3. Keep remote old containers stopped
    throughout. Do not set an external `rq:suspended` value or interfere with the
@@ -120,6 +124,35 @@ or prove why each child became stuck. No debugger/signal/process mutation was
 used. Three corresponding historical job hashes have expired naturally, so their
 full metadata cannot be recovered from current Redis. Do not claim a complete
 historical root cause or scientific-output validation from these observations.
+
+### Retired-container shutdown assessment
+
+A read-only refresh at 2026-11-06 05:29:01 UTC found the same exact container
+`bf9adc613a7bf87ecb607dd6626c0ab9ce80996e4f564b7f2322fb707d7664f4`,
+zero registrations and zero started entries on all three queues. Its only live
+process tree remained init → supervisor PID 7 → four futex-waiting retired child
+processes. Each child had one zombie descendant. The live processes had no open
+`/wc1` or `/geodata` descriptors or file mappings. Zombies have exited and do not
+constitute running scientific work. These observations must be refreshed at the
+actual disposition boundary; they are not standing permission to kill a pool.
+
+Installed RQ 1.16.2 `WorkerPool.request_stop` sets the pool state to STOPPED and
+sends SIGINT to its worker children. Its main loop then waits for every child to
+exit. A retired child blocked in a native futex may not execute its Python signal
+handler, so warm shutdown can remain stuck despite no active job. The exact mutex
+cause is still unproved; a 216,000-second wait would not resolve that uncertainty.
+
+The smallest bounded disposition for this already-approved container recreation
+is: initiate the normal warm stop asynchronously; observe approximately 30 seconds;
+if it has not exited, retain shutdown-request/STOPPED logs and refresh the entire
+process tree, worker registrations, started registries and project descriptor/map
+checks. Only if the unchanged exact container still contains solely these retired
+idle processes and zombies may the operator terminate that exact container with
+SIGKILL to finish the stop. An automatic short timeout for arbitrary worker pools
+is not this procedure. Any new execution, descendant, registration or project
+writer blocks escalation and requires diagnosis. Preserve Redis records, project
+files and lock inodes; verify the old container and host PIDs are gone, then leave
+it stopped until canonical candidate deployment. No signal was sent by this reviewer.
 
 ## Failure-Class Coverage
 
@@ -199,12 +232,13 @@ linked from final acceptance. No new exception or hidden project record is appro
 - **Gate status:** pass for revised design and prerequisite patches, conditional
   on live stopped-process/drain evidence and the other stage prerequisites before
   activation. Production feature/fleet acceptance remains pending.
-- **Unresolved findings:** High 0; Medium 1; Low 0. COR-01 is resolved as a design
+- **Unresolved findings:** High 0; Medium 2; Low 0. COR-01 is resolved as a design
   finding but its live evidence is mandatory before transition; COR-03 source
   repair is accepted without claiming deployment acceptance.
 - **Release recommendation:** ship-with-conditions. COR-02 requires genuine wepp2
   capacity after its canonical recreation; it does not prohibit the preceding
   wepp1 transition while every old wepp2 worker is verifiably held stopped.
+  COR-05 must close before new catalog pilot/general admission.
 - **Reviewer sign-off:** `production_cutover_correctness`, 2026-11-06 UTC.
   Re-review after concrete controls and actual deployment evidence are available.
 
@@ -242,3 +276,107 @@ wepp2 container `bf9adc613a7b` reported RQ 1.16.2 and count 0; forest weppcloud
 reported RQ 2.12.0 and count 0. Both exited successfully. This closes COR-04's
 runtime compatibility/read-only concern; it is not a later production drain
 certificate. No production queue records were created, cleaned or changed.
+
+## Expired completed catalog bindings: bounded reconciliation
+
+Read-only inspection at 2026-11-06 05:41:44 UTC confirmed exactly two reservations
+in `query-catalog:batch-admission:v1`, both from `qcat-20261027-shared01`.
+The current ledger SHA256 is
+`bef8d251c310df87872dcd569dc2784f3cd5d698e6cc334b374442930abd2474`;
+`initialized_at` is `1793120006.7626648`, and its TTL is -1. Both job hashes are
+absent (TTL -2). Both bindings are claimed with execution-exit timestamps
+`1793120185.796539` and `1793120185.9182475`. SHA256 digests of their exact job IDs
+are, respectively,
+`a8700dfc8f0a6f95ab03d84bae23a518d913023c580193153464f896712311ab` and
+`48e58df373448cb5fb2b574afdb95d359785e6969ef6088033fb89054e183216`.
+Keep exact IDs, bindings and scope locators in the protected execution snapshot.
+
+Independent evidence establishes completion rather than merely expired status:
+
+- The private original `result.json` on wepp1 has SHA256
+  `a940ebc78d12d43970feb3916f80b00c925506a234679c0974b82dcab8bc8710`, matching
+  `20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot/summary.json`.
+  It records completed acceptance, zero outstanding/uncertain/failures, and both
+  exact jobs finished at 2026-10-27 16:56:25.797801 and 16:56:25.920027 UTC.
+- Each complete current ledger binding equals its historical result binding
+  after removing only the result's derived `status` field. It also equals the
+  corresponding live pilot binding; the immutable manifest still matches.
+- The live pilot is paused for `acceptance_readback_complete`, with counters
+  16 refresh/one inventory, no failures, completed artifact/receipt phases,
+  persistent TTL and no observer lease. Its current raw SHA256 is
+  `1c525ccb0670e0ad4370e52cbefdb9dd055b2bb893d52b7b309c5007b9e686c5`.
+- Original inventory/receipt readbacks and cleanup files also match the hashes
+  committed in that summary. The historical acceptance explicitly records the
+  missing original status-byte snapshot; this reconciliation does not recreate it.
+- Neither exact ID occurs in default/batch/fork-archive ready lists or their
+  started, deferred or scheduled registries. This was a raw read without cleanup.
+
+There is no existing targeted operator release command. `initialize_admission`
+preserves an existing ledger; normal admission prunes provably terminal bindings
+but intentionally refuses absent job hashes; pilot `drain`/observation does not
+reconstruct expired history. Do not weaken `execution_uncertain` globally, restore
+fake job hashes/statuses, restart the expired pilot or replace the ledger with a
+new initialization. The durable contract allows explicit operator recovery
+against retained evidence (query refresh contract, Bounded admission).
+
+The reviewed mutation boundary is one WATCH transaction affecting only this
+ledger value:
+
+1. Preserve the full original private result, readbacks and cleanup evidence
+   before container replacement. They reside on existing host storage under
+   `/geodata/wc1/query-catalog-validation/20261027/shared-pilot-01/` (container
+   `/wc1/query-catalog-validation/20261027/shared-pilot-01/`). Verify their committed
+   hashes rather than trusting copied filenames.
+2. Establish an owned persistent **catalog admission** pause at
+   `query-catalog:batch-admission:v1:paused`, preserving any pre-existing pause.
+   This is not an external `rq:suspended` key. Retain the pause owner/value.
+   Complete all old producer/scheduler/worker holds and verify no execution;
+   catalog pause alone does not stop an already-admitted worker.
+3. Save private byte-exact before snapshots and TTLs of the ledger, every retained
+   pilot key and the relevant queue/registry observations; record their hashes.
+   Require the expected ledger/pilot digests, exactly the two approved bindings,
+   matching historical bindings, finished results, matching manifest, exit markers,
+   completed phases, no failures, and absent job hashes/observer lease. Unexpected
+   differences abort for review instead of broadening the target set.
+4. WATCH the ledger, catalog pause, old pilot and observer keys, both absent job
+   hashes, and all inspected ready/intermediate and nonterminal registry keys.
+   Re-read the protected values and all membership/identity conditions after WATCH.
+   Require the owned pause and persistent ledger TTL. Check entire relevant
+   registry membership without invoking RQ cleanup or deserializing job payloads.
+5. Construct a copy of the current ledger and remove only the two exact approved
+   job-ID members from its `jobs` mapping. Preserve every other field, especially
+   `initialized_at`; assert the semantic diff consists exclusively of those two
+   removals. MULTI/SET with TTL preservation/EXEC writes only the ledger. Do not
+   delete/reinitialize the key, modify pilot counters, clear failures or receipts,
+   change any queue/registry record, or synthesize an RQ terminal status. A WATCH
+   conflict aborts; reassess from fresh evidence rather than blindly retrying.
+6. Save private after bytes and a diff. Require the same persistent ledger/key
+   identity and initialization time, exactly the two removed bindings, unchanged
+   pilot bytes/manifest/counters/receipts, absent job hashes and owned pause still
+   present. Only then close COR-05. Leave catalog admission paused until the new
+   default-worker pilot's normal gates and explicit release.
+
+The historical pilot may now report unknown/outstanding jobs because its RQ
+hashes expired. Preserve that truthful retained history; do not force its current
+status green. The retained original result proves the old completion. A fresh
+pilot uses its own authority and the reconciled global ledger. An extended future
+pause past job retention can require similar explicit recovery; this bounded
+operation is not a general automatic-expiry repair.
+
+## New-scheduler hold between host deployments
+
+After canonical wepp1 deployment completes, stopping only its newly created
+scheduler while wepp2/wepp3 deploy is consistent with the bounded fleet hold.
+Keep both feature flags false; restart through the approved scheduler-only
+recreation after fleet convergence. This prevents access-log/docs-index admissions
+from unnecessarily occupying workers during later deployment gates.
+
+Verify scheduler start time and stop before the earliest enabled task's actual
+due time. With the reviewed YAML, those tasks start after 900 seconds plus
+nonnegative jitter (`wepppy/tools/scheduler.py:193`); disabled zero-delay catalog
+tasks must actually be disabled. Canonical health checks expect scheduler running,
+so stop after those checks rather than making them fail deliberately. If the
+script itself takes beyond the earliest due time, inspect and drain any admitted
+work; a later stop does not retract queued jobs. No deletion or cancellation of
+accepted tasks is justified. Record the hold/recreation and actual first feature
+schedule time rather than promising a fixed wall-clock execution.
