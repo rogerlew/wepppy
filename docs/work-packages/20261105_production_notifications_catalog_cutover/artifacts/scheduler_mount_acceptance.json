@@ -1,0 +1,30 @@
+{
+  "scheduler_id": "fa07f9e8eec9485959ab52a788019663fc2db421470a9c592f716833b66d8fe7",
+  "scheduler_image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+  "started_at": "2026-11-06T08:28:43.670078617Z",
+  "user": "roger",
+  "only_two_mount_sources_changed": true,
+  "all_other_container_ids_images_states_unchanged": true,
+  "unrelated_container_count": 24,
+  "runtime_root_identity_parity": true,
+  "natural_reconciliation": {
+    "inventory_key": "query-catalog:inventory:b3c2767cf7183d35990ad37688c2092d87ee008915aa6494e83b26c52dcc3569",
+    "cursor": {
+      "cycle": null,
+      "cycle_started_at": null,
+      "completed_at": null,
+      "failures": [],
+      "cycle_errors": [],
+      "unavailable_namespaces": []
+    },
+    "discovery": {
+      "cycle": null,
+      "started_at": null,
+      "completed_at": null,
+      "state": null,
+      "errors": null
+    },
+    "pending": 0
+  },
+  "pause_retained": "production-cutover-20261106:general-observation"
+}

@@ -1,0 +1,85 @@
+{
+  "observation": "general-observation-01",
+  "status": "failed_parent_attendance_gate",
+  "previous_parent_probe_at": 1793955034.845939,
+  "next_parent_probe_at": 1793955156.6279356,
+  "parent_probe_gap_seconds": 121.78199672698975,
+  "containment_at": 1793955171.7797086,
+  "admitted_work_retained": true,
+  "samples": 48,
+  "maximum_collector_sample_gap_seconds": 10.146466732025146,
+  "activation": {
+    "started_at": 1793954705.4446151,
+    "deadline": 1794127194.157908,
+    "baseline_cycle": null,
+    "configuration": {
+      "protocol": 1,
+      "roots": [
+        {
+          "path": "/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/wc1/runs",
+          "namespace": "wc1:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "sharded"
+        },
+        {
+          "path": "/geodata/wc1/batch",
+          "namespace": "wc1:batch",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "batch"
+        },
+        {
+          "path": "/geodata/wc1/culverts",
+          "namespace": "wc1:culverts",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "culverts"
+        },
+        {
+          "path": "/geodata/weppcloud_runs",
+          "namespace": "legacy:runs",
+          "coordination": "/geodata/wc1/query-engine-coordination/locks",
+          "layout": "flat"
+        }
+      ],
+      "enabled": true,
+      "inventory_protocol": 1,
+      "admission_protocol": 1,
+      "pilot_protocol": 1,
+      "queue": "default"
+    },
+    "inventory_key": "query-catalog:inventory:b3c2767cf7183d35990ad37688c2092d87ee008915aa6494e83b26c52dcc3569"
+  },
+  "target_cycle": {
+    "cycle": "query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b",
+    "started_at": 1793954730.1461189,
+    "activation": 1793954705.4446151,
+    "baseline_cycle": null
+  },
+  "collector_stop": {
+    "time": 1793955178.8442822,
+    "reason": "observer_stopped",
+    "pause_owned": true
+  },
+  "last_ordinary_wait": 0.07284903526306152,
+  "ordinary_jobs_observed": 7,
+  "execution_uncertain_observed": false,
+  "acceptance_authored": false,
+  "completion_authored": false
+}

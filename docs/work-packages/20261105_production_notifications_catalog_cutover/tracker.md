@@ -154,3 +154,40 @@ pass) and actual merged Compose render confirms correct sources. COR-08/SEC-09
 hold general release until actual scheduler root/coordination parity and normal
 reconciliation readback pass. Existing scoped recreation authority applies;
 identity, image, destinations, RW mode and unrelated containers must remain fixed.
+
+Published correction: `51e1f2345`. wepp1 fast-forward and actual host Compose
+comparison passed: exactly two effective mount-source changes. WCTL regenerates
+an unused extension env-file pathname; expanded service environments are identical.
+A same-image scheduler one-off under UID 1002/GID 130 matched the worker on all
+seven root directory identities and coordination inodes. Actual scheduler recreation
+and normal reconciliation remain pending while wepp3 exports its image; observed
+root-disk I/O is active (93% utilization), with 224 GB free.
+
+### Fleet convergence and scheduler repair (2026-11-06 08:30 UTC)
+
+All three second canonical deployments passed; code/native/runtime parity holds.
+Corrected scheduler fa07f9e8 started at 08:28:43 UTC on its unchanged image and
+identity, with exactly two mount sources changed. All 24 unrelated container IDs,
+images and states are unchanged. Actual scheduler root/coordination probes match
+the worker, and scheduled reconciliation naturally cleared all unavailable
+namespaces. Owned admission pause remains; no cursor, ledger or receipt reset.
+General observation awaits the private representative sample matrix and launch.
+
+### Observation 01 containment (2026-11-06 08:53 UTC)
+
+The first general observation started at 08:45:05 UTC. A 121.782-second parent
+probe interval violated the 60-second attendance bound; admission was paused at
+08:52:51 UTC and the collector exited. All 48 collector samples were retained
+(maximum gap 10.146 seconds); no acceptance/completion marker was written. The
+admitted inventory continues normally under the owned pause. New model acceptance
+passed all 18 jobs, 25 fresh Parquets, strict reports and browser/CSV readback; seven
+observed ordinary arrivals waited at most 0.073 seconds. These remain historical
+evidence, not acceptance for a new attempt. SEC-10 holds resumption until a bounded
+machine supervisor and fresh-attempt preflight pass. The original deadline stays
+fixed and only a later natural cycle can close recovery acceptance.
+
+Recovery controls passed 36 disposable checks, including real parent hard exit
+contained in 50.049 seconds with ledger unchanged. Prelaunch cost measurement
+then showed the whole pending-list age read exceeds its 45-second bound; bounded
+rotating sampling is under review. No admission release has occurred. Full-union
+census remains required and observation 01 remains failed.

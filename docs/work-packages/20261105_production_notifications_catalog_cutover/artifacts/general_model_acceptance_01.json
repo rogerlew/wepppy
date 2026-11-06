@@ -1,0 +1,238 @@
+{
+  "runid": "cutover-20261106-model",
+  "fresh_parquet_count": 25,
+  "fresh_rows": 706190,
+  "parquets": [
+    {
+      "path": "wepp/output/interchange/H.element.parquet",
+      "rows": 6800,
+      "columns": 30,
+      "bytes": 135436,
+      "sha256": "7572a8d1892a4efb8f385190267065af3a1253b9ff54e4ef468480728f142100"
+    },
+    {
+      "path": "wepp/output/interchange/H.pass.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1519992,
+      "sha256": "51a7781e0c280979c7d0a8fd7f419422271cba780958c87d2b2f523eab2eb45c"
+    },
+    {
+      "path": "wepp/output/interchange/H.ebe.parquet",
+      "rows": 2140,
+      "columns": 20,
+      "bytes": 41699,
+      "sha256": "a4d1a4dc3165d610698a8aed1a5153324181e636e2b3655791bb25d58606102b"
+    },
+    {
+      "path": "wepp/output/interchange/H.loss.parquet",
+      "rows": 10,
+      "columns": 11,
+      "bytes": 5818,
+      "sha256": "87eb3aea08fee138ef9bee055add1223b4d055b9e1906d8c3e7d900dea37135e"
+    },
+    {
+      "path": "wepp/output/interchange/H.soil.parquet",
+      "rows": 73048,
+      "columns": 21,
+      "bytes": 934980,
+      "sha256": "ee82adeafbd2ab16a6d77df5949ac9d90a31f4cf5f21f5fa9aac86fa41cf0252"
+    },
+    {
+      "path": "wepp/output/interchange/H.wat.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1808600,
+      "sha256": "ee47da9f916224fd5e73996fed81785881ac72d9d5153599f7e4f321e823b89a"
+    },
+    {
+      "path": "wepp/output/interchange/totalwatsed3.parquet",
+      "rows": 36524,
+      "columns": 79,
+      "bytes": 3834249,
+      "sha256": "d918623542610062ba006821952651a4e38937e1389d4ef7ffcd513d316a394b"
+    },
+    {
+      "path": "wepp/output/interchange/return_period_events.parquet",
+      "rows": 36524,
+      "columns": 25,
+      "bytes": 1756562,
+      "sha256": "4eaaf67c3efe912d2edcb0725073d1e674ebeb83713eb015ee4839c4ec211d1b"
+    },
+    {
+      "path": "wepp/output/interchange/tc_out.parquet",
+      "rows": 36524,
+      "columns": 7,
+      "bytes": 338690,
+      "sha256": "250bdadd10f384bfe2f6cbadd553534f111ff9d4110531b54f66e84e4f375457"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.chn.parquet",
+      "rows": 1,
+      "columns": 12,
+      "bytes": 4310,
+      "sha256": "e4e0f773792c65ed0ad92537255124a99851004e1a6d4d1849144e177fdb3fca"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.out.parquet",
+      "rows": 11,
+      "columns": 3,
+      "bytes": 1774,
+      "sha256": "49a7d3317814fc0cd593b67387993859a5ec26e9bad127572d5afda574f587b4"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.class_data.parquet",
+      "rows": 5,
+      "columns": 8,
+      "bytes": 3223,
+      "sha256": "94e2614c4df42d7c2550914a9c55da0185c4f1faf132195f949a62578f9c6e7f"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+      "rows": 200,
+      "columns": 13,
+      "bytes": 8923,
+      "sha256": "18329c9d99d3032f3e65b3c4183247c4769f710b7da8356a2d5dd0160e860159"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+      "rows": 100,
+      "columns": 12,
+      "bytes": 7140,
+      "sha256": "37032d459d687976a9e5b22357b996d53d40a0e5085a09080839844476e14c5a"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+      "rows": 900,
+      "columns": 4,
+      "bytes": 5552,
+      "sha256": "3861b7c863aa8cd9e0b31c4e84fe66f584b3ed886e03cabe420fd2a8de5fe52a"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.all_years.class_data.parquet",
+      "rows": 500,
+      "columns": 9,
+      "bytes": 4403,
+      "sha256": "721d5991fe6ed00e053f8398c42edd40c80ca8a301a712b1b051726585c1ac99"
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.metadata.parquet",
+      "rows": 2,
+      "columns": 12,
+      "bytes": 4199,
+      "sha256": "c22d9262c511e6481f61656f6e6c11a95ec9375e4f401e2ce02214ab6d9bcbef"
+    },
+    {
+      "path": "wepp/output/interchange/loss_pw0.hill.parquet",
+      "rows": 2,
+      "columns": 12,
+      "bytes": 4428,
+      "sha256": "6a3e1c5eb8b6b49b052c4333d165757f5720f6c2d1ec30bab327ffd28fa8a0b9"
+    },
+    {
+      "path": "wepp/output/interchange/soil_pw0.parquet",
+      "rows": 36524,
+      "columns": 21,
+      "bytes": 240171,
+      "sha256": "498a3f7f2c1151bdb6ca030cb987e936af8a30c92da28aba139d45ae8647498c"
+    },
+    {
+      "path": "wepp/output/interchange/pass_pw0.events.parquet",
+      "rows": 73048,
+      "columns": 32,
+      "bytes": 1348291,
+      "sha256": "eff8c43bfc9c14fc6f0b7c3ba19996cdb073b3aaad764a7de9d4b91ab4927b4c"
+    },
+    {
+      "path": "wepp/output/interchange/ebe_pw0.parquet",
+      "rows": 36524,
+      "columns": 15,
+      "bytes": 537338,
+      "sha256": "578a2272c6ff3e0549ff55e28d6aa9ec1fc38a65ff6af97dce49060b0bc5b3fb"
+    },
+    {
+      "path": "wepp/output/interchange/chnwb.parquet",
+      "rows": 36524,
+      "columns": 29,
+      "bytes": 1238955,
+      "sha256": "c83bd5a66bd17487868d6d3a0936c03ca0bdaa9db66b08019e30481d5aff1143"
+    },
+    {
+      "path": "wepp/output/interchange/chanwb.parquet",
+      "rows": 36524,
+      "columns": 14,
+      "bytes": 411813,
+      "sha256": "831b92c4e3b42e0965fcbf8237b48dece8816a22b429857da99f6cd8314c3fe7"
+    },
+    {
+      "path": "wepp/output/interchange/chan.out.parquet",
+      "rows": 36524,
+      "columns": 10,
+      "bytes": 83629,
+      "sha256": "56c41bef233bd4f956866e0da4648c77d27ae647ca24e3f359ceef0ac201421b"
+    },
+    {
+      "path": "wepp/output/interchange/return_period_event_ranks.parquet",
+      "rows": 111135,
+      "columns": 5,
+      "bytes": 534225,
+      "sha256": "e1df1a4929400c0c3a002184b8140856bfecf1aaf98d51d505ae932fe11e2657"
+    }
+  ],
+  "binary_execution_identities": [
+    "[run_hillslope] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029_hill\" binary_sha256=210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936 binary_size_bytes=2766808 binary_mtime_ns=1793944930107963522 binary_identity_status=ok binary_identity_error=\"\"",
+    "[run_hillslope] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029_hill\" binary_sha256=210d48da09ff60707ba2404dd32af1f0a74e95437d2cb900c5408121141a1936 binary_size_bytes=2766808 binary_mtime_ns=1793944930107963522 binary_identity_status=ok binary_identity_error=\"\"",
+    "[run_watershed] binary_identity binary_path=\"/workdir/wepppy/wepp_runner/bin/wepp_261029\" binary_sha256=4a9da3980d1a9249e566626c01de920de7dba5088ec25324dc1c6dd6eff8c825 binary_size_bytes=2827768 binary_mtime_ns=1793944930087962845 binary_identity_status=ok binary_identity_error=\"\""
+  ],
+  "strict_report_construction": [
+    "OutletSummaryReport",
+    "HillSummaryReport",
+    "ChannelSummaryReport"
+  ],
+  "job_id": "3e00dd6e-ac45-4c5b-9328-20125756b39f",
+  "finished_tree_jobs": 18,
+  "browser": [
+    {
+      "path": "/weppcloud/runs/cutover-20261106-model/disturbed9002/",
+      "status": 200,
+      "body_length": 9727
+    },
+    {
+      "path": "/weppcloud/runs/cutover-20261106-model/disturbed9002/report/wepp/summary",
+      "status": 200,
+      "body_length": 3324
+    },
+    {
+      "path": "/weppcloud/usersum/",
+      "status": 200,
+      "body_length": 10998
+    },
+    {
+      "download_status": 200,
+      "bytes": 451,
+      "sha256": "9de50a64fbe1008c9432b178885f97b4d939d2404eec244bcdaaf5f56b025c00",
+      "content_type": "text/csv; charset=utf-8"
+    }
+  ],
+  "ordinary_observation": {
+    "sample_time": 1793954937.2752812,
+    "ordinary_jobs_observed": 7,
+    "ordinary_started_observed": 7,
+    "post_activation_arrival_waits": {
+      "wait_seconds": {
+        "3e00dd6e-ac45-4c5b-9328-20125756b39f": 0.046643972396850586,
+        "43192ac6-be01-437c-be07-14de01e762e4": 0.05352616310119629,
+        "2fdc76a5-cab1-4137-b18b-4bf6d8f0ce41": 0.04500412940979004,
+        "21d64487-24ae-440a-a7dd-c8a5ac5593dc": 0.03821301460266113,
+        "dd775f28-b2f0-4018-8388-9fbb8c601430": 0.03544211387634277,
+        "160dd380-be87-4abf-9bb4-67c2ad3ac3d5": 0.07284903526306152,
+        "d97fb6be-0303-46af-9edb-565af8a82e56": 0.0687110424041748
+      },
+      "max_observed_wait_seconds": 0.07284903526306152,
+      "unavailable_timestamps": []
+    },
+    "outstanding_count": 1,
+    "uncertain_count": 0
+  },
+  "acceptance_scope": "historical observation01 evidence; not reused for observation02 acceptance"
+}

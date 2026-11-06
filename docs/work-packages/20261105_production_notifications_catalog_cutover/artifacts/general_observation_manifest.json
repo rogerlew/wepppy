@@ -1,6 +1,6 @@
 {
   "environment": "https://wepp.cloud",
-  "state": "prepared_not_activated",
+  "state": "authorized_observation",
   "application_candidate": "8d079b41db466fda5235a599c151324190393e9d",
   "maximum_observation_seconds": 172800,
   "maintenance_queue": "default",
@@ -69,13 +69,197 @@
     "sample timeout/failure",
     "artifact/coverage proof mismatch"
   ],
-  "expected_configuration": null,
-  "host_runtime_images": null,
-  "absolute_deadline": null,
+  "expected_configuration": {
+    "protocol": 1,
+    "roots": [
+      {
+        "path": "/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/wc1/runs",
+        "namespace": "wc1:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "sharded"
+      },
+      {
+        "path": "/geodata/wc1/batch",
+        "namespace": "wc1:batch",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "batch"
+      },
+      {
+        "path": "/geodata/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "culverts"
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "namespace": "legacy:runs",
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "layout": "flat"
+      }
+    ],
+    "enabled": true,
+    "inventory_protocol": 1,
+    "admission_protocol": 1,
+    "pilot_protocol": 1,
+    "queue": "default"
+  },
+  "host_runtime_images": {
+    "wepp1": [
+      {
+        "service": "scheduler",
+        "id": "fa07f9e8eec9485959ab52a788019663fc2db421470a9c592f716833b66d8fe7",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "profile-playback",
+        "id": "d2fab5893053c21a76b4afac088b3268a41aafc7833ca5ca62096c82b00a8721",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "weppcloud",
+        "id": "7973f9ba83d08418faa122013666b7944722e08e64ed089ec7a175ba2cafdcac",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "query-engine",
+        "id": "450d2187ab98eaaf739b4ac4f2114199f79c94bb5d5590672e306d79d96c50f8",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "rq-worker",
+        "id": "6aac280bc8cf0bbf16c3b13bdc0cdc159a0bff519d202eddd77786fab90f88f0",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "rq-worker-batch",
+        "id": "4fcfc89e93b940fca8e159de1b10459cdf1a8e14d237cc8d3774984bff1ab4c5",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "browse",
+        "id": "64009db8e3d19cae5594aa1d0bc8b94c4535c48a33a57dcf116fb7c2772c5f12",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "rq-engine",
+        "id": "a0a9e080a32401e61f1bded1a1fe7d5ae560257b31374020cf7a2fb13516a6f8",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "download",
+        "id": "e5ae6afa6a5924717ecc464a037a7a38b2b0d6ab65678596d97f422e4c7b934b",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "dtale",
+        "id": "2b8c3d886b9ed0da63140290eb79983186761e6eb7ed827f3fe436966de1c668",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "wmesque2",
+        "id": "525add6d1cfa3e0737a9cc4090e90b30676564f8b6b869ef12a08217c38f2936",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "wmesque",
+        "id": "211866ffe2e44155c62aa7740fa1e939afb9ac94e6020b08412df97f14590c48",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "elevationquery",
+        "id": "9ddb897a00c006ec820001da31fe6d7d7459cd6d1fd43748f5a338b9025778b6",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "metquery",
+        "id": "4b365203a0b00e15ed6c675c7e4c9131884af8cb7fb22068a2af738635961da9",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "shape-converter",
+        "id": "cabac13f3f5e9af82e04e4ae65dd57a9939a539e58966f5264d929b8a97e6f47",
+        "image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b"
+      },
+      {
+        "service": "status",
+        "id": "58193c662336a8f60e43d0f3e8578fde3894f6aedd3a3f3025ee24a1476ea77f",
+        "image": "sha256:1ec9259f23621d14a6cfcf5cddb39654512fc4d518c2ddafb73ddb71aaa77ba8"
+      },
+      {
+        "service": "preflight",
+        "id": "64095e0dc815bb2bf325c508aaca175072b330131b0dee0be34cbca6231f22be",
+        "image": "sha256:dddcb1d78a50caecbb67b6dfe77c2716e92cdf8b5e6feca0cb9e2d1979301dda"
+      },
+      {
+        "service": "cap",
+        "id": "2d4557c2c3115d729d51b368b912a890581defd42b200036df29aabacde5ba72",
+        "image": "sha256:10a34deb9dd1dccdb3a145eb6e07868d55b29bbf2beb581f92bada4d19c441d8"
+      }
+    ],
+    "wepp2": [
+      {
+        "service": "rq-worker-batch",
+        "id": "e4ba4e1ae4cbbd48d70735b616143d0701f52efca2e0aa429bf75ed8e55eb6d6",
+        "image": "sha256:f053880b07f0a3c10a3127851044ade06c0c00fb620435554ed532a9194587fa"
+      },
+      {
+        "service": "rq-worker",
+        "id": "f2371bef6f3ac1774cbbad6e7841340c82240c70a00144e6675358cb757cf3c9",
+        "image": "sha256:f053880b07f0a3c10a3127851044ade06c0c00fb620435554ed532a9194587fa"
+      }
+    ],
+    "wepp3": [
+      {
+        "service": "rq-worker-fork-archive",
+        "id": "ad017c28c3ebeaa42e21ee9eabd72608550596b6187ee2c119b3e7111f3b78b2",
+        "image": "sha256:2e4fe1c30165e64168d96d4ab535bcb8cfd3a229ba7f2ec2716f9f01818c4c25"
+      }
+    ]
+  },
+  "absolute_deadline": 1794127194.157908,
   "authorization_preconditions": [
     "Concrete expected_configuration, host_runtime_images and fixed absolute_deadline replace nulls before state authorized_observation",
     "Fresh evidence directory and exclusive observer-start.json; no in-place retry",
     "Any admission pause after release invalidates uninterrupted observation",
     "Fresh target cycle and measured ordinary jobs enqueued after activation; scheduled reconciler ticks excluded from arrival acceptance"
-  ]
+  ],
+  "configuration_revision": "51e1f2345c06745aa2de3522bcb1928db242ba97",
+  "sample_selection": {
+    "namespace_counts": {
+      "wc1:runs": 1,
+      "wc1:batch": 2,
+      "legacy:runs": 2
+    },
+    "scopes": 5,
+    "datasets": 13,
+    "nested_batch_scopes": 2,
+    "bootstrap_legacy_scopes": 2,
+    "uncovered": {
+      "wc1:culverts": "No suitable readable canonical Parquet example in bounded first-four-owner scope probes; a 12-owner layout-only follow-up confirmed runs/_base structure. This does not establish namespace-wide absence.",
+      "parent_backed": "None of selected catalog datasets resolves outside its scope. Nested batch runs are covered; a parent-backed dataset is not.",
+      "readonly_artifacts": "Readonly candidates were excluded from generic refresh selection; retain prior readonly noninterference evidence separately."
+    },
+    "selection_source": "Bounded read-only production worker inspection; existing catalog keys or existing canonical Parquet sources",
+    "private_samples_sha256": "7f1beedcc86e682c7a8e0209c540b1e143991cc11d596eaef65d01a2dbf2692d",
+    "private_matrix_sha256": "18806f8b0352e22ed9410ca9643fdc6ee22c5dfe352304ebcd9cbfbd24b2d61e",
+    "production_mutations": false
+  }
 }

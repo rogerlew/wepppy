@@ -43,7 +43,8 @@ implemented by the present canonical script.
 | COR-05 | Medium | Fresh catalog pilot/general admission | Two final reservations from the completed October 27 pilot remained in the shared ledger after their RQ hashes expired. `execution_uncertain(..., None)` is always true (`wepppy/rq/_query_catalog_admission.py:49`), so `prepare` denied all new admissions (`:132`); pilot observation also stopped on them. | Perform only the proof-gated two-binding reconciliation below after catalog pause and old-runtime holds. Preserve ledger identity, all pilot records, receipts and historical evidence. | Resolved: exact two-binding removal, preserved metadata/history and live byte hashes verified; catalog remains paused |
 | COR-06 | Medium | Source checkout/deployment preparation | wepp1's cached repository-local LFS basic-access setting selected a path that stalled both installed clients; identical cold-cache requests succeeded without that setting. | Remove only the isolated setting and prove ordinary cold-cache filter checkout plus recovered candidate source. | Resolved: exact one-key config diff, repeated cold fetch and normal filter checkout passed; deeper authenticated-request failure mechanism remains unproved |
 | COR-07 | Medium | General catalog observation acceptance | Prepared collector could accept an older completed cycle, a preactivation ordinary job or a concurrently admitted maintenance job as evidence of ordinary arrivals; it also omitted observed terminal maintenance failures. Separate reads and old heartbeat timestamps weakened completion/monitoring. | Bind completion to a fresh observed cycle and new started arrival; classify canonical maintenance correctly; retain all-job wait/failure stops; establish a coherent final checkpoint and timestamp heartbeat after sample completion. | Resolved in prepared source: 18 real-Redis local boundary checks pass; live activation/observation evidence remains pending |
-| COR-08 | Medium | Scheduler filesystem authority and general catalog launch | wepp1 scheduler inherited generic `/wc1` and `/wc1/geodata` host mounts instead of production `/geodata/wc1` and `/geodata`; it directly executes reconciliation, so matching worker configuration did not prove scheduler root visibility. Live mount audit confirms the mismatch. | Add only the scheduler's existing production volume anchor, test actual merged Compose mounts, and verify real scheduler root visibility/reconciliation while admission remains paused. Preserve isolated services and unrelated runtimes. | Open before general launch; parent implementing the bounded mount correction |
+| COR-08 | Medium | Scheduler filesystem authority and general catalog launch | wepp1 scheduler inherited generic `/wc1` and `/wc1/geodata` host mounts instead of production `/geodata/wc1` and `/geodata`; it directly executes reconciliation, so matching worker configuration did not prove scheduler root visibility. Live mount audit confirms the mismatch. | Add only the scheduler's existing production volume anchor, test actual merged Compose mounts, and verify real scheduler root visibility/reconciliation while admission remains paused. Preserve isolated services and unrelated runtimes. | Resolved: recreated scheduler mounts/root identities verified, 24 unrelated runtimes unchanged, normal reconciliation clears unavailable namespaces with owned pause preserved |
+| COR-09 | Medium | General observation attendance and recovery | Observation 01 exceeded its independent parent-attendance limit: 121.782 seconds between recorded checks despite healthy collector samples. Its collector has no reciprocal parent-liveness guard. | Preserve observation 01 as failed; add tested bounded foreground supervision before any release, retain the original absolute deadline, and require a fresh naturally scheduled cycle for observation 02 acceptance. | Source/control resolved: 38 focused checks and 18 prior collector boundary checks pass; observation 02 live preflight and final cycle acceptance remain pending |
 
 These are execution gates, not claims that the feature implementation is
 otherwise defective. Missing final migration/browser/model/cycle evidence remains
@@ -236,7 +237,8 @@ linked from final acceptance. No new exception or hidden project record is appro
 
 - **Gate status:** pass for reviewed design, prerequisite repairs and completed
   wepp1/wepp2 stage. Production feature/fleet acceptance remains pending.
-- **Unresolved findings:** High 0; Medium 1; Low 0. COR-01/COR-02/COR-05 live
+- **Unresolved findings:** High 0; Medium 0; Low 0. COR-09 source/control
+  closure is recorded below; its fresh live launch gates remain required. COR-01/COR-02/COR-05 live
   closure evidence is recorded below. COR-03 source repair is accepted without
   claiming actual scheduled production acceptance.
 - **Release recommendation:** ship-with-conditions. Complete wepp3 registration,
@@ -244,7 +246,7 @@ linked from final acceptance. No new exception or hidden project record is appro
   fresh catalog pilot and full-cycle/ordinary-arrival gates before final acceptance.
   COR-07 source review is closed; populate the observation manifest and meet its
   live launch prerequisites before releasing the owned catalog pause.
-  COR-08 scheduler mount/visibility closure is required before general launch.
+  COR-08 scheduler mount/visibility closure is recorded below.
 - **Reviewer sign-off:** `production_cutover_correctness`, 2026-11-06 UTC.
   Re-review after concrete controls and actual deployment evidence are available.
 
@@ -764,3 +766,277 @@ cursor or ledger to make the state appear clean. A new inventory cycle/default
 maintenance execution is a later post-release observation gate. This one-service
 configuration repair is distinct from the previously rejected full-fleet
 `--skip-build` proposal. No host mutation was performed by this reviewer.
+
+### Concrete scheduler patch review
+
+The patch adds only `volumes: *wepp1-volumes` beneath the wepp1 scheduler. This
+reviewer independently rendered actual Docker Compose base-plus-override
+configurations before and after the patch. Exactly two JSON fields change:
+`/services/scheduler/volumes/0/source` and
+`/services/scheduler/volumes/1/source`. Image, identity, entrypoint, command,
+secrets, environment, destination/RW mode and every unrelated service remain
+unchanged in that render. The new three-case producer/consumer storage regression
+failed only for the old scheduler (one failed, two passed); the retained focused
+startup/scheduler/deployment-plan run passes 47 checks in 11.50 seconds. The
+durable infrastructure note now explains why queued notification success cannot
+prove scheduler storage visibility. Source closure is accepted; the real host
+configuration diff, same-image root/coordination probe, recreated runtime mounts
+and naturally recovered availability state remain COR-08's execution gates.
+
+### Published mount preflight
+
+Published commit `51e1f2345c06745aa2de3522bcb1928db242ba97` is present on wepp1.
+Independent comparison of its protected before/after host Compose snapshots finds
+only the two effective scheduler mount-source changes. The additional extension
+field `/x-wepppy-service/env_file/0` names WCTL's regenerated temporary file:
+`tools/wctl2/context.py:95` intentionally creates a new filename on each call.
+Every expanded service environment is equal; this extension-path difference is
+not a runtime environment change.
+
+This reviewer inspected the normal-identity root probe and independently compared
+its scheduler one-off and existing worker receipts. Both have SHA256
+`8bb836245f659c49ce9f555cbecaab5b3cceb9388093d7e510b3bced44b62df3`,
+UID 1002/GID 130/groups `[130]`, all seven validated readable/traversable roots,
+four namespaces and identical root/coordination device-inode pairs. Coordination
+directories pass the probe's existing read/write/traverse access check without
+creating lock files. The retained summary is `artifacts/scheduler_mount_preflight.json`.
+Live Docker inspection confirms scheduler and worker use the same image
+`sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b`.
+The scheduler is still exited at this checkpoint. Preflight is accepted; final
+actual recreation, unrelated-container identity preservation and natural cursor
+availability recovery remain required before COR-08 can close.
+
+### Actual scheduler mount closure
+
+COR-08 is resolved. Scheduler `fa07f9e8eec9` started at 08:28:43 UTC with the
+same verified `89d9c1e8...` image and the corrected two host sources. Independent
+live Docker inspection confirms both intended RW mounts and exact preservation
+of all 24 other containers' IDs, images and states against the protected checkpoint.
+The actual running scheduler's root probe independently reproduces the worker
+receipt SHA256 `8bb836245f659c49ce9f555cbecaab5b3cceb9388093d7e510b3bced44b62df3`.
+
+The retained `artifacts/scheduler_mount_acceptance.json` records natural scheduled
+reconciliation recovery. Fresh read-only Redis inspection through the scheduler
+confirms empty unavailable-namespace, failure and cycle-error lists and the exact
+general-observation pause owner with persistent TTL. No inventory cycle or
+completion exists yet, as expected while admission is paused. Neither cursor nor
+ledger was reset. This closes the mount defect without claiming general-cycle
+acceptance.
+
+## Bounded prelaunch artifact sample matrix
+
+The selected private matrix contains five writable scopes and 13 actual Parquet
+datasets: the owned model run, two nested batch runs and two legacy runs with
+existing canonical landuse/soils Parquet sources but no catalog yet. The latter
+provide explicit bootstrap examples for the target cycle. Selection ran under
+production worker UID 1002/GID 130 using raw catalog/file/schema reads only.
+No query freshness barrier, metadata mutation or model execution was invoked.
+
+The October full-discovery sets had seven-day retention and are no longer in
+Redis. Their path-bearing classifier sample was stored in the replaced worker's
+temporary directory; retained shared-storage evidence contains only the scoped
+pilot. Selection therefore used bounded immediate-directory/known-layout probes,
+not another recursive inventory. A bounded probe encountered a TimeoutError;
+completed selections were retained and uncovered portions remain limitations.
+
+No suitable culvert Parquet example was found within the bounded inspected owner
+scopes, and no selected dataset was parent-backed. This does not prove either
+class absent across production. Nested batch coverage is not parent-backed
+coverage. Readonly scopes were excluded from generic-refresh samples; preserve
+their separate prior noninterference evidence. These gaps must remain explicit
+in final artifact acceptance even if the full metadata census covers all four
+namespaces.
+
+Raw sample paths and detailed schema evidence remain only in mode-0600 files
+`/tmp/general-artifact-samples.json` and
+`/tmp/general-artifact-sample-matrix-private.json`. The sanitized artifact
+`artifacts/general_artifact_sample_selection.json` retains counts, limitations
+and their hashes. The sample-list SHA256 is
+`7f1beedcc86e682c7a8e0209c540b1e143991cc11d596eaef65d01a2dbf2692d`.
+This prepares representative readback; it is not a completed cycle or a
+whole-fleet artifact-parity claim.
+
+## Observation 01 attendance failure and bounded recovery
+
+Observation 01 is failed for its independent attendance gate. Its retained
+`external-supervision-gap.json` records checks at epochs `1793955034.845939` and
+`1793955156.6279356`, a gap of 121.782 seconds. The owner pause was applied at
+`1793955171.7797086`; the collector subsequently exited 1 and retained
+`stop.json`. No `completed.json` or artifact acceptance was authored. These are
+operational acceptance facts, not evidence that catalog refresh harmed ordinary
+jobs. Preserve the entire directory and do not relabel or resume it as a passing
+uninterrupted observation.
+
+Independent readback of its 48 sample rows finds maximum sample-start spacing
+10.146 seconds, at most two maintenance ledger bindings, no uncertain execution,
+no cursor/discovery failure and a maximum observed ordinary wait of 0.072849
+seconds. Seven ordinary jobs were observed. This evidence remains useful for
+the interval actually covered, but does not repair the missing parent attendance.
+
+At epoch `1793955340.568316`, read-only production inspection confirms the exact
+persistent owned pause (`production-cutover-20261106:general-observation`), one
+known started inventory binding and one finished refresh binding. Default queued
+work is empty. The inventory remains the same cycle
+`query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b`, started at
+`1793954730.1461189`; it has visited 267 directories and inspected 101,174 entries,
+with 28,323 frontier entries and no emitted scopes yet. Its latest checkpoint is
+advancing. Cursor/discovery error lists are empty. A separate started batch job
+is not owned by this observation and must remain untouched.
+
+### Recovery timing and permitted claims
+
+Retaining the pause permits already admitted inventory execution to finish or
+reach its existing RQ deadline while preserving checkpoints. It does not ensure
+the full reconciliation cycle can complete: newly discovered scopes eventually
+need refresh admission, which the pause blocks. Do not kill an active inventory,
+clear its registry, change its timeout or reset its frontier merely to obtain
+an idle/completed state.
+
+The existing fresh-cycle guard deliberately excludes the current cycle when a
+new collector captures it as its baseline. Observation 02 may therefore serve as
+a monitored continuation of admitted work, but can only accept a later cycle
+that starts after its own activation. `wepppy/rq/query_catalog_rq.py:442` starts
+the next normal cycle no earlier than the preceding cursor's `completed_at`
+plus `cycle_seconds`, currently 86,400 seconds. This interval is measured after
+completion, not after the initial cycle start.
+
+Carry the original absolute deadline, `1794127194.157908`, into observation 02.
+The earliest possible accepted finish is the current cycle's completion plus
+86,400 seconds plus the next cycle's duration. Whether that fits the remaining
+window is presently unknown. No current timing evidence justifies a promise of
+completion within that window. A deadline stop remains a valid bounded outcome;
+it leaves the rollout's general-cycle acceptance incomplete. Do not silently
+grant another 48 hours, shorten cycle spacing, force rediscovery, clear the
+generation/cursor or repurpose old-cycle evidence to obtain a pass.
+
+### Minimum foreground supervision before release
+
+Use one bounded foreground parent process through the existing worker/container
+tooling, with a new private observation directory and exclusive start marker.
+No daemon, service, queue, cron job or permanent monitoring subsystem is needed.
+The implementation must retain these properties:
+
+1. Bind the supervisor and collector to the same unique observation ID, exact
+   evidence directory, expected container identity, pause owner and original
+   absolute deadline. Complete the paused preflight before the collector's
+   existing compare-and-delete release. Never reuse observation 01 files.
+2. Sample machine cadence every 10–20 seconds with bounded individual probes.
+   Record successful probe completion times and use a monotonic clock to detect
+   local delays. A failed probe, more than 60 seconds between successful parent
+   checks, stale collector heartbeat, unexpected collector exit, configuration
+   drift or absolute deadline must initiate containment. Do not write successful
+   attendance before the corresponding probe completes.
+3. Have the parent atomically publish a private heartbeat receipt after each
+   successful check. The collector must validate its observation binding and
+   freshness before release and during sampling. This reciprocal check lets the
+   existing collector pause when its parent dies or hangs; parent-only polling
+   cannot enforce attendance after the parent itself disappears. This is a
+   small operation-specific control, not a new runtime health architecture.
+4. On failure, set the existing pause with NX and read back ownership; never
+   overwrite another owner's pause. Record confirmed or unconfirmed containment
+   accurately. Stop only the package's collector/supervisor processes, without
+   touching admitted RQ work, workers, jobs, receipts or ledger records. Redis
+   or whole-host loss can prevent immediate pause confirmation; do not claim
+   unconditional containment across that boundary.
+5. Success still requires the collector's coherent fresh-cycle checkpoint,
+   independent same-cycle artifact/age acceptance, fresh ordinary arrivals,
+   normal process completion and complete supervisor attendance evidence. A
+   healthy heartbeat alone is not acceptance. Preserve explicit readback and
+   representative-sample coverage limitations.
+
+Review and exercise actual control code before release. Required focused cases
+are stale/missing/wrong-observation parent heartbeat, parent hard exit, blocked
+probe, collector exit, delayed cadence, absolute deadline, foreign pause owner,
+exclusive-directory reuse and the normal completion path. A disposable Redis
+and local child process are sufficient; no production failure injection is
+needed. These cases must verify the retained stop reason and actual pause result,
+not only helper return values. COR-09 remains open until that source/test evidence
+is reviewed. No production mutation was performed by this reviewer.
+
+### COR-09 source/control closure
+
+The prepared recovery uses three operation-specific files:
+`supervise_general_catalog.py`, `supervision_probe.py` and
+`observe_general_catalog_supervised.py`. The original observation 01 collector is
+unchanged. The supervisor uses monotonic attendance/progress measurements and a
+15-second cadence with a 15-second SSH timeout. Its local journal/evidence
+directory cannot be reused. Probe execution has its own 10-second alarm and
+monotonic bound, so a surviving remote process cannot indefinitely refresh
+supervision after its local transport times out.
+
+The first real parent-SIGKILL experiment took 60.077 seconds to pause with the
+initial 60-second receipt lifetime. That left no containment margin. The reviewed
+version expires parent receipts after 45 seconds and limits each active sample
+to the remaining receipt lifetime or original absolute deadline. The probe
+rechecks timestamps immediately before publication and verifies the prior
+worker hostname as well as nonce/PID. The collector also checks the deadline at
+the final completion boundary and records the actual completion time. Guard
+failures retain their concrete stop reason.
+
+Containment remains SET NX. The supervisor reports durable confirmation only
+when the pause exists with persistent TTL; an expiring foreign pause is preserved
+and explicitly unconfirmed. The existing alternate-host attempt is recorded,
+not represented as a hidden success. Neither path terminates admitted jobs or
+alters catalog coordination records.
+
+`artifacts/validate_supervision_controls.py` passes 36 checks using a disposable
+Unix-socket Redis 6.2.0 and owned local child processes. The final actual heartbeat
+parent SIGKILL test reaches an owned persistent pause in 50.049 seconds, retains
+the ledger sentinel and writes no completion. An actual blocked subprocess probe
+hits its timeout and executes NX containment. Other checks cover missing,
+malformed, stale, future and wrong-identity parent receipts; receipt expiry during
+an in-flight probe; probe/collector/supervisor deadlines; monotonic attendance;
+foreign persistent/expiring pauses; process exit/completion coherence; exclusive
+directory reuse; sample alarm budget; and rejection of pre-target-cycle arrivals.
+
+The prior 18 real-Redis collector boundary checks also pass against the supervised
+sample implementation, with only a valid parent receipt and identity added to
+the harness. Those retain coverage for old-cycle/arrival rejection, ordinary wait
+stops, maintenance classification, discovery failures and concurrent WATCH
+checkpoint changes. Sanitized results and all three reviewed source hashes are
+in `artifacts/supervision_validation.json`. The primary focused harness is
+retained; the adapted prior harness is private at
+`/tmp/review-supervised-prior-boundaries.py`, with its hash in the result artifact.
+
+COR-09's source/control prerequisite is resolved. This does not turn observation
+01 into a pass or authorize a changed deadline. The next live gate must bind the
+exact reviewed files, new private directory, fresh manifest nonce/digest and
+current worker identity under the retained owned pause. Recheck current ledger,
+capacity and cycle baseline before releasing through the paired foreground
+supervisor. Fresh-cycle artifact/age evidence and uninterrupted observation 02
+attendance remain execution gates. Tests inject identity/configuration boundaries
+and local transports; they do not prove live SSH or simultaneous host/Redis
+failure behavior. No production launch or mutation was performed by this reviewer.
+
+### Bounded age instrumentation after measured prelaunch overrun
+
+The operator's retained read-only timing probe found 4,641 pending paths; reading
+1,272 `catalog_refresh_status` values consumed 45.011 seconds and hit the sample
+alarm. Thus the original all-pending age loop could not meet the reviewed
+sampling bound at the actual production population. This justifies narrowing
+observational reads, without changing admission, state, deadlines or acceptance.
+
+Only the supervised recovery collector changes. Each sample reads all admitted
+paths (at most seven ledger bindings) and at most 25 sorted, rotating pending
+paths. Their union deduplicates identical path strings. Retained fields distinguish
+raw pending record count, distinct pending path population, selection count/offset,
+distinct admitted paths and actual path-read count. They explicitly count lexical
+paths rather than unique scopes, since aliases can overlap. Population changes
+prevent a claim that rotation eventually covers every path.
+
+The final focused run passes 38 checks, including a 4,641-pending-path fixture
+with two admitted paths: exactly 27 reads on each of two samples, advancing the
+pending offset from zero to 25 and retaining both admitted reads. Small,
+wraparound, overlapping and empty pending populations also preserve the admitted
+checks without duplicate path reads. The prior 18 collector boundary checks pass
+again. Updated exact hashes and the measured overrun are retained in
+`artifacts/supervision_validation.json`; the final supervised collector SHA256 is
+`3e31f7a6bb759f11be6ece50c76c042484a408fa43ba6402d48489be495f776a`.
+
+The procedure now states the sampling limits explicitly. The recovery manifest
+must carry the same limits. No sample age, empty selected set or
+`pending_exhaustive` flag can authorize global age acceptance. The independent
+full retained-union census and same-cycle artifact proof remain mandatory.
+Production timing of the bounded path set remains a launch preflight; the local
+test proves the read bound, not production filesystem latency. The original
+observation 01 collector/evidence and its failed outcome are unchanged.

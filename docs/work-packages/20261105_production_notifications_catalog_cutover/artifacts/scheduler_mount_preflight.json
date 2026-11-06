@@ -1,0 +1,106 @@
+{
+  "same_image": "sha256:89d9c1e89c769f847e007ffb7fd327bc81f7ce8c643c86f2efe1fd68c2b6c92b",
+  "worker_scheduler_identity_and_root_parity": true,
+  "configured_locators": 7,
+  "namespaces": 4,
+  "probe": {
+    "uid": 1002,
+    "gid": 130,
+    "groups": [
+      130
+    ],
+    "roots": [
+      {
+        "path": "/wc1/runs",
+        "namespace": "wc1:runs",
+        "directory_identity": [
+          105,
+          91507529
+        ],
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/wc1/batch",
+        "namespace": "wc1:batch",
+        "directory_identity": [
+          105,
+          192812452
+        ],
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "directory_identity": [
+          105,
+          225434314
+        ],
+        "coordination": "/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/geodata/wc1/runs",
+        "namespace": "wc1:runs",
+        "directory_identity": [
+          105,
+          91507529
+        ],
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/geodata/wc1/batch",
+        "namespace": "wc1:batch",
+        "directory_identity": [
+          105,
+          192812452
+        ],
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/geodata/wc1/culverts",
+        "namespace": "wc1:culverts",
+        "directory_identity": [
+          105,
+          225434314
+        ],
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      },
+      {
+        "path": "/geodata/weppcloud_runs",
+        "namespace": "legacy:runs",
+        "directory_identity": [
+          105,
+          562380
+        ],
+        "coordination": "/geodata/wc1/query-engine-coordination/locks",
+        "coordination_identity": [
+          105,
+          209679975
+        ]
+      }
+    ]
+  }
+}

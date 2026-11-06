@@ -1,0 +1,20 @@
+[
+  {
+    "sample": 0,
+    "pending_population": 6266,
+    "status_reads": 26,
+    "elapsed_seconds": 0.3121142089366913
+  },
+  {
+    "sample": 1,
+    "pending_population": 6266,
+    "status_reads": 26,
+    "elapsed_seconds": 0.2623305357992649
+  },
+  {
+    "sample": 2,
+    "pending_population": 6266,
+    "status_reads": 26,
+    "elapsed_seconds": 0.3412933945655823
+  }
+]

@@ -91,9 +91,11 @@ Notification scheduling enabled at 07:12 UTC; the actual scheduled sweep created
 4,992 production notices and preserved the fixture warning's read state and TTL.
 Scheduled browser acceptance passed. At 07:56 UTC the owned fixture and its 101
 notices were removed, retaining all production notices. General configuration is
-staged true on all hosts; wepp1's second canonical rollout passed and wepp2 is
-building. Admission remains paused by the general-observation owner; scheduler
-is temporarily stopped until fleet convergence. General observation remains open.
+true and converged on all three hosts after their second canonical rollouts.
+Scheduler mount correction 51e1f2345 passed same-image preflight and actual runtime
+root/inode checks, with all 24 other container identities preserved. Scheduler
+restarted at 08:28:43 UTC; normal ticks cleared namespace unavailability under
+the retained admission pause. General observation remains open.
 
 ## Context and Orientation
 
@@ -286,3 +288,39 @@ Feature rollback is independent: disable notification scheduling and keep tables
 pause catalog admission, drain and coordinate synchronous producer mode while
 retaining guards/disclosure. Repeated fixture checks use exact owned identities.
 No force-reset/stash of unrelated source, no branch creation/switching.
+
+## Observation supervision recovery (2026-11-06 UTC)
+
+Observation 01 remains failed: manual parent probes were 121.782 seconds apart,
+exceeding the 60-second attendance bound. Its collector retained 48 samples with
+a maximum 10.146-second gap and no cycle errors, but that does not restore the
+failed control result. Admission was paused with NX; admitted inventory and all
+state remain intact. No completion or acceptance marker exists.
+
+The smallest justified control escalation is a bounded foreground operator
+supervisor with 15-second machine cadence and bounded SSH probes. It journals
+checks and pauses admission on probe/child failure, stale heartbeat, attendance
+gap, interruption or the original deadline. A nonce/PID-bound parent heartbeat
+lets the collector detect loss of its supervisor and pause independently. Pausing
+uses NX and preserves other owners; only the operator collector is supervised,
+never admitted RQ work. No daemon, service, queue or deployment identity changes.
+Redis/host loss can prevent confirmed containment and must be reported honestly.
+
+Fresh observation 02 uses new markers/arrivals and the same absolute deadline,
+1794127194.157908 (November 8, 08:39:54 UTC). Baseline is the existing failed-run
+cycle. It may finish under controlled continuation but cannot satisfy acceptance.
+Only a different naturally scheduled cycle starting after activation is eligible;
+final ordinary-arrival proof must include arrivals during that target cycle.
+Do not reset cursor/generation/scopes/receipts, shorten the 86400-second spacing,
+reuse prior success evidence or silently extend time. Insufficient remaining
+time leaves the gate incomplete. Failure-injection tests and independent reviews
+are required before the new supervisor releases admission.
+
+Empirical prelaunch readback found that 4,641 pending-scope status reads cannot fit
+the 45-second sample budget: only 1,272 completed in 45.011 seconds. The supervised
+collector therefore checks every admitted scope plus a deterministic rotating
+sample of at most 25 pending scopes. It records population, sample counts and
+offset; these ages are explicitly nonexhaustive. The independent retained-union
+census remains mandatory for global-age acceptance. Deadline and containment
+bounds are unchanged. This bounded instrumentation change follows a measured
+failure of the simpler whole-pending-list observation.

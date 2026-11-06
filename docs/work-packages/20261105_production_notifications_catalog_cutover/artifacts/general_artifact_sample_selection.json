@@ -1,0 +1,20 @@
+{
+  "namespace_counts": {
+    "wc1:runs": 1,
+    "wc1:batch": 2,
+    "legacy:runs": 2
+  },
+  "scopes": 5,
+  "datasets": 13,
+  "nested_batch_scopes": 2,
+  "bootstrap_legacy_scopes": 2,
+  "uncovered": {
+    "wc1:culverts": "No suitable readable canonical Parquet example in bounded first-four-owner scope probes; a 12-owner layout-only follow-up confirmed runs/_base structure. This does not establish namespace-wide absence.",
+    "parent_backed": "None of selected catalog datasets resolves outside its scope. Nested batch runs are covered; a parent-backed dataset is not.",
+    "readonly_artifacts": "Readonly candidates were excluded from generic refresh selection; retain prior readonly noninterference evidence separately."
+  },
+  "selection_source": "Bounded read-only production worker inspection; existing catalog keys or existing canonical Parquet sources",
+  "private_samples_sha256": "7f1beedcc86e682c7a8e0209c540b1e143991cc11d596eaef65d01a2dbf2692d",
+  "private_matrix_sha256": "18806f8b0352e22ed9410ca9643fdc6ee22c5dfe352304ebcd9cbfbd24b2d61e",
+  "production_mutations": false
+}

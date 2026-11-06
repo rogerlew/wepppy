@@ -1,0 +1,7 @@
+import json,time,redis
+from pathlib import Path
+from wepppy.config.redis_settings import RedisDB,redis_connection_kwargs
+from wepppy.rq import query_catalog_rq as cq,_query_catalog_admission as a
+root=Path('/wc1/query-catalog-validation/20261106/general-observation-01');r=redis.Redis(**redis_connection_kwargs(RedisDB.RQ));key='query-catalog:inventory:'+cq._configuration_id()
+h=json.loads((root/'heartbeat.json').read_text());c=json.loads(r.get(key) or '{}');d=json.loads(r.get(key+':discovery') or '{}');ledger=json.loads(r.get(a.LEDGER_KEY))
+print(json.dumps({'now':time.time(),'heartbeat_age_seconds':time.time()-h['time'],'samples':h['samples'],'pid':h['pid'],'pause':(r.get(a.PAUSE_KEY) or b'').decode(),'completed':(root/'completed.json').exists(),'stopped':json.loads((root/'stop.json').read_text()) if (root/'stop.json').exists() else None,'cycle':c.get('cycle'),'cycle_started_at':c.get('cycle_started_at'),'cycle_completed_at':c.get('completed_at'),'discovery_state':d.get('state'),'directories_visited':d.get('visited'),'entries_examined':d.get('entries'),'discovery_last_update':d.get('updated_at'),'discovery_completed_at':d.get('completed_at'),'pending':len(c.get('pending',[])),'failures':len(c.get('failures',[])),'cycle_errors':len(c.get('cycle_errors',[])),'unavailable_namespaces':c.get('unavailable_namespaces',[]),'retained_scopes':r.scard(key+':scopes'),'ledger_jobs':len(ledger['jobs']),'queued_default':r.llen('rq:queue:default'),'started_default':r.zcard('rq:wip:default')},indent=2))

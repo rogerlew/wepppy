@@ -1,0 +1,258 @@
+{
+  "checks_passed": 38,
+  "redis": "6.2.0",
+  "source_sha256": {
+    "observe_general_catalog_supervised.py": "3e31f7a6bb759f11be6ece50c76c042484a408fa43ba6402d48489be495f776a",
+    "supervision_probe.py": "3b0bd08226e6beaebaa5d206b04ceebcda8982c88516170212778ce7acbcb353",
+    "supervise_general_catalog.py": "8bf29a469ffff2c392db2761626d97e4de3c87e8d167cab7f73761c752473acf"
+  },
+  "results": [
+    {
+      "case": "actual_parent_sigkill_collector_pauses",
+      "seconds_to_stop": 50.04978877399117,
+      "reason": "AssertionError: Parent supervision heartbeat missing or stale"
+    },
+    {
+      "case": "stale_parent",
+      "reason": "AssertionError: Parent supervision heartbeat missing or stale"
+    },
+    {
+      "case": "future_parent",
+      "reason": "AssertionError: Parent supervision heartbeat missing or stale"
+    },
+    {
+      "case": "wrong_nonce",
+      "reason": "AssertionError: Parent heartbeat identity changed"
+    },
+    {
+      "case": "wrong_pid",
+      "reason": "AssertionError: Parent heartbeat identity changed"
+    },
+    {
+      "case": "wrong_worker",
+      "reason": "AssertionError: Parent heartbeat worker changed"
+    },
+    {
+      "case": "nonfinite_parent",
+      "reason": "AssertionError: Parent supervision heartbeat missing or stale"
+    },
+    {
+      "case": "malformed_parent",
+      "reason": "JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+    },
+    {
+      "case": "missing_parent",
+      "reason": "FileNotFoundError: parent-heartbeat.json missing in isolated temporary evidence directory"
+    },
+    {
+      "case": "deadline",
+      "reason": "AssertionError: Original observation deadline reached"
+    },
+    {
+      "case": "foreign_pause",
+      "reason": "AssertionError: Expected owned pause required at launch"
+    },
+    {
+      "case": "probe_real_pid_private_atomic_handshake"
+    },
+    {
+      "case": "probe_stale_parent"
+    },
+    {
+      "case": "probe_bad_digest"
+    },
+    {
+      "case": "probe_wrong_worker_receipt"
+    },
+    {
+      "case": "probe_foreign_pause"
+    },
+    {
+      "case": "probe_wrong_pid"
+    },
+    {
+      "case": "probe_parent_expires_during_call"
+    },
+    {
+      "case": "probe_duration_exceeded"
+    },
+    {
+      "case": "probe_absolute_deadline"
+    },
+    {
+      "case": "probe_coherent_completion"
+    },
+    {
+      "case": "probe_old_cycle_completion"
+    },
+    {
+      "case": "probe_unaccepted_completion"
+    },
+    {
+      "case": "contain_absent",
+      "confirmed": true,
+      "attempts": 1
+    },
+    {
+      "case": "contain_foreign_persistent",
+      "confirmed": true,
+      "attempts": 1
+    },
+    {
+      "case": "contain_foreign_expiring",
+      "confirmed": false,
+      "attempts": 2
+    },
+    {
+      "case": "actual_blocked_probe_timeout_contains",
+      "reason": "TimeoutExpired"
+    },
+    {
+      "case": "supervisor_deadline",
+      "reason": "RuntimeError: Original deadline already reached"
+    },
+    {
+      "case": "supervisor_monotonic_gap",
+      "reason": "RuntimeError: Supervisor attendance gap"
+    },
+    {
+      "case": "supervisor_noncompleted_exit",
+      "reason": "RuntimeError: Collector transport exited without accepted completion"
+    },
+    {
+      "case": "supervisor_completed_exit",
+      "reason": "completed"
+    },
+    {
+      "case": "supervisor_evidence_directory_reuse_rejected"
+    },
+    {
+      "case": "sample_alarm_respects_remaining_parent_lifetime",
+      "remaining_seconds": 4.99948
+    },
+    {
+      "case": "large_pending_age_sample_bounded_and_rotating",
+      "population": 4641,
+      "reads_per_sample": 27
+    },
+    {
+      "case": "pending_age_wrap_overlap_empty_preserves_admitted"
+    },
+    {
+      "case": "completion"
+    },
+    {
+      "case": "pre_target_arrival"
+    },
+    {
+      "case": "deadline_crossing"
+    }
+  ],
+  "scope": "Disposable Unix-socket Redis and owned local processes only; no production execution or SSH.",
+  "validation_script": "artifacts/validate_supervision_controls.py",
+  "validation_script_sha256": "f903f2c627a1fcb18bf7544b4bd4ee205283ec4ebf1dc116cff2bd90908f4949",
+  "prior_collector_boundary_regression": {
+    "checks_passed": 18,
+    "redis": "6.2.0",
+    "results": [
+      {
+        "case": "fresh_cycle_and_new_started_arrival",
+        "result": true,
+        "completed_file": true
+      },
+      {
+        "case": "paused_preflight_cannot_complete",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "old_completed_cycle_cannot_complete",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "old_arrival_cannot_satisfy_acceptance",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "preexisting_300s_backlog_stops",
+        "result": "Ordinary wait stop threshold",
+        "completed_file": false
+      },
+      {
+        "case": "missing_timestamp_stops",
+        "result": "Ordinary arrival timestamps unavailable",
+        "completed_file": false
+      },
+      {
+        "case": "failed_maintenance_stops",
+        "result": "Maintenance terminal failure: maintenance",
+        "completed_file": false
+      },
+      {
+        "case": "discovery_errors_stop",
+        "result": "Discovery failure",
+        "completed_file": false
+      },
+      {
+        "case": "wrong_cycle_proof_stops",
+        "result": "Artifact/age acceptance missing",
+        "completed_file": false
+      },
+      {
+        "case": "new_pause_stops",
+        "result": "Observation interrupted by admission pause",
+        "completed_file": false
+      },
+      {
+        "case": "scheduler_tick_not_ordinary_acceptance",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "scheduler_tick_old_backlog_stops",
+        "result": "Ordinary wait stop threshold",
+        "completed_file": false
+      },
+      {
+        "case": "unaccounted_maintenance_stops",
+        "result": "Unaccounted maintenance-looking job: ordinary",
+        "completed_file": false
+      },
+      {
+        "case": "ledger_changed_before_checkpoint_defers",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "actual_watch_error_defers",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "canonical_description_unaccounted_maintenance_stops",
+        "result": "Unaccounted maintenance-looking job: ordinary",
+        "completed_file": false
+      },
+      {
+        "case": "canonical_maintenance_admitted_mid_sample_excluded",
+        "result": false,
+        "completed_file": false
+      },
+      {
+        "case": "previously_misclassified_ordinary_purged",
+        "result": false,
+        "completed_file": false
+      }
+    ],
+    "adapter_sha256": "9d473544134a52c15e670e19731c8bae6a415e98f05ebaa7f7ff6a0b47445896",
+    "adaptation": "Existing validate_observer_boundaries.py with supervised collector selected, check_parent included and a valid private parent receipt/nonce injected. Sample implementation unchanged."
+  },
+  "prelaunch_unbounded_age_probe": {
+    "scope_count": 4641,
+    "scopes_read": 1272,
+    "elapsed_seconds": 45.01054608076811,
+    "sample_bound_exceeded": true
+  }
+}

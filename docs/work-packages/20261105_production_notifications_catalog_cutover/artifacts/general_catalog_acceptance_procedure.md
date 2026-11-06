@@ -72,6 +72,16 @@ model is run and no model outputs are rewritten.
 
 ## Interpreting ages and coverage
 
+The recovery collector checks all admitted paths (at most seven bindings) and
+at most 25 deterministically rotating pending paths per sample. Its
+`age_sampling` records raw pending records, distinct pending paths, selected
+count/offset, distinct admitted paths and actual distinct path reads. These are
+lexical path counts, not unique scope counts: aliases can refer to the same scope.
+Changing pending populations mean rotation does not guarantee eventual exhaustive
+coverage. Empty sampled ages or `pending_exhaustive=true` for one cursor sample
+cannot establish global age acceptance. The full retained-union census
+remains mandatory; independent acceptance and its limitations remain unchanged.
+
 - `oldest_pending_receipt_age_seconds` is the oldest observed immutable receipt
   creation time among the full retained union during this census. If no receipt
   exists, the age is null and the receipt count is zero. Null with a nonzero
