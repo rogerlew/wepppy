@@ -13,7 +13,7 @@
 | SEC-07 | Medium | Ordinary-work accounting | The initial collector excluded any unbound job whose description started with `wepppy.rq.query_catalog_rq.`. Canonical `_query_catalog_admission.py:136` grants maintenance classification only through ledger ownership; descriptive exclusion could hide ordinary queue delay. A concurrent ledger/queue snapshot could also misclassify new maintenance as an ordinary arrival. | Use ledger authority for exclusion. Re-read ownership or stop conservatively for unaccounted maintenance-looking work; never silently exclude by description or credit it as an ordinary arrival. | Resolved in final `e3f295df…`: canonical job prefix/description and refresh/inventory functions recheck ledger or stop; retained maintenance IDs purge prior ordinary candidates. Scheduler ticks cannot qualify as acceptance arrivals. Correctness's 18 real-Redis checks include the canonical-description regression. |
 | SEC-08 | Medium | Scoped fixture deletion guards | Initial `/tmp/production-cleanup-notification-fixture.py` uses only assertions for environment, fixture/path identity, notice ownership and preservation. Optimized Python removes those guards while retaining SQL deletion and `rmtree`. | Add an explicit non-assert `__debug__` rejection before destructive execution; retain ordinary Python and the proven runtime identity. | Resolved: final `e94e6098…` rejects optimized Python before imports; both optimization levels checked without executing imports or mutations. |
 | SEC-09 | Medium | Scheduler storage parity | `docker-compose.prod.wepp1.yml` omitted the scheduler volume override, so production inherited generic `/wc1:/wc1` and `/wc1/geodata:/geodata` instead of the accepted wepp1 storage. The scheduler directly calls reconciliation; healthy worker mounts did not prove this producer could see the four namespaces. Operator readback reported all four unavailable. | Apply only `volumes: *wepp1-volumes` to the wepp1 scheduler, verify the actual merged diff and seven-root/shared-coordination parity under its normal identity, and retain the owned admission pause through fleet convergence and evidence review. | Resolved: published `51e1f2345`, exact config diff, same-image and live root parity, only scheduler recreated, 24 other containers unchanged, and naturally cleared namespace failures with owned pause retained. Independent final live readbacks below. |
-| SEC-10 | Medium | Observation continuity control | Observation 01's parent monitoring interval was 121.782 seconds, exceeding its explicit 60-second bound. The collector stayed healthy, but that does not satisfy the independent control. The operator paused admission and the observer exited without acceptance. | Retain observation 01 as failed. Review/test a bounded foreground supervisor with machine cadence and failure containment; use a fresh evidence directory and the unchanged original deadline. Accept only a new naturally scheduled cycle under continuous new observation, without resetting retained work/state. | Control correction resolved in source and 36 disposable tests, including real parent SIGKILL containment in 50.049 seconds. Observation 01 remains failed. Fresh observation-02 staged/runtime preflight remains required before admission resumes. |
+| SEC-10 | Medium | Observation continuity control | Observation 01's parent monitoring interval was 121.782 seconds, exceeding its explicit 60-second bound. The collector stayed healthy, but that does not satisfy the independent control. The operator paused admission and the observer exited without acceptance. | Retain observation 01 as failed. Review/test a bounded foreground supervisor with machine cadence and failure containment; use a fresh evidence directory and the unchanged original deadline. Accept only a new naturally scheduled cycle under continuous new observation, without resetting retained work/state. | Resolved: final source passes 38 control and 18 prior boundary checks, including real parent SIGKILL containment in 50.050 seconds. Independent observation-02 staged/runtime preflight passed at 09:36 UTC. Observation 01 remains failed; general whole-cycle acceptance remains pending. |
 
 These findings concern execution controls, not requests for new infrastructure or renewed
 authorization. No risk acceptance is recorded. Medium/high findings require
@@ -23,7 +23,7 @@ closure or explicit owner risk acceptance before their dependent steps.
 
 - **Package**: `docs/work-packages/20261105_production_notifications_catalog_cutover/`.
 - **Reviewer**: independent `production_cutover_security`, security reviewer role.
-- **Date**: 2026-11-06 UTC; review checkpoints retained through 08:45 UTC;
+- **Date**: 2026-11-06 UTC; review checkpoints retained through 09:46 UTC;
   direct live readbacks and operator-reported receipts are distinguished below.
 - **Scope reviewed**: active deployment plan, readiness record, canonical deploy
   script, production build inputs, notification migration/auth/worker boundaries,
@@ -80,8 +80,9 @@ Valid states to preserve:
   browser evidence. Scheduler storage parity is closed; no unresolved security
   source finding blocks the earlier reviewed deployment controls. Observation 01
   subsequently failed its external monitoring bound (SEC-10); the corrected
-  supervisor is reviewed/tested, and general admission remains paused pending
-  fresh-attempt staged/runtime preflight.
+  supervisor is reviewed/tested, and the fresh observation-02 staged/runtime
+  preflight passed independently at 09:36 UTC. Observation 02 subsequently
+  launched; paired supervision was independently healthy at 09:46 UTC.
   Final production coverage acceptance and package closeout remain pending;
   missing sample classes remain explicit acceptance obligations.
 - **Unresolved findings**: high 0; medium 0; low 0.
@@ -1146,6 +1147,96 @@ the pause, retain the actual bounded production timing result and a fresh
 observation-02 manifest with the exact reviewed hashes and limited coverage text.
 The existing fresh-directory, identity/configuration, execution-certainty,
 original-deadline and different-natural-cycle gates still apply.
+
+## Observation-02 independent launch preflight
+
+At **2026-11-06 09:36:24.952 UTC**, this reviewer independently read the staged
+directory and raw Redis state through the existing wepp1 worker. The worker was
+`6aac280bc8cf`, UID 1002, GID 130, supplementary groups `[130]`. The canonical
+private directory contained exactly the five staged input files, each privately
+accessible and owned by UID 1002; no observer start, heartbeat, target-cycle,
+acceptance or completion file existed.
+
+The [recovery manifest](general_observation_02_manifest.json) and actual private
+`manifest.json` bytes both hash to
+`b73ae955eb6b908ed486cb5f59c01d049d1a6be8ec71774c00a18387381cdd84`.
+Live collector, census, sample-selection and matrix hashes exactly match the
+bootstrap receipt and reviewed source. Local supervisor/probe hashes also match
+the manifest. The fresh nonce, original deadline `1794127194.157908`, 45-second
+parent receipt limit and explicit bounded age coverage are retained.
+
+Separate read-only inspection verified all 21 listed participant containers
+(18 wepp1, two wepp2, one wepp3) running with their exact manifest IDs/images.
+The worker's configuration equals the manifest; raw worker registrations show
+12 compatible default consumers, no incompatible consumer and no suspension.
+The pause owner is `production-cutover-20261106:general-observation`, persistent
+with `TTL == -1`.
+
+Both retained ledger entries were `finished`, with `outstanding=false` and
+`uncertain=false`: inventory
+`query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b` and refresh
+`query_catalog_refresh_de4cc265-5101-4e65-9180-9c1db70e26fe`. The existing baseline
+cycle still had 6,837 pending records and no cursor completion. Discovery
+completed at **09:36:08.576 UTC**; no discovery errors, cycle errors, failures or
+unavailable namespaces were present. No ledger, cursor or receipt was reset, and
+this reviewer did not stop or change any job.
+
+The retained [production timing result](bounded_pending_age_probe_cost.json),
+SHA256 `f16ec381e0e1559906c99fe786b9f874bf8af8b19181cb47eeb40bba89fc9fa2`,
+reports three exact-selection probes against 6,266 then-pending paths: 26 status
+reads each, taking 0.312, 0.262 and 0.341 seconds. These measurements demonstrate
+the bounded reads fit the sample budget at that checkpoint; they are not a
+guarantee of future filesystem latency. The collector's alarm and reciprocal
+supervision remain required.
+
+No security launch blocker remains for the reviewed foreground supervisor. The
+baseline may finish normally, but only a later naturally scheduled cycle begun
+after observation-02 activation may satisfy acceptance. Keep the original
+deadline, fresh target-cycle ordinary arrivals and independent full census and
+artifact proof. The 86,400-second cycle spacing is unchanged. Whole-cycle
+acceptance and package closeout are still pending; this preflight is not that
+acceptance.
+
+## Observation-02 live supervision and handoff
+
+Independent checks at **2026-11-06 09:45:31.665 UTC** and **09:45:57.709 UTC**
+confirm the paired controls are running. The local private journal is
+`/var/tmp/production-cutover-acceptance-20261106/general-supervisor-02/supervisor.jsonl`.
+Supervisor PID 2755992 and its owned SSH transport PID 2755993 were alive; the
+parent process matched the reviewed supervisor script without exposing process
+arguments. Its journal contained 32 checks, maximum check gap 15.162 seconds,
+latest check age 6.721 seconds and no finish record. The remote transport had
+not exited.
+
+The existing worker's collector PID 2126 was alive under UID 1002/GID 130.
+Manifest and collector hashes remained exact. Parent/child receipts agreed on
+nonce, PID and worker hostname; parent receipt age was 2.994 seconds and collector
+heartbeat age 10.666 seconds. Forty-six samples had a maximum gap of 10.958
+seconds. The original absolute deadline remains **2026-11-08 08:39:54.157908 UTC**.
+Activation was **2026-11-06 09:37:55.037 UTC**.
+
+Admission was open, all 12 default consumers remained compatible, and the live
+ledger had seven bindings, zero uncertain executions and two outstanding refresh
+jobs. The sampled old baseline still had 8,385 pending records and no cursor
+completion, errors, failures or unavailable namespaces. Bounded age metadata
+reported 25 selected pending paths plus seven admitted paths, 32 distinct lexical
+reads and nonexhaustive coverage. There was no target-cycle, stop, acceptance or
+completion marker. These reads did not mutate production state or interrupt work.
+
+The bounded handoff may report **observation running under machine supervision**.
+It must preserve the live process and both evidence directories; a later reader
+must verify process/journal/receipt freshness instead of treating this checkpoint
+as ongoing proof. Do not restart this attempt, reset its deadline, reinterpret
+the old baseline as the new target or relabel observation 01 as successful. On
+loss, failure or deadline the reviewed controls attempt NX containment while
+preserving foreign pause owners and admitted jobs. Redis/host loss can still
+prevent confirmed containment, which requires an explicit unconfirmed outcome.
+
+No additional security blocker was observed at this checkpoint. This is not a
+full-cycle pass, a global age proof or final artifact acceptance. The later
+natural cycle, fresh ordinary arrivals, independent retained-union census,
+reviewed artifact coverage and same-cycle acceptance remain open. Handoff does
+not complete these gates.
 
 ## Sign-off
 

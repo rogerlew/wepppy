@@ -1,0 +1,46 @@
+{
+  "checked_at": 1793957770.4168887,
+  "access": "Independent read-only inspection through the production rq-worker; no observation activation or mutation",
+  "uid": 1002,
+  "gid": 130,
+  "hostname": "6aac280bc8cf",
+  "directory_mode": "0700",
+  "files": {
+    "manifest.json": "b73ae955eb6b908ed486cb5f59c01d049d1a6be8ec71774c00a18387381cdd84",
+    "observe_general_catalog.py": "3e31f7a6bb759f11be6ece50c76c042484a408fa43ba6402d48489be495f776a",
+    "read_general_catalog_evidence.py": "50193cf1f883ebfed8fff2d96078ba7c5b2a8c97aca2a1237a578468bc95ef89",
+    "artifact-samples.json": "7f1beedcc86e682c7a8e0209c540b1e143991cc11d596eaef65d01a2dbf2692d",
+    "artifact-sample-matrix.json": "18806f8b0352e22ed9410ca9643fdc6ee22c5dfe352304ebcd9cbfbd24b2d61e"
+  },
+  "semantic_manifest_sha256": "6be2e5c3d967ab9e61f564521f107d096768b33fbc529319268eae3778ddefd5",
+  "absolute_deadline": 1794127194.157908,
+  "parent_heartbeat_max_age_seconds": 45,
+  "age_sampling_pending_limit": 25,
+  "worker_matches_manifest": true,
+  "configuration_matches_manifest": true,
+  "owned_pause": true,
+  "pause_ttl": -1,
+  "started_marker_exists": false,
+  "completion_exists": false,
+  "cursor": {
+    "cycle": "query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b",
+    "cycle_started_at": 1793954730.1461189,
+    "completed_at": null,
+    "failures": [],
+    "cycle_errors": [],
+    "unavailable_namespaces": []
+  },
+  "pending_count": 6837,
+  "discovery": {
+    "cycle": "query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b",
+    "completed_at": 1793957768.5761845,
+    "errors": [],
+    "visited": 52604,
+    "updated_at": 1793957768.5753763
+  },
+  "ledger_jobs": [
+    {"kind": "inventory", "status": "finished", "uncertain": false, "outstanding": false},
+    {"kind": "refresh", "status": "finished", "uncertain": false, "outstanding": false}
+  ],
+  "acceptance": "Prelaunch staging and bounded age-read cost only; final capacity preflight and supervised full-cycle acceptance remain required"
+}

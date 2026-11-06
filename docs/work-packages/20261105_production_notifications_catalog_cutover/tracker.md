@@ -191,3 +191,20 @@ contained in 50.049 seconds with ledger unchanged. Prelaunch cost measurement
 then showed the whole pending-list age read exceeds its 45-second bound; bounded
 rotating sampling is under review. No admission release has occurred. Full-union
 census remains required and observation 01 remains failed.
+
+### Supervised observation 02 (2026-11-06 09:44 UTC)
+
+Recovery controls at 0c0b48dbe passed 38 focused and 18 collector-boundary checks;
+both independent reviewers approved fresh staging. The paired supervisor and
+collector now run with 15-second probes, 45-second parent receipts and the original
+November 8 08:39:54 UTC deadline. Admission is released. Latest readback: 40 samples,
+3.2-second heartbeat age, no stop/completion marker, zero cycle errors and no
+unavailable namespaces. Discovery retained 41,573 locator paths including aliases.
+Running application code is 8d079b41d; host configuration is 51e1f2345.
+
+The existing f63a3a51 cycle cannot count toward acceptance. A later natural cycle,
+new ordinary arrivals during it, independent full-union age census and artifact
+acceptance are outstanding. Culvert-Parquet, parent-backed dataset and read-only
+artifact sample gaps remain explicit. Notifications and permanent wepp1 Git repair
+are complete; model/pilot/account cleanup and package closure remain open. See
+the active ExecPlan's observation-02 handoff for exact evidence paths and recovery.

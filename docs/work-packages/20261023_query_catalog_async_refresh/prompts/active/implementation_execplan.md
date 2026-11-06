@@ -6,7 +6,7 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep P
 
 Remove catalog traversal from eligible artifact-producing requests without losing updates, breaking immediate reports, or allowing old background work to publish into a replaced project. Reproduce the Mill Creek submission failure on an isolated copy; prove responsive submission, actual model execution and correct catalog-backed consumption after repair.
 
-The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. The operator subsequently instructed execution of this plan; implementation and bounded validation are now complete, including the separately authorized full deployment. General enablement and user-project repair remain excluded. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
+The operator authorized committing the reviewed contract and scaffolding execution on 2026-10-23. The operator subsequently instructed execution of this plan; implementation and bounded validation are complete. November 6 authority additionally covers production general enablement through the combined deployment package. User-project repair remains excluded. When instructed to execute, proceed milestone by milestone within the accepted contract; do not ask for repeated routine implementation approval.
 
 ## Progress
 
@@ -23,10 +23,17 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] Explicit pause, retained lease rejection and post-expiry resume preserved original budgets/window; all admitted work drained. No active-job exception was used.
 - [x] Nine scratch scopes retired under lifecycle guards to private evidence storage; 711 source hashes and eight catalog hashes preserved, old managed paths absent.
 - [x] Independent execution correctness/security review complete; exact evidence limits retained. Secondary QA documented separately.
-- [ ] M6 general fleet rollout: complete-cycle/oldest-pending-age and new ordinary-arrival delay acceptance remain unproved and outside the authorized pilot. General async stays disabled.
+- [x] November 6 authorized production deployment: compatible fleet, fresh default-worker pilot, scheduler routing/storage parity and general async configuration converged.
+- [ ] M6 general fleet rollout acceptance: supervised observation 02 is running; later natural complete cycle, full-union age census, artifact proof and new ordinary-arrival delay remain unproved.
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+November 6: scheduler direct reconciliation required the same host storage mappings
+as workers; the reviewed one-line wepp1 volume anchor repair restored all namespace
+visibility. Manual parent attendance failed observation 01 despite a healthy
+collector, and whole-pending age reads exceeded the sample bound. Observation 02
+uses machine supervision and bounded diagnostic samples; global census remains mandatory.
 
 2026-10-28: routing is also enforced in admission, execution claims and pilot manifests, not just the Queue constructor. Preserve the historically named ledger to avoid resetting permits. Production defaults have twelve default consumers, versus eight batch consumers.
 
@@ -91,6 +98,12 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+November 6: the operator authorized combined notifications/catalog production
+deployment. Preserve observation 01 as failed and use independently reviewed
+paired supervision for observation 02, retaining the original deadline and requiring
+a later natural cycle. This addresses measured control failures without resetting
+state, shortening reconciliation spacing or weakening global acceptance.
+
 - 2026-10-28: operator directs catalog maintenance onto default because batch backlog can last days. Execute the October 28 contract decision; retain cap, timing, guards and disabled production mode.
 - 2026-10-27 / operator: “complete pending work” resumes the bounded pilot after the separately authorized full canonical deployment completed on all three hosts. Reuse the existing controller and normal batch workers; no source overlay, service restart, broader namespace mutation or general async enablement is needed. The canonical pilot explicitly excludes general enablement even after success; finish its evidence and disposition the distinct whole-fleet capacity gate honestly.
 - 2026-10-27 / operator: “standby. we will do a full deploy when the jobs clear”. Preserve the active-job gate and select the full canonical deployment path after quiescence. The one-job exception proposal is not approved; retain the scoped candidate as historical preparation. Commit/push authorization does not resume deployment.
@@ -125,6 +138,13 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+November 6 09:44 UTC: all three production deployments and the fresh default-worker
+pilot passed. General async is live under bounded machine supervision. Observation
+02 has no reported cycle errors or unavailable namespaces, but complete-cycle,
+global-age and target-cycle ordinary-arrival gates remain open. Deployment success
+does not establish fleet acceptance. The combined package retains exact private
+evidence locations, recovery controls and outstanding sample/cleanup limitations.
 
 2026-10-28: default routing is implemented and focused/local normal-worker checks pass. Admission history survives migration and legacy authority is rejected. [Validation](../../artifacts/20261028_default_queue_validation.md) retains evidence and review dispositions; full pytest stopped at preexisting Roads provenance mismatch after 6,810 passed/61 skipped. No full-suite pass is claimed; production unchanged.
 

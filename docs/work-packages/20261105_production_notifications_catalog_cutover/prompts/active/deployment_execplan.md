@@ -24,7 +24,9 @@ catalog remains legacy/timestamp-only with its sweep disabled.
 - [x] M2: backup, schema rehearsal and production migration (2026-11-06 06:34 UTC).
 - [x] M3: compatible fleet activation and model/runtime acceptance (2026-11-06 07:24 UTC).
 - [x] M4: notification preflight, activation and scheduled/browser readback (2026-11-06 07:44 UTC).
-- [ ] M5: default-worker pilot and bounded general catalog observation.
+- [x] M5a: default-worker pilot and fleet convergence; scheduler storage parity verified.
+- [x] M5b: observation 01 contained after supervision failure; reviewed machine supervision launched observation 02.
+- [ ] M5c: later natural complete cycle, new ordinary arrivals, independent age census and artifact acceptance.
 - [ ] M6: final independent review, fixture cleanup and package closure.
 
 ## Surprises & Discoveries
@@ -35,7 +37,7 @@ missed the real configuration boundary. Production wctl merges .env inputs into
 the existing service env_file; render-only proof showed the notification flag
 passes without adding Compose wiring. wepp2 batch registration differs from its
 running process count. Root disk cleanup recovered 195.5 GB on wepp1 and preserved
-all containers/tagged images. The current fleet still runs RQ 1.16.2 and the
+all containers/tagged images. The initial fleet ran RQ 1.16.2 and the
 candidate upgrades to 2.12.0; mixed execution/reverse state compatibility is not
 supported. The canonical script resumes its own global fence per host.
 
@@ -47,7 +49,17 @@ workers validated all seven locators. Keep admission paused until the one-line
 wepp1 volume-anchor correction passes runtime parity. Dormant webpush/scale-zero
 fork workers are inactive cases; shape-converter's empty mounts preserve isolation.
 
+Observation 01 exposed a manual attendance gap despite a healthy collector.
+Machine supervision now owns that timing boundary. Full pending-list age reads
+also exceeded the bounded sample time; rotating samples are diagnostic only,
+with independent full-union census still required for acceptance.
+
 ## Decision Log
+
+2026-11-06 UTC / Codex and independent reviewers: use the tested foreground
+supervisor and reciprocal parent receipt for observation 02. Preserve the original
+deadline and exclude the baseline cycle from acceptance; this addresses measured
+control failures without changing reconciliation cadence or adding a service.
 
 2026-11-06 UTC / operator and Codex: permanently remove only wepp1's repository-local forced LFS access=basic setting after controlled tests isolated it; preserve credential helpers, TLS and client selection. Normal uncached filters passed.
 
@@ -95,7 +107,10 @@ true and converged on all three hosts after their second canonical rollouts.
 Scheduler mount correction 51e1f2345 passed same-image preflight and actual runtime
 root/inode checks, with all 24 other container identities preserved. Scheduler
 restarted at 08:28:43 UTC; normal ticks cleared namespace unavailability under
-the retained admission pause. General observation remains open.
+the retained admission pause. Observation 02 subsequently released that pause
+under machine supervision; general-cycle acceptance remains open. Host checkouts
+are 51e1f2345, running application code is 8d079b41d, and published observation
+controls are 0c0b48dbe. Notifications and the permanent Git fix are accepted.
 
 ## Context and Orientation
 
@@ -324,3 +339,45 @@ offset; these ages are explicitly nonexhaustive. The independent retained-union
 census remains mandatory for global-age acceptance. Deadline and containment
 bounds are unchanged. This bounded instrumentation change follows a measured
 failure of the simpler whole-pending-list observation.
+
+## Observation 02 running handoff (2026-11-06 09:44 UTC)
+
+Reviewed controls passed 38 focused checks plus 18 collector-boundary checks.
+Parent hard-exit containment took 50.050 seconds with ledger unchanged. Production
+bounded age samples took 0.262–0.341 seconds. Both independent reviewers approved
+fresh private staging before launch. Observation 01 remains failed.
+
+The foreground supervisor on forest is PID 2755992 (tool session 5723); its child
+transport is PID 2755993 and the existing wepp1 worker collector is PID 2126.
+Read the journal at
+`/var/tmp/production-cutover-acceptance-20261106/general-supervisor-02/supervisor.jsonl`
+and collector evidence at
+`/wc1/query-catalog-validation/20261106/general-observation-02` inside the worker.
+Use `artifacts/general_observation_02_manifest.json` and the reviewed controls at
+0c0b48dbe; do not relaunch into an existing evidence directory. Machine checks
+run every 15 seconds, parent receipts expire after 45 seconds, and the absolute
+deadline remains November 8 at 08:39:54.157908 UTC. Loss of control or deadline
+pauses admission; inability to confirm Redis containment must remain explicit.
+
+At 09:44 UTC, 40 samples were retained with heartbeat age 3.2 seconds, no pause,
+no stop/completion marker, zero cycle errors and no unavailable namespaces.
+Discovery completed at 09:36 UTC with 52,604 directories, 178,516 entries and
+41,573 locator paths (including aliases, not unique projects). The existing cycle
+`query_catalog_refresh_f63a3a51-bf7f-48b7-bd6b-c57bf6e2120b` is excluded from
+acceptance. Wait for its natural completion and the next naturally scheduled
+cycle, starting at least 86,400 seconds later. New ordinary arrivals must occur
+during that target cycle. Neither prior model evidence nor baseline completion
+can close this gate.
+
+After target completion, follow `artifacts/general_catalog_acceptance_procedure.md`
+using the observation-02 directory and fresh output filenames. Independently
+review the retained-union census and artifact proofs before writing acceptance.
+The sample matrix still has explicit culvert-Parquet, parent-backed dataset and
+read-only artifact gaps; resolve or retain these limitations honestly. Keep owned
+model/pilot fixtures and acceptance accounts until required validation finishes,
+then revoke the owned token and document account/onboarding-audit disposition.
+Do not extend the deadline, reset receipts/cursor, or declare package completion
+if the remaining window cannot supply the required evidence.
+
+Revision: record actual supervised release and distinguish completed deployment
+from the outstanding calendar-dependent acceptance and cleanup gates.

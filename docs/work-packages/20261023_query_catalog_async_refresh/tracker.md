@@ -255,3 +255,19 @@ remains set. Fresh default-worker pilot qcat-20261106-default01 passed two waves
 on eight scopes with actual artifacts/query readback and ordinary waits below
 0.13 seconds. General enablement is staged on all hosts; wepp1's second canonical
 deployment passed and wepp2 is building. Complete-cycle observation remains open.
+
+### November 6 09:44 UTC superseding checkpoint
+
+All three second canonical deployments completed. General async is true and
+converged; scheduler root/coordination parity passed after the wepp1 mount-anchor
+repair. Observation 01 failed a manual supervision interval and was contained;
+its evidence cannot establish acceptance. Independently reviewed observation 02
+is now running with paired machine supervision, admission released, no cycle
+errors and no unavailable namespaces. Controls are published at 0c0b48dbe.
+
+The fixed deadline remains November 8 08:39:54 UTC. Existing f63a3a51 baseline
+cycle is excluded; acceptance requires a different naturally scheduled complete
+cycle, new ordinary arrivals during that cycle, independent full-union age census
+and artifact proof. Sample coverage gaps and owned fixture/account cleanup remain
+open. See the combined package's active ExecPlan observation-02 handoff; do not
+reset state, shorten cycle spacing or extend the deadline to force completion.

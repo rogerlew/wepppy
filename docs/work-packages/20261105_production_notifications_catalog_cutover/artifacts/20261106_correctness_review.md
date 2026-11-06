@@ -1040,3 +1040,74 @@ full retained-union census and same-cycle artifact proof remain mandatory.
 Production timing of the bounded path set remains a launch preflight; the local
 test proves the read bound, not production filesystem latency. The original
 observation 01 collector/evidence and its failed outcome are unchanged.
+
+### Actual bounded-cost and observation 02 staging closure
+
+The retained production timing in `artifacts/bounded_pending_age_probe_cost.json`
+closes the measured pending-age loop overrun. With 6,266 pending paths, three
+successive selections each made 26 actual status reads in 0.312, 0.262 and 0.341
+seconds. This reviewer inspected the read-only timing script: its path-selection
+statements match the reviewed collector's bounded selection. These measurements
+cover that filesystem-read loop at the sampled state, not a guarantee about
+every future sample or the duration of an entire catalog cycle. The existing
+sample/parent/deadline guards remain active.
+
+Independent production readback at epoch `1793957770.4168887` verifies normal
+worker UID 1002/GID 130, expected container hostname `6aac280bc8cf`, canonical
+private observation 02 directory mode 0700 and exact staged collector/census/
+sample hashes. The raw manifest hash is
+`b73ae955eb6b908ed486cb5f59c01d049d1a6be8ec71774c00a18387381cdd84`;
+its semantic digest is
+`6be2e5c3d967ab9e61f564521f107d096768b33fbc529319268eae3778ddefd5`.
+It retains the original absolute deadline, 45-second parent receipt lifetime,
+25-pending-path bound and explicit alias/nonexhaustive/full-census limitations.
+Worker configuration matches that manifest. The exact owned pause remains
+persistent; neither an observation 02 start marker nor completion exists.
+
+At this checkpoint the old baseline inventory discovery has naturally completed
+at `1793957768.5761845`, after visiting 52,604 directories. Both retained ledger
+bindings are finished and neither uncertain nor outstanding. The cursor remains
+incomplete with 6,837 pending entries and no failures, cycle errors or unavailable
+namespaces. Discovery completion alone is not full reconciliation or accepted
+cycle evidence. No cursor, ledger or receipt was reset.
+
+The sanitized independent readback is
+`artifacts/correctness_observation_02_readback.json`. COR-09's staged identity,
+manifest and measured-cost prerequisites are accepted. The independent security
+reviewer's subsequent 09:36:24.952 UTC preflight confirms all 21 listed container
+IDs/images unchanged and running, 12 compatible default consumers, no suspension
+and the same owned persistent pause. Its retained security review clears the
+remaining live launch prerequisite. Launch only through the paired supervisor.
+Observation 01 remains failed; observation 02 must still observe a later natural
+cycle and meet its artifact, age, arrival, deadline and continuous-supervision
+gates. This reviewer performed no production mutation or activation.
+
+### Live observation 02 handoff checkpoint
+
+Independent read-only checks at epochs `1793958328.944671` through
+`1793958387.570086` confirm bounded observation is running. Forest supervisor
+PID 2755992 retains its private journal under
+`/var/tmp/production-cutover-acceptance-20261106/general-supervisor-02` (operator
+tool session 5723). The first 32 successful probes have maximum spacing 15.162
+seconds, no transport exit and no supervisor completion/failure event. Remote
+collector PID 2126 has a fresh heartbeat, no stop/completion and no admission
+pause. Its parent receipt is 2.882 seconds old at the latest readback.
+
+The latest sample verifies 12 compatible default consumers, no suspension,
+seven ledger bindings within the cap, one outstanding execution and zero
+uncertain executions. It checks exactly 32 age paths: all seven admitted paths
+plus 25 rotating selections from 8,468 pending paths. There are no unavailable
+ordinary timestamps or observed queued waits, but no ordinary-arrival acceptance
+evidence yet. The preceding direct queue read reports zero queued default jobs;
+the changing pending count is retained progress, not a completion claim.
+
+The collector activated at `1793957875.0368552` with the previous `f63...` cycle
+as its baseline and the unchanged absolute deadline `1794127194.157908`. There
+is no target-cycle file or artifact acceptance. This is a safe bounded handoff
+of a running observation with automatic pause controls; it is not final rollout
+acceptance. Remaining gates are baseline reconciliation completion, a later
+naturally scheduled cycle, new ordinary arrivals during that target cycle,
+independent full-census/representative-artifact acceptance and continuous paired
+supervision through completion. Process/host loss or deadline may instead leave
+a paused incomplete outcome. Observation 01 remains failed. No production
+mutation was performed for this handoff review.
