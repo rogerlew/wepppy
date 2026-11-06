@@ -77,6 +77,14 @@ Supports burn severity uploads and leverages historical vegetative cover data fr
 
 Designed for European watersheds. Uses ESDAC land use classifications, EU-SoilHydroGrids for soil properties, and E-OBS climate data to match U.S. climate stations by monthly precipitation and temperature patterns. The PeP (Post-fire Erosion and Prevention) extension adds post-fire erosion modeling and WATAR ash transport for European landscapes.
 
+European soils can build even when a soil name or other descriptive data are
+missing, provided the physical soil information is sufficient. For shallow
+soils, data for material below the modeled soil boundary are not required.
+Builds with source warnings remain usable. If **Build Soils** rejects source data, the
+**Summary** identifies the missing or invalid physical information; include
+that summary and your project link when requesting help. The full location
+record is available through **More → Browse → soils → soil_quality.json**.
+
 #### WEPPcloud-AU (Australia)
 
 Experimental interface for Australian watersheds. Assigns land management from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. Climate stations are selected using AGDC monthly precipitation and temperature patterns.

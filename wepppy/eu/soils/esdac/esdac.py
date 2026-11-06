@@ -21,6 +21,13 @@ from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 from .quality import (
     ESDACSoilBuildError,
     SoilQualityContext,
+    SoilQualityDiagnostic,
+    SoilQualityResult,
+    _OPTIONAL_CATEGORICAL,
+    _optional_metadata,
+    _uses_subsoil,
+    _il_short_to_depth_mm,
+    _texdepchg_short_to_depth_mm,
     merge_quality_results,
     rejected_quality_result,
     validate_esdac_source_profile,
@@ -99,30 +106,10 @@ _tex_short_to_simple_texture: Final[dict[str, str | None]] = {
 }
 
 
-_il_short_to_depth_mm: Final[dict[str, int | None]] = {
-    '0':   None,
-    '1':   1500,
-    '2':   1150,
-    '3':   600,
-    '4':   400
-}
-
-
 _cec_to_cmol_per_kg: Final[dict[str, float]] = {
     'H': 50.0, 
     'M': 27.5, 
     'L': 10
-}
-
-_texdepchg_short_to_depth_mm: Final[dict[str, int | None]] = {
-    '0': None,
-    '1': 300,
-    '2': 500,
-    '3': 700,
-    '4': 1000,
-    '5': 1200,
-    '6': 400,
-    '7': 900,
 }
 
 _octop_short_to_pct: Final[dict[str, float]] = {
@@ -272,8 +259,16 @@ class ESDAC:
 
         # { attr, raster_attribute table}
         rats: dict[str, dict[str, str]] = {}
+        self._optional_rat_errors: dict[str, Exception] = {}
         for fn in catalog:
-            rats[_attr_fmt(_split(fn)[-1][:-4])] = self._rat_extract(fn[:-4] + ".json")
+            attr = _attr_fmt(_split(fn)[-1][:-4])
+            try:
+                rats[attr] = self._rat_extract(fn[:-4] + ".json")
+            except (KeyError, TypeError, ValueError, FileNotFoundError) as exc:
+                if attr not in (*_OPTIONAL_CATEGORICAL, "cecsub"):
+                    raise
+                # Defer to the location warning boundary, retaining the cause.
+                self._optional_rat_errors[attr] = exc
         self.rats = rats
 
         # { attr, raster_file_path}
@@ -320,6 +315,8 @@ class ESDAC:
             attr = _attr_fmt(attr)
             if attr not in catalog:
                 raise KeyError(attr)
+            if attr in self._optional_rat_errors:
+                raise self._optional_rat_errors[attr]
             rdi = RasterDatasetInterpolator(catalog[attr])
             x = rdi.get_location_info(lng, lat, method="near")
             px_val = str(int(x))
@@ -382,11 +379,13 @@ class ESDAC:
                 lng,
                 lat,
                 (
-                    'fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top',
-                    'cec_sub', 'dgh', 'dimp', 'dr',
+                    'textdepchg', 'il', 'cec_top',
                 ),
             )
-        except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
+            use_subsoil = _uses_subsoil(d_esdb)
+            if use_subsoil:
+                d_esdb.update(self.query(lng, lat, ('cec_sub',)))
+        except (KeyError, TypeError, ValueError, FileNotFoundError, RDIOutOfBoundsException) as exc:
             raise ESDACSoilBuildError(
                 rejected_quality_result(
                     context,
@@ -396,14 +395,24 @@ class ESDAC:
                 )
             ) from exc
 
+        # Descriptive rasters may be incomplete independently of physical data.
+        lookup_warnings = []
+        optional_fields = _OPTIONAL_CATEGORICAL + (() if use_subsoil else ("cec_sub",))
+        for field in optional_fields:
+            try:
+                d_esdb.update(self.query(lng, lat, (field,)))
+            except (KeyError, TypeError, ValueError, FileNotFoundError, RDIOutOfBoundsException) as exc:
+                lookup_warnings.append(SoilQualityDiagnostic(
+                    "source.categorical.lookup_failed", field, "warning",
+                    exception_type=type(exc).__name__,
+                ))
+
         try:
-            d_stu = self.query_derived_db(lng, lat,
-                ('STU_EU_T_CLAY',   'STU_EU_S_CLAY',
-                 'STU_EU_T_SAND',   'STU_EU_S_SAND',
-                 'STU_EU_T_SILT',   'STU_EU_S_SILT',
-                 'STU_EU_T_OC',     'STU_EU_S_OC',
-                 'STU_EU_T_BD',     'STU_EU_S_BD',
-                 'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL'))
+            stu_fields = tuple(
+                f'STU_EU_{layer}_{field}' for field in ('CLAY', 'SAND', 'SILT', 'OC', 'BD', 'GRAVEL')
+                for layer in (('T', 'S') if use_subsoil else ('T',))
+            )
+            d_stu = self.query_derived_db(lng, lat, stu_fields)
         except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
             raise ESDACSoilBuildError(
                 rejected_quality_result(
@@ -419,8 +428,24 @@ class ESDAC:
             esdb=d_esdb,
             stu=d_stu,
         )
+        if lookup_warnings:
+            source_quality = merge_quality_results(
+                source_quality,
+                SoilQualityResult(context, "degraded", tuple(lookup_warnings)),
+            )
         if source_quality.outcome == "rejected":
             raise ESDACSoilBuildError(source_quality)
+
+        # Diagnostics above retain raw metadata; preserve any usable class even
+        # when the pixel or description is missing (especially forest landuse).
+        for field in (*optional_fields, "textdepchg", "il", "cec_top",
+                      *(("cec_sub",) if use_subsoil else ())):
+            d_esdb[_attr_fmt(field)] = _optional_metadata(d_esdb, field, [])
+        # Keep historical provenance order so a valid soil rebuild reuses its key.
+        d_esdb = {field: d_esdb[field] for field in (
+            'fao90lev1', 'usedom', 'textdepchg', 'il', 'cectop', 'cecsub',
+            'dgh', 'dimp', 'dr',
+        )}
 
         cec_top_class = d_esdb['cectop'][1]
         cec_sub_class = d_esdb['cecsub'][1]
@@ -458,14 +483,7 @@ class ESDAC:
             )
 
         normalized_stu = dict(d_stu)
-        for field in (
-            'STU_EU_T_CLAY', 'STU_EU_S_CLAY',
-            'STU_EU_T_SAND', 'STU_EU_S_SAND',
-            'STU_EU_T_SILT', 'STU_EU_S_SILT',
-            'STU_EU_T_OC', 'STU_EU_S_OC',
-            'STU_EU_T_BD', 'STU_EU_S_BD',
-            'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL',
-        ):
+        for field in stu_fields:
             try:
                 normalized_stu[field] = float(d_stu[field])
             except (KeyError, TypeError, ValueError, OverflowError) as exc:
@@ -487,20 +505,23 @@ class ESDAC:
                      bd=d_stu['STU_EU_T_BD'], 
                      gravel=d_stu['STU_EU_T_GRAVEL'], 
                      _cec=cec_top_class, 
-                     depth=solthk0)
+                     depth=min(solthk0, solthk1))
 
-        h1 = Horizon(clay=d_stu['STU_EU_S_CLAY'], 
-                     sand=d_stu['STU_EU_S_SAND'], 
-                     silt=d_stu['STU_EU_S_SILT'], 
-                     om=d_stu['STU_EU_S_OC'],
-                     bd=d_stu['STU_EU_S_BD'], 
-                     gravel=d_stu['STU_EU_S_GRAVEL'], 
-                     _cec=cec_sub_class, 
-                     depth=solthk1)
+        h1 = None
+        if use_subsoil:
+            h1 = Horizon(clay=d_stu['STU_EU_S_CLAY'],
+                         sand=d_stu['STU_EU_S_SAND'],
+                         silt=d_stu['STU_EU_S_SILT'],
+                         om=d_stu['STU_EU_S_OC'],
+                         bd=d_stu['STU_EU_S_BD'],
+                         gravel=d_stu['STU_EU_S_GRAVEL'],
+                         _cec=cec_sub_class,
+                         depth=solthk1)
+
 
         horizon_quality = validate_horizon_profile(
             context,
-            (_horizon_quality_payload(h0), _horizon_quality_payload(h1)),
+            tuple(_horizon_quality_payload(h) for h in (h0, h1) if h is not None),
         )
         if horizon_quality.outcome == "rejected":
             raise ESDACSoilBuildError(horizon_quality)
@@ -514,6 +535,8 @@ class ESDAC:
              '#', '#']
 
         s.extend(_disclaimer.split('\n'))
+        for diagnostic in source_quality.diagnostics:
+            s.append(f"# Source warning: {diagnostic.code} field={diagnostic.field}")
         
         s.append('# ESDAC ESDB Soil Parameters')
         s.append('#')
@@ -541,7 +564,8 @@ class ESDAC:
         s.append('#  ' + '-' * 120)
 
         for v in ('CLAY', 'SAND', 'SILT', 'OC', 'BD', 'GRAVEL'):
-            s.append('#  {:10}{:>10.1f}{:>10.1f}'.format(v, d_stu[f'STU_EU_T_{v}'], d_stu[f'STU_EU_S_{v}']))
+            sub = f"{d_stu[f'STU_EU_S_{v}']:.1f}" if use_subsoil else 'unused'
+            s.append('#  {:10}{:>10.1f}{:>10}'.format(v, d_stu[f'STU_EU_T_{v}'], sub))
 
         s.append('#')
         
@@ -551,7 +575,8 @@ class ESDAC:
         s.append('#  ' + '-' * 120)
         
         for v in h0.rosetta_d:
-            s.append('#  {:10}{:>10.1f}{:>10.1f}'.format(v, h0.rosetta_d[v], h1.rosetta_d[v]))
+            sub = f'{h1.rosetta_d[v]:.1f}' if h1 is not None else 'unused'
+            s.append('#  {:10}{:>10.1f}{:>10}'.format(v, h0.rosetta_d[v], sub))
         s.append('#  + ks, wp, and fc used for WEPP soil parameters')
 
         s.append('#')
@@ -683,7 +708,7 @@ class ESDAC:
 
         description = d_esdb['fao90lev1'][2]
 
-        if h1.depth <= 0:
+        if h1 is None:
             num_layers = 1
         else:
             num_layers = 2

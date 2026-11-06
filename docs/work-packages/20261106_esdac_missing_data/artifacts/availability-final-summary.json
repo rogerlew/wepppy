@@ -1,0 +1,184 @@
+{
+  "baseline_ref": null,
+  "bounds": {
+    "lat": [
+      35.01229315088369,
+      71.02053254818479
+    ],
+    "lng": [
+      -10.32371403570267,
+      71.22082379560577
+    ]
+  },
+  "candidate_sha256": {
+    "esdac/esdac.py": "3724d776e38047a494af95cfa65f6ae1f8234f0de974473de7b2b021ee34aca0",
+    "esdac/quality.py": "aba4e0f7c0d34198e829663298abe0b6498a8f1f264738f0a5965cbd1a462d07",
+    "soil_build.py": "4b072a86d391827f114645a31e80bab1524982c80aff7b61a94b8dec53f7975e"
+  },
+  "counts": {
+    "degraded": 521,
+    "rejected": 343,
+    "valid": 136
+  },
+  "geographic_bins_10_degrees": {
+    "lon-10:lat30": {
+      "degraded": 1,
+      "rejected": 18,
+      "valid": 12
+    },
+    "lon-10:lat40": {
+      "degraded": 10,
+      "rejected": 14,
+      "valid": 15
+    },
+    "lon-10:lat50": {
+      "degraded": 33,
+      "rejected": 26
+    },
+    "lon-10:lat60": {
+      "degraded": 5,
+      "rejected": 2
+    },
+    "lon-20:lat50": {
+      "degraded": 1,
+      "rejected": 2
+    },
+    "lon0:lat30": {
+      "degraded": 4,
+      "rejected": 4,
+      "valid": 4
+    },
+    "lon0:lat40": {
+      "degraded": 34,
+      "rejected": 15,
+      "valid": 6
+    },
+    "lon0:lat50": {
+      "degraded": 22,
+      "rejected": 15,
+      "valid": 1
+    },
+    "lon0:lat60": {
+      "degraded": 2,
+      "rejected": 10,
+      "valid": 3
+    },
+    "lon10:lat30": {
+      "degraded": 10,
+      "rejected": 9
+    },
+    "lon10:lat40": {
+      "degraded": 23,
+      "rejected": 16,
+      "valid": 12
+    },
+    "lon10:lat50": {
+      "degraded": 30,
+      "rejected": 22,
+      "valid": 1
+    },
+    "lon10:lat60": {
+      "degraded": 3,
+      "rejected": 34,
+      "valid": 10
+    },
+    "lon20:lat30": {
+      "degraded": 15,
+      "rejected": 14
+    },
+    "lon20:lat40": {
+      "degraded": 20,
+      "rejected": 17,
+      "valid": 30
+    },
+    "lon20:lat50": {
+      "degraded": 24,
+      "rejected": 2,
+      "valid": 14
+    },
+    "lon20:lat60": {
+      "degraded": 2,
+      "rejected": 9,
+      "valid": 25
+    },
+    "lon20:lat70": {
+      "degraded": 3,
+      "rejected": 6
+    },
+    "lon30:lat40": {
+      "degraded": 34,
+      "rejected": 11
+    },
+    "lon30:lat50": {
+      "degraded": 44,
+      "rejected": 7
+    },
+    "lon30:lat60": {
+      "degraded": 22,
+      "rejected": 15,
+      "valid": 3
+    },
+    "lon40:lat40": {
+      "degraded": 41,
+      "rejected": 10
+    },
+    "lon40:lat50": {
+      "degraded": 53,
+      "rejected": 1
+    },
+    "lon40:lat60": {
+      "degraded": 21,
+      "rejected": 5
+    },
+    "lon50:lat50": {
+      "degraded": 44,
+      "rejected": 10
+    },
+    "lon50:lat60": {
+      "degraded": 20,
+      "rejected": 9
+    },
+    "lon60:lat50": {
+      "rejected": 28
+    },
+    "lon60:lat60": {
+      "rejected": 8
+    },
+    "lon70:lat50": {
+      "rejected": 4
+    }
+  },
+  "git_head": "f77469e41b6e83b0f4ffbf7e6f827a3638a9bf80",
+  "hostname": "6aeecd27417d",
+  "manifest_sha256": "51de17d574566a9c29e56a095ed33a804182e05e98b6dd73225e4c57c1e74dc6",
+  "reasons": {
+    "error:horizon.depth_order:horizons[1].depth": 72,
+    "error:source.categorical.empty:cec_sub": 7,
+    "error:source.categorical.empty:cec_top": 7,
+    "error:source.categorical.lookup_failed:esdb": 20,
+    "error:source.hydrogrids.all_missing:hydrogrids": 33,
+    "error:source.hydrogrids.provider_unavailable:hydrogrids": 1,
+    "error:source.il.no_information:il": 65,
+    "error:source.stu.bulk_density_nonpositive:STU_EU_S_BD": 130,
+    "error:source.stu.bulk_density_nonpositive:STU_EU_T_BD": 37,
+    "error:source.stu.mandatory_profile_empty:STU_EU_S_CLAY/SAND/SILT": 130,
+    "error:source.stu.mandatory_profile_empty:STU_EU_T_CLAY/SAND/SILT": 37,
+    "error:source.stu.provider_unavailable:stu": 10,
+    "error:source.stu.texture_balance:STU_EU_S_CLAY/SAND/SILT": 7,
+    "error:source.textdepchg.no_information:textdepchg": 93,
+    "warning:source.categorical.description_missing:dgh": 7,
+    "warning:source.categorical.description_missing:dimp": 7,
+    "warning:source.categorical.description_missing:dr": 34,
+    "warning:source.categorical.description_missing:fao90lev1": 1,
+    "warning:source.categorical.description_missing:usedom": 40,
+    "warning:source.categorical.empty:dgh": 7,
+    "warning:source.categorical.empty:dimp": 7,
+    "warning:source.categorical.empty:dr": 34,
+    "warning:source.categorical.empty:fao90lev1": 261,
+    "warning:source.usedom.no_information:usedom": 354
+  },
+  "results_sha256": "da98173d83ae0a70321fb4f9334f6cd0aadb8d20a2b42dee854cbb03bb06ecf4",
+  "sample_count": 1000,
+  "source_unchanged": false,
+  "uid": 1000
+}

@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/test_usersum_template_wiring.py -q
+....F......                                                              [100%]
+=================================== FAILURES ===================================
+___________ test_runs_template_uses_the_ttl_deletion_usersum_doc_id ____________
+
+    def test_runs_template_uses_the_ttl_deletion_usersum_doc_id() -> None:
+        root = Path(__file__).resolve().parents[2]
+        template = root / "wepppy" / "weppcloud" / "templates" / "user" / "runs2.html"
+        contents = _read(template)
+    
+        assert "usersum.weppcloud.run_ttl_deletion" in contents
+>       assert "runsTtlDeletionHelpUrl" in contents
+E       assert 'runsTtlDeletionHelpUrl' in '{% extends "base_pure.htm" %}\n\n{% block title %}Runs{% endblock %}\n\n{% block body_container_class %}wc-container ...er></script>\n  <script src="{{ static_url(\'js/controllers_gl_stale_check.js\') }}" defer></script>\n{% endblock %}\n'
+
+tests/weppcloud/test_usersum_template_wiring.py:95: AssertionError
+=============================== warnings summary ===============================
+tests/weppcloud/test_usersum_template_wiring.py::test_usersum_layout_inherits_base_pure_for_theme_bootstrap
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/weppcloud/test_usersum_template_wiring.py::test_usersum_layout_inherits_base_pure_for_theme_bootstrap
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/test_usersum_template_wiring.py::test_runs_template_uses_the_ttl_deletion_usersum_doc_id
+1 failed, 10 passed, 2 warnings in 9.37s

@@ -125,3 +125,11 @@ outside the accepted contract. Phase 3 must retain the Phase 1 valid control,
 add a valid-zero matrix, and report rejection counts as a guardrail. Rollback
 is to revert the Phase 3 validation boundary while preserving the fixture and
 diagnostic tests; do not restore silent fallback without a revised ADR.
+
+## Amendment — 2026-11-06
+
+[ADR-0139](ADR-0139-esdac-missing-metadata.md) defines required data by the
+physical materials actually emitted, allows missing descriptive metadata with
+warnings, and handles shallow profiles using existing mapped depths. Consult
+the [current source sufficiency contract](../schemas/esdac-soil-source-contract.md)
+for field policy and deterministic batch identity/retry behavior.

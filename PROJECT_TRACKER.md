@@ -1,3 +1,5 @@
+Completed locally: [ESDAC missing-data robustness](docs/work-packages/20261106_esdac_missing_data/package.md) — 1,000-location paired study improves usable soils from 446 to 733 with zero regressions; all 35 incident locations and downstream readbacks pass. Independent review passed; broad regression retains one proven baseline template failure. Not deployed.
+
 In progress: [Production notifications/catalog cutover](docs/work-packages/20261105_production_notifications_catalog_cutover/package.md) — authorized fleet deployment including RQ 2.12, WEPP 261029 config defaults, notification activation and default-worker catalog acceptance.
 
 Completed: [User notifications](docs/work-packages/20261105_user_notifications/package.md) — generic PostgreSQL inbox, Flask APIs, quiet unread bell and daily TTL reconciliation verified on forest. Browser, actual scheduled execution, CAPTCHA repair, application rollback and fixture cleanup passed; regression disposition and independent reviews retained.

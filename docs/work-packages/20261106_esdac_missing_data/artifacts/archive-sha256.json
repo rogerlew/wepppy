@@ -1,0 +1,7 @@
+{
+  "availability-baseline.tar.gz": "9429c5bb5d8861d926ad66b964ae1e0502854e1365861e83d578b1a5ecd6e1db",
+  "availability-final.tar.gz": "0ed7d5dedb07519dec46502afac7d39a2dcbc42f2b54b2a7c4210d1fd44fd99a",
+  "availability-sufficiency.tar.gz": "b8d699fca371783bb36614c1837666ddb8c636bb90a1f0528d013f071de5f4d3",
+  "incident-final.tar.gz": "071a67b29d70fb6ab6b5f5077df2ad6999833e16fe96249708aa4dd104500ebb",
+  "incident-sufficiency.tar.gz": "5f8b98b7a9ee08d936d46dc5ddc68e0bd99f14dc550ab7b2b35c0f49c70e649f"
+}

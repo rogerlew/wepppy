@@ -116,8 +116,8 @@ def _mutate_serialized_horizon(path: Path, *, field_index: int, value: str) -> N
 
 @pytest.mark.parametrize(
     ("case_index", "expected_outcome"),
-    ((0, "valid"), (2, "degraded")),
-    ids=("valid-base", "degraded-base"),
+    ((0, "valid"), (2, "degraded"), (1, "degraded"), (3, "degraded")),
+    ids=("valid-base", "degraded-base", "shallow-material", "unused-missing-subsoil"),
 )
 def test_fixture_base_survives_serialized_disturbed_round_trip(
     monkeypatch: pytest.MonkeyPatch,
@@ -198,6 +198,9 @@ def test_rejected_base_diagnostics_are_not_replaced_by_generic_disturbed_soil(
     tmp_path: Path,
 ) -> None:
     case = _load_fixture()["cases"][3]
+    # This source now supports a shallow profile; invalidate the emitted top material.
+    for field in ("CLAY", "SAND", "SILT"):
+        case["stu"][f"STU_EU_T_{field}"] = 0
     _patch_source_provider(monkeypatch, case)
 
     with pytest.raises(ESDACSoilBuildError) as error:

@@ -1,0 +1,813 @@
+{
+  "accepted_count": 0,
+  "batch_outcome": "rejected",
+  "profiles": [
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.943332184393924,
+      "longitude": 6.878030223381789,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 42
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.9568161250686,
+      "longitude": 6.889533769739065,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 91
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.943076476022014,
+      "longitude": 6.8763667129917705,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 22
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.94168824524053,
+      "longitude": 6.886467206481933,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 161
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.942550387107744,
+      "longitude": 6.88442329262895,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 153
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.95212651285993,
+      "longitude": 6.891399082914451,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 122
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.94138948820921,
+      "longitude": 6.88246196960797,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 163
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.949881640311645,
+      "longitude": 6.879436206652901,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 62
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.95069170719846,
+      "longitude": 6.886769645971915,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 112
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.9542573496983,
+      "longitude": 6.884949858941901,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 92
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.938562362087374,
+      "longitude": 6.875547364344055,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 183
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.954180242406935,
+      "longitude": 6.8929898299247885,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 111
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.93913553517907,
+      "longitude": 6.882219282903838,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 172
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.937044593444874,
+      "longitude": 6.878622383258215,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 181
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.93966147736615,
+      "longitude": 6.874163218121069,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 23
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.95168603948174,
+      "longitude": 6.879697205121547,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 71
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.950555972490484,
+      "longitude": 6.879408607397787,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 72
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.951476750055974,
+      "longitude": 6.892764927821093,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 121
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.947390544431585,
+      "longitude": 6.878533682343083,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 52
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.94392371120991,
+      "longitude": 6.885706436058163,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 152
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.9472522289868,
+      "longitude": 6.883226867012198,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 63
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.95208962115631,
+      "longitude": 6.889391459994258,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 113
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.937830038024245,
+      "longitude": 6.884615955542972,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 171
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.943486474926225,
+      "longitude": 6.886393871195909,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 151
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.948176010273784,
+      "longitude": 6.8845284447144355,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 83
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.949647796986255,
+      "longitude": 6.89116512070191,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 123
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.94158957560516,
+      "longitude": 6.881114649188734,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 143
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.945503322175945,
+      "longitude": 6.885976800142204,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 53
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.948517754879965,
+      "longitude": 6.89087628174094,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 132
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.940465685586666,
+      "longitude": 6.8811605959611475,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 43
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.95458678745479,
+      "longitude": 6.890629203479355,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 93
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.9373187921819,
+      "longitude": 6.881289232002803,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 173
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.946676472310344,
+      "longitude": 6.8886074930993795,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 133
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.950836335120826,
+      "longitude": 6.882410747862688,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 82
+    },
+    {
+      "diagnostics": [
+        {
+          "code": "source.categorical.empty",
+          "exception_type": null,
+          "field": "fao90lev1",
+          "raw_value": [
+            "24",
+            "",
+            "No information"
+          ],
+          "severity": "error"
+        }
+      ],
+      "latitude": 47.94695659190348,
+      "longitude": 6.891609467209332,
+      "outcome": "rejected",
+      "reason_codes": [
+        "source.categorical.empty"
+      ],
+      "soil_key": null,
+      "topaz_id": 131
+    }
+  ],
+  "rejected_count": 35,
+  "schema_version": 1
+}

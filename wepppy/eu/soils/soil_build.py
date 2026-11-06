@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime
+import hashlib
 import json
 import logging
 from multiprocessing import Pool
@@ -263,6 +264,38 @@ def _raise_batch_conflict(
     )
 
 
+def _artifact_content(path: Path) -> bytes:
+    """Ignore volatile dates and additive warning comments for soil identity."""
+    return b"\n".join(
+        line for line in path.read_bytes().splitlines()
+        if not line.startswith((b"#  Build Date: ", b"# Source warning: "))
+    )
+
+
+def _resolve_artifact_keys(
+    results: Sequence[SoilBuildWorkerResult], staging_dir: Path, final_dir: Path,
+) -> list[SoilBuildWorkerResult]:
+    """Keep distinct profiles sharing a rounded legacy key without overwrites."""
+    contents: dict[str, set[bytes]] = {}
+    for index, result in enumerate(results):
+        if result.key is None:
+            raise RuntimeError("accepted ESDAC result is missing its soil key")
+        path = staging_dir / str(index) / f"{result.key}.sol"
+        contents.setdefault(str(result.key), set()).add(_artifact_content(path))
+    resolved = []
+    for index, result in enumerate(results):
+        key = str(result.key)
+        path = staging_dir / str(index) / f"{key}.sol"
+        content = _artifact_content(path)
+        existing = final_dir / f"{key}.sol"
+        if len(contents[key]) > 1 or (existing.exists() and _artifact_content(existing) != content):
+            key = f"{key}-{hashlib.sha256(content).hexdigest()}"
+            path.rename(path.with_name(f"{key}.sol"))
+            result = replace(result, key=key, quality=replace(result.quality, soil_key=key))
+        resolved.append(result)
+    return resolved
+
+
 def build_esdac_soils(
     orders: Sequence[tuple[int | str, tuple[float, float]]],
     soils_dir: str,
@@ -327,6 +360,7 @@ def build_esdac_soils(
                 status_channel=status_channel,
             )
 
+        results = _resolve_artifact_keys(results, Path(staging_dir), final_dir)
         staged_report_path = Path(staging_dir) / "soil_quality.json"
         _write_quality_report(
             staged_report_path,
@@ -346,7 +380,7 @@ def build_esdac_soils(
             key_indexes.setdefault(key_str, []).append(index)
             source_path = Path(staging_dir) / str(index) / f"{key_str}.sol"
             if key_str in move_plan:
-                if source_path.read_bytes() != move_plan[key_str].read_bytes():
+                if _artifact_content(source_path) != _artifact_content(move_plan[key_str]):
                     _raise_batch_conflict(
                         results,
                         key_indexes[key_str],
@@ -361,7 +395,7 @@ def build_esdac_soils(
 
         for key_str, source_path in move_plan.items():
             target_path = final_dir / f"{key_str}.sol"
-            if target_path.exists() and target_path.read_bytes() != source_path.read_bytes():
+            if target_path.exists() and _artifact_content(target_path) != _artifact_content(source_path):
                 _raise_batch_conflict(
                     results,
                     key_indexes[key_str],

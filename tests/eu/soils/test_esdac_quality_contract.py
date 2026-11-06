@@ -202,7 +202,7 @@ def test_missing_depth_source_is_rejected_without_a_fallback() -> None:
     assert result.reason_codes == ("horizon.depth_missing",)
 
 
-def test_malformed_landuse_payload_is_rejected_before_builder_indexing() -> None:
+def test_malformed_landuse_payload_is_degraded_before_builder_indexing() -> None:
     case = _load_fixture()["cases"][0]
     esdb = dict(case["esdb"])
     esdb["usedom"] = ("5", "5")
@@ -213,8 +213,8 @@ def test_malformed_landuse_payload_is_rejected_before_builder_indexing() -> None
         stu=case["stu"],
     )
 
-    assert result.outcome == "rejected"
-    assert "source.categorical.malformed" in result.reason_codes
+    assert result.outcome == "degraded"
+    assert "source.categorical.description_missing" in result.reason_codes
 
 
 def test_quality_report_evidence_is_json_safe_for_numpy_scalars() -> None:
@@ -229,3 +229,38 @@ def test_quality_report_evidence_is_json_safe_for_numpy_scalars() -> None:
     encoded = json.dumps(result.as_dict(), allow_nan=False)
 
     assert '"raw_value": "nan"' in encoded
+
+
+@pytest.mark.parametrize('field', ['fao90lev1', 'usedom', 'dgh', 'dimp', 'dr'])
+@pytest.mark.parametrize('state', ['absent', 'empty', 'none', 'malformed'])
+def test_optional_metadata_is_degraded_not_rejected(field, state):
+    case = _load_fixture()['cases'][0]
+    esdb = dict(case['esdb'])
+    if state == 'absent':
+        esdb.pop(field)
+    else:
+        esdb[field] = {'empty': ('24', '', 'No information'),
+                       'none': None, 'malformed': ('24',)}[state]
+    result = validate_esdac_source_profile(_context(case), esdb=esdb, stu=case['stu'])
+    assert result.outcome == 'degraded'
+    assert all(d.severity == 'warning' for d in result.diagnostics)
+    assert any(d.field == field for d in result.diagnostics)
+
+
+@pytest.mark.parametrize('field', ['textdepchg', 'il', 'cec_top', 'cec_sub'])
+def test_required_physical_category_still_rejects_missing(field):
+    case = _load_fixture()['cases'][0]
+    esdb = dict(case['esdb'])
+    esdb.pop(field)
+    result = validate_esdac_source_profile(_context(case), esdb=esdb, stu=case['stu'])
+    assert result.outcome == 'rejected'
+    assert any(d.field == field and d.severity == 'error' for d in result.diagnostics)
+
+
+def test_partial_depth_metadata_does_not_raise_or_discard_known_depths():
+    case = _load_fixture()['cases'][0]
+    esdb = dict(case['esdb'], textdepchg=('5','5'), il=('4','4'))
+    result = validate_esdac_source_profile(_context(case), esdb=esdb, stu=case['stu'])
+    assert result.accepted
+    assert 'source.categorical.description_missing' in result.reason_codes
+    assert 'source.profile.single_horizon' in result.reason_codes

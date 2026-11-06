@@ -50,15 +50,35 @@ _CEC_ALIASES: dict[str, tuple[str, ...]] = {
 }
 
 _REQUIRED_CATEGORICAL: tuple[str, ...] = (
-    "fao90lev1",
     "textdepchg",
     "il",
     "cec_top",
     "cec_sub",
-    "dgh",
-    "dimp",
-    "dr",
 )
+
+_OPTIONAL_CATEGORICAL = ("fao90lev1", "usedom", "dgh", "dimp", "dr")
+
+# Existing ESDAC class representatives (mm), shared by admission and writer.
+_il_short_to_depth_mm = {'0': None, '1': 1500, '2': 1150, '3': 600, '4': 400}
+_texdepchg_short_to_depth_mm = {
+    '0': None, '1': 300, '2': 500, '3': 700, '4': 1000, '5': 1200, '6': 400, '7': 900,
+}
+
+
+def _uses_subsoil(esdb: Mapping[str, object]) -> bool:
+    """Unknown depths remain subject to required-data validation, never guessed."""
+    values = []
+    for field, mapping in (("textdepchg", _texdepchg_short_to_depth_mm),
+                           ("il", _il_short_to_depth_mm)):
+        value = esdb.get(field)
+        if not isinstance(value, (list, tuple)) or len(value) < 2 or not isinstance(value[1], str):
+            return True
+        depth = mapping.get(value[1])
+        if depth is None:
+            return True
+        values.append(depth)
+    return values[1] > values[0]
+
 
 _STU_FIELDS: tuple[str, ...] = ("CLAY", "SAND", "SILT", "OC", "BD", "GRAVEL")
 
@@ -235,7 +255,7 @@ def _categorical_short(
             )
         )
         return None
-    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 3:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 2:
         diagnostics.append(
             SoilQualityDiagnostic(
                 "source.categorical.malformed", field, "error", raw_value=value
@@ -253,6 +273,44 @@ def _categorical_short(
     return str(short)
 
 
+def _optional_metadata(
+    source: Mapping[str, object],
+    field: str,
+    diagnostics: list[SoilQualityDiagnostic],
+) -> tuple[str, str, str]:
+    """Retain every usable metadata component; never discard a known class."""
+    value = _source_value(source, _CEC_ALIASES.get(field, (field,)))
+    fallback = "0" if field == "usedom" else "unknown"
+
+    def warn(code: str) -> None:
+        diagnostics.append(SoilQualityDiagnostic(
+            code, field, "warning", raw_value=None if value is _MISSING else value,
+        ))
+
+    if value is _MISSING:
+        warn("source.categorical.missing")
+        return "", fallback, "No information"
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 2:
+        warn("source.categorical.malformed")
+        return "", fallback, "No information"
+    pixel = value[0]
+    if not isinstance(pixel, (str, Real)) or str(pixel).strip() in {"", "None"}:
+        warn("source.categorical.pixel_missing")
+        pixel = ""
+    short = value[1]
+    if short is None or (isinstance(short, str) and short.strip() in {"", "None"}):
+        warn("source.categorical.empty")
+        short = fallback
+    elif not isinstance(short, str):
+        warn("source.categorical.malformed")
+        short = fallback
+    description = value[2] if len(value) > 2 else None
+    if not isinstance(description, str) or description.strip() in {"", "None"}:
+        warn("source.categorical.description_missing")
+        description = "No information"
+    return str(pixel), short, description
+
+
 def validate_esdac_source_profile(
     context: SoilQualityContext,
     *,
@@ -263,10 +321,15 @@ def validate_esdac_source_profile(
     diagnostics: list[SoilQualityDiagnostic] = []
 
     categorical: dict[str, str | None] = {}
+    use_subsoil = _uses_subsoil(esdb)
     for field in _REQUIRED_CATEGORICAL:
+        if field == "cec_sub" and not use_subsoil:
+            continue
         categorical[field] = _categorical_short(esdb, field, diagnostics)
+        if categorical[field] is not None:
+            _optional_metadata(esdb, field, diagnostics)
 
-    for field in ("cec_top", "cec_sub"):
+    for field in (("cec_top", "cec_sub") if use_subsoil else ("cec_top",)):
         value = categorical[field]
         if value is not None and value not in {"H", "M", "L"}:
             diagnostics.append(
@@ -288,8 +351,19 @@ def validate_esdac_source_profile(
                     raw_value=categorical[field],
                 )
             )
+        elif categorical[field] is not None:
+            mapping = _texdepchg_short_to_depth_mm if field == "textdepchg" else _il_short_to_depth_mm
+            if categorical[field] not in mapping:
+                diagnostics.append(SoilQualityDiagnostic(
+                    f"source.{field}.unsupported", field, "error",
+                    raw_value=categorical[field],
+                ))
 
-    usedom = _categorical_short(esdb, "usedom", diagnostics)
+    optional_fields = _OPTIONAL_CATEGORICAL + (() if use_subsoil else ("cec_sub",))
+    for field in optional_fields:
+        categorical[field] = _optional_metadata(esdb, field, diagnostics)[1]
+
+    usedom = categorical["usedom"]
     if usedom is None or usedom == "0":
         diagnostics.append(
             SoilQualityDiagnostic(
@@ -300,7 +374,14 @@ def validate_esdac_source_profile(
             )
         )
 
-    for layer in ("T", "S"):
+    if not use_subsoil:
+        diagnostics.append(SoilQualityDiagnostic(
+            "source.profile.single_horizon", "horizons", "warning",
+            raw_value=[_texdepchg_short_to_depth_mm[categorical["textdepchg"]],
+                       _il_short_to_depth_mm[categorical["il"]]],
+        ))
+
+    for layer in (("T", "S") if use_subsoil else ("T",)):
         texture: dict[str, float] = {}
         for field in _STU_FIELDS:
             source_field = f"STU_EU_{layer}_{field}"

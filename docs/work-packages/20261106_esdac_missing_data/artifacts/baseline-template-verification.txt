@@ -1,0 +1,4 @@
+Baseline template failure verification (2026-11-06 UTC)
+HEAD: f77469e41b6e83b0f4ffbf7e6f827a3638a9bf80
+wepppy/weppcloud/templates/user/runs2.html: working file identical to HEAD=True; expected token present=False
+tests/weppcloud/test_usersum_template_wiring.py: working file identical to HEAD=True; expected token present=True

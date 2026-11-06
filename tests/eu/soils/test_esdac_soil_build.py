@@ -134,7 +134,7 @@ def test_batch_commits_staged_outputs_and_quality_report(
     assert not list(tmp_path.glob(".esdac-build-*"))
 
 
-def test_batch_rejects_divergent_duplicate_soil_keys_before_commit(
+def test_batch_disambiguates_divergent_duplicate_soil_keys_before_commit(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -155,21 +155,17 @@ def test_batch_rejects_divergent_duplicate_soil_keys_before_commit(
     monkeypatch.setattr(soil_build, "Pool", _InlinePool)
     monkeypatch.setattr(soil_build, "_build_esdac_soil", fake_worker)
 
-    with pytest.raises(soil_build.ESDACSoilBatchError) as error:
-        soil_build.build_esdac_soils(
-            [(1, (-6.3, 43.1)), (2, (-6.4, 43.2))],
-            str(tmp_path),
-        )
-
-    assert [result.topaz_id for result in error.value.rejected] == [1, 2]
-    assert not (tmp_path / "shared-key.sol").exists()
-    report = json.loads((tmp_path / "soil_quality.json").read_text())
-    assert report["batch_outcome"] == "rejected"
-    assert report["rejected_count"] == 2
-    assert all(
-        entry["reason_codes"] == ["batch.duplicate_soil_key"]
-        for entry in report["profiles"]
-    )
+    orders = [(1, (-6.3, 43.1)), (2, (-6.4, 43.2))]
+    soils, dominant = soil_build.build_esdac_soils(orders, str(tmp_path))
+    assert len(soils) == 2
+    assert dominant['1'] != dominant['2']
+    for topaz_id, key in dominant.items():
+        assert key.startswith('shared-key-')
+        assert (tmp_path / f'{key}.sol').read_text() == f'soil-{topaz_id}'
+    report = json.loads((tmp_path / 'soil_quality.json').read_text())
+    assert report['batch_outcome'] == 'accepted'
+    assert {str(p['topaz_id']): p['soil_key'] for p in report['profiles']} == dominant
+    assert soil_build.build_esdac_soils(orders, str(tmp_path))[1] == dominant
 
 
 def test_rejected_batch_discards_staged_outputs_and_writes_report(
@@ -395,3 +391,35 @@ def test_status_publish_failure_does_not_mask_batch_error(
         "Failed to publish ESDAC batch diagnostic" in message
         for message in caplog.messages
     )
+
+
+def test_timestamp_only_duplicates_and_retry_reuse_existing_artifact(monkeypatch, tmp_path):
+    count = 0
+    def worker(kwargs):
+        nonlocal count
+        count += 1
+        path = Path(kwargs['soils_dir']) / 'same.sol'
+        path.write_text(f'#  Build Date: {count}\nstable soil\n')
+        return soil_build.SoilBuildWorkerResult(kwargs['topaz_id'], 'same', None,
+            'description', _quality(kwargs['topaz_id']))
+    monkeypatch.setattr(soil_build, 'Pool', _InlinePool)
+    monkeypatch.setattr(soil_build, '_build_esdac_soil', worker)
+    orders = [(1, (1, 2)), (2, (1, 2))]
+    _, mapping = soil_build.build_esdac_soils(orders, str(tmp_path))
+    original = (tmp_path/'same.sol').read_bytes()
+    assert mapping == {'1':'same', '2':'same'}
+    assert soil_build.build_esdac_soils(orders, str(tmp_path))[1] == mapping
+    assert (tmp_path/'same.sol').read_bytes() == original
+
+
+def test_distinct_existing_legacy_artifact_is_preserved(monkeypatch, tmp_path):
+    (tmp_path/'same.sol').write_text('historical soil')
+    def worker(kwargs):
+        (Path(kwargs['soils_dir'])/'same.sol').write_text('new physical soil')
+        return soil_build.SoilBuildWorkerResult(1,'same',None,'description',_quality(1))
+    monkeypatch.setattr(soil_build, 'Pool', _InlinePool)
+    monkeypatch.setattr(soil_build, '_build_esdac_soil', worker)
+    _, mapping = soil_build.build_esdac_soils([(1,(1,2))],str(tmp_path))
+    assert mapping['1'].startswith('same-')
+    assert (tmp_path/'same.sol').read_text() == 'historical soil'
+    assert (tmp_path/f"{mapping['1']}.sol").read_text() == 'new physical soil'

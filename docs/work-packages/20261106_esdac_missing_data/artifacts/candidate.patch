@@ -1,0 +1,471 @@
+diff --git a/wepppy/eu/soils/esdac/esdac.py b/wepppy/eu/soils/esdac/esdac.py
+index bb26f7819..5241a6745 100755
+--- a/wepppy/eu/soils/esdac/esdac.py
++++ b/wepppy/eu/soils/esdac/esdac.py
+@@ -21,6 +21,13 @@ from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
+ from .quality import (
+     ESDACSoilBuildError,
+     SoilQualityContext,
++    SoilQualityDiagnostic,
++    SoilQualityResult,
++    _OPTIONAL_CATEGORICAL,
++    _optional_metadata,
++    _uses_subsoil,
++    _il_short_to_depth_mm,
++    _texdepchg_short_to_depth_mm,
+     merge_quality_results,
+     rejected_quality_result,
+     validate_esdac_source_profile,
+@@ -99,32 +106,12 @@ _tex_short_to_simple_texture: Final[dict[str, str | None]] = {
+ }
+ 
+ 
+-_il_short_to_depth_mm: Final[dict[str, int | None]] = {
+-    '0':   None,
+-    '1':   1500,
+-    '2':   1150,
+-    '3':   600,
+-    '4':   400
+-}
+-
+-
+ _cec_to_cmol_per_kg: Final[dict[str, float]] = {
+     'H': 50.0, 
+     'M': 27.5, 
+     'L': 10
+ }
+ 
+-_texdepchg_short_to_depth_mm: Final[dict[str, int | None]] = {
+-    '0': None,
+-    '1': 300,
+-    '2': 500,
+-    '3': 700,
+-    '4': 1000,
+-    '5': 1200,
+-    '6': 400,
+-    '7': 900,
+-}
+-
+ _octop_short_to_pct: Final[dict[str, float]] = {
+     'H': 6.5,
+     'M': 4.0,
+@@ -272,8 +259,16 @@ class ESDAC:
+ 
+         # { attr, raster_attribute table}
+         rats: dict[str, dict[str, str]] = {}
++        self._optional_rat_errors: dict[str, Exception] = {}
+         for fn in catalog:
+-            rats[_attr_fmt(_split(fn)[-1][:-4])] = self._rat_extract(fn[:-4] + ".json")
++            attr = _attr_fmt(_split(fn)[-1][:-4])
++            try:
++                rats[attr] = self._rat_extract(fn[:-4] + ".json")
++            except (KeyError, TypeError, ValueError, FileNotFoundError) as exc:
++                if attr not in (*_OPTIONAL_CATEGORICAL, "cecsub"):
++                    raise
++                # Defer to the location warning boundary, retaining the cause.
++                self._optional_rat_errors[attr] = exc
+         self.rats = rats
+ 
+         # { attr, raster_file_path}
+@@ -320,6 +315,8 @@ class ESDAC:
+             attr = _attr_fmt(attr)
+             if attr not in catalog:
+                 raise KeyError(attr)
++            if attr in self._optional_rat_errors:
++                raise self._optional_rat_errors[attr]
+             rdi = RasterDatasetInterpolator(catalog[attr])
+             x = rdi.get_location_info(lng, lat, method="near")
+             px_val = str(int(x))
+@@ -382,11 +379,13 @@ class ESDAC:
+                 lng,
+                 lat,
+                 (
+-                    'fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top',
+-                    'cec_sub', 'dgh', 'dimp', 'dr',
++                    'textdepchg', 'il', 'cec_top',
+                 ),
+             )
+-        except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
++            use_subsoil = _uses_subsoil(d_esdb)
++            if use_subsoil:
++                d_esdb.update(self.query(lng, lat, ('cec_sub',)))
++        except (KeyError, TypeError, ValueError, FileNotFoundError, RDIOutOfBoundsException) as exc:
+             raise ESDACSoilBuildError(
+                 rejected_quality_result(
+                     context,
+@@ -396,14 +395,24 @@ class ESDAC:
+                 )
+             ) from exc
+ 
++        # Descriptive rasters may be incomplete independently of physical data.
++        lookup_warnings = []
++        optional_fields = _OPTIONAL_CATEGORICAL + (() if use_subsoil else ("cec_sub",))
++        for field in optional_fields:
++            try:
++                d_esdb.update(self.query(lng, lat, (field,)))
++            except (KeyError, TypeError, ValueError, FileNotFoundError, RDIOutOfBoundsException) as exc:
++                lookup_warnings.append(SoilQualityDiagnostic(
++                    "source.categorical.lookup_failed", field, "warning",
++                    exception_type=type(exc).__name__,
++                ))
++
+         try:
+-            d_stu = self.query_derived_db(lng, lat,
+-                ('STU_EU_T_CLAY',   'STU_EU_S_CLAY',
+-                 'STU_EU_T_SAND',   'STU_EU_S_SAND',
+-                 'STU_EU_T_SILT',   'STU_EU_S_SILT',
+-                 'STU_EU_T_OC',     'STU_EU_S_OC',
+-                 'STU_EU_T_BD',     'STU_EU_S_BD',
+-                 'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL'))
++            stu_fields = tuple(
++                f'STU_EU_{layer}_{field}' for field in ('CLAY', 'SAND', 'SILT', 'OC', 'BD', 'GRAVEL')
++                for layer in (('T', 'S') if use_subsoil else ('T',))
++            )
++            d_stu = self.query_derived_db(lng, lat, stu_fields)
+         except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
+             raise ESDACSoilBuildError(
+                 rejected_quality_result(
+@@ -419,9 +428,25 @@ class ESDAC:
+             esdb=d_esdb,
+             stu=d_stu,
+         )
++        if lookup_warnings:
++            source_quality = merge_quality_results(
++                source_quality,
++                SoilQualityResult(context, "degraded", tuple(lookup_warnings)),
++            )
+         if source_quality.outcome == "rejected":
+             raise ESDACSoilBuildError(source_quality)
+ 
++        # Diagnostics above retain raw metadata; preserve any usable class even
++        # when the pixel or description is missing (especially forest landuse).
++        for field in (*optional_fields, "textdepchg", "il", "cec_top",
++                      *(("cec_sub",) if use_subsoil else ())):
++            d_esdb[_attr_fmt(field)] = _optional_metadata(d_esdb, field, [])
++        # Keep historical provenance order so a valid soil rebuild reuses its key.
++        d_esdb = {field: d_esdb[field] for field in (
++            'fao90lev1', 'usedom', 'textdepchg', 'il', 'cectop', 'cecsub',
++            'dgh', 'dimp', 'dr',
++        )}
++
+         cec_top_class = d_esdb['cectop'][1]
+         cec_sub_class = d_esdb['cecsub'][1]
+ 
+@@ -458,14 +483,7 @@ class ESDAC:
+             )
+ 
+         normalized_stu = dict(d_stu)
+-        for field in (
+-            'STU_EU_T_CLAY', 'STU_EU_S_CLAY',
+-            'STU_EU_T_SAND', 'STU_EU_S_SAND',
+-            'STU_EU_T_SILT', 'STU_EU_S_SILT',
+-            'STU_EU_T_OC', 'STU_EU_S_OC',
+-            'STU_EU_T_BD', 'STU_EU_S_BD',
+-            'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL',
+-        ):
++        for field in stu_fields:
+             try:
+                 normalized_stu[field] = float(d_stu[field])
+             except (KeyError, TypeError, ValueError, OverflowError) as exc:
+@@ -487,20 +505,23 @@ class ESDAC:
+                      bd=d_stu['STU_EU_T_BD'], 
+                      gravel=d_stu['STU_EU_T_GRAVEL'], 
+                      _cec=cec_top_class, 
+-                     depth=solthk0)
++                     depth=min(solthk0, solthk1))
++
++        h1 = None
++        if use_subsoil:
++            h1 = Horizon(clay=d_stu['STU_EU_S_CLAY'],
++                         sand=d_stu['STU_EU_S_SAND'],
++                         silt=d_stu['STU_EU_S_SILT'],
++                         om=d_stu['STU_EU_S_OC'],
++                         bd=d_stu['STU_EU_S_BD'],
++                         gravel=d_stu['STU_EU_S_GRAVEL'],
++                         _cec=cec_sub_class,
++                         depth=solthk1)
+ 
+-        h1 = Horizon(clay=d_stu['STU_EU_S_CLAY'], 
+-                     sand=d_stu['STU_EU_S_SAND'], 
+-                     silt=d_stu['STU_EU_S_SILT'], 
+-                     om=d_stu['STU_EU_S_OC'],
+-                     bd=d_stu['STU_EU_S_BD'], 
+-                     gravel=d_stu['STU_EU_S_GRAVEL'], 
+-                     _cec=cec_sub_class, 
+-                     depth=solthk1)
+ 
+         horizon_quality = validate_horizon_profile(
+             context,
+-            (_horizon_quality_payload(h0), _horizon_quality_payload(h1)),
++            tuple(_horizon_quality_payload(h) for h in (h0, h1) if h is not None),
+         )
+         if horizon_quality.outcome == "rejected":
+             raise ESDACSoilBuildError(horizon_quality)
+@@ -514,6 +535,8 @@ class ESDAC:
+              '#', '#']
+ 
+         s.extend(_disclaimer.split('\n'))
++        for diagnostic in source_quality.diagnostics:
++            s.append(f"# Source warning: {diagnostic.code} field={diagnostic.field}")
+         
+         s.append('# ESDAC ESDB Soil Parameters')
+         s.append('#')
+@@ -541,7 +564,8 @@ class ESDAC:
+         s.append('#  ' + '-' * 120)
+ 
+         for v in ('CLAY', 'SAND', 'SILT', 'OC', 'BD', 'GRAVEL'):
+-            s.append('#  {:10}{:>10.1f}{:>10.1f}'.format(v, d_stu[f'STU_EU_T_{v}'], d_stu[f'STU_EU_S_{v}']))
++            sub = f"{d_stu[f'STU_EU_S_{v}']:.1f}" if use_subsoil else 'unused'
++            s.append('#  {:10}{:>10.1f}{:>10}'.format(v, d_stu[f'STU_EU_T_{v}'], sub))
+ 
+         s.append('#')
+         
+@@ -551,7 +575,8 @@ class ESDAC:
+         s.append('#  ' + '-' * 120)
+         
+         for v in h0.rosetta_d:
+-            s.append('#  {:10}{:>10.1f}{:>10.1f}'.format(v, h0.rosetta_d[v], h1.rosetta_d[v]))
++            sub = f'{h1.rosetta_d[v]:.1f}' if h1 is not None else 'unused'
++            s.append('#  {:10}{:>10.1f}{:>10}'.format(v, h0.rosetta_d[v], sub))
+         s.append('#  + ks, wp, and fc used for WEPP soil parameters')
+ 
+         s.append('#')
+@@ -683,7 +708,7 @@ class ESDAC:
+ 
+         description = d_esdb['fao90lev1'][2]
+ 
+-        if h1.depth <= 0:
++        if h1 is None:
+             num_layers = 1
+         else:
+             num_layers = 2
+diff --git a/wepppy/eu/soils/esdac/quality.py b/wepppy/eu/soils/esdac/quality.py
+index cab3ea896..b8026773d 100644
+--- a/wepppy/eu/soils/esdac/quality.py
++++ b/wepppy/eu/soils/esdac/quality.py
+@@ -50,16 +50,36 @@ _CEC_ALIASES: dict[str, tuple[str, ...]] = {
+ }
+ 
+ _REQUIRED_CATEGORICAL: tuple[str, ...] = (
+-    "fao90lev1",
+     "textdepchg",
+     "il",
+     "cec_top",
+     "cec_sub",
+-    "dgh",
+-    "dimp",
+-    "dr",
+ )
+ 
++_OPTIONAL_CATEGORICAL = ("fao90lev1", "usedom", "dgh", "dimp", "dr")
++
++# Existing ESDAC class representatives (mm), shared by admission and writer.
++_il_short_to_depth_mm = {'0': None, '1': 1500, '2': 1150, '3': 600, '4': 400}
++_texdepchg_short_to_depth_mm = {
++    '0': None, '1': 300, '2': 500, '3': 700, '4': 1000, '5': 1200, '6': 400, '7': 900,
++}
++
++
++def _uses_subsoil(esdb: Mapping[str, object]) -> bool:
++    """Unknown depths remain subject to required-data validation, never guessed."""
++    values = []
++    for field, mapping in (("textdepchg", _texdepchg_short_to_depth_mm),
++                           ("il", _il_short_to_depth_mm)):
++        value = esdb.get(field)
++        if not isinstance(value, (list, tuple)) or len(value) < 2 or not isinstance(value[1], str):
++            return True
++        depth = mapping.get(value[1])
++        if depth is None:
++            return True
++        values.append(depth)
++    return values[1] > values[0]
++
++
+ _STU_FIELDS: tuple[str, ...] = ("CLAY", "SAND", "SILT", "OC", "BD", "GRAVEL")
+ 
+ _HORIZON_FIELDS: dict[str, tuple[str, ...]] = {
+@@ -235,7 +255,7 @@ def _categorical_short(
+             )
+         )
+         return None
+-    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 3:
++    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 2:
+         diagnostics.append(
+             SoilQualityDiagnostic(
+                 "source.categorical.malformed", field, "error", raw_value=value
+@@ -253,6 +273,44 @@ def _categorical_short(
+     return str(short)
+ 
+ 
++def _optional_metadata(
++    source: Mapping[str, object],
++    field: str,
++    diagnostics: list[SoilQualityDiagnostic],
++) -> tuple[str, str, str]:
++    """Retain every usable metadata component; never discard a known class."""
++    value = _source_value(source, _CEC_ALIASES.get(field, (field,)))
++    fallback = "0" if field == "usedom" else "unknown"
++
++    def warn(code: str) -> None:
++        diagnostics.append(SoilQualityDiagnostic(
++            code, field, "warning", raw_value=None if value is _MISSING else value,
++        ))
++
++    if value is _MISSING:
++        warn("source.categorical.missing")
++        return "", fallback, "No information"
++    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 2:
++        warn("source.categorical.malformed")
++        return "", fallback, "No information"
++    pixel = value[0]
++    if not isinstance(pixel, (str, Real)) or str(pixel).strip() in {"", "None"}:
++        warn("source.categorical.pixel_missing")
++        pixel = ""
++    short = value[1]
++    if short is None or (isinstance(short, str) and short.strip() in {"", "None"}):
++        warn("source.categorical.empty")
++        short = fallback
++    elif not isinstance(short, str):
++        warn("source.categorical.malformed")
++        short = fallback
++    description = value[2] if len(value) > 2 else None
++    if not isinstance(description, str) or description.strip() in {"", "None"}:
++        warn("source.categorical.description_missing")
++        description = "No information"
++    return str(pixel), short, description
++
++
+ def validate_esdac_source_profile(
+     context: SoilQualityContext,
+     *,
+@@ -263,10 +321,15 @@ def validate_esdac_source_profile(
+     diagnostics: list[SoilQualityDiagnostic] = []
+ 
+     categorical: dict[str, str | None] = {}
++    use_subsoil = _uses_subsoil(esdb)
+     for field in _REQUIRED_CATEGORICAL:
++        if field == "cec_sub" and not use_subsoil:
++            continue
+         categorical[field] = _categorical_short(esdb, field, diagnostics)
++        if categorical[field] is not None:
++            _optional_metadata(esdb, field, diagnostics)
+ 
+-    for field in ("cec_top", "cec_sub"):
++    for field in (("cec_top", "cec_sub") if use_subsoil else ("cec_top",)):
+         value = categorical[field]
+         if value is not None and value not in {"H", "M", "L"}:
+             diagnostics.append(
+@@ -288,8 +351,19 @@ def validate_esdac_source_profile(
+                     raw_value=categorical[field],
+                 )
+             )
++        elif categorical[field] is not None:
++            mapping = _texdepchg_short_to_depth_mm if field == "textdepchg" else _il_short_to_depth_mm
++            if categorical[field] not in mapping:
++                diagnostics.append(SoilQualityDiagnostic(
++                    f"source.{field}.unsupported", field, "error",
++                    raw_value=categorical[field],
++                ))
+ 
+-    usedom = _categorical_short(esdb, "usedom", diagnostics)
++    optional_fields = _OPTIONAL_CATEGORICAL + (() if use_subsoil else ("cec_sub",))
++    for field in optional_fields:
++        categorical[field] = _optional_metadata(esdb, field, diagnostics)[1]
++
++    usedom = categorical["usedom"]
+     if usedom is None or usedom == "0":
+         diagnostics.append(
+             SoilQualityDiagnostic(
+@@ -300,7 +374,14 @@ def validate_esdac_source_profile(
+             )
+         )
+ 
+-    for layer in ("T", "S"):
++    if not use_subsoil:
++        diagnostics.append(SoilQualityDiagnostic(
++            "source.profile.single_horizon", "horizons", "warning",
++            raw_value=[_texdepchg_short_to_depth_mm[categorical["textdepchg"]],
++                       _il_short_to_depth_mm[categorical["il"]]],
++        ))
++
++    for layer in (("T", "S") if use_subsoil else ("T",)):
+         texture: dict[str, float] = {}
+         for field in _STU_FIELDS:
+             source_field = f"STU_EU_{layer}_{field}"
+diff --git a/wepppy/eu/soils/soil_build.py b/wepppy/eu/soils/soil_build.py
+index 5066a390c..20f5c7e24 100755
+--- a/wepppy/eu/soils/soil_build.py
++++ b/wepppy/eu/soils/soil_build.py
+@@ -5,6 +5,7 @@ from __future__ import annotations
+ from collections.abc import Sequence
+ from dataclasses import dataclass, replace
+ from datetime import datetime
++import hashlib
+ import json
+ import logging
+ from multiprocessing import Pool
+@@ -263,6 +264,38 @@ def _raise_batch_conflict(
+     )
+ 
+ 
++def _artifact_content(path: Path) -> bytes:
++    """Ignore volatile dates and additive warning comments for soil identity."""
++    return b"\n".join(
++        line for line in path.read_bytes().splitlines()
++        if not line.startswith((b"#  Build Date: ", b"# Source warning: "))
++    )
++
++
++def _resolve_artifact_keys(
++    results: Sequence[SoilBuildWorkerResult], staging_dir: Path, final_dir: Path,
++) -> list[SoilBuildWorkerResult]:
++    """Keep distinct profiles sharing a rounded legacy key without overwrites."""
++    contents: dict[str, set[bytes]] = {}
++    for index, result in enumerate(results):
++        if result.key is None:
++            raise RuntimeError("accepted ESDAC result is missing its soil key")
++        path = staging_dir / str(index) / f"{result.key}.sol"
++        contents.setdefault(str(result.key), set()).add(_artifact_content(path))
++    resolved = []
++    for index, result in enumerate(results):
++        key = str(result.key)
++        path = staging_dir / str(index) / f"{key}.sol"
++        content = _artifact_content(path)
++        existing = final_dir / f"{key}.sol"
++        if len(contents[key]) > 1 or (existing.exists() and _artifact_content(existing) != content):
++            key = f"{key}-{hashlib.sha256(content).hexdigest()}"
++            path.rename(path.with_name(f"{key}.sol"))
++            result = replace(result, key=key, quality=replace(result.quality, soil_key=key))
++        resolved.append(result)
++    return resolved
++
++
+ def build_esdac_soils(
+     orders: Sequence[tuple[int | str, tuple[float, float]]],
+     soils_dir: str,
+@@ -327,6 +360,7 @@ def build_esdac_soils(
+                 status_channel=status_channel,
+             )
+ 
++        results = _resolve_artifact_keys(results, Path(staging_dir), final_dir)
+         staged_report_path = Path(staging_dir) / "soil_quality.json"
+         _write_quality_report(
+             staged_report_path,
+@@ -346,7 +380,7 @@ def build_esdac_soils(
+             key_indexes.setdefault(key_str, []).append(index)
+             source_path = Path(staging_dir) / str(index) / f"{key_str}.sol"
+             if key_str in move_plan:
+-                if source_path.read_bytes() != move_plan[key_str].read_bytes():
++                if _artifact_content(source_path) != _artifact_content(move_plan[key_str]):
+                     _raise_batch_conflict(
+                         results,
+                         key_indexes[key_str],
+@@ -361,7 +395,7 @@ def build_esdac_soils(
+ 
+         for key_str, source_path in move_plan.items():
+             target_path = final_dir / f"{key_str}.sol"
+-            if target_path.exists() and target_path.read_bytes() != source_path.read_bytes():
++            if target_path.exists() and _artifact_content(target_path) != _artifact_content(source_path):
+                 _raise_batch_conflict(
+                     results,
+                     key_indexes[key_str],
