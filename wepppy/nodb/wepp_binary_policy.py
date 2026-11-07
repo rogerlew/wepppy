@@ -13,25 +13,14 @@ def project_wepp_binary_options(config, *, multi_ofe=None, backend=None):
     getter = getattr(config, 'config_get_bool', None)
     flattened = bool(getter('config', 'flattened', False)) if getter else False
     uploads = single_input_uploads_enabled(config)
-    if not flattened and not uploads:
-        return None
-    authority = capability_authority(config)
-    # Validate legacy axis shape even though its old population no longer pins releases.
-    capability_ids(config, 'wepp_binaries')
     multiple = bool(getattr(config, 'multi_ofe', False)) if multi_ofe is None else multi_ofe
-    backends = authority.delineation_backends if authority else capability_ids(config, 'delineation_backends')
-    representations = authority.watershed_representations if authority else capability_ids(config, 'watershed_representations')
-    if backend is None and (backends is not None or multiple):
-        watershed = config.watershed_instance
-        value = getattr(watershed, 'delineation_backend', None)
-        backend = str(getattr(value, 'name', value) or '').lower()
-        if not backend and authority is not None:
-            backend = authority.defaults['delineation_backend']
-    representation = 'multiple-ofe' if multiple else 'single-ofe'
-    if ((backends is not None and backend not in backends)
-            or (representations is not None and representation not in representations)
-            or (multiple and backend != 'wbt')):
-        return ()
+    if not flattened and not uploads and not multiple:
+        return None
+    # Validate stored metadata, but geometry never determines executable support.
+    # Builder geometry authorization is enforced separately from this selector.
+    capability_authority(config)
+    for axis in ('wepp_binaries', 'delineation_backends', 'watershed_representations'):
+        capability_ids(config, axis)
     return get_compatible_wepp_bin_opts(multi_ofe=multiple, single_user_defined_inputs=uploads)
 
 

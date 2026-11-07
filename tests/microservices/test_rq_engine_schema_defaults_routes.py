@@ -1920,3 +1920,31 @@ def test_edde_controller_defaults_preserve_unselected_or_saved_future_fields(sel
     assert defaults["edde_projection"] == selection
     assert defaults["future_start_year"] == (2060 if selection else "")
     assert "observed_start_year" not in defaults
+
+
+def test_runtime_live_binaries_preserve_geometry_with_empty_historic_mofe(monkeypatch, tmp_path):
+    graph = build_continental_us_capability_graph(
+        ('wepp_260803',), _binary_revisions(('wepp_260803',)),
+        wepp_binary_capabilities={},
+    )
+    assert not any('|multiple-ofe|' in item for item in graph.allowed_model_tuples)
+    wepp = SimpleNamespace(multi_ofe=True, wepp_bin='wepp_261029',
+                           config_get_bool=lambda section, option, default=None: True if (section, option) == ('config', 'flattened') else default,
+                           config_get_raw=lambda section, option, default=None: default,
+                           config_get_list=lambda section, option, default=None: default)
+    for name, instance in {
+        'Ron': SimpleNamespace(mods=[], config_stem=CONFIG),
+        'Watershed': SimpleNamespace(delineation_backend='topaz'),
+        'Climate': SimpleNamespace(), 'Landuse': SimpleNamespace(multi_ofe=True),
+        'Soils': SimpleNamespace(), 'Wepp': wepp, 'RedisPrep': SimpleNamespace(),
+    }.items():
+        monkeypatch.setattr(schema_defaults_routes, name,
+                            SimpleNamespace(getInstance=lambda wd, instance=instance: instance))
+    monkeypatch.setattr(schema_defaults_routes, 'get_wd', lambda _: str(tmp_path))
+    monkeypatch.setattr(schema_defaults_routes, '_resolve_runtime_capability_graphs',
+                        lambda _: (graph, graph, frozenset()))
+    monkeypatch.setattr(schema_defaults_routes, '_runtime_snapshot_updated_at', lambda **_: None)
+    runtime = schema_defaults_routes._load_runtime_state(RUNID, CONFIG)
+    assert 'wepp_261010' in runtime.wepp_binary_options
+    assert 'wbt|multiple-ofe|wepp_261010' in runtime.wepp_model_tuples
+    assert not any(item.startswith('topaz|multiple-ofe|') for item in runtime.wepp_model_tuples)

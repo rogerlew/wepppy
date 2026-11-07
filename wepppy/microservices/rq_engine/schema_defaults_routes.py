@@ -27,7 +27,7 @@ from wepppy.nodb.mods.features_export import (
     resolve_download_artifact_path,
 )
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
-from wepppy.nodb.locales.capability_graph import CapabilityGraph
+from wepppy.nodb.locales.capability_graph import CapabilityGraph, capability_structure_payload
 from wepppy.nodb.locales.climate_catalog import (
     CLIMATE_SPATIAL_METHOD_RUNTIME,
     CLIMATE_STATION_METHOD_RUNTIME,
@@ -544,8 +544,7 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         if binary_options is not None and model_capability_graph is not None:
             model_tuples = tuple(
                 f"{backend}|{representation}|{binary}"
-                for backend in model_capability_graph.delineation_backends
-                for representation in model_capability_graph.watershed_representations
+                for backend, representation in capability_structure_payload(model_capability_graph)["allowed_model_pairs"]
                 for binary in project_wepp_binary_options(
                     wepp, backend=backend, multi_ofe=representation == "multiple-ofe"
                 )

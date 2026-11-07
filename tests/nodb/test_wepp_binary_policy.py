@@ -98,8 +98,7 @@ def test_v1_choices_expand_only_binary_axis_and_preserve_geometry():
     config = V1Config()
     assert project_wepp_binary_options(config) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     validate_project_wepp_binary_selection(config, 'wepp_261010')
-    assert project_wepp_binary_options(config, backend='topaz') == ()
-    assert project_wepp_binary_options(config, multi_ofe=False) == ()
+    assert project_wepp_binary_options(config, backend='topaz') == project_wepp_binary_options(config, backend='wbt')
 
 
 def test_zero_mofe_and_historical_graphs_keep_structure_identity():
@@ -141,3 +140,33 @@ def test_explicit_v1_saved_config_persists_new_binary(old_project, tmp_path):
     reloaded.parse_inputs({'wepp_bin': 'wepp_261010'})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == 'wepp_261010'
     assert ((tmp_path / 'config.cfg').read_bytes(), manifest_path.read_bytes()) == before
+
+
+@pytest.mark.parametrize('flattened', [False, True])
+def test_legacy_mofe_choices_do_not_depend_on_backend(flattened):
+    config = SimpleNamespace(
+        multi_ofe=True, wepp_bin='wepp_261029',
+        config_get_raw=lambda section, option, default=None: default,
+        config_get_list=lambda section, option, default=None: default,
+        config_get_bool=lambda section, option, default=None: flattened if (section, option) == ('config', 'flattened') else default,
+    )
+    expected = ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    for backend in ('topaz', 'wbt'):
+        assert project_wepp_binary_options(config, backend=backend) == expected
+        validate_project_wepp_binary_selection(config, 'wepp_261010', backend=backend)
+        with pytest.raises(ValueError):
+            validate_project_wepp_binary_selection(config, '/tmp/solver', backend=backend)
+
+
+def test_topaz_mofe_preset_can_persist_another_release(tmp_path):
+    from wepppy.nodb.core import Climate, Watershed, Wepp
+    (tmp_path / 'dem').mkdir()
+    wd = str(tmp_path)
+    config = 'disturbed9002-10-mofe.cfg'
+    Climate(wd, config)
+    watershed = Watershed(wd, config)
+    wepp = Wepp(wd, config)
+    assert watershed.delineation_backend.name == 'TOPAZ'
+    assert wepp.multi_ofe
+    wepp.parse_inputs({'wepp_bin': 'wepp_261010'})
+    assert Wepp.load_detached(wd).wepp_bin == 'wepp_261010'
