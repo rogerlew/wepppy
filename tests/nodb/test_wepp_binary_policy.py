@@ -38,13 +38,16 @@ def old_project(tmp_path, monkeypatch):
     return Wepp(str(tmp_path), 'config.cfg')
 
 
-@pytest.mark.parametrize('binary', ['wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029'])
+@pytest.mark.parametrize('binary', ['wepp_260430', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029'])
 def test_old_builder_project_can_persist_new_release_without_config_migration(old_project, tmp_path, binary):
     from wepppy.nodb.core import Wepp
     before = {name: (tmp_path / name).read_bytes() for name in ('config.cfg', 'config-manifest.json')}
-    assert project_wepp_binary_options(old_project) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(old_project) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     old_project.parse_inputs({'wepp_bin': binary})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == binary
+    if binary == 'wepp_260430':
+        from wepp_runner.wepp_runner import infer_pass_family_for_wepp_bin
+        assert infer_pass_family_for_wepp_bin(binary) == 'legacy_ascii'
     assert all((tmp_path / name).read_bytes() == content for name, content in before.items())
 
 
@@ -96,7 +99,7 @@ class V1Config:
 
 def test_v1_choices_expand_only_binary_axis_and_preserve_geometry():
     config = V1Config()
-    assert project_wepp_binary_options(config) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(config) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     validate_project_wepp_binary_selection(config, 'wepp_261010')
     assert project_wepp_binary_options(config, backend='topaz') == project_wepp_binary_options(config, backend='wbt')
 
@@ -136,7 +139,7 @@ def test_explicit_v1_saved_config_persists_new_binary(old_project, tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     before = (serialized, manifest_path.read_bytes())
     reloaded = Wepp.load_detached(str(tmp_path))
-    assert project_wepp_binary_options(reloaded) == ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(reloaded) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     reloaded.parse_inputs({'wepp_bin': 'wepp_261010'})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == 'wepp_261010'
     assert ((tmp_path / 'config.cfg').read_bytes(), manifest_path.read_bytes()) == before
@@ -150,7 +153,7 @@ def test_legacy_mofe_choices_do_not_depend_on_backend(flattened):
         config_get_list=lambda section, option, default=None: default,
         config_get_bool=lambda section, option, default=None: flattened if (section, option) == ('config', 'flattened') else default,
     )
-    expected = ('wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    expected = ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
     for backend in ('topaz', 'wbt'):
         assert project_wepp_binary_options(config, backend=backend) == expected
         validate_project_wepp_binary_selection(config, 'wepp_261010', backend=backend)

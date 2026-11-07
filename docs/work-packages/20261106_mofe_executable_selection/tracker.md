@@ -34,3 +34,7 @@ reloaded at 2026-11-07 00:09 UTC. All five releases render and validate; schema
 agrees. RQ job workers untouched. See artifacts/20261106_wepp1_hotfix.md for
 rollback, checks, and browser/model-output limits. Scoped incident repair
 complete; full model-output conformance not claimed.
+
+Follow-up: operator requested 260430 MOFE availability. Paired hash-bound
+metadata prepared; both exact binaries pass committed 3-OFE native replay.
+See artifacts/20261106_wepp260430_capabilities.md.
