@@ -1,6 +1,7 @@
 # WEPP executable capabilities and selection (CBEXEC-01)
 
-Status: operator-authorized 2026-10-12; implemented; independent correctness/security review and Forest conformance complete.
+Status: original CBEXEC-01 implemented and reviewed; MOFE-EXEC-02 amendment
+authorized 2026-11-06, implementation conformance pending.
 
 ## Purpose and authority
 
@@ -39,7 +40,9 @@ minting; no WEPPpy release-name allowlist is permitted.
 ## Builder and existing projects
 
 Use the complete unique `get_linux_wepp_bin_opts()` provider output for
-ordinary single-OFE choices. Multiple OFE requires WBT and declared MOFE support.
+ordinary single-OFE choices. Multiple OFE executable selection requires declared
+MOFE support independently of the delineation backend: TOPAZ and WBT projects
+with the same input requirements receive the same installed compatible releases.
 Checked single-file upload projects additionally require declared input-reader
 support. Keep their existing feature exclusions, native source validation,
 maximum OFE count and buffer prohibition. Unsupported selections produce
@@ -74,8 +77,36 @@ operation metadata must describe the same effective binary choices as the UI
 and submission validator; their freshness identity must reflect live binary
 capabilities. Model-authority metadata retains the complete stored-authorized
 geometry with live compatible tuples, while the executable field enum is
-filtered for the current geometry. `executable_revision` identifies live role
+filtered for the current input requirements. `executable_revision` identifies live role
 bytes and declarations separately from the stored `provider_revision`.
+
+### Backend-independent executable compatibility (2026-11-06)
+
+Implementation conformance: pending. Operator-authorized correction following
+the `bronzed-liberator` incident.
+
+Executable compatibility is determined by installed release capabilities,
+whether MOFE is enabled, and required native upload-reader support. It must not
+be filtered by delineation backend, including when a legacy preset is stored as
+a flattened configuration without a Builder capability graph. Apply this rule
+to MOFE projects with or without flattened configuration. For equal input
+requirements, TOPAZ and WBT must expose identical eligible binary enums in the
+run page, submission validator, and schema surfaces.
+
+Geometry authorization remains a separate concern. This amendment does not
+add TOPAZ/MOFE to Builder creation or rewrite stored graph geometry. Schema
+model-authority tuples must retain only stored-authorized backend/representation
+pairs, then combine those pairs with compatible live releases; do not derive
+geometry authorization from the executable selector. Invalid stored capability
+metadata still fails explicitly. Ordinary non-flattened single-OFE behavior,
+saved legacy selection, omission, and exact installed-ID validation retain their
+existing contracts.
+
+Rationale: the WEPP executable consumes prepared model inputs, and its MOFE
+support does not depend on which tool delineated the watershed. The previous
+WBT gate erased all eligible releases for working TOPAZ/MOFE presets and left
+only the saved release visible. Changing the project's backend or recreating it
+is not an acceptable repair.
 
 An omitted field preserves saved selection. A previously saved binary no longer
 available or lacking a newly required declaration remains visible as current
@@ -86,9 +117,10 @@ provider IDs and satisfy required features before any NoDb mutation or enqueue.
 Use existing current-value and disabled-option metadata to distinguish saved
 legacy display from eligible choice enums; do not put a disabled current value
 back into the eligible enum merely to render it.
-Reject arbitrary paths and unknown IDs. Legacy non-flattened projects retain
-their existing selection behavior unless the user changes to a new executable
-on a capability-governed upload path.
+Reject arbitrary paths and unknown IDs. Ordinary legacy non-flattened
+single-OFE projects retain their existing selection behavior unless the user
+changes to a new executable on a capability-governed upload path. Non-flattened
+MOFE projects follow the backend-independent MOFE capability rule above.
 
 ## Evidence and limits
 
