@@ -38,3 +38,6 @@ complete; full model-output conformance not claimed.
 Follow-up: operator requested 260430 MOFE availability. Paired hash-bound
 metadata prepared; both exact binaries pass committed 3-OFE native replay.
 See artifacts/20261106_wepp260430_capabilities.md.
+
+260430 follow-up complete: dff5d4f57 pushed, sidecars installed in wepp1 web/API,
+six choices verified at 2026-11-07 00:35 UTC without restart or run mutation.

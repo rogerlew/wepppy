@@ -37,4 +37,10 @@ Rollback removes the new pair (binary files remain unchanged).
 
 Scoped tests: 57 passed; added real 260430 save/reload and legacy PASS-family
 check also passed. Independent metadata review found no correctness blocker.
-Production eligibility verification: pending.
+Production eligibility verified on wepp1 at 2026-11-07 00:35 UTC:
+web and rq-engine have both sidecars, validated against installed hashes. Actual
+WEPP Exec template renders all six choices; runtime API schema includes 260430,
+selection validation accepts it, and inferred PASS family remains legacy_ascii.
+Saved selection remains 261029. No process, worker, or container restart.
+Metadata commit dff5d4f57 pushed to origin/master. The running containers have
+the metadata overlay; future images must include that commit.
