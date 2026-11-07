@@ -1,7 +1,7 @@
 # WEPP executable capabilities and selection (CBEXEC-01)
 
 Status: original CBEXEC-01 implemented and reviewed; MOFE-EXEC-02 amendment
-authorized 2026-11-06, implementation conformance pending.
+authorized 2026-11-06; selection repair scoped-tested and hotfixed on wepp1.
 
 ## Purpose and authority
 
@@ -82,8 +82,9 @@ bytes and declarations separately from the stored `provider_revision`.
 
 ### Backend-independent executable compatibility (2026-11-06)
 
-Implementation conformance: pending. Operator-authorized correction following
-the `bronzed-liberator` incident.
+Selection conformance: 305 scoped tests and wepp1 template/schema checks pass.
+Full model-output conformance was not rerun for this hotfix. Operator-authorized
+correction following the `bronzed-liberator` incident.
 
 Executable compatibility is determined by installed release capabilities,
 whether MOFE is enabled, and required native upload-reader support. It must not

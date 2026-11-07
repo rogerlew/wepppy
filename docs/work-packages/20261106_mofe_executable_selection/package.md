@@ -1,6 +1,7 @@
 # Backend-independent MOFE executable selection
 
-Status: contract checkpoint preparation; implementation pending.
+Status: selection repair implemented, scoped-tested and hotfixed on wepp1;
+full model-output conformance not claimed.
 
 Repair the executable choices for TOPAZ/MOFE projects such as
 `bronzed-liberator/disturbed9002-10-mofe`. The operator explicitly requires the

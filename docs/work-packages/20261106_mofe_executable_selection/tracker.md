@@ -26,3 +26,11 @@ passed under web container uid 1002/gid 130 against the incident run without
 mutating its state. Full model output regeneration is outside this hotfix check.
 
 Scoped validation: 305 passed; independent review approved. Hotfix pending.
+
+## Hotfix outcome
+
+Implementation a17aa349a pushed; wepp1 web and rq-engine hotfixed and gracefully
+reloaded at 2026-11-07 00:09 UTC. All five releases render and validate; schema
+agrees. RQ job workers untouched. See artifacts/20261106_wepp1_hotfix.md for
+rollback, checks, and browser/model-output limits. Scoped incident repair
+complete; full model-output conformance not claimed.

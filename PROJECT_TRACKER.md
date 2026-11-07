@@ -1,4 +1,4 @@
-In progress: [MOFE executable selection](docs/work-packages/20261106_mofe_executable_selection/package.md) — backend-independent release compatibility authorized; contract checkpoint prepared, implementation pending.
+In progress: [MOFE executable selection](docs/work-packages/20261106_mofe_executable_selection/package.md) — 305 scoped tests pass; committed/pushed and hotfixed on wepp1 with graceful web/API reloads. RQ job workers unchanged.
 
 Completed locally: [ESDAC missing-data robustness](docs/work-packages/20261106_esdac_missing_data/package.md) — 1,000-location paired study improves usable soils from 446 to 733 with zero regressions; all 35 incident locations and downstream readbacks pass. Independent review passed; broad regression retains one proven baseline template failure. Not deployed.
 
