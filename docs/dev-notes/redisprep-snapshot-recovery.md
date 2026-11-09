@@ -21,6 +21,16 @@ or profile namespace rejects old wrappers. No guard is held across model work.
 Loaded reads need no new filesystem write permissions. Missing-directory dump
 remains a no-op; a formerly bound wrapper cannot seed deleted/recreated live state.
 
+Ordinary catalog metadata operations participate in the same short serializer,
+including identity initialization, clone rotation, receipts and publication.
+Batch siblings share lifecycle ownership because deleting or restoring a batch
+replaces every child. They wait for ordinary metadata work, while genuine
+lifecycle contention remains an explicit pre-mutation failure for RedisPrep.
+Catalog callers retain their historical waiting behavior: only acquisition is
+retried, with the serializer released between attempts. Caller bodies execute
+once, and deleted directories are refused. Candidate collection and model execution stay outside these critical sections;
+final inventory/schema revalidation remains inside publication ownership.
+
 ## Failure interpretation
 
 - **Pre-replacement file failure:** prior snapshot remains authoritative on disk;

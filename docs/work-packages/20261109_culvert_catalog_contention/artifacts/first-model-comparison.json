@@ -1,0 +1,865 @@
+{
+  "previous": "cbdb8928-114f-4b8f-8c79-f46ecf354f24",
+  "current": "99ee4497-6214-44be-b9ff-519d3390b84f",
+  "checks": {
+    "1040": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 704,
+        "current_rows": 704
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 289,
+        "current_rows": 289
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "1751": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "252": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 18,
+        "current_rows": 18
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 7,
+        "current_rows": 7
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "253": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 43,
+        "current_rows": 43
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 17,
+        "current_rows": 17
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "255": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 283,
+        "current_rows": 283
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 117,
+        "current_rows": 117
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "256": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 13,
+        "current_rows": 13
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 5,
+        "current_rows": 5
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2871": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 13,
+        "current_rows": 13
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 5,
+        "current_rows": 5
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2900": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2901": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 7,
+        "current_rows": 7
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2902": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 8,
+        "current_rows": 8
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2904": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 8,
+        "current_rows": 8
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2905": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 13,
+        "current_rows": 13
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 5,
+        "current_rows": 5
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2909": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2915": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2930": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2931": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 28,
+        "current_rows": 28
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 11,
+        "current_rows": 11
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "2939": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "573": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 157,
+        "current_rows": 157
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 65,
+        "current_rows": 65
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "574": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 157,
+        "current_rows": 157
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 65,
+        "current_rows": 65
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "577": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 261,
+        "current_rows": 261
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 107,
+        "current_rows": 107
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "580": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 18,
+        "current_rows": 18
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 7,
+        "current_rows": 7
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "581": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "582": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 8,
+        "current_rows": 8
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "583": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 28,
+        "current_rows": 28
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 11,
+        "current_rows": 11
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "584": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 90,
+        "current_rows": 90
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 37,
+        "current_rows": 37
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "586": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 15,
+        "current_rows": 15
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 6,
+        "current_rows": 6
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "587": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "588": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 307,
+        "current_rows": 307
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 126,
+        "current_rows": 126
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "590": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 33,
+        "current_rows": 33
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 13,
+        "current_rows": 13
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "591": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 8,
+        "current_rows": 8
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "755": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 3,
+        "current_rows": 3
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 1,
+        "current_rows": 1
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "791": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 69,
+        "current_rows": 69
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 29,
+        "current_rows": 29
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    },
+    "792": {
+      "watershed/hillslopes.parquet": {
+        "equal": true,
+        "row_order_equal": false,
+        "previous_rows": 48,
+        "current_rows": 48
+      },
+      "watershed/channels.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 19,
+        "current_rows": 19
+      },
+      "wepp/output/interchange/totalwatsed3.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      },
+      "wepp/output/interchange/ebe_pw0.parquet": {
+        "equal": true,
+        "row_order_equal": true,
+        "previous_rows": 18627,
+        "current_rows": 18627
+      }
+    }
+  },
+  "all_equal": true
+}

@@ -17,6 +17,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Notification inbox | `tests/weppcloud/test_notifications.py` | Disposable PostgreSQL schemas and unique advisory keys, real TTL/CSRF boundaries, recipient scope and pagination |
 | NoDb controllers | `tests/nodb/` | Singleton behavior, locking semantics, serialization |
 | RedisPrep snapshots | `tests/nodb/test_redis_prep_snapshots.py` | Disposable real Redis, deterministic process/file failures, archive and receipt consumer readback; optional marked `RQ212_TEST_REDIS_SOCKET` |
+| Culvert batches | `tests/culverts/test_culverts_runner.py`, `tests/culverts/test_culvert_batch_live.py` | Managed clone identity states; opt-in real HTTP admission, parallel workers, all-child success and authenticated artifact readback; live gate uses `redis.StrictRedis` to avoid the autouse recorder |
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Disturbed matrix | `tests/disturbed/` | 96 canonical hourly hillslope cases including young forest; committed finite climate; legacy/v3 PASS and event-accounting contracts |
 | Roads matrix | `tests/roads/` | 516 site-derived native profiles across four textures; declared paired sensitivity helper with exact runtime/calendar guards; separate opt-in full-project checks; reviewed Usersum report |

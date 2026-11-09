@@ -787,6 +787,123 @@ def test_lifecycle_contention_fails_before_mutation_and_retry_succeeds(state):
         child.join()
 
 
+@pytest.mark.parametrize('operation', [
+    'initialize', 'rotate', 'snapshot', 'publish', 'receipt', 'status',
+    'refresh_begin', 'refresh_publish', 'refresh_ack', 'refresh_error',
+])
+def test_sibling_catalog_writer_serializes_with_prep_setter(state, operation):
+    """Ordinary sibling metadata work waits; it is not a lifecycle conflict."""
+    from wepppy.query_engine import catalog_refresh as catalog
+
+    module, client, owner = state
+    left, right = owner / 'runs/left', owner / 'runs/right'
+    left.mkdir(parents=True)
+    right.mkdir(parents=True)
+    client.delete('right')  # This fixture may reuse an explicitly disposable Redis.
+    if operation != 'initialize':
+        catalog.resolve_scope(left, create=True)
+    prep = module.RedisPrep.getInstance(str(right))
+    assert catalog.catalog_guard_identity(left) == catalog.catalog_guard_identity(right)
+    ctx = multiprocessing.get_context('fork')
+    held, release, attempted, contended = [ctx.Event() for _ in range(4)]
+
+    def writer():
+        original_write = catalog.atomic_json
+        original_digest = catalog._catalog_digest
+        paused = False
+
+        def pause():
+            nonlocal paused
+            if not paused:
+                paused = True
+                held.set()
+                assert release.wait(15)
+
+        def write(path, data, **kwargs):
+            selected = (
+                operation in {'initialize', 'rotate'} and path.name == 'incarnation.json'
+                or operation in {'publish', 'refresh_publish'} and path.name == 'catalog.json'
+                or operation == 'receipt' and path.parent.name == 'requests'
+                or operation == 'status' and path.name == 'status.json'
+                or operation == 'refresh_begin' and data.get('state') == 'running'
+                or operation == 'refresh_ack' and path.parent.name == 'attempts'
+                    and data.get('state') == 'published'
+                or operation == 'refresh_error' and path.parent.name == 'attempts'
+                    and data.get('state') == 'failed'
+            )
+            if selected:
+                pause()
+            return original_write(path, data, **kwargs)
+
+        def digest(path):
+            if operation == 'snapshot':
+                pause()
+            return original_digest(path)
+
+        catalog.atomic_json = write
+        catalog._catalog_digest = digest
+        if operation == 'initialize':
+            catalog.resolve_scope(left, create=True)
+        elif operation == 'rotate':
+            catalog.invalidate_catalog_incarnation(left)
+        elif operation == 'snapshot':
+            catalog.catalog_snapshot(left)
+        elif operation == 'publish':
+            catalog.publish_catalog(left, {'files': [], 'version': 1, 'root': str(left)})
+        elif operation == 'receipt':
+            catalog.record_catalog_refresh(left)
+        elif operation == 'status':
+            catalog.set_catalog_refresh_state(left, 'pending')
+        elif operation == 'refresh_error':
+            def fail_scan(*args, **kwargs):
+                raise ValueError('injected scan failure')
+            catalog._updated_catalog = fail_scan
+            with pytest.raises(ValueError, match='injected scan failure'):
+                catalog.refresh_catalog(left)
+        else:
+            catalog.refresh_catalog(left)
+
+    def setter():
+        lockf = catalog.fcntl.lockf
+
+        def observe(fd, flags):
+            if flags == catalog.fcntl.LOCK_EX:
+                try:
+                    lockf(fd, flags | catalog.fcntl.LOCK_NB)
+                except BlockingIOError:
+                    contended.set()
+                    attempted.set()
+                else:
+                    attempted.set()
+            return lockf(fd, flags)
+
+        catalog.fcntl.lockf = observe
+        prep.set_rq_job_id('x', 'sibling-completed')
+
+    first, second = ctx.Process(target=writer), ctx.Process(target=setter)
+    first.start()
+    try:
+        assert held.wait(10)
+        second.start()
+        assert attempted.wait(10)
+        assert contended.wait(1), 'catalog writer bypassed the shared serializer'
+        assert not client.hexists(prep.run_id, 'rq:x')
+        release.set()
+        first.join(10)
+        second.join(10)
+        assert first.exitcode == second.exitcode == 0
+        assert content(right)['rq:x'] == 'sibling-completed'
+        assert module.RedisPrep.getInstance(str(right)).get_rq_job_id('x') == 'sibling-completed'
+    finally:
+        release.set()
+        for process in (first, second):
+            if process.pid is not None:
+                if process.is_alive():
+                    process.kill()
+                process.join()
+        client.delete(prep.run_id)
+
+
 def test_direct_receipt_removal_consumer_survives_reload(state):
     module, client, wd = state
     from wepppy.weppcloud.routes.weppcloudr import _clear_tracked_job

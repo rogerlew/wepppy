@@ -195,6 +195,69 @@ def test_batch_owner_and_nested_scope_identity(tmp_path, monkeypatch):
     assert top.scope_id != nested.scope_id
 
 
+@pytest.mark.parametrize('operation', ['initialize', 'rotate', 'snapshot', 'publish',
+                                      'receipt', 'status', 'refresh'])
+def test_metadata_operations_refuse_deleted_directory(managed, operation):
+    managed.rmdir()
+    actions = {
+        'initialize': lambda: refresh.resolve_scope(managed, create=True),
+        'rotate': lambda: refresh.invalidate_catalog_incarnation(managed),
+        'snapshot': lambda: refresh.catalog_snapshot(managed),
+        'publish': lambda: refresh.publish_catalog(managed, {'files': []}),
+        'receipt': lambda: refresh.record_catalog_refresh(managed),
+        'status': lambda: refresh.set_catalog_refresh_state(managed, 'pending'),
+        'refresh': lambda: refresh.refresh_catalog(managed),
+    }
+    with pytest.raises(FileNotFoundError):
+        actions[operation]()
+    assert not managed.exists()
+
+
+def test_catalog_guard_never_retries_body_failure(managed):
+    calls = []
+    with pytest.raises(BlockingIOError, match='body failed'):
+        with refresh.catalog_metadata_guard(managed):
+            calls.append('executed')
+            raise BlockingIOError('body failed')
+    assert calls == ['executed']
+
+
+def test_catalog_wait_releases_serializer_and_refuses_deleted_tree(managed):
+    import shutil
+    ctx = multiprocessing.get_context('fork')
+    waiting, refused = ctx.Event(), ctx.Event()
+    def contender():
+        sleep = refresh.time.sleep
+        def observe_wait(seconds):
+            waiting.set()
+            sleep(seconds)
+        refresh.time.sleep = observe_wait
+        try:
+            refresh.record_catalog_refresh(managed)
+        except FileNotFoundError:
+            refused.set()
+        else:
+            raise AssertionError('deleted project was recreated')
+    child = ctx.Process(target=contender)
+    try:
+        with refresh.catalog_lifecycle_guard(managed):
+            child.start()
+            assert waiting.wait(10)
+            # The lifecycle owner can enter metadata coordination while a
+            # competing publisher waits; no opposite lock-order deadlock.
+            refresh.resolve_scope(managed, create=True)
+            shutil.rmtree(managed)
+        child.join(10)
+        assert child.exitcode == 0
+        assert refused.is_set()
+        assert not managed.exists()
+    finally:
+        if child.pid is not None:
+            if child.is_alive():
+                child.kill()
+            child.join()
+
+
 
 @pytest.mark.parametrize('component', ['_query_engine', '_query_engine/refresh',
                                       '_query_engine/refresh/requests', '_query_engine/refresh/attempts'])

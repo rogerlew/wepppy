@@ -1546,7 +1546,7 @@ def _process_culvert_run(
     except Exception as exc:
         status = "failed"
         error_payload = {"type": type(exc).__name__, "message": str(exc)}
-        logger.error(f"culvert_run {culvert_batch_uuid}/{run_id}: failed - {exc}")
+        logger.exception(f"culvert_run {culvert_batch_uuid}/{run_id}: failed - {exc}")
     else:
         logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: completed")
     finally:

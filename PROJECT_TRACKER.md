@@ -1,3 +1,5 @@
+Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
+
 In progress: [MOFE executable selection](docs/work-packages/20261106_mofe_executable_selection/package.md) — 305 scoped tests pass; committed/pushed and hotfixed on wepp1 with graceful web/API reloads. RQ job workers unchanged.
 
 Completed locally: [ESDAC missing-data robustness](docs/work-packages/20261106_esdac_missing_data/package.md) — 1,000-location paired study improves usable soils from 446 to 733 with zero regressions; all 35 incident locations and downstream readbacks pass. Independent review passed; broad regression retains one proven baseline template failure. Not deployed.

@@ -308,6 +308,17 @@ Payload validation/extraction happens in the rq-engine API handler; batch topo g
   - `wbt.stream_junction_identifier(d8_pntr=flovec_fn, streams=topo/netful.tif, output=chnjnt_fn)` → `topo/chnjnt.tif`
 - Create per-culvert runs under `/wc1/culverts/<culvert_batch_uuid>/runs/<Point_ID>/` using the `culvert` config.
 
+The batch `_base` copy and each new per-culvert copy establish fresh query-catalog
+lifecycle identities before controller or RedisPrep access. They use
+`invalidate_catalog_incarnation`, retaining copied refresh receipts as history
+and invalidating copied freshness, as required by the
+[catalog lifecycle contract](../schemas/query-engine-catalog-refresh-contract.md).
+The source template and existing-run retry identities are preserved. This avoids
+rejecting valid submissions when the source template already has catalog metadata;
+scope validation remains strict. A batch that already failed with
+`Catalog identity belongs to another project scope` needs explicit recovery or a
+fresh submission after the fix; retrying its unchanged copied tree is insufficient.
+
 ### Per-culvert processing
 For each culvert (identified by `Point_ID`):
 

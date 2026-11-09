@@ -18,6 +18,7 @@ from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.vrt import calculate_src_window
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
 from wepppy.nodb.core import Map, Ron, Watershed
+from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -448,6 +449,7 @@ class CulvertsRunner(NoDbBase):
         group_name = culvert_batch_uuid
 
         shutil.copytree(self.base_wd, run_wd, symlinks=True)
+        invalidate_catalog_incarnation(run_wd)
 
         for nodb_fn in glob(_join(run_wd, "*.nodb")):
             with open(nodb_fn, "r", encoding="utf-8") as handle:
@@ -550,6 +552,7 @@ class CulvertsRunner(NoDbBase):
             raise FileNotFoundError(f"Base runid path does not exist: {src}")
 
         shutil.copytree(src, dest, symlinks=True)
+        invalidate_catalog_incarnation(dest)
 
         for nodb_fn in glob(_join(dest, "*.nodb")):
             with open(nodb_fn, "r", encoding="utf-8") as handle:

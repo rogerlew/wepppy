@@ -14,8 +14,9 @@ import logging
 import os
 import stat
 import threading
+import time
 from collections.abc import Iterable, Iterator
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,7 +27,7 @@ LOGGER = logging.getLogger(__name__)
 PROTOCOL = 1
 REFRESH_PATH = Path('_query_engine/refresh')
 __all__ = ['RootConfig', 'CatalogScope', 'CatalogRefreshConflict', 'configured_roots',
-           'catalog_worker_configuration', 'resolve_scope', 'catalog_lifecycle_guard', 'redisprep_snapshot_guard',
+           'catalog_worker_configuration', 'resolve_scope', 'catalog_lifecycle_guard', 'catalog_metadata_guard', 'redisprep_snapshot_guard',
            'invalidate_catalog_incarnation', 'record_catalog_refresh', 'request_catalog_refresh',
            'pending_catalog_requests', 'refresh_catalog', 'ensure_catalog_fresh',
            'catalog_refresh_status', 'catalog_snapshot', 'publish_catalog', 'atomic_json',
@@ -192,7 +193,7 @@ def resolve_scope(wd: str | Path, *, create: bool = False) -> CatalogScope:
     scope = CatalogScope(base, owner, namespace, relative, scope_id, root is not None,
                          incarnation, identity, initialization_only)
     if create and incarnation is None:
-        with catalog_lifecycle_guard(base):
+        with catalog_metadata_guard(base):
             if is_catalog_readonly(base):
                 raise PermissionError('Readonly project cannot initialize refresh state')
             if marker.exists():
@@ -297,16 +298,36 @@ def catalog_lifecycle_guard(wd: str | Path, *, allow_missing: bool = False, bloc
 
 
 @contextmanager
-def redisprep_snapshot_guard(wd: str | Path) -> Iterator[None]:
+def redisprep_snapshot_guard(wd: str | Path, *, allow_missing: bool = True) -> Iterator[None]:
     """Serialize short metadata operations before trying the lifecycle guard.
 
-    Ordinary concurrent setters wait for each other. A snapshot holder never
+    Ordinary catalog publications and concurrent setters wait for each other. A snapshot holder never
     waits for lifecycle ownership, so a lifecycle owner can safely call Prep
     without introducing an opposing lock-order wait cycle.
     """
-    with _filesystem_guard(wd, allow_missing=True, snapshot_only=True):
-        with catalog_lifecycle_guard(wd, allow_missing=True, blocking=False):
+    with _filesystem_guard(wd, allow_missing=allow_missing, snapshot_only=True):
+        with catalog_lifecycle_guard(wd, allow_missing=allow_missing, blocking=False):
             yield
+
+
+@contextmanager
+def catalog_metadata_guard(wd: str | Path) -> Iterator[None]:
+    """Wait for catalog ownership without opposing lifecycle-owner lock order.
+
+    Only acquisition is retried. Release the serializer before waiting so a
+    lifecycle owner can call RedisPrep; never replay the caller's operation.
+    """
+    while True:
+        with ExitStack() as guards:
+            guards.enter_context(_filesystem_guard(wd, snapshot_only=True))
+            try:
+                guards.enter_context(catalog_lifecycle_guard(wd, blocking=False))
+            except BlockingIOError:
+                pass  # Contended acquisition only; release both guards below.
+            else:
+                yield
+                return
+        time.sleep(0.01)
 
 
 def atomic_json(path: Path, data: dict[str, Any], *, metadata_source: Path | None = None) -> None:
@@ -373,7 +394,7 @@ def is_refresh_path(path: str | Path) -> bool:
 def invalidate_catalog_incarnation(wd: str | Path, *, recursive: bool = True) -> str:
     """Rotate lifecycle identity; retained old receipts are historical evidence."""
     base = Path(wd).resolve()
-    with catalog_lifecycle_guard(base):
+    with catalog_metadata_guard(base):
         # A copied marker may belong to the source project: establish fresh identity.
         root = _root_for(base)
         relative = base.relative_to(root.path.resolve()).as_posix() if root else str(base)
@@ -409,7 +430,7 @@ def _catalog_digest(base: Path) -> str | None:
 def catalog_snapshot(wd: str | Path) -> tuple[CatalogScope, str | None]:
     if is_catalog_readonly(wd):
         raise PermissionError('Readonly project cannot publish catalog metadata')
-    with catalog_lifecycle_guard(wd):
+    with catalog_metadata_guard(wd):
         return resolve_scope(wd, create=True), _catalog_digest(Path(wd).resolve())
 
 
@@ -426,7 +447,7 @@ def publish_catalog(wd: str | Path, catalog: dict[str, Any], *,
                     snapshot: tuple[CatalogScope, str | None] | None = None,
                     acknowledged: Iterable[str] = ()) -> dict[str, Any]:
     base = Path(wd).resolve()
-    with catalog_lifecycle_guard(base):
+    with catalog_metadata_guard(base):
         scope = resolve_scope(base, create=True)
         if snapshot:
             _validate_scope(snapshot[0])
@@ -470,7 +491,7 @@ def record_catalog_refresh(wd: str | Path, asset_path: str | None = None) -> dic
     asset = _asset_path(base, asset_path)
     if is_catalog_readonly(base):
         raise PermissionError('Readonly project cannot record catalog intent')
-    with catalog_lifecycle_guard(base):
+    with catalog_metadata_guard(base):
         scope = resolve_scope(base, create=True)
         _validate_scope(scope)
         identifier = str(uuid4())
@@ -727,7 +748,7 @@ def refresh_catalog(wd: str | Path, *, expected_incarnation: str | None = None,
     base = Path(wd).resolve()
     if is_catalog_readonly(base):
         raise PermissionError('Readonly project cannot refresh its catalog')
-    with catalog_lifecycle_guard(base):
+    with catalog_metadata_guard(base):
         scope, digest = catalog_snapshot(base)
         if expected_incarnation is not None and expected_incarnation != scope.incarnation:
             raise CatalogRefreshConflict('Queued refresh belongs to an old project incarnation')
@@ -746,7 +767,7 @@ def refresh_catalog(wd: str | Path, *, expected_incarnation: str | None = None,
         candidate = _updated_catalog(base, catalog, paths, prefer_canonical=True)
         if strict:
             _verify_required(base, candidate, paths)
-        with catalog_lifecycle_guard(base):
+        with catalog_metadata_guard(base):
             if strict:
                 _verify_required(base, candidate, paths)
             publication = publish_catalog(base, candidate, snapshot=(scope, digest),
@@ -756,7 +777,7 @@ def refresh_catalog(wd: str | Path, *, expected_incarnation: str | None = None,
     except (OSError, ValueError, RuntimeError) as exc:
         # Deliberate maintenance boundary: persist safe diagnostic state, then fail.
         LOGGER.exception('Catalog refresh failed scope=%s', scope.scope_id)
-        with catalog_lifecycle_guard(base):
+        with catalog_metadata_guard(base):
             current = resolve_scope(base)
             if (current.incarnation == scope.incarnation and
                     current.directory_identity == scope.directory_identity and
@@ -833,7 +854,7 @@ def set_catalog_refresh_state(wd: str | Path, state: str, *,
     base = Path(wd).resolve()
     if is_catalog_readonly(base):
         raise PermissionError('Readonly project cannot write catalog state')
-    with catalog_lifecycle_guard(base):
+    with catalog_metadata_guard(base):
         scope = resolve_scope(base)
         if expected_incarnation is not None and scope.incarnation != expected_incarnation:
             raise CatalogRefreshConflict('Catalog state belongs to another incarnation')

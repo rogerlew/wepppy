@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -197,10 +198,18 @@ def test_watershed_symlink_channels_map_creates_links(tmp_path: Path) -> None:
     assert Path(watershed.netful_shp).exists()
 
 
+@pytest.mark.parametrize("catalog_state", ["absent", "initialized", "pending"])
 def test_culverts_runner_creates_runs_and_get_wd(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, catalog_state: str
 ) -> None:
+    from wepppy.query_engine import catalog_refresh as refresh
+
     culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("QUERY_CATALOG_ROOTS_JSON", json.dumps([
+        {"path": str(tmp_path / name), "namespace": f"test:{name}",
+         "coordination": str(tmp_path / "locks"), "layout": name}
+        for name in ("batch", "culverts")
+    ]))
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
 
@@ -217,6 +226,18 @@ def test_culverts_runner_creates_runs_and_get_wd(
     override_src = tmp_path / "batch" / override_project_name / override_leaf_name
     _init_base_project(override_src, nlcd_db="nlcd/2021")
     (override_src / "README.txt").write_text("base-override", encoding="utf-8")
+    if catalog_state == "absent":
+        refresh_dir = override_src / "_query_engine" / "refresh"
+        if refresh_dir.exists():
+            shutil.rmtree(refresh_dir)
+    if catalog_state != "absent":
+        refresh.resolve_scope(override_src, create=True)
+    if catalog_state == "pending":
+        refresh.record_catalog_refresh(override_src, "ron.nodb")
+    source_records = {
+        str(path.relative_to(override_src)): path.read_bytes()
+        for path in override_src.glob("_query_engine/refresh/**/*.json")
+    }
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:
         if runid == base_runid:
@@ -268,8 +289,19 @@ def test_culverts_runner_creates_runs_and_get_wd(
     assert runner.runs == {}
     base_copy = batch_root / "_base" / "README.txt"
     assert base_copy.read_text(encoding="utf-8") == "base-override"
+    base_scope = refresh.resolve_scope(batch_root / "_base")
+    assert base_scope.incarnation is not None
+    scopes = [base_scope]
     for run_id in run_ids:
         run_wd = batch_root / "runs" / run_id
+        scope = refresh.resolve_scope(run_wd)
+        scopes.append(scope)
+        assert scope.incarnation is not None
+        assert refresh.pending_catalog_requests(run_wd) == []
+        if catalog_state == "pending":
+            assert list(run_wd.glob("_query_engine/refresh/attempts/retired-*/*.json"))
+        runner.create_run_if_missing(run_id, payload_metadata, model_parameters=model_parameters)
+        assert refresh.resolve_scope(run_wd).incarnation == scope.incarnation
         dem_link = run_wd / "dem" / "dem.tif"
         flovec_link = run_wd / "dem" / "wbt" / "flovec.tif"
         netful_link = run_wd / "dem" / "wbt" / "netful.tif"
@@ -289,6 +321,16 @@ def test_culverts_runner_creates_runs_and_get_wd(
 
         runid = f"culvert;;{batch_uuid};;{run_id}"
         assert get_wd(runid) == str(run_wd)
+
+    assert len({scope.scope_id for scope in scopes}) == 3
+    assert len({scope.incarnation for scope in scopes}) == 3
+    assert refresh.resolve_scope(override_src).incarnation not in {
+        scope.incarnation for scope in scopes
+    }
+    assert source_records == {
+        str(path.relative_to(override_src)): path.read_bytes()
+        for path in override_src.glob("_query_engine/refresh/**/*.json")
+    }
 
 
 def test_culverts_runner_cleanup_relief_and_chnjnt(

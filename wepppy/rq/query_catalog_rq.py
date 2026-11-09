@@ -504,8 +504,8 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
                 if item["reconcile"]:
                     # Full scan detects the artifact-publication/pre-receipt crash gap.
                     if pilot_id:
-                        from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
-                        with catalog_lifecycle_guard(path):
+                        from wepppy.query_engine.catalog_refresh import catalog_metadata_guard
+                        with catalog_metadata_guard(path):
                             pilot.authorize_receipt(connection, pilot_id, str(path), controller_token)
                             record_catalog_refresh(path)
                     else:
