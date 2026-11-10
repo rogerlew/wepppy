@@ -1,3 +1,5 @@
+Planning scaffold: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — shared RQ acquisition, image/provenance evidence, read-only finalization and on-demand viewing on open-wepp-org. Active ExecPlan and review/evidence gates prepared; no implementation or deployment.
+
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
 
 In progress: [MOFE executable selection](docs/work-packages/20261106_mofe_executable_selection/package.md) — 305 scoped tests pass; committed/pushed and hotfixed on wepp1 with graceful web/API reloads. RQ job workers unchanged.
