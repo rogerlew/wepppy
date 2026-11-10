@@ -4,9 +4,9 @@
 
 **Started / last updated**: 2026-11-10 20:18 UTC
 
-**Phase**: Planning scaffold; no code or cluster changes
+**Phase**: M1 concrete contract approved; ancestor checkpoint preparation
 
-**Next**: M1 source/viewer discovery and contract checkpoint preparation
+**Next**: Commit reviewed contract checkpoint; implement M2–M4; prepare deployment handoff
 
 **Security**: High; dedicated review pending
 
@@ -68,3 +68,16 @@ implementation work is requested. This scaffold is not a completed contract
 checkpoint or deployment authorization. Prepare concrete reviews/configuration
 before any required approval; do not request repeated approval for already accepted
 product policy. Update this tracker and the ExecPlan at every milestone.
+
+## Execution update — 2026-11-10
+
+User authorized execution through deployment-ready handoff. Selected public
+`ned1/2024`, 30 m, bounded Idaho extent and existing zero-write HTTP elevation
+query. Two independent contract reviews passed after restore/finalization fixes;
+see `artifacts/20261110_contract_reviews.md`. No cluster deployment authorized.
+Local baseline run `metastatic-interconnection`, job
+`88af4419-a979-4718-99d0-cf4e5f441443`, was created through ordinary initialization
+and enqueued on the existing local default queue; artifact readback pending.
+Current source baseline is `3a113ac28df9c5b2cdf453a4223e1c42e83b81bb`.
+The local environment has no `kubectl` executable; live Kubernetes verification
+remains a deployment handoff prerequisite, not a claimed local result.

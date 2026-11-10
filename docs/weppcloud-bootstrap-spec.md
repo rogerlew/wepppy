@@ -798,3 +798,11 @@ Known measurement limitation:
 - `/wc1/runs/fa/fast-paced-blastoff` exists but currently lacks `.git` and
   `wepp/runs` content, so destructive bootstrap-init timing tests were not run
   there.
+
+## Declarative DEM v1 (conformance pending)
+
+See the [bounded DEM contract](schemas/declarative-dem-v1-contract.md).
+Declarative DEM projects reject Bootstrap enablement, initialization, checkout,
+push authorization and no-prep execution before Git/model writes. Their local
+provenance repository confers no Bootstrap capability. Ordinary projects retain
+existing Bootstrap behavior.

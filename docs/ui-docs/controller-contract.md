@@ -298,3 +298,11 @@ Project readonly presentation on a report page must not initialize Outlet when
 the Outlet form is absent. Reset Outlet mode only on pages hosting its control;
 report unit preferences still initialize normally. This avoids requiring map
 libraries merely to render a report (2026-10-10 observed deck.gl warning).
+
+## Declarative DEM v1 (conformance pending)
+
+See the [bounded DEM contract](../schemas/declarative-dem-v1-contract.md).
+Declarative DEM projects show origin and build/protection outcome with a normal
+browse link to provenance. Editing, unlocking and Bootstrap are unavailable;
+read-only browsing and the existing map elevation consumer remain available.
+Presentation does not replace backend mutation enforcement.

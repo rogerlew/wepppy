@@ -356,3 +356,10 @@ any destructive edits, preserving the incarnation and held standalone publicatio
 lock through cleanup/extraction. Incoming archive coordination markers cannot
 overwrite them. Fencing failure blocks destruction; interruption must not erase
 replacement provenance and later masquerade as initial identity creation.
+
+## Declarative DEM v1 (conformance pending)
+
+See the [bounded DEM contract](declarative-dem-v1-contract.md).
+The DEM v1 consumer is an existing zero-write elevation query. Prepare pending
+catalogs through shared read-only finalization; no post-freeze publication
+exception is granted. Its final build record path exists before manifest creation.

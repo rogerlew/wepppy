@@ -713,3 +713,11 @@ Do not assume mixed-version workers or rollback against 2.x-written Redis state
 are safe. Actual Redis/workers, API/auth and fresh generated-artifact acceptance
 are required, including metadata isolation and cancellation/process containment.
 Production migration remains separately authorized.
+
+## Declarative DEM v1 (conformance pending)
+
+See the [bounded DEM contract](declarative-dem-v1-contract.md).
+Declarative DEM mutation refusal uses the existing error envelope with code
+`declarative_protected` and HTTP 409 after authorization. Queued refusal uses
+normal RQ failure bookkeeping. The private operator protocol does not add a
+public endpoint or change ordinary responses.

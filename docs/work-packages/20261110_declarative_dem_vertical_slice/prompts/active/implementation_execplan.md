@@ -3,8 +3,9 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective.
-Current scope is planning; execute only when tasked to implement. Keep the package
-tracker synchronized. No implementation or live deployment has happened.
+Execution authorized on 2026-11-10 through deployment-ready handoff. Keep the
+package tracker synchronized. Live deployment and cluster acceptance are deferred
+to the receiving operator; no live cluster changes have happened.
 
 ## Purpose / Big Picture
 
@@ -28,6 +29,8 @@ unit test. Production wepp.cloud remains out of rollout scope.
 - [ ] M5 cluster acceptance, fault/recovery cases and retention evidence.
 - [ ] M6 independent final reviews, required gates and closeout.
 
+- [x] (2026-11-10) M1 concrete contract and two independent reviews; checkpoint commit pending.
+
 ## Surprises & Discoveries
 
 
@@ -39,6 +42,12 @@ ordering and not advertise successful protection after a failed transition.
 The cluster's execution-plane runbook describes fourteen general worker slots;
 this is repository documentation, not verified current capacity. Never replace
 or drain active workers merely to obtain the slice's worker.
+
+Elevation query is a genuine zero-write HTTP DEM consumer, not an RQ task. Its
+existing endpoint lacks project authorization; v1 explicitly admits public source
+and public projects only. READONLY is not a complete mutation fence. Archive
+restore currently deletes the admission directory, requiring preserved protection
+through interrupted restore. No kubectl executable exists in this local shell.
 
 ## Decision Log
 
@@ -53,6 +62,12 @@ Bootstrap. Determinism and cross-build comparison are deferred.
 with one provider and bounded extent, one dedicated worker if no child-wait exists,
 and a real derived DEM viewer operation. These reduce the number of simultaneous
 unknowns. M1 fixes exact fields/paths and records any evidence-based adjustment.
+
+2026-11-10, execution: canonical bounded protocol is
+`docs/schemas/declarative-dem-v1-contract.md`. Independent correctness/security
+reviews approved after stable lifecycle publication, interrupted-restore protection
+and separate finalizer authority were specified. Implement before deployment
+handoff; do not claim M5 cluster evidence from local tests.
 
 ## Outcomes & Retrospective
 

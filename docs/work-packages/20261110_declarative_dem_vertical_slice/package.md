@@ -1,6 +1,6 @@
 # Declarative DEM vertical slice
 
-**Status**: Open — planning scaffold, 2026-11-10 20:18 UTC
+**Status**: Open — M1 contract checkpoint approved, execution active
 
 **Timezone**: UTC
 
@@ -12,7 +12,8 @@ Deliver one real declarative acquisition build on the open-wepp-org Kubernetes
 cluster using the same DEM RQ task as on-demand modeling. The resulting ordinary
 project must retain task/image provenance, finalize read-only, and support an
 actual subsequent on-demand viewing task without changing protected build state.
-This request scaffolds the work; it does not execute the implementation or deploy.
+Execution is now authorized through deployment-ready handoff; deployment and live
+acceptance remain a separate receiving step.
 
 ## Objectives and scope
 

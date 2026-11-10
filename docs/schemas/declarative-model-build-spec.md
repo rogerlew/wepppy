@@ -443,3 +443,11 @@ remain pending.
 - [File dependency freshness](file-dependency-freshness-contract.md)
 - [Artifact observability](../standards/artifact-observability-standard.md)
 - [Generated artifact validation](../standards/generated-artifact-validation-standard.md)
+
+## DEM v1 execution checkpoint
+
+The [DEM v1 contract](declarative-dem-v1-contract.md) defines the bounded initial
+implementation: exact fields, public fixture, operator-side runtime verifier,
+visible records, lifecycle and zero-write HTTP elevation viewing. Conformance is
+pending; execution authorization does not authorize deployment or establish live
+identity evidence. Broader schema/source/task enrollment remains deferred.

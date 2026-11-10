@@ -504,3 +504,11 @@ Missing or unreadable required files fail explicitly; present empty files remain
 hashable and existing numerical consumers retain their own validation.
 There is no persisted signature migration. Existing NoDb stale-write, atomic
 publication and rollback behavior remain mandatory.
+
+## Declarative DEM v1 (conformance pending)
+
+See the [bounded DEM contract](declarative-dem-v1-contract.md).
+A declarative admission marker prohibits ordinary mutation while building and
+after finalization; READONLY cannot be cleared through ordinary calls. Absent
+markers retain existing behavior; malformed markers fail closed for mutation.
+No general NoDb lock or catalog-write exemption is introduced.
