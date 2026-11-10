@@ -20,6 +20,9 @@ unit test. Production wepp.cloud remains out of rollout scope.
 
 ## Progress
 
+- [x] (2026-11-10 23:32 UTC) Receiving migration, native checks and candidate fleet rollout passed.
+- [ ] Repair confirmed RedisPrep NFS attribute-preservation failure, verify real mounted workflow, publish reviewed correction and resume M5 with a fresh UUID.
+
 
 - [x] (2026-11-10 20:18 UTC) Scaffold plan and evidence/review records.
 - [x] M1 discovery, canonical amendments, two independent reviews and ancestor `d6e101ab8`.
@@ -33,6 +36,12 @@ unit test. Production wepp.cloud remains out of rollout scope.
 - [x] (2026-11-10) Reviewed inactive receiving configuration and runbook copied to open-wepp-org.
 
 ## Surprises & Discoveries
+
+Receiving initialization failed before science: `publish_snapshot` line 70 raises
+EOPNOTSUPP while setting inherited NFS attributes. An isolated ordinary constructor
+on the same /wc1 mount reproduced the same failure; Redis timestamp committed but
+its file snapshot did not. This is a shared RedisPrep runtime defect, not DEM science.
+
 
 
 `wepppy/rq/project_rq.py:set_run_readonly_rq` does more than toggle a flag: it holds
@@ -51,6 +60,17 @@ restore currently deletes the admission directory, requiring preserved protectio
 through interrupted restore. No kubectl executable exists in this local shell.
 
 ## Decision Log
+
+2026-11-10 receiving repair: restore the existing RPS-01 access-preservation
+contract without changing it. Apply original mode before comparing attributes;
+skip only already-identical attributes, set genuinely different values, and
+retain exact final mode/attribute verification and fail-closed behavior. First
+add regression coverage for read-only inherited labels, mode-derived NFS ACLs,
+user attributes and unpreservable differences. Test via wctl on forest and on
+the actual candidate mount under UID:GID 1000:993 before publishing the correction.
+No new dependency, privilege, storage configuration, payload format or science.
+Preserve the failed submission and do not replay uncertain work.
+
 
 
 2026-11-10 20:18 UTC, user/author: target open-wepp-org for the working slice, with
@@ -71,6 +91,13 @@ and separate finalizer authority were specified. Implement before deployment
 handoff; do not claim M5 cluster evidence from local tests.
 
 ## Outcomes & Retrospective
+
+Receiving correction checks: 106 focused tests passed with real disposable Redis;
+RQ graph passed, and the exact snapshot correction passed ordinary initialization
+and repeated publication on the actual NFS mount with unchanged access metadata.
+The live `python -m` entrypoint also exposed RQ rejection of __main__ functions;
+canonical import-string enqueue restores the intended fixed dispatch contract.
+Publication and fresh-UUID acceptance remain pending; failed original state is retained.
 
 
 Contract checkpoint and local on-demand science/readback are complete. Shared

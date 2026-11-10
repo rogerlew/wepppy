@@ -135,3 +135,32 @@ original session-reset limitation are in `artifacts/validation_matrix.md`.
 No unresolved high/medium source findings. No image publication, push, active
 infrastructure change or deployment occurred. M5 and final package closure remain
 with the receiving canary; no remaining local implementation task blocks handoff.
+
+## Receiving execution — 2026-11-10
+
+Roger authorized handoff execution and then explicitly authorized table migrations.
+Receiving PR202 deployed b3786ae7e (amd64 child 0effe388...) and additive notification
+revision f6b8d27a901c after fresh encrypted backup. Fleet/native/ordinary existing
+reader and authenticated notification checks pass. First DEM UUID
+01b51a4d-a617-46ef-a7a2-072520dc9e5b failed initialization, science not dispatched.
+Real NFS EOPNOTSUPP on redundant RedisPrep xattr writes reproduced in isolated
+ordinary constructor; bounded conformance repair underway. No M5 completion claim.
+Receiving durable record: open-wepp-org docs/work-packages/20261110-declarative-dem-canary.
+
+### Receiving correction validation
+
+The shared snapshot regression now preserves original mode before comparing NFS
+attributes, skips only identical inherited values and verifies exact final mode
+and attributes. A regression first failed against old code; the corrected module
+passed a real NFS ordinary-constructor/repeated-snapshot probe at UID:GID1000:993,
+umask0022, with original mode/ACL/security label unchanged. No privileges changed.
+Independent review also confirmed RQ rejects `__main__` function objects from the
+actual `python -m` adapter entrypoint; both jobs now enqueue canonical import names.
+The lifecycle matrix covers both imported and `__main__` function identities.
+
+Forest Docker-wrapper focused validation with a dedicated disposable Redis socket:
+**106 passed**, no skips (47.21s). The earlier run's 35passes/62skips reflected a
+missing test Redis executable; it is not the acceptance result. RQ graph check
+passes. No full-suite claim is made; broad-suite limitations from the original
+handoff remain. Independent source correction review is retained in the receiving
+security review. Corrected image publication and fresh-UUID live acceptance follow.
