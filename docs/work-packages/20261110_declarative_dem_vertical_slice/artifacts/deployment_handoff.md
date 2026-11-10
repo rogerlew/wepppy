@@ -1,6 +1,6 @@
 # Deployment handoff — declarative DEM
 
-The implementation is prepared for a bounded open-wepp-org canary. No image has
+The implementation is ready for a bounded open-wepp-org canary handoff. No image has
 been published or deployed by this package. M5 and package closure remain pending
 real cluster acceptance. Current local gates and any limitations are recorded in
 `validation_matrix.md`; independent correctness, QA and security reviews are peers
@@ -20,8 +20,8 @@ These are inactive preparation. The renderer creates a reviewable fixed-fixture
 definition, approvals, Pod, ConfigMap and Kustomization. No generated resource is
 included in live Flux desired state until an authorized receiving deployment.
 The runbook contains exact render/engine/reconcile commands, target, capacity
-preflight, acceptance gates and containment. The actual source implementation
-commit and selected child-manifest digest must be recorded before activation.
+preflight, acceptance gates and containment. Source implementation candidate is `185429547`; receiving preparation commit is
+`5c98b96`. The selected child-manifest digest must be recorded before activation.
 
 ## Required deployment sequence
 
@@ -62,3 +62,12 @@ private-project authorization. No new scientific formula/default is introduced.
 Large ordinary DEM observation memory/cost remains an explicit follow-up: the
 962-cell timing does not bound an 8192-by-8192 DEM. Full raster readback uses the
 existing rasterio/numpy dependencies; no replacement science or new dependency.
+
+## Final source gate
+
+102 focused tests and 1069 frontend tests pass. Retained broad continuations have
+6401 unique passes/241 skips and one reproduced preexisting TTL-help template
+assertion; the ledger records the session-reset limitation rather than claiming
+one clean full-suite run. Correctness, QA and security have no open high/medium
+source findings. Stub hygiene, graph, lint and inactive-render checks pass.
+The subsequent test-double/evidence commit changes no production code.

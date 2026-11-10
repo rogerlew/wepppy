@@ -1,6 +1,6 @@
 # Vertical slice validation ledger
 
-**Status**: Local implementation gates executed; cluster acceptance pending (2026-11-10).
+**Status**: Ready for controlled canary handoff; local gates complete with one confirmed unrelated baseline assertion. Cluster acceptance pending (2026-11-10).
 
 ## Fixture registration (M1)
 
@@ -108,3 +108,63 @@ an out-of-root path panicked, so its failure is tooling scope, not a doc pass.
 Spelling preview covered 14 documents; one harmless oversize normalization applied.
 Receiving secret policy passed; synthetic render plus engine validate passed.
 No generated overlay was added to active Flux resources.
+
+Implementation candidate: `185429547`; inactive receiving handoff: open-wepp-org
+`5c98b96`. Neither has been pushed or published by this task. Contract ancestry
+is `d6e101ab8` before implementation. Final changed-file quality telemetry covers
+29 files: new production modules remain green by LOC/function length; the real
+lifecycle fault test is a 130-line yellow fixture to keep actual RQ setup/cleanup
+and failure expectations together. Existing large shared files gained only entry
+fences and archive ordering, not opportunistic restructuring. Python complexity
+metrics are unavailable without radon; this is observe-only, not a claimed pass.
+
+## Broad-run interruption and continuation
+
+The original `wctl run-pytest tests --maxfail=1` visibly completed the test groups
+through query-engine and entered roads. Its handle/final output was lost when the
+execution environment reset; the process was no longer running. Its failure cache
+is not a substitute for a retained test result. Do not report that run as a full
+suite pass. The final scoped tests had already rerun all changed adapter boundaries.
+
+A frozen-code continuation from `tests/roads` through all remaining test roots
+collected 6642 cases and retained log/JUnit evidence. It stopped with **1393 passed,
+35 skipped, 1 failed** in 535.22 s. The failure was the cache-ordering `DummyRon`
+without `wd`, a required real controller attribute now read by provenance. Additive
+`wd` and `runid` fields repair the double without changing production code or
+bypassing evidence logic. Its module then passed **65 tests** in 9.91 s.
+The remainder restarts at that entire module; results follow when complete.
+
+Exact commands are `dem-broad-continuation-command.txt` and
+`dem-broad-remainder-command.txt`. Local retained logs are
+`/tmp/dem-broad-continuation.log` and `/tmp/dem-broad-remainder.log`; JUnit reports
+are `out/declarative-dem-broad-continuation.xml` and
+`out/declarative-dem-broad-remainder.xml`. Raw test logs are not published as project
+provenance or committed as potentially sensitive operational output.
+
+## Final local disposition
+
+The retained remainder completed 4940 passes/207 skips before the unrelated
+`test_runs_template_uses_the_ttl_deletion_usersum_doc_id` assertion. Both its test
+and `templates/user/runs2.html` are byte-identical to contract ancestor `d6e101ab8`;
+see `baseline_template_inputs.json`. Executing those two baseline files from
+`out/declarative-dem-baseline-template/` reproduced the same missing
+`runsTtlDeletionHelpUrl` assertion (1 failed, 0.97 s). No DEM change touches that
+Runs-list template. This is a confirmed preexisting assertion, not an unexplained
+regression or a claim that all repository tests pass.
+
+With only that exact assertion deselected, the final template tail passed **16**
+tests (10.33 s); the remaining `tests/weppcloud/utils` group passed **60** (11.86 s).
+Its command was `wctl run-pytest tests/weppcloud/utils --maxfail=1
+--junitxml=/workdir/wepppy/out/declarative-dem-broad-utils.xml`.
+The four retained JUnit reports deduplicate to **6401 passed, 241 skipped, one
+confirmed baseline failure** from roads onward. See `broad_validation_summary.json`.
+The earlier full invocation visibly passed the preceding groups, but its lost
+terminal result is not counted as a single full-suite pass. Final stub hygiene
+passed again after the test-double correction; independent QA accepted that fix.
+
+Local handoff is ready: focused lifecycle/artifact/guard gates pass, independent
+reviews have no open high/medium findings, configuration is inactive and reviewed,
+and no new production defect remains. The unrelated assertion stays outside this
+package. Live image/platform identity, mounted runtime parity, actual HTTP/browser
+and archive/download workflow, running cancellation and worker-loss evidence remain
+M5 receiving gates. The package is **open**, not closed or deployed.

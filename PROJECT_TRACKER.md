@@ -1,4 +1,4 @@
-In progress: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — shared RQ acquisition, image/provenance evidence, read-only finalization and on-demand viewing on open-wepp-org. Contract ancestor d6e101ab8; local lifecycle/artifact/failure gates and independent reviews pass. Inactive open-wepp-org handoff prepared; final broad gate and live cluster acceptance remain pending.
+Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
 
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
 

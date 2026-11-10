@@ -4,9 +4,9 @@
 
 **Started / last updated**: 2026-11-10
 
-**Phase**: M2–M4 locally implemented; final gates and inactive deployment handoff
+**Phase**: Ready for controlled canary handoff; M5 live acceptance pending
 
-**Next**: Finish final local gates; hand off receiving M5 canary
+**Next**: Receiving operator publishes/reviews the candidate and authorizes the bounded canary
 
 **Security**: High; independent source and staged deployment review passed
 
@@ -123,3 +123,15 @@ Reviewed inactive renderer/template/runbook/receiving package copied to
 consumers must be deployed before admission, and rollback must retain guards for
 existing declarative projects. This rationale and sequence are in
 `artifacts/deployment_handoff.md` and receiving `docs/operations/declarative-dem-canary.md`.
+
+## Ready-for-handoff disposition — 2026-11-10
+
+Implementation `185429547`; reviewed inactive receiving preparation `5c98b96`.
+Final scoped gate: 102 passed; corrected legacy cache-ordering double module:
+65 passed. Frontend 1069 passed, lint/stubs/RQ graph/docs checks passed. Retained
+broad continuations deduplicate to 6401 passed/241 skipped with one confirmed
+preexisting Runs-list TTL-help assertion; exact baseline reproduction and the
+original session-reset limitation are in `artifacts/validation_matrix.md`.
+No unresolved high/medium source findings. No image publication, push, active
+infrastructure change or deployment occurred. M5 and final package closure remain
+with the receiving canary; no remaining local implementation task blocks handoff.

@@ -258,6 +258,10 @@ def test_fetch_dem_rq_clears_ron_cache_before_hydration_and_fetch(
 
     class DummyRon:
         max_map_dimension_px = 10_000
+        wd = str(run_wd)
+        runid = "demo"
+
+        # This cache-ordering double does not emulate optional DEM evidence.
 
         def set_map(self, extent, center, zoom) -> None:
             events.append(("set_map", tuple(extent), tuple(center), zoom))

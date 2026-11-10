@@ -1,6 +1,6 @@
 # Declarative DEM vertical slice
 
-**Status**: Open — local implementation reviewed; receiving canary pending
+**Status**: Open — ready for controlled canary handoff; live acceptance pending
 
 **Timezone**: UTC
 
@@ -110,7 +110,7 @@ stop and separately scope the scientific change rather than hide it here.
 - [Architecture review dispositions](../../reviews/declarative-model-build-spec-review.md)
 - [Tracker](tracker.md)
 - [Active ExecPlan](prompts/active/implementation_execplan.md)
-- [Contract decision scaffold](artifacts/20261110_contract_decision.md)
+- [Reviewed contract decision](artifacts/20261110_contract_decision.md)
 - [Evidence ledger](artifacts/validation_matrix.md)
 
 Deliverables are working application/deployment changes in their respective

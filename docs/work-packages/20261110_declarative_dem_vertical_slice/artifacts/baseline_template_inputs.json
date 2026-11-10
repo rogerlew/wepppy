@@ -1,0 +1,10 @@
+{
+  "tests/weppcloud/test_usersum_template_wiring.py": {
+    "baseline_sha256": "738b5cd17c5d59b28eed7d7955038d6d598aa55af41d861f54f7383933aa38c9",
+    "current_identical": true
+  },
+  "wepppy/weppcloud/templates/user/runs2.html": {
+    "baseline_sha256": "dba1f745b74b3b75f3b99b0549d05b6ce7757c9f24032adefcddebcc1ba26d62",
+    "current_identical": true
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "implementation_commit": "185429547",
+  "runs": {
+    "continuation": {
+      "counts": {
+        "skipped": 35,
+        "passed": 1393,
+        "failed": 1
+      },
+      "junit": "out/declarative-dem-broad-continuation.xml"
+    },
+    "remainder": {
+      "counts": {
+        "skipped": 207,
+        "passed": 4940,
+        "failed": 1
+      },
+      "junit": "out/declarative-dem-broad-remainder.xml"
+    },
+    "tail": {
+      "counts": {
+        "passed": 16
+      },
+      "junit": "out/declarative-dem-broad-tail.xml"
+    },
+    "utils": {
+      "counts": {
+        "passed": 60
+      },
+      "junit": "out/declarative-dem-broad-utils.xml"
+    }
+  },
+  "deduplicated_latest": {
+    "skipped": 241,
+    "passed": 6401,
+    "failed": 1
+  },
+  "remaining_failures": [
+    "tests.weppcloud.test_usersum_template_wiring::test_runs_template_uses_the_ttl_deletion_usersum_doc_id"
+  ],
+  "scope": "Broad continuation from tests/roads onward; not a single full-suite pass"
+}
