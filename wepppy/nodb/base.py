@@ -1997,6 +1997,9 @@ class NoDbBase(object):
     def dump(self) -> None:
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
+        from wepppy.declarative.policy import require_controller_mutation
+        require_controller_mutation(self.wd)
+
         self._assert_lock_owned_for_dump()
 
         expected_mtime = getattr(self, "_nodb_mtime", None)
@@ -2511,6 +2514,8 @@ class NoDbBase(object):
         return False
 
     def lock(self, ttl: Optional[int] = None):
+        from wepppy.declarative.policy import require_controller_mutation
+        require_controller_mutation(self.wd)
         recovery = id(self) in getattr(_RECOVERY_ACCESS, 'instances', ())
         with type(self)._instances_lock:
             if not recovery and (self in _MUTATION_SCOPES or self in _LOCK_OWNER_THREADS
@@ -2685,6 +2690,13 @@ class NoDbBase(object):
     def readonly(self, value):
         assert value in [False, True]
 
+        if not value:
+            from wepppy.declarative.policy import reject_mutation
+            reject_mutation(self.wd)
+        else:
+            from wepppy.declarative.policy import require_controller_mutation
+            require_controller_mutation(self.wd)
+
         path = _join(self.wd, 'READONLY')
         if value:
             with open(path, 'w') as fp:
@@ -2712,6 +2724,9 @@ class NoDbBase(object):
     @public.setter
     def public(self, value):
         assert value in [False, True]
+
+        from wepppy.declarative.policy import require_controller_mutation
+        require_controller_mutation(self.wd)
 
         path = _join(self.wd, 'PUBLIC')
         if value:

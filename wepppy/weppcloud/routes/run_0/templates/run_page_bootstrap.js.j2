@@ -89,7 +89,7 @@
             "isAdmin": current_user.has_role('Admin') or current_user.has_role('Root'),
             "isRoot": current_user.has_role('Root'),
             "isAuthenticated": user.is_authenticated,
-            "readonly": ron.readonly
+            "readonly": (ron.readonly or (is_declarative | default(false)))
         },
         "ttl": {
             "policy": ((ttl_state.policy | default(None)) if ttl_state else None),
@@ -190,7 +190,7 @@
             "map": {"boundary": boundary},
             "channel": {"zoomMin": 11},
             "subcatchment": {"defaultColorMap": "slp_asp"},
-            "project": {"readonly": ron.readonly},
+            "project": {"readonly": (ron.readonly or (is_declarative | default(false)))},
             "wepp": {"job_id": wepp.job_id, "job_key": wepp.job_key},
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
@@ -242,7 +242,7 @@
     window.runid = runId;
     window.runId = runId;
     window.config = runConfig;
-    window.readonly = {{ ron.readonly | tojson }};
+    window.readonly = {{ (ron.readonly or (is_declarative | default(false))) | tojson }};
     window.WEPP_channel_critical_shear = null;
     window.runContext = runContext;
 

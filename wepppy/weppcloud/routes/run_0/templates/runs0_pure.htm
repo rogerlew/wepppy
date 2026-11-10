@@ -68,6 +68,16 @@
 {% endblock %}
 
 {% block body_container %}
+{% if is_declarative | default(false) %}
+<aside class="wc-alert wc-alert--info" role="status">
+  <strong>Declarative project</strong>
+  <p>This project is protected from editing. Recorded build state: {{ declarative_build.processing }}.
+    Protection: {{ declarative_build.protection }}.
+    {% if declarative_build.verified %}Build verified.{% else %}Build verification is incomplete.{% endif %}
+    <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='provenance') }}">View build records</a>
+  </p>
+</aside>
+{% endif %}
 {% include 'command-bar.htm' %}
 {% include 'controls/poweruser_panel.htm' %}
 {% include 'controls/disturbed_modal.htm' %}

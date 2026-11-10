@@ -2,22 +2,22 @@
 
 ## Quick Status
 
-**Started / last updated**: 2026-11-10 20:18 UTC
+**Started / last updated**: 2026-11-10
 
-**Phase**: M1 concrete contract approved; ancestor checkpoint preparation
+**Phase**: M2–M4 locally implemented; final gates and inactive deployment handoff
 
-**Next**: Commit reviewed contract checkpoint; implement M2–M4; prepare deployment handoff
+**Next**: Finish final local gates; hand off receiving M5 canary
 
-**Security**: High; dedicated review pending
+**Security**: High; independent source and staged deployment review passed
 
 ## Task Board
 
 - [x] Scaffold package, active ExecPlan, checkpoint/review artifacts and evidence ledger.
-- [ ] M1: identify source/viewer fixture, exact paths, interfaces and runtime verifier;
+- [x] M1: identify source/viewer fixture, exact paths, interfaces and runtime verifier;
       amend contracts, obtain two independent reviews and checkpoint ancestor commit.
-- [ ] M2: shared DEM task provenance and on-demand regression coverage.
-- [ ] M3: independent engine/image adapter and bounded queue/worker execution.
-- [ ] M4: read-only finalization and real derived viewing task.
+- [x] M2: shared DEM task provenance and on-demand regression coverage.
+- [x] M3: independent engine/image adapter; inactive bounded worker preparation.
+- [x] M4: real local finalization/viewing; cluster endpoint evidence belongs to M5.
 - [ ] M5: open-wepp-org validation, fault cases and archive/readback evidence.
 - [ ] M6: final correctness, QA, security, documentation and closeout.
 
@@ -42,10 +42,12 @@ infrastructure repository's existing secret delivery requirements.
 
 ## Verification and evidence
 
-[Validation matrix](artifacts/validation_matrix.md) is entirely pending.
-[Contract checkpoint](artifacts/20261110_contract_decision.md) is not ratified or
-committed. [Correctness](artifacts/20261110_correctness_review.md) and
-[security](artifacts/20261110_security_review.md) reviews are not performed.
+[Validation matrix](artifacts/validation_matrix.md) records actual local evidence
+and pending receiving gates. Contract ancestor is `d6e101ab8`. Independent
+[correctness](artifacts/20261110_correctness_review.md),
+[QA](artifacts/20261110_qa_review.md) and
+[security](artifacts/20261110_security_review.md) report zero open high/medium
+findings in the reviewed local candidate. No live deployment approval is implied.
 
 Run focused tests as behavior lands; required closeout includes broad Python,
 applicable frontend/stub checks, RQ graph validation and live job-tree inspection,
@@ -63,11 +65,11 @@ working-tree changes and do not create/switch branches.
 
 ## Handoff
 
-Start the [active ExecPlan](prompts/active/implementation_execplan.md) at M1 when
-implementation work is requested. This scaffold is not a completed contract
-checkpoint or deployment authorization. Prepare concrete reviews/configuration
-before any required approval; do not request repeated approval for already accepted
-product policy. Update this tracker and the ExecPlan at every milestone.
+Continue the [active ExecPlan](prompts/active/implementation_execplan.md) at the
+receiving M5 gate. [Deployment handoff](artifacts/deployment_handoff.md) links the
+inactive open-wepp-org package and runbook. Source implementation and local tests
+are complete subject to final gates below; live runtime identity, browser/download,
+production-equivalent workflow and worker-loss acceptance remain unexecuted.
 
 ## Execution update — 2026-11-10
 
@@ -81,3 +83,43 @@ and enqueued on the existing local default queue; artifact readback pending.
 Current source baseline is `3a113ac28df9c5b2cdf453a4223e1c42e83b81bb`.
 The local environment has no `kubectl` executable; live Kubernetes verification
 remains a deployment handoff prerequisite, not a claimed local result.
+
+## M1 checkpoint and implementation progress
+
+Contract ancestor: `d6e101ab8`, committed before implementation edits. The tracker
+revision entry was recorded after implementation began; the commit/review ancestry
+itself preceded every code edit. M1 contract review is complete; M2–M4 implementation
+and direct boundary validation are active. No cluster deployment has occurred.
+
+Local baseline `metastatic-interconnection` produced EPSG:32611, 37 x 26 pixels,
+962 valid cells, elevation range 989.341–1066.154 m and center query 1032.540 m.
+Raster SHA-256: `10b6b95c574f8a90e6fe5ebed0a56ae68f90f38129cd434c8d7cb04302698134`.
+Original job took 3.960 s. An isolated local worker then ran updated shared DEM
+code successfully in 3.684 s (job `a7b1626b-9783-4b2a-9675-181de81067b0`).
+Neither timing establishes a global performance budget.
+
+Focused gates: 14 original new boundary tests passed; ordinary regressions
+ultimately passed 150 tests across two runs after the worker test double acquired
+RQ's real `perform` interface. Six canonical archive tests passed, including
+interrupted restore, alias/extra raster rejection and byte preservation. Expanded
+protocol/real RQ rejection suite: 19 passed. Further integration/UI/gates pending.
+
+Interim independent reviews found archive aliases/extra protected paths, executable
+Pod hooks, positional-path task binding, science-to-finalization fingerprint drift,
+initialization failure truth, duplicate completion writes and stale observation
+publication. Fixes are implemented; post-fix review and final gates remain pending.
+
+## Local review and receiving preparation
+
+Correctness/security/QA passed after reviewed fixes; findings and failed evidence
+are retained. Real adapter/RQ/NoDb/Git/manifest fixture success and failure matrix
+passed. The QA manifest fault injects inside the real shared writer; it confirms
+READONLY remains, error state is durable and repeated finalize does not replay.
+Frontend: 124 suites/1069 tests passed, lint passed. Stub hygiene and regenerated
+RQ graph checks passed. Full Python and final focused gates are pending below.
+
+Reviewed inactive renderer/template/runbook/receiving package copied to
+`/workdir/open-wepp-org`; no active resource inclusion or image change. All guard
+consumers must be deployed before admission, and rollback must retain guards for
+existing declarative projects. This rationale and sequence are in
+`artifacts/deployment_handoff.md` and receiving `docs/operations/declarative-dem-canary.md`.

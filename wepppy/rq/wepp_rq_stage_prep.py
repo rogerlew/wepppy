@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.declarative.policy import require_task
+
 from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 import inspect
 
@@ -16,6 +18,7 @@ from .wepp_rq_stage_helpers import with_stage_read_projections
 
 def _prep_multi_ofe_rq(runid: str) -> None:
     """Prepare multi-OFE slope inputs prior to hillslope execution."""
+    require_task(get_wd(runid), "_prep_multi_ofe_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -42,6 +45,7 @@ def _prep_multi_ofe_rq(runid: str) -> None:
 
 def _prep_slopes_rq(runid: str) -> None:
     """Export slope files for each hillslope in preparation for WEPP runs."""
+    require_task(get_wd(runid), "_prep_slopes_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -68,6 +72,7 @@ def _prep_slopes_rq(runid: str) -> None:
 
 def _run_hillslopes_rq(runid: str) -> None:
     """Execute all queued hillslope WEPP runs for the scenario."""
+    require_task(get_wd(runid), "_run_hillslopes_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -86,6 +91,7 @@ def _run_hillslopes_rq(runid: str) -> None:
 
 def _prep_managements_rq(runid: str) -> None:
     """Export management files required for upcoming hillslope runs."""
+    require_task(get_wd(runid), "_prep_managements_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -107,6 +113,7 @@ def _prep_managements_rq(runid: str) -> None:
 
 def _prep_soils_rq(runid: str) -> None:
     """Export soil files required for upcoming hillslope runs."""
+    require_task(get_wd(runid), "_prep_soils_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -128,6 +135,7 @@ def _prep_soils_rq(runid: str) -> None:
 
 def _prep_climates_rq(runid: str) -> None:
     """Copy climate artifacts into the run directory for hillslope prep."""
+    require_task(get_wd(runid), "_prep_climates_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -149,6 +157,7 @@ def _prep_climates_rq(runid: str) -> None:
 
 def _prep_remaining_rq(runid: str) -> None:
     """Finalize hillslope preparation, including optional frost/baseflow assets."""
+    require_task(get_wd(runid), "_prep_remaining_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -209,6 +218,7 @@ def _prep_remaining_rq(runid: str) -> None:
 
 def _prep_watershed_rq(runid: str) -> None:
     """Generate watershed-scale WEPP inputs after hillslopes complete."""
+    require_task(get_wd(runid), "_prep_watershed_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)

@@ -1,10 +1,10 @@
 # Declarative DEM vertical slice
 
-**Status**: Open — M1 contract checkpoint approved, execution active
+**Status**: Open — local implementation reviewed; receiving canary pending
 
 **Timezone**: UTC
 
-**Owner**: Roger Lew; implementation agent to be assigned
+**Owner**: Roger Lew; Codex implementation and independent reviewers
 
 ## Overview
 
@@ -45,7 +45,7 @@ cost. One worker is conditional on the selected task not waiting for queued chil
 ## Implementation fidelity and evidence
 
 Target: faithful reuse of `wepppy/rq/project_rq.py:fetch_dem_rq` and existing
-scientific acquisition. This document is a scaffold; package completion requires
+scientific acquisition. Package completion requires
 wired execution and generated-output evidence on the target cluster. Local tests,
 mocked execution, or a new task that never serves a project cannot close it.
 
@@ -56,17 +56,16 @@ state, actual fetched raster identity and semantic readback (CRS, extent, shape,
 nodata and meaningful sample content), task/worker/image evidence, Git checkpoint,
 read-only state, and a fresh derived viewing result linked to the consumed raster.
 Verify normal browse/download and archive/restore preserve the visible records.
-Use real writers and readers under actual cluster identities/mounts/umask. No
-claim beyond planning is supported today; implementation, local validation,
-environment validation and deployment must be tracked separately.
+Use real writers and readers under actual cluster identities/mounts/umask. Local implementation and boundary tests are recorded in the validation ledger;
+environment validation and deployment remain separate receiving gates.
 
 ## Success Criteria
 
-- [ ] Contract checkpoint and two independent read-only reviews precede code edits.
+- [x] Contract checkpoint and two independent read-only reviews precede code edits.
 - [ ] Valid minimal definition produces a fresh ordinary project on open-wepp-org.
 - [ ] Exact approved image/schema admitted; actual task/container identity verified.
 - [ ] Real DEM semantic readback and visible task-linked Git provenance pass.
-- [ ] On-demand DEM baseline preserves behavior without an engine dependency.
+- [x] On-demand DEM baseline preserves behavior without an engine dependency.
 - [ ] Successful build finalizes read-only; protected UI/API/queued mutations fail.
 - [ ] Real on-demand derived viewing succeeds after finalization with bounded writes.
 - [ ] Failure, checkpoint loss, cancellation, worker interruption and duplicate
@@ -74,7 +73,7 @@ environment validation and deployment must be tracked separately.
 - [ ] Bootstrap is unavailable on declarative projects; ordinary Bootstrap unchanged.
 - [ ] Browse/download/archive/restore evidence, overhead measurements and rollback
       instructions are retained; failed evidence is not erased.
-- [ ] Correctness, QA and security reviews close all medium/high findings.
+- [x] Correctness, QA and security reviews close all medium/high findings.
 
 ## Security Impact and Review Gate
 
@@ -82,7 +81,8 @@ Impact: **high** (queue/worker deployment, image authority, path handling and
 read-only mutation permissions). Dedicated security review required in
 [security review](artifacts/20261110_security_review.md); correctness review is
 separate in [correctness review](artifacts/20261110_correctness_review.md).
-Both artifacts are pending, not approvals. Operator-approved images and source
+Independent local correctness, QA and security reviews passed; live deployment
+remains separately authorized. Operator-approved images and source
 access do not permit arbitrary code mounts, credentials or URLs.
 
 ## Compatibility and regression plan

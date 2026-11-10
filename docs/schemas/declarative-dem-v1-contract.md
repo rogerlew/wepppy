@@ -1,6 +1,6 @@
 # Declarative DEM v1 contract
 
-Status: proposed execution checkpoint, 2026-11-10; implementation conformance pending.
+Status: implemented and locally validated, 2026-11-10; cluster conformance pending.
 This bounded contract specializes [declarative model builds](declarative-model-build-spec.md).
 
 ## Scope and authority
@@ -30,7 +30,8 @@ No arbitrary paths, URLs, Python names, environment variables or secret referenc
 
 Deployment-owned approval JSON maps exact image references to `schema`, `protocol`,
 `platform` (`linux/amd64`) and `operation` (`fetch_dem_rq`). Exactly matching entries
-are required. The worker template and approval file are reviewed deployment inputs,
+are required for new admission. Revocation does not block status/cancel for an
+existing build. The worker template and approval file are reviewed deployment inputs,
 not model fields. An image may implement only one schema. No candidate digest is
 approved until publication and operator review; an empty approval file denies all.
 Invalid input or unavailable/mismatched runtime evidence causes no project or job
@@ -67,7 +68,7 @@ initialize over existing files. No custom storage root is accepted by production
 
 Before dispatch and again before verified completion, the operator engine reads
 the exact dedicated Pod and its Node through Kubernetes. Retain namespace, Pod
-name/UID, container name, declared image, runtime imageID/containerID, restart count,
+name/UID, node name, container name, declared image, runtime imageID/containerID, restart count,
 node architecture/OS, observation time and worker name. Require the approved
 single-platform image digest, linux/amd64, Running/ready container and zero restarts.
 Reject index/config digest ambiguity; only a runtime identity whose documented
@@ -82,6 +83,9 @@ path and still cross-checked against actual task observations; job fields or que
 names alone cannot prove runtime identity. No worker Kubernetes API credential.
 Reject template changes introducing image overlays, init/sidecar code injection,
 command overrides, PYTHONPATH or unreviewed environment/mount changes.
+Compare reviewed resource limits/requests and node placement too; the actual Node
+must satisfy the reviewed selector. This prevents accepting an oversize or
+misplaced worker under the same image identity.
 
 ## Visible records and publication
 

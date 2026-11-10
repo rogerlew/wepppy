@@ -255,10 +255,21 @@ class WepppyRqWorker(Worker):
 
         coverage_state = self._start_job_coverage(job)
         webhook_token = webhook_hooks.execution_started(job)
+        original_perform = job.perform
+
+        def protected_perform():
+            if wd is not None:
+                from wepppy.declarative.policy import require_queued_job
+                require_queued_job(wd, job)
+            return original_perform()
+
+        # RQ catches execution errors here and owns failed registry/result handling.
+        job.perform = protected_perform
         try:
             print(f"Starting job {job.id}")
             return super().perform_job(job, queue)
         finally:
+            job.perform = original_perform
             webhook_hooks.execution_returned(job, webhook_token)
             if coverage_state:
                 self._stop_job_coverage(coverage_state)

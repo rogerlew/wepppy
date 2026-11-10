@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 import logging
 import traceback
 from datetime import datetime
@@ -36,7 +37,7 @@ def _append_exception_log(runid: str, func_name: str) -> None:
         formatted = traceback.format_exc()
         with target.open("a", encoding="utf-8") as stream:
             stream.write(f"[{timestamp}] {func_name} failed\n{formatted}\n")
-    except Exception as exc:  # pragma: no cover - best-effort logging only
+    except Exception as exc:  # broad-except: best-effort logging must preserve original failure
         # Best-effort: never mask the original exception path while attempting to
         # write `exceptions.log`.
         LOGGER.debug(
@@ -51,12 +52,18 @@ def _append_exception_log(runid: str, func_name: str) -> None:
 def with_exception_logging(func: Callable[P, R]) -> Callable[P, R]:
     """Decorator that appends exceptions to ``exceptions.log`` under the run folder."""
 
+    signature = inspect.signature(func)
+
     @functools.wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        runid = None
         try:
+            runid = signature.bind(*args, **kwargs).arguments.get("runid")
+            if runid is not None:
+                from wepppy.declarative.policy import require_task
+                require_task(get_wd(runid), func.__name__)
             return func(*args, **kwargs)
-        except Exception:
-            runid = _extract_runid(args, dict(kwargs))
+        except Exception:  # broad-except: RQ telemetry boundary re-raises original task failure
             job = get_current_job()
             job_id = getattr(job, "id", None) if job is not None else None
             LOGGER.exception(

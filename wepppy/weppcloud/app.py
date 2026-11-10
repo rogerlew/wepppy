@@ -114,6 +114,32 @@ def _emit_request_correlation_id(response):
     return response
 
 
+@app.before_request
+def _protect_declarative_project():
+    values = request.view_args or {}
+    runid = values.get("runid")
+    config = values.get("config")
+    if not runid or not config:
+        return None
+    view = app.view_functions.get(request.endpoint)
+    changes_project = (request.method in {"POST", "PUT", "PATCH", "DELETE"}
+                       or "/tasks/" in request.path or "/bootstrap/" in request.path
+                       or getattr(view, "_requires_run_lifecycle_fence", False))
+    if not changes_project:
+        return None
+    from wepppy.declarative.records import ProtectedProjectError, marker
+    from wepppy.weppcloud.utils.helpers import authorize
+    try:
+        admission = marker(get_wd(runid))
+    except ProtectedProjectError:
+        admission = True
+    if admission is None:
+        return None
+    authorize(runid, config)
+    return jsonify({"error": {"code": "declarative_protected",
+                              "message": "Declarative projects are protected from editing"}}), 409
+
+
 @app.teardown_request
 def _reset_request_correlation_id(_exception: BaseException | None) -> None:
     token = getattr(g, _CORRELATION_TOKEN_KEY, None)

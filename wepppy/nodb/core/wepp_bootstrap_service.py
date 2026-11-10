@@ -37,6 +37,8 @@ class WeppBootstrapService:
         return mapping
 
     def run_git(self, wepp: "Wepp", args: list[str]) -> subprocess.CompletedProcess[str]:
+        from wepppy.declarative.policy import reject_mutation
+        reject_mutation(wepp.wd)
         result = subprocess.run(
             ["git", *args],
             cwd=wepp.wd,
@@ -106,6 +108,8 @@ class WeppBootstrapService:
         wepp.logger.info("Optimized Bootstrap repository with %d Git pack threads", threads)
 
     def init_bootstrap(self, wepp: "Wepp") -> None:
+        from wepppy.declarative.policy import reject_mutation
+        reject_mutation(wepp.wd)
         if not wepp._bootstrap_repo_exists():
             try:
                 self.run_git(wepp, ["init", "-b", "main"])

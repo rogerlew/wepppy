@@ -2453,6 +2453,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
             f"{current_app.config.get('SITE_PREFIX', '').rstrip('/')}/runs/{runid}/{config}/download/__ARTIFACT_RELPATH__"
         ),
     )
+    from wepppy.declarative.records import marker, read
+    context["is_declarative"] = marker(wd) is not None
+    context["declarative_build"] = read(wd, "provenance/build.json") if context["is_declarative"] else None
     return context
 
 @run_0_bp.route('/runs/<string:runid>/<config>/')

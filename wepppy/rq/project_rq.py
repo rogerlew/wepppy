@@ -1137,6 +1137,8 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, readonly={readonly})')
 
     wd = get_wd(runid)
+    from wepppy.declarative.policy import require_task
+    require_task(wd, "set_run_readonly_rq")
     with catalog_lifecycle_guard(wd):
         ron = Ron.getInstance(wd)
         previous_state = ron.readonly
@@ -1380,7 +1382,17 @@ def fetch_dem_rq(
         if ron.map.num_cols > ron.max_map_dimension_px or ron.map.num_rows > ron.max_map_dimension_px:
             raise Exception(f'Map size too large: {ron.map.num_cols}x{ron.map.num_rows}. Maximum is {ron.max_map_dimension_px}x{ron.max_map_dimension_px}.')
         
-        ron.fetch_dem()
+        from wepppy.declarative.observations import start_observation
+        observation = start_observation(ron, job)
+        try:
+            ron.fetch_dem()
+        except Exception:  # broad-except: acquisition evidence boundary
+            # Acquisition boundary: retain failed evidence and propagate science failure.
+            if observation is not None:
+                observation.finish(ron, succeeded=False)
+            raise
+        if observation is not None:
+            observation.finish(ron, succeeded=True)
         
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
@@ -1766,6 +1778,8 @@ def build_subcatchments_rq(
     Raises:
         Exception: Propagates failures from watershed delineation.
     """
+    from wepppy.declarative.policy import require_task
+    require_task(get_wd(runid), "build_subcatchments_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)

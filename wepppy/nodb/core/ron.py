@@ -597,6 +597,8 @@ class Ron(NoDbBase):
     # dem
     #
     def fetch_dem(self) -> None:
+        from wepppy.declarative.policy import require_task
+        require_task(self.wd, "fetch_dem_rq")
         assert self.map is not None
         self._dem_is_vrt = False
 

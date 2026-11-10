@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.declarative.policy import require_task
+
 import inspect
 import logging
 import os
@@ -85,6 +87,7 @@ def _run_published_features_export_profile(
 
 def _post_run_cleanup_out_rq(runid: str) -> None:
     """Move WEPP .out files into output directories once runs finish."""
+    require_task(get_wd(runid), "_post_run_cleanup_out_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -130,6 +133,7 @@ def _post_run_cleanup_out_rq(runid: str) -> None:
 
 def _analyze_return_periods_rq(runid: str) -> None:
     """Generate return period summaries for the completed hillslope runs."""
+    require_task(get_wd(runid), "_analyze_return_periods_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -165,6 +169,7 @@ def _analyze_return_periods_rq(runid: str) -> None:
 
 def _build_hillslope_interchange_rq(runid: str) -> None:
     """Create hillslope interchange parquet artifacts for downstream tools."""
+    require_task(get_wd(runid), "_build_hillslope_interchange_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -203,6 +208,7 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
 
 def _build_totalwatsed3_rq(runid: str) -> None:
     """Generate the aggregate watershed TotWatSed interchange dataset."""
+    require_task(get_wd(runid), "_build_totalwatsed3_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -238,6 +244,7 @@ def _build_totalwatsed3_rq(runid: str) -> None:
 
 def _run_hillslope_watbal_rq(runid: str) -> None:
     """Compute water balance metrics once hillslope interchange data exists."""
+    require_task(get_wd(runid), "_run_hillslope_watbal_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -258,6 +265,7 @@ def _run_hillslope_watbal_rq(runid: str) -> None:
 
 def _post_prep_details_rq(runid: str) -> None:
     """Export prep detail CSVs/Parquets after runs complete."""
+    require_task(get_wd(runid), "_post_prep_details_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -279,6 +287,7 @@ def _post_prep_details_rq(runid: str) -> None:
 
 def _post_watershed_interchange_rq(runid: str) -> None:
     """Generate watershed interchange artifacts and documentation."""
+    require_task(get_wd(runid), "_post_watershed_interchange_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -371,6 +380,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
 
 def _post_legacy_arc_export_rq(runid: str) -> None:
     """Rebuild the legacy Arc-compatible export bundle when requested."""
+    require_task(get_wd(runid), "_post_legacy_arc_export_rq")
     try:
         from wepppy.export import legacy_arc_export
 
@@ -390,6 +400,7 @@ def _post_legacy_arc_export_rq(runid: str) -> None:
 
 def _post_gpkg_export_rq(runid: str) -> None:
     """Rebuild published post-WEPP spatial exports (GeoPackage + FileGDB)."""
+    require_task(get_wd(runid), "_post_gpkg_export_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -411,6 +422,7 @@ def _post_gpkg_export_rq(runid: str) -> None:
 
 def post_dss_export_rq(runid: str) -> None:
     """Build DSS exports once hillslope interchange data is ready."""
+    require_task(get_wd(runid), "post_dss_export_rq")
     try:
         from wepppy.wepp.interchange import (
             archive_dss_export_zip,
@@ -521,6 +533,7 @@ def post_dss_export_rq(runid: str) -> None:
 
 def _post_make_loss_grid_rq(runid: str) -> None:
     """Generate raster loss grids once watershed outputs are available."""
+    require_task(get_wd(runid), "_post_make_loss_grid_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)

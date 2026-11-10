@@ -892,3 +892,82 @@ def test_revegetation_retired_and_failed_inputs_survive_archive_restore(archive_
     project.restore_archive_rq('demo', archive.name)
     for relative, content in expected.items():
         assert (root / relative).read_bytes() == content
+
+
+def _declarative_archive_project(environment):
+    from uuid import uuid4
+    from wepppy.declarative import records, schema
+    project, tmp_path, _, _ = environment
+    submission = str(uuid4())
+    runid, queue = schema.identities(submission)
+    root = tmp_path / runid
+    root.mkdir()
+    (root / 'dem').mkdir()
+    (root / 'dem/dem.tif').write_bytes(b'protected DEM')
+    (root / 'READONLY').touch()
+    admission = {'schema': schema.SCHEMA, 'runid': runid, 'queue': queue,
+                 'definition': {'submission_id': submission}, 'owner_id': 1,
+                 'attempt_id': str(uuid4()), 'finalizer_id': str(uuid4())}
+    with records.guard(root):
+        records.write(root, 'provenance/declarative.json', admission)
+        records.write(root, 'provenance/build.json', {'processing': 'succeeded', 'protection': 'readonly'})
+        records.write(root, 'provenance/protected.json', records.protected_manifest(root))
+    project.archive_rq(runid)
+    archive = next((root / 'archives').glob('*.zip'))
+    return project, root, runid, archive
+
+
+def test_declarative_archive_restore_preserves_records_and_raster(archive_rq_environment):
+    from wepppy.declarative import records
+    project, root, runid, archive = _declarative_archive_project(archive_rq_environment)
+    before = {p.relative_to(root): p.read_bytes() for p in (root / 'provenance').rglob('*') if p.is_file()}
+    (root / 'dem/dem.tif').write_bytes(b'damaged')
+    project.restore_archive_rq(runid, archive.name)
+    records.verify_protected(root)
+    assert (root / 'READONLY').is_file()
+    assert before == {p: (root / p).read_bytes() for p in before}
+
+
+@pytest.mark.parametrize('extra', ['dem/dem.vrt', 'extra.nodb', './dem/dem.tif'])
+def test_declarative_restore_rejects_extra_or_aliased_protected_paths(archive_rq_environment, extra):
+    from wepppy.declarative.records import ProtectedProjectError
+    project, root, runid, archive = _declarative_archive_project(archive_rq_environment)
+    with zipfile.ZipFile(archive, 'a') as zf:
+        zf.writestr(extra, b'changed consumer')
+    before = (root / 'dem/dem.tif').read_bytes()
+    with pytest.raises(ProtectedProjectError):
+        project.restore_archive_rq(runid, archive.name)
+    assert (root / 'dem/dem.tif').read_bytes() == before
+
+
+def test_interrupted_declarative_restore_retains_fence(archive_rq_environment, monkeypatch):
+    from wepppy.declarative import policy, records
+    from wepppy.rq import project_rq_archive as helper
+    project, root, runid, archive = _declarative_archive_project(archive_rq_environment)
+    original = helper._remove_restore_directory
+    def interrupted(path):
+        original(path)
+        if path.name == 'dem':
+            raise OSError('injected interrupted extraction')
+    monkeypatch.setattr(helper, '_remove_restore_directory', interrupted)
+    with pytest.raises(OSError):
+        project.restore_archive_rq(runid, archive.name)
+    assert not (root / 'dem').exists()
+    assert (root / 'READONLY').is_file()
+    assert records.marker(root)['runid'] == runid
+    with pytest.raises(records.ProtectedProjectError):
+        policy.reject_mutation(root)
+
+
+def test_ordinary_restore_rejects_aliased_declarative_marker(archive_rq_environment):
+    from wepppy.declarative.records import ProtectedProjectError
+    project, tmp_path, _, _ = archive_rq_environment
+    root = tmp_path / 'ordinary'
+    (root / 'archives').mkdir(parents=True)
+    (root / 'keep.txt').write_text('keep')
+    archive = root / 'archives/incoming.zip'
+    with zipfile.ZipFile(archive, 'w') as zf:
+        zf.writestr('./provenance/declarative.json', '{}')
+    with pytest.raises(ProtectedProjectError):
+        project.restore_archive_rq('ordinary', archive.name)
+    assert (root / 'keep.txt').read_text() == 'keep'

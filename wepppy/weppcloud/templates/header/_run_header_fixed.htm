@@ -234,6 +234,7 @@
                 <input id="checkbox_readonly"
                        type="checkbox"
                        data-project-toggle="readonly"
+                       {% if is_declarative | default(false) %}disabled{% endif %}
                        {% if current_ron.readonly %}checked{% endif %}>
                 <span>Readonly</span>
               </label>
@@ -241,6 +242,7 @@
                 <input id="checkbox_public"
                        type="checkbox"
                        data-project-toggle="public"
+                       {% if is_declarative | default(false) %}disabled{% endif %}
                        {% if current_ron.public %}checked{% endif %}>
                 <span>Public</span>
               </label>

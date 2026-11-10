@@ -915,6 +915,12 @@ def authorize_and_handle_with_exception_factory(
             if request.method in {"POST", "PUT", "PATCH", "DELETE"} or getattr(
                 func, "_requires_run_lifecycle_fence", False
             ):
+                from wepppy.declarative.policy import reject_mutation
+                from wepppy.declarative.records import ProtectedProjectError
+                try:
+                    reject_mutation(get_wd(runid))
+                except ProtectedProjectError as exc:
+                    return error_factory(str(exc), status_code=409, code=exc.code)
                 from wepppy.rq.submission_recovery import (
                     RqSubmissionConflict,
                     rq_submission_lock,

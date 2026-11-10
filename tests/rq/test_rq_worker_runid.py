@@ -27,6 +27,9 @@ class _DummyJob:
     def save(self) -> None:
         self.saved = True
 
+    def perform(self) -> bool:
+        return True
+
 
 def _build_worker(monkeypatch: pytest.MonkeyPatch) -> WepppyRqWorker:
     worker = object.__new__(WepppyRqWorker)

@@ -111,6 +111,25 @@ async def run_mutation_lifecycle_middleware(request: Request, call_next):
             exc.message, status_code=exc.status_code, code=exc.code
         )
     runid = match.group(1)
+    if not request.url.path.rstrip("/").endswith(("/session-token", "/archive", "/restore-archive")):
+        from .auth import authorize_run_access, require_jwt
+        from .responses import error_response
+        from wepppy.weppcloud.utils.helpers import get_wd
+        from wepppy.declarative.policy import reject_mutation
+        from wepppy.declarative.records import ProtectedProjectError, marker
+        try:
+            wd = get_wd(runid)
+            try:
+                protected = marker(wd) is not None
+            except ProtectedProjectError:
+                protected = True
+            if protected:
+                authorize_run_access(require_jwt(request), runid)
+                reject_mutation(wd)
+        except AuthError as exc:
+            return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+        except ProtectedProjectError as exc:
+            return error_response(str(exc), status_code=409, code=exc.code)
     with _LIFECYCLE_REDIS_CLIENT(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         try:
             with rq_submission_lock(

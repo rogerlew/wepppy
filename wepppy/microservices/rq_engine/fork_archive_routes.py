@@ -787,6 +787,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
 
     try:
         wd = get_wd(runid)
+        from wepppy.declarative.policy import reject_mutation
+        from wepppy.declarative.records import ProtectedProjectError
+        try:
+            reject_mutation(wd)
+        except ProtectedProjectError as exc:
+            return error_response(str(exc), status_code=409, code=exc.code)
         if not _exists(wd):
             return error_response(
                 f"Error forking project, run_id={runid} does not exist",

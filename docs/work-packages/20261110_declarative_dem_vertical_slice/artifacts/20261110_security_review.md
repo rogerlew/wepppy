@@ -1,182 +1,144 @@
-# Security Review - Declarative DEM vertical slice
+# Security review — Declarative DEM vertical slice
 
-**Scaffold only — review NOT PERFORMED; release HOLD.** Complete the fields and checklists against the implemented revision; no findings or sign-off are asserted.
+## Review status and scope
 
-> Use this template when a work package has security impact beyond routine correctness/QA checks.
-> Link this artifact from the package tracker and closeout notes.
+Reviewer: `/root/dem_contract_security` (independent `security_reviewer`).
+Date: 2026-11-10. Security impact: **high**; dedicated review required.
+Contract ancestor: `d6e101ab8`; implementation reviewed in the working tree.
+This replaces the unperformed-review scaffold with actual findings and evidence.
 
-## Metadata
+**Local security findings: closed; zero open high/medium findings.** Contract review
+passed after SEC-C1/C2 amendments before implementation. The closing implementation
+recheck confirms SEC-I1–I5 remediation. Final release disposition still follows
+correctness/QA review and the required environment evidence; those gates are not
+substituted by this report. No image publication/live deployment authorization or
+risk acceptance is recorded.
 
-- **Package**: `docs/work-packages/20261110_declarative_dem_vertical_slice/`
-- **Reviewer**: [Name/agent]
-- **Date**: YYYY-MM-DD
-- **Scope reviewed**: [Files/routes/services]
-- **Commit/branch context**: [SHA or branch]
-- **Related artifacts**:
-  - Code review: `docs/work-packages/.../artifacts/..._code_review.md`
-  - QA review: `docs/work-packages/.../artifacts/..._qa_review.md`
+Reviewed application scope: `wepppy/declarative/`, `tools/declarative_dem.py`,
+NoDb mutation/read-only guards, Flask/rq-engine admission, RQ execution and direct
+task guards, Bootstrap, and canonical archive/restore changes. Reviewed deployment
+drafts: `/tmp/declarative-deploy-prep/templates/declarative-dem-pod.json` and
+`/tmp/declarative-deploy-prep/scripts/render-declarative-dem.py`. Those temporary
+artifacts are preparation material, not deployed or durable infrastructure changes.
 
-## Security Triage Decision
+Canonical authority: [DEM v1 contract](../../../schemas/declarative-dem-v1-contract.md),
+[contract decision](20261110_contract_decision.md), and the cross-linked NoDb,
+RQ, UI, Bootstrap and catalog contracts. Required generated-artifact and normal
+browse/archive evidence remains in the [validation ledger](validation_matrix.md).
 
-- **Security impact level**: `none | low | high`
-- **Dedicated security review required**: `yes | no`
-- **Triage rationale**: [Why this package does/does not change attack surface]
-- **Threat model assumptions**:
-  - [Assumption 1]
-  - [Assumption 2]
-  - [Assumption 3]
-- **Valid states that controls must preserve**: [Absent/empty/populated/legacy
-  states from the correctness review]
+## Findings and disposition
 
-## Findings
+| ID | Severity | Finding | Disposition and evidence |
+| --- | --- | --- | --- |
+| SEC-C1 | High | Project-local publication locking alone permits stale publication across restore. | Contract resolved before implementation: stable catalog lifecycle guard, identity/incarnation revalidation, and refusal during active/uncertain execution. Implementation uses that guard plus publication locking; observation replacement refusal has a direct regression. |
+| SEC-C2 | Medium | Incoming declarative archive identity and fence continuity were unspecified. | Contract resolved before implementation: same-build identity/records/hashes before deletion; preserve provenance and READONLY through interrupted restore. Canonical restore and fault tests added. |
+| SEC-I1 | High | Raw ZIP-name validation allowed a second normalized path to overwrite a hash-validated DEM; directory-mode restore could alter the preserved provenance fence. | Code corrected: validate normalized targets, reject duplicates/noncanonical paths and extra protected artifacts, detect incoming aliased markers on ordinary projects, exclude provenance directory modes. Canonical archive tests cover aliases, extra files and interrupted restore. |
+| SEC-I2 | High | Runtime template comparison omitted executable lifecycle hooks and probes. | Code corrected: compare lifecycle, startup/liveness/readiness probes and volumeDevices; defaults normalized only for known probe fields. Focused negative tests passed. |
+| SEC-I3 | Medium | New exception-decorator guard interpreted migration/GC positional filesystem paths as run IDs. | Code corrected: bind the named `runid` argument; non-run operations remain unchanged. Positional migration/GC regression passed. |
+| SEC-I4 | Medium | Direct subcatchment/stage task calls could write before reaching a NoDb lock. | Code corrected: explicit task guards added to subcatchment and stage entry points. Direct subcatchment/stage rejection regression passed. |
+| SEC-I5 | Medium | Runtime verifier ignored reviewed resource limits and scheduling selection, and omitted node identity from retained evidence. | Resolved after reproduced failure: compare resources and nodeSelector/affinity/scheduler/runtimeClass/priority, check observed Node labels against reviewed selector, and retain strict `node_name` identity. Closing direct reproduction accepts the approved template and refuses both altered limits and unexpected placement; focused regression passed. |
 
-| ID | Severity | Surface | Description | Evidence | Required action | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| SEC-01 | High/Medium/Low | [surface name] | [what can go wrong] | [file/test/log reference] | [specific fix] | Open/Resolved/Accepted-risk |
+## Threat model and surface assessment
 
-Risk acceptance authority: `Accepted-risk` requires security reviewer recommendation plus explicit package owner acknowledgment in Sign-off.
+- Operator CLI, reviewed approval file/template, Kubernetes control plane, approved
+  image and existing deployment credentials are trusted. The public model definition
+  cannot select code, mounts, commands, credentials, paths or arbitrary URLs.
+- Public source/public-project admission is explicit. The existing elevation service
+  remains unauthenticated; this review grants no private-project/source capability.
+- New metadata is additive. Missing marker and empty provenance directory preserve
+  ordinary project behavior; malformed/empty/symlinked marker denies mutation.
+- Admission owns the project before science. Fixed job IDs, queue binding and durable
+  exclusive claims deny duplicate scientific execution; missing/uncertain work
+  cannot authorize replay. Terminal RQ state alone does not prove killed-child cleanup.
+- Backend and direct-task guards protect scientific state; controls alone are not
+  authority. NoDb read-only clearing, public-state changes and Bootstrap reject
+  before mutation. Operational archives/logs remain bounded exceptions.
+- Git uses explicit paths, disabled hooks/signing/fsmonitor, sanitized Git environment
+  and restricted local repository configuration; no remote transport or raster blobs.
+  Atomic publication and symlink refusal are exercised on actual files.
+- Container draft keeps UID 1000/GID 993, non-root, dropped capabilities, read-only
+  root filesystem, read-only geodata/secrets, and disabled service-account tokens.
+  It adds one dedicated queue/Pod without changing ordinary queues. Capacity and
+  actual mount/identity/umask parity remain deployment evidence requirements.
+- External access reuses the existing fixed WMESQUE source resolver. No new dependency,
+  public submission endpoint, secret-management system or cluster privilege is added.
+- Results/records retain fixed sanitized errors instead of provider/database exception
+  text. Existing ordinary exception logging is unchanged; runtime logs still require
+  normal access and sanitation before package retention.
 
-## Verdict
+## Reviewer-run validation
 
-- **Gate status**: `pass | fail`
-- **Unresolved findings**:
-  - High: [count]
-  - Medium: [count]
-  - Low: [count]
-- **Release recommendation**: [ship/ship-with-conditions/hold]
+`wctl run-pytest tests/rq/test_declarative_dem.py
+ tests/rq/test_declarative_dem_integration.py --maxfail=1`
+passed **22 tests** in 16.41 seconds, with 12 dependency/RQ deprecation warnings.
+This exercises actual Git/filesystem/raster boundaries, direct policy and Bootstrap
+refusal, the real RQ failed registry, and a fixture-backed adapter/NoDb/finalizer/view
+flow. The source acquisition, owner database registration and Kubernetes identity
+in that lifecycle test are fixtures; it is explicitly not cluster/source evidence.
 
-## Surface Checks
+Reviewer also reproduced SEC-I5 with the staged Pod template and direct `observe()`
+invocation: unexpected node/resource limits were accepted and node identity absent.
+`wctl run-pytest tests/rq/test_project_rq_archive.py -k declarative --maxfail=1`
+passed **6 tests**, 56 deselected, in 9.69 seconds. This exercises actual canonical
+archive creation/restoration, protected-byte retention, extra/aliased member refusal,
+and interrupted restore fence retention. Scoped documentation lint also passed.
 
-### 0) Valid-State Non-Interference and User Experience
+Closing SEC-I5 verification repeated the direct staged-template experiment after
+remediation: the approved template passed and retained `worker-dell-01`; independently
+altered limits and frontend-node placement both raised `AdmissionError`.
+`wctl run-pytest tests/rq/test_declarative_dem.py -k runtime_rejects --maxfail=1`
+passed **1 test**, 21 deselected, in 8.89 seconds. No live Pod was involved.
+The staged renderer produced Pod, definition, approvals, ConfigMap and kustomization
+artifacts under `/tmp/dem-security-render-check` using a synthetic all-`a` digest,
+which is test input only and does not approve a published execution image.
 
-- [ ] The linked correctness review enumerates absent, empty, populated,
-  supported legacy, and hostile states.
-- [ ] Every security control preserves all valid states and their contracted
-  user-visible outcomes.
-- [ ] Expected absence of optional state is not rejected merely because a
-  containment helper expects a preexisting object.
-- [ ] Every new user-reachable exception is limited to a malformed or hostile
-  state, or is explicitly authorized by the canonical contract.
-- [ ] At least one direct, unmocked test exercises the changed security
-  boundary for both a valid state and a hostile state.
-- [ ] Security approval does not claim or replace correctness/UX approval.
+## Remaining release evidence
 
-### 1) Auth, Session, and Authorization
+Final release review must inspect the final revision after correctness/QA
+disposition. Retain cancellation, worker interruption, checkpoint
+publication failure and finalization-failure results, including truthful outcomes
+and no replay. Finish ordinary API/Bootstrap parity and scoped/broad required gates.
 
-- [ ] Entry points enforce expected authn/authz checks for changed routes/services.
-- [ ] Role checks and scope checks are explicit, least-privilege, and regression-tested.
-- [ ] Session/JWT token validation paths preserve canonical contracts.
-- [ ] CSRF protections are preserved for browser session mutation paths.
-- [ ] Cross-service auth token mint/verify flows are not widened unintentionally.
-- [ ] Error paths do not disclose token contents or auth internals.
+The target deployment must retain approved published platform digest, actual Pod/
+container/worker binding, selected node/capacity, identities/mounts/umask, real DEM
+acquisition/readback, normal authorized browse/download, archive/restore, and the
+fresh zero-write elevation result. Unavailable cluster evidence keeps the package
+open. Neither mocked Pod data nor this review supplies live-change authorization.
 
-### 2) Secrets and Credential Handling
+## Receiving deployment preparation review
 
-- [ ] No new plaintext secrets in repository files, env defaults, or docs examples.
-- [ ] `*_FILE` secret-file contract is preserved where applicable.
-- [ ] No secrets passed in argv, query params, or logs.
-- [ ] Added/changed services mount only required secrets (least privilege).
-- [ ] Rotation and rollback behavior are documented for new secret dependencies.
-- [ ] Changed code avoids fallback wrappers that silently skip missing secrets.
+The staged operations runbook and receiving package/tracker were independently
+reviewed before infrastructure-repository transfer. **Static preparation PASS**;
+no additional medium/high findings. Scope is inactive files only, with no new
+RBAC, Flux application, ingress or service. Copying reviewed preparation does not
+activate resources or approve a candidate image.
 
-### 3) Input Validation and Output Safety
+The runbook correctly accounts for the parent app image transformer and requires
+the dedicated worker, definition, approval entry and candidate fleet to agree.
+It forbids admission until all guard consumers are healthy and affected writers
+are settled, preserves ordinary compute slots, and requires an explicit deployment
+window. Recovery retains project/provenance/READONLY and a compatible guard-bearing
+image; reverting to pre-feature images while serving declarative projects is
+explicitly prohibited. Capacity, runtime imageID representation and actual access/
+artifact evidence remain receiving gates.
 
-- [ ] Untrusted input is validated at boundaries (types, ranges, enum membership).
-- [ ] File/path inputs block traversal and out-of-scope path access.
-- [ ] Rendered output paths avoid unsafe HTML/markdown/script injection.
-- [ ] URL fetch/download flows enforce allowlist or explicit safety constraints.
-- [ ] Unsafe deserialization and shell interpolation patterns are absent.
-- [ ] Failing validation returns explicit contract-compliant errors.
+Reviewed preparation SHA-256 identities (relative to `/tmp/declarative-deploy-prep`):
 
-### 4) File System and Run-Tree Boundaries
+| File | SHA-256 |
+| --- | --- |
+| `templates/declarative-dem-pod.json` | `c0852101b51aeaec63a8b06667a36a5dd6a01276beb7055c5db6573c8d741653` |
+| `scripts/render-declarative-dem.py` | `b210e500516b403f1050d122476c57c187e03897c2875805793051bcf5287f6f` |
+| `docs/operations/declarative-dem-canary.md` | `b12401d697be1f7a5303d0bc9d1704a2b3bb4e0d7b60f180fd80e8e953debce0` |
+| `docs/work-packages/20261110-declarative-dem-canary/package.md` | `581c4a5fc496db40f30fe8f0803560d2006c571f88bac0d9104335fa05344a8f` |
+| `docs/work-packages/20261110-declarative-dem-canary/tracker.md` | `b5c5cfc3a6cad747ff9c04af4857d2c3ee563f73ff6a599829a1cb9864a78447` |
 
-- [ ] Writes remain inside intended run roots (`/wc1/runs/...`) and approved paths.
-- [ ] No new path joins allow escaping run scope via symlink or relative path tricks.
-- [ ] Export/download paths avoid leaking unrelated files.
-- [ ] Temporary files and artifacts are cleaned up or intentionally retained with policy.
-- [ ] Permissions for generated files/directories are least-privilege.
-
-### 5) Queue, Worker, and Subprocess Surfaces
-
-- [ ] Enqueue sites and dependency edges remain intentional and documented.
-- [ ] Worker task inputs are validated before shell/subprocess/file operations.
-- [ ] Subprocess invocation avoids shell injection and unbounded command composition.
-- [ ] Queue cancellation/retry paths cannot bypass auth or data ownership boundaries.
-- [ ] `wctl check-rq-graph` has been run when queue wiring changed.
-- [ ] Failure handling preserves canonical response/error contracts.
-
-### 6) Agentic Tooling and MCP Surfaces
-
-- [ ] Agent/tool calls do not grant broader permissions than the parent request needs.
-- [ ] No path for implicit privilege escalation through subagents or helper tools.
-- [ ] MCP/tool tokens and credentials are scoped and not leaked in logs/artifacts.
-- [ ] Tool execution constraints are explicit when running commands or file writes.
-- [ ] Guardrails block unauthorized network egress or public artifact publication.
-
-### 7) Network and External Integrations
-
-- [ ] New outbound calls are justified, constrained, and observable.
-- [ ] Timeouts/retries avoid denial-of-service amplification and unsafe fallback loops.
-- [ ] Internal-only endpoints are not exposed through new proxy/route changes.
-- [ ] Rate limits/throttles are considered for high-cost or abuse-prone endpoints.
-- [ ] External dependency trust assumptions are documented.
-
-### 8) CI/CD and Supply Chain
-
-- [ ] Self-hosted runner access scope is unchanged or tightened.
-- [ ] Workflow token permissions are minimal for changed jobs.
-- [ ] Build/test scripts avoid exposing credentials in logs.
-- [ ] New third-party dependencies passed precedent and risk checks.
-- [ ] Pinned versions/digests are used where policy requires.
-
-### 9) Data Integrity, Locking, and Concurrency
-
-- [ ] NoDb lock/dump contracts are preserved (`dump_and_unlock`, lock scope).
-- [ ] Cross-process shared state updates remain atomic and auditable.
-- [ ] Redis keyspaces and TTL behavior are unchanged unless explicitly planned.
-- [ ] Concurrent mutation paths include regression coverage for race conditions.
-- [ ] Recovery after partial failure leaves state consistent and diagnosable.
-
-### 10) Logging, Monitoring, and Incident Readiness
-
-- [ ] Logs include enough context for incident triage without exposing secrets.
-- [ ] Security-relevant events have observable signals (auth failures, denials, exfil attempts).
-- [ ] New error handlers do not swallow exceptions silently.
-- [ ] Alerting/operational checks are updated for new high-risk surfaces.
-- [ ] Rollback and containment steps are documented for the changed scope.
-
-## Validation Evidence
-
-- Automated checks run:
-  - `wctl run-pytest [target]`
-  - `wctl check-rq-graph` (if queue wiring touched)
-  - `wctl run-npm lint && wctl run-npm test` (if frontend changed)
-  - `wctl doc-lint --path [changed docs]` (if docs changed)
-- Manual checks run:
-  - [Check name] - [result]
-  - [Check name] - [result]
-
-## Residual Risk
-
-- **Accepted residual risks**:
-  - [risk + justification + owner]
-- **Follow-up packages/issues**:
-  - [link/path + scope]
+These hashes identify the preparation reviewed here. The final published candidate,
+rendered overlay and live target still require the receiving deployment review.
 
 ## Sign-off
 
-- **Security reviewer**: [name/agent], YYYY-MM-DD
-- **Package owner**: [name/agent], YYYY-MM-DD
-
-## Artifact Observability Gate (Required)
-
-Follow [artifact observability](../../../standards/artifact-observability-standard.md).
-Reject hidden-only/download-only project records or unapproved exclusions.
-
-- [ ] Comparable module and canonical artifact inventory are named.
-- [ ] Inputs, intermediates, failure evidence, provenance and outputs are visible
-  through established project tools under normal project authorization.
-- [ ] Real writer/failure tests prove retention; canonical archive/restore tests
-  prove member coverage and byte equality; live browser/download evidence exists.
-- [ ] Any exception has explicit operator approval, exact scope and a canonical
-  decision. Safety/atomicity arguments alone do not override observability.
+Contract checkpoint: approved after SEC-C1/C2 fixes.
+Local implementation security recheck: **PASS**, zero open high/medium findings.
+Final release/package closure remains pending correctness/QA disposition and
+production-equivalent evidence. Reviewer made no implementation or infrastructure
+repository changes and performed no live deployment.

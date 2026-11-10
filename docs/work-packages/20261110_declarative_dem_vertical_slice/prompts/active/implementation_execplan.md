@@ -22,14 +22,15 @@ unit test. Production wepp.cloud remains out of rollout scope.
 
 
 - [x] (2026-11-10 20:18 UTC) Scaffold plan and evidence/review records.
-- [ ] M1 discovery, canonical contract amendments, independent reviews and checkpoint.
-- [ ] M2 shared task provenance with real artifact and on-demand parity tests.
-- [ ] M3 operator engine, image adapter and dedicated worker routing.
-- [ ] M4 protected finalization and real on-demand derived viewing.
+- [x] M1 discovery, canonical amendments, two independent reviews and ancestor `d6e101ab8`.
+- [x] M2 shared task provenance with real artifact and on-demand parity tests.
+- [x] M3 operator engine/image adapter; reviewed inactive deployment configuration.
+- [x] M4 real local protection/viewing; live endpoint acceptance remains M5.
 - [ ] M5 cluster acceptance, fault/recovery cases and retention evidence.
 - [ ] M6 independent final reviews, required gates and closeout.
 
-- [x] (2026-11-10) M1 concrete contract and two independent reviews; checkpoint commit pending.
+- [x] (2026-11-10) Independent source correctness, QA and security reviews passed.
+- [x] (2026-11-10) Reviewed inactive receiving configuration and runbook copied to open-wepp-org.
 
 ## Surprises & Discoveries
 
@@ -72,8 +73,10 @@ handoff; do not claim M5 cluster evidence from local tests.
 ## Outcomes & Retrospective
 
 
-Only the scaffold exists. No scientific task, deployment, contract review or
-runtime validation has run. This package cannot close until M5 demonstrates the
+Contract checkpoint and local on-demand science/readback are complete. Shared
+observations, bounded adapter, engine and protection are implemented with focused
+tests; broader integration, deployment preparation and final reviews are active.
+No cluster deployment or cluster runtime validation has run. This package cannot close until M5 demonstrates the
 real user workflow and M6 closes reviews. Planning completion is not implementation
 completion.
 
@@ -212,7 +215,7 @@ Incompatible optional reports may fail visibly; no compatibility layer is added.
 
 Prepare rendered manifests, image identity, target context, impact, rollback and
 commands using current deployment runbooks. Observe all live-change authorization
-requirements; the current task scaffolds only. Do not apply broad manifests or
+requirements; the current task prepares source and an inactive handoff only. Do not apply broad manifests or
 alter production Compose. Retain exact revisions and workload identifiers, not
 secrets. Validate the whole path under actual identities, groups, mounts and umask.
 
@@ -341,3 +344,19 @@ not claim complete task enrollment or a production Compose rollout.
 Revision note, 2026-11-10 20:18 UTC: created the planning scaffold to turn accepted
 architecture into a bounded, verifiable end-to-end slice; implementation remains
 pending the contract checkpoint and the appropriate execution task.
+
+## Final local review update — 2026-11-10
+
+All independent source high/medium findings are resolved. The real local RQ
+fixture matrix covers successful publication/finalization/viewing, duplicate
+submission, source/initialization/checkpoint/grid/finalizer failures and queued
+cancellation. A real manifest fault preserves READONLY and truthfully fails.
+Actual provider acquisition retains identical baseline DEM bytes and explicit
+unknown registry identity. M5 cannot be inferred from these local observations.
+
+The receiving package/runbook is inactive in open-wepp-org. Parent image
+transformation means the fleet and dedicated image must match. Existing consumers
+must receive mutation guards before admission, and retained declarations prohibit
+rollback to a pre-guard image. This deployment sequencing is documented in
+`artifacts/deployment_handoff.md`. Full Python and final focused/docs gates are
+tracked in the validation ledger before local handoff.

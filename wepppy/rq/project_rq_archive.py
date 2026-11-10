@@ -290,6 +290,8 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         authority_wd = runtime.project_config_authority_wd(runid)
         roads_guard = roads_lifecycle.operation(wd_path, shared=True, create=True)
         with catalog_lifecycle_guard(wd_path), runtime.project_config_lifecycle_guard(authority_wd), roads_guard:
+            from wepppy.declarative.policy import require_settled
+            require_settled(wd_path)
             locked = [name for name, state in runtime.lock_statuses(runid).items() if name.endswith(".nodb") and state]
             if locked:
                 raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
@@ -425,7 +427,12 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
+            from wepppy.declarative.archive import validate_restore
+            preserve_declarative = validate_restore(wd, zf, restore_members)
             directory_modes = _restore_directory_modes(restore_members, wd)
+            if preserve_declarative:
+                directory_modes = {path: mode for path, mode in directory_modes.items()
+                                   if path.relative_to(wd).parts[0] != "provenance"}
             reclaimable_bytes, _ = _calculate_run_payload_bytes(wd)
             required_bytes = _estimate_archive_required_bytes(restore_bytes, restore_file_count)
             _assert_sufficient_disk_space(
@@ -464,6 +471,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_started = True
                 try:
                     for entry in sorted(wd.iterdir()):
+                        if preserve_declarative and entry.name in {"provenance", "READONLY"}:
+                            continue
                         if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
                             continue
 
@@ -487,6 +496,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                         os.chmod(directory, mode | 0o700)
 
                     for member, target_path, relative_target in restore_members:
+                        if preserve_declarative and relative_target.parts[0] in {"provenance", "READONLY"}:
+                            continue
                         if member.is_dir():
                             target_path.mkdir(parents=True, exist_ok=True)
                             runtime.publish_status(status_channel, f"Restored directory {relative_target}")
@@ -539,6 +550,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
 
                 for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
                     os.chmod(directory, mode)
+                if preserve_declarative:
+                    from wepppy.declarative.records import verify_protected
+                    verify_protected(wd)
 
         from wepppy.nodb.persistence_events import notify_committed
         notify_committed(str(notification_wd), runid, "lifecycle")

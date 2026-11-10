@@ -249,6 +249,8 @@ def _validate_with_pool(entries: list[Tuple[str, bytes]]) -> None:
 
 
 def main() -> int:
+    from wepppy.declarative.policy import reject_mutation
+    reject_mutation(_git_dir().resolve().parent)
     auth_user = _resolve_auth_user()
     updates = _parse_updates(sys.stdin)
     if not updates:
@@ -290,6 +292,6 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except Exception as exc:
+    except Exception as exc:  # broad-except: Git hook process boundary reports rejection
         sys.stderr.write(f"Bootstrap validation failed: {exc}\n")
         sys.exit(1)

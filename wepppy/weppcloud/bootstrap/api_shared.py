@@ -157,6 +157,8 @@ def ensure_bootstrap_eligibility(
     email: str | None = None,
     require_user_access: bool = False,
 ) -> tuple[Any, Any | None]:
+    from wepppy.declarative.policy import reject_mutation
+    reject_mutation(bootstrap_wd(runid))
     run = _resolve_run_record(runid)
     if run is None:
         raise BootstrapOperationError("run not found", status_code=400)
@@ -186,6 +188,8 @@ def bootstrap_wd(runid: str) -> str:
 
 def ensure_bootstrap_opt_in(runid: str) -> Wepp:
     wd = bootstrap_wd(runid)
+    from wepppy.declarative.policy import reject_mutation
+    reject_mutation(wd)
     wepp = Wepp.getInstance(wd)
     if not wepp.bootstrap_enabled:
         raise BootstrapOperationError("bootstrap not enabled", status_code=400)

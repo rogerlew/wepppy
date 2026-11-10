@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.declarative.policy import require_task
+
 import inspect
 import logging
 from typing import Callable
@@ -83,6 +85,7 @@ def _log_complete_rq(
     send_message: Callable[[str], None] | None = send_discord_message,
 ) -> None:
     """Record final completion metadata and emit notifications for the run."""
+    require_task(get_wd(runid), "_log_complete_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -143,6 +146,7 @@ def _log_prep_complete_rq(
     send_message: Callable[[str], None] | None = None,
 ) -> None:
     """Record prep-only completion metadata and emit prep completion trigger."""
+    require_task(get_wd(runid), "_log_prep_complete_rq")
     try:
         job = get_current_job()
         wd = get_wd(runid)

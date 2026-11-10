@@ -106,9 +106,11 @@
     {% endcall %}
   {% endif %}
 
+  {% if not (is_declarative | default(false)) %}
   {% call ui.collapsible_card(title="Bootstrap", expanded=False, card_id="wepp_bootstrap") %}
     {% include "controls/bootstrap_pure.htm" %}
   {% endcall %}
+  {% endif %}
 
   <div class="wc-stack">
     {% call button_row() %}
