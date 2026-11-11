@@ -7,6 +7,31 @@ Owner: Roger
 Developer: codex
 Status: Approved
 
+
+## Browser authorization (2026-11-11)
+
+The [WebSocket authorization contract](../../docs/schemas/weppcloud-websocket-auth-contract.md)
+is authoritative for the handshake and message boundary. Browser clients first
+mint a service-specific, five-minute credential through the same-origin,
+cookie-only rq-engine `stream-token` route. They send `wepp-stream.v1` and
+`bearer.<credential>` subprotocols; only `wepp-stream.v1` is negotiated. The URL
+contains only the resolved `config` query value.
+
+Set `WEPP_AUTH_JWT_SECRETS_FILE` to the mounted signing key-ring file and
+`STATUS_ALLOWED_ORIGINS` to exact external origins (scheme and host, with port
+when non-default). Missing keys or an empty Origin list fail startup. Validation
+checks signature, exact run/config/service claims, session marker and SID fence
+in Redis DB 11, and JTI fence in DB 0 before upgrade or run-specific reads.
+Redis host/credentials come from the existing service Redis configuration.
+
+Expiry closes with code 4001 without a terminal hangup. The shared browser
+transport refreshes before expiry and bounds failed-upgrade retries. Health
+probes remain unauthenticated. Never log protocol credentials: both canonical
+Caddy configurations filter the incoming subprotocol header, and the service
+logs fixed failure categories. Deploy the browser, mint route, proxy filter,
+and both validators together; verify actual authorized messages before rollout.
+
+
 ## 1. Context
 
 The legacy `wepppy/microservices/status.py` service is a Tornado-based
@@ -68,7 +93,7 @@ timers are reliable, fatal errors are avoided, and instrumentation is built in.
 2. **Redis subscription**:
    - Channel names mirror legacy format `<runid>:<channel>`.
    - Each connection maintains its own Redis `PubSub` listener.
-   - On receiving messages, forward text payload to browser without mutation.
+   - On receiving messages, forward sanitized text payloads; preserve documented control and structured diagnostic fields.
 3. **Heartbeat**:
    - Server emits `ping` every N seconds (default 5s).
    - Connection closes if no `pong` within configured timeout (>60s).

@@ -1,4 +1,13 @@
 {
+    # Stream credentials are forwarded, but must never enter proxy error logs.
+    log default {
+        format filter {
+            wrap json
+            fields {
+                request>headers>Sec-Websocket-Protocol delete
+            }
+        }
+    }
 	auto_https off
 }
 

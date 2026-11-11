@@ -78,6 +78,7 @@ describe("Command Bar production client", () => {
         FakeWebSocket.CONNECTING = 0;
         FakeWebSocket.OPEN = 1;
         window.WebSocket = FakeWebSocket;
+        window.WCHttp = { createStreamConnection: jest.fn(options => new FakeWebSocket("/status/" + options.runId + ":command")) };
         window.fetch = jest.fn((url, options = {}) => {
             if (url.endsWith("/agent/chat") && options.method === "POST") {
                 return Promise.resolve(response({

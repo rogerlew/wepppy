@@ -17,7 +17,7 @@ Environment variables are prefixed with `STATUS_`. Common options:
 - `STATUS_LISTEN_ADDR` – bind address (default `:9002`).
 - `STATUS_PING_INTERVAL`, `STATUS_PONG_TIMEOUT` – WebSocket heartbeat timings.
 - `STATUS_REDIS_RETRY_BASE`, `STATUS_REDIS_RETRY_MAX`, `STATUS_REDIS_MAX_RETRIES` – control startup retry behavior. Use `0` retries for infinite.
-- `STATUS_ALLOWED_ORIGINS` – comma-separated list for strict Origin checks.
+- `STATUS_ALLOWED_ORIGINS` – required comma-separated exact external origins; empty fails startup.
 
 ## Local Development
 1. Build with `docker compose build status`.
@@ -38,3 +38,13 @@ Environment variables are prefixed with `STATUS_`. Common options:
 - **502 from Caddy:** Check `docker compose logs status` for retry messages; ensure the Redis healthcheck is passing.
 - **No updates received:** Verify the run/token pair matches the channel pattern `runid:topic`. Redis keyspace events must be enabled (`--notify-keyspace-events Kh` in docker-compose).
 - **High CPU/memory:** Inspect metrics and consider scaling websockets behind something like HAProxy if connections >5k.
+
+## Browser stream authorization
+
+Use the [canonical contract](../../docs/schemas/weppcloud-websocket-auth-contract.md).
+`WEPP_AUTH_JWT_SECRETS_FILE` must mount the shared signing key ring. The owned
+`services/streamauth` module validates every upgrade before run-specific Redis
+access. Browser clients mint through the same-origin cookie bridge and use the
+fixed plus bearer subprotocol pair. Keep proxy header filtering and static error
+logs intact; credentials must never enter retained diagnostics. Expiry is 4001,
+without terminal hangup. Health probes remain unauthenticated.

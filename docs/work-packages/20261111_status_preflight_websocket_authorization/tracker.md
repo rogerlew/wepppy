@@ -4,18 +4,15 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-11 15:49 UTC  
-**Current phase**: M0 operator lifecycle decisions and final checkpoint pending  
+**Current phase**: M4 validation and independent review
 **Finding**: F4 / SEC-04 (Medium; high likelihood)  
 **Change security impact**: high  
 **Starting revision**: `b7c2e44d5947aabeda22f19e55b0b91d7f0baca1`  
 **Dedicated security review**: `artifacts/20261111_security_review.md`
 
-M0 discovery, canonical draft, ADR-0141, dependency assessment and two
-independent read-only reviews are prepared. The exact lifecycle matrix remains
-unratified; no accepted checkpoint commit exists. No code, configuration, dependency, service,
-forest, or production change has occurred. The operator explicitly requires and
-authorizes a service-scoped **forest** redeploy and browser end-to-end validation
-as the final package gate. That authorization does not extend to production.
+M0 is ratified in standalone ancestor `6a06ad49a`. M1-M3 are implemented;
+focused checks pass and broad gates are running. Forest deployment and actual
+browser acceptance remain mandatory. Production deployment is not authorized.
 
 ## Task Board
 
@@ -28,13 +25,13 @@ as the final package gate. That authorization does not extend to production.
       preflight token handshakes.
 - [x] M0 discovery and two independent read-only reviews; canonical draft,
       dependency evaluation and ADR-0141 prepared (not accepted).
-- [ ] M0: ratify token/public-run/message contracts, evaluate the Go JWT option,
+- [x] M0: ratify token/public-run/message contracts, evaluate the Go JWT option,
       obtain two independent read-only reviews, and commit a standalone
       checkpoint ancestor.
-- [ ] M1: add the stream-token minting boundary and focused Python tests.
-- [ ] M2: add frontend credential transport, refresh/reconnect behavior,
+- [x] M1: add the stream-token minting boundary and focused Python tests.
+- [x] M2: add frontend credential transport, refresh/reconnect behavior,
       generated controller parity, and focused Jest tests.
-- [ ] M3: add status2/preflight2 pre-accept validation, Redis/session checks,
+- [x] M3: add status2/preflight2 pre-accept validation, Redis/session checks,
       exact Origin configuration, message redaction, and Go integration tests.
 - [ ] M4: run focused gates, full pytest, npm lint, full npm tests, and close
       correctness, QA, and security review findings.
@@ -71,10 +68,10 @@ current source before implementation.
   No forest1/wepp1/wepp2/wepp3/openwepp.org action is implied.
 - Decision: use a contract-first checkpoint because the change spans browser,
   RQ/session, Go services, Redis, and Compose security boundaries.
-- Proposed, not yet ratified: mint a short-lived run-bound stream token and send
+- Ratified: mint a short-lived run-bound stream token and send
   it through `Sec-WebSocket-Protocol`, with a fixed negotiated protocol and the
   bearer value excluded from the selected protocol and all retained evidence.
-- Proposed, not yet ratified: a five-minute default lifetime, explicit status2
+- Ratified: a five-minute default lifetime, explicit status2
   and preflight2 audiences, `status:read`/`preflight:read` scopes, exact run and
   session binding, and live marker/revocation checks.
 - Decision: no new JWT library or hand-written crypto may enter implementation
@@ -157,20 +154,12 @@ dirty work. Update this tracker and the active ExecPlan at every stopping point.
 Do not describe F4 as fixed until the actual forest browser gate and independent
 reviews pass. Production deployment remains separately authorized.
 
-## Execution stopping point (2026-11-11)
-
-Review receipt: `artifacts/20261111_m0_reviews.md`. Proposed durable contract:
-`docs/schemas/weppcloud-websocket-auth-contract.md`. Request ratification of
-ownerless no-cookie inspection, pending run-sync job/channel-bound status, and
-selected-project diagnostics. Review prepared message fixtures and obtain post-decision confirmation
-before the standalone ancestor. No implementation/tests/deployment gate is passed.
-
-Validation so far: ADR date checker passed (143 ADRs); new canonical draft doc
-lint passed. Final scoped docs lint results are recorded in the review receipt.
-
 ## Operator ratification (2026-11-11)
 
 The operator explicitly approved all three proposed lifecycle policies and
 instructed ratification and implementation. The canonical contract and ADR now
 record that approval. Final independent confirmation and standalone ancestor
 commit precede code edits; no further policy permission is required.
+
+M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
+approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.

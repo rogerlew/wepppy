@@ -188,7 +188,6 @@
         var wsUrl = protocol + "//" + host + "/weppcloud-microservices/status/" + encodeURIComponent(urlRunId) + ":" + encodeURIComponent(config.channel);
 
         var messages = [];
-        var reconnectAttempts = 0;
         var ws = null;
         var shouldReconnect = true;
         var renderTimeout = null;
@@ -481,10 +480,10 @@
             }
 
             shouldReconnect = true;
-            ws = new WebSocket(wsUrl);
+            ws = global.WCHttp.createStreamConnection({ runId: runId, config: options.config,
+                service: "status", channel: config.channel, jobId: options.jobId });
 
             ws.onopen = function () {
-                reconnectAttempts = 0;
                 try {
                     ws.send(JSON.stringify({ type: "init" }));
                 } catch (err) {
@@ -510,15 +509,14 @@
 
             ws.onclose = function () {
                 ws = null;
-                dispatch("status:disconnected", { willReconnect: shouldReconnect });
+                dispatch("status:disconnected", { willReconnect: false });
 
                 if (!shouldReconnect) {
                     return;
                 }
 
-                reconnectAttempts += 1;
-                var delay = Math.min(config.reconnectBaseMs * Math.pow(2, reconnectAttempts - 1), config.reconnectMaxMs);
-                setTimeout(connect, delay);
+                shouldReconnect = false;
+                appendMessage("Live updates unavailable. Reload the page to reconnect.");
             };
         }
 

@@ -7,6 +7,31 @@ Owner: Roger Lew
 Developer: codex
 Status: Approved
 
+
+## Browser authorization (2026-11-11)
+
+The [WebSocket authorization contract](../../docs/schemas/weppcloud-websocket-auth-contract.md)
+is authoritative for the handshake and message boundary. Browser clients first
+mint a service-specific, five-minute credential through the same-origin,
+cookie-only rq-engine `stream-token` route. They send `wepp-stream.v1` and
+`bearer.<credential>` subprotocols; only `wepp-stream.v1` is negotiated. The URL
+contains only the resolved `config` query value.
+
+Set `WEPP_AUTH_JWT_SECRETS_FILE` to the mounted signing key-ring file and
+`PREFLIGHT_ALLOWED_ORIGINS` to exact external origins (scheme and host, with port
+when non-default). Missing keys or an empty Origin list fail startup. Validation
+checks signature, exact run/config/service claims, session marker and SID fence
+in Redis DB 11, and JTI fence in DB 0 before upgrade or run-specific reads.
+Redis host/credentials come from the existing service Redis configuration.
+
+Expiry closes with code 4001 without a terminal hangup. The shared browser
+transport refreshes before expiry and bounds failed-upgrade retries. Health
+probes remain unauthenticated. Never log protocol credentials: both canonical
+Caddy configurations filter the incoming subprotocol header, and the service
+logs fixed failure categories. Deploy the browser, mint route, proxy filter,
+and both validators together; verify actual authorized messages before rollout.
+
+
 ## 1. Context
 
 The existing `microservices/preflight.py` Tornado application streams readiness
@@ -32,8 +57,7 @@ with the following outcomes:
 - Deterministic per-connection processing — no shared async state between
   unrelated runs.
 - Fast recovery from Redis outages or container restarts.
-- Backwards compatible wire protocol so the existing `/static/js/preflight.js`
-  can operate unchanged (or with opt-in enhancements).
+- Compatible checklist payloads; the browser uses the authorized shared transport.
 - Operational transparency: structured logs, metrics, and health checks.
 
 ## 3. Non-Goals

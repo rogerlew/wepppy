@@ -1598,6 +1598,8 @@ function controlBase() {
             const streamOptions = {
                 element: panelElement,
                 channel: config.channel || config.topic || null,
+                config: config.config,
+                jobId: config.jobId,
                 runId: config.runId || self.runId || window.runid || window.runId || null,
                 logLimit: typeof config.logLimit === "number" ? config.logLimit : undefined,
                 formatter: config.formatter,

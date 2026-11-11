@@ -1,12 +1,9 @@
 package checklist
 
 import (
-	"log/slog"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 // Payload represents the structure delivered to WebSocket clients.
@@ -19,7 +16,6 @@ type Payload struct {
 
 // Evaluate translates raw Redis hash data into the preflight checklist and lock statuses.
 func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
-	debugDumpState("Evaluate", prep)
 
 	check := map[string]bool{
 		"sbs_map":         prep["attrs:has_sbs"] == "true",
@@ -184,12 +180,11 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 
 	locks := make(map[string]bool)
 	for k, v := range prep {
-		if len(k) > 7 && k[:7] == "locked:" {
+		if len(k) > 7 && k[:7] == "locked:" && allowedLocks[k[7:]] {
 			locks[k[7:]] = v == "true"
 		}
 	}
 
-	debugDumpChecklist("Evaluate", check, locks)
 	return check, locks
 }
 
@@ -294,24 +289,31 @@ func equalsIntPtr(a, b *int64) bool {
 	return *a == *b
 }
 
-var (
-	debugOnce sync.Once
-	logger    *slog.Logger
-)
-
-func debugLogger() *slog.Logger {
-	debugOnce.Do(func() {
-		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug,
-		}))
-	})
-	return logger
-}
-
-func debugDumpState(label string, prep map[string]string) {
-	debugLogger().Debug("checklist input", "label", label, "fields", prep)
-}
-
-func debugDumpChecklist(label string, checklist map[string]bool, locks map[string]bool) {
-	debugLogger().Debug("checklist output", "label", label, "checklist", checklist, "locks", locks)
+// Mirror the browser's finite lock icon vocabulary; never reflect arbitrary Redis keys.
+var allowedLocks = map[string]bool{
+"ron.nodb": true,
+"topaz.nodb": true,
+"watershed.nodb": true,
+"landuse.nodb": true,
+"shrubland.nodb": true,
+"rangeland_cover.nodb": true,
+"soils.nodb": true,
+"climate.nodb": true,
+"treatments.nodb": true,
+"rhem.nodb": true,
+"rhempost.nodb": true,
+"wepp.nodb": true,
+"wepppost.nodb": true,
+"observed.nodb": true,
+"unitizer.nodb": true,
+"baer.nodb": true,
+"disturbed.nodb": true,
+"rred.nodb": true,
+"lt.nodb": true,
+"ash.nodb": true,
+"ashpost.nodb": true,
+"debris_flow.nodb": true,
+"roads.nodb": true,
+"omni.nodb": true,
+"rusle.nodb": true,
 }

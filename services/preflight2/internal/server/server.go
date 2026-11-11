@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rogerlew/wepppy/services/streamauth"
 	"log/slog"
 	"net/http"
 	"regexp"
@@ -29,6 +30,7 @@ var (
 
 // Server wires together configuration, Redis access, and HTTP handling.
 type Server struct {
+	auth    *streamauth.Validator
 	cfg     config.Config
 	logger  *slog.Logger
 	redis   *redis.Client
@@ -54,12 +56,19 @@ func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
 		opts.DB = 0
 	}
 	opts.ContextTimeoutEnabled = true
+	auth, err := streamauth.New(cfg.SigningKeyFile, cfg.RedisURL, cfg.AllowedOrigins)
+	if err != nil {
+		return nil, err
+	}
 	client := redis.NewClient(opts)
 	if err := client.Ping(context.Background()).Err(); err != nil {
+		_ = client.Close()
+		_ = auth.Close()
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
 	return &Server{
+		auth:    auth,
 		cfg:     cfg,
 		logger:  logger,
 		redis:   client,
@@ -70,6 +79,9 @@ func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
 
 // Close releases redis resources.
 func (s *Server) Close() error {
+	if s.auth != nil {
+		defer s.auth.Close()
+	}
 	if s.redis == nil {
 		return nil
 	}
@@ -106,16 +118,17 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accept := &websocket.AcceptOptions{
-		OriginPatterns: s.cfg.AllowedOrigins,
+	grant, denied := s.auth.Authorize(r, runID, "", "preflight")
+	if denied != 0 {
+		http.Error(w, "stream authorization denied", denied)
+		return
 	}
-	if len(s.cfg.AllowedOrigins) == 0 {
-		accept.InsecureSkipVerify = true
-	}
+	// Exact Origin was checked above; do not use the library's wildcard host matching.
+	accept := &websocket.AcceptOptions{InsecureSkipVerify: true, Subprotocols: []string{streamauth.Protocol}}
 
 	conn, err := websocket.Accept(w, r, accept)
 	if err != nil {
-		s.logger.Warn("websocket accept failed", "run_id", runID, "error", err)
+		s.logger.Warn("websocket accept failed", "run_id", runID, "category", "upgrade")
 		return
 	}
 	defer func() {
@@ -123,10 +136,17 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}()
 	conn.SetReadLimit(s.cfg.MaxMessageSize)
 
-	ctx := r.Context()
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
+	expiry := time.AfterFunc(time.Until(grant.Expires), func() {
+		_ = conn.Close(websocket.StatusCode(streamauth.ExpiredCode), "stream credential expired")
+        cancel()
+	})
+	defer expiry.Stop()
 	connLogger := s.logger.With("run_id", runID)
 	connection := newConnection(s, connLogger, runID, conn)
-	if err := connection.run(ctx); err != nil {
+	connection.expires = grant.Expires
+ if err := connection.run(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			return
 		}
@@ -134,7 +154,7 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		if status == websocket.StatusNormalClosure || status == websocket.StatusGoingAway {
 			return
 		}
-		connLogger.Warn("connection ended with error", "error", err)
+		connLogger.Warn("connection ended with error", "error", "stream operation failed")
 	}
 }
 
@@ -150,6 +170,7 @@ type wsConn interface {
 }
 
 type connection struct {
+ expires time.Time
 	srv      *Server
 	logger   *slog.Logger
 	runID    string
@@ -180,20 +201,24 @@ func (c *connection) run(ctx context.Context) error {
 	c.srv.metrics.incConnections()
 	defer c.srv.metrics.decConnections()
 
-	defer c.sendHangup()
+	defer func() {
+		if c.expires.IsZero() || time.Now().Before(c.expires) {
+			c.sendHangup()
+		}
+	}()
 
 	group, ctx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		err := c.readLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Info("read loop exited", "error", err)
+			c.logger.Info("read loop exited", "error", "stream operation failed")
 		}
 		return err
 	})
 	group.Go(func() error {
 		err := c.pingLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Info("ping loop exited", "error", err)
+			c.logger.Info("ping loop exited", "error", "stream operation failed")
 		}
 		return err
 	})
@@ -203,7 +228,7 @@ func (c *connection) run(ctx context.Context) error {
 		}
 		err := c.redisLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			c.logger.Info("redis loop exited", "error", err)
+			c.logger.Info("redis loop exited", "error", "stream operation failed")
 		}
 		return err
 	})
@@ -224,7 +249,7 @@ func (c *connection) readLoop(ctx context.Context) error {
 			Type string `json:"type"`
 		}
 		if err := json.Unmarshal(data, &msg); err != nil {
-			c.logger.Warn("invalid client message", "error", err)
+			c.logger.Warn("invalid client message", "error", "stream operation failed")
 			continue
 		}
 		switch strings.ToLower(msg.Type) {
@@ -277,7 +302,7 @@ outer:
 		closePubsub := func(reason string) {
 			closeOnce.Do(func() {
 				if err := pubsub.Close(); err != nil {
-					c.logger.Debug("pubsub close error", "reason", reason, "error", err)
+					c.logger.Debug("pubsub close error", "reason", reason, "error", "stream operation failed")
 				}
 			})
 		}
@@ -303,7 +328,7 @@ outer:
 			closePubsub("subscribe ack failed")
 			attempt++
 			wait := c.redisBackoff(attempt, base)
-			c.logger.Warn("redis subscription failed", "attempt", attempt, "error", err, "backoff", wait)
+			c.logger.Warn("redis subscription failed", "attempt", attempt, "error", "stream operation failed", "backoff", wait)
 			if c.shouldAbort(attempt) {
 				return fmt.Errorf("redis subscription failed after %d attempts: %w", attempt, err)
 			}
@@ -327,7 +352,7 @@ outer:
 				}
 				attempt++
 				wait := c.redisBackoff(attempt, base)
-				c.logger.Warn("redis stream interrupted", "attempt", attempt, "error", err, "backoff", wait)
+				c.logger.Warn("redis stream interrupted", "attempt", attempt, "error", "stream operation failed", "backoff", wait)
 				if c.shouldAbort(attempt) {
 					return fmt.Errorf("redis stream interrupted after %d attempts: %w", attempt, err)
 				}
@@ -346,7 +371,7 @@ outer:
 					closePubsub("forward canceled")
 					return err
 				}
-				c.logger.Warn("failed to broadcast update", "error", err)
+				c.logger.Warn("failed to broadcast update", "error", "stream operation failed")
 			}
 		}
 	}

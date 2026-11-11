@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-11T17:39:56.966639+00:00",
+  "host": "forest",
+  "cwd": "/home/workdir/wepppy",
+  "branch": "master",
+  "ancestor": "6a06ad49a",
+  "compose": "docker/docker-compose.dev.yml",
+  "containers": [
+    {
+      "name": "/weppcloud",
+      "container": "36ef158e549528a6c46fe40b05e08e74c97e9619a9e0055370acd22890f83405",
+      "image": "sha256:b32d1c74915c7f7235c4f1bd02ff8e25808be7c8bac665e925a01785bc9f9afa",
+      "started": "2026-11-11T02:34:12.145555344Z",
+      "state": "running",
+      "user": "1000:993"
+    },
+    {
+      "name": "/wepppy-rq-engine",
+      "container": "a69d58c07c49f567d6379ff88d81d15ecca64cfc1a88f1547b219d53f13fb533",
+      "image": "sha256:b32d1c74915c7f7235c4f1bd02ff8e25808be7c8bac665e925a01785bc9f9afa",
+      "started": "2026-11-05T23:17:04.020190882Z",
+      "state": "running",
+      "user": "1000:993"
+    },
+    {
+      "name": "/weppcloud-status",
+      "container": "f29f58d4a2667853ceab67a89ecfc6bb950673e833b0514f7fd242dc34d9b633",
+      "image": "sha256:cd73a7d5e2e5ff9ae5a1dc96c838a700dc2abefb5811bc460c55e998062aa087",
+      "started": "2026-11-05T16:53:39.976055445Z",
+      "state": "running",
+      "user": "1000:993"
+    },
+    {
+      "name": "/weppcloud-preflight",
+      "container": "a1f391dba03dad63788180e6043ad8949f7682ffcee6875da6317d2d3aef0a9f",
+      "image": "sha256:2998547246db386779d40843ea3d42f80af10ddd0847fda140202968870499e7",
+      "started": "2026-11-05T16:53:39.740524891Z",
+      "state": "running",
+      "user": "1000:993"
+    },
+    {
+      "name": "/wepppy-caddy",
+      "container": "ca73565daf7fff2a676045e8f065cbbfc9b57f9364ccfc620239d73b3f385827",
+      "image": "sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90",
+      "started": "2026-11-05T16:53:43.233442216Z",
+      "state": "running",
+      "user": ""
+    }
+  ],
+  "queues": "All discovered queues had zero queued and started jobs; 11 workers registered. No jobs canceled."
+}

@@ -145,6 +145,7 @@ async function runTests() {
     origin: "https://example.com",
   };
   global.WebSocket = MockWebSocket;
+  global.WCHttp = { createStreamConnection: (options) => new MockWebSocket(options.url) };
 
   const statusPanel = new MockElement("status_panel", { "data-status-panel": true });
   const logElement = new MockElement("status_log", { "data-status-log": true });
@@ -242,10 +243,10 @@ async function runTests() {
   assert.strictEqual(stacktraceFetches[1], "b94b574f-7b1f-456a-93ab-b6a5c797d9dd", "Should strip rq: prefix");
   assert.strictEqual(stacktraceBody.textContent, "STACK:b94b574f-7b1f-456a-93ab-b6a5c797d9dd");
 
-  // Reconnect on close
+  // The shared authorized transport owns retries; terminal closure stops here.
   socket.close();
-  assert.ok(deferred.length > 0, "Reconnect should schedule retry");
-  deferred.pop()();
+  assert.strictEqual(MockWebSocket.instances.length, 1);
+  instance.connect();
   assert.strictEqual(MockWebSocket.instances.length, 2, "New WebSocket should spawn");
 
   const nextSocket = MockWebSocket.instances[1];

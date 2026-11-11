@@ -323,7 +323,10 @@
       }
 
       try {
-        socket = new SocketCtor(config.url);
+        socket = window.WCHttp.createStreamConnection({
+          runId: config.runId, config: config.runConfig,
+          service: config.requirePreflightFrame ? "preflight" : "status", channel: DIAGNOSTICS_CHANNEL
+        });
       } catch (error) {
         fail("WebSocket construction failed: " + String(error && error.message ? error.message : error));
         return;
@@ -401,6 +404,7 @@
       var attemptOutcome = await runProbeAttempt({
         SocketCtor: config.SocketCtor,
         url: config.url,
+        runId: config.runId, runConfig: config.runConfig,
         probeWindowMs: config.probeWindowMs,
         requirePreflightFrame: !!config.requirePreflightFrame,
         attempt: attempt
@@ -474,6 +478,10 @@
       description: "Checks that WEPPcloud can send live progress updates to this browser.",
       severity: "degraded",
       run: async function () {
+        if (!shared.runId || !shared.runConfig) {
+          return buildCheckResult(this, "skipped", "Select an accessible project to check live updates.",
+            "Enter a project run ID and configuration above. Service health checks remain available.");
+        }
         var SocketCtor = resolveSocketConstructor(shared);
         if (!SocketCtor) {
           return buildCheckResult(
@@ -491,6 +499,7 @@
         var result = await runProbeWithRetry({
           SocketCtor: SocketCtor,
           url: shared.statusUrl,
+          runId: shared.runId, runConfig: shared.runConfig,
           probeWindowMs: shared.probeWindowMs,
           reconnectRetries: shared.reconnectRetries,
           requirePreflightFrame: false
@@ -531,6 +540,10 @@
       description: "Checks that WEPPcloud can stream setup-readiness updates to this browser.",
       severity: "degraded",
       run: async function () {
+        if (!shared.runId || !shared.runConfig) {
+          return buildCheckResult(this, "skipped", "Select an accessible project to check live updates.",
+            "Enter a project run ID and configuration above. Service health checks remain available.");
+        }
         var SocketCtor = resolveSocketConstructor(shared);
         if (!SocketCtor) {
           return buildCheckResult(
@@ -548,6 +561,7 @@
         var result = await runProbeWithRetry({
           SocketCtor: SocketCtor,
           url: shared.preflightUrl,
+          runId: shared.runId, runConfig: shared.runConfig,
           probeWindowMs: shared.probeWindowMs,
           reconnectRetries: shared.reconnectRetries,
           requirePreflightFrame: true
@@ -724,10 +738,14 @@
       pageDiagRunId = diagRunId;
     }
 
+    var params = new URLSearchParams(window.location.search);
+    var runId = opts.runId || params.get("runid") || "";
+    var runConfig = opts.config || params.get("config") || "";
     var shared = {
+      runId: runId, runConfig: runConfig,
       diagRunId: diagRunId,
-      statusUrl: createStatusProbeUrl(diagRunId, opts),
-      preflightUrl: createPreflightProbeUrl(diagRunId, opts),
+      statusUrl: createStatusProbeUrl(runId, opts),
+      preflightUrl: createPreflightProbeUrl(runId, opts),
       statusHealthUrl: createStatusHealthUrl(),
       preflightHealthUrl: createPreflightHealthUrl(),
       probeWindowMs: normalizeProbeWindowMs(opts.probeWindowMs),

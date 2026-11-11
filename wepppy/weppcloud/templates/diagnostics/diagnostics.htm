@@ -105,6 +105,16 @@
       Checks cover required browser features, degraded capabilities, and informational signals.
       {{ usersum_doc_link('weppcloud', 'diagnostics.md', 'Read the Browser Diagnostics guide') }}.
     </p>
+    <form method="get" class="pure-form pure-form-stacked">
+      <fieldset>
+        <legend>Project for live-update checks</legend>
+        <label for="diagnostics-runid">Run ID</label>
+        <input id="diagnostics-runid" name="runid" value="{{ request.args.get('runid', '') }}" required>
+        <label for="diagnostics-config">Configuration</label>
+        <input id="diagnostics-config" name="config" value="{{ request.args.get('config', 'cfg') }}" required>
+        <button type="submit" class="pure-button">Select project</button>
+      </fieldset>
+    </form>
     <noscript>
       <div class="wc-alert wc-alert--error" role="alert">
         <p class="wc-alert__body">
@@ -199,6 +209,7 @@
 
 {% block script_extras %}
   {{ super() }}
+  <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
   <script src="{{ static_url('js/diagnostics/core.js') }}" defer></script>
   <script src="{{ static_url('js/diagnostics/auth_checks.js') }}" defer></script>
   <script src="{{ static_url('js/diagnostics/bandwidth_checks.js') }}" defer></script>

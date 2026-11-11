@@ -4,9 +4,10 @@ ARG GO_BUILDER_IMAGE=golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b441
 ARG RUNTIME_IMAGE=gcr.io/distroless/static:nonroot@sha256:f7f8f729987ad0fdf6b05eeeae94b26e6a0f613bdf46feea7fc40f7bd72953e6
 
 FROM ${GO_BUILDER_IMAGE} AS build
-WORKDIR /src
+WORKDIR /src/preflight2
 
 COPY services/preflight2/go.mod ./
+COPY services/streamauth/ ../streamauth/
 RUN go mod download
 COPY services/preflight2/ ./
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /preflight2 ./cmd/preflight2

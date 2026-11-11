@@ -32,13 +32,13 @@ and leaves no token in URLs, logs, storage, selected protocols or artifacts.
       browser proof for both status and preflight as mandatory closeout gates.
 - [x] (2026-11-11) Execute M0 discovery and two independent read-only reviews;
       prepare canonical draft, dependency assessment and proposed ADR-0141.
-- [ ] M0: write/ratify the canonical contract and valid-state matrices; complete
+- [x] M0: write/ratify the canonical contract and valid-state matrices; complete
       dependency evaluation; obtain two independent read-only reviews; commit a
       standalone checkpoint ancestor.
-- [ ] M1: implement stream-token issuance and focused Python tests.
-- [ ] M2: implement browser token acquisition/transport/refresh, generated
+- [x] M1: implement stream-token issuance and focused Python tests.
+- [x] M2: implement browser token acquisition/transport/refresh, generated
       controller parity, and focused Jest tests.
-- [ ] M3: implement pre-accept status2/preflight2 validation, Redis session
+- [x] M3: implement pre-accept status2/preflight2 validation, Redis session
       checks, exact Origins, bounded message redaction, and Go integration tests.
 - [ ] M4: pass focused and broad validation; close correctness, QA and security
       review findings.
@@ -111,15 +111,11 @@ and leaves no token in URLs, logs, storage, selected protocols or artifacts.
 
 ## Outcomes & Retrospective
 
-M0 execution produced a canonical proposed contract, ADR-0141, dependency
-assessment and two independent reviews. No reviewer has approved M0. Three
-concrete lifecycle policy decisions need operator ratification; message-fixture confirmation,
-post-decision review and the standalone checkpoint remain. No implementation,
-service deployment or vulnerability closure is claimed.
-
-No implementation outcome exists yet. The package and its acceptance boundary
-are scaffolded. Populate this section with observed security behavior,
-compatibility, forest evidence, unresolved risk and lessons at each milestone.
+M0 is ratified in ancestor `6a06ad49a`. M1-M3 are implemented. Focused
+Python/controller checks: 45 passed; shared Go validator/redaction tests pass.
+Generated assets were rebuilt inside the canonical web container. Correctness
+and security reviewers approve the code; QA, broad gates and forest acceptance
+remain pending. No deployed vulnerability closure is claimed yet.
 
 ## Context and Orientation
 
@@ -395,3 +391,34 @@ The operator explicitly approved all three proposed lifecycle policies and
 instructed ratification and implementation. The canonical contract and ADR now
 record that approval. Final independent confirmation and standalone ancestor
 commit precede code edits; no further policy permission is required.
+
+M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
+approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.
+
+## Resolved forest deployment commands
+
+Inspected `scripts/deploy-production.sh` and installed dev preset. The targeted
+web plan resolves `recreate=weppcloud rq-engine` and skips worker/stack shutdown.
+Web Python is bind-mounted from this checkout; no Python dependency changed, so
+reuse the current web image and rebuild generated assets through the canonical
+entry point. Both Go images are rebuilt from the reviewed Dockerfiles.
+
+After M4 completes, execute:
+
+```bash
+wctl build status preflight
+wctl up -d --no-deps --force-recreate caddy
+PATH="$PWD/.venv/bin:$PATH" scripts/deploy-production.sh --targeted-web \
+  --skip-pull --skip-build --skip-themes --no-flush-rq-db --skip-docker-prune
+wctl up -d --no-deps --force-recreate status preflight
+node docs/work-packages/20261111_status_preflight_websocket_authorization/artifacts/forest_acceptance.mjs
+```
+
+Caddy is recreated first because its effective error-log filter changed; this
+protects credential headers before the web/validator cutover. Preserve old
+image IDs and the preimplementation bind-mounted source mapping for rollback;
+restore only these five services if health/configuration fails. No Redis flush,
+worker restart, job cancellation, registry publication or production operation
+is authorized. Before-cutover identities are in `20261111_forest_before.json`.
+The browser script disables recording, inspects CDP credentials in memory, and
+uses the canonical delete routine only for its exact newly created owned runs.

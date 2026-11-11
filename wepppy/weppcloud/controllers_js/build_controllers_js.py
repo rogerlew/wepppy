@@ -118,7 +118,8 @@ def render_status_stream_bundle() -> str:
         " * ----------------------------------------------------------------------------\n"
         " */\n"
     )
-    return header + source
+    http_source = (STATUS_STREAM_SOURCE.parent / "http.js").read_text(encoding="utf-8")
+    return header + http_source + "\n" + source
 
 
 def render_theme_bundle() -> str:

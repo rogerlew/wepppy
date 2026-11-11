@@ -13,6 +13,7 @@ import (
 type Config struct {
 	ListenAddr          string
 	RedisURL            string
+	SigningKeyFile      string
 	PingInterval        time.Duration
 	PongTimeout         time.Duration
 	WriteTimeout        time.Duration
@@ -53,6 +54,7 @@ func Load() (Config, error) {
 	cfg := Config{
 		ListenAddr:          getEnv("LISTEN_ADDR", defaultListenAddr),
 		RedisURL:            redisURL,
+		SigningKeyFile:      os.Getenv("WEPP_AUTH_JWT_SECRETS_FILE"),
 		PingInterval:        getDurationEnv("PING_INTERVAL", defaultPingInterval),
 		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
 		WriteTimeout:        getDurationEnv("WRITE_TIMEOUT", defaultWriteTimeout),

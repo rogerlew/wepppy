@@ -17,7 +17,7 @@ All environment variables use the `PREFLIGHT_` prefix:
   - Falls back to `REDIS_URL` + `REDIS_PASSWORD` (or `REDIS_HOST`/`REDIS_PORT`) when unset.
 - `PREFLIGHT_LISTEN_ADDR` – bind address (default `:9001`).
 - `PREFLIGHT_PING_INTERVAL`, `PREFLIGHT_PONG_TIMEOUT` – WebSocket heartbeat intervals.
-- `PREFLIGHT_ALLOWED_ORIGINS` – optional comma-separated whitelist for strict Origin enforcement.
+- `PREFLIGHT_ALLOWED_ORIGINS` – required comma-separated exact external origins; empty fails startup.
 - `PREFLIGHT_REDIS_RETRY_BASE`, `PREFLIGHT_REDIS_RETRY_MAX`, `PREFLIGHT_REDIS_MAX_RETRIES` – control retry cadence. Set `PREFLIGHT_REDIS_MAX_RETRIES=0` for infinite retries.
 - `PREFLIGHT_METRICS_ENABLED=true` – expose Prometheus metrics at `/metrics`.
 
@@ -48,3 +48,13 @@ All environment variables use the `PREFLIGHT_` prefix:
 - **Clients see 502s / reconnect loops:** Ensure the container is running and `docker compose ps preflight` reports “healthy”. Review Caddy logs for upstream errors.
 - **No checklist updates:** Check that Redis keyspace notifications remain enabled and that the run ID matches the regex `^[A-Za-z0-9_-]+$`.
 - **High latency:** The worker uses a single goroutine per websocket; if latency rises with load, consider vertical scaling or sharding readers across Redis channels.
+
+## Browser stream authorization
+
+Use the [canonical contract](../../docs/schemas/weppcloud-websocket-auth-contract.md).
+`WEPP_AUTH_JWT_SECRETS_FILE` must mount the shared signing key ring. The owned
+`services/streamauth` module validates every upgrade before run-specific Redis
+access. Browser clients mint through the same-origin cookie bridge and use the
+fixed plus bearer subprotocol pair. Keep proxy header filtering and static error
+logs intact; credentials must never enter retained diagnostics. Expiry is 4001,
+without terminal hangup. Health probes remain unauthenticated.

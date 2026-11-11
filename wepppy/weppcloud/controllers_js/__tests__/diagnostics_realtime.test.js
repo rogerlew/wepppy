@@ -5,7 +5,7 @@
 function makeSocketCtor(attemptPlans) {
   var attemptIndex = 0;
 
-  return function MockWebSocket() {
+  var MockWebSocket = function () {
     var plan = attemptPlans[Math.min(attemptIndex, attemptPlans.length - 1)] || {};
     attemptIndex += 1;
 
@@ -46,6 +46,8 @@ function makeSocketCtor(attemptPlans) {
       }
     }, 0);
   };
+  window.WCHttp = { createStreamConnection: function () { return new MockWebSocket(); } };
+  return MockWebSocket;
 }
 
 var originalFetch = global.fetch;
@@ -53,6 +55,7 @@ var originalFetch = global.fetch;
 describe("diagnostics realtime module", () => {
   beforeEach(() => {
     jest.resetModules();
+    window.history.replaceState({}, "", "/?runid=example&config=cfg");
     delete window.WCDiagnosticsRealtime;
     delete window.WCDiagnostics;
     delete window.__wcDiagnosticsPendingChecks;

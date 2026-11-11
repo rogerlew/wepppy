@@ -116,22 +116,11 @@ function dispatchPreflightEvent(checklist, lockStatuses, lastModified) {
 }
 
 function initPreflight(runid) {
-    var wsUrl = `wss://${window.location.host}/weppcloud-microservices/preflight/${runid}`;
-    var reconnectTimer = null;
+    var stopped = false;
     var isConnecting = false;
 
-    function scheduleReconnect(reason) {
-        if (reconnectTimer) {
-            return;
-        }
-        reconnectTimer = window.setTimeout(function() {
-            reconnectTimer = null;
-            connectWebSocket(reason || "timer");
-        }, 5000);
-    }
-
     function connectWebSocket(reason) {
-        if (preflight_ws || isConnecting) {
+        if (stopped || preflight_ws || isConnecting) {
             return;
         }
         if (document.hidden) {
@@ -140,7 +129,7 @@ function initPreflight(runid) {
         }
 
         isConnecting = true;
-        preflight_ws = new WebSocket(wsUrl);
+        preflight_ws = window.WCHttp.createStreamConnection({ runId: runid, service: "preflight" });
 
         preflight_ws.onopen = function() {
             window.preflightConnected = true;
@@ -168,6 +157,7 @@ function initPreflight(runid) {
             if (payload.type === "ping") {
                 preflight_ws.send(JSON.stringify({ "type": "pong" }));
             } else if (payload.type === "hangup") {
+                stopped = true;
                 preflight_ws.close(1000, "server hangup");
                 preflight_ws = null;
             } else if (payload.type === "preflight") {
@@ -197,7 +187,7 @@ function initPreflight(runid) {
             if (statusEl) {
                 statusEl.textContent = "Preflight Connection Closed";
             }
-            scheduleReconnect("onclose");
+            stopped = true;
         };
     }
 

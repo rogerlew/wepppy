@@ -1,6 +1,8 @@
 (function (global) {
     "use strict";
 
+    if (global.WCHttp) { return; }
+
     var SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "TRACE"];
     var DEFAULT_ACCEPT = "application/json, text/plain;q=0.9";
     var DEFAULT_TIMEOUT_MS = 0;
@@ -914,6 +916,140 @@
         opts.body = params;
         return http.request(url, opts);
     }
+
+    var streamTokenCache = new Map();
+
+    function streamContext(options) {
+        return resolveRunContext(options || {});
+    }
+
+    function getStreamToken(runId, config, service, options) {
+        var opts = options || {};
+        var key = JSON.stringify([runId, config, service, opts.jobId || null]);
+        var entry = streamTokenCache.get(key);
+        if (entry && entry.promise) { return entry.promise; }
+        if (!opts.forceRefresh && entry && entry.expiresAt > Date.now() + 30000) {
+            return Promise.resolve(entry);
+        }
+        var url = "/rq-engine/api/runs/" + encodeURIComponent(runId) + "/" + encodeURIComponent(config) + "/stream-token";
+        var payload = { service: service };
+        if (opts.jobId) { payload.job_id = opts.jobId; }
+        entry = {};
+        entry.promise = http.postJson(url, payload, { credentials: "same-origin", timeoutMs: 15000 })
+            .then(function (response) {
+                var body = response.body;
+                if (!body || typeof body.token !== "string" || !body.token ||
+                    typeof body.config !== "string" || !body.config || body.service !== service ||
+                    !Number.isFinite(body.expires_at) || body.expires_at * 1000 <= Date.now() + 30000) {
+                    throw new Error("Invalid stream authorization response");
+                }
+                var credential = { token: body.token, config: body.config, expiresAt: body.expires_at * 1000 };
+                streamTokenCache.set(key, credential);
+                return credential;
+            }).catch(function (error) {
+                streamTokenCache.delete(key);
+                // Never propagate response objects/bodies containing credentials to loggable callers.
+                throw new HttpError("Stream authorization unavailable", { status: error.status || 0 });
+            });
+        streamTokenCache.set(key, entry);
+        return entry.promise;
+    }
+
+    // WebSocket-compatible facade owning mint, refresh, bounded retry and cancellation.
+    // Only final closure is emitted; transient renewal stays inside this connection.
+    function createStreamConnection(options) {
+        var opts = options || {};
+        var context = streamContext(opts);
+        var socket = null;
+        var timer = null;
+        var generation = 0;
+        var stopped = false;
+        var failures = 0;
+        var state = 0;
+        var events = new global.EventTarget();
+        var facade = {
+            onopen: null, onmessage: null, onclose: null, onerror: null,
+            addEventListener: events.addEventListener.bind(events),
+            removeEventListener: events.removeEventListener.bind(events),
+            send: function (data) { if (socket && socket.readyState === 1) { socket.send(data); } },
+            close: function () {
+                if (stopped) { return; }
+                stopped = true;
+                generation += 1;
+                global.clearTimeout(timer);
+                state = 3;
+                if (socket) { socket.close(1000, "client disconnected"); socket = null; }
+                emit("close", { code: 1000, reason: "client disconnected", wasClean: true });
+            }
+        };
+        Object.defineProperty(facade, "readyState", { get: function () { return state; } });
+        function emit(type, data) {
+            var event = new global.Event(type);
+            Object.keys(data || {}).forEach(function (key) { Object.defineProperty(event, key, { value: data[key] }); });
+            if (typeof facade["on" + type] === "function") { facade["on" + type](event); }
+            events.dispatchEvent(event);
+        }
+        function finish() {
+            if (stopped) { return; }
+            stopped = true;
+            state = 3;
+            global.clearTimeout(timer);
+            emit("error", {});
+            emit("close", { code: 1008, reason: "Stream authorization unavailable", wasClean: false });
+        }
+        function retry() {
+            if (stopped) { return; }
+            failures += 1;
+            if (failures > 1) { finish(); return; }
+            timer = global.setTimeout(function () { connect(true); }, 1000);
+        }
+        function connect(force) {
+            if (stopped) { return; }
+            if (!context.runId || !context.config || !opts.service) { finish(); return; }
+            var attempt = ++generation;
+            state = 0;
+            getStreamToken(context.runId, context.config, opts.service, { jobId: opts.jobId, forceRefresh: force })
+                .then(function (credential) {
+                    if (stopped || attempt !== generation) { return; }
+                    var scheme = global.location.protocol === "https:" ? "wss:" : "ws:";
+                    var path = "/weppcloud-microservices/" + opts.service + "/" + encodeURIComponent(context.runId);
+                    if (opts.service === "status") { path += ":" + encodeURIComponent(opts.channel); }
+                    var url = scheme + "//" + global.location.host + path + "?config=" + encodeURIComponent(credential.config);
+                    socket = new global.WebSocket(url, ["wepp-stream.v1", "bearer." + credential.token]);
+                    var current = socket;
+                    current.onopen = function () {
+                        if (stopped || attempt !== generation) { current.close(); return; }
+                        failures = 0;
+                        state = 1;
+                        timer = global.setTimeout(function () { current.close(4001, "renew authorization"); },
+                            Math.max(1, credential.expiresAt - Date.now() - 30000));
+                        emit("open", {});
+                    };
+                    current.onmessage = function (event) { if (!stopped && attempt === generation) { emit("message", { data: event.data }); } };
+                    current.onerror = function () { /* onclose owns bounded retry; never expose handshake details. */ };
+                    current.onclose = function (event) {
+                        if (stopped || attempt !== generation) { return; }
+                        global.clearTimeout(timer);
+                        socket = null;
+                        state = 0;
+                        if (event.code === 4001) {
+                            timer = global.setTimeout(function () { connect(true); }, 1000);
+                        } else { retry(); }
+                    };
+                }).catch(function (error) {
+                    if (stopped || attempt !== generation) { return; }
+                    if (error.status === 401 || error.status === 403 || error.status === 400 || error.status === 404) { finish(); }
+                    else { retry(); }
+                });
+        }
+        // Defer so callers install event handlers before synchronous validation failures.
+        Promise.resolve().then(function () { connect(false); });
+        return facade;
+    }
+
+    http.getStreamToken = getStreamToken;
+    http.createStreamConnection = createStreamConnection;
+    http.streamContext = streamContext;
 
     http.request = request;
     http.getJson = getJson;

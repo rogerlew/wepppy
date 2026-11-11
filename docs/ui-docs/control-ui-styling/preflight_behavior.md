@@ -20,6 +20,18 @@ The preflight system is a real-time task completion tracker that:
 
 ---
 
+## Connection access
+
+Live updates use the same project access as the page. The browser obtains a
+short-lived credential and renews it while the page remains open. If access is
+denied, the connection closes and the page shows “Preflight Connection Closed.”
+Sign in with an account that can access the project, then reload the page.
+Diagnostics requires a project ID and configuration for live-stream checks;
+global service health checks remain available without a selected project.
+
+Developers must use `WCHttp.createStreamConnection` for authorization, renewal,
+and bounded retries. See the [authorization contract](../../schemas/weppcloud-websocket-auth-contract.md).
+
 ## Architecture
 
 ### Data Flow

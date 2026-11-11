@@ -543,3 +543,16 @@ and Cancel reloads authoritative state. Full source and state semantics are in t
 
 Coverage: `__tests__/roads_parameterization.test.js` and
 `tests/weppcloud/routes/test_roads_bp.py`; rebuild `controllers-gl.js` after edits.
+
+## Authorized status and preflight transport
+
+Use `WCHttp.createStreamConnection({runId, config, service, channel, jobId})` for
+status/preflight sockets. `StatusStream` and `controlBase.attach_status_stream`
+use it automatically. `jobId` is only for pending run-sync status inspection;
+ordinary streams bind to the existing project. Credentials stay in memory,
+separate by run/config/service/job, and are never included in URLs or errors.
+The helper owns proactive renewal, one fresh retry after a failed upgrade, and
+cancellation of a pending mint on disconnect. Consumers must not add another
+reconnect loop. Terminal authorization failure must remain visible to the user.
+The standalone status bundle includes the guarded HTTP helper for archive and
+run-sync pages. See the [canonical contract](../../../docs/schemas/weppcloud-websocket-auth-contract.md).

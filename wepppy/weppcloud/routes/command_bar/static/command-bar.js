@@ -1427,6 +1427,10 @@
         }
 
         connectCommandChannel() {
+            if (!window.WCHttp && document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.connectCommandChannel(), { once: true });
+                return;
+            }
             if (!this.commandChannelUrl) {
                 return;
             }
@@ -1444,10 +1448,14 @@
             this.clearCommandChannelReconnect();
 
             try {
-                this.commandChannelSocket = new WebSocket(this.commandChannelUrl);
+                const context = this.getRunContextFromPath();
+                this.commandChannelSocket = window.WCHttp.createStreamConnection({
+                    runId: decodeURIComponent(context.runId), config: decodeURIComponent(context.config),
+                    service: "status", channel: "command"
+                });
             } catch (error) {
                 console.warn('CommandBar: Unable to open command channel socket:', error);
-                this.scheduleCommandChannelReconnect();
+                this.commandChannelShouldReconnect = false;
                 return;
             }
 
@@ -1511,13 +1519,15 @@
             }
         }
 
-        handleCommandChannelClose() {
+        handleCommandChannelClose(event) {
             this.commandChannelSocket = null;
             if (!this.commandChannelShouldReconnect) {
                 return;
             }
-            this.commandChannelReconnectDelayMs = Math.min(this.commandChannelReconnectDelayMs * 2, 30000);
-            this.scheduleCommandChannelReconnect();
+            this.commandChannelShouldReconnect = false;
+            if (event && event.code === 1008) {
+                this.showResult("Live command updates unavailable. Reload the page to reconnect.");
+            }
         }
 
         handleCommandChannelError(event) {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rogerlew/wepppy/services/streamauth"
 	"log/slog"
 	"math/rand"
 	"net/http"
@@ -26,6 +27,7 @@ var channelPattern = regexp.MustCompile(`^[A-Za-z0-9_.;-]+:[A-Za-z0-9_.-]+$`)
 
 // Server provides HTTP/WebSocket handling backed by Redis Pub/Sub.
 type Server struct {
+	auth   *streamauth.Validator
 	cfg    config.Config
 	logger *slog.Logger
 	redis  *redis.Client
@@ -51,12 +53,19 @@ func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
 	}
 	opts.ContextTimeoutEnabled = true
 
+	auth, err := streamauth.New(cfg.SigningKeyFile, cfg.RedisURL, cfg.AllowedOrigins)
+	if err != nil {
+		return nil, err
+	}
 	client := redis.NewClient(opts)
 	if err := client.Ping(context.Background()).Err(); err != nil {
+		_ = client.Close()
+		_ = auth.Close()
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
 	return &Server{
+		auth:   auth,
 		cfg:    cfg,
 		logger: logger,
 		redis:  client,
@@ -66,6 +75,9 @@ func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
 
 // Close releases redis resources.
 func (s *Server) Close() error {
+	if s.auth != nil {
+		defer s.auth.Close()
+	}
 	if s.redis == nil {
 		return nil
 	}
@@ -104,23 +116,33 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}
 	runID, channel, _ := strings.Cut(path, ":")
 
-	accept := &websocket.AcceptOptions{OriginPatterns: s.cfg.AllowedOrigins}
-	if len(s.cfg.AllowedOrigins) == 0 {
-		accept.InsecureSkipVerify = true
+	grant, denied := s.auth.Authorize(r, runID, channel, "status")
+	if denied != 0 {
+		http.Error(w, "stream authorization denied", denied)
+		return
 	}
+	// Exact Origin was checked above; do not use the library's wildcard host matching.
+	accept := &websocket.AcceptOptions{InsecureSkipVerify: true, Subprotocols: []string{streamauth.Protocol}}
 
 	conn, err := websocket.Accept(w, r, accept)
 	if err != nil {
-		s.logger.Warn("websocket accept failed", "run_id", runID, "channel", channel, "error", err)
+		s.logger.Warn("websocket accept failed", "run_id", runID, "channel", channel, "category", "upgrade")
 		return
 	}
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "closing") }()
 	conn.SetReadLimit(s.cfg.MaxMessageSize)
 
-	ctx := r.Context()
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
+	expiry := time.AfterFunc(time.Until(grant.Expires), func() {
+		_ = conn.Close(websocket.StatusCode(streamauth.ExpiredCode), "stream credential expired")
+        cancel()
+	})
+	defer expiry.Stop()
 	connLogger := s.logger.With("run_id", runID, "channel", channel)
 	connection := newConnection(s, connLogger, runID, channel, conn)
-	if err := connection.run(ctx); err != nil {
+	connection.expires = grant.Expires
+ if err := connection.run(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			return
 		}
@@ -128,11 +150,12 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		if status == websocket.StatusNormalClosure || status == websocket.StatusGoingAway {
 			return
 		}
-		connLogger.Warn("connection ended with error", "error", err)
+		connLogger.Warn("connection ended with error", "error", "stream operation failed")
 	}
 }
 
 type connection struct {
+ expires time.Time
 	srv      *Server
 	logger   *slog.Logger
 	runID    string
@@ -159,7 +182,11 @@ func newConnection(srv *Server, logger *slog.Logger, runID, channel string, ws *
 func (c *connection) run(ctx context.Context) error {
 	c.srv.metric.incConnections()
 	defer c.srv.metric.decConnections()
-	defer c.sendHangup()
+	defer func() {
+		if c.expires.IsZero() || time.Now().Before(c.expires) {
+			c.sendHangup()
+		}
+	}()
 
 	group, ctx := errgroup.WithContext(ctx)
 	group.Go(func() error { return c.readLoop(ctx) })
@@ -182,7 +209,7 @@ func (c *connection) readLoop(ctx context.Context) error {
 			Type string `json:"type"`
 		}
 		if err := json.Unmarshal(data, &msg); err != nil {
-			c.logger.Warn("invalid client message", "error", err)
+			c.logger.Warn("invalid client message", "error", "stream operation failed")
 			continue
 		}
 		switch strings.ToLower(msg.Type) {
@@ -235,7 +262,7 @@ outer:
 		closePubsub := func(reason string) {
 			closeOnce.Do(func() {
 				if err := pubsub.Close(); err != nil {
-					c.logger.Debug("pubsub close error", "reason", reason, "error", err)
+					c.logger.Debug("pubsub close error", "reason", reason, "error", "stream operation failed")
 				}
 			})
 		}
@@ -264,7 +291,7 @@ outer:
 			closePubsub("subscribe ack failed")
 			attempt++
 			wait := c.redisBackoff(attempt, base)
-			c.logger.Warn("redis subscribe failed", "attempt", attempt, "error", err, "backoff", wait)
+			c.logger.Warn("redis subscribe failed", "attempt", attempt, "error", "stream operation failed", "backoff", wait)
 			if c.shouldAbort(attempt) {
 				return fmt.Errorf("redis subscribe failed after %d attempts: %w", attempt, err)
 			}
@@ -290,7 +317,7 @@ outer:
 				}
 				attempt++
 				wait := c.redisBackoff(attempt, base)
-				c.logger.Warn("redis stream interrupted", "attempt", attempt, "error", err, "backoff", wait)
+				c.logger.Warn("redis stream interrupted", "attempt", attempt, "error", "stream operation failed", "backoff", wait)
 				if c.shouldAbort(attempt) {
 					closePubsub("stream aborted")
 					return fmt.Errorf("redis stream interrupted after %d attempts: %w", attempt, err)
@@ -309,7 +336,7 @@ outer:
 					closePubsub("forward canceled")
 					return err
 				}
-				c.logger.Warn("failed to forward message", "error", err)
+				c.logger.Warn("failed to forward message", "error", "stream operation failed")
 			}
 		}
 	}
@@ -318,7 +345,7 @@ outer:
 func (c *connection) forward(ctx context.Context, data string) error {
 	out := payload.StatusMessage{
 		Type: "status",
-		Data: data,
+		Data: streamauth.SanitizeStatus(data),
 	}
 	bytes, err := json.Marshal(out)
 	if err != nil {

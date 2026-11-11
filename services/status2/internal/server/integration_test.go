@@ -6,6 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+ "os"
+ "path/filepath"
+ "net/http"
 	"log/slog"
 	"net/http/httptest"
 	"strings"
@@ -24,7 +27,13 @@ func TestStatusWebsocketFlow(t *testing.T) {
 	m := miniredis.RunT(t)
 	defer m.Close()
 
-	cfg := config.Config{
+	key := filepath.Join(t.TempDir(), "key")
+ os.WriteFile(key, []byte("fixture-key"), 0600)
+ m.Select(11)
+ m.Set("auth:session:run:testrun:sid", "1")
+ m.Select(2)
+ cfg := config.Config{
+ SigningKeyFile: key,
 		ListenAddr:          ":0",
 		RedisURL:            "redis://" + m.Addr() + "/2",
 		PingInterval:        time.Second,
@@ -35,7 +44,7 @@ func TestStatusWebsocketFlow(t *testing.T) {
 		RedisRetryMax:       200 * time.Millisecond,
 		RedisMaxRetries:     3,
 		LogLevel:            slog.LevelInfo,
-		AllowedOrigins:      nil,
+		AllowedOrigins:      []string{"https://example.test"},
 		MetricsEnabled:      false,
 		MaxMessageSize:      64 * 1024,
 	}
@@ -51,12 +60,12 @@ func TestStatusWebsocketFlow(t *testing.T) {
 	httpServer := httptest.NewServer(srv.Handler())
 	defer httpServer.Close()
 
-	wsURL := "ws" + strings.TrimPrefix(httpServer.URL, "http") + "/testrun:wepp"
+	wsURL := "ws" + strings.TrimPrefix(httpServer.URL, "http") + "/testrun:wepp?config=cfg"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	conn, _, err := websocket.Dial(ctx, wsURL, nil)
+	conn, _, err := websocket.Dial(ctx, wsURL, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": []string{"https://example.test"}}, Subprotocols: []string{"wepp-stream.v1", "bearer."+serviceToken(t,"testrun",300)}})
 	if err != nil {
 		t.Fatalf("websocket dial: %v", err)
 	}

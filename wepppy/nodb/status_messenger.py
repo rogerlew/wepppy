@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Optional
+from .stream_messages import sanitize_progress
 
 import redis
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -29,7 +30,7 @@ class StatusMessenger:
     def publish(cls, channel: str, message: str) -> int:
         """Publish ``message`` to ``channel`` via Redis pub/sub."""
 
-        return cls._get_client().publish(channel, message)
+        return cls._get_client().publish(channel, sanitize_progress(message))
 
     @classmethod
     def publish_command(cls, runid: str, message: str) -> int:

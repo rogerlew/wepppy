@@ -353,7 +353,7 @@
             statusStream = null;
         }
 
-        function startStream(container, runId, channel) {
+        function startStream(container, runId, channel, jobId) {
             ensureSummaryElement(container);
             if (!runId || !channel) {
                 return;
@@ -367,6 +367,7 @@
                     form: poller.form,
                     channel: channel,
                     runId: runId,
+                    config: activeConfig, jobId: jobId,
                     logElement: statusLog,
                     stacktrace: stacktracePanel ? { element: stacktracePanel, body: stacktraceBody } : null,
                     autoConnect: false,
@@ -389,6 +390,7 @@
                 element: statusPanel || container,
                 logElement: statusLog,
                 runId: runId,
+                config: activeConfig, jobId: jobId,
                 channel: channel,
                 onTrigger: handleTrigger,
                 onAppend: function (detail) {
@@ -603,7 +605,7 @@
                             throw new Error("Run sync response did not include a job id.");
                         }
                         appendStatus("Job enqueued: " + syncJobId);
-                        startStream(container, payload.runid, statusChannel);
+                        startStream(container, payload.runid, statusChannel, syncJobId);
                         if (poller && typeof poller.connect_status_stream === "function") {
                             poller.connect_status_stream(poller);
                         }

@@ -50,6 +50,7 @@ from .rusle_routes import router as rusle_router
 from .postfire_debris_flow_routes import router as postfire_debris_flow_router
 from .schema_defaults_routes import router as schema_defaults_router
 from .session_routes import router as session_router, validate_session_cookie_profile
+from .stream_routes import router as stream_router
 from .setup_discovery_routes import router as setup_discovery_router
 from .soils_routes import router as soils_router
 from .swat_routes import router as swat_router
@@ -98,7 +99,8 @@ async def run_mutation_lifecycle_middleware(request: Request, call_next):
         # Anonymous requests never receive the fence; ordinary routes reject
         # them, while the CAPTCHA-gated fork endpoint owns its target fence.
         return await call_next(request)
-    if request.url.path.rstrip("/").endswith("/fork"):
+    if request.url.path.rstrip("/").endswith(("/fork", "/stream-token")):
+        # The cookie-only stream bridge owns Authorization-header rejection.
         return await call_next(request)
     from .auth import AuthError
 
@@ -212,6 +214,7 @@ app.include_router(builder_router, prefix="/api")
 app.include_router(project_config_update_router, prefix="/api")
 app.include_router(culvert_router, prefix="/api")
 app.include_router(session_router, prefix="/api")
+app.include_router(stream_router, prefix="/api")
 app.include_router(setup_discovery_router, prefix="/api")
 app.include_router(orchestration_read_router, prefix="/api")
 app.include_router(schema_defaults_router, prefix="/api")
