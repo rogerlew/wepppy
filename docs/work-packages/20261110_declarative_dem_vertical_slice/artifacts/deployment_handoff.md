@@ -1,5 +1,16 @@
 # Deployment handoff — declarative DEM
 
+**Execution complete — 2026-11-11 UTC.** Roger authorized this handoff and its
+additive table migrations. Corrected source `f02e78cc0` is deployed; real success,
+HTTP/archive and owned fault gates passed; temporary workers are removed and
+ordinary services/Flux are healthy. See [receiving acceptance](receiving_acceptance.md)
+and [final test disposition](final_full_suite.txt). Preserve all historical
+attempts; this record is not an instruction to replay them.
+
+The original pre-deployment handoff below is retained as historical provenance
+and is superseded by those execution records.
+
+
 The implementation is ready for a bounded open-wepp-org canary handoff. No image has
 been published or deployed by this package. M5 and package closure remain pending
 real cluster acceptance. Current local gates and any limitations are recorded in
