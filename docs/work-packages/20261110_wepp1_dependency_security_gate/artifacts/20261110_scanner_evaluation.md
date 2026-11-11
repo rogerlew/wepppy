@@ -819,3 +819,96 @@ remediation and representative Pillow/PyCurl parity evidence. Their filename
 versions raise an applicability question; they do not alone prove the fix is
 absent. Keep the shared-advisory assessment open for every confirmed consumer,
 including Debian-packaged copies under their own distro/backport evidence.
+
+## 11. Primary frontend lock: runtime, static build and test inputs
+
+The retained all-dependency audit has **19 package rows**, comprising ten
+packages with their own advisories and nine propagated dependency rows, with
+**22 distinct GHSA aliases**. The production-only audit's zero count does not
+dispose of the other rows. Review preserves every path/version, `via` edge,
+severity and alias rather than counting propagated Jest rows as new advisories.
+
+**Narrow not-affected decision:** these 19 rows do not affect the exact common
+image's frontend runtime or its recorded Docker static-build entrypoints.
+This does not approve lint/Jest/Playwright execution on an unverified PR runner.
+No accepted-risk exception or blanket development-dependency exclusion is used.
+
+Evidence and boundary:
+
+- Exact-image readback verifies Dockerfile, `.dockerignore`, package/lock,
+  `build.mjs`, Jest and ESLint configuration hashes against reviewed sources.
+  The frontend `node_modules` tree is absent; the image's npm inventory has none
+  of the 19 package names. Only the selected vendor assets and archive-console
+  JavaScript are copied from the build stage. This says nothing about unrelated
+  bundled JavaScript or native components elsewhere in the image.
+- The recorded builder is `node:20-alpine` at digest
+  `afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb`.
+  It runs `npm ci --legacy-peer-deps`, then `npm run build`; it does not invoke
+  the separate lint, test, smoke or clean scripts. `build.mjs` copies a fixed
+  list and imports Node builtins plus `fs-extra` 11.2.0. Its package closure is
+  `fs-extra`, `graceful-fs`, `jsonfile` and `universalify`, outside these 19 rows.
+- Install hooks were reviewed separately. The Linux lock's script-bearing
+  package is `unrs-resolver` 1.11.1 using `napi-postinstall` 0.3.4; its helpers,
+  Node builtins and native-package loading/fallback do not call these audited
+  package instances. Both `fsevents` entries are Darwin-only. This does not
+  declare npm's own bundled toolchain or install/download supply chain clean.
+- Seventeen locked package archives were verified against lock integrity;
+  39 relevant consumer/build source files match installed bytes. This is source
+  analysis and actual image readback, not a dynamic install-hook trace. All 12
+  direct development dependencies and their separate command roles are retained.
+
+### Other consumers and minimum repair candidates
+
+The following entries explain the remaining lint/test input surface. Candidate
+versions are researched fixes, not installed or compatibility-approved changes.
+Each row also retains the bounded static-build/runtime disposition above.
+
+| Audited package and installed version | Concrete input or feature boundary | Candidate / limitation |
+| --- | --- | --- |
+| `@babel/core` 7.28.4 | Compilation can follow a repository source's `sourceMappingURL`. Current ordinary Jest transforms are disabled; coverage is not requested and no current inline-snapshot calls were found. New source/config/coverage commands require review. | [7.29.6](https://github.com/advisories/GHSA-4x5r-pxfx-6jf8), same major. |
+| `ajv` 6.12.6 | ESLint's reviewed constructors do not enable `$data`, required by this advisory. Narrow feature-based not-affected for these constructors, not arbitrary Ajv users. | [6.14.0](https://github.com/advisories/GHSA-2g4f-4pwh-qvx6), same major. |
+| `baseline-browser-mapping` 2.8.19 | Invalid/conflicting browser-target parameters can terminate its caller. No invocation in the copy-only build. | [2.11.0](https://github.com/advisories/GHSA-w5vr-8v7q-w6rv), same major. |
+| `brace-expansion` 1.1.12 / 5.0.4 | Patterns reach minimatch through ESLint config and glob consumers, including module-error paths. Fixed reviewed patterns do not establish safe arbitrary PR filenames/config. Preserve all five paths and eight aliases. | [1.1.21 / 5.0.12](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr), on their respective major lines. |
+| `browserslist` 4.26.3 | Babel target resolution reads environment/config queries and discovers custom stats; repeated distinct queries also grow its cache. A fixed query alone does not exclude malformed stats. | [4.28.7](https://github.com/advisories/GHSA-73wf-gq98-2v4g), same major; retain the separate [cache advisory](https://github.com/advisories/GHSA-c83g-rgw3-j3cx). |
+| `deepmerge` 4.3.1 | `jest-config` calls it when merging preset globals. Current config has neither preset nor globals, supporting a narrow not-affected decision for that exact config. | [No patched release](https://github.com/advisories/GHSA-gcqx-w48m-w2h4); do not downgrade Jest to 25.1.0. |
+| `glob` 11.1.0 | Reviewed Jest consumers call synchronous glob without a signal; the direct cancellation-bypass advisory's signal boundary is absent. This does not close inherited minimatch findings. | [14.0.2](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) fixes the direct advisory; major compatibility qualification required. |
+| `js-yaml` 3.14.2 / 4.1.1 | ESLint discovers YAML/legacy config; Istanbul can load YAML coverage config. Current CJS config/no coverage is not evidence that arbitrary PR config discovery is safe. | [3.15.2 / 4.3.2](https://github.com/advisories/GHSA-2883-xcg3-v3hh), preserving both major lines. |
+| `minimatch` 10.2.4 | Glob explicitly selects optimization level 2, matching the advisory prerequisite. Inputs include project/coverage patterns and module-error paths. | [11.0.1](https://github.com/advisories/GHSA-g3hv-75wg-m249), major change requiring consumer parity. |
+| `ws` 8.18.3 | jsdom creates real clients. Its WebIDL close wrapper converts the reason to `USVString`, excluding the [TypedArray disclosure](https://github.com/advisories/GHSA-58qx-3vcg-4xpx) through that wrapper only. Inbound fragmentation/OOM remains a network-input concern; no full Jest network trace is claimed. | [8.21.0](https://github.com/advisories/GHSA-96hv-2xvq-fx4p), same major. |
+
+The nine propagated rows are `@jest/core`, `@jest/reporters`, `jest`,
+`jest-circus`, `jest-cli`, `jest-config`, `jest-runner`, `jest-runtime` (all
+30.2.0), and direct `rimraf` 5.0.5. Their underlying advisory IDs remain attached;
+closing a single inherited condition cannot close an aggregated package row.
+The distinct package `braces` 3.0.3, consumed by `micromatch` 4.0.8, has no direct
+row in this audit; neither findings nor exemptions transfer by name similarity.
+
+Candidate registry metadata confirms Node 20 support for glob 14.0.2 and
+minimatch 11.0.1, and static source inspection confirms `glob.sync` remains
+exported. The incompatibility requiring investigation is the declared major
+contract: consumers request glob 7 or 10, while the existing global override
+already forces 11.1.0. Do not present 14 as a patch update or assert an unobserved
+engine/API failure. Rimraf 6.1.4 requests glob `^14.0.3`. Qualify every affected
+consumer before changing the override; do not use audit's Jest 25 downgrade.
+
+### Retained evidence and acceptance limits
+
+Under private baseline `npm-audit/review/`:
+
+- `frontend-reachability-review.json` (all 19 rows, paths, aliases and scope):
+  `9eec2dea6374a516faf5ce17fe11231687461ff6711e0ccf3541edfbc03e1aaa`.
+- `exact-image-readback.json`:
+  `06dfebb559e6604f4b7074437b6fca18faca4ae7c0168dc52ea17285816b61a8`.
+- `locked-source-readback.json` and retained source files:
+  `a1b3b0983a64b941f762e96d49d526c070fa48c19ddcef1673979c76494b3746`.
+- `fixed-candidate-metadata.json`:
+  `6b62e6d0ffb04bcca9a0fdc0a1c2777d7894e8f8b5f0582ff89852073b9c656a`.
+
+The report is bound to lock SHA-256
+`2ddc0117c0bf2c559d2509bded8964801092fe68e4046ec3c8fa3df9c6877a92`
+and the exact baseline image already identified above. Reevaluate when image,
+lock, scripts/config, install hooks, command options or input trust changes.
+PR tests execute repository-controlled code/configuration; runtime exclusion is
+not host isolation. Disposable runner containment and authenticated manual
+collection remain unverified M3/M4 obligations. No dependencies were changed and
+no candidate, install hook or advisory exploit was executed by this reviewer.

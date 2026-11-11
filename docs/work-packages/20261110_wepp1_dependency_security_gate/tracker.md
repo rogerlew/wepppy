@@ -10,6 +10,15 @@
 **Dedicated security review**: `artifacts/20261110_security_review.md`  
 **Starting revision**: `2041fb8e2`
 
+**Accepted M0 checkpoint**: `d4b175436`
+
+The M3 local manual importer passes 31 focused tests, actual private artifact
+readback and independent correctness/security review. Full pytest passes at
+2026-11-11 08:52 UTC: 13,533 passed, 435 skipped. Fresh npm lint and all 1,069
+npm tests pass. This is development-runtime component validation, not M4.
+CI retrieval remains an external prerequisite; evaluator and deploy hook are
+not yet implemented. See `artifacts/20261111_importer_validation.md`.
+
 ## Task Board
 
 - [x] Confirm F6 audit scope and the wepp1 common-image production boundary.
@@ -58,13 +67,39 @@
 
 ## Validation and Review
 
+The itemized M1 review packet preserves all 3,221 scan rows and 3,133
+artifact-scoped alias groups. Version 3 proposes 327 header-only, three exact
+patched Python Brotli and 109 absent MariaDB implementation dispositions;
+2,782 rows remain unresolved. No
+approval or activation clearance is inferred. See
+`artifacts/20261110_advisory_dispositions.md` for hashes and coverage limits.
+
+The 19 npm audit rows have independently supported not-affected proposals only
+for the exact runtime/static build; CI admission remains pending. The first
+crypto/TLS-only clean Compose build is running in a detached checkout. Authlib
+adoption is held for the reviewed OAuth failure/CSRF contract checkpoint;
+`artifacts/20261111_oauth_contract_decision.md` records the concrete proposal.
+
 Preparatory unchanged-source common-image build succeeds, using canonical
 production/wepp1 Compose overlays and immutable base/vendor arguments. Exact
 image ID and command evidence are in `artifacts/20261111_baseline_image.md`.
 Native import readback passes as UID 1002/GID 130; GDAL/Fiona use GDAL 3.10.3
 while Rasterio bundles 3.8.4. Image inventory/scan and the full baseline rerun
-have completed. The refreshed database currently exceeds the 24-hour freshness
-limit, so resulting scans are triage evidence only.
+have completed. The original database exceeds the 24-hour freshness limit, so
+those reports remain triage evidence. A separately retained November 11 database
+is fresh; the clean crypto/TLS scan has no matches for those upgraded packages.
+The same-database baseline comparison removes 22 raw selected-package rows with
+no package-level additions. Whole-image findings and coverage remain blocking.
+
+The clean crypto/TLS candidate builds with exactly three installed-version
+upgrades, unchanged native versions, 51 focused tests and seven TLS checks
+passing. Details are in `artifacts/20261111_upgrade_research.md`. The isolated
+test-image candidate-base argument passes a real local build, layer/runtime
+identity readback, native/Python version parity and another 51 focused tests.
+The npm source/generated workflow now runs lint before tests; generation parity
+passes. Remote CI evidence collection and the deploy hook remain open.
+Production remains Docker Compose through installed wctl/deploy-production,
+as explicitly reaffirmed by Roger; no registry dependency is introduced.
 
 The first full pytest run failed on an obsolete Runs help-link assertion after
 13,429 passes. The test now follows the existing UI contract; all 11 module tests
@@ -87,7 +122,8 @@ for retention. Evidence and approved policy hashes are stored in its ignored,
 private `.local/dependency-security/` area. CI ingestion and deployment retention
 remain M3/M4 validation boundaries. See `artifacts/20261110_m0_validation.md` for
 identities, report hashes, measured trials, baseline status, and limitations.
-No dependencies, workflows, deployment code, or production systems have changed.
+Primary dependencies, deployment code and production systems are unchanged;
+candidate dependency changes are confined to the detached checkout.
 
 ## Timeline
 
@@ -98,6 +134,10 @@ No dependencies, workflows, deployment code, or production systems have changed.
 - 2026-11-11 UTC: reproduce Trivy matching failure; qualify alternative; obtain
   independent scoped-tool approval and owner policy/storage ratification.
 - 2026-11-11 07:18 UTC: green full baseline retained; reviewed M0 checkpoint.
+- 2026-11-11 08:52 UTC: importer full regression passes; reviewed local evidence
+  importer, candidate test-image wiring and npm lint checkpoint. The detached
+  crypto/TLS batch has clean-build, fresh-scan and focused compatibility evidence;
+  the final candidate, advisory decisions and deployment integration remain open.
 - Pending: exact-image inventory, triage, compatible batches, and gate wiring.
 - Pending: complete final regression gates and independent reviews.
 - Pending: separately authorized rollout; no production action performed.

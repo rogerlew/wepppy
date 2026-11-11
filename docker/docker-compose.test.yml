@@ -4,6 +4,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.test
+      args:
+        - WEPPCLOUD_TEST_BASE_IMAGE
     user: "${UID:-1000}:${GID:-1000}"
     entrypoint: ["/bin/sleep", "infinity"]
     working_dir: /workdir/wepppy

@@ -1,7 +1,7 @@
 # Preparatory unchanged common-image baseline
 
-**Status**: Build succeeds; inventory/scan in progress; M0 full baseline and M1
-acceptance remain pending. This does not authorize deployment.
+**Status**: Build and inventory/scan complete; M0 accepted at `d4b175436`.
+M1 dispositions and native coverage remain open. This does not authorize deployment.
 
 ## Source and build
 
@@ -93,7 +93,10 @@ The diagnostic Grype run retains 2,894 matches and 327 ignored matches, includin
 records. These are raw records, not deduplicated/applicable vulnerability counts.
 All 3,221 records have draft disposition rows with source record, aliases,
 ecosystem/package/version/path identity, range/fix, layer and advisory references;
-all remain explicitly pending review. Database bytes match before/after scanning.
+the original draft remains unchanged. An itemized review packet now proposes
+330 narrowly scoped not-affected rows, with 2,891 rows still pending. See
+`20261110_advisory_dispositions.md` for hashes and limits. Database bytes match
+before/after scanning.
 
 Native-analysis uncertainty, every finding's disposition, unmanaged/vendor
 coverage, and independent M1 review remain open.

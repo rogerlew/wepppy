@@ -24,6 +24,9 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-11 UTC) Commit reviewed M0 checkpoint `d4b175436`; preserve
+      unrelated work. Prepare itemized M1 review packet with all 3,221 raw rows,
+      330 narrow not-affected proposals and 2,891 unresolved rows; no clearance.
 - [x] (2026-11-11 04:44 UTC) Confirm the F6 audit statement, wepp1 common-image
       path, and absence of retained raw scan evidence.
 - [x] (2026-11-11 04:44 UTC) Discover dependency-upgrade, immutable-image,
@@ -61,8 +64,22 @@ segmented substitute is not accepted.
 - [ ] M1: build and inventory the exact baseline common image; reconcile the
       SBOM and disposition every Python/OS/npm finding.
 - [ ] M2: implement compatible dependency batches with focused tests.
+- [x] (2026-11-11 UTC) Clean Compose crypto/TLS candidate builds; exactly three
+      installed-version upgrades, unchanged native versions, 51 focused tests
+      and seven TLS checks pass. Fresh candidate scan removes 22 selected-package
+      rows against the same-database baseline, with no package-level additions. Authlib
+      remains held for the separate OAuth contract checkpoint.
 - [ ] M3: wire candidate-image evidence into CI/test-image and the canonical
       pre-activation deployment path.
+- [x] (2026-11-11 UTC) Test-image candidate argument builds the local image,
+      preserves default digest, and passes layer/runtime/native readback plus
+      51 focused tests. Add npm lint to its generated workflow and verify
+      generation parity. Remote evidence handoff and activation wiring remain open.
+- [x] (2026-11-11 UTC) Implement local manual importer; pass 31 focused tests,
+      actual five-file private readback, and independent correctness/security
+      component reviews. Full pytest passes with 13,533 passed/435 skipped;
+      npm lint and 1,069 npm tests pass. Remote CI retrieval,
+      policy evaluator and activation hook remain open.
 - [ ] M4: build the final candidate; pass focused, full pytest, npm lint, full
       npm tests, artifact readback, and independent reviews.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
@@ -151,6 +168,21 @@ segmented substitute is not accepted.
 
 ## Decision Log
 
+- Decision: reaffirm production Docker Compose after the operator's explicit
+  reminder. The candidate-base argument belongs only to the isolated test image;
+  it neither requires a registry nor changes installed wctl/deploy-production.
+  Rationale: prove tests use the locally built candidate while preserving the
+  established production deployment boundary.
+  Date/Author: 2026-11-11, Roger; recorded by Codex.
+
+- Decision: develop and validate the local manual evidence importer while M1
+  applicability review remains open. This is an M3 component, not milestone
+  acceptance or permission to activate an image. The external CI prerequisite
+  is a confirmed operator retrieval route before isolated-runner cleanup.
+  Rationale: manual collection is owner-selected, and import integrity can be
+  tested independently without approving findings or changing deployment.
+  Date/Author: 2026-11-11, Codex.
+
 - Decision (Roger, 2026-11-11): transfer evidence **manually** to the selected
   private store; production remains Docker Compose through canonical wctl/deploy
   entry points. Verify imported report hashes/identities before acceptance.
@@ -238,6 +270,13 @@ segmented substitute is not accepted.
 
 ## Outcomes & Retrospective
 
+The M3 manual importer is implemented and passes focused/local evidence checks
+and scoped independent review. Full pytest passes with 13,533 passed and 435
+skipped at 2026-11-11 08:52 UTC; npm lint and all 1,069 npm tests pass.
+The operator's CI
+retrieval method remains an external prerequisite; this does not replace or
+alter host-local Compose deployment. See `artifacts/20261111_importer_validation.md`.
+
 M0 is accepted with a green full baseline, reviewed tooling/policy and this checkpoint. M1 is in progress. Source/manifest identity was recaptured, full pre-change gates
 found one stale test assertion (corrected, full rerun passes), and confined scanner trials produced actual inventory, matching,
 and failure evidence. Independent correctness, security, and operations reviews
@@ -255,9 +294,14 @@ A preparatory unchanged-source image now exists at
 see `artifacts/20261111_baseline_image.md`. The required full baseline rerun passes with 13,502 tests. Classified native inventory preserves all package artifacts, but
 freshness, executable coverage and advisory dispositions remain blocking.
 
-No application dependency, lock, workflow, deployment code, running service, or
-production system changed. Temporary downloaded tools and a disposable scratch
-fixture image exist only for qualification. No accepted fresh common-image scan or M1-M5 acceptance is claimed.
+Primary application dependencies and production systems remain unchanged.
+A detached checkout holds the bounded crypto/TLS candidate; a separate isolated
+Compose test project passes focused checks. The test Dockerfile/Compose now
+accept an explicit candidate base while retaining their existing digest default;
+actual extension build, layer ancestry, runtime identity, native/Python version
+readback and 51 focused tests pass. The npm workflow now runs lint before tests;
+generation check passes using the existing repository virtualenv. No M1-M5
+acceptance is claimed.
 
 ## Context and Orientation
 
@@ -290,9 +334,9 @@ summary, and every disposition in this package. Never include runtime secrets,
 registry credentials, private run identifiers, or project data.
 
 The isolated full Python runtime uses `docker/Dockerfile.test` and
-`docker/docker-compose.test.yml`. The Dockerfile currently names a fixed
-published common image. To validate dependency changes, make that base an
-explicit build argument with the current digest as its safe default, then have
+`docker/docker-compose.test.yml`. The Dockerfile now exposes
+`WEPPCLOUD_TEST_BASE_IMAGE` with the previous digest as its default. To validate
+dependency changes, have
 the dependency-security workflow pass the locally built candidate tag or exact
 published digest. This keeps unrelated baseline workflows stable while proving
 the candidate under review.
@@ -663,6 +707,10 @@ Compose through `scripts/deploy-production.sh`; the GHCR publication workflow
 continues to serve its existing non-deploying/Kubernetes compatibility purpose.
 
 ## Revision Note
+
+2026-11-11: Record accepted M0 checkpoint and itemized M1 review packet. The
+preparatory image remains bound to its original source revision; documentation
+and test additions do not permit relabeling the copied image context.
 
 2026-11-11 M0 execution: record development-runtime identity, independent policy
 review, Trivy's reproduced GDAL matching gap, justified alternative-tool trials,

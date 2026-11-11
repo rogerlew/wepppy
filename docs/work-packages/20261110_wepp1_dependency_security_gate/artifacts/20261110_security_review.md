@@ -37,7 +37,7 @@
 | F6-S5 | Medium | Scanner completeness | Trivy 0.76.2 logs a Python constraint error, omits GDAL CVE-2026-8212 from Python results, and exits zero | Reject matching errors and retain alternative detection regression | Trivy rejected; alternate qualified; M3 guards pending |
 | F6-S6 | Medium | Scanner archive input | Syft/Grype link the vulnerable ar reader in GO-2026-6905; tested image mode excludes its cataloger | Enforce qualified image-to-SBOM scope and reject parser unknowns in M3/M4 | Scope-specific M1 exclusion evidenced; automation pending |
 | F6-S7 | Medium | Common-image analysis | Syft treats 15,574 scientific `.par` files as Java archives and records parser failures despite exit zero | Validate exact-image scientific data, retain exact path/hash exclusions, and rescan with Java enabled | M1 classification/rescan pass; M3/M4 automation pending |
-| F6-S8 | High | Bundled native components | Pillow and PyCurl carry independent Brotli decoder copies whose advisory applicability is not established by the Python Brotli Git fix | Retain each native path/hash and prove its patch provenance or remediate with representative consumer parity checks | Open; component applicability unverified |
+| F6-S8 | High | Bundled native components | Pillow and PyCurl carry independent Brotli decoder copies whose advisory applicability is not established by the Python Brotli Git fix | Retain each native path/hash and prove its patch provenance or remediate with representative consumer parity checks | Open; Pillow 13.0.0 wheel repair rejected; native repair/consumer parity pending |
 
 These are package acceptance gaps, not claims of demonstrated live exploitation.
 The preliminary count does not establish vulnerability reachability or severity.
@@ -258,6 +258,71 @@ alone do not prove affectedness; require each component's patch evidence or a
 compatible repair. No global CVE suppression or accepted-risk exception is
 granted.
 
+### Pillow 13.0.0 bundled decoder qualification
+
+**F6-S8 remains open:** the reviewed upstream Pillow 13.0.0 wheel does not
+incorporate the reviewed Brotli fix and cannot close this finding by version
+upgrade alone. The CPython 3.12/x86_64 wheel hash matches retained PyPI metadata;
+runtime/API compatibility has not been tested.
+
+The [tagged dependency manifest](https://github.com/python-pillow/Pillow/blob/13.0.0/.github/dependencies.json)
+selects Brotli 1.2.0. Its [wheel build script](https://github.com/python-pillow/Pillow/blob/13.0.0/.github/workflows/wheels-dependencies.sh)
+reads that value through `_get_ver`, downloads the corresponding upstream tag,
+and builds it without applying the decoder fix. The tagged decoder retains the
+old boolean/error handling. The [upstream fix](https://github.com/google/brotli/commit/0ed4268a4401abcb4472096340477cf4af7d1a2b)
+adds `FORMAT_BLOCK_SWITCH` and error-status propagation. Static inspection finds
+the existing exported error function and older error strings in the wheel's
+actual decoder, but not the new error string. Exact-baseline Pillow and PyCurl
+decoders show the same absence; the independently proven patched Python Brotli
+extension contains it. This conclusion combines recipe, source and binary
+evidence; it does not rely on the shared-library filename.
+
+Private `upstream-metadata/pillow-13-brotli-review.json` beneath the baseline
+evidence directory retains full paths, hashes, source links and limits; SHA-256
+`cfb7376bc0889670fdfee54d28c663e8cf1cb5da9342d70b19fed2d406b4ca0c`.
+No wheel was installed and no exploit or font-decoding test was run. Absence of
+the marker alone cannot exclude a separately implemented fix; none is evidenced
+here.
+
+The bounded M2 candidate is an owned build of pinned upstream Pillow with fixed
+Brotli, or verified patched distribution libraries if they preserve the current
+features. Record build provenance and actual linked-library/cache hashes,
+compare codec/font features, and exercise representative image/font/report
+workflows plus required full gates. A source build is not yet qualified:
+optional features and major-version API changes need parity checks. Updating
+the standalone Python Brotli package cannot repair these native copies.
+
+## M1 frontend npm applicability review
+
+The 19 primary-lock audit rows contain ten directly advised packages and nine
+propagated rows, with 22 distinct GHSA aliases. Exact-image readback and verified
+consumer sources support **not affected for these rows in the recorded common
+image runtime and bounded Docker static build**. The frontend dependency tree
+is absent at runtime. The build copies fixed assets using `fs-extra`; its package
+closure and the separately reviewed Linux install-hook closure do not invoke
+these 19 package instances. This decision is bound to exact image/lock/source
+and command identities, not the development-dependency flag or production-only
+audit count.
+
+Scanner evaluation section 11 retains every row/path/alias, actual parser-input
+sources, narrow feature exclusions, candidate fixes and limits. In particular,
+glob's no-signal argument does not close its inherited minimatch finding;
+jsdom's string conversion excludes one ws condition but not network-fragment
+exhaustion. Existing Jest configuration avoids the preset/globals deepmerge
+branch; new configs require reevaluation. `braces` and `brace-expansion` are
+different packages.
+
+Same-major candidate repairs are separated from glob/minimatch major changes.
+Do not apply npm audit's Jest 25.1.0 downgrade. Source/metadata inspection proves
+Node 20 and `glob.sync` support for the researched glob candidate, but not full
+consumer compatibility. No dependency update or risk exception is approved by
+this review.
+
+**PR/CI admission remains open.** Tests and lint consume repository-controlled
+code/configuration and can have parser or network inputs beyond the static
+build. Runtime exclusion cannot prove runner isolation or a private retrieval
+route. Those obligations remain M3/M4 gates, including for this exact lock.
+
 ## M3 manual handoff design review
 
 **Design status:** acceptable within the ratified manual-transfer and existing
@@ -361,6 +426,200 @@ claim a later post-drain failure left already-stopped services untouched, or
 silently extend freshness to accommodate the interval. This is validation of
 the canonical deployment path, not authorization for a different workflow.
 
+## M3 local importer security review
+
+**Scoped status: pass for local byte retention only.** Reviewed
+`tools/security/import_dependency_evidence.py`, its focused tests, and
+`docs/infrastructure/dependency-security-evidence.md`. This decision does not
+complete M3 or approve any advisory disposition, image, CI transfer or deployment.
+
+Findings closed during review:
+
+- **Low, receipt path:** changing a caller-selected store alias during copying
+  originally left correct bytes under the held directory while the returned
+  alias path pointed elsewhere. The importer now resolves roots once and returns
+  the canonical store path. An independent `wctl exec` probe reproduces the
+  original defect and confirms the corrected result; the alias-swap regression
+  checks retained bytes and leaves the alternate store empty.
+- **Medium, completion evidence:** correctness review identified that a directory
+  synchronization failure after rename left a completed-looking `bundle/`.
+  Publication is now marked successful only after synchronization; failure
+  removes the newly renamed bundle. Both post-rename synchronization failures
+  have regression coverage. The contract requires successful exit/receipt and
+  readback, so directory existence after a crash cannot confer completion.
+
+No unresolved Medium/High finding was identified in this component's stated
+boundary. The manifest is strict, hash-bound, and duplicate-key rejecting;
+filenames cannot contain traversal or nested paths. Nonblocking, no-follow file
+opens followed by regular-file checks reject symlinks, directories and FIFOs.
+Held directory descriptors, exclusive reservation and exclusive file creation
+prevent bundle content from redirecting writes or replacing earlier imports.
+The invoking user must own the 0700 destination; retained directories/files are
+0700/0600. Payloads remain opaque bytes and are never executed. Expected hash
+and image ID must come from the trusted collection record; the declared image ID
+does not independently prove the contents of a scanner report.
+
+An independent filesystem probe modifies an already-read source byte while the
+remaining stream still has the expected hash. The metadata guard rejects it
+and removes the reservation; this case is now a focused regression. The primary
+agent's final focused `wctl run-pytest tests/tools/test_import_dependency_evidence.py`
+run reports **31 passed in 8.97 seconds**, including source mutation, alias swap,
+special files, malformed identities, duplicate keys, no-overwrite and durability
+failures. Caller-controlled root selection and same-user/root modification of
+the trusted store remain outside the untrusted-bundle boundary.
+
+Independent readback of the real local import verifies all five files totaling
+72,245,902 bytes, the manifest hash, and private modes. Its private
+`evidence/import-trial-20261111/receipt-v2.json` SHA-256 is
+`8705c565a4a077b03e2db99e556ec3140a3c583b933e1e05ee73eb773e72a7e1`;
+status is `retained-not-approved`. Reviewed implementation SHA-256 is
+`c5bcbb8d6fdefeae138f2af1b4ccf8cac8c98e9912f67e6cecd45ae009bb6ebe`.
+Independent probe evidence is retained through
+`out/security-audit-20261110/f6/m3-import-review-20261111/`; review JSON SHA-256
+`acc24020ac371ba595491f8d9b5e7b65e16f61e96eafa1a48d22e52e8d4963f0`.
+
+The authenticated CI retrieval route is still missing. Report schema/coverage,
+freshness, policy authority, advisory evaluation, final test identity, retention
+lifecycle and the Compose pre-activation boundary remain separate gates. This
+local trial supplies no exception or implied approval for those obligations.
+
+## OAuth verification-failure contract review (pre-implementation)
+
+**Frozen proposal assessment: security pass for owner ratification.**
+Reviewed `artifacts/20261111_oauth_contract_decision.md` at SHA-256
+`09b2790f274c5891732680f1fa518c6bbd17ef17a81dd58d802b79417821059b`,
+the current callback at `d4b175436`, session/CSRF authorities and the retained
+candidate probes. This review grants no route edit, dependency adoption or owner
+ratification.
+
+Final frozen-text readback confirms the exact redirect/flash, unconditional
+value-free diagnostics and callback-only CSRF classification remain as reviewed.
+Added new-account, authenticated-identity rejection, optional next destination
+and remember/session cases improve valid-state coverage. Consuming flow state
+while preserving existing identity is consistent; no-side-effects assertions
+apply to rejected callbacks, while valid callbacks exercise existing creation
+and login. OAUTH-C1/C2 remain closed. Owner ratification and canonical checkpoint
+ancestry are still pending; this is approval of the proposed contract only.
+
+| Finding | Severity | Evidence / required disposition |
+| --- | --- | --- |
+| OAUTH-C1: conditional reuse of exception text | Medium | Closed in the revised proposal: separate JOSE handling mandates static/provider/class diagnostics and prohibits raw exception text/traceback or token/header/claim values. Implementation must prove this with a sentinel-bearing error/log capture regression. |
+| OAUTH-C2: implicit response details | Low | Closed in the revised proposal: HTTP 302, configured `SECURITY_LOGIN_ERROR_VIEW` with fallback `security_ui.login`, and the exact generic error flash are normative. |
+
+The proposed `JoseError` catch is appropriately bounded to
+`authorize_access_token`: it returns before userinfo, datastore/linking and
+`login_user`, without weakening verification or catching unrelated programming
+errors. [Official joserfc error documentation](https://jose.authlib.org/en/guide/errors/)
+shows descriptions can interpolate token-header input; a few value-free sample
+messages cannot establish a safe raw-error logging contract. Existing provider
+cancellation/transport branches are separate and receive no new behavior waiver.
+
+The revised state matrix includes absent optional OpenID claims that remain
+valid for the configured provider, successful non-OpenID providers, supported
+linking/legacy alias states, and mismatched/replayed Authlib OAuth state. Missing PKCE verifier
+and OAuth state validation are distinct boundaries. Preserve already-authenticated
+session identity when a callback is rejected; do not introduce logout, cookie
+clearing, weaker claim rules or retry. Existing/new account and valid identity
+linking outcomes plus `remember=True` remain noninterference checks. Include a
+real verification success through the callback, not only a mocked success token.
+
+The additional CSRF clarification is appropriately limited to the two named GET
+callback paths. It reconciles the existing safe-GET rule with the generic
+cookie-backed session same-origin rule while retaining session-bound OAuth
+state, the existing PKCE exchange, and configured OpenID checks. Rejected
+verification cannot restore consumed state. No exception applies to disconnect,
+token minting or other session mutations. Validate cross-site/no-origin valid
+returns and missing/mismatched/replayed state separately on both callback paths;
+do not require previously optional provider capabilities or claims. This is a
+protocol-specific contract clarification, not permission to weaken CSRF middleware.
+
+The retained actual-library probe confirms one valid RS256 token and 15 expected
+JOSE rejections. The Flask invalid-nonce probe confirms that real verification
+escapes the current route through `LoggedBlueprint`; it substitutes the client
+exchange and therefore does not prove OAuth state/transport or complete login
+parity. Its receipt SHA-256 is
+`243f2b396a131c268e9269771c8adbcef99f751cbb126bbf0ffaaa065a534e83`.
+No crafted-provider network request was needed to establish this discrepancy.
+
+The finite-authority conclusion is correct: the current session contract governs
+identity/remember behavior and credential-free logging, but does not specify this
+OpenID failure response. Ratify the precise delta, promote it to the session and
+CSRF contracts with implementation pending, and obtain independent readback of
+both final amended texts. The checkpoint, canonical amendments and resolved reviews
+must be a standalone ancestor before route/Authlib edits. Existing plan/M0
+authorization is not recorded as that specific ratification.
+
+## M2 crypto/TLS candidate review (2026-11-11)
+
+**Scoped assessment: pass to continue candidate validation; no release clearance.**
+No new batch-specific Medium/High finding was identified. M1 applicability and
+coverage work, M4 final gates, and the existing package findings remain open.
+Private evidence is retained under
+`/workdir/weppcloud-deployments/.local/dependency-security/evidence/crypto-batch-20261111/`;
+independent `security-batch-review.json` SHA-256 is
+`4fe798058cb332b5de857d5abfa153a97dfe25e3a6f2bf37c6d1f55c388b36ab`.
+
+The reviewed common image is
+`sha256:f0f3fbb48f4afe636eb8bfcc491d7fa28514543cc1fe4bc628bce8fda373da48`.
+Its only installed Python version changes are cryptography 46.0.7 → 50.0.2,
+certifi 2024.8.30 → 2026.10.18, and urllib3 2.7.0 → 2.8.0; the existing Brotli
+Git source is pinned to its already evaluated commit. Authlib remains 1.6.12.
+Independent JSON duplicate-key checks, declared Syft schema 16.1.13, tool/image
+identities, unique artifact IDs and all Grype artifact references pass readback.
+This is structural/identity validation, not a claim of formal JSON Schema
+validation. Direct inventories reconcile 308/308 Python and 432/432 Debian
+name/version pairs. All 15,574 classified scientific data path/hash pairs are
+unchanged; exact exclusion-set and symlink checks pass again.
+
+The same fresh Grype database (schema v6.1.10, built 2026-11-11 06:21:32 UTC)
+produces 3,056 → 3,034 ordinary matches and 330 → 330 ignored matches.
+Matcher suppressions remain included. The package/version/advisory multiset
+removes exactly 22 records: cryptography 14, urllib3 six, certifi two, including
+installed and cached copies; it adds none. These are records, including advisory
+aliases, not 22 distinct vulnerabilities. Candidate report SHA-256 is
+`ba07f596350334e0242e830da11cdfb31b81333887029b7eb9fd0ba7f35f0b51`.
+The qualified repeat closes the initial missing before/after input-hash receipt
+gap: actual DB/SBOM hashes agree with its before/after states, and both match
+arrays are identical. Its report SHA-256 is
+`6c545912cdabb69223c598ab3a504902cec72ed663deebeb2bce245c688193d8`;
+independent `security-qualified-readback.json` SHA-256 is
+`402b803eb6d7b5029657f6bdb560d92adbef308f523796c8b98f3c2a258d3b4d`.
+Changed cache paths do not transfer prior applicability dispositions automatically.
+
+The scan still contains 2,099 unidentified executable files and 46 artifacts
+without PURLs. No new parser-unknown class or matcher constraint error appears.
+Debug logs also retain 73 missing NVD metadata lookups for 12 CVE IDs, identical
+in baseline and candidate. Exact Grype source and report readback show these
+remain **UNKNOWN primary findings**, also present in related-vulnerability
+metadata; none disappeared. They require explicit review. A metadata fallback,
+unknown severity, or unchanged count does not waive their disposition.
+
+Candidate Brotli evidence independently renews the narrow NOT AFFECTED proposal
+for its three Python records. The imported extension and both cached extensions
+all hash to `ddd8f72be33cfbd7a459625555610cdf31b97fbfca8e4cd799085f708a3f4ceb`;
+the installed RECORD agrees and a real round trip passes. Installed `direct_url`
+records requested and resolved commit `d89c4b1c52e25ddafe047bc78bbee5c1e24b1809`.
+Candidate `decode.c` hashes to
+`c74c2d668314fefe645d3ab9bbafe6b6db8a95769ca06dc54d875610c803fc56`, matching the
+previously verified upstream fixed source and retaining the checked error guard.
+These hashes were measured from this candidate, although they equal baseline.
+The initial failed cache probe is retained: cached `direct_url.json` is absent;
+the corrected readback uses actual source and binaries. This proposal does not
+cover Pillow/PyCurl native copies or claim exploit-proof testing. F6-S8 stays open.
+
+Real RS256, Fernet and Paramiko outcomes and native-library readback match
+baseline. Seven local TLS checks cover trusted/untrusted CA behavior, redirects,
+Authorization stripping, timeout and HTTP-error handling; the actual certifi
+bundle independently loads 117 CAs. Live provider trust compatibility is not
+proven. Both compared images still accept the wrong nonce when the token sets
+`nonce_supported: false`; preserved Authlib behavior is not security closure.
+Focused tests pass 51 cases on the common image and 51 on its test extension.
+The extension's layer ancestry, all 308 Python versions and native/crypto outputs
+match the common image; its 90 additional browser OS packages are separate test
+inputs. Production-identity probes use UID 1002/GID 130; Compose tests use their
+existing UID 1000/GID 993. These observations do not replace final end-to-end
+workflow evidence, authorize production changes, or infer owner risk acceptance.
+
 ## Required Review Checks
 
 - [ ] Scanner adoption passes the dependency-evaluation standard and is pinned.
@@ -385,6 +644,8 @@ the canonical deployment path, not authorization for a different workflow.
   image-to-SBOM commands and explicit coverage/error obligations.
 - **M3 manual handoff design status**: pass for bounded manual collection/import
   and exact host-local Compose image checks; real transfer/retention evidence pending.
+- **M3 local importer security status**: pass for the reviewed byte-retention
+  component and local readback; remote collection and policy acceptance remain open.
 - **Final gate status**: hold; full baseline, common-image evidence,
   implementation, transfer/retention validation and final reviews remain open.
 - **Release recommendation**: hold until all applicable High/Medium package

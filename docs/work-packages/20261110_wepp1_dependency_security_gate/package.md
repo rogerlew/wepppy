@@ -1,7 +1,9 @@
 # wepp1 common-image dependency security gate
 
 **Status**: Open (2026-11-11 UTC); M0 complete with green full baseline and
-reviewed checkpoint; M1 inventory/disposition work executing
+reviewed checkpoint `d4b175436`; M1 inventory/disposition work executing.
+The local M3 manual importer passes focused checks and independent review;
+full pytest is running. CI retrieval and activation wiring remain open.
 
 **Timezone**: UTC
 
@@ -145,10 +147,14 @@ focused run does not replace these gates.
   authentication/parser workflow smokes when rollout is separately authorized.
 - **Direct unmocked boundary**: the actual locally built image, not a reconstructed
   requirements list.
-- **Raw evidence storage**: gitignored `out/security-audit-20261110/f6/` or a
-  protected CI artifact; tracked docs retain hashes, versions, summary, and
-  dispositions without secrets.
-- **Highest completion claim currently supported**: diagnosed and scaffolded.
+- **Raw evidence storage**: owner-selected private
+  `/workdir/weppcloud-deployments/.local/dependency-security/`; ignored local
+  `out/` paths link to retained evidence. Manual CI collection still requires
+  operational validation; public Actions artifacts are not an approved store.
+  Tracked docs retain sanitized hashes, versions, summaries and dispositions.
+- **Highest completion claim currently supported**: M0 accepted; local importer
+  and bounded candidate/test-image components validated. M1-M4 acceptance remains
+  open; no production deployment or advisory-risk exception is authorized.
 
 ## Stakeholders
 

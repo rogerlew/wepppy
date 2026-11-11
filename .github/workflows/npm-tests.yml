@@ -7,6 +7,7 @@ on:
     - wepppy/weppcloud/controllers_js/**
     - package.json
     - package-lock.json
+    - .github/forest_workflows/npm-tests.yml
     - .github/workflows/npm-tests.yml
   push:
     branches:
@@ -16,6 +17,7 @@ on:
     - wepppy/weppcloud/controllers_js/**
     - package.json
     - package-lock.json
+    - .github/forest_workflows/npm-tests.yml
     - .github/workflows/npm-tests.yml
   workflow_dispatch: null
 jobs:
@@ -61,6 +63,10 @@ jobs:
       run: |
         set -euo pipefail
         wctl run-npm install
+    - name: Run npm lint
+      run: |
+        set -euo pipefail
+        wctl run-npm lint
     - name: Run npm tests
       run: |
         set -euo pipefail

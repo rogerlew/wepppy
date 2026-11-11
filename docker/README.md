@@ -282,8 +282,17 @@ locks use the existing `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR` setting under `/tmp`;
 transport authentication tests create fixture-owned account data rather than
 reading deployment accounts.
 
-The CI image is built locally and is not published. `Dockerfile.test` pins the
-common image and Node image by digest. Node/npm plus the existing static-src
+The CI image is built locally and is not published. `Dockerfile.test` defaults to
+the pinned common-image digest and pins Node by digest. To test a host-local
+candidate, set `WEPPCLOUD_TEST_BASE_IMAGE` to its unique local tag for the test
+Compose build, and retain the resolved image ID before and after building.
+Leave the variable unset to use the Dockerfile's default; an explicitly empty
+value is invalid. Compose passes the variable through without repeating the pin.
+Verify that the test image inherits the candidate layers and installed versions;
+a source bind mount cannot update image dependencies. This override affects only
+the isolated test image. Production still builds locally through the installed
+`wctl` preset and `scripts/deploy-production.sh` using Docker Compose.
+Node/npm plus the existing static-src
 lockfile provision Playwright/Chromium under `/opt/wepppy-ci`, outside the checkout
 bind mount. Image construction installs browser system dependencies as root;
 the image restores its original user and Compose runs tests without privileges.
