@@ -9,6 +9,8 @@ import os
 from os.path import basename
 from urllib.parse import quote, urlencode
 
+from markupsafe import Markup
+
 
 def _normalize_nodir_request(env, subpath: str, *, filter_pattern_default: str) -> tuple[str, str]:
     nodir_rel_path, nodir_filter = env._extract_nodir_filter(subpath, default=filter_pattern_default)
@@ -418,8 +420,9 @@ def _build_breadcrumbs_html(
     query_suffix: str,
 ) -> str:
     rel_path = os.path.relpath(path, wd)
+    base_browse_url = quote(base_browse_url, safe='/')
     root_href = f'{base_browse_url}{query_suffix}'
-    breadcrumb_items = [(f'<a href="{root_href}"><b>{runid}</b></a>', os.path.abspath(wd))]
+    breadcrumb_items = [(Markup('<a href="{}"><b>{}</b></a>').format(root_href, runid), os.path.abspath(wd))]
 
     if rel_path != '.':
         parts = rel_path.split('/')
@@ -429,32 +432,37 @@ def _build_breadcrumbs_html(
             abs_part_path = os.path.abspath(os.path.join(wd, rel_path_acc))
             is_last = idx == len(parts) - 1
             if is_last:
-                breadcrumb_html = f'<b>{part}</b>'
+                breadcrumb_html = Markup('<b>{}</b>').format(part)
             else:
-                part_href = f'{base_browse_url}{rel_path_acc}/{query_suffix}'
-                breadcrumb_html = f'<a href="{part_href}"><b>{part}</b></a>'
+                part_href = f'{base_browse_url}{quote(rel_path_acc, safe="/")}/{query_suffix}'
+                breadcrumb_html = Markup('<a href="{}"><b>{}</b></a>').format(part_href, part)
             breadcrumb_items.append((breadcrumb_html, abs_part_path))
 
     breadcrumb_segments: list[str] = []
     previous_abs_path = None
     for idx, (crumb_html, abs_path_str) in enumerate(breadcrumb_items):
         if idx and previous_abs_path is not None:
-            escaped_abs_path = env.html_escape(previous_abs_path, quote=True)
             breadcrumb_segments.append(
-                f' <span class="breadcrumb-separator" data-copy-path="{escaped_abs_path}" title="Copy absolute path" role="button" tabindex="0">❯</span> '
+                Markup(
+                    ' <span class="breadcrumb-separator" data-copy-path="{}"'
+                    ' title="Copy absolute path" role="button" tabindex="0">❯</span> '
+                ).format(previous_abs_path)
             )
         breadcrumb_segments.append(crumb_html)
         previous_abs_path = abs_path_str
 
     current_abs_path = previous_abs_path or os.path.abspath(path)
     breadcrumb_segments.append(
-        f' <span class="breadcrumb-separator" data-copy-path="{env.html_escape(current_abs_path, quote=True)}" title="Copy absolute path" role="button" tabindex="0">❯</span> '
+        Markup(
+            ' <span class="breadcrumb-separator" data-copy-path="{}"'
+            ' title="Copy absolute path" role="button" tabindex="0">❯</span> '
+        ).format(current_abs_path)
     )
     breadcrumb_segments.append(
-        f'<input type="text" id="pathInput" value="{env.html_escape(filter_pattern, quote=True)}" '
-        'placeholder="../output/p1.*" size="50">'
+        Markup('<input type="text" id="pathInput" value="{}" '
+        'placeholder="../output/p1.*" size="50">').format(filter_pattern)
     )
-    return ''.join(breadcrumb_segments)
+    return Markup('').join(breadcrumb_segments)
 
 
 def _normalize_page_or_redirect(env, *, request, page: int, total_items: int):
@@ -550,7 +558,9 @@ async def _render_directory_response(
         path,
         runid,
         wd,
-        request.path,
+        # URL.path reparses decoded '?'/'#' as URL syntax; ASGI retains the
+        # complete decoded filesystem path for exactly-once segment encoding.
+        request.scope['path'],
         diff_wd,
         base_query,
         page=page,
@@ -582,9 +592,9 @@ async def _render_directory_response(
         runid=runid,
         config=config,
         diff_runid=diff_runid,
-        project_href=env.Markup(f'<a href="{home_href}">☁️</a> '),
-        breadcrumbs_html=env.Markup(breadcrumbs),
-        listing_html=env.Markup(listing_html),
+        project_href=Markup('<a href="{}">☁️</a> ').format(quote(home_href, safe="/")),
+        breadcrumbs_html=breadcrumbs,
+        listing_html=listing_html,
         pagination_html=env.Markup(pagination_html),
         showing_text=env.Markup(showing_text),
         using_manifest=using_manifest,

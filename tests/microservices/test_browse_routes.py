@@ -2,6 +2,7 @@ import importlib
 import base64
 import json
 from pathlib import Path
+from html.parser import HTMLParser
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -595,3 +596,176 @@ def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix,
     assert listing.status_code == 200
     assert name in listing.text
     assert f"/dtale/{name}" not in listing.text
+
+
+# Inert corpus: no script execution, only structural HTML assertions.
+_OUTPUT_NAME = 'name & <x-probe data-extra="yes">\' #?% café ∕＼'
+
+
+class _BrowseHTML(HTMLParser):
+    def __init__(self, body):
+        super().__init__(convert_charrefs=True)
+        self.tags = []
+        self.text = []
+        self.feed(body)
+
+    def handle_starttag(self, tag, attrs):
+        self.tags.append((tag, dict(attrs)))
+
+    def handle_data(self, data):
+        self.text.append(data)
+
+    def links(self):
+        return [attrs for tag, attrs in self.tags if tag == 'a']
+
+    def assert_inert(self):
+        assert not any(tag == 'x-probe' for tag, _ in self.tags)
+        assert not any('data-extra' in attrs for _, attrs in self.tags)
+
+
+def _output_client(load_run_browse, root, monkeypatch, **env):
+    browse = load_run_browse({'output-safe': root, 'comparison': root}, SITE_PREFIX='/weppcloud', **env)
+    from types import SimpleNamespace
+    from wepppy.microservices.browse import _download
+
+    monkeypatch.setattr(_download, 'authorize_run_request', browse.authorize_run_request)
+    monkeypatch.setattr(_download, '_resolve_run_context', lambda *args: SimpleNamespace(active_root=root))
+    return TestClient(browse.create_app())
+
+
+_OUTPUT_BASE = '/weppcloud/runs/output-safe/cfg/browse/'
+
+
+def test_browse_listing_escapes_filename_and_encodes_entry_links(tmp_path, load_run_browse, monkeypatch):
+    from urllib.parse import quote
+
+    names = ['ordinary.txt', '日本語.txt', _OUTPUT_NAME + '.txt']
+    for name in names:
+        _write_file(tmp_path / name, name)
+    with _output_client(load_run_browse, tmp_path, monkeypatch) as client:
+        response = client.get(_OUTPUT_BASE)
+        assert response.status_code == 200
+        parsed = _BrowseHTML(response.text)
+        parsed.assert_inert()
+        for name in names:
+            assert name in ''.join(parsed.text)
+            for route in ('browse', 'download'):
+                href = _OUTPUT_BASE.replace('/browse/', f'/{route}/') + quote(name, safe='')
+                assert any(a.get('href') == href for a in parsed.links())
+                delivered = client.get(href, params={'raw': '1'})
+                assert delivered.status_code == 200
+                assert delivered.text == name
+
+
+def test_browse_directory_breadcrumb_escapes_and_encodes_stored_name(tmp_path, load_run_browse, monkeypatch):
+    from urllib.parse import quote
+
+    directory = tmp_path / _OUTPUT_NAME
+    (directory / 'child').mkdir(parents=True)
+    _write_file(directory / 'literal%23.txt', 'nested')
+    href = _OUTPUT_BASE + quote(_OUTPUT_NAME, safe='') + '/'
+    with _output_client(load_run_browse, tmp_path, monkeypatch) as client:
+        parent = _BrowseHTML(client.get(_OUTPUT_BASE).text)
+        parent.assert_inert()
+        assert any(a.get('href') == href for a in parent.links())
+        nested = client.get(href)
+        assert nested.status_code == 200
+        parsed = _BrowseHTML(nested.text)
+        parsed.assert_inert()
+        file_href = href + 'literal%2523.txt'
+        assert any(a.get('href') == file_href for a in parsed.links()), parsed.links()
+        # Starlette TestClient unquotes HTTPX's already decoded path again.
+        # ASGITransport preserves a literal percent escape as a filename.
+        import asyncio
+        import httpx
+
+        async def read_literal_percent_name():
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=client.app), base_url='http://testserver'
+            ) as direct:
+                delivered = await direct.get(file_href, params={'raw': '1'})
+                assert delivered.status_code == 200
+                assert delivered.text == 'nested'
+
+        asyncio.run(read_literal_percent_name())
+        child = client.get(href + 'child/')
+        assert child.status_code == 200
+        parsed = _BrowseHTML(child.text)
+        parsed.assert_inert()
+        assert _OUTPUT_NAME in ''.join(parsed.text)
+        assert any(a.get('href') == href for a in parsed.links())
+        assert any(a.get('data-copy-path') == str(directory) for _, a in parsed.tags)
+        # Empty child retains the normal empty-state presentation.
+        assert 'No items to display' in child.text
+
+
+def test_browse_listing_escapes_symlink_target_text(tmp_path, load_run_browse, monkeypatch):
+    import os
+
+    if not hasattr(os, 'symlink'):
+        pytest.skip('symlink unavailable')
+    _write_file(tmp_path / _OUTPUT_NAME, 'target bytes')
+    (tmp_path / 'link.txt').symlink_to(_OUTPUT_NAME)
+    with _output_client(load_run_browse, tmp_path, monkeypatch) as client:
+        response = client.get(_OUTPUT_BASE)
+        assert response.status_code == 200
+        parsed = _BrowseHTML(response.text)
+        parsed.assert_inert()
+        assert '->' + _OUTPUT_NAME in ''.join(parsed.text)
+        assert client.get(_OUTPUT_BASE + 'link.txt', params={'raw': '1'}).text == 'target bytes'
+
+
+@pytest.mark.parametrize('suffix, actions', [
+    ('.parquet', {'browse', 'download', 'dtale', 'schema'}),
+    ('.tif', {'browse', 'download', 'gdalinfo'}),
+    ('.sol', {'browse', 'download', 'diff'}),
+    ('.csv', {'browse', 'download', 'dtale', 'diff'}),
+])
+def test_browse_action_links_encode_filename_and_preserve_query(tmp_path, load_run_browse, monkeypatch, suffix, actions):
+    from urllib.parse import quote
+
+    name = _OUTPUT_NAME + suffix
+    if suffix == '.parquet':
+        pytest.importorskip('pandas').DataFrame({'value': [1]}).to_parquet(tmp_path / name)
+    else:
+        _write_file(tmp_path / name)
+    pqf = _encode_filter_payload({'kind': 'condition', 'field': 'value', 'operator': 'Equals', 'value': 1})
+    with _output_client(load_run_browse, tmp_path, monkeypatch, BROWSE_PARQUET_FILTERS_ENABLED='1') as client:
+        response = client.get(_OUTPUT_BASE, params={'diff': 'comparison', 'pqf': pqf})
+        assert response.status_code == 200
+        parsed = _BrowseHTML(response.text)
+        parsed.assert_inert()
+        entry_links = [a for a in parsed.links() if quote(name, safe='') in a.get('href', '')]
+        assert {urlparse(a['href']).path.split('/')[5] for a in entry_links} == actions
+        for a in entry_links:
+            url = urlparse(a['href'])
+            assert url.path.endswith('/' + quote(name, safe=''))
+            assert not url.fragment and not url.netloc
+            query = parse_qs(url.query)
+            if '/diff/' in url.path:
+                assert query['diff'] == ['comparison']
+            if suffix == '.parquet' and '/schema/' not in url.path:
+                assert query['pqf'] == [pqf]
+            if 'data-schema-url' in a:
+                assert a['data-schema-url'] == a['href']
+                assert client.get(a['href']).status_code == 200
+        if suffix == '.parquet':
+            assert any(parse_qs(urlparse(a['href']).query).get('as_csv') == ['1'] for a in entry_links)
+        if suffix == '.sol':
+            assert any(parse_qs(urlparse(a['href']).query).get('repr') == ['1'] for a in entry_links)
+
+
+def test_browse_not_found_breadcrumb_escapes_reflected_path(tmp_path, load_run_browse, monkeypatch):
+    from urllib.parse import quote
+
+    (tmp_path / _OUTPUT_NAME).mkdir()
+    with _output_client(load_run_browse, tmp_path, monkeypatch) as client:
+        response = client.get(_OUTPUT_BASE + quote(_OUTPUT_NAME, safe='') + '/missing/', params={'diff': 'other&"value'})
+        assert response.status_code == 404
+        parsed = _BrowseHTML(response.text)
+        parsed.assert_inert()
+        assert _OUTPUT_NAME in ''.join(parsed.text)
+        href = _OUTPUT_BASE + quote(_OUTPUT_NAME, safe='') + '/'
+        links = [a['href'] for a in parsed.links() if a.get('href', '').startswith(href)]
+        assert len(links) == 1
+        assert parse_qs(urlparse(links[0]).query) == {'diff': ['other&"value']}

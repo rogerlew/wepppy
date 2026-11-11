@@ -791,11 +791,12 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     diff_runid = args.get('diff', '')
     if '?' in diff_runid:
         diff_runid = diff_runid.split('?')[0]
-    diff_arg = f'?diff={diff_runid}' if diff_runid else ''
+    diff_arg = '?' + urlencode({'diff': diff_runid}) if diff_runid else ''
 
     # Build breadcrumbs up to the point of failure
     base_browse_url, home_href = _resolve_browse_paths(request.path, runid, config)
-    breadcrumbs = [f'<a href="{base_browse_url}{diff_arg}"><b>{runid}</b></a>']
+    base_browse_url = quote(base_browse_url, safe='/')
+    breadcrumbs = [Markup('<a href="{}"><b>{}</b></a>').format(base_browse_url + diff_arg, runid)]
 
     # Clean the subpath for display and split into components
     # This handles cases where a search pattern like "wepp/runs/p100.*" was used
@@ -809,20 +810,20 @@ def _path_not_found_response(runid, subpath, wd, request, config):
         next_path_segment = os.path.join(wd, current_rel_path, part)
         if os.path.isdir(next_path_segment):
             current_rel_path = os.path.join(current_rel_path, part)
-            part_url = f'{base_browse_url}{current_rel_path}/{diff_arg}'
-            breadcrumbs.append(f'<a href="{part_url}"><b>{part}</b></a>')
+            part_url = f'{base_browse_url}{quote(current_rel_path, safe="/")}/{diff_arg}'
+            breadcrumbs.append(Markup('<a href="{}"><b>{}</b></a>').format(part_url, part))
         else:
             # This part and the rest of the path do not exist
-            breadcrumbs.append(f'<b>{part}</b>')
+            breadcrumbs.append(Markup('<b>{}</b>').format(part))
             # Once we find a non-existent part, we stop creating links
             # and just show the rest of the requested path as bold text.
             remaining_index = parts.index(part) + 1
             if remaining_index < len(parts):
-                breadcrumbs.extend([f'<b>{p}</b>' for p in parts[remaining_index:]])
+                breadcrumbs.extend([Markup('<b>{}</b>').format(p) for p in parts[remaining_index:]])
             break
 
-    breadcrumbs.append('<input type="text" id="pathInput" placeholder="../output/p1.*" size="50">')
-    breadcrumbs_html = ' ❯ '.join(breadcrumbs)
+    breadcrumbs.append(Markup('<input type="text" id="pathInput" placeholder="../output/p1.*" size="50">'))
+    breadcrumbs_html = Markup(' ❯ ').join(breadcrumbs)
 
     # Create the main content tree with the error message
     escaped_subpath = html_escape(subpath)
@@ -832,7 +833,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     <p>The path '<code>{escaped_subpath}</code>' could not be found on the server.</p>
 </div>"""
 
-    project_href = Markup(f'<a href="{home_href}">☁️</a> ')
+    project_href = Markup('<a href="{}">☁️</a> ').format(quote(home_href, safe="/"))
 
     page_html = _render_browse_error_page(
         runid=runid,

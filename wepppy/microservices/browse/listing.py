@@ -10,7 +10,9 @@ import os
 import sqlite3
 from datetime import datetime
 from functools import cmp_to_key
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
+
+from markupsafe import Markup
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -760,6 +762,11 @@ def get_pad(x):
     return x * " "
 
 
+def _url_segment(name: str) -> str:
+    """Encode one filesystem entry without granting it URL structure."""
+    return quote(name, safe="")
+
+
 async def html_dir_list(
     _dir,
     runid,
@@ -797,6 +804,8 @@ async def html_dir_list(
             hide_mixed_nodir=hide_mixed_nodir,
         )
 
+    # The request adapter exposes a decoded path; encode it once before URL assembly.
+    request_path = quote(request_path, safe="/")
     original_request_path = request_path
     if filter_pattern:
         request_path = request_path.rsplit("/", 1)[0]
@@ -829,7 +838,7 @@ async def html_dir_list(
         href = original_request_path
         if query_params:
             href = f"{href}?{urlencode(query_params)}"
-        return f'<a href="{href}" class="browse-sort-link">{display}{pad}</a>'
+        return Markup('<a href="{}" class="browse-sort-link">{}{}</a>').format(href, display, pad)
 
 
     name_col_width = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
@@ -837,11 +846,12 @@ async def html_dir_list(
     size_col_width = 12
 
     header_line = (
-        f'<span class="browse-header">{_padding}  '
-        f"{_build_sort_link('name', 'Name', name_col_width)}"
-        f"{_build_sort_link('date', 'Modified', date_col_width)}"
-        f"{_build_sort_link('size', 'Size', size_col_width)}"
-        "Actions</span>\n"
+        Markup('<span class="browse-header">{}  {}{}{}Actions</span>\n').format(
+            _padding,
+            _build_sort_link('name', 'Name', name_col_width),
+            _build_sort_link('date', 'Modified', date_col_width),
+            _build_sort_link('size', 'Size', size_col_width),
+        )
     )
     s.append(header_line)
 
@@ -849,13 +859,14 @@ async def html_dir_list(
         _file = entry[0]
         is_dir = entry[1]
         path = _join(_dir, _file)
+        entry_url = request_path.rstrip("/") + "/" + _url_segment(_file)
         ts_pad = get_pad(name_col_width - len(_file))
         last_modified_time = entry[2]
         _tree_char = "├└"[i == len(page_entries) - 1]
         row_html = ""
 
         if is_dir:
-            file_link = _join(request_path, _file)
+            file_link = entry_url
             item_count = entry[3]
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
@@ -865,10 +876,13 @@ async def html_dir_list(
                 dir_href = f"{dir_href}{query_suffix}"
             row_html = (
                 _padding
-                + f'{_tree_char} <a href="{dir_href}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n'
+                + Markup('{} <a href="{}"><b>{}{}</b></a>{} {}{}{}{}  \n').format(
+                    _tree_char, dir_href, _file, ts_pad, last_modified_time,
+                    item_pad, item_count, end_pad, sym_target,
+                )
             )
         else:
-            file_link = _join(request_path, _file)
+            file_link = entry_url
             sym_target = entry[5]
             file_size = entry[3]
             item_pad = get_pad(8 - len(file_size.split()[0]))
@@ -879,34 +893,34 @@ async def html_dir_list(
             dl_url = None
             symlink_is_dir = entry[6] if len(entry) > 6 else False
             if not symlink_is_dir:
-                dl_url = _join(request_path, _file).replace("/browse/", "/download/")
-                dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
+                dl_url = entry_url.replace("/browse/", "/download/", 1)
+                dl_link = Markup('{}<a href="{}">download</a>').format(dl_pad, dl_url)
             file_lower = _file.lower()
             is_parquet_file = file_lower.endswith((".parquet", ".geoparquet", ".pq"))
-            parquet_link_attrs = ''
+            parquet_link_attrs = Markup('')
             if is_parquet_file:
                 file_link = _append_query_params(file_link, parquet_filter_query)
-                parquet_link_attrs = ' data-parquet-link="1"'
+                parquet_link_attrs = Markup(' data-parquet-link="1"')
                 if dl_url is not None:
                     dl_url = _append_query_params(dl_url, parquet_filter_query)
-                    dl_link = f'{dl_pad}<a href="{dl_url}"{parquet_link_attrs}>download</a>'
+                    dl_link = Markup('{}<a href="{}"{}>download</a>').format(dl_pad, dl_url, parquet_link_attrs)
             gl_link = "      "
             if file_lower.endswith((".arc", ".tif", ".img", ".nc")):
-                gl_url = _join(request_path, _file).replace("/browse/", "/gdalinfo/")
-                gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
+                gl_url = entry_url.replace("/browse/", "/gdalinfo/", 1)
+                gl_link = Markup('  <a href="{}">gdalinfo</a>').format(gl_url)
             if is_parquet_file:
-                gl_url = _join(request_path, _file).replace("/browse/", "/download/")
+                gl_url = entry_url.replace("/browse/", "/download/", 1)
                 csv_query = {"as_csv": "1"}
                 if pqf_value:
                     csv_query["pqf"] = pqf_value
                 gl_url = _append_query_params(gl_url, csv_query)
-                gl_link = f'  <a href="{gl_url}"{parquet_link_attrs}>.csv</a>'
+                gl_link = Markup('  <a href="{}"{}>.csv</a>').format(gl_url, parquet_link_attrs)
             repr_link = "           "
             dtale_link = "          "
             schema_link = "          "
             if file_lower.endswith(".man") or file_lower.endswith(".sol"):
-                repr_url = _join(request_path, _file) + "?repr=1"
-                repr_link = f'  <a href="{repr_url}">annotated</a>'
+                repr_url = entry_url + "?repr=1"
+                repr_link = Markup('  <a href="{}">annotated</a>').format(repr_url)
             if (
                 file_lower.endswith(".parquet")
                 or file_lower.endswith(".geoparquet")
@@ -918,38 +932,43 @@ async def html_dir_list(
                 or file_lower.endswith(".tsv")
                 or file_lower.endswith(".tsv.gz")
             ):
-                dtale_url = _join(request_path, _file).replace("/browse/", "/dtale/")
+                dtale_url = entry_url.replace("/browse/", "/dtale/", 1)
                 if is_parquet_file:
                     dtale_url = _append_query_params(dtale_url, parquet_filter_query)
-                    dtale_link = f'  <a href="{dtale_url}"{parquet_link_attrs}>d-tale</a>'
+                    dtale_link = Markup('  <a href="{}"{}>d-tale</a>').format(dtale_url, parquet_link_attrs)
                 else:
-                    dtale_link = f'  <a href="{dtale_url}">d-tale</a>'
+                    dtale_link = Markup('  <a href="{}">d-tale</a>').format(dtale_url)
             if is_parquet_file:
-                schema_url = _join(request_path, _file).replace("/browse/", "/schema/")
+                schema_url = entry_url.replace("/browse/", "/schema/", 1)
                 panel_id = f"parquet-schema-panel-{i}"
                 schema_link = (
-                    f'  <a href="{schema_url}"'
-                    f' data-parquet-schema-link="1" data-schema-url="{schema_url}"'
-                    f' data-schema-target="{panel_id}" aria-expanded="false">schema</a>'
+                    Markup(
+                        '  <a href="{}" data-parquet-schema-link="1" data-schema-url="{}"'
+                        ' data-schema-target="{}" aria-expanded="false">schema</a>'
+                    ).format(schema_url, schema_url, panel_id)
                 )
 
             diff_link = "    "
             if diff_wd and not file_lower.endswith((".tif", ".parquet", ".geoparquet", ".gz", ".img")):
                 diff_path = _join(diff_wd, os.path.relpath(path, wd))
                 if _exists(diff_path):
-                    diff_url = _join(request_path, _file).replace("/browse/", "/diff/")
+                    diff_url = entry_url.replace("/browse/", "/diff/", 1)
                     if query_suffix:
                         diff_url = f"{diff_url}{query_suffix}"
-                    diff_link = f'  <a href="{diff_url}">diff</a>'
+                    diff_link = Markup('  <a href="{}">diff</a>').format(diff_url)
             row_html = (
                 _padding
-                + f'{_tree_char} <a href="{file_link}"{parquet_link_attrs}>{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{dtale_link}{schema_link}{diff_link}{sym_target}\n'
+                + Markup('{} <a href="{}"{}>{}{}</a>{} {}{}{}{}{}{}{}{}{}\n').format(
+                    _tree_char, file_link, parquet_link_attrs, _file, ts_pad,
+                    last_modified_time, item_pad, file_size, dl_link, gl_link,
+                    repr_link, dtale_link, schema_link, diff_link, sym_target,
+                )
             )
 
         if i % 2:
-            row_html = f'<span class="even-row">{row_html}</span>'
+            row_html = Markup('<span class="even-row">{}</span>').format(row_html)
         else:
-            row_html = f'<span class="odd-row">{row_html}</span>'
+            row_html = Markup('<span class="odd-row">{}</span>').format(row_html)
         s.append(row_html)
 
-    return "".join(s), total_items, using_manifest
+    return Markup("").join(s), total_items, using_manifest

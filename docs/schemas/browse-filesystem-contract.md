@@ -56,8 +56,10 @@ Escaping HTML alone leaves URL structure ambiguous; URL quoting alone cannot
 protect HTML text. Contextual encoding preserves filesystem transparency without
 a filename allowlist or reliance on site-wide CSP. Focused regressions must parse
 rendered structure and URLs and follow ordinary, Unicode and punctuation links.
-Implementation and local validation are pending; rollout requires separate
-authorization under the browse listing output safety package.
+Implemented and locally validated with focused route tests; rollout requires
+separate authorization under the browse listing output safety package.
+The directory renderer reads the complete decoded ASGI path before URL encoding;
+reparsing a decoded path as a URL would truncate names containing `#` or `?`.
 
 ## Failure observability
 

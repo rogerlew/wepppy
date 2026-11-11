@@ -49,8 +49,8 @@ const config = "{{ config }}";
 {% endif %}
 <pre id="file-tree" class="wc-browse-tree">
 {{ showing_text|safe }}{{ pagination_html|safe }}
-{{ project_href|safe }}{{ breadcrumbs_html|safe }}
-{{ listing_html|safe }}
+{{ project_href|safe }}{{ breadcrumbs_html }}
+{{ listing_html }}
 {{ pagination_html|safe }}
 {% if mixed_state_roots %}
 <span class="mixed-state-warning"><b>Mixed-state NoDir roots:</b> {{ mixed_state_roots|join(', ') }}</span>
