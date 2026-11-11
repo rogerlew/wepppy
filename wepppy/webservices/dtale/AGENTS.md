@@ -78,7 +78,7 @@ gunicorn --workers 1 --bind 0.0.0.0:9010 --log-level info wepppy.webservices.dta
 Keep workers at 1—D-Tale keeps state in-process.
 
 ## Extending
-- Follow the [browse filesystem contract](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts): `.pkl`/`.pickle` are unsupported case-insensitively, must have no registered reader, and direct internal loads return 415. Existing artifacts remain listable/downloadable through browse. The amendment is approved; implementation conformance is pending.
+- Follow the [browse filesystem contract](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts): `.pkl`/`.pickle` are unsupported case-insensitively, must have no registered reader, and direct internal loads return 415. Existing artifacts remain listable/downloadable through browse. The amendment is implemented and locally validated; deployment is pending.
 - Add new geojson assets by augmenting `_ensure_geojson_assets`.
 - Update identifier alias tuples (`_IDENTIFIER_STRING_ALIASES`) when new id
   fields surface.

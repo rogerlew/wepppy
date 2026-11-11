@@ -23,7 +23,7 @@ downloadable as original bytes. Preview and D-Tale actions are unavailable;
 direct preview or D-Tale requests return HTTP 415. Existing raw download modes
 remain available. These restrictions prevent server-side pickle execution;
 supported table formats keep their existing behavior. This approved contract
-amendment is pending implementation conformance and deployment.
+amendment is implemented and locally validated; deployment pending.
 
 ## High-level architecture
 - **Application**: `wepppy/microservices/browse/browse.py`

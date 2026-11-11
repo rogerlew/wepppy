@@ -1,0 +1,1751 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/microservices/test_files_routes.py tests/microservices/test_browse_dtale.py -k pickle
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 121 items / 105 deselected / 16 selected
+
+tests/microservices/test_files_routes.py FFFFFFFF                        [ 50%]
+tests/microservices/test_browse_dtale.py FFFF....                        [100%]
+
+=================================== FAILURES ===================================
+______________ test_pickle_legacy_metadata_and_bytes[False-.pkl] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77480151cb90>
+load_browse = <function load_browse.<locals>._loader at 0x774800ff45e0>
+suffix = '.pkl', under_nodir = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+>           preview = client.get(f"{base}/browse/{rel}")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_files_routes.py:2017: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1444: in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1305: in _handle_browse_request
+    result = await _browse_tree_helper(
+wepppy/microservices/browse/browse.py:1014: in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+wepppy/microservices/browse/flow.py:370: in browse_tree_helper
+    return await _handle_regular_tree(
+wepppy/microservices/browse/flow.py:304: in _handle_regular_tree
+    return await env.browse_response(full_path, runid, wd, request, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1041: in browse_response
+    return await _flow_browse_response(
+wepppy/microservices/browse/flow.py:1070: in browse_response
+    return await _render_file_response(
+wepppy/microservices/browse/flow.py:979: in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+wepppy/microservices/browse/flow.py:703: in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151138048912'>
+args = ('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an0/legacy.pkl',)
+kwargs = {}, effect = AssertionError('pickle reader reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: pickle reader reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=30a69112ae424c678ea744de0e1b5eee method=GET path=/weppcloud/runs/pickle-test/cfg/browse/legacy.pkl
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1444, in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1305, in _handle_browse_request
+    result = await _browse_tree_helper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1014, in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 370, in browse_tree_helper
+    return await _handle_regular_tree(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 304, in _handle_regular_tree
+    return await env.browse_response(full_path, runid, wd, request, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1041, in browse_response
+    return await _flow_browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 1070, in browse_response
+    return await _render_file_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 979, in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 703, in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: pickle reader reached
+_____________ test_pickle_legacy_metadata_and_bytes[False-.pickle] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7748010083b0>
+load_browse = <function load_browse.<locals>._loader at 0x77480102d580>
+suffix = '.pickle', under_nodir = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+            preview = client.get(f"{base}/browse/{rel}")
+            downloads = [
+                client.get(f"{base}/download/{rel}"),
+                client.get(f"{base}/browse/{rel}?download"),
+                client.get(f"{base}/browse/{rel}?raw"),
+                client.get(f"{base}/browse/{rel}", headers={"Raw": "1"}),
+            ]
+        assert meta.status_code == 200
+>       assert meta.json()["preview_available"] is False
+E       assert True is False
+
+tests/microservices/test_files_routes.py:2025: AssertionError
+______________ test_pickle_legacy_metadata_and_bytes[False-.PkL] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x774800f598b0>
+load_browse = <function load_browse.<locals>._loader at 0x7748006b0720>
+suffix = '.PkL', under_nodir = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+>           preview = client.get(f"{base}/browse/{rel}")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_files_routes.py:2017: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1444: in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1305: in _handle_browse_request
+    result = await _browse_tree_helper(
+wepppy/microservices/browse/browse.py:1014: in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+wepppy/microservices/browse/flow.py:370: in browse_tree_helper
+    return await _handle_regular_tree(
+wepppy/microservices/browse/flow.py:304: in _handle_regular_tree
+    return await env.browse_response(full_path, runid, wd, request, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1041: in browse_response
+    return await _flow_browse_response(
+wepppy/microservices/browse/flow.py:1070: in browse_response
+    return await _render_file_response(
+wepppy/microservices/browse/flow.py:979: in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+wepppy/microservices/browse/flow.py:703: in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151138809344'>
+args = ('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an2/legacy.PkL',)
+kwargs = {}, effect = AssertionError('pickle reader reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: pickle reader reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=1bca64f2dd4242d6adc58ad49aba8c11 method=GET path=/weppcloud/runs/pickle-test/cfg/browse/legacy.PkL
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1444, in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1305, in _handle_browse_request
+    result = await _browse_tree_helper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1014, in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 370, in browse_tree_helper
+    return await _handle_regular_tree(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 304, in _handle_regular_tree
+    return await env.browse_response(full_path, runid, wd, request, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1041, in browse_response
+    return await _flow_browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 1070, in browse_response
+    return await _render_file_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 979, in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 703, in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: pickle reader reached
+_____________ test_pickle_legacy_metadata_and_bytes[False-.PiCkLe] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77480014adb0>
+load_browse = <function load_browse.<locals>._loader at 0x774800153ba0>
+suffix = '.PiCkLe', under_nodir = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+            preview = client.get(f"{base}/browse/{rel}")
+            downloads = [
+                client.get(f"{base}/download/{rel}"),
+                client.get(f"{base}/browse/{rel}?download"),
+                client.get(f"{base}/browse/{rel}?raw"),
+                client.get(f"{base}/browse/{rel}", headers={"Raw": "1"}),
+            ]
+        assert meta.status_code == 200
+>       assert meta.json()["preview_available"] is False
+E       assert True is False
+
+tests/microservices/test_files_routes.py:2025: AssertionError
+_______________ test_pickle_legacy_metadata_and_bytes[True-.pkl] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7748000db740>
+load_browse = <function load_browse.<locals>._loader at 0x77480011c360>
+suffix = '.pkl', under_nodir = True
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+>           preview = client.get(f"{base}/browse/{rel}")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_files_routes.py:2017: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1444: in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1305: in _handle_browse_request
+    result = await _browse_tree_helper(
+wepppy/microservices/browse/browse.py:1014: in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+wepppy/microservices/browse/flow.py:355: in browse_tree_helper
+    return await _handle_nodir_tree(
+wepppy/microservices/browse/flow.py:245: in _handle_nodir_tree
+    return await env.browse_response(
+wepppy/microservices/browse/browse.py:1041: in browse_response
+    return await _flow_browse_response(
+wepppy/microservices/browse/flow.py:1070: in browse_response
+    return await _render_file_response(
+wepppy/microservices/browse/flow.py:979: in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+wepppy/microservices/browse/flow.py:703: in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151138693792'>
+args = ('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an4/watershed/legacy.pkl',)
+kwargs = {}, effect = AssertionError('pickle reader reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: pickle reader reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=c0a4b91aaa314cd2b5dde1c68c0b0f4b method=GET path=/weppcloud/runs/pickle-test/cfg/browse/watershed/legacy.pkl
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1444, in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1305, in _handle_browse_request
+    result = await _browse_tree_helper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1014, in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 355, in browse_tree_helper
+    return await _handle_nodir_tree(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 245, in _handle_nodir_tree
+    return await env.browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1041, in browse_response
+    return await _flow_browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 1070, in browse_response
+    return await _render_file_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 979, in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 703, in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: pickle reader reached
+_____________ test_pickle_legacy_metadata_and_bytes[True-.pickle] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x774800115640>
+load_browse = <function load_browse.<locals>._loader at 0x77480011c2c0>
+suffix = '.pickle', under_nodir = True
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+            preview = client.get(f"{base}/browse/{rel}")
+            downloads = [
+                client.get(f"{base}/download/{rel}"),
+                client.get(f"{base}/browse/{rel}?download"),
+                client.get(f"{base}/browse/{rel}?raw"),
+                client.get(f"{base}/browse/{rel}", headers={"Raw": "1"}),
+            ]
+        assert meta.status_code == 200
+>       assert meta.json()["preview_available"] is False
+E       assert True is False
+
+tests/microservices/test_files_routes.py:2025: AssertionError
+_______________ test_pickle_legacy_metadata_and_bytes[True-.PkL] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7748000f75c0>
+load_browse = <function load_browse.<locals>._loader at 0x774800152200>
+suffix = '.PkL', under_nodir = True
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+>           preview = client.get(f"{base}/browse/{rel}")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_files_routes.py:2017: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1444: in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/browse.py:1305: in _handle_browse_request
+    result = await _browse_tree_helper(
+wepppy/microservices/browse/browse.py:1014: in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+wepppy/microservices/browse/flow.py:355: in browse_tree_helper
+    return await _handle_nodir_tree(
+wepppy/microservices/browse/flow.py:245: in _handle_nodir_tree
+    return await env.browse_response(
+wepppy/microservices/browse/browse.py:1041: in browse_response
+    return await _flow_browse_response(
+wepppy/microservices/browse/flow.py:1070: in browse_response
+    return await _render_file_response(
+wepppy/microservices/browse/flow.py:979: in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+wepppy/microservices/browse/flow.py:703: in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151128326320'>
+args = ('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an6/watershed/legacy.PkL',)
+kwargs = {}, effect = AssertionError('pickle reader reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: pickle reader reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=2c278405f0bd457da4dc1c69c9306c9e method=GET path=/weppcloud/runs/pickle-test/cfg/browse/watershed/legacy.PkL
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1444, in browse_subpath
+    return await _handle_browse_request(request, runid, config, subpath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1305, in _handle_browse_request
+    result = await _browse_tree_helper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1014, in _browse_tree_helper
+    return await _flow_browse_tree_helper(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 355, in browse_tree_helper
+    return await _handle_nodir_tree(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 245, in _handle_nodir_tree
+    return await env.browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/browse.py", line 1041, in browse_response
+    return await _flow_browse_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 1070, in browse_response
+    return await _render_file_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 979, in _render_file_response
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/flow.py", line 703, in _tabular_preview
+    df = await asyncio.to_thread(env.pd.read_pickle, path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: pickle reader reached
+_____________ test_pickle_legacy_metadata_and_bytes[True-.PiCkLe] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_legacy_metadata_an7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x774800274fe0>
+load_browse = <function load_browse.<locals>._loader at 0x77480026d620>
+suffix = '.PiCkLe', under_nodir = True
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("under_nodir", [False, True])
+    def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+        import hashlib
+        from unittest.mock import Mock
+    
+        name = f"legacy{suffix}"
+        content = b"inert legacy bytes\r\n\x00\xff"
+        if under_nodir:
+            (tmp_path / "watershed").mkdir()
+            (tmp_path / "watershed" / name).write_bytes(content)
+            rel = f"watershed/{name}"
+            parent = "watershed/"
+        else:
+            (tmp_path / name).write_bytes(content)
+            rel, parent = name, ""
+        browse = load_browse(SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        import wepppy.microservices.browse._download as download_mod
+        monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        reader = Mock(side_effect=AssertionError("pickle reader reached"))
+        monkeypatch.setattr(browse.pd, "read_pickle", reader)
+        base = "/weppcloud/runs/pickle-test/cfg"
+        with TestClient(browse.create_app()) as client:
+            meta = client.get(f"{base}/files/{rel}?meta=true")
+            listing = client.get(f"{base}/browse/{parent}")
+            preview = client.get(f"{base}/browse/{rel}")
+            downloads = [
+                client.get(f"{base}/download/{rel}"),
+                client.get(f"{base}/browse/{rel}?download"),
+                client.get(f"{base}/browse/{rel}?raw"),
+                client.get(f"{base}/browse/{rel}", headers={"Raw": "1"}),
+            ]
+        assert meta.status_code == 200
+>       assert meta.json()["preview_available"] is False
+E       assert True is False
+
+tests/microservices/test_files_routes.py:2025: AssertionError
+________ test_pickle_bridge_rejects_before_downstream_work[False-.pkl] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_bridge_rejects_bef0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7748002054c0>
+load_browse = <function load_browse.<locals>._loader at 0x7748001f7f60>
+suffix = '.pkl', archived = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("archived", [False, True])
+    def test_pickle_bridge_rejects_before_downstream_work(tmp_path, monkeypatch, load_browse, suffix, archived):
+        import zipfile
+        from unittest.mock import Mock
+        import wepppy.microservices.browse.dtale as bridge
+    
+        name = f"legacy{suffix}"
+        if archived:
+            with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
+                archive.writestr(name, b"N.")
+            rel = f"watershed/{name}"
+        else:
+            (tmp_path / name).write_bytes(b"N.")
+            rel = name
+        browse = load_browse(DTALE_SERVICE_URL="http://dtale-service", SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        materialize = Mock(side_effect=AssertionError("materialization reached"))
+        outbound = Mock(side_effect=AssertionError("outbound HTTP reached"))
+        monkeypatch.setattr(bridge, "materialize_file", materialize)
+        monkeypatch.setattr(bridge.httpx, "AsyncClient", outbound)
+        with TestClient(browse.create_app()) as client:
+>           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_browse_dtale.py:858: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/dtale.py:316: in dtale_open
+    return await _dtale_open_for_root(
+wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151122340160'>, args = ()
+kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
+effect = AssertionError('outbound HTTP reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: outbound HTTP reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=cdc46bf559404144a1e3e3c3e15a3315 method=GET path=/weppcloud/runs/pickle-test/cfg/dtale/legacy.pkl
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 316, in dtale_open
+    return await _dtale_open_for_root(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 275, in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: outbound HTTP reached
+_______ test_pickle_bridge_rejects_before_downstream_work[False-.pickle] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_bridge_rejects_bef1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77480021a3f0>
+load_browse = <function load_browse.<locals>._loader at 0x774800f6c220>
+suffix = '.pickle', archived = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("archived", [False, True])
+    def test_pickle_bridge_rejects_before_downstream_work(tmp_path, monkeypatch, load_browse, suffix, archived):
+        import zipfile
+        from unittest.mock import Mock
+        import wepppy.microservices.browse.dtale as bridge
+    
+        name = f"legacy{suffix}"
+        if archived:
+            with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
+                archive.writestr(name, b"N.")
+            rel = f"watershed/{name}"
+        else:
+            (tmp_path / name).write_bytes(b"N.")
+            rel = name
+        browse = load_browse(DTALE_SERVICE_URL="http://dtale-service", SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        materialize = Mock(side_effect=AssertionError("materialization reached"))
+        outbound = Mock(side_effect=AssertionError("outbound HTTP reached"))
+        monkeypatch.setattr(bridge, "materialize_file", materialize)
+        monkeypatch.setattr(bridge.httpx, "AsyncClient", outbound)
+        with TestClient(browse.create_app()) as client:
+>           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_browse_dtale.py:858: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/dtale.py:316: in dtale_open
+    return await _dtale_open_for_root(
+wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151123454176'>, args = ()
+kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
+effect = AssertionError('outbound HTTP reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: outbound HTTP reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=b4deeab405334b13bebd1df95ba687f1 method=GET path=/weppcloud/runs/pickle-test/cfg/dtale/legacy.pickle
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 316, in dtale_open
+    return await _dtale_open_for_root(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 275, in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: outbound HTTP reached
+________ test_pickle_bridge_rejects_before_downstream_work[False-.PkL] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_bridge_rejects_bef2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x774800217d70>
+load_browse = <function load_browse.<locals>._loader at 0x7748001c9c60>
+suffix = '.PkL', archived = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("archived", [False, True])
+    def test_pickle_bridge_rejects_before_downstream_work(tmp_path, monkeypatch, load_browse, suffix, archived):
+        import zipfile
+        from unittest.mock import Mock
+        import wepppy.microservices.browse.dtale as bridge
+    
+        name = f"legacy{suffix}"
+        if archived:
+            with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
+                archive.writestr(name, b"N.")
+            rel = f"watershed/{name}"
+        else:
+            (tmp_path / name).write_bytes(b"N.")
+            rel = name
+        browse = load_browse(DTALE_SERVICE_URL="http://dtale-service", SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        materialize = Mock(side_effect=AssertionError("materialization reached"))
+        outbound = Mock(side_effect=AssertionError("outbound HTTP reached"))
+        monkeypatch.setattr(bridge, "materialize_file", materialize)
+        monkeypatch.setattr(bridge.httpx, "AsyncClient", outbound)
+        with TestClient(browse.create_app()) as client:
+>           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_browse_dtale.py:858: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/dtale.py:316: in dtale_open
+    return await _dtale_open_for_root(
+wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151122708672'>, args = ()
+kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
+effect = AssertionError('outbound HTTP reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: outbound HTTP reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=37f05169dc2e49b4a74cb8694b66cdbd method=GET path=/weppcloud/runs/pickle-test/cfg/dtale/legacy.PkL
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 316, in dtale_open
+    return await _dtale_open_for_root(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 275, in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: outbound HTTP reached
+_______ test_pickle_bridge_rejects_before_downstream_work[False-.PiCkLe] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-7/test_pickle_bridge_rejects_bef3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x774800215190>
+load_browse = <function load_browse.<locals>._loader at 0x7748001c9b20>
+suffix = '.PiCkLe', archived = False
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+    @pytest.mark.parametrize("archived", [False, True])
+    def test_pickle_bridge_rejects_before_downstream_work(tmp_path, monkeypatch, load_browse, suffix, archived):
+        import zipfile
+        from unittest.mock import Mock
+        import wepppy.microservices.browse.dtale as bridge
+    
+        name = f"legacy{suffix}"
+        if archived:
+            with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
+                archive.writestr(name, b"N.")
+            rel = f"watershed/{name}"
+        else:
+            (tmp_path / name).write_bytes(b"N.")
+            rel = name
+        browse = load_browse(DTALE_SERVICE_URL="http://dtale-service", SITE_PREFIX="/weppcloud")
+        monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+        materialize = Mock(side_effect=AssertionError("materialization reached"))
+        outbound = Mock(side_effect=AssertionError("outbound HTTP reached"))
+        monkeypatch.setattr(bridge, "materialize_file", materialize)
+        monkeypatch.setattr(bridge.httpx, "AsyncClient", outbound)
+        with TestClient(browse.create_app()) as client:
+>           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_browse_dtale.py:858: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/microservices/browse/dtale.py:316: in dtale_open
+    return await _dtale_open_for_root(
+wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1139: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Mock id='131151123436688'>, args = ()
+kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
+effect = AssertionError('outbound HTTP reached')
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               AssertionError: outbound HTTP reached
+
+/usr/local/lib/python3.12/unittest/mock.py:1198: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.browse.errors:errors.py:50 File request failed request_id=fd87cc151f9046d186dc3f47310b9431 method=GET path=/weppcloud/runs/pickle-test/cfg/dtale/legacy.PiCkLe
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 316, in dtale_open
+    return await _dtale_open_for_root(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/browse/dtale.py", line 275, in _dtale_open_for_root
+    async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: outbound HTTP reached
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[False-.pkl]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[False-.pickle]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[False-.PkL]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[False-.PiCkLe]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[True-.pkl]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[True-.pickle]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[True-.PkL]
+FAILED tests/microservices/test_files_routes.py::test_pickle_legacy_metadata_and_bytes[True-.PiCkLe]
+FAILED tests/microservices/test_browse_dtale.py::test_pickle_bridge_rejects_before_downstream_work[False-.pkl]
+FAILED tests/microservices/test_browse_dtale.py::test_pickle_bridge_rejects_before_downstream_work[False-.pickle]
+FAILED tests/microservices/test_browse_dtale.py::test_pickle_bridge_rejects_before_downstream_work[False-.PkL]
+FAILED tests/microservices/test_browse_dtale.py::test_pickle_bridge_rejects_before_downstream_work[False-.PiCkLe]
+=========== 12 failed, 4 passed, 105 deselected, 6 warnings in 8.29s ===========

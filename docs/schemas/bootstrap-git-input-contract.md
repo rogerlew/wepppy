@@ -1,7 +1,6 @@
 # Bootstrap Git input contract
 
-Status: approved pickle restriction, 2026-11-10 Pacific; implementation
-conformance and deployment pending.
+Status: approved pickle restriction, 2026-11-10 Pacific; implemented and locally validated; deployment pending.
 
 ## Pickle artifact admission
 

@@ -1,0 +1,27 @@
+docs/work-packages/20261110_pickle_artifact_restriction: exit 0
+✅ 10 files validated, 0 errors, 0 warnings
+
+docs/schemas/bootstrap-git-input-contract.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/browse-filesystem-contract.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/file-dependency-freshness-contract.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/weppcloud-bootstrap-spec.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/microservices/browse/AGENTS.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/microservices/browse/README.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/webservices/dtale/AGENTS.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/webservices/dtale/README.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+

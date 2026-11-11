@@ -14,6 +14,7 @@ ZERO_SHA = "0" * 40
 MAX_FILE_BYTES = 50 * 1024 * 1024
 ALLOWED_PREFIXES = ("wepp/runs/", "swat/TxtInOut/")
 IGNORED_PATHS = {"wepp/runs/tc_out.txt"}
+DENIED_SUFFIXES = {".pkl", ".pickle"}
 PARSER_EXTS = {".cli", ".sol", ".man", ".slp"}
 
 
@@ -153,7 +154,25 @@ def _ensure_run_files_unchanged(new_sha: str, baseline_sha: str) -> None:
             raise RuntimeError(f".run files are read-only; change detected in {path}")
 
 
+def _reject_pickle_path(path: str) -> None:
+    if Path(path).suffix.lower() in DENIED_SUFFIXES:
+        raise RuntimeError(f"Pickle files are not allowed: {path}")
+
+
+def _validate_pickle_changes(baseline: str, commit: str) -> None:
+    # Merge display and --not --all can omit paths adopted from existing refs.
+    # Check only pickle admission here; preserve other merge validation behavior.
+    payload = _git_output(
+        ["diff", "--no-renames", "--name-only", "-z", "--diff-filter=AMT", baseline, commit],
+        text=False,
+    )
+    for raw_path in payload.split(b"\x00"):
+        if raw_path:
+            _reject_pickle_path(os.fsdecode(raw_path))
+
+
 def _validate_path(path: str) -> None:
+    _reject_pickle_path(path)
     if ".." in Path(path).parts:
         raise RuntimeError(f"Invalid path '{path}'")
     if path in IGNORED_PATHS:
@@ -264,7 +283,11 @@ def main() -> int:
         if new_sha == ZERO_SHA:
             raise RuntimeError(f"Ref deletion not allowed: {ref}")
 
+        admission_baseline = baseline_main if old_sha == ZERO_SHA else old_sha
+        _validate_pickle_changes(admission_baseline, new_sha)
         for commit in _list_introduced_commits(old_sha, new_sha):
+            if commit != new_sha:
+                _validate_pickle_changes(admission_baseline, commit)
             if commit in validated_commits:
                 continue
             validated_commits.add(commit)

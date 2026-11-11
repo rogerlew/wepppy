@@ -72,8 +72,7 @@ An eager viewer remains an explicitly acquired snapshot until reopened.
 
 ## Pickle artifacts
 
-Status of the 2026-11-10 Pacific amendment: approved restriction; implementation
-conformance and deployment pending.
+Status of the 2026-11-10 Pacific amendment: approved restriction; implemented and locally validated; deployment pending.
 
 Existing `.pkl` and `.pickle` artifacts, case-insensitively, MUST remain listable
 and downloadable byte-for-byte within existing authorization, containment and

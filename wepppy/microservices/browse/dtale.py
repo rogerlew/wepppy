@@ -49,10 +49,16 @@ DTALE_SUPPORTED_SUFFIXES = (
     '.csv.gz',
     '.tsv',
     '.tsv.gz',
-    '.pkl',
-    '.pickle',
 )
 _DTALE_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=5.0)
+
+
+def _require_supported_suffix(path: str) -> None:
+    if not path.lower().endswith(DTALE_SUPPORTED_SUFFIXES):
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail='D-Tale supports parquet, csv/tsv, feather, and arrow files.',
+        )
 
 
 def _env_truthy(key: str, *, default: bool = False) -> bool:
@@ -209,6 +215,7 @@ def build_handlers(
         if nodir_target is None:
             if not os.path.isfile(requested_target):
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+            _require_supported_suffix(logical_rel_path)
             dtale_rel_path = logical_rel_path.replace('\\', '/')
         else:
             try:
@@ -221,6 +228,7 @@ def build_handlers(
             if nodir_entry.is_dir:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
 
+            _require_supported_suffix(logical_rel_path)
             if nodir_target.form == 'archive':
                 try:
                     materialized_path = Path(materialize_file(wd, logical_rel_path, purpose='dtale'))
@@ -242,11 +250,6 @@ def build_handlers(
                 dtale_rel_path = logical_rel_path.replace('\\', '/')
 
         rel_lower = dtale_rel_path.lower()
-        if not any(rel_lower.endswith(ext) for ext in DTALE_SUPPORTED_SUFFIXES):
-            raise HTTPException(
-                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
-                detail='D-Tale currently supports parquet, csv/tsv, feather, and pickle files.',
-            )
 
         payload = {
             'runid': runid,

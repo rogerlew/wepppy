@@ -171,8 +171,7 @@ limits, identifier aliases and supported readers unchanged, except for the
 approved [pickle artifact restriction](browse-filesystem-contract.md#pickle-artifacts):
 `.pkl`/`.pickle` readers are removed case-insensitively, direct load requests
 return 415 before materialization or parsing, and authorized legacy list/raw
-download access remains available. This bounded security amendment is pending
-implementation conformance and deployment; source-generation rules for supported
+download access remains available. This bounded security amendment is implemented and locally validated; deployment pending; source-generation rules for supported
 formats are unchanged. Same-byte metadata
 changes may reuse a dataset; changed bytes require refresh even when size and
 mtime are restored. Reuse also requires the same resolved source path; a

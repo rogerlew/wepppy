@@ -1,161 +1,69 @@
 # Tracker - Pickle artifact restriction
 
-> Living status, decisions, risks, and handoff record for F2/SEC-02.
-
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-11-11 03:50 UTC  
-**Current phase**: M1 focused failing regressions  
-**Last updated**: 2026-11-11 03:50 UTC  
-**Next milestone**: ratify and checkpoint the restriction contract  
-**Security impact**: `high`  
-**Dedicated security review**: `yes`  
-**Security artifact**: `artifacts/20261110_security_review.md`
+**Timezone**: UTC
+**Last updated**: 2026-11-11 UTC
+**Current phase**: M0-M3 complete; M4 awaits separate rollout authorization
+**Security impact**: high
+**Dedicated security review**: `artifacts/20261110_security_review.md`
+**Checkpoint ancestors**: `aeab3c3e1`, supplemental `e2b9f6b35`
+**Starting revision**: `991fc5e2c3f1cd2e5d74169e2d7bccb609203924`
 
 ## Task Board
 
-### Ready / Backlog
+- [x] M0: promote Bootstrap/browse/freshness contracts; two independent reviews;
+      commit checkpoint before production edits.
+- [x] M1: retain focused failing real Git and HTTP regressions.
+- [x] M2: remove pickle readers and capability advertisements; add admission and
+      HTTP guards; synchronize docs and D-Tale declarations.
+- [x] Run approved focused suites: Bootstrap27, browse/files130, D-Tale48.
+- [x] Stubtest (2 modules) and test-stub hygiene pass.
+- [x] M3: final independent correctness, QA and security approvals; scoped docs checks.
+- [ ] M4: separately authorized rollout and controlled production smoke.
 
-- [ ] Amend Bootstrap and browse canonical contracts with the approved rule.
-- [ ] Obtain two independent contract reviews and commit the ancestor checkpoint.
-- [ ] Add focused Bootstrap suffix rejection tests.
-- [ ] Add browse preview/listing/files API/D-Tale bridge restriction tests.
-- [ ] Add direct D-Tale loader/dispatch restriction tests.
-- [ ] Remove pickle readers and capability advertisements.
-- [ ] Update browse and D-Tale docs plus D-Tale stubs.
-- [ ] Run only the approved focused tests, stub checks, and docs lint.
-- [ ] Complete independent correctness, QA/code, and security reviews.
-- [ ] Perform a scoped deployment smoke when rollout is authorized.
+## Decisions and discoveries
 
-### In Progress
+The approved suffix-only rule, raw-byte preservation, case handling, supported
+formats and no-full-suite waiver are durable in the canonical Bootstrap and
+browse contracts. The freshness contract explicitly permits the bounded reader
+removal. Independent contract review receipts are in
+`artifacts/20261110_contract_reviews.md`.
 
-- [ ] Contract decision and failure-class matrix are ready for review.
+Archive-backed NoDir traversal was already retired. Preserve its existing409/404
+responses and whole-archive downloads; exercise physical files under NoDir roots.
+The supplemental checkpoint records both reviewers' approval of this correction.
 
-### Blocked
+Security review found merges and already-reachable ref tips could bypass the
+introduced-commit display. Real pushes reproduced it. A suffix-only per-ref
+baseline comparison now checks tips and intermediate introduced commits with
+rename detection disabled; general merge/file validation is unchanged. Allowed
+text merge/fast-forward controls retain unchanged inherited pickle bytes.
 
-- [ ] Implementation is gated, not externally blocked: the contract-first
-      checkpoint has not yet been reviewed and committed.
+Initial stubtest exposed existing declaration drift; synchronized only the
+existing DatasetMeta fields and response helper keyword parameters. No runtime
+identity, permissions, authentication or deployment topology changed.
 
-### Done
+## Validation and review
 
-- [x] Operator selected suffix restriction, raw legacy download preservation, and
-      focused validation without the full suite (2026-11-11 03:50 UTC).
-- [x] Confirmed two request-time pickle readers and their advertised browse/D-Tale
-      entry points (2026-11-11 03:50 UTC).
-- [x] Scaffolded package, ExecPlan, decision, matrices, and review gates
-      (2026-11-11 03:50 UTC).
+See `artifacts/20261110_validation.md` for commands, red/green receipts, digest,
+limitations and test corrections. 205 focused tests pass. Full Python/frontend
+suites are intentionally waived, not claimed as passing. Dedicated correctness,
+QA and security artifacts retain findings and final dispositions.
 
 ## Timeline
 
-- **2026-11-11 03:50 UTC** - Package opened for the operator-requested F2 fix.
-- **2026-11-11 04:08 UTC** - Contract checkpoint ancestor `aeab3c3e1`; both independent reviews approved.
-- **Pending** - Focused implementation and validation.
-- **Pending** - Scoped rollout and closeout.
+- 2026-11-11 03:50 UTC: source diagnosis and package scaffold.
+- 2026-11-11 04:08 UTC: reviewed contract checkpoint `aeab3c3e1`.
+- 2026-11-11 04:10 UTC: reviewed archive compatibility checkpoint `e2b9f6b35`.
+- 2026-11-11 UTC: focused red/green implementation and merge-bypass correction.
+- Pending: explicitly authorized scoped rollout; no production change performed.
 
-## Decisions Log
+## Handoff
 
-### 2026-11-11 03:50 UTC: Restrict rather than convert
-
-**Context**: Request-time pickle parsing can execute code. The operator sees no
-need for a migration or broad artifact redesign.
-
-**Decision**: Reject `.pkl`/`.pickle` in Bootstrap and remove their interactive
-parsers. Existing files remain listable and downloadable as bytes.
-
-**Impact**: No legacy deletion, conversion, content scanner, or replacement
-format enters this package.
-
-### 2026-11-11 03:50 UTC: Focused validation only
-
-**Context**: The implementation affects small suffix-dispatch surfaces and has
-direct tests.
-
-**Decision**: Run changed-surface Bootstrap, browse, D-Tale, stub, documentation,
-and source-search checks. Do not run the full Python or frontend suites.
-
-**Impact**: Package closure must not list a full-suite pass, and reviewers must
-assess the focused matrix rather than request broad testing without new evidence.
-
-## Risks and Issues
-
-| Risk | Severity | Likelihood | Mitigation | Status |
-| --- | --- | --- | --- | --- |
-| One pickle reader remains reachable | High | Medium | Failure-class search and zero-call assertions | Open |
-| Mixed-case suffix bypass | High | Low | Lowercase suffix tests at each boundary | Open |
-| Legacy raw download breaks | Medium | Medium | Byte-equality download test | Open |
-| D-Tale bridge forwards before reject | High | Low | Reject before materialization/HTTP spy | Open |
-| Allowed tabular formats regress | Medium | Low | CSV/Feather/Parquet controls | Open |
-| Documentation advertises pickle | Low | Medium | Scoped capability search and docs lint | Open |
-
-## Hardening Signal Log
-
-- **Baseline health signal**: allowed previews and Bootstrap inputs work.
-- **Baseline danger signal**: two request-time `read_pickle` call paths exist.
-- **Post-change signals**: pending focused validation.
-- **Temporary callus register**: none.
-- **Recurrence trigger**: any request-time pickle reader or advertised pickle
-  preview/D-Tale capability creates a new incident record.
-
-## Verification Checklist
-
-### Contract and Security
-
-- [ ] Contract checkpoint precedes implementation edits.
-- [ ] Every request-time pickle consumer has a disposition.
-- [ ] No unsafe deserialization or hidden fallback remains.
-- [ ] Raw download behavior is explicitly preserved.
-- [ ] Security and correctness artifacts have no unresolved medium/high findings.
-
-### Approved Focused Validation
-
-- [ ] `wctl run-pytest tests/weppcloud/bootstrap/test_pre_receive.py --maxfail=1`
-- [ ] `wctl run-pytest tests/microservices/test_browse_routes.py tests/microservices/test_files_routes.py --maxfail=1`
-- [ ] `wctl run-pytest tests/microservices/test_browse_dtale.py tests/microservices/test_dtale_freshness.py --maxfail=1`
-- [ ] Applicable `wctl run-stubtest` and `wctl check-test-stubs` checks.
-- [ ] Scoped docs lint and spelling preview.
-- [ ] Source/capability search shows no request-time pickle support.
-- [ ] Full Python suite intentionally not run per operator decision.
-- [ ] Frontend suite intentionally not run unless frontend source changes.
-
-### Deployment
-
-- [ ] Exact candidate revision and changed services are recorded.
-- [ ] Scoped wepp1 Bootstrap rejection, 415, listing, and download controls pass.
-- [ ] Rollback does not restore request-time pickle loading.
-
-## Progress Notes
-
-### 2026-11-11 03:50 UTC: Source review and scaffold
-
-**Agent/Contributor**: Codex
-
-**Work completed**:
-
-- Confirmed Bootstrap's NUL check does not establish pickle safety.
-- Confirmed browse preview and D-Tale are the two request-time pickle readers.
-- Identified preview metadata, directory links, bridge admission, D-Tale dispatch,
-  documentation, and stub surfaces that must stay consistent.
-- Created the work package without changing runtime code or production systems.
-
-**Blockers encountered**: none for scaffolding. Implementation awaits the
-contract-first ancestor checkpoint.
-
-**Next steps**:
-
-1. Amend and review canonical contracts.
-2. Commit the contract checkpoint.
-3. Implement tests first, then the smallest suffix restriction.
-
-**Test results**: docs validation only for this scaffold; runtime tests were not
-warranted before implementation.
-
-## Handoff Summary
-
-**From**: Codex  
-**To**: implementation owner after checkpoint  
-**Date**: 2026-11-11 03:50 UTC
-
-The approved behavior and validation scope are fixed. Do not expand into pickle
-migration, generic content scanning, internal serialization, or the full test
-suite without new evidence and an explicit scope decision.
+The package remains open for M4. Approve the committed implementation candidate
+before deploying through the canonical wepp1 entry point. Controlled acceptance:
+forbidden Bootstrap push, inert existing pickle listing/no preview/no D-Tale,
+415 responses, byte-identical raw download, and supported CSV/Parquet viewing.
+Do not upload or execute an executable pickle. Rollback must retain equivalent
+admission and HTTP restrictions. Local tests do not establish production parity.

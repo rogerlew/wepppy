@@ -15,7 +15,7 @@ browse. Direct D-Tale bridge and internal loader requests return HTTP 415;
 there is no pickle reader or fallback. This prevents server-side execution of
 project-controlled pickle content. The approved
 [pickle restriction](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts)
-is pending implementation conformance and deployment.
+is implemented and locally validated; deployment pending.
 
 Changing file timestamps alone does not reload identical data. Changed bytes
 refresh on the next launch even if timestamps were restored. An already loaded
@@ -34,7 +34,7 @@ Fingerprints use the shared verified file digest cache. Cold loads and recently
 changed or evicted sources may require full streaming hash reads; settled page
 checks reuse verified hashes without rereading content. Parquet data itself
 remains lazily paged and is never loaded wholesale into pandas as a fallback.
-See the [freshness contract](../../../docs/schemas/file-dependency-freshness-contract.md#d-tale-dataset-generations-implementation-pending)
+See the [freshness contract](../../../docs/schemas/file-dependency-freshness-contract.md#d-tale-dataset-generations-implemented)
 and [local implementation guide](AGENTS.md).
 
 Validate with `wctl run-pytest tests/microservices/test_dtale_freshness.py` and the

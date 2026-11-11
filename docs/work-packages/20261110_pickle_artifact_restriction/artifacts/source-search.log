@@ -1,0 +1,20 @@
+wepppy/weppcloud/bootstrap/pre_receive.py:17:DENIED_SUFFIXES = {".pkl", ".pickle"}
+wepppy/weppcloud/bootstrap/pre_receive.py:157:def _reject_pickle_path(path: str) -> None:
+wepppy/weppcloud/bootstrap/pre_receive.py:159:        raise RuntimeError(f"Pickle files are not allowed: {path}")
+wepppy/weppcloud/bootstrap/pre_receive.py:162:def _validate_pickle_changes(baseline: str, commit: str) -> None:
+wepppy/weppcloud/bootstrap/pre_receive.py:164:    # Check only pickle admission here; preserve other merge validation behavior.
+wepppy/weppcloud/bootstrap/pre_receive.py:171:            _reject_pickle_path(os.fsdecode(raw_path))
+wepppy/weppcloud/bootstrap/pre_receive.py:175:    _reject_pickle_path(path)
+wepppy/weppcloud/bootstrap/pre_receive.py:287:        _validate_pickle_changes(admission_baseline, new_sha)
+wepppy/weppcloud/bootstrap/pre_receive.py:290:                _validate_pickle_changes(admission_baseline, commit)
+wepppy/webservices/dtale/AGENTS.md:81:- Follow the [browse filesystem contract](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts): `.pkl`/`.pickle` are unsupported case-insensitively, must have no registered reader, and direct internal loads return 415. Existing artifacts remain listable/downloadable through browse. The amendment is implemented and locally validated; deployment is pending.
+wepppy/webservices/dtale/README.md:12:Pickle files (`.pkl` and `.pickle`, in any letter case) cannot be opened in
+wepppy/webservices/dtale/README.md:15:there is no pickle reader or fallback. This prevents server-side execution of
+wepppy/webservices/dtale/README.md:16:project-controlled pickle content. The approved
+wepppy/webservices/dtale/README.md:17:[pickle restriction](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts)
+wepppy/webservices/dtale/dtale.py:1605:    if target.suffix.lower() in {".pkl", ".pickle"}:
+wepppy/microservices/browse/AGENTS.md:11:- Pickle artifacts (`.pkl`/`.pickle`, case-insensitive) are list/download-only: no preview or D-Tale metadata/links; direct previews and D-Tale requests return 415 before readers, materialization or forwarding. Preserve raw byte modes, normal 404 and existing access-check precedence. The canonical pickle amendment is implemented and locally validated; deployment is pending.
+wepppy/microservices/browse/README.md:21:Pickle files (`.pkl` and `.pickle`, in any letter case) remain visible and
+wepppy/microservices/browse/README.md:24:remain available. These restrictions prevent server-side pickle execution;
+wepppy/microservices/browse/flow.py:934:    if path_lower.endswith(('.pkl', '.pickle')):
+wepppy/microservices/browse/flow.py:938:            env.abort(415, 'Pickle preview is not supported. Download the original file instead.')

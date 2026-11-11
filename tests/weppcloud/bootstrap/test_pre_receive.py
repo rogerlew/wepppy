@@ -276,3 +276,90 @@ def test_pre_receive_rejects_deleting_allowed_inputs(tmp_path: Path, monkeypatch
 
     with pytest.raises(RuntimeError, match=r"Deleting inputs is not allowed"):
         _run_pre_receive(monkeypatch, repo, baseline_sha, new_sha)
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+@pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
+def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
+    import shlex
+
+    source = tmp_path / "source"
+    source.mkdir()
+    _init_repo(source)
+    remote = tmp_path / "remote.git"
+    _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+    _run_git(source, ["remote", "add", "origin", str(remote)])
+    _run_git(source, ["push", "origin", "main"])
+    baseline = _run_git(remote, ["rev-parse", "main"])
+    hook = remote / "hooks" / "pre-receive"
+    hook.write_text(
+        "#!/bin/sh\nexec " + shlex.quote(sys.executable)
+        + " -m wepppy.weppcloud.bootstrap.pre_receive\n"
+    )
+    hook.chmod(0o755)
+    monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+    monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+    artifact = source / prefix / "nested" / f"legacy{suffix}"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(b"N.")  # Inert NUL-free protocol-shaped bytes, never loaded.
+    _commit_all(source, "add forbidden artifact")
+    result = subprocess.run(
+        ["git", "push", "origin", "main"], cwd=source,
+        text=True, capture_output=True, check=False,
+    )
+    assert result.returncode != 0
+    assert "Pickle files are not allowed" in result.stderr
+    assert _run_git(remote, ["rev-parse", "main"]) == baseline
+    assert not (remote / "bootstrap" / "push-log.ndjson").exists()
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+@pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+    import shlex
+
+    source = tmp_path / "source"
+    source.mkdir()
+    _init_repo(source)
+    inherited = source / "wepp" / "runs" / "inherited.pkl"
+    inherited.parent.mkdir(parents=True)
+    inherited.write_bytes(b"unchanged legacy bytes")
+    _commit_all(source, "baseline legacy artifact")
+    remote = tmp_path / "remote.git"
+    _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+    _run_git(source, ["remote", "add", "origin", str(remote)])
+    _run_git(source, ["push", "origin", "main"])
+    baseline = _run_git(remote, ["rev-parse", "main"])
+    # Model an already reachable legacy branch from before suffix restriction.
+    _run_git(source, ["checkout", "-b", "legacy"])
+    artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    artifact.write_bytes(b"N.")
+    _commit_all(source, "legacy artifact")
+    _run_git(source, ["push", "origin", "legacy"])
+    _run_git(source, ["checkout", "main"])
+    if mode == "fast-forward":
+        _run_git(source, ["merge", "--ff-only", "legacy"])
+    else:
+        _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+        if mode == "legacy-first":
+            _run_git(source, ["checkout", "legacy"])
+            _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+        else:
+            _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+    hook = remote / "hooks" / "pre-receive"
+    hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                    + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+    hook.chmod(0o755)
+    monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+    monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+    result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                            text=True, capture_output=True, check=False)
+    if suffix == ".txt":
+        assert result.returncode == 0, result.stderr
+        assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+        return
+    assert result.returncode != 0
+    assert "Pickle files are not allowed" in result.stderr
+    assert _run_git(remote, ["rev-parse", "main"]) == baseline
+    assert not (remote / "bootstrap" / "push-log.ndjson").exists()

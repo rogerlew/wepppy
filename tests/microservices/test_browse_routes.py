@@ -573,3 +573,25 @@ def test_retired_and_failed_revegetation_inputs_remain_browsable(tmp_path, load_
             assert response.status_code == 200
             assert response.content == path.read_bytes()
             assert 'attachment' in response.headers['content-disposition']
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+@pytest.mark.parametrize("mode", ["", "?repr=1"])
+def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
+    from unittest.mock import Mock
+
+    root = tmp_path / "run"
+    root.mkdir()
+    name = f"legacy{suffix}"
+    (root / name).write_bytes(b"N.")
+    browse = load_run_browse({"pickle-test": root}, SITE_PREFIX="/weppcloud")
+    reader = Mock(side_effect=AssertionError("pickle reader reached"))
+    monkeypatch.setattr(browse.pd, "read_pickle", reader)
+    with TestClient(browse.create_app()) as client:
+        response = client.get(f"/weppcloud/runs/pickle-test/cfg/browse/{name}{mode}")
+        listing = client.get("/weppcloud/runs/pickle-test/cfg/browse/")
+    assert response.status_code == 415
+    reader.assert_not_called()
+    assert listing.status_code == 200
+    assert name in listing.text
+    assert f"/dtale/{name}" not in listing.text

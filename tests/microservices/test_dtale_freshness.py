@@ -511,3 +511,38 @@ def test_roads_file_preview_needs_no_publication_receipt(tmp_path, dtale_service
     assert grid.json.get('success') is not False
     assert 'error' not in grid.json
     response.close()
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+def test_pickle_loader_rejects_before_fingerprint_or_dispatch(tmp_path, monkeypatch, dtale_service, suffix):
+    from unittest.mock import Mock
+    from werkzeug.exceptions import UnsupportedMediaType
+
+    module = dtale_service
+    path = tmp_path / f"legacy{suffix}"
+    path.write_bytes(b"N.")
+    reader = Mock(side_effect=AssertionError("pickle reader reached"))
+    fingerprint = Mock(side_effect=AssertionError("fingerprint reached"))
+    monkeypatch.setattr(module.pd, "read_pickle", reader)
+    monkeypatch.setattr(module, "_fingerprint", fingerprint)
+    response = _load(module, tmp_path, path.name)
+    assert response.status_code == 415
+    with module.app.test_request_context():
+        with pytest.raises(UnsupportedMediaType):
+            module._load_dataframe(path)
+    assert ".pkl" not in module.READERS and ".pickle" not in module.READERS
+    reader.assert_not_called()
+    fingerprint.assert_not_called()
+
+
+@pytest.mark.parametrize("extension", ["csv", "tsv", "feather", "arrow"])
+def test_supported_eager_reader_control(tmp_path, dtale_service, extension):
+    frame = pd.DataFrame({"value": [11, 22]})
+    path = tmp_path / f"control.{extension}"
+    if extension in {"csv", "tsv"}:
+        frame.to_csv(path, index=False, sep="\t" if extension == "tsv" else ",")
+    else:
+        frame.to_feather(path)
+    response = _load(dtale_service, tmp_path, path.name)
+    assert response.status_code == 200
+    pd.testing.assert_frame_equal(dtale_service._load_dataframe(path), frame.convert_dtypes())

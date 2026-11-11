@@ -917,8 +917,6 @@ async def html_dir_list(
                 or file_lower.endswith(".csv.gz")
                 or file_lower.endswith(".tsv")
                 or file_lower.endswith(".tsv.gz")
-                or file_lower.endswith(".pkl")
-                or file_lower.endswith(".pickle")
             ):
                 dtale_url = _join(request_path, _file).replace("/browse/", "/dtale/")
                 if is_parquet_file:

@@ -24,14 +24,15 @@ operator's decision, do not run the full Python or frontend suites.
 - [x] (2026-11-11 03:50 UTC) Scaffold package and review artifacts.
 - [x] (2026-11-11 04:08 UTC) M0: amend canonical contracts, obtain two reviews, and commit the ancestor
       checkpoint.
-- [ ] M1: add focused failing tests for Bootstrap, browse, and D-Tale.
-- [ ] M2: remove pickle admission/readers/capability advertisements and update
+- [x] (2026-11-11 04:11 UTC) M1: add focused failing tests for Bootstrap, browse, and D-Tale.
+- [x] (2026-11-11 04:18 UTC) M2: remove pickle admission/readers/capability advertisements and update
       docs/stubs.
-- [ ] M3: run the approved focused gates and close correctness, QA/code, and
+- [x] (2026-11-11 04:18 UTC) M3: run the approved focused gates and close correctness, QA/code, and
       security reviews.
 - [ ] M4: perform an explicitly authorized scoped rollout and closeout.
 
-Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`). Two independent reviews approved before implementation.
+Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`); archive clarification
+`e2b9f6b35`. Two independent reviews approved both before production edits.
 
 ## Surprises & Discoveries
 
@@ -56,6 +57,15 @@ Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`). Two independent reviews ap
 
 ## Decision Log
 
+- Decision: compare only added/modified/type-changed pickle paths against each
+  ref update baseline, for its final tip and every introduced commit, with rename
+  detection disabled. Keep general merge/blob/parser validation unchanged.
+  Rationale: real-push regressions reproduced merge admission bypass when a
+  legacy branch already exists remotely; reverse parent order and already-reachable
+  tips also evade introduced-commit-only checks. This is a bounded extension of
+  the same suffix admission boundary, without changing allowed-file behavior.
+  Date/Author: 2026-11-11, Codex and independent security/correctness reviewers.
+
 - Decision: deny `.pkl` and `.pickle` case-insensitively at Bootstrap and every
   interactive parser boundary.
   Rationale: the suffix selects the unsafe parser; removing that capability is
@@ -73,10 +83,13 @@ Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`). Two independent reviews ap
 
 ## Outcomes & Retrospective
 
-Only diagnosis and planning are complete. Runtime behavior is unchanged, and F2
-is not implemented, validated, deployed, or resolved. The plan accounts for all
-current capability advertisements so implementation cannot remove one reader
-while leaving another user-reachable path or misleading link.
+Implemented Bootstrap suffix admission, including merges and already-reachable
+ref adoption, and removed both interactive pickle readers/capability advertisements.
+Physical legacy files remain listable and downloadable byte-for-byte, including
+raw query/header modes and files under NoDir directory roots. Retired archive
+traversal remains retired; whole-archive delivery is unchanged. Focused tests,
+stub checks, and independent reviews are retained in `artifacts/`. Production
+rollout is not authorized or performed; M4 remains open. Full suites are waived.
 
 ## Context and Orientation
 
@@ -300,3 +313,7 @@ No new runtime dependency, parser, converter, scanner, or service is permitted.
 Revision note, 2026-11-11: created for the operator-approved F2 restriction.
 The package intentionally preserves raw legacy downloads and uses scoped tests
 without a full-suite gate.
+
+Revision note, 2026-11-11: executed M0-M2 and focused validation; discovered retired
+archive semantics and legacy-ref merge admission gap, retained red evidence, and
+implemented a suffix-only per-ref comparison without changing other merge validators.

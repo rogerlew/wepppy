@@ -1,0 +1,44 @@
+--- docs/schemas/file-dependency-freshness-contract.md
++++ uk2us preview
+@@ -106,7 +106,7 @@
+ therefore insufficient. Per the
+ [cache-admission ADR](../adrs/20260917-file-digest-cache-admission.md), a newly
+ observed path/version must remain uncached for a one-second monotonic observation
+-interval. Afterward, admit only a freshly computed digest, never one retained
++interval. Afterwards, admit only a freshly computed digest, never one retained
+ from the observation interval. Keep a bounded 512-entry observation LRU;
+ eviction restarts this interval and uncached verification. Warm zero-byte-read
+ acceptance applies after admission. The original rapid-rewrite probe must pass
+--- wepppy/webservices/dtale/AGENTS.md
++++ uk2us preview
+@@ -45,7 +45,7 @@
+   serve requested row ranges from DuckDB/PyArrow. All non-lazy datasets delegate
+   to the upstream D-Tale view.
+ 
+-`__init__.py` re-exports everything from `dtale.py`; external consumers can keep
++`__init__.py` reexports everything from `dtale.py`; external consumers can keep
+ importing `wepppy.webservices.dtale`.
+ 
+ ## Lazy Parquet Backend
+--- docs/work-packages/20261110_pickle_artifact_restriction/artifacts/20261110_contract_decision.md
++++ uk2us preview
+@@ -64,7 +64,7 @@
+ 
+ ## Classification and Boundaries
+ 
+-This is an intended security behavior change, not conformance to a pre-existing
++This is an intended security behavior change, not conformance to a preexisting
+ pickle prohibition. Security impact is high: project-controlled artifacts
+ currently reach Python deserialization in request processes. The amendment
+ uses the existing filesystem contract's security exception while preserving
+--- docs/work-packages/20261110_pickle_artifact_restriction/artifacts/20261110_validation.md
++++ uk2us preview
+@@ -35,7 +35,7 @@
+ The first supported eager control expected NumPy int64; the existing reader
+ normalizes to pandas nullable Int64. Corrected the expected frame with
+ `convert_dtypes()`; runtime behavior was unchanged. Initial stubtest reported
+-nine pre-existing declaration mismatches (DatasetMeta fields and response helper
++nine preexisting declaration mismatches (DatasetMeta fields and response helper
+ keyword arguments). `stubtest-initial.log` retains them; declarations now match
+ the existing runtime, with no authentication or execution changes.
+ 

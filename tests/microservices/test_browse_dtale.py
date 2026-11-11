@@ -831,3 +831,33 @@ def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     assert first_data_id != second_data_id
     assert target_module.LAZY_PARQUET_DATASETS[first_data_id].rows() == 1
     assert target_module.LAZY_PARQUET_DATASETS[second_data_id].rows() == 2
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+@pytest.mark.parametrize("archived", [False, True])
+def test_pickle_bridge_rejects_before_downstream_work(tmp_path, monkeypatch, load_browse, suffix, archived):
+    import zipfile
+    from unittest.mock import Mock
+    import wepppy.microservices.browse.dtale as bridge
+
+    name = f"legacy{suffix}"
+    if archived:
+        with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
+            archive.writestr(name, b"N.")
+        rel = f"watershed/{name}"
+    else:
+        (tmp_path / name).write_bytes(b"N.")
+        rel = name
+    browse = load_browse(DTALE_SERVICE_URL="http://dtale-service", SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+    materialize = Mock(side_effect=AssertionError("materialization reached"))
+    outbound = Mock(side_effect=AssertionError("outbound HTTP reached"))
+    monkeypatch.setattr(bridge, "materialize_file", materialize)
+    monkeypatch.setattr(bridge.httpx, "AsyncClient", outbound)
+    with TestClient(browse.create_app()) as client:
+        response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
+    assert response.status_code == (409 if archived else 415)
+    if archived:
+        assert "NODIR_ARCHIVE_RETIRED" in response.text
+    materialize.assert_not_called()
+    outbound.assert_not_called()

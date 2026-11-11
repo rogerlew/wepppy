@@ -1986,3 +1986,48 @@ def test_files_nodir_list_handles_listdir_file_not_found_as_404(
     assert response.status_code == 404
     payload = response.json()
     assert payload["error"]["code"] == "path_not_found"
+
+
+@pytest.mark.parametrize("suffix", [".pkl", ".pickle", ".PkL", ".PiCkLe"])
+@pytest.mark.parametrize("under_nodir", [False, True])
+def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, under_nodir):
+    import hashlib
+    from unittest.mock import Mock
+
+    name = f"legacy{suffix}"
+    content = b"inert legacy bytes\r\n\x00\xff"
+    if under_nodir:
+        (tmp_path / "watershed").mkdir()
+        (tmp_path / "watershed" / name).write_bytes(content)
+        rel = f"watershed/{name}"
+        parent = "watershed/"
+    else:
+        (tmp_path / name).write_bytes(content)
+        rel, parent = name, ""
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda *_args, **_kw: str(tmp_path))
+    import wepppy.microservices.browse._download as download_mod
+    monkeypatch.setattr(download_mod, "get_wd", lambda *_args, **_kw: str(tmp_path))
+    reader = Mock(side_effect=AssertionError("pickle reader reached"))
+    monkeypatch.setattr(browse.pd, "read_pickle", reader)
+    base = "/weppcloud/runs/pickle-test/cfg"
+    with TestClient(browse.create_app()) as client:
+        meta = client.get(f"{base}/files/{rel}?meta=true")
+        listing = client.get(f"{base}/browse/{parent}")
+        preview = client.get(f"{base}/browse/{rel}")
+        downloads = [
+            client.get(f"{base}/download/{rel}"),
+            client.get(f"{base}/browse/{rel}?download"),
+            client.get(f"{base}/browse/{rel}?raw"),
+            client.get(f"{base}/browse/{rel}", headers={"Raw": "1"}),
+        ]
+    assert meta.status_code == 200
+    assert meta.json()["preview_available"] is False
+    assert listing.status_code == 200 and name in listing.text
+    assert f"/dtale/{rel}" not in listing.text
+    assert preview.status_code == 415
+    for response in downloads:
+        assert response.status_code == 200
+        assert response.content == content
+        assert hashlib.sha256(response.content).digest() == hashlib.sha256(content).digest()
+    reader.assert_not_called()

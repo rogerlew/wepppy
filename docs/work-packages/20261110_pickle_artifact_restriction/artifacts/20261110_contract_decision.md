@@ -1,8 +1,8 @@
 # Contract decision - Pickle artifact restriction
 
-**Status**: Canonical amendments prepared; independent reviews and ancestor pending  
-**Remediation ID**: `PICKLE-RESTRICT-F2-20261110`  
-**Starting revision**: `991fc5e2c3f1cd2e5d74169e2d7bccb609203924`  
+**Status**: Accepted and checkpointed; implementation locally validated
+**Remediation ID**: `PICKLE-RESTRICT-F2-20261110`
+**Starting revision**: `991fc5e2c3f1cd2e5d74169e2d7bccb609203924`
 **Prepared**: 2026-11-11 03:50 UTC
 
 ## Decision
@@ -64,7 +64,7 @@ visible or downloadable.
 
 ## Classification and Boundaries
 
-This is an intended security behavior change, not conformance to a pre-existing
+This is an intended security behavior change, not conformance to a preexisting
 pickle prohibition. Security impact is high: project-controlled artifacts
 currently reach Python deserialization in request processes. The amendment
 uses the existing filesystem contract's security exception while preserving
@@ -103,11 +103,10 @@ evidence that it consumes project artifacts through these entry points.
   reaffirmed by the instruction to execute this plan, including its checkpoint.
 - **Independent contract review 1**: approved; see `20261110_contract_reviews.md`.
 - **Independent contract review 2**: approved; see `20261110_contract_reviews.md`.
-- **Canonical amendments**: prepared; implementation conformance and deployment
-  explicitly pending.
-- **Standalone ancestor commit**: pending.
+- **Canonical amendments**: accepted and checkpointed; deployment pending.
+- **Standalone ancestor commit**: `aeab3c3e1`; reviewed archive clarification `e2b9f6b35`.
 
-Implementation is gated until the pending checkpoint items are complete.
+Both checkpoints preceded production implementation. See the validation and final review artifacts for local conformance evidence.
 
 ## Archive compatibility clarification
 

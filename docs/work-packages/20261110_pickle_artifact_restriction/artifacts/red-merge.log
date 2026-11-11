@@ -1,0 +1,105 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/bootstrap/test_pre_receive.py -k pickle_merge
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 20 items / 18 deselected / 2 selected
+
+tests/weppcloud/bootstrap/test_pre_receive.py FF                         [100%]
+
+=================================== FAILURES ===================================
+_________ test_pickle_merge_from_existing_remote_branch_rejected[.pkl] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-12/test_pickle_merge_from_existin0')
+suffix = '.pkl'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x740457185ac0>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe"])
+    def test_pickle_merge_from_existing_remote_branch_rejected(tmp_path, suffix, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-12/test_pickle_merge_from_existin0/remote.git\n   bad24bb..c7cd7e5  main -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:345: AssertionError
+_______ test_pickle_merge_from_existing_remote_branch_rejected[.PiCkLe] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-12/test_pickle_merge_from_existin1')
+suffix = '.PiCkLe'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x740189a3fbc0>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe"])
+    def test_pickle_merge_from_existing_remote_branch_rejected(tmp_path, suffix, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-12/test_pickle_merge_from_existin1/remote.git\n   8f9c22e..1dd32d0  main -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:345: AssertionError
+=============================== warnings summary ===============================
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pickle_merge_from_existing_remote_branch_rejected[.pkl]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/weppcloud/bootstrap/test_pre_receive.py::test_pickle_merge_from_existing_remote_branch_rejected[.pkl]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_pickle_merge_from_existing_remote_branch_rejected[.pkl]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_pickle_merge_from_existing_remote_branch_rejected[.PiCkLe]
+================= 2 failed, 18 deselected, 2 warnings in 9.34s =================

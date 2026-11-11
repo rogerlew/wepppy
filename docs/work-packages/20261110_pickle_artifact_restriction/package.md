@@ -1,6 +1,6 @@
 # Pickle artifact restriction
 
-**Status**: Open (2026-11-11 UTC); scaffold and source assessment complete
+**Status**: Open (2026-11-11 UTC); M0-M3 complete; implemented and locally validated; rollout pending
 
 **Timezone**: UTC
 

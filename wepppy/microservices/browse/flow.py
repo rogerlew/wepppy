@@ -699,10 +699,6 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
     html_table = None
     filter_feedback = None
 
-    if path_lower.endswith('.pkl'):
-        df = await asyncio.to_thread(env.pd.read_pickle, path)
-        html_table = await env._async_df_to_html(df)
-
     if path_lower.endswith(('.parquet', '.geoparquet', '.pq')):
         raw_payload = request.args.get('pqf')
         started_ns = env._monotonic_ns()
@@ -934,6 +930,13 @@ async def _render_file_response(
     args = request.args
     headers = request.headers
     repr_mode = args.get('repr') is not None
+
+    if path_lower.endswith(('.pkl', '.pickle')):
+        download = 'download' in args or 'Download' in headers
+        raw = 'raw' in args or 'Raw' in headers
+        if repr_mode or not (download or raw):
+            env.abort(415, 'Pickle preview is not supported. Download the original file instead.')
+        return env.send_file(path, as_attachment=download, download_name=env._split(path)[-1])
 
     if path_lower.endswith('.dss') and not _wants_binary_response(args, headers, repr_mode=repr_mode):
         dss_response = await env._maybe_render_dss_preview(path, runid, config)

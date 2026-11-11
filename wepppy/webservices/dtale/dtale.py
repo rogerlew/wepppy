@@ -6,7 +6,7 @@ browser. The wrapper:
 
 * resolves run-scoped file paths (`/runs/<runid>/<config>/...`) and guards
   against traversal attacks
-* converts a range of tabular formats (Parquet, CSV/TSV, Feather, Pickle) into
+* converts a range of tabular formats (Parquet, CSV/TSV, Feather/Arrow) into
   pandas DataFrames with canonical identifier aliases (`TopazID`, `field_id`, …)
 * multiplexes datasets in-process by hashing the resolved path so that repeated
   requests reuse cached D-Tale sessions when the underlying file has not
@@ -842,19 +842,11 @@ def _read_csv(path: Path, *, sep: str = ",", compression: str | None = None) -> 
     return _postprocess_dataframe(df)
 
 
-def _read_pickle(path: Path) -> pd.DataFrame:
-    """Load a pickle payload and coerce it into a DataFrame when necessary."""
-    df = pd.read_pickle(path)
-    return _postprocess_dataframe(pd.DataFrame(df) if not isinstance(df, pd.DataFrame) else df)
-
-
 READERS: dict[str, Callable[[Path], pd.DataFrame]] = {
     ".feather": _read_feather,
     ".arrow": _read_feather,
     ".csv": _read_csv,
     ".tsv": lambda p: _read_csv(p, sep="\t"),
-    ".pkl": _read_pickle,
-    ".pickle": _read_pickle,
 }
 
 
@@ -1610,6 +1602,8 @@ def load_into_dtale():
 
     rel_path = _normalize_rel(rel_path)
     wd, target = _resolve_target(runid, rel_path, config=config or None)
+    if target.suffix.lower() in {".pkl", ".pickle"}:
+        abort(415, description=f"Unsupported file extension: {target.suffix}")
     try:
         resolved_target = _resolve_source_path(target)
         size_mb = target.stat().st_size / (1024 * 1024)

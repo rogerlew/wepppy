@@ -1,0 +1,347 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/bootstrap/test_pre_receive.py -k existing_remote
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 27 items / 18 deselected / 9 selected
+
+tests/weppcloud/bootstrap/test_pre_receive.py FF.FF.FF.                  [100%]
+
+=================================== FAILURES ===================================
+______ test_merge_from_existing_remote_branch_admission[main-first-.pkl] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot0')
+suffix = '.pkl', mode = 'main-first'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x723b7c8dad50>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot0/remote.git\n   46142c1..bca7da5  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+_____ test_merge_from_existing_remote_branch_admission[main-first-.PiCkLe] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot1')
+suffix = '.PiCkLe', mode = 'main-first'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238aeb9b800>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot1/remote.git\n   46142c1..03f4a4f  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+_____ test_merge_from_existing_remote_branch_admission[legacy-first-.pkl] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot3')
+suffix = '.pkl', mode = 'legacy-first'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac098290>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot3/remote.git\n   66ccf0d..3e32ffb  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+____ test_merge_from_existing_remote_branch_admission[legacy-first-.PiCkLe] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot4')
+suffix = '.PiCkLe', mode = 'legacy-first'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac094aa0>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot4/remote.git\n   66ccf0d..3857cb8  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+_____ test_merge_from_existing_remote_branch_admission[fast-forward-.pkl] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot6')
+suffix = '.pkl', mode = 'fast-forward'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac094d40>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot6/remote.git\n   3406cfc..a6459f5  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+____ test_merge_from_existing_remote_branch_admission[fast-forward-.PiCkLe] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot7')
+suffix = '.PiCkLe', mode = 'fast-forward'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac097ad0>
+
+    @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe", ".txt"])
+    @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
+    def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
+        import shlex
+    
+        source = tmp_path / "source"
+        source.mkdir()
+        _init_repo(source)
+        remote = tmp_path / "remote.git"
+        _run_git(tmp_path, ["init", "--bare", "-b", "main", str(remote)])
+        _run_git(source, ["remote", "add", "origin", str(remote)])
+        _run_git(source, ["push", "origin", "main"])
+        baseline = _run_git(remote, ["rev-parse", "main"])
+        # Model an already reachable legacy branch from before suffix restriction.
+        _run_git(source, ["checkout", "-b", "legacy"])
+        artifact = source / "wepp" / "runs" / f"legacy{suffix}"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_bytes(b"N.")
+        _commit_all(source, "legacy artifact")
+        _run_git(source, ["push", "origin", "legacy"])
+        _run_git(source, ["checkout", "main"])
+        if mode == "fast-forward":
+            _run_git(source, ["merge", "--ff-only", "legacy"])
+        else:
+            _run_git(source, ["commit", "--allow-empty", "-m", "diverge main"])
+            if mode == "legacy-first":
+                _run_git(source, ["checkout", "legacy"])
+                _run_git(source, ["merge", "--no-ff", "main", "-m", "merge main"])
+            else:
+                _run_git(source, ["merge", "--no-ff", "legacy", "-m", "merge legacy inputs"])
+        hook = remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable)
+                        + " -m wepppy.weppcloud.bootstrap.pre_receive\n")
+        hook.chmod(0o755)
+        monkeypatch.setenv("PYTHONPATH", str(Path(pre_receive.__file__).resolve().parents[3]))
+        monkeypatch.setenv("HTTP_X_AUTH_USER", "pickle-test")
+        result = subprocess.run(["git", "push", "origin", "HEAD:main"], cwd=source,
+                                text=True, capture_output=True, check=False)
+        if suffix == ".txt":
+            assert result.returncode == 0, result.stderr
+            assert _run_git(remote, ["rev-parse", "main"]) == _run_git(source, ["rev-parse", "HEAD"])
+            return
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['git', 'push', 'origin', 'HEAD:main'], returncode=0, stdout='', stderr='To /tmp/pytest-of-unknown/pytest-13/test_merge_from_existing_remot7/remote.git\n   3406cfc..92f99d3  HEAD -> main\n').returncode
+
+tests/weppcloud/bootstrap/test_pre_receive.py:358: AssertionError
+=============================== warnings summary ===============================
+tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[main-first-.pkl]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[main-first-.pkl]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[main-first-.pkl]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[main-first-.PiCkLe]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[legacy-first-.pkl]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[legacy-first-.PiCkLe]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[fast-forward-.pkl]
+FAILED tests/weppcloud/bootstrap/test_pre_receive.py::test_merge_from_existing_remote_branch_admission[fast-forward-.PiCkLe]
+=========== 6 failed, 3 passed, 18 deselected, 2 warnings in 12.40s ============

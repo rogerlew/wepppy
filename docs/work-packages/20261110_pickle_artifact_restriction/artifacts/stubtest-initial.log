@@ -1,0 +1,56 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.webservices.dtale
+error: wepppy.webservices.dtale.dtale.DatasetMeta.__init__ is inconsistent, stub does not have parameter "runid"
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:42
+def (self: wepppy.webservices.dtale.dtale.DatasetMeta, path: pathlib.Path, fingerprint: builtins.str, name: builtins.str, last_loaded: builtins.float, resolved_path: pathlib.Path | None =)
+Runtime: in file <string>
+def (self, path: 'Path', fingerprint: 'str', name: 'str', last_loaded: 'float', resolved_path: 'Path | None' = None, runid: 'str' = '', config: 'str' = '', resource_public: 'bool' = False) -> None
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.__init__ is inconsistent, stub does not have parameter "config"
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:42
+def (self: wepppy.webservices.dtale.dtale.DatasetMeta, path: pathlib.Path, fingerprint: builtins.str, name: builtins.str, last_loaded: builtins.float, resolved_path: pathlib.Path | None =)
+Runtime: in file <string>
+def (self, path: 'Path', fingerprint: 'str', name: 'str', last_loaded: 'float', resolved_path: 'Path | None' = None, runid: 'str' = '', config: 'str' = '', resource_public: 'bool' = False) -> None
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.__init__ is inconsistent, stub does not have parameter "resource_public"
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:42
+def (self: wepppy.webservices.dtale.dtale.DatasetMeta, path: pathlib.Path, fingerprint: builtins.str, name: builtins.str, last_loaded: builtins.float, resolved_path: pathlib.Path | None =)
+Runtime: in file <string>
+def (self, path: 'Path', fingerprint: 'str', name: 'str', last_loaded: 'float', resolved_path: 'Path | None' = None, runid: 'str' = '', config: 'str' = '', resource_public: 'bool' = False) -> None
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.__match_args__ variable differs from runtime type tuple[Literal['path'], Literal['fingerprint'], Literal['name'], Literal['last_loaded'], Literal['resolved_path'], Literal['runid'], Literal['config'], Literal['resource_public']]
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:-1
+tuple[Literal['path'], Literal['fingerprint'], Literal['name'], Literal['last_loaded'], Literal['resolved_path']]
+Runtime:
+('path', 'fingerprint', 'name', 'last_loaded', 'resolved_path', 'runid', 'config', 'resource_publ...
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.config is not present in stub
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi
+MISSING
+Runtime:
+''
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.resource_public is not present in stub
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi
+MISSING
+Runtime:
+False
+
+error: wepppy.webservices.dtale.dtale.DatasetMeta.runid is not present in stub
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi
+MISSING
+Runtime:
+''
+
+error: wepppy.webservices.dtale.dtale._build_instance_response is inconsistent, stub does not have parameter "access_claims"
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:151
+def (data_id: builtins.str, instance: Any, meta: wepppy.webservices.dtale.dtale.DatasetMeta) -> flask.wrappers.Response
+Runtime: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.py:1521
+def (data_id: 'str', instance: 'DtaleData', meta: 'DatasetMeta', *, access_claims: 'dict[str, Any] | None' = None, feature_id: 'str | None' = None)
+
+error: wepppy.webservices.dtale.dtale._build_instance_response is inconsistent, stub does not have parameter "feature_id"
+Stub: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.pyi:151
+def (data_id: builtins.str, instance: Any, meta: wepppy.webservices.dtale.dtale.DatasetMeta) -> flask.wrappers.Response
+Runtime: in file /workdir/wepppy/wepppy/webservices/dtale/dtale.py:1521
+def (data_id: 'str', instance: 'DtaleData', meta: 'DatasetMeta', *, access_claims: 'dict[str, Any] | None' = None, feature_id: 'str | None' = None)
+
+Found 9 errors (checked 2 modules)

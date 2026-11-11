@@ -15,7 +15,7 @@ All rendering is handled by Jinja templates bundled with the original blueprint 
 - `not_found.htm` - 404-style response shown when a requested directory segment is missing.
 - `_path_input_script.htm` - shared script that wires up the inline path input field for directory and 404 pages.
 - `arc_file.htm` - minimal viewer for “.arc” outputs.
-- `data_table.htm` - table presentation for CSV/TSV/Pickle content rendered via pandas and Parquet content rendered from Arrow tables.
+- `data_table.htm` - table presentation for CSV/TSV content rendered via pandas and Parquet content rendered from Arrow tables.
 - `text_file.htm` - general text viewer (including the command bar) for other readable file types.
 
 Routes
@@ -588,8 +588,6 @@ _FILES_PREVIEW_EXTENSIONS = (
         '.mkdn',
         '.nodb',
         '.out',
-        '.pkl',
-        '.pickle',
         '.sol',
         '.tsv',
         '.txt',
