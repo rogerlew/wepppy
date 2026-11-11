@@ -1,0 +1,37 @@
+[
+  {
+    "service": "status",
+    "credential": "wrong",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "service": "status",
+    "credential": "missing",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "service": "preflight",
+    "credential": "wrong",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "service": "preflight",
+    "credential": "missing",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "service": "rq-production-startup",
+    "credential": "wrong",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "service": "redis",
+    "private_acl_write_failure": "FAIL_CLOSED",
+    "exit": 1
+  }
+]

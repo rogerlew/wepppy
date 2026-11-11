@@ -4,16 +4,16 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: M1-M3 implemented; M4 focused runtime/reviews in progress
-**Last updated**: 2026-11-11 18:27 UTC
-**Next milestone**: final candidate review and M5 checkpoint
+**Current phase**: Complete — F5 prerequisite checkpoint PASS
+**Last updated**: 2026-11-11 21:15 UTC
+**Next milestone**: dependent F5 implementation (separate package)
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 **Security artifact**: `artifacts/20261111_security_review.md`
 
 This package runs first. It uses focused validation only and must reach scoped
-acceptance before F5 implementation begins. No code, configuration, secret,
-service or deployment change has occurred.
+acceptance before F5 implementation begins. Code and isolated acceptance are complete; no production deployment occurred.
+The incidental shared-dev Redis recreation is recorded below.
 
 ## Task Board
 
@@ -26,8 +26,8 @@ service or deployment change has occurred.
 - [x] M1: convert Python native/session/async consumers with focused tests.
 - [x] M2: convert status2/preflight2/streamauth Go clients with focused tests.
 - [x] M3: convert RQ startup, server entrypoint, healthchecks and operator helpers.
-- [ ] M4: run scoped unit/integration/Compose acceptance and independent reviews.
-- [ ] M5: publish the reviewed checkpoint that unblocks F5.
+- [x] M4: run scoped unit/integration/Compose acceptance and independent reviews.
+- [x] M5: publish the reviewed checkpoint that unblocks F5.
 
 ## Confirmed Starting Evidence
 
@@ -87,26 +87,26 @@ service or deployment change has occurred.
 
 ## Review Gates
 
-- [ ] Contract and failure matrix accepted.
-- [ ] Correctness review passed.
-- [ ] QA review passed.
-- [ ] Dedicated security review passed.
-- [ ] Operations/rollback review passed.
-- [ ] Focused validation and actual Compose smoke pass.
-- [ ] F5 unblock checkpoint recorded.
+- [x] Contract and failure matrix accepted.
+- [x] Correctness review passed.
+- [x] QA review passed.
+- [x] Dedicated security review passed.
+- [x] Operations/rollback review passed.
+- [x] Focused validation and actual Compose smoke pass.
+- [x] F5 unblock checkpoint recorded.
 
 ## Timeline
 
 - 2026-11-11 18:27 UTC: scaffold and record order/test scope.
-- Pending: M0 contract checkpoint.
-- Pending: M1-M3 implementation.
-- Pending: M4 scoped acceptance and reviews.
+- 2026-11-11 UTC: M0 ratified and committed as `ca1034a2b`.
+- 2026-11-11 UTC: M1-M3 implemented and committed as `db7ef7cb7`.
+- 2026-11-11 UTC: M4/M5 scoped acceptance and all independent reviews PASS; F5 unblocked.
 
 ## Handoff
 
-Continue from `prompts/active/implementation_execplan.md`. Preserve unrelated
-dirty files. Do not start F5 implementation until this tracker records a green
-scoped checkpoint. Do not claim full-suite coverage or production deployment.
+Execution is complete; see `prompts/completed/implementation_execplan.md`.
+Preserve unrelated dirty files. F5 may start from the recorded green scoped
+checkpoint. Do not claim full-suite coverage or production deployment.
 
 ## M0 execution receipt — 2026-11-11 UTC
 
@@ -129,3 +129,11 @@ The Go wrapper unexpectedly recreated shared dev Redis at 20:45:58 UTC. It is
 healthy with original password/data/image and native AUTH succeeds. No prior
 state snapshot exists; no zero-interruption claim is made. Further builders use
 --no-deps. See operations review for the candid event record.
+
+## Final checkpoint — 2026-11-11 UTC
+
+Complete at implementation `db7ef7cb7`; all four independent verdicts PASS.
+See `artifacts/20261111_f5_unblock_checkpoint.md` and final JSON receipts.
+F5 is unblocked. No production rollout or uninterrupted shared-dev workload
+claim is made. The isolated validation stack is cleaned up after evidence
+retention; existing caches, volumes and shared services are preserved.

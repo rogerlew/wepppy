@@ -1,6 +1,6 @@
 # Redis credential transport hardening
 
-**Status**: Open (2026-11-11 UTC); implemented, final scoped acceptance/review pending
+**Status**: Closed 2026-11-11 UTC; scoped checkpoint PASS at db7ef7cb7
 
 **Timezone**: UTC
 
@@ -223,3 +223,13 @@ this package.
 Execute this package before F5. Begin with the active ExecPlan, preserve current
 secret values/lifecycle and working Redis behavior, and do not broaden into ACL
 authorization redesign. No deployment action occurred during scaffolding.
+
+## Completion
+
+Native Python/Go, RQ, Redis ACL startup, dashboard and operator credential
+transport are implemented and validated in the isolated canonical environment.
+All independent review gates pass; F5 is unblocked by the retained checkpoint.
+Production rollout is separate. See the validation and operations artifacts for
+the incidental shared-dev Redis recreation, confirmed current availability and
+limits on prior workload continuity. Durable authority is the
+[transport contract](../../schemas/redis-credential-transport-contract.md).

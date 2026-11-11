@@ -1,4 +1,4 @@
-Scaffolded; execute first: [Redis credential transport hardening](docs/work-packages/20261111_redis_credential_transport/package.md) - Separate prerequisite package removing Redis credentials from URLs and process arguments while preserving the current password, mounted-secret lifecycle, default user, databases, topology and rotation behavior. Validation is intentionally scoped to affected Python, Go, RQ and Compose contracts; no full-suite gate or runtime change yet.
+Completed: [Redis credential transport hardening](docs/work-packages/20261111_redis_credential_transport/package.md) - Accepted implementation db7ef7cb7 removes generated credential URLs/argv while preserving Redis auth/topology. Scoped Python/Go and isolated Compose acceptance plus all four independent reviews passed; F5 is unblocked. Shared-dev Redis recreation and job-continuity limits are documented; no production rollout.
 
 Scaffolded; queued behind Redis transport: [Safe traceback and exceptional-path secret sanitization](docs/work-packages/20261111_safe_traceback_sanitization/package.md) - F5/SEC-05 remediation preserving traceback diagnostics, absolute paths and one sanitized representation while preventing process-owned configured secret values from reaching API, log, run-file, RQ Redis, status or container-log sinks. Openwepp mounted-secret handling is mapped without adding SOPS/Kubernetes API authority. Full pytest, npm lint and full npm tests are mandatory; no implementation or runtime change yet.
 
@@ -867,11 +867,12 @@ topology, TLS posture and rotation behavior. Python sync/async/session clients,
 Go services, RQ startup, Redis server startup and operator contracts are in
 scope.
 
-**Status**: Package, active ExecPlan, transport inventory, contract decision,
-failure-class matrix and independent review gates scaffolded. This package
-executes before F5. Validation is deliberately limited to affected Python, Go,
-RQ and Compose contracts plus direct authentication checks; full pytest and npm
-suites are not package gates. No code, runtime or production change occurred.
+**Status**: Closed 2026-11-11 UTC at `db7ef7cb7`. Focused Python/Go tests,
+real AUTH/session/RQ/Go/dashboard, scans, restart/recovery and all four
+independent review gates passed. F5 may begin from the recorded checkpoint;
+its full gates remain required. Shared-dev Redis was incidentally recreated
+by the Go test wrapper; current availability is verified, prior job continuity
+is unknown. No production rollout occurred.
 
 
 ### Safe Traceback and Exceptional-Path Secret Sanitization

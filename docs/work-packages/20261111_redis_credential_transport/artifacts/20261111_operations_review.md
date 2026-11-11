@@ -2,7 +2,11 @@
 
 **Reviewer:** `ops_security_control_agent` (`/root/contract_ops`)
 **Date:** 2026-11-11 UTC
-**Status:** Implementation review in progress; scoped runtime approval pending.
+**Candidate:** `db7ef7cb7e1d05400b6acca333526dfe80c7b417`
+**Status:** PASS for scoped operations acceptance at the candidate revision.
+All five implementation findings are closed. This approves the package's local
+operations gate and F5 dependency checkpoint; it does not authorize production
+deployment or claim uninterrupted shared-development service.
 
 ## Unintended shared development Redis recreation
 
@@ -19,8 +23,11 @@ Read-only inspection recorded the replacement container created at
 `sha256:646a47c903c5c45f99081094d8c3ba51ec2a1091babf42dc5a928cef024e6fcd`.
 The live `.docker-data/redis` bind and mounted password remained in place;
 the new entrypoint, password reader and CLI wrapper were mounted read-only.
-Docker reported healthy. The executor additionally reported successful native
-AUTH from the existing web container; that claim needs its validation receipt.
+Docker reported healthy. Independent follow-up via `wctl exec -T weppcloud`
+confirmed native AUTH/PING, 11 registered worker keys with positive TTLs, and
+HTTP 200/OK from both existing status/preflight health endpoints. Only reads
+were issued; no job was enqueued, deleted or flushed. These checks establish
+current availability, not pre/post job continuity.
 
 Containment: subsequent builder commands must use explicit `--no-deps`. Retain
 the healthy shared Redis rather than causing an additional speculative restart.
@@ -37,20 +44,22 @@ documented wrapper caller relies on dependency startup.
 
 ## Implementation findings
 
-1. **Medium, source corrected; runtime case pending — dev/HPC healthchecks can accept failed AUTH.** Both invoked
-   the CLI wrapper with `ping` but omit the required PONG output check. Redis
+1. **Medium, closed — dev/HPC healthchecks could accept failed AUTH.** Both invoked
+   the CLI wrapper with `ping` but omitted the required PONG output check. Redis
    CLI command errors can have a successful process exit. Match prod/canary
    output checking and exercise wrong credentials through the actual probe.
-   Re-review confirms both definitions now require PONG.
+   Re-review confirms both definitions now require PONG. The private
+   `restart-negative.txt` receipt records wrong-health-credential rejection.
 
-2. **Medium, source corrected; runtime readback pending — canary/aux snapshot behavior changed.** Those paths now set
+2. **Medium, closed — canary/aux snapshot behavior changed.** Those paths now set
    `REDIS_SAVE_SCHEDULE=""` through the shared entrypoint instead of using
    `--save ""`. The entrypoint's `:-` expansion substitutes the default when
    empty, enabling snapshots. Preserve explicit empty with the appropriate shell
    expansion and read back `CONFIG GET save` in the acceptance instance.
-   Re-review confirms the entrypoint uses the unset-only `-` expansion.
+   Re-review confirms the entrypoint uses the unset-only `-` expansion. The
+   private pinned-Alpine receipt confirms authenticated PONG and empty `save`.
 
-3. **Medium, resolver source corrected; legacy disposition pending — an operator consumer loses AUTH.**
+3. **Medium, closed — an operator consumer lost AUTH.**
    `tools/perf/redis_nodb_cache_stress/run_harness.py` resolver mode calls
    `redis_url(DB13)` and derives pool kwargs only from the result. The endpoint
    helper is now credential-free, so this consumer loses its password. Migrate
@@ -58,10 +67,12 @@ documented wrapper caller relies on dependency startup.
    CLI input, raw-input errors and the credential-bearing README example.
    Re-review confirms resolver mode now uses `redis_connection_kwargs(...,
    for_pool=True)` and explicit parser messages no longer interpolate raw URLs.
-   Direct `--redis-url` mode remains a legacy credential/argv path requiring
-   disposition; do not imply it was migrated by the resolver-mode fix.
+   Explicit URL inputs now also pass through canonical native kwargs; operators
+   are directed to the file input, and displayed/retained endpoints have userinfo
+   removed. The private operator receipt confirms real DB13 AUTH. User-supplied
+   legacy URL input remains a transition input, not a recommended argv pattern.
 
-4. **Medium, substantially corrected; exact parity pending — file framing validation differs across consumers.** A
+4. **Medium, closed — file framing validation differed across consumers.** A
    local synthetic test under `LC_ALL=C` found `redis-password.sh` accepts a
    leading U+00A0, whereas Python/Go reject it as surrounding whitespace. Normal
    LF framing passed; empty, NUL, malformed UTF-8 and embedded CR failed. This
@@ -70,11 +81,13 @@ documented wrapper caller relies on dependency startup.
    automatically. Re-review of the codepoint validator confirms leading/trailing
    U+00A0, malformed UTF-8, NUL, CR, embedded LF and empty content reject; ordinary
    and repeated terminal LF and nonspace Unicode pass. Go's `strings.TrimSpace`
-   differs from Python for U+001C through U+001F; resolve those four framing cases
-   before claiming identical validation.
+   differs from Python for U+001C through U+001F; both Go configs now use a trim
+   predicate that includes those four codepoints. Focused shell/native parity
+   tests cover those bytes, Unicode whitespace, malformed UTF-8 and valid
+   nonspace Unicode.
 
-5. **Medium, inventory disposition pending — canonical deployment helpers
-   retain older credential rules.** `scripts/redis_flush_rq_db.sh` exports
+5. **Medium, closed — canonical deployment helpers
+   retained older credential rules.** `scripts/redis_flush_rq_db.sh` exported
    `REDISCLI_AUTH` to its parent shell, prefers `REDIS_PASSWORD` over the mounted
    file, and continues without auth if the file is absent. This is an existing
    behavior rather than a new regression, but it conflicts with the new universal
@@ -83,17 +96,58 @@ documented wrapper caller relies on dependency startup.
    password rather than the canonical resolver. Inventory and narrowly migrate
    these paths or explicitly document the supported compatibility boundary;
    never execute the destructive flush while validating credential transport.
+   Current source gives configured files authority and confines auth environment
+   to the CLI/timeout child. The registration probe uses canonical native kwargs.
+   The private operator receipt shows only `--dry-run --require-redis`; it did
+   not execute FLUSHDB. Explicit password-free local fixture behavior is retained
+   and documented rather than silently removed.
 
-## Pending acceptance and recovery evidence
+## Acceptance and recovery evidence
 
-Review the final isolated Compose render before execution: unique container and
-network names, no inherited fixed subnet/ports, disposable data, synthetic
-secret paths, same relevant users/groups and mount permissions. Record exact
-source and image identities. Require actual RQ registration/dequeue, session
-set/get/expiry, status/preflight and streamauth AUTH, dashboard access, negative
-secret cases, argv/log/config scans, and restart/rollback over the same disposable
-data with sentinel retention. Require canonical persistence and notification
-settings to match, and record cleanup limited to the acceptance-owned resources.
+Read-only review of `/tmp/wepppy-redis-transport-acceptance/compose.json` confirms
+unique project, internal project-scoped network, no fixed container names or
+published ports, isolated Redis data, synthetic Redis/signing files, and preserved
+users/mount structure. The containing directory is mode 0700. Application/worker
+mounts deliberately preserve canonical repository/run-data structure; the tested
+job is only `operator.add(20, 22)` on the isolated Redis queue.
 
-No M4 or F5-unblock approval is granted by this interim artifact. No production
-deployment was performed or authorized by this review.
+Reviewed private receipts and the public scoped validation record show real AUTH,
+six worker registrations, result 42, sessions/expiry, Go and dashboard health,
+negative auth/files, private ACL permissions, candidate restart, baseline
+rollback/candidate restore over the same disposable data, and retained sentinel.
+Five service argv/log scans and all seven rendered Compose variants passed.
+The pinned Alpine fixture preserved empty snapshot settings.
+
+## Final verdict and recovery limits
+
+Independently read the retained final receipts for candidate
+`db7ef7cb7e1d05400b6acca333526dfe80c7b417`:
+
+- `20261111_final-candidate.json` binds exact running image IDs and confirms
+  final rebuilt Go health, all seven logical DBs, async PubSub, session expiry,
+  dashboard HTTP, six workers and fresh job
+  `2c42074f-f19b-49c4-b26a-73f24fbb7267` returning 42. All five service
+  argv/config/log scans pass, and Redis retains umask 0022.
+- `20261111_final-negative-services.json` confirms wrong/missing credentials
+  terminate both rebuilt Go services with exit 1, wrong credentials terminate
+  production RQ readiness with exit 1, and an unwritable private ACL destination
+  fails Redis startup with exit 1.
+- `20261111_final-dashboard-negatives.json` confirms wrong AUTH and empty
+  credential input fail in the actual dashboard image, without canary output.
+- `20261111_final-redis-config.json` confirms AOF enabled, everysec fsync, the
+  original RDB schedule and AOF preamble, and equivalent keyspace flags `hK`.
+
+These receipts close the final operations approval condition. Recovery evidence
+includes restarting affected consumers after Redis rollback/candidate restore:
+an intermediate query saw zero registrations, while final consumer startup
+restored six workers and completed the fresh job. This supports the explicit
+orchestrated recovery path; it does not establish automatic worker recovery
+through a Redis outage. Keep that operational requirement visible for rollout.
+
+**Verdict: PASS for the named local M4 operations gate and F5 checkpoint.** No
+production deployment was performed or authorized by this review. TLS/Unix
+transport has parser/constructor coverage; real AUTH acceptance covers canonical
+TCP/default-user topology. Cleanup must remain limited to acceptance-owned
+resources. The accidental shared development recreation, current availability
+checks and unavailable pre-event workload baseline remain material limits in
+the final handoff. No zero-interruption or unchanged-job claim is approved.

@@ -27,14 +27,24 @@ frontend gates.
 - [x] (2026-11-11 18:27 UTC) Record Redis-first ordering and the scoped-test
       waiver for this package.
 - [x] (2026-11-11 UTC) M0: ratify transport contract through independent
-      correctness/security/operations reviews; standalone checkpoint follows.
-- [x] (2026-11-11 UTC; focused acceptance in progress) M1: migrate Python native/session/async Redis clients.
-- [x] (2026-11-11 UTC; focused acceptance in progress) M2: migrate Go status/preflight/streamauth clients.
-- [x] (2026-11-11 UTC; final review in progress) M3: migrate RQ CLI, Redis server, healthchecks and operator helpers.
-- [ ] M4: pass focused tests, real Compose acceptance and independent reviews.
-- [ ] M5: record the checkpoint that unblocks F5.
+      correctness/security/operations reviews; standalone commit `ca1034a2b`.
+- [x] (2026-11-11 UTC; accepted at db7ef7cb7) M1: migrate Python native/session/async Redis clients.
+- [x] (2026-11-11 UTC; accepted at db7ef7cb7) M2: migrate Go status/preflight/streamauth clients.
+- [x] (2026-11-11 UTC; accepted at db7ef7cb7) M3: migrate RQ CLI, Redis server, healthchecks and operator helpers.
+- [x] (2026-11-11 UTC) M4: pass focused tests, real Compose acceptance and independent reviews.
+- [x] (2026-11-11 UTC) M5: record the checkpoint that unblocks F5.
 
 ## Surprises & Discoveries
+
+- Installed RQ config drops username/socket options and Click selects its
+  environment URL before config. The accepted owned adapter, explicit empty
+  --url and pool-preserving constructor address these observed APIs.
+- Pool and Redis constructors require different TLS/Unix arguments. Explicit
+  for_pool kwargs preserve both; real TCP AUTH and parser/constructor coverage
+  validate the current topology and compatibility options.
+- The Go test wrapper starts Compose dependencies and recreated shared Redis
+  after Compose edits. All later builders use --no-deps; the operations receipt
+  records the event and current availability without a job-continuity claim.
 
 - Observation: the repository already has both sides of the Python migration.
   `redis_connection_kwargs()` supplies separate password fields, while
@@ -51,6 +61,15 @@ frontend gates.
   Evidence: `services/streamauth/auth.go`.
 
 ## Decision Log
+
+- Decision: accept implementation `db7ef7cb7` as the F5 prerequisite after all
+  four independent gates passed; retain remote production rollout separately.
+  Rationale: exact-candidate scoped runtime and recovery evidence now meets M4.
+  Date/Author: 2026-11-11 UTC, Codex and independent reviewers.
+- Decision: preserve explicit consumer restart in rollback recovery and use
+  --no-deps for Go builders. Rationale: observed recovery and test-wrapper
+  behavior must remain explicit rather than inferred from a Redis PING.
+  Date/Author: 2026-11-11 UTC, Codex and operations reviewer.
 
 - Decision: complete Redis credential transport before F5 implementation.
   Rationale: Roger selected this order so avoidable Redis credential strings are
@@ -72,13 +91,19 @@ frontend gates.
 
 ## Outcomes & Retrospective
 
-M0 contract review passed at `ca1034a2b`. M1-M3 are implemented; M4 final
-revision/review gates remain pending. Initial isolated Compose acceptance passes
-sync DBs 0/2/9/11/13/14/15, async PubSub, Flask session expiry, six RQ workers
-and job result 42, Go health and dashboard HTTP. Private ACL modes, negative
-credentials, restart and baseline rollback/candidate restore passed. Populate this section with exact
-credential scans, connectivity evidence, compatibility limits and residual
-deployment risk after each milestone.
+Implementation and isolated environment acceptance completed at `db7ef7cb7`.
+255 focused Python tests passed, one container-only render case was covered by
+seven host renders, and Go integration/real AUTH passed. Final client evidence
+covers all DBs, async PubSub, Flask expiry, six RQ workers/job42, Go/dashboard,
+negative inputs, protected ACLs, logs/argv/config scans, restart and rollback.
+All correctness/QA/security/operations findings are closed. F5 may begin under
+`artifacts/20261111_f5_unblock_checkpoint.md`; its full gates remain required.
+
+The shared-dev Redis recreation remains an operational limitation: current
+11-worker/health/AUTH availability is verified, prior job continuity is unknown.
+No production deployment is claimed. Durable rules are promoted in
+`docs/schemas/redis-credential-transport-contract.md`. Isolated validation
+containers/networks are removed after sanitized receipts are retained.
 
 ## Context and Orientation
 
@@ -246,3 +271,6 @@ of zero interruption or unchanged jobs is made. All subsequent builders use
 explicit --no-deps. Canonical-derived synthetic acceptance is isolated under
 `/tmp/wepppy-redis-transport-acceptance`; it replaces names/network/ports/data
 and secrets. No production service was deployed.
+
+2026-11-11 closeout: M4/M5 completed after exact-candidate final receipts and
+independent PASS verdicts. F5 is unblocked; production rollout remains separate.

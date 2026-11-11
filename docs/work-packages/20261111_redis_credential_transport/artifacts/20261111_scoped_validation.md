@@ -1,6 +1,7 @@
 # Redis transport scoped validation receipt
 
-Status: initial acceptance passed; final candidate revision/re-review pending.
+Status: final candidate acceptance and all four independent review gates PASS.
+Implementation revision: `db7ef7cb7e1d05400b6acca333526dfe80c7b417`.
 Date: 2026-11-11 UTC. Ancestor contract: `ca1034a2b`.
 
 ## Focused tests
@@ -95,3 +96,47 @@ Production rollout remains separate; remote host identities/mounts must pass
 its existing deployment workflow. TLS/Unix option preservation has constructor
 and parser coverage; the real shared/default-user authentication acceptance is
 TCP, matching the current canonical Compose topology.
+
+## Final committed-candidate receipt
+
+`20261111_final-candidate.json` binds `db7ef7cb7` and exact running image IDs.
+The final rebuilt services passed the complete client probe after baseline
+rollback/candidate restore and consumer restart: six registered default workers,
+job `2c42074f-f19b-49c4-b26a-73f24fbb7267` returned 42, all seven DBs,
+async PubSub, session expiry, Go health and dashboard HTTP. Process argv,
+inspect config and logs contain no synthetic credential; Redis umask is 0022.
+Consumer restart was needed after the rollback test (an intermediate rq-info
+query saw zero registrations). Recovery evidence therefore covers explicitly
+restarting affected consumers, not automatic worker recovery after Redis loss.
+
+`20261111_final-negative-services.json` records exit 1 for both rebuilt Go
+services with wrong and missing credential files, production RQ readiness with
+wrong credentials, and Redis private-ACL creation on a read-only filesystem.
+`20261111_final-dashboard-negatives.json` records wrong AUTH and empty-file
+rejection in the actual dashboard image. All negative output scans exclude the
+canary. `20261111_final-redis-config.json` retains nonsecret CONFIG GET readback:
+AOF yes/everysec, configured RDB schedule, AOF preamble yes, keyspace flags hK.
+Pinned Alpine's separate empty save readback remains empty.
+
+Final Go integration suites also pass after the candidate commit, including
+new file-framing and malformed-host cases. A read-only shared development
+availability check now confirms AUTH/PING, 11 workers with positive TTLs and
+both existing Go health endpoints; this does not establish job continuity
+through the earlier unplanned recreation.
+
+## Cleanup and reproduction
+
+Both isolated Compose projects (canonical-derived and pinned Alpine) were
+brought down without --volumes after final review. No labeled acceptance
+containers remain. Synthetic password/signing files and full private rendered
+models were removed; sanitized receipts, original model hash and nonsecret
+identity/mount/command summary are retained. Existing named build caches,
+shared services and existing data volumes were not deleted. Disposable Redis
+bind data remains private under the temporary acceptance directory.
+
+`20261111_prepare_isolated_compose.py` retains the preparation recipe, creates a
+fresh private directory, and refuses an already-existing acceptance project so
+it cannot rotate credentials beneath running tests. Its generated model path
+can be substituted into the commands above. The source recipe and retained
+probe use the current canonical environment; do not treat them as production
+rollout tooling.

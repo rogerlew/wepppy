@@ -1,0 +1,12 @@
+[
+  {
+    "dashboard_credential": "wrong",
+    "exit": 1,
+    "canary_scan": "PASS"
+  },
+  {
+    "dashboard_credential": "empty",
+    "exit": 1,
+    "canary_scan": "PASS"
+  }
+]

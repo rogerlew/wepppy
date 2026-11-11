@@ -1,0 +1,55 @@
+{
+  "revision": "db7ef7cb7e1d05400b6acca333526dfe80c7b417",
+  "client": {
+    "async_ping_pubsub": true,
+    "dashboard_http": true,
+    "go_health": true,
+    "negative_auth_and_missing_file": true,
+    "rq_job_id": "2c42074f-f19b-49c4-b26a-73f24fbb7267",
+    "rq_job_result": 42,
+    "rq_workers": 6,
+    "session_roundtrip_expiry": true,
+    "sync_databases": [
+      0,
+      2,
+      9,
+      11,
+      13,
+      14,
+      15
+    ]
+  },
+  "services": [
+    {
+      "name": "/redis-transport-acceptance-preflight-1",
+      "image": "sha256:a7c402b22eb36faf908e260fbe16604bd408593f11dbf549f2069fa09c97b3b7",
+      "user": "1000:993",
+      "argv_config_logs_scan": "PASS"
+    },
+    {
+      "name": "/redis-transport-acceptance-redis-1",
+      "image": "sha256:646a47c903c5c45f99081094d8c3ba51ec2a1091babf42dc5a928cef024e6fcd",
+      "user": "",
+      "argv_config_logs_scan": "PASS"
+    },
+    {
+      "name": "/redis-transport-acceptance-rq-dashboard-1",
+      "image": "sha256:019fbdf6ba5c5027149115e30818a8542b6bf33c78be43bc8e77fe841beb2087",
+      "user": "",
+      "argv_config_logs_scan": "PASS"
+    },
+    {
+      "name": "/redis-transport-acceptance-rq-worker-1",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "argv_config_logs_scan": "PASS"
+    },
+    {
+      "name": "/redis-transport-acceptance-status-1",
+      "image": "sha256:2edcdb86e66bda4725aafdae239aa9fef4164e3eb3d2b95c211f70f8dae3e5f2",
+      "user": "1000:993",
+      "argv_config_logs_scan": "PASS"
+    }
+  ],
+  "redis_umask": "0022"
+}

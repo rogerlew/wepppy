@@ -1,0 +1,52 @@
+[
+  {
+    "variant": [
+      "docker-compose.dev.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.dev.hpc.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.prod.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.prod.yml",
+      "docker-compose.prod.wepp1.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.prod.worker.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.prod.wepp3.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  },
+  {
+    "variant": [
+      "docker-compose.canary-smoke.yml"
+    ],
+    "render": "PASS",
+    "canary_scan": "PASS"
+  }
+]

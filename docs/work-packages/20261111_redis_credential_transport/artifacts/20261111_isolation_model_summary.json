@@ -1,0 +1,264 @@
+{
+  "compose_sha256": "faa2cd917062f26f5409b0aa55529e453ffdba96b1ba4cbe6144001fbf3373d5",
+  "services": {
+    "redis": {
+      "image": "redis:latest",
+      "user": null,
+      "entrypoint": [
+        "/usr/local/bin/redis-entrypoint.sh"
+      ],
+      "command": null,
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy/docker/redis-entrypoint.sh",
+          "target": "/usr/local/bin/redis-entrypoint.sh",
+          "read_only": true,
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy/docker/redis-password.sh",
+          "target": "/usr/local/bin/redis-password.sh",
+          "read_only": true,
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy/docker/redis-cli-secret.sh",
+          "target": "/usr/local/bin/redis-cli-secret.sh",
+          "read_only": true,
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/tmp/wepppy-redis-transport-acceptance/data",
+          "target": "/data"
+        }
+      ]
+    },
+    "rq-worker": {
+      "image": "wepppy-dev",
+      "user": "1000:993",
+      "entrypoint": [
+        "/opt/venv/bin/python",
+        "/workdir/wepppy/docker/wepppyo3-interchange-preflight.py",
+        "--"
+      ],
+      "command": [
+        "bash",
+        "-lc",
+        "set -euo pipefail\nexec /opt/venv/bin/rq worker-pool -n \"6\" --url '' --config wepppy.config.rq_redis --connection-class wepppy.config.rq_redis.Connection --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default\n"
+      ],
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy",
+          "target": "/workdir/wepppy",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/rosetta",
+          "target": "/workdir/rosetta",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/peridot",
+          "target": "/workdir/peridot",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/weppcloud-wbt",
+          "target": "/workdir/weppcloud-wbt",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppyo3",
+          "target": "/workdir/wepppyo3",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy-test-engine-data",
+          "target": "/workdir/wepppy-test-engine-data",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/wc1",
+          "target": "/wc1",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/wc1/geodata",
+          "target": "/geodata",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/var/run/docker.sock",
+          "target": "/var/run/docker.sock",
+          "bind": {}
+        }
+      ]
+    },
+    "status": {
+      "image": "redis-transport-status:candidate",
+      "user": "1000:993",
+      "entrypoint": null,
+      "command": null,
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": null
+    },
+    "preflight": {
+      "image": "redis-transport-preflight:candidate",
+      "user": "1000:993",
+      "entrypoint": null,
+      "command": null,
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": null
+    },
+    "rq-dashboard": {
+      "image": "docker-rq-dashboard",
+      "user": null,
+      "entrypoint": null,
+      "command": [
+        "bash",
+        "-lc",
+        "set -euo pipefail\nexec gunicorn --bind 0.0.0.0:9181 --workers \"2\" --threads \"2\" --timeout \"30\" --log-level info \"rq_dashboard.app:create_app()\"\n"
+      ],
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/workdir/rq-dashboard",
+          "target": "/rq-dashboard",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy/docker/rq_dashboard_redis_config.py",
+          "target": "/opt/wepppy/rq_dashboard_redis_config.py",
+          "read_only": true,
+          "bind": {}
+        }
+      ]
+    },
+    "weppcloud": {
+      "image": "wepppy-dev",
+      "user": "1000:993",
+      "entrypoint": [
+        "/opt/venv/bin/python"
+      ],
+      "command": [
+        "-c",
+        "print(\"acceptance client\")"
+      ],
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy",
+          "target": "/workdir/wepppy",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/rosetta",
+          "target": "/workdir/rosetta",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/peridot",
+          "target": "/workdir/peridot",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/weppcloud-wbt",
+          "target": "/workdir/weppcloud-wbt",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppyo3",
+          "target": "/workdir/wepppyo3",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy-test-engine-data",
+          "target": "/workdir/wepppy-test-engine-data",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/wc1",
+          "target": "/wc1",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/wc1/geodata",
+          "target": "/geodata",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/var/run/docker.sock",
+          "target": "/var/run/docker.sock",
+          "bind": {}
+        }
+      ]
+    },
+    "status-build": {
+      "image": "golang:1.25-alpine",
+      "user": null,
+      "entrypoint": null,
+      "command": null,
+      "networks": {
+        "isolated": null
+      },
+      "ports": null,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/workdir/wepppy",
+          "target": "/workspace",
+          "bind": {}
+        },
+        {
+          "type": "volume",
+          "source": "status_go_cache",
+          "target": "/go"
+        }
+      ]
+    }
+  }
+}
