@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	cryptorand "crypto/rand"
+	"encoding/hex"
 	"flag"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"math"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"os"
 	"sort"
@@ -42,6 +46,29 @@ func main() {
 		quietFlag    = flag.Bool("quiet", false, "Reduce log chatter; exit code still reflects success")
 	)
 	flag.Parse()
+	// This trusted operator fixture proves service fanout, not browser issuance.
+	keyFile := os.Getenv("STATUS2_SIGNING_KEY_FILE")
+	origin := os.Getenv("STATUS2_ORIGIN")
+	if keyFile == "" || origin == "" {
+		log.Fatal("STATUS2_SIGNING_KEY_FILE and STATUS2_ORIGIN are required")
+	}
+	rawKey, err := os.ReadFile(keyFile)
+	if err != nil {
+		log.Fatal("signing file unavailable")
+	}
+	key := strings.TrimSpace(strings.Split(string(rawKey), ",")[0])
+	if key == "" {
+		log.Fatal("signing file empty")
+	}
+	if *timeoutFlag <= 0 || *timeoutFlag > 290*time.Second {
+		log.Fatal("timeout must be positive and at most 290s")
+	}
+	random := make([]byte, 32)
+	if _, err := cryptorand.Read(random); err != nil {
+		log.Fatal("fixture identity unavailable")
+	}
+	sid := hex.EncodeToString(random)
+	*runIDFlag += "-" + sid[:16]
 
 	logger := log.New(os.Stdout, "status2-smoke: ", log.LstdFlags|log.Lmsgprefix)
 
@@ -56,14 +83,39 @@ func main() {
 
 	wsURL, err := buildWebSocketURL(*wsURLFlag, *runIDFlag, *channelFlag)
 	if err != nil {
-		logger.Fatalf("invalid WebSocket URL: %v", err)
+		logger.Fatal("invalid WebSocket URL")
 	}
 
 	redisOpts, err := redis.ParseURL(*redisURLFlag)
 	if err != nil {
-		logger.Fatalf("invalid Redis URL: %v", err)
+		logger.Fatal("invalid Redis URL")
 	}
 
+	if passwordFile := os.Getenv("STATUS2_REDIS_PASSWORD_FILE"); passwordFile != "" {
+		password, err := os.ReadFile(passwordFile)
+		if err != nil {
+			logger.Fatal("Redis password file unavailable")
+		}
+		redisOpts.Password = strings.TrimSpace(string(password))
+	}
+	sessionOpts := *redisOpts
+	sessionOpts.DB = 11
+	sessions := redis.NewClient(&sessionOpts)
+	defer sessions.Close()
+	marker := "auth:session:run:" + *runIDFlag + ":" + sid
+	ttl := *timeoutFlag + 5*time.Second
+	if err := sessions.Set(ctx, marker, "1", ttl).Err(); err != nil {
+		logger.Fatal("fixture marker unavailable")
+	}
+	defer sessions.Del(context.Background(), marker)
+	now := time.Now().Unix()
+	claims := jwt.MapClaims{"iss": "weppcloud-stream", "aud": "wepp-status", "token_class": "session", "stream": "status", "scope": "status:read",
+		"runid": *runIDFlag, "config": "smoke", "sub": sid, "session_id": sid, "jti": sid, "iat": now, "nbf": now, "exp": now + int64(ttl/time.Second)}
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(key))
+	if err != nil {
+		logger.Fatal("fixture signing failed")
+	}
+	dial := &websocket.DialOptions{HTTPHeader: http.Header{"Origin": []string{origin}}, Subprotocols: []string{"wepp-stream.v1", "bearer." + token}}
 	redisClient := redis.NewClient(redisOpts)
 	defer func() {
 		_ = redisClient.Close()
@@ -92,7 +144,7 @@ func main() {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			latencies, payloadBytes, err := runClient(ctx, logger, id, *samplesFlag, extraPayload, redisClient, wsURL, redisChannel, *recvTimeout)
+			latencies, payloadBytes, err := runClient(ctx, logger, id, *samplesFlag, extraPayload, redisClient, wsURL, redisChannel, *recvTimeout, dial)
 			results <- result{latencies: latencies, payloadSize: payloadBytes, err: err}
 		}(clientID)
 	}
@@ -107,7 +159,8 @@ func main() {
 
 	for res := range results {
 		if res.err != nil {
-			logger.Fatalf("client error: %v", res.err)
+			sessions.Del(context.Background(), marker)
+			logger.Fatal("client smoke failed")
 		}
 		allLatencies = append(allLatencies, res.latencies...)
 		if res.payloadSize > 0 {
@@ -134,6 +187,10 @@ func buildWebSocketURL(base, runID, channel string) (string, error) {
 	if !strings.HasSuffix(parsed.Path, "/") {
 		parsed.Path += "/"
 	}
+	if parsed.RawQuery != "" || parsed.User != nil {
+		return "", fmt.Errorf("base URL must not contain credentials or query parameters")
+	}
+	parsed.RawQuery = "config=smoke"
 	parsed.Path += fmt.Sprintf("%s:%s", url.PathEscape(runID), url.PathEscape(channel))
 	return parsed.String(), nil
 }
@@ -155,19 +212,23 @@ func runClient(
 	wsURL string,
 	redisChannel string,
 	recvTimeout time.Duration,
+	dial *websocket.DialOptions,
 ) ([]time.Duration, int, error) {
 	logger.Printf("[client %d] connecting to %s", clientID, wsURL)
-	conn, resp, err := websocket.Dial(ctx, wsURL, nil)
+	conn, resp, err := websocket.Dial(ctx, wsURL, dial)
 	if err != nil {
 		if resp != nil {
-			return nil, 0, fmt.Errorf("client %d websocket dial failed: %w (HTTP %d)", clientID, err, resp.StatusCode)
+			return nil, 0, fmt.Errorf("client %d websocket dial failed (HTTP %d)", clientID, resp.StatusCode)
 		}
-		return nil, 0, fmt.Errorf("client %d websocket dial failed: %w", clientID, err)
+		return nil, 0, fmt.Errorf("client %d websocket dial failed", clientID)
 	}
 	defer func() {
 		_ = conn.Close(websocket.StatusNormalClosure, "client complete")
 	}()
 
+	if conn.Subprotocol() != "wepp-stream.v1" {
+		return nil, 0, fmt.Errorf("unexpected selected protocol")
+	}
 	latencies := make([]time.Duration, 0, samples)
 	rng := rand.New(rand.NewSource(time.Now().UnixNano() + int64(clientID)*1_000_000))
 	payloadBytes := 0

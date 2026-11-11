@@ -5,33 +5,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
 : "${STATUS2_SMOKE_ENV_FILE:=docker/.env}"
-cleanup_env_file=0
-if [ ! -f "${STATUS2_SMOKE_ENV_FILE}" ]; then
-  STATUS2_SMOKE_ENV_FILE="/tmp/status2-smoke.env"
-  cleanup_env_file=1
-
-  WC1_DIR_VALUE=${WC1_DIR:-${STATUS2_SMOKE_WC1_DIR:-/tmp/status2-smoke-wc1}}
-  GEODATA_DIR_VALUE=${GEODATA_DIR:-${STATUS2_SMOKE_GEODATA_DIR:-/tmp/status2-smoke-geodata}}
-  DATABASE_URL_VALUE=${DATABASE_URL:-${STATUS2_SMOKE_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}}
-  WEPP_AUTH_JWT_SECRET_VALUE=${WEPP_AUTH_JWT_SECRET:-${STATUS2_SMOKE_WEPP_AUTH_JWT_SECRET:-dev-secret}}
-  AGENT_JWT_SECRET_VALUE=${AGENT_JWT_SECRET_KEY:-${STATUS2_SMOKE_AGENT_JWT_SECRET:-dev-agent-secret}}
-  OPENTOPO_API_KEY_VALUE=${OPENTOPOGRAPHY_API_KEY:-${STATUS2_SMOKE_OPENTOPO_API_KEY:-dummy}}
-  CADDY_FILE_VALUE=${CADDY_FILE:-${STATUS2_SMOKE_CADDY_FILE:-${ROOT_DIR}/docker/caddy/Caddyfile}}
-
-  mkdir -p "${WC1_DIR_VALUE}" "${GEODATA_DIR_VALUE}"
-
-  cat <<EOF_ENV > "${STATUS2_SMOKE_ENV_FILE}"
-UID=$(id -u)
-GID=$(id -g)
-WC1_DIR=${WC1_DIR_VALUE}
-GEODATA_DIR=${GEODATA_DIR_VALUE}
-CADDY_FILE=${CADDY_FILE_VALUE}
-DATABASE_URL=${DATABASE_URL_VALUE}
-WEPP_AUTH_JWT_SECRET=${WEPP_AUTH_JWT_SECRET_VALUE}
-AGENT_JWT_SECRET_KEY=${AGENT_JWT_SECRET_VALUE}
-OPENTOPOGRAPHY_API_KEY=${OPENTOPO_API_KEY_VALUE}
-EOF_ENV
-fi
+# Authenticated smoke needs the same configured secret files as the service.
+# Never create fallback signing keys or an alternate anonymous service.
+test -f "${STATUS2_SMOKE_ENV_FILE}" || { echo "Configured smoke env file required" >&2; exit 1; }
 
 COMPOSE=(docker compose --env-file "${STATUS2_SMOKE_ENV_FILE}" -f docker/docker-compose.dev.yml)
 
@@ -71,12 +47,27 @@ cleanup() {
   if [ "${redis_was_running}" -eq 0 ]; then
     "${COMPOSE[@]}" stop redis >/dev/null 2>&1 || true
   fi
-  if [ "${cleanup_env_file}" -eq 1 ]; then
-    rm -f "${STATUS2_SMOKE_ENV_FILE}"
-  fi
 }
 trap cleanup EXIT
 
 "${COMPOSE[@]}" up -d redis status >/dev/null
 
-"${COMPOSE[@]}" run --rm status-build sh -lc "cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:\$PATH go run . --ws '${WS_URL}' --redis '${REDIS_URL}' --run '${RUN_ID}' --channel '${CHANNEL}' --samples ${SAMPLES} --payload-bytes ${PAYLOAD_BYTES} --clients ${CLIENTS} --receive-timeout ${RECEIVE_TIMEOUT} --timeout ${OVERALL_TIMEOUT}" | tee "${STATUS2_SMOKE_LOG}"
+# Render only non-secret paths and Origin; mount secrets only into this trusted invocation.
+mapfile -t fixture_config < <("${COMPOSE[@]}" config --format json | python3 -c '
+import json,sys
+c=json.load(sys.stdin)
+print(c["secrets"]["wepp_auth_jwt_secrets"]["file"])
+print(c["secrets"]["redis_password"]["file"])
+print(c["services"]["status"]["environment"]["STATUS_ALLOWED_ORIGINS"].split(",")[0])
+')
+[ "${#fixture_config[@]}" -eq 3 ] || { echo "Smoke authorization configuration unavailable" >&2; exit 1; }
+"${COMPOSE[@]}" run --rm \
+  -v "${fixture_config[0]}:/run/secrets/smoke_signing:ro" \
+  -v "${fixture_config[1]}:/run/secrets/smoke_redis:ro" \
+  -e STATUS2_SIGNING_KEY_FILE=/run/secrets/smoke_signing \
+  -e STATUS2_REDIS_PASSWORD_FILE=/run/secrets/smoke_redis \
+  -e "STATUS2_ORIGIN=${fixture_config[2]}" \
+  status-build sh -lc 'cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:$PATH exec go run . "$@"' smoke \
+  --ws "${WS_URL}" --redis "${REDIS_URL}" --run "${RUN_ID}" --channel "${CHANNEL}" \
+  --samples "${SAMPLES}" --payload-bytes "${PAYLOAD_BYTES}" --clients "${CLIENTS}" \
+  --receive-timeout "${RECEIVE_TIMEOUT}" --timeout "${OVERALL_TIMEOUT}" | tee "${STATUS2_SMOKE_LOG}"

@@ -1,7 +1,7 @@
 # Status and preflight WebSocket run authorization
 
-**Status**: Open (2026-11-11 UTC); package scaffolded, contract and review
-checkpoint required before implementation
+**Status**: Open (2026-11-11 UTC); contract ratified at `6a06ad49a`,
+implementation committed; broad validation and forest acceptance in progress
 
 **Timezone**: UTC
 

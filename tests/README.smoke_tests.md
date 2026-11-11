@@ -181,45 +181,27 @@ This suite is intended to become a collection of targeted tests. Each spec shoul
 
 ## Status2 WebSocket Smoke
 
-A lightweight Go harness lives at `tests/tools/status2_smoke/`. It exercises the
-status2 WebSocket fan-out from inside the dev stack:
+A trusted operator Go fixture lives at `tests/tools/status2_smoke/`. Run it through
+`scripts/run-status2-smoke.sh` with a configured `docker/.env` and the same
+secret files used by status2. No default signing secrets are generated.
 
 ```bash
-wctl run status-build sh -lc 'cd /workspace/tests/tools/status2_smoke && PATH=/usr/local/go/bin:$PATH go run . \
-  --ws ws://status:9002 \
-  --redis redis://redis:6379/2 \
-  --run smoke-test \
-  --channel climate \
-  --samples 5 \
-  --payload-bytes 256 \
-  --clients 1 \
-  --receive-timeout 10s \
-  --timeout 10s'
+STATUS2_SMOKE_CLIENTS=4 STATUS2_SMOKE_TIMEOUT=60s scripts/run-status2-smoke.sh
 ```
 
-Flags:
+The wrapper mounts the signing ring and Redis password only into the one-off
+builder and passes the exact configured Origin. The fixture appends a random
+suffix to the requested run prefix, creates one bounded DB 11 session marker,
+and signs the exact status profile with `config=smoke`. It sends only the fixed
+plus bearer protocol pair, verifies the fixed selected protocol, and removes its
+exact marker on normal completion or client failure (TTL bounds interruption).
+It does not create or inspect a real run. This is **service fanout evidence**;
+only the separate browser acceptance test proves cookie/run authorization.
 
-- `--samples` – number of publish/receive cycles to measure (default `1`)
-- `--payload-bytes` – bytes of additional payload appended to each message (default `0`)
-- `--clients` – number of concurrent WebSocket clients to run (default `1`)
-- `--receive-timeout` – per-message receive timeout (default `8s`)
-- `--timeout` – overall deadline for the run (default `10s`)
-
-The tool publishes payload(s) to Redis and waits for matching `status` frames
-over the WebSocket connection. When `--clients > 1`, each client runs in
-parallel with its own WebSocket connection; all latencies are aggregated into a
-single summary (min/median/mean/p95/max in milliseconds). Use `--ws`/`--redis`
-to point at alternate hosts (the defaults target `127.0.0.1` from inside the
-container).
-
-### CI/Nightly Helper
-
-To avoid orphan containers and prep dependencies automatically, use the helper
-script:
-
-```bash
-scripts/run-status2-smoke.sh
-```
-
-Override defaults via environment variables (for example
-`STATUS2_SMOKE_CLIENTS=4 STATUS2_SMOKE_TIMEOUT=60s scripts/run-status2-smoke.sh`).
+Existing options remain: `STATUS2_SMOKE_SAMPLES`, `STATUS2_SMOKE_PAYLOAD_BYTES`,
+`STATUS2_SMOKE_CLIENTS`, `STATUS2_SMOKE_RECEIVE_TIMEOUT`, `STATUS2_SMOKE_TIMEOUT`,
+`STATUS2_SMOKE_WS_URL`, `STATUS2_SMOKE_REDIS_URL`, `STATUS2_SMOKE_RUN_ID` (prefix),
+and `STATUS2_SMOKE_CHANNEL`. Overall timeout is at most 290 seconds. The nightly
+workflow invokes this wrapper; its runner must provision the configured secret
+files. Latency summaries contain no credentials; never enable shell tracing or
+upload secret files.

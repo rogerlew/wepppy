@@ -1,0 +1,40 @@
+name: Status2 Smoke
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch: null
+jobs:
+  status2-smoke:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 20
+    steps:
+      - name: Require provisioned smoke configuration and secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${RUNNER_DOCKER_ENV}" || { echo "Provision RUNNER_DOCKER_ENV outside the checkout" >&2; exit 1; }
+          mkdir -p docker/secrets
+          for name in redis_password wepp_auth_jwt_secrets; do
+            target="docker/secrets/${name}"
+            source_file="$(dirname "${RUNNER_DOCKER_ENV}")/secrets/${name}"
+            if [ ! -f "${target}" ]; then
+              test -f "${source_file}" || { echo "Provision the required smoke secret files" >&2; exit 1; }
+              cp "${source_file}" "${target}"
+            fi
+            chmod 600 "${target}"
+          done
+      - name: Run status2 smoke test
+        run: |
+          set -euo pipefail
+          scripts/run-status2-smoke.sh
+      - name: Upload status2 smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: status2-smoke-log
+          path: telemetry/status2-smoke.log
+          if-no-files-found: warn

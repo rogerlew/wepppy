@@ -4,6 +4,10 @@ This guide outlines the operational drills used to validate `status2` under fail
 
 ## Prerequisites
 
+- A selected accessible disposable project and a freshly minted status credential.
+- A temporary mode-0600 credential file containing the stream-token JSON response
+  (`token`, `expires_at`, `config`, `service`); remove it after the test and never
+  upload it as an artifact or enable k6 HTTP debugging.
 - Docker Compose development stack running (`wctl up status redis`).
 - `k6` installed on the host (`brew install k6` or download from https://k6.io).
 - Redis CLI available (`docker compose exec redis redis-cli`).
@@ -14,26 +18,41 @@ This guide outlines the operational drills used to validate `status2` under fail
    ```bash
    wctl up -d status redis
    ```
-2. Kick off a background publisher to feed messages:
+2. Start a bounded background publisher for the same disposable run. Keep it
+   running while sockets connect; a one-off publish before connection is lost.
+   Use the configured web container's Redis credentials:
    ```bash
-   docker compose exec redis redis-cli \
-     -n 2 --raw --pipe <<'EOF'
-   PUBLISH loadtest:wepp "ready"
-   PLAY
-   EOF
+   wctl exec -T weppcloud python - "$DISPOSABLE_RUN_ID" <<'PYTHON' &
+   import sys, time
+   from redis import Redis
+   from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+   with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as conn:
+       for _ in range(130):
+           conn.publish(sys.argv[1] + ':wepp', 'load-test progress')
+           time.sleep(1)
+   PYTHON
    ```
-   or run a Python loop to publish every second.
 3. Start the k6 scenario:
    ```bash
    STATUS2_WS_URL=ws://localhost:9002 \
-   STATUS2_RUN_ID=loadtest \
+   STATUS2_RUN_ID="$DISPOSABLE_RUN_ID" \
+   STATUS2_ORIGIN=https://forest.tail305ec9.ts.net \
+   STATUS2_CREDENTIAL_FILE="$PROTECTED_CREDENTIAL_FILE" \
    STATUS2_CHANNEL=wepp \
    STATUS2_VUS=300 \
-   STATUS2_DURATION=5m \
+   STATUS2_DURATION=2m \
    k6 run services/status2/docs/k6-status2-load.js
    ```
+The scenario rejects a duration exceeding remaining credential validity and
+checks the actual HTTP 101 and fixed negotiated protocol. Failed checks or
+zero received status messages fail the run. Mint a fresh credential
+for each bounded drill; it does not renew browser sessions. API reference:
+[k6 WebSocket parameters](https://grafana.com/docs/k6/latest/javascript-api/k6-ws/params/).
+
 4. Inspect Prometheus metrics (if enabled) or container logs for reconnect spikes.
-5. Compare `status2_message_latency_ms` trend against SLO (95th percentile < 50 ms).
+5. Require successful handshakes and received status messages. The
+   `status2_message_connection_age_ms` trend records socket age at receipt; it
+   does not measure publish-to-receive latency and has no latency SLO threshold.
 
 ## 2. Redis Restart Drill
 

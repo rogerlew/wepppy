@@ -87,3 +87,11 @@ wctl run --rm preflight-build sh -lc 'PATH=/usr/local/go/bin:$PATH go test ./int
 ```
 
 Keep this document current; update the status tables and automation notes whenever the test surface evolves.
+
+## Authenticated performance clients (2026-11-11)
+
+The status load client cannot target preflight by changing its port. Preflight
+requires its own `wepp-preflight` audience, `preflight:read` scope, run/config
+binding, path without a channel suffix, and checklist-frame assertions. Use the
+authenticated preflight Go integration and browser acceptance gates; do not use
+an unauthenticated port-only adaptation as evidence.

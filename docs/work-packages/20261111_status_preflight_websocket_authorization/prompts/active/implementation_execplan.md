@@ -422,3 +422,16 @@ worker restart, job cancellation, registry publication or production operation
 is authorized. Before-cutover identities are in `20261111_forest_before.json`.
 The browser script disables recording, inspects CDP credentials in memory, and
 uses the canonical delete routine only for its exact newly created owned runs.
+
+
+M4 follow-up: the first full pytest attempt stopped on a 24-byte OpenAPI budget
+excess; concise new endpoint metadata fixed it without raising the budget. The
+second attempt was interrupted after 387 passes because a parallel diagnostics
+render test exposed a missing Flask request global in its test harness. The
+harness is corrected and all 57 diagnostics/run-sync/fork checks pass. A third
+unsegmented full run is in progress. Interrupted output is not full-suite proof.
+
+Final consumer inventory added the operator Go smoke/nightly and k6 clients.
+Their authentication repair preserves service fanout testing; its trusted
+signing fixture does not replace browser authorization proof. See the failure
+matrix for authority, isolation and temporary-credential handling.

@@ -37,3 +37,19 @@ forest cutover. All commands run on forest through the installed dev `wctl`.
 
 Raw test output remains local under `/tmp/stream-auth-*.log`. Browser evidence
 must contain only selected non-secret claims and assertions, never credentials.
+
+## Final consumer/tooling checks
+
+The second full pytest attempt was explicitly interrupted at 387 passed / 28
+skipped (103 seconds) after a focused diagnostics render test exposed a missing
+Flask `request` global in its isolated Jinja harness. Corrected the harness;
+all 57 diagnostics/run-sync/fork regressions pass (14.80 seconds). The third
+unsegmented full attempt is running.
+
+Operator Go smoke compiles/tests through the Go builder. Shell and k6 syntax
+checks pass; k6 is not installed on forest, so no k6 runtime/load claim is made.
+The generated nightly workflow passes `build_forest_workflows.py --check`;
+actual GitHub Actions execution is not claimed. Independent reviewers approved
+the tooling auth changes. The inherited k6 connection-age metric was renamed
+and its invalid latency threshold removed; handshake and message-count gates
+remain enforced. Live operator smoke will follow forest cutover.

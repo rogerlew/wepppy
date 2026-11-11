@@ -85,3 +85,16 @@ Preflight derives output from RedisPrep rather than forwarding its raw hash.
 Confirmed disclosure is unconditional raw-hash debug logging and unbounded
 `locked:*` field-name reflection. Preserve checklist booleans/timestamps; remove
 raw input logging and validate supported lock names.
+
+## Operator tooling consumer follow-up
+
+The final inventory found two additional executable callers: the Go smoke client
+(`tests/tools/status2_smoke`, `scripts/run-status2-smoke.sh`, nightly workflow)
+and `services/status2/docs/k6-status2-load.js`. Both previously dialed without
+Origin/config/credentials. The smoke fixture now uses a trusted one-off signing
+file mount, a random isolated run/SID and an expiring exact DB11 marker with
+cleanup; it proves live service fanout only. The separate mandatory browser
+acceptance proves real cookie/project issuance. k6 requires a protected temporary
+mint response and a bounded duration within its remaining validity. Neither
+client supports an unauthenticated fallback. Runner secret provisioning is an
+explicit prerequisite; no known default signing secret is generated.

@@ -8,7 +8,7 @@ import pytest
 from jinja2 import DictLoader, Environment
 
 pytest.importorskip("flask")
-from flask import Flask
+from flask import Flask, request
 
 weppcloud_site_module = import_module("wepppy.weppcloud.routes.weppcloud_site")
 weppcloud_site_bp = weppcloud_site_module.weppcloud_site_bp
@@ -134,6 +134,7 @@ def test_diagnostics_template_renders_registered_usersum_document_url() -> None:
     )
     with app.test_request_context():
         env.globals.update(
+            request=request,
             url_for=lambda endpoint, **_values: f"/mock/{endpoint}",
             usersum_doc_link=lambda category, filename, label: (
                 f'<a href="{weppcloud_site_module.url_for("usersum.view_markdown", category=category, filename=filename)}">'
