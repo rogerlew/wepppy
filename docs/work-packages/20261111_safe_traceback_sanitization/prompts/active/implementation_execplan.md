@@ -35,7 +35,11 @@ focused sink/canary checks and the exact full Python and frontend gates.
       npm lint and npm tests for F5.
 - [x] (2026-11-11 19:05 UTC) Review openwepp SOPS/projected-secret handling and
       record process-owned sources, compound decoders and container-log sinks.
-- [ ] Prerequisite: Redis credential transport passes scoped acceptance/reviews.
+- [x] (2026-11-11) Prerequisite: Redis scoped acceptance/reviews PASS at
+      `db7ef7cb7e1d05400b6acca333526dfe80c7b417`.
+- [x] (2026-11-11) M0 draft canonical contract, source search and sink inventory.
+- [x] (2026-11-11 21:24 UTC) M0 independent correctness/security PASS; all
+      source ownership findings resolved.
 - [ ] M0: ratify safe traceback/source/sink contract and checkpoint.
 - [ ] M1: implement renderer/snapshot and focused unit/performance tests.
 - [ ] M2: integrate API/error factory and logging formatter sinks.
@@ -44,6 +48,12 @@ focused sink/canary checks and the exact full Python and frontend gates.
 - [ ] M5: pass full pytest, npm lint and full npm tests; close SEC-05.
 
 ## Surprises & Discoveries
+
+- M0 review: lazy owner/auth helpers import the full Flask app in other
+  processes. Source profiles cannot simply mirror Kubernetes mount subsets.
+  NoDb QueueHandler drops exception provenance and StatusMessengerHandler skips
+  formatters; both require direct boundary coverage. RQ persistence receives a
+  separate raw string after exception logging. Evidence: expanded failure matrix.
 
 - Observation: standard Python traceback formatting does not capture locals by
   default, but exception messages, notes and library errors can include complete
@@ -127,8 +137,10 @@ focused sink/canary checks and the exact full Python and frontend gates.
 
 ## Outcomes & Retrospective
 
-No implementation outcome exists. Populate this section with sink coverage,
-canary results, performance, full-suite receipts and residual risks.
+Redis prerequisite verified. M0 canonical contract and expanded inventories are
+drafted; independent reviewers found transitive Flask secret consumption, NoDb
+queue/status formatter bypasses and additional exception-text persistence.
+Implementation and all validation gates remain pending.
 
 ## Context and Orientation
 

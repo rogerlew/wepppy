@@ -1,6 +1,6 @@
 # F5 safe traceback contract decision
 
-**Status**: Proposed; owner direction recorded, canonical contract pending
+**Status**: M0 accepted; independent correctness/security PASS
 **Finding**: F5 / SEC-05
 **Date**: 2026-11-11 UTC
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
@@ -78,11 +78,36 @@
 
 ## Required Checkpoint
 
-- [ ] Explicit secret-source and sink inventories accepted.
-- [ ] Process-owned Kubernetes source profiles and compound decoders accepted.
-- [ ] Container stdout/stderr and uncaught-exception coverage accepted.
-- [ ] Output/depth bounds and ADR disposition accepted.
-- [ ] Logging formatter and RQ pre-persistence ordering reviewed.
-- [ ] Correctness and security reviewers approve a standalone ancestor commit.
+- [x] Explicit secret-source and sink inventories accepted.
+- [x] Process-owned Kubernetes source profiles and compound decoders accepted.
+- [x] Container stdout/stderr and uncaught-exception coverage accepted.
+- [x] Output/depth bounds and ADR disposition accepted.
+- [x] Logging formatter and RQ pre-persistence ordering reviewed.
+- [x] Correctness and security reviewers approve a standalone ancestor commit.
 
 This artifact records owner direction but does not claim implementation.
+
+## Execution checkpoint scope
+
+Starting implementation revision: `2b6439df4d7b12e3fb740c9632d45d6eec7da809`.
+Redis prerequisite accepted: `db7ef7cb7e1d05400b6acca333526dfe80c7b417`.
+Operator authorization: 2026-11-11 request to execute this active plan, including
+its standalone ancestor checkpoint and implementation milestones.
+
+Canonical amendment: `docs/schemas/safe-traceback-contract.md`; cross-links in
+`docs/schemas/rq-response-contract.md` and `docs/ui-docs/controller-contract.md`.
+Existing browse-filesystem and WEPPcloudR controlled-error restrictions are
+preserved; no additional traceback fields or audiences are authorized.
+Discrepancy: intended security behavior change; unfiltered diagnostics become
+filtered before existing sinks. No scientific/run-data schema changes.
+Security impact high. Compatibility and regression plan: preserve response
+keys/statuses and controlled-error omissions, job/callback/retry semantics,
+ordinary progress output, useful frames and paths; directly read API/log/file/
+Redis/publication/container outputs with synthetic canaries and fail-closed
+negative cases. Full requested Python/frontend gates remain mandatory.
+
+Bounds are fixed implementation resource ceilings, not configurable scientific
+or workflow parameterization; no parameterization ADR is required. Rationale
+and exact bounds are in the canonical Rendering and failure section. Reviewers
+must assess this disposition. Normal-path I/O remains prohibited. No new
+runtime dependency, queue, service, datastore or deployment is authorized.

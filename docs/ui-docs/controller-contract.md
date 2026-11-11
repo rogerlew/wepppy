@@ -32,6 +32,8 @@
 - Verify the rendered page against the reference controller, including uploaded and error states when affected. DOM assertions alone do not establish visual consistency.
 
 ### Status stream + stacktrace
+
+Traceback content follows the [safe traceback contract](../schemas/safe-traceback-contract.md) (implementation pending). Existing fields and panel behavior stay unchanged; credential material is filtered before publication.
 - Always call `attach_status_stream` with `channel`, `runId`, `spinner`, and `stacktrace: { element, body? }`.
 - StatusStream will enrich stacktraces via `/rq-engine/api/jobinfo/<jobid>` when the channel message includes an RQ job id (`rq:<uuid> ...`). Keep the `data-stacktrace-*` hooks intact or enrichment will fail silently.
 - Prefer `pushResponseStacktrace`/`pushErrorStacktrace` for synchronous failures; rely on StatusStream for RQ errors.

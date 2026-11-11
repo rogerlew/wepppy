@@ -540,6 +540,7 @@ validated, deployment separate.
 }
 ```
 - `error.details` is required for 4xx responses; include a human-readable summary for validation/auth/access failures (structured details belong in `errors`).
+- Exception-derived diagnostics follow the [safe traceback contract](safe-traceback-contract.md) (implementation pending): “full/original” tracebacks retain diagnostic context after secret filtering. Existing field omissions, status codes and authorization remain unchanged.
 - For 5xx responses, include traceback text in `error.details` when available. When traceback details are intentionally omitted from the client response, return `error_id` and ensure logs preserve traceback/error context for that identifier.
 - `error_id` is **required for all HTTP 5xx responses** so operators can correlate client-visible failures to server logs and failure sites.
 - For 5xx responses, observability requirements are:

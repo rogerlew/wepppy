@@ -4,15 +4,16 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: queued behind Redis credential transport
+**Current phase**: M0 contract and inventory review
 **Last updated**: 2026-11-11 19:05 UTC
-**Next milestone**: Redis prerequisite, then F5 contract checkpoint
+**Next milestone**: F5 standalone contract checkpoint
 **Finding**: F5 / SEC-05
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 **Security artifact**: `artifacts/20261111_security_review.md`
 
-The package is scaffolded and blocked by the Redis credential transport package.
+Redis prerequisite PASS at `db7ef7cb7e1d05400b6acca333526dfe80c7b417`.
+M0 canonical draft and expanded inventories are under independent review.
 No code, logging, API, secret or deployment behavior changed.
 
 ## Task Board
@@ -24,7 +25,7 @@ No code, logging, API, secret or deployment behavior changed.
 - [x] Record mandatory full pytest, npm lint and full npm tests.
 - [x] Review openwepp Kubernetes/SOPS handling and add process-owned source,
       compound decoder, container-log and production-equivalent mount gates.
-- [ ] Prerequisite: Redis credential transport scoped checkpoint passes.
+- [x] Prerequisite: Redis credential transport scoped checkpoint passes.
 - [ ] M0: ratify safe traceback/source/sink contract and standalone checkpoint.
 - [ ] M1: implement renderer, temporary snapshot and focused unit tests.
 - [ ] M2: integrate API/error-factory and logging formatter sinks.
@@ -136,3 +137,10 @@ tracker records its green checkpoint. Start M0 from
 `artifacts/20261111_kubernetes_secret_handling_review.md`; preserve its
 process-owned source distinction and separate live-deployment boundary. Preserve
 unrelated dirty work. No full suite or security closure has occurred.
+
+## M0 execution update
+
+Starting revision `2b6439df4d7b12e3fb740c9632d45d6eec7da809`. Canonical draft:
+`docs/schemas/safe-traceback-contract.md`. Independent review is resolving
+transitive source ownership and final source/sink coverage before the standalone
+checkpoint. No implementation or full-suite/security closure is claimed.
