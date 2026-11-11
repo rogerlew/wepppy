@@ -44,7 +44,7 @@ and leaves no token in URLs, logs, storage, selected protocols or artifacts.
       review findings.
 - [x] M5: perform the authorized, service-scoped forest redeploy with health and
       rollback evidence.
-- [ ] M6: pass real forest browser E2E and cleanup; update the audit board from
+- [x] M6: pass real forest browser E2E and cleanup; update the audit board from
       retained sanitized evidence.
 
 ## Surprises & Discoveries
@@ -91,14 +91,14 @@ name the inventory guard before the expensive full suite.
 
 QA tightened the forest harness before deployment: wait for Redis subscribers,
 require a fresh preflight frame after renewal, log out explicitly, and clear the
-disposable run cache before deletion. Cleanup can resume after partial success.
+disposable run cache before deletion. Cleanup supports already-absent runs; NFS partial deletion required the scoped recovery recorded below.
 
 Remaining-directory precheck found one additional integration omission after
 3,704 passes: diagnostics needed the standard deferred stale-controller check
 immediately after its new controller bundle. Added that companion script;
 all 2,370 web and OpenAPI checks pass (205.58 seconds), and QA approved the fix.
 The fourth unsegmented full suite started at revision `fadc8847b`; forest cutover
-is still held until it passes. No partial run is counted as full-suite proof.
+was held until it passed. No partial run is counted as full-suite proof.
 ## Decision Log
 
 - Decision: make an actual forest redeploy and browser-level proof for both
@@ -116,26 +116,35 @@ is still held until it passes. No partial run is counted as full-suite proof.
 
 - Decision: start from a dedicated short-lived stream token transported in
   `Sec-WebSocket-Protocol`, with a fixed negotiated application protocol and the
-  bearer value never echoed or retained. This remains proposed until M0.
+  bearer value never echoed or retained. This was ratified at M0.
   Rationale: browsers cannot attach an Authorization header; query parameters
   commonly leak through logs/history, and a dedicated credential allows narrow
   audience, scope and lifetime.
   Date/Author: 2026-11-11, Codex.
 
 - Decision: require live session marker and revocation checks before upgrade and
-  Redis subscription, not signature validation alone. This remains proposed
-  until M0.
+  Redis subscription, not signature validation alone. This was ratified
+  at M0.
   Rationale: the existing RQ token model includes server-side session state;
   preserving it prevents a signed but revoked session from continuing to read.
   Date/Author: 2026-11-11, Codex.
 
 ## Outcomes & Retrospective
 
-M0 is ratified in ancestor `6a06ad49a`. M1-M3 are implemented. Focused
-Python/controller checks: 45 passed; shared Go validator/redaction tests pass.
-Generated assets were rebuilt inside the canonical web container. Correctness
-and security reviewers approve the code; QA, broad gates and forest acceptance
-remain pending. No deployed vulnerability closure is claimed yet.
+Completed on forest on 2026-11-11. Ratified ancestor `6a06ad49a`, runtime tested
+at `fadc8847b`, and browser evidence at `bae13ff84`. Full pytest passed 13,568
+with 435 skips (3,785.08 seconds); full npm passed 126 suites / 1,076 tests.
+Focused Python, Go integration, generated assets, docs and independent reviews
+pass. The five-service deployment is healthy. All 27 browser assertions passed,
+including renewal and denied missing/cross-run credentials. Original cleanup
+exit 1 is retained: NFS log handles delayed filesystem deletion after DB removal.
+Scoped web/RQ restart and canonical exact-fixture cleanup completed successfully;
+see `artifacts/20261111_forest_acceptance.json` and supplemental cleanup receipt.
+
+Lessons: run endpoint inventory and stale-controller wiring guards before the
+expensive full suite; preserve closed inventory history by promoting current
+contracts; honor the canonical candidate-build guard; distinguish browser
+assertions from deferred filesystem cleanup. No production rollout is claimed.
 
 ## Context and Orientation
 
@@ -413,7 +422,7 @@ record that approval. Final independent confirmation and standalone ancestor
 commit precede code edits; no further policy permission is required.
 
 M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
-approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.
+approved. M1-M6 are now implemented and verified; final forest evidence is retained.
 
 ## Resolved forest deployment commands
 
@@ -467,4 +476,8 @@ has no registered queue listener and is preserved; no started jobs exist.
 M5 completed: five forest containers recreated, all running with zero restarts;
 login and rq-engine/status/preflight health return HTTP 200. Caddy header filter
 is verified active. Canonical candidate web build and image/stability gates
-passed. M6 real-browser acceptance remains pending. See before/after receipts.
+passed. M6 browser assertions and scoped cleanup recovery subsequently passed; see combined acceptance.
+
+Final closeout: all milestones and three independent evidence reviews pass for
+forest. Audit tasks W-01 through W-05 verified; SEC-04 production rollout is
+READY FOR REVIEW and remains outside this authorization.

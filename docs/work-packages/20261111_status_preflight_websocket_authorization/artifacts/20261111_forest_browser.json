@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-11T20:20:52.017Z",
+  "since": "2026-11-11T20:15:26.836Z",
+  "revision": "bae13ff84522c3ed5f100cc60075ae130f0ad2b8",
+  "browser": "141.0.7390.37",
+  "stage": "credential-non-retention",
+  "passed": false,
+  "checks": {
+    "private-state-1": true,
+    "private-state-2": true,
+    "status-valid-handshake": true,
+    "preflight-valid-handshake": true,
+    "token-free-urls": true,
+    "actual-preflight-payload": true,
+    "actual-status-marker": true,
+    "status-marker-rendered": true,
+    "both-streams-renewed-with-fresh-credentials": true,
+    "actual-preflight-payload-after-renewal": true,
+    "renewed-preflight-connected": true,
+    "status-marker-rendered-after-renewal": true,
+    "status-missing-token-denied": true,
+    "status-cross-run-denied": true,
+    "preflight-missing-token-denied": true,
+    "preflight-cross-run-denied": true,
+    "anonymous-private-denied-heaven-sent-centennial": true,
+    "anonymous-private-denied-beheaded-deterioration": true,
+    "standalone-archive-authorized": true,
+    "log-read-weppcloud": true,
+    "log-read-wepppy-rq-engine": true,
+    "log-read-weppcloud-status": true,
+    "log-read-weppcloud-preflight": true,
+    "log-read-wepppy-caddy": true,
+    "no-raw-credential-in-storage-console-logs-selected-protocol": true,
+    "no-raw-credential-in-retained-artifacts": true,
+    "logout-removes-private-authority": true
+  },
+  "runs": [
+    {
+      "runid": "heaven-sent-centennial",
+      "config": "0"
+    },
+    {
+      "runid": "beheaded-deterioration",
+      "config": "0"
+    }
+  ],
+  "cleanup": "FAILED; recover exact identities from /tmp/stream-auth-disposable-runs.json"
+}

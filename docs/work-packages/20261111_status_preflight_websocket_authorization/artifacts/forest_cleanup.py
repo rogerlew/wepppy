@@ -13,6 +13,11 @@ from wepppy.weppcloud.utils.helpers import get_wd, get_user_models, get_run_owne
 runs = json.loads(sys.stdin.read())
 assert 0 < len(runs) <= 2
 receipt = []
+# Bind deletion to the same locally configured identity used for browser login.
+settings = Path('/workdir/wepppy/docker/secrets/dev-agent.env').read_text().splitlines()
+expected_email = next(line.split('=', 1)[1].strip().strip('"\'')
+                      for line in settings if line.startswith('DEV_AGENT_EMAIL='))
+assert expected_email
 with app.app_context():
     Run, User, datastore = get_user_models()
     for run in runs:
@@ -22,7 +27,7 @@ with app.app_context():
         record = Run.query.filter(Run.runid == runid).first()
         if record is not None or Path(wd).exists():
             owners = get_run_owners_lazy(runid)
-            assert owners and all(owner.email == 'dev-agent@example.com' for owner in owners)
+            assert owners and all(owner.email == expected_email for owner in owners)
             if Path(wd).exists():
                 clear_nodb_file_cache(runid, wd_override=wd)
             delete_run_rq(runid, wd, delete_files=True)

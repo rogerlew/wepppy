@@ -1,3 +1,5 @@
+Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
+
 Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
 
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
@@ -1700,6 +1702,20 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Status and Preflight WebSocket Run Authorization
+
+**Completed**: 2026-11-11 (forest scope)
+
+**Link**: [Work package](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md)
+
+Ratified at `6a06ad49a`; full regression passed 13,568 tests (435 skipped),
+plus 1,076 frontend tests and Go integration gates. Five forest services were
+redeployed. All 27 real-browser assertions passed, including both streams,
+renewal, messages, denials and credential non-retention. NFS delayed disposable
+cleanup; scoped recovery is retained and verified. Three independent final
+reviews approved. Production rollout remains separately authorized.
+
 
 ### Roads Parameterization and Configuration View
 

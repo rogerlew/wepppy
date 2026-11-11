@@ -56,8 +56,8 @@ are governed by the ratified stream contract.
 
 ## Evidence
 
-- [Proposed stream contract](../schemas/weppcloud-websocket-auth-contract.md).
-- [Execution plan](../work-packages/20261111_status_preflight_websocket_authorization/prompts/active/implementation_execplan.md).
+- [Ratified stream contract](../schemas/weppcloud-websocket-auth-contract.md).
+- [Execution plan](../work-packages/20261111_status_preflight_websocket_authorization/prompts/completed/implementation_execplan.md).
 
 ## Risk and Rollback Notes
 

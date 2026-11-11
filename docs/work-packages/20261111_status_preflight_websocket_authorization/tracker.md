@@ -3,16 +3,16 @@
 ## Quick Status
 
 **Timezone**: UTC  
-**Last updated**: 2026-11-11 15:49 UTC  
-**Current phase**: M4 validation and independent review
+**Last updated**: 2026-11-11 20:30 UTC
+**Current phase**: Closed — forest acceptance complete
 **Finding**: F4 / SEC-04 (Medium; high likelihood)  
 **Change security impact**: high  
 **Starting revision**: `b7c2e44d5947aabeda22f19e55b0b91d7f0baca1`  
 **Dedicated security review**: `artifacts/20261111_security_review.md`
 
-M0 is ratified in standalone ancestor `6a06ad49a`. M1-M3 are implemented;
-focused checks pass and broad gates are running. Forest deployment and actual
-browser acceptance remain mandatory. Production deployment is not authorized.
+M0-M7 complete for forest. Full regression, five-service cutover, 27 browser
+assertions and scoped cleanup recovery are verified. See the combined acceptance
+receipt; production deployment remains separately authorized.
 
 ## Task Board
 
@@ -37,9 +37,9 @@ browser acceptance remain mandatory. Production deployment is not authorized.
       correctness, QA, and security review findings.
 - [x] M5: render and validate forest Compose; drain affected work safely;
       redeploy only affected services; check health and rollback readiness.
-- [ ] M6: run actual forest browser E2E for both token-bearing handshakes,
+- [x] M6: run actual forest browser E2E for both token-bearing handshakes,
       authorized messages, negative cases, secret non-retention, and cleanup.
-- [ ] M7: update the audit board with evidence and close or disposition SEC-04.
+- [x] M7: update the audit board with evidence and close or disposition SEC-04.
 
 ## Confirmed Starting Evidence
 
@@ -135,8 +135,8 @@ summary, negative results, and cleanup receipt.
 - [x] Correctness review passed.
 - [x] QA review passed.
 - [x] Dedicated security review passed.
-- [ ] Forest operations/deployment review passed.
-- [ ] Audit board SEC-04 status updated from evidence, not from implementation
+- [x] Forest operations/deployment review passed.
+- [x] Audit board SEC-04 status updated from evidence, not from implementation
       intent.
 
 ## Timeline
@@ -144,8 +144,8 @@ summary, negative results, and cleanup receipt.
 - 2026-11-11 15:49 UTC: scaffold package and record the forest E2E requirement.
 - 2026-11-11: M0 ratified at `6a06ad49a`.
 - 2026-11-11: M1-M3 implemented; code reviews approved; focused suites pass.
-- Pending: M4 complete local/broad validation and independent reviews.
-- Pending: M5-M6 authorized forest redeploy and end-to-end acceptance.
+- Completed: M4 full regression and independent reviews.
+- Completed: M5-M6 forest redeploy, browser assertions and scoped cleanup recovery.
 
 The third full pytest attempt stopped after 9,803 passed and 429 skipped
 (3,491.79 seconds) because the new browser-only route was missing from the
@@ -159,20 +159,21 @@ name the inventory guard before the expensive full suite.
 
 QA tightened the forest harness before deployment: wait for Redis subscribers,
 require a fresh preflight frame after renewal, log out explicitly, and clear the
-disposable run cache before deletion. Cleanup can resume after partial success.
+disposable run cache before deletion. Cleanup supports already-absent runs; NFS partial deletion required the scoped recovery recorded below.
 
 Remaining-directory precheck found one additional integration omission after
 3,704 passes: diagnostics needed the standard deferred stale-controller check
 immediately after its new controller bundle. Added that companion script;
 all 2,370 web and OpenAPI checks pass (205.58 seconds), and QA approved the fix.
 The fourth unsegmented full suite started at revision `fadc8847b`; forest cutover
-is still held until it passes. No partial run is counted as full-suite proof.
+was held until it passed. No partial run is counted as full-suite proof.
 ## Handoff
 
-Continue from `prompts/active/implementation_execplan.md`. Preserve unrelated
-dirty work. Update this tracker and the active ExecPlan at every stopping point.
-Do not describe F4 as fixed until the actual forest browser gate and independent
-reviews pass. Production deployment remains separately authorized.
+Forest scope is complete. Read the completed ExecPlan and
+`artifacts/20261111_forest_acceptance.json`; the original browser aggregate failed
+only NFS cleanup and is retained alongside verified recovery. SEC-04 production
+rollout remains pending separately authorized deployment. Preserve unrelated
+worktree changes.
 
 ## Operator ratification (2026-11-11)
 
@@ -182,11 +183,15 @@ record that approval. Final independent confirmation and standalone ancestor
 commit precede code edits; no further policy permission is required.
 
 M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
-approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.
+approved. M1-M6 are now implemented and verified; final forest evidence is retained.
 
 M4 completed: full pytest passed (13,568 passed / 435 skipped, 3,785.08 seconds) at `fadc8847b`. Local gates and independent code reviews pass. Proceeding to authorized forest cutover and browser acceptance.
 
 M5 completed: five forest containers recreated, all running with zero restarts;
 login and rq-engine/status/preflight health return HTTP 200. Caddy header filter
 is verified active. Canonical candidate web build and image/stability gates
-passed. M6 real-browser acceptance remains pending. See before/after receipts.
+passed. M6 browser assertions and scoped cleanup recovery subsequently passed; see combined acceptance.
+
+Final closeout: M0-M7 complete for forest; all three final evidence reviews
+approved. SEC-04 remains READY FOR REVIEW on the production audit board pending
+a separately authorized rollout; W-01 through W-05 are VERIFIED on forest.

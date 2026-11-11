@@ -1,17 +1,15 @@
 # Status and preflight WebSocket run authorization
 
-**Status**: Open (2026-11-11 UTC); contract ratified at `6a06ad49a`,
-implementation committed; broad validation and forest acceptance in progress
+**Status**: Closed 2026-11-11 (forest scope); production rollout pending separate authorization
 
 **Timezone**: UTC
 
 ## Overview
 
 Remediate security audit finding F4/SEC-04 by requiring run-bound authorization
-for the status2 and preflight2 WebSocket services. Today the browser opens both
-streams without a token, and each Go service can accept a connection after only
-method, path, and Origin checks. A caller who can name a run can therefore reach
-run-scoped Redis channels without proving access to that run.
+for the status2 and preflight2 WebSocket services. At discovery, the browser opened both streams without a token and the services
+could accept after method, path and Origin checks alone. The implemented
+contract now requires run authorization before acceptance and run-specific Redis access.
 
 This package defines a short-lived stream credential, sends it from the existing
 WEPPcloud frontend without placing it in a URL, validates it before WebSocket
@@ -144,9 +142,9 @@ custom cryptography and anonymous fallback are excluded.
   insufficient.
 - **Sensitive-evidence rule**: raw JWTs, protocol headers, credentials, private
   message bodies, and secret values remain in memory and must not be persisted.
-- **Highest completion claim currently supported**: implementation and independent
-  code reviews are complete; focused tests and the status canary pass. Full
-  regression and deployed browser acceptance remain pending.
+- **Highest completion claim supported**: implementation, full regression, three
+  independent final reviews and deployed forest browser acceptance pass. NFS
+  cleanup recovery is verified separately. Production rollout is not claimed.
 
 ## Stakeholders
 
@@ -288,10 +286,18 @@ messages, and prove no-token/cross-run denial. The exact command, commit,
 container IDs, start times, browser version, health evidence, and cleanup must be
 recorded without raw tokens or credentials.
 
-## Handoff
+## Outcome
 
-Begin with the active ExecPlan. Do not implement until the contract, failure
-matrix, two independent read-only contract reviews, dependency decision, and
-standalone checkpoint are complete. Do not deploy until local and broad gates
-pass. Forest deployment is explicitly required and authorized for this package;
-production deployment remains outside this authorization.
+Ratified ancestor `6a06ad49a`; implementation and broad regression revision
+`fadc8847b`; forest browser revision `bae13ff84`. Full pytest passed 13,568 tests
+(435 skipped), npm passed 126 suites / 1,076 tests, and Go/focused gates passed.
+Five forest services were redeployed and the real browser proved both streams,
+renewal, message rendering, denial and credential non-retention. All 27 browser
+assertions passed. NFS delayed fixture deletion; the retained failed aggregate
+receipt and supplemental recovery receipt disclose that separately.
+
+See [combined forest acceptance](artifacts/20261111_forest_acceptance.json),
+[validation](artifacts/20261111_validation.md), and the completed ExecPlan.
+Production SEC-04 exposure remains pending a separately authorized rollout.
+Canonical policy lives in `docs/schemas/weppcloud-websocket-auth-contract.md`
+and ADR-0141; this closed package is historical evidence.
