@@ -1,6 +1,6 @@
 # Failure-class matrix - Browse output encoding
 
-**Status**: Initial source inventory; update during implementation  
+**Status**: Locally validated at `73d219877`; rollout pending
 **Date**: 2026-11-11 UTC
 
 ## Failure Class
@@ -47,3 +47,25 @@ test node ID, and result. Any newly confirmed consumer must be repaired in this
 package or explicitly blocked with operator direction; it may not be silently
 deferred. Reviewed non-consumers remain out of test scope unless the patch
 touches them.
+
+## Final consumer dispositions
+
+All confirmed consumers are closed locally at `73d219877` (10 focused tests
+pass). Node names below belong to `tests/microservices/test_browse_routes.py`.
+
+| Consumers | Evidence and disposition |
+| --- | --- |
+| Directory row; breadcrumb; copy-path | `test_browse_directory_breadcrumb_escapes_and_encodes_stored_name`; real nested directory, empty child, exact href and copy-path readback pass |
+| File row; download | `test_browse_listing_escapes_filename_and_encodes_entry_links`; ASCII/Unicode/hostile labels and byte delivery pass |
+| Raster/CSV; annotated; D-Tale; schema/data; diff | `test_browse_action_links_encode_filename_and_preserve_query` (four suffix cases); encoded route/query attributes and schema GET pass; external backend execution not claimed |
+| Symlink suffix | `test_browse_listing_escapes_symlink_target_text`; target text and permitted target bytes pass |
+| Not-found breadcrumbs and diff | `test_browse_not_found_breadcrumb_escapes_reflected_path`; 404, inert labels, encoded path and quote/ampersand query pass |
+| Trusted listing handoff | Source review: only literal Markup.format builders; no listing/breadcrumb handoff casts or safe filters |
+| Sort links | Source review: complete decoded ASGI path quoted once; query encoded and href escaped |
+| Pagination/showing | Source review: query values encoded, labels/counts integers/static; unchanged |
+| Filter input | Source review: Markup.format replaces explicit attribute escape without double escaping |
+| Manifest/virtual tuples | Source review: same tested html_dir_list renderer, no independent HTML assembly or archive behavior change |
+| JSON APIs; file preview bodies | Unchanged separate boundaries; not expanded into this patch |
+
+The preliminary source-line inventory above is retained as diagnosis provenance;
+this section records the final disposition. No production-equivalent claim.

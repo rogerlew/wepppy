@@ -1,6 +1,6 @@
 # Browse listing output safety
 
-**Status**: Open (2026-11-11 UTC); scaffolded, implementation not started
+**Status**: Open (2026-11-11 UTC); M0-M3 implemented and locally validated, M4 pending
 
 **Timezone**: UTC
 

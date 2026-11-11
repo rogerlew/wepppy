@@ -28,14 +28,21 @@ or frontend suites.
 - [x] (2026-11-11 04:22 UTC) Record the operator's patch-scoped test decision.
 - [x] M0: amend the canonical contract, obtain independent correctness/security
       review, and retain a pre-implementation checkpoint.
-- [ ] M1: add focused failing tests for labels, links, breadcrumbs, symlink text,
+- [x] M1: add focused failing tests for labels, links, breadcrumbs, symlink text,
       and action-bearing files.
-- [ ] M2: implement one-segment URL encoding and context-aware HTML rendering.
-- [ ] M3: run only the approved focused validation and close independent
+- [x] M2: implement one-segment URL encoding and context-aware HTML rendering.
+- [x] M3: run only the approved focused validation and close independent
       correctness, QA, and security findings.
 - [ ] M4: perform a separately authorized wepp1-equivalent rollout and closeout.
 
 ## Surprises & Discoveries
+
+- Observation (2026-11-11): URL.path reparses decoded `#`/`?` as URL syntax;
+  the nested real-directory test exposed truncated generated links. Use the
+  complete decoded ASGI scope path at the listing boundary.
+- Observation (2026-11-11): Starlette TestClient double-unquotes HTTPX paths;
+  installed HTTPX ASGITransport proves literal `%23` byte delivery without
+  introducing a production decode workaround.
 
 - Observation: the primary defect is not only filename label interpolation.
   The same raw name is reused in browse, download, raster-info, CSV, annotated,
@@ -58,6 +65,16 @@ or frontend suites.
 
 ## Decision Log
 
+- Decision: include the confirmed missing-path breadcrumb and diff-query repair.
+  Rationale: independent M0 review and the focused red test confirmed the same
+  output-boundary defect; no new policy or backend scope is necessary.
+  Date/Author: 2026-11-11, Codex with independent reviewers.
+- Decision: preserve the request adapter and use ASGI scope only at the listing
+  call boundary to avoid reparsing filename syntax as a URL.
+  Rationale: this fixes the demonstrated nested-path loss without changing other
+  request consumers or authentication behavior.
+  Date/Author: 2026-11-11, Codex.
+
 - Decision: fix the output boundary and preserve valid filenames.
   Rationale: a filename allowlist would change filesystem transparency, miss
   other artifact producers, and would not establish correct HTML/URL handling.
@@ -67,13 +84,13 @@ or frontend suites.
   escape the completed URL for its HTML attribute context.
   Rationale: HTML escaping alone does not stop `?`, `#`, or separator semantics,
   while URL quoting alone does not make an attribute safe.
-  Date/Author: 2026-11-11, Codex; review pending.
+  Date/Author: 2026-11-11, Codex; independently reviewed and accepted.
 
 - Decision: include stored directory breadcrumbs but defer site-wide CSP.
   Rationale: breadcrumbs are a confirmed consumer of the same unsafe trust
   assumption. CSP is a separate site-wide compatibility/rollout decision and is
   defense in depth, not a substitute for encoding.
-  Date/Author: 2026-11-11, Codex; review pending.
+  Date/Author: 2026-11-11, Codex; independently reviewed and accepted.
 
 - Decision: run only patch-scoped tests.
   Rationale: the operator explicitly requested scoped validation and no full
@@ -82,9 +99,12 @@ or frontend suites.
 
 ## Outcomes & Retrospective
 
-The source diagnosis and implementation board exist. No production code, tests,
-or runtime configuration changed in the scaffold milestone. M0-M4 remain open;
-no local validation or production claim is made.
+M0-M3 completed on 2026-11-11 UTC. Reviewed checkpoint `5e6de201b` precedes
+implementation `73d219877`. Eight focused red cases proved HTML injection;
+10 focused green cases prove local rendered structure and navigation. Independent
+correctness, QA and security reviews passed without High/Medium findings.
+M4 remains pending separately authorized rollout. Full Python/frontend suites
+were not run. The validation receipt records exact commands and limitations.
 
 ## Context and Orientation
 
@@ -382,3 +402,13 @@ direction.
 2026-11-11 M0: canonical amendment reviewed by independent correctness and
 security agents; missing-path consumer confirmed and included. Scoped doc lint
 passed (8 files). Required standalone checkpoint follows before code edits.
+
+2026-11-11 implementation revision: completed M0-M3 at `73d219877`. The source
+path supplied to listing must come from ASGI scope: URL.path reparses decoded
+`#`/`?` and loses filename text. Missing-path breadcrumbs were confirmed and
+repaired within the planned conditional scope. Literal `%23` navigation uses
+HTTPX ASGITransport in the test because Starlette TestClient double-unquotes.
+The real renderers and file readers remain unmocked. QA's optional named-format
+and stricter action-map suggestions are retained in its artifact; no blockers.
+The canonical decision remains in browse-filesystem-contract.md, section
+"Filesystem names in HTML and URLs". Rollout remains unauthorized and pending.

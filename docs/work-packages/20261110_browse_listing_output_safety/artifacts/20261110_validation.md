@@ -4,8 +4,8 @@
 
 Base `c040d51d09530dee7f1562c467b98d74c8d6c5a4`; reviewed contract checkpoint
 `5e6de201b`. Validation on 2026-11-11 UTC through the existing development
-container with `wctl run-pytest`; no deployment. Final implementation revision
-is recorded in the tracker after commit.
+container with `wctl run-pytest`; no deployment. Final implementation revision:
+`73d219877` (the exact source/test candidate observed by independent reviewers).
 
 ## Red evidence
 
@@ -63,4 +63,7 @@ values and integer labels; showing text has integer counts and a static note.
 The missing-path message already escaped its path; repaired breadcrumbs now
 encode diff separately. No JSON, authorization, containment or dependency changes.
 
-Scoped documentation lint and `git diff --check` are recorded at final handoff.
+`wctl doc-lint --path docs/schemas/browse-filesystem-contract.md --path docs/work-packages/20261110_browse_listing_output_safety --path PROJECT_TRACKER.md`:
+11 files validated, zero errors/warnings, exit 0. Final `git diff --check` passed
+after removing one trailing Markdown hard-break space on the updated status line.
+Spelling-normalization preview used `uk2us`; no prose replacements were needed.

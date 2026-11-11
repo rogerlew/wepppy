@@ -3,10 +3,10 @@
 ## Metadata
 
 - **Package**: `docs/work-packages/20261110_browse_listing_output_safety/`
-- **Reviewer**: unassigned; must be independent of implementation author
-- **Date**: pending
-- **Implementation revision**: pending
-- **Gate status**: fail until implementation evidence is reviewed
+- **Reviewer**: `/root/correctness` (independent agent)
+- **Date**: 2026-11-11 UTC
+- **Implementation revision**: `73d219877`
+- **Gate status**: pass for local implementation
 
 ## User Goal
 
@@ -46,20 +46,20 @@ or changing the destination of a link.
 
 ## Required Direct Evidence
 
-- [ ] Red tests fail on the pre-fix renderer for the intended reason.
-- [ ] Green tests create actual temporary names and symlinks; they do not mock
+- [x] Red tests fail on the pre-fix renderer for the intended reason.
+- [x] Green tests create actual temporary names and symlinks; they do not mock
       the output string.
-- [ ] Ordinary and Unicode links return the intended file or directory.
-- [ ] Hostile corpus yields no injected tags or attributes.
-- [ ] Every changed action keeps its route prefix and query values.
-- [ ] Existing authorization and containment outcomes are unchanged by review.
-- [ ] Exact focused commands, counts, revision, and limitations are retained.
-- [ ] No full-suite or production claim is made.
+- [x] Ordinary and Unicode links return the intended file or directory.
+- [x] Hostile corpus yields no injected tags or attributes.
+- [x] Every changed action keeps its route prefix and query values.
+- [x] Existing authorization and containment outcomes are unchanged by review.
+- [x] Exact focused commands, counts, revision, and limitations are retained.
+- [x] No full-suite or production claim is made.
 
 ## Verdict
 
-Pending. Closure requires all valid states above to pass and no unresolved
-High/Medium correctness or user-experience finding.
+Pass for local implementation. All scoped valid-state and hostile-string tests
+pass; no unresolved High/Medium correctness findings.
 
 ## M0 independent review
 
@@ -68,3 +68,14 @@ Reviewer `/root/correctness` (`reviewer`), 2026-11-11 UTC, base
 no blocking findings. Implementation cautions accepted: `.htm` lacks default
 autoescaping, missing-path breadcrumbs need the planned repair, and action
 coverage must include raster, annotated and diff alongside Parquet.
+
+## Final independent review
+
+Reviewer `/root/correctness`, 2026-11-11 UTC: approved scoped source/test candidate
+committed as `73d219877`, descendant of reviewed checkpoint `5e6de201b`.
+Observed validation: 10 focused tests passed; no unresolved High/Medium findings.
+Real filesystem entries, parsed HTML/URL attributes, byte readback, nested literal
+percent names, symlink targets and missing paths establish local output behavior.
+Authorization, containment and parser capabilities are unchanged. Full suites
+were waived; external action backends and production identities were not tested.
+M4 remains pending separate authorization.

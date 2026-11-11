@@ -1,68 +1,41 @@
 # Tracker - Browse listing output safety
 
-## Quick Status
+## Status
 
-**Timezone**: UTC  
-**Last updated**: 2026-11-11 04:22 UTC  
-**Current phase**: scaffolded; M0 contract checkpoint is next  
-**Security impact**: high  
-**Dedicated security review**: `artifacts/20261110_security_review.md`  
-**Starting revision**: `c040d51d0`
+Updated 2026-11-11 UTC: **implemented and locally validated; not deployed**.
+M0-M3 complete. M4 requires separate operator authorization and production-equivalent
+identity, mount, routing and template evidence. Security impact: high.
 
-## Task Board
+- [x] M0: canonical amendment and independent correctness/security review.
+- [x] M1: eight focused red cases prove injected HTML from real entries.
+- [x] M2: contextual escaping and exactly-once URL encoding implemented.
+- [x] M3: 10 focused tests pass; correctness, QA and security gates pass.
+- [ ] M4: separately authorized rollout and production smoke.
 
-- [x] Confirm F3 source evidence and production boundary (`wepp1`).
-- [x] Scaffold package, active ExecPlan, failure-class inventory, and review gates.
-- [x] Record the operator's focused-test decision and full-suite waiver.
-- [x] M0: amend the canonical browse contract; obtain correctness and security
-      review; retain a checkpoint before production-code edits.
-- [ ] M1: add focused failing renderer/route regressions using real temporary
-      filenames, directories, and symlinks.
-- [ ] M2: implement contextual escaping and one-segment URL encoding; update
-      directly affected documentation.
-- [ ] M3: run only the approved focused tests and close correctness, QA, and
-      security findings.
-- [ ] M4: perform a separately authorized wepp1-equivalent rollout smoke and
-      closeout. No production action is authorized by this scaffold.
+Base: `c040d51d09530dee7f1562c467b98d74c8d6c5a4`.
+Contract checkpoint: `5e6de201b` (standalone ancestor before implementation).
+Implementation reviewed and tested: `73d219877`.
 
-## Decisions and Discoveries
+## Decisions and discoveries
 
-- F3 is a stored same-origin XSS risk: `html_dir_list()` inserts filesystem names
-  and symlink targets into HTML and URL attributes, and `_render_directory_response()`
-  marks the assembled listing trusted.
-- Filesystem-derived directory breadcrumbs repeat the same unsafe trust pattern
-  and are included in the failure class. Query-encoded pagination and JSON APIs
-  are not confirmed consumers and remain out of implementation scope unless a
-  focused red test proves otherwise.
-- The repair preserves valid names. It escapes display text and percent-encodes
-  each name as one path segment; it does not add a Bootstrap filename allowlist.
-- CSP is deferred to a separate package because it has site-wide compatibility
-  and rollout concerns and cannot replace output encoding.
-- The operator requires patch-scoped tests. The full Python and frontend suites
-  are waived and must not be claimed as passing evidence for this package.
+Canonical decision: `docs/schemas/browse-filesystem-contract.md`, section
+"Filesystem names in HTML and URLs". Preserve names and current access policies;
+escape text/attributes, encode filename segments, and encode queries separately.
+CSP remains separate. No data/schema/default changes.
 
-## Validation and Review
+The complete decoded path must come from ASGI scope, because URL.path truncates
+at decoded `#`/`?`. Missing-path breadcrumbs repeat the defect and were repaired.
+Starlette TestClient double-unquotes literal percent escapes; the nested `%23`
+byte readback uses installed HTTPX ASGITransport. No production fallback added.
 
-No runtime tests have been run because this turn only scaffolds the package. The
-future validation receipt must list exact node IDs, red/green behavior, and the
-implementation revision. At minimum it must retain direct route output for an
-ordinary Unicode control and inert hostile filename, directory, action-link, and
-symlink-target cases.
+## Evidence and handoff
 
-## Timeline
+See `artifacts/20261110_validation.md` for commands, red/green outcomes and
+limitations, plus the failure matrix and independent correctness, QA and security
+reviews. All High/Medium findings are locally closed. Optional QA suggestions
+are retained without expanding this patch.
 
-- 2026-11-11 04:22 UTC: source diagnosis and package scaffold.
-- Pending: M0 contract amendment and independent review checkpoint.
-- Pending: focused red/green implementation and validation.
-- Pending: separately authorized rollout; no production change performed.
-
-## Handoff
-
-Begin with M0 in the active ExecPlan. Do not edit production code until the
-canonical output-context rules and failure-class dispositions are reviewed. Keep
-all tests limited to changed renderer/route surfaces. Preserve authorization,
-containment, raw file access, actual filenames, and existing action behavior.
-
-2026-11-11 M0: canonical amendment reviewed by independent correctness and
-security agents; missing-path consumer confirmed and included. Scoped doc lint
-passed (8 files). Required standalone checkpoint follows before code edits.
+Full Python/frontend suites were explicitly not run. External action backends and
+production-equivalent identities were not exercised. No deployment or incident
+resolution claim is made. Continue only with separately authorized M4; preserve
+unrelated existing worktree changes and the generated usersum index.
