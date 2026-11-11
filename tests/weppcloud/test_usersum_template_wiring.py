@@ -91,8 +91,14 @@ def test_runs_template_uses_the_ttl_deletion_usersum_doc_id() -> None:
     template = root / "wepppy" / "weppcloud" / "templates" / "user" / "runs2.html"
     contents = _read(template)
 
-    assert "usersum.weppcloud.run_ttl_deletion" in contents
-    assert "runsTtlDeletionHelpUrl" in contents
+    # Runs catalog contract: one panel-level help link, not a per-row JS URL.
+    help_link = (
+        '<a href="{{ url_for(\'usersum.view_doc\', '
+        "doc_id='usersum.weppcloud.run_ttl_deletion') }}\">"
+        "How to keep your project</a>"
+    )
+    assert contents.count(help_link) == 1
+    assert contents.count("usersum.weppcloud.run_ttl_deletion") == 1
 
 
 def test_theme_switcher_labels_aa_checked_and_sensory_preference_themes() -> None:
