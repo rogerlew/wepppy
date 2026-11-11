@@ -1,3 +1,7 @@
+Scaffolded; execute first: [Redis credential transport hardening](docs/work-packages/20261111_redis_credential_transport/package.md) - Separate prerequisite package removing Redis credentials from URLs and process arguments while preserving the current password, mounted-secret lifecycle, default user, databases, topology and rotation behavior. Validation is intentionally scoped to affected Python, Go, RQ and Compose contracts; no full-suite gate or runtime change yet.
+
+Scaffolded; queued behind Redis transport: [Safe traceback and exceptional-path secret sanitization](docs/work-packages/20261111_safe_traceback_sanitization/package.md) - F5/SEC-05 remediation preserving traceback diagnostics, absolute paths and one sanitized representation while preventing process-owned configured secret values from reaching API, log, run-file, RQ Redis, status or container-log sinks. Openwepp mounted-secret handling is mapped without adding SOPS/Kubernetes API authority. Full pytest, npm lint and full npm tests are mandatory; no implementation or runtime change yet.
+
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
 Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
@@ -122,8 +126,8 @@ Completed (source/local validation): [Gregorian calendar repair](docs/work-packa
 Completed (investigation/design): [ASCII PASS century failure](docs/work-packages/20261021_ascii_pass_century_investigation/package.md) — reproduced year-102 stop in the 200-year project; confirmed legacy/Gregorian mismatch and stale climate buffer reuse. Robust repair identified; no implementation or deployment.
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-10-26
-**Active Packages**: 46
+**Last Updated**: 2026-11-11
+**Active Packages**: 48
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -846,6 +850,56 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+
+### Redis Credential Transport Hardening
+
+**Started**: 2026-11-11 UTC
+
+**Priority/Security**: High transport exposure / `high` change impact
+
+**Link**: [docs/work-packages/20261111_redis_credential_transport/](docs/work-packages/20261111_redis_credential_transport/)
+
+**Scope**: Remove Redis credentials from connection URLs, command-line
+arguments, healthchecks and re-emitted configuration while preserving the
+current password, mounted-secret lifecycle, default user, database layout,
+topology, TLS posture and rotation behavior. Python sync/async/session clients,
+Go services, RQ startup, Redis server startup and operator contracts are in
+scope.
+
+**Status**: Package, active ExecPlan, transport inventory, contract decision,
+failure-class matrix and independent review gates scaffolded. This package
+executes before F5. Validation is deliberately limited to affected Python, Go,
+RQ and Compose contracts plus direct authentication checks; full pytest and npm
+suites are not package gates. No code, runtime or production change occurred.
+
+
+### Safe Traceback and Exceptional-Path Secret Sanitization
+
+**Started**: 2026-11-11 UTC
+
+**Priority/Security**: Medium finding / `high` change impact
+
+**Link**: [docs/work-packages/20261111_safe_traceback_sanitization/](docs/work-packages/20261111_safe_traceback_sanitization/)
+
+**Scope**: Close F5/SEC-05 without removing traceback observability. Build one
+lightweight sanitized traceback representation, preserve absolute paths and
+existing endpoint authorization/fields, and redact explicit configured secret
+values before API, log, run-file, RQ Redis and status sinks. Secret snapshots
+are exceptional-path only and do not create a process-wide registry or change
+the existing secret/client lifecycle. Process adapters select metadata for only
+their locally consumed sources; F5 does not decrypt SOPS, query Kubernetes
+Secrets or infer ownership from every configured `*_FILE` path.
+
+**Status**: Package, active ExecPlan, proposed contract, sink/failure inventory
+and independent review gates scaffolded. Openwepp projected-secret paths,
+compound key rings, WEPPcloudR/control-plane tokens and container stdout/stderr
+are now included in the contract and production-equivalent synthetic-mount gate.
+Implementation is queued behind the Redis credential transport checkpoint.
+Final acceptance requires full pytest, npm lint and full npm tests in addition
+to focused sanitizer and sink tests. No code, runtime or production change
+occurred.
+
 
 
 ### Batch and Culvert Climate Rehydration Hardening
