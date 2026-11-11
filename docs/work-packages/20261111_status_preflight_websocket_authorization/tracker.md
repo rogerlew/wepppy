@@ -33,7 +33,7 @@ browser acceptance remain mandatory. Production deployment is not authorized.
       generated controller parity, and focused Jest tests.
 - [x] M3: add status2/preflight2 pre-accept validation, Redis/session checks,
       exact Origin configuration, message redaction, and Go integration tests.
-- [ ] M4: run focused gates, full pytest, npm lint, full npm tests, and close
+- [x] M4: run focused gates, full pytest, npm lint, full npm tests, and close
       correctness, QA, and security review findings.
 - [ ] M5: render and validate forest Compose; drain affected work safely;
       redeploy only affected services; check health and rollback readiness.
@@ -160,6 +160,13 @@ name the inventory guard before the expensive full suite.
 QA tightened the forest harness before deployment: wait for Redis subscribers,
 require a fresh preflight frame after renewal, log out explicitly, and clear the
 disposable run cache before deletion. Cleanup can resume after partial success.
+
+Remaining-directory precheck found one additional integration omission after
+3,704 passes: diagnostics needed the standard deferred stale-controller check
+immediately after its new controller bundle. Added that companion script;
+all 2,370 web and OpenAPI checks pass (205.58 seconds), and QA approved the fix.
+The fourth unsegmented full suite started at revision `fadc8847b`; forest cutover
+is still held until it passes. No partial run is counted as full-suite proof.
 ## Handoff
 
 Continue from `prompts/active/implementation_execplan.md`. Preserve unrelated
@@ -176,3 +183,5 @@ commit precede code edits; no further policy permission is required.
 
 M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
 approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.
+
+M4 completed: full pytest passed (13,568 passed / 435 skipped, 3,785.08 seconds) at `fadc8847b`. Local gates and independent code reviews pass. Proceeding to authorized forest cutover and browser acceptance.

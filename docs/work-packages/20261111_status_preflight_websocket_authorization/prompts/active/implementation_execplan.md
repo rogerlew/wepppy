@@ -40,7 +40,7 @@ and leaves no token in URLs, logs, storage, selected protocols or artifacts.
       controller parity, and focused Jest tests.
 - [x] M3: implement pre-accept status2/preflight2 validation, Redis session
       checks, exact Origins, bounded message redaction, and Go integration tests.
-- [ ] M4: pass focused and broad validation; close correctness, QA and security
+- [x] M4: pass focused and broad validation; close correctness, QA and security
       review findings.
 - [ ] M5: perform the authorized, service-scoped forest redeploy with health and
       rollback evidence.
@@ -92,6 +92,13 @@ name the inventory guard before the expensive full suite.
 QA tightened the forest harness before deployment: wait for Redis subscribers,
 require a fresh preflight frame after renewal, log out explicitly, and clear the
 disposable run cache before deletion. Cleanup can resume after partial success.
+
+Remaining-directory precheck found one additional integration omission after
+3,704 passes: diagnostics needed the standard deferred stale-controller check
+immediately after its new controller bundle. Added that companion script;
+all 2,370 web and OpenAPI checks pass (205.58 seconds), and QA approved the fix.
+The fourth unsegmented full suite started at revision `fadc8847b`; forest cutover
+is still held until it passes. No partial run is counted as full-suite proof.
 ## Decision Log
 
 - Decision: make an actual forest redeploy and browser-level proof for both
@@ -448,3 +455,5 @@ Final consumer inventory added the operator Go smoke/nightly and k6 clients.
 Their authentication repair preserves service fanout testing; its trusted
 signing fixture does not replace browser authorization proof. See the failure
 matrix for authority, isolation and temporary-credential handling.
+
+M4 completed: full pytest passed (13,568 passed / 435 skipped, 3,785.08 seconds) at `fadc8847b`. Local gates and independent code reviews pass. Proceeding to authorized forest cutover and browser acceptance.

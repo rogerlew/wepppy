@@ -14,7 +14,7 @@ forest cutover. All commands run on forest through the installed dev `wctl`.
 | `wctl exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py` | Pass |
 | `wctl check-test-stubs` | Pass |
 | Scoped canonical/package docs lint | Pass |
-| `wctl run-pytest tests --maxfail=1` | Running; no full-suite claim yet |
+| `wctl run-pytest tests --maxfail=1` | 13,568 passed / 435 skipped, 3,785.08 seconds; exit 0, revision `fadc8847b` |
 | Correctness / QA / security source reviews | Approved; environment gate pending |
 
 ## Discovered validation issues
@@ -51,6 +51,13 @@ name the inventory guard before the expensive full suite.
 QA tightened the forest harness before deployment: wait for Redis subscribers,
 require a fresh preflight frame after renewal, log out explicitly, and clear the
 disposable run cache before deletion. Cleanup can resume after partial success.
+
+Remaining-directory precheck found one additional integration omission after
+3,704 passes: diagnostics needed the standard deferred stale-controller check
+immediately after its new controller bundle. Added that companion script;
+all 2,370 web and OpenAPI checks pass (205.58 seconds), and QA approved the fix.
+The fourth unsegmented full suite started at revision `fadc8847b`; forest cutover
+is still held until it passes. No partial run is counted as full-suite proof.
 ## Final consumer/tooling checks
 
 The second full pytest attempt was explicitly interrupted at 387 passed / 28
@@ -90,3 +97,7 @@ Preflight startup canary also passed with UID/GID `1000:993` and image
 Its internal `/health` returned `OK`; the disposable container was removed.
 This is startup/readability evidence only; real preflight frames remain the
 browser gate. Workflow bootstrap regressions: 2 passed (8.94 seconds).
+
+## M4 completion
+
+The fourth exact `wctl run-pytest tests --maxfail=1` run passed at `fadc8847b`: 13,568 passed, 435 skipped, 6,029 warnings in 3,785.08 seconds. All code review findings are closed. Forest deployment and browser acceptance are the remaining gates.
