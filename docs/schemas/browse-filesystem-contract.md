@@ -37,6 +37,28 @@ not-found response; read/parse/I/O errors remain honest errors, never silent
 empty success or false absence. Listings are observations, not transactional
 snapshots: producers can change a file between listing and reading.
 
+## Filesystem names in HTML and URLs
+
+Filesystem-derived labels, directory breadcrumbs, and symlink targets MUST be
+rendered as text. Each entry name in a route MUST be percent-encoded as exactly
+one path segment; existing decoded route components are encoded once. Query
+values MUST be encoded separately, and completed URLs MUST be escaped for their
+HTML attribute context. Intentional markup may be trusted only after every
+dynamic field is encoded for its output context. This includes action links,
+schema data attributes, sort links, and missing-path breadcrumbs.
+
+Valid filesystem names MUST NOT be filtered or renamed. JSON APIs continue to
+serialize names as JSON data. Authorization, containment, symlink policies and
+representation capabilities remain unchanged.
+
+Rationale (2026-11-10 Pacific): filenames can contain both HTML and URL syntax.
+Escaping HTML alone leaves URL structure ambiguous; URL quoting alone cannot
+protect HTML text. Contextual encoding preserves filesystem transparency without
+a filename allowlist or reliance on site-wide CSP. Focused regressions must parse
+rendered structure and URLs and follow ordinary, Unicode and punctuation links.
+Implementation and local validation are pending; rollout requires separate
+authorization under the browse listing output safety package.
+
 ## Failure observability
 
 Browse, manifests and download services must return meaningful failure responses.
