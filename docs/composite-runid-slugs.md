@@ -117,6 +117,14 @@ This is the current map of how services resolve a runid into a working directory
 | Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves the run root via `get_wd()`. Does **not** honor `?pup=`; use composite runids for child runs. |
 | weppcloudR (R renderer) | `weppcloudR/plumber.R`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R` | `resolve_run_root()` | Used by DEVAL and report helper scripts; now supports omni scenarios/contrasts (including composite parents) plus batch/culvert/profile slugs. |
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+the [query HTTP contract](schemas/query-engine-http-access-contract.md) supersedes
+the query HTTP filesystem-path acceptance recorded in this table. Primary HTTP
+routes require `runid/config`; MCP retains its bare-ID interface. Query admission
+uses side-effect-free canonical layout resolution before any Omni shared-input
+fixup. Query cookies use hashed keys for all IDs and a semicolon-safe query
+prefix so parent credentials reach child URLs; browse cookie rules are unchanged.
+
 ## Preflight and Telemetry Routing
 
 Preflight updates and status channels are keyed off `NoDbBase.runid` (parent runid for omni child runs). This is why preflight and WebSocket status streams target the parent run even when the URL uses a composite slug.

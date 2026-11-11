@@ -1,0 +1,31 @@
+$ wctl doc-lint --path docs/schemas/query-engine-http-access-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/schemas/weppcloud-session-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/dev-notes/auth-token.spec.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/schemas/weppcloud-csrf-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/composite-runid-slugs.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/schemas/feature-access-governance-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path docs/ui-docs/contracts/combined-watershed-viewer-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0
+
+$ wctl doc-lint --path wepppy/query_engine/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+Exit: 0

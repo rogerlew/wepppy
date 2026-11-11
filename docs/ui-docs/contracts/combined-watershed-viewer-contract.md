@@ -16,6 +16,17 @@ The 63 incident runs are ownerless and already readable through ordinary geometr
 
 This bounded collection admission is distinct from feature-action governance in [the feature access contract](../../schemas/feature-access-governance-contract.md). Existing query-engine and browse transports retain their current identity, scope, sensitive-file and path containment rules under [browse authorization](../../schemas/weppcloud-browse-auth-contract.md). No credentials may appear in a share URL or a saved browser artifact.
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+[query HTTP access](../../schemas/query-engine-http-access-contract.md) closes
+private route-target and path bypasses while preserving this contract's legacy
+ownerless reads and exact server-catalog/current-PortlandGroup read grant. Query
+credentials for direct multi-run viewers must follow per-resource admission.
+This checkpoint explicitly includes query summary/schema/console/POST-read
+surfaces for any actually private catalog-listed run admitted to a current
+PortlandGroup member; no other downstream surface gains new admission;
+collection membership confers no forced activation or unrelated-run rights.
+Existing collection-entry rules and original artifact visibility remain intact.
+
 ## Inputs, errors, and generator
 
 Existing `/combined_ws_viewer/` and `/combined_ws_viewer2/` links render the repaired Deck.gl collection. Preserve the `ws` list of runid/cfg objects, title, center [latitude,longitude], zoom, units SI/English, varname, and varopts. Resolve the actual config from run metadata; historic URL config aliases are not authoritative. Deduplicate run IDs preserving order. Bound a request to 100 runs; reject malformed JSON, invalid IDs, nonfinite/out-of-range view values, unknown variables/units, and nonpositive ranges with HTTP 400. Unauthorized lists return 403 without naming the denied run. Empty entry renders an explanatory empty state with a generator link. Missing runs/required data return a bounded readiness error to authorized callers, never a success-colored empty map.

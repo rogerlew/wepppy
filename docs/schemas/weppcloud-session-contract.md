@@ -18,6 +18,15 @@
 - Does not redefine JWT claim rules; those remain in `docs/dev-notes/auth-token.spec.md`.
 - Does not redefine canonical error payloads; those remain in `docs/schemas/rq-response-contract.md`.
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+the [query HTTP contract](query-engine-http-access-contract.md#browser-transport-and-lifecycle)
+adds a separate query-engine-audience HttpOnly cookie using existing four-day
+session/marker lifetime and revocation. Signed resource/config binding and hashed
+cookie names isolate credentials under `/query-engine/runs/`. Actual direct
+page/dashboard/collection entry paths must issue only authorized credentials;
+no token enters JavaScript. Browse cookie defaults and Flask lifecycle remain
+unchanged. The query contract owns its bounded activation exception.
+
 ## Product and UX Priority
 
 - WEPPcloud authentication architecture MUST minimize repeated authentication

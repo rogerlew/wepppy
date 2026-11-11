@@ -200,6 +200,15 @@ and observes public-to-private visibility changes; anonymous/global lookup does
 not expose them. Each private request rechecks credential expiry/revocation and
 current run or feature-group authorization.
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+[query HTTP access](query-engine-http-access-contract.md) narrows the preserved
+HTTP behavior to authorized canonical resources and authenticated POST forced
+activation. Normal public/legacy ownerless retained-result reads and authorized
+cache preparation remain allowed. Private grouped admission, PCV-01 read grants,
+restricted feature-action rights and ordinary editing policy are unchanged.
+Neither the feature-sharing language here nor public query access waives the
+HTTP target/scenario containment or existing SQL-expression restrictions.
+
 ## Remaining implementation checkpoint
 
 Runtime work follows the reviewed milestone-zero checkpoint and requires the bounded restricted-feature surface/state matrix, deployment-specific resolution of `rogerlew@gmail.com`, and the redacted Culvert integration inventory. The operator has excluded a new public-run writer/anonymous-creator boundary. These are explicit milestone-zero inputs, not permission to invent identities or silently alter supported workflows.

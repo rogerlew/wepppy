@@ -21,6 +21,15 @@ CSRF policy must follow `docs/schemas/weppcloud-csrf-contract.md`.
 - Defines required claims, token classes, audience usage, and revocation rules.
 - Non-auth payload schemas live in their own contracts (see `docs/schemas/rq-response-contract.md`).
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+[query HTTP access](../schemas/query-engine-http-access-contract.md) requires
+`query-engine` audience for primary HTTP routes independently of MCP. Page
+cookies carry only `runs:read queries:execute`; bearer forced refresh requires
+`runs:read runs:activate`. Cookie forced refresh uses the contract's explicit
+human/resource/origin exception, not a feature or RQ execution grant. Existing
+issuance, revocation, session-marker and four-day bridge lifetime apply. MCP
+claims and existing service registration/audiences remain unchanged.
+
 ## Environment configuration
 
 The token issuer (and any service that validates tokens) relies on the
@@ -196,6 +205,7 @@ after normal submission authorization. Dispatch does not revalidate an expired
 submission token; it uses the accepted intent, never the credential. This grants
 no additional token scopes or resource access and does not change polling or
 new-request authentication. Emergency dispatch pause is an operator control.
+
 ## Token issuance utility
 
 The script `_scripts/issue_auth_token.py` issues tokens from the CLI:

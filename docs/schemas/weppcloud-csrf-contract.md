@@ -131,6 +131,14 @@ The shared regression vectors are:
 | `same-origin` | HTTP:80 application tuple plus HTTPS:443 Origin on same authoritative host | allow |
 | `same-origin` | any other scheme/port bridge | reject |
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+the [query HTTP contract](query-engine-http-access-contract.md#explicit-activation-and-browser-request-origin)
+applies this guard to cookie-authenticated query POST and forced activation POST.
+GET/HEAD forced activation is forbidden. Explicit bearer clients need no browser
+CSRF signal, but a supplied Origin must belong to the configured exact set.
+Anonymous public query POST remains a retained-result read; forced activation
+requires authentication. No other Flask/RQ exemptions change.
+
 ## Browser-State Reset Cookie Ownership
 
 Implementation conformance is pending REM-04. Browser-state reset owns only:
@@ -165,6 +173,7 @@ variants. A late response MUST NOT recreate a fenced SID.
 MRS-01 proposed checkpoint (implementation pending): [payload validation](request-payload-contract.md)
 runs within existing auth/CSRF/request-lock boundaries before business mutation.
 This amendment changes no CSRF exemptions, token requirements or auth precedence.
+
 ## rq-engine and 3rd-Party API Requirements
 - 3rd-party and agent clients MUST use bearer-token auth for rq-engine API routes.
 - Bearer-token routes MUST remain CSRF-agnostic so non-browser clients are not coupled to CSRF tokens.

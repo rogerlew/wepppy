@@ -149,6 +149,15 @@ The `/mcp` prefix provides a **Model Context Protocol**-compatible API for LLM a
 
 **Note:** MCP routes are mounted when `WEPP_MCP_JWT_SECRET` is configured. If the secret is unset, `/mcp` is not mounted.
 
+QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+[query HTTP access](../../docs/schemas/query-engine-http-access-contract.md)
+defines canonical identifiers, pre-catalog authorization, browser cookie
+transport and POST-only forced activation. The implemented primary discovery
+and console paths are `/schema` and GET `/query`; `/catalog` and `/console`
+below are historical documentation errors, not additional aliases. Deployment
+must configure `QUERY_ENGINE_ALLOWED_ORIGINS` with exact public origins and pass
+real browser/Compose/Caddy gates. No deployment or conformance is claimed here.
+
 ### Catalog Activation
 
 Before querying, a run must be **activated** to generate the `catalog.json` file:
