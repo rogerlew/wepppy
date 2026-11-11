@@ -279,3 +279,10 @@ omitting it.
 
 ## Change Management
 - Any change to session TTLs, cookie defaults, heartbeat interval, stale-tab UX, or endpoint auth rules MUST update this contract and linked implementation docs in the same PR.
+
+## F4 stream session contract (ratified; implementation pending)
+
+The ratified [WebSocket contract](weppcloud-websocket-auth-contract.md) reuses
+canonical cookie selection and session revocation. Stream minting must not
+shorten an existing four-day run marker. A rejected supplied session must not
+be silently replaced through public fallback. Other session profiles remain unchanged.

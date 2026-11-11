@@ -244,3 +244,12 @@ Before enabling blanket global CSRF middleware enforcement, the following MUST b
 - `wepppy/weppcloud/controllers_js/forms.js`
 - `wepppy/microservices/rq_engine/session_routes.py`
 - `wepppy/microservices/rq_engine/auth.py`
+
+## F4 stream bridge contract (ratified; implementation pending)
+
+The ratified [WebSocket contract](weppcloud-websocket-auth-contract.md) adds a
+same-origin stream-token browser bridge governed by the existing Browser
+Same-Origin Guard matrix, including its explicit Fetch Metadata rules. The
+WebSocket handshake separately requires an exact allowed Origin and an explicit
+subprotocol credential. No existing Flask CSRF exemption changes. Public
+sessionless and lifecycle cases follow the ratified stream contract.

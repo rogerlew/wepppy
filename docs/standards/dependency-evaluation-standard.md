@@ -42,6 +42,7 @@ When a dependency is promoted with performance or capability claims: treat marke
 
 | Date | Dependency | Outcome | Evidence |
 |------|------------|---------|----------|
+| 2026-11 | golang-jwt/jwt/v5 v5.3.1 | accept for stream verification | `docs/work-packages/20261111_status_preflight_websocket_authorization/artifacts/20261111_dependency_evaluation.md` |
 | 2026-03 | raster_tools (USDA RMRS) | defer | `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/adoption_recommendation.md` |
 
 Add new rows as evaluations complete. Link to the work package recommendation artifact, not raw data.

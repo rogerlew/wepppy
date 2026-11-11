@@ -406,3 +406,11 @@ If validation fails a `JWTDecodeError` is raised.
 
 Scopes are additive; downstream services should check presence before
 performing an operation.
+
+## F4 stream credential contract (ratified; implementation pending)
+
+The ratified [WebSocket contract](../schemas/weppcloud-websocket-auth-contract.md)
+defines a separate short-lived issuance profile, exact service audience/scope,
+and no token cookie. It must not inherit general default-audience injection or
+shorten existing run markers. SID fences/markers remain in DB 11; JTI revocation
+remains in DB 0. Other token profiles remain unchanged.
